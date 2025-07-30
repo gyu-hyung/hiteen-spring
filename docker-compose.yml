@@ -1,0 +1,35 @@
+version: "3.8"
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    volumes:
+      - mongo_data:/data/mongodb
+
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: hiteen
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/data/postgresdb
+
+  emqx:
+    image: emqx/emqx:latest
+    container_name: emqx
+    ports:
+      - "1883:1883"     # MQTT
+      - "18083:18083"   # EMQX 대시보드
+      - "8083:8083"     # MQTT WebSocket
+
+volumes:
+  mongo_data:
+  postgres_data:
