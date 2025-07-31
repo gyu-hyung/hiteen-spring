@@ -25,9 +25,6 @@ dependencies {
 	testImplementation("org.springframework.security:spring-security-test")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
-	// Postgres
-	runtimeOnly("org.postgresql:postgresql")
-
 	// 테스트용 (JUnit5 기반, WebFlux 대응)
 	testImplementation("org.springframework.boot:spring-boot-starter-test") {
 		exclude(group = "org.junit.vintage")
@@ -35,14 +32,11 @@ dependencies {
 	testImplementation("io.projectreactor:reactor-test")
 	testImplementation("org.jetbrains.kotlin:kotlin-test")
 
-	// Mockito
-	testImplementation("org.mockito.kotlin:mockito-kotlin:5.2.1")
+	// Spring Security
+	implementation("org.springframework.boot:spring-boot-starter-security")
 
 	// WebFlux(리액티브) 서버
 	implementation("org.springframework.boot:spring-boot-starter-webflux")
-
-	// jpa
-	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 
 	// Coroutine
 	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0")
@@ -51,6 +45,17 @@ dependencies {
 	// Kotlin 리플렉션(코틀린 프레임워크 작동에 필요)
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 
+	// R2dbc
+	implementation("org.springframework.boot:spring-boot-starter-data-r2dbc")
+
+	// Postgres
+	implementation("io.r2dbc:r2dbc-postgresql:0.8.13.RELEASE")
+
+	// Mockito
+	testImplementation("org.mockito.kotlin:mockito-kotlin:5.2.1")
+
+	// Swagger
+	implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.8.9")
 
 	// MQTT
 	implementation("org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.5")

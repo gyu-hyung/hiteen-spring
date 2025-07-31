@@ -11,7 +11,7 @@ services:
     volumes:
       - mongo_data:/data/mongodb
 
-  postgres:
+  postgresql:
     image: postgres:15-alpine
     environment:
       POSTGRES_USER: user
@@ -29,6 +29,15 @@ services:
       - "1883:1883"     # MQTT
       - "18083:18083"   # EMQX 대시보드
       - "8083:8083"     # MQTT WebSocket
+
+#  DB GUI
+#  pgadmin:
+#    image: dpage/pgadmin4
+#    ports:
+#      - "5050:8081"
+#    environment:
+#      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+#      PGADMIN_DEFAULT_PASSWORD: admin
 
 volumes:
   mongo_data:
