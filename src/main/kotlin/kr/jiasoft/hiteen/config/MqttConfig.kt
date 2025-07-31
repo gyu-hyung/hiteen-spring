@@ -1,17 +1,17 @@
-package kr.jiasoft.hiteen.mqtt
+package kr.jiasoft.hiteen.config
 
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.integration.channel.DirectChannel
+import org.springframework.integration.channel.ExecutorChannel
 import org.springframework.integration.core.MessageProducer
-
 import org.springframework.integration.mqtt.core.DefaultMqttPahoClientFactory
 import org.springframework.integration.mqtt.core.MqttPahoClientFactory
 import org.springframework.integration.mqtt.inbound.MqttPahoMessageDrivenChannelAdapter
 import org.springframework.integration.mqtt.support.DefaultPahoMessageConverter
 import org.springframework.messaging.MessageChannel
+import java.util.concurrent.Executors
 
 @Configuration
 class MqttConfig(
@@ -37,9 +37,12 @@ class MqttConfig(
 
     // 2. MQTT 메시지가 흘러갈 채널 Bean
     @Bean
-    fun mqttInputChannel(): MessageChannel {
-        return DirectChannel()
-    }
+    fun mqttInputChannel(): MessageChannel = ExecutorChannel(Executors.newFixedThreadPool(1))
+
+
+//    @Bean
+//    fun errorChannel(): MessageChannel = ExecutorChannel(Executors.newFixedThreadPool(1))
+
 
     // 3. MQTT Inbound Channel Adapter Bean (핵심)
     // 브로커로부터 메시지를 수신하여 mqttInputChannel로 전달
@@ -50,10 +53,11 @@ class MqttConfig(
             mqttClientFactory(),
             topic
         ).apply {
-            setCompletionTimeout(5000) // 연결 타임아웃 5초
+            setCompletionTimeout(5000)
             setConverter(DefaultPahoMessageConverter())
-            setQos(1) // Quality of Service 레벨 설정
+            setQos(1)
             outputChannel = mqttInputChannel()
         }
     }
+
 }
