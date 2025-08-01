@@ -1,7 +1,7 @@
 package kr.jiasoft.hiteen.feature.user
 
 import kotlinx.coroutines.reactive.awaitFirstOrNull
-import kr.jiasoft.hiteen.feature.jwt.JwtProvider2
+import kr.jiasoft.hiteen.feature.jwt.JwtProvider
 import org.springframework.http.HttpStatus
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.core.userdetails.ReactiveUserDetailsService
@@ -16,7 +16,7 @@ class UserController(
     private val userService: UserService,
     private val users: ReactiveUserDetailsService,
     private val encoder: PasswordEncoder,
-    private val jwtProvider2: JwtProvider2,
+    private val jwtProvider: JwtProvider,
 ) {
 
     data class Jwt(val token: String)
@@ -37,7 +37,7 @@ class UserController(
             println("encoder.matches = ${encoder.matches(login.password, it.password)}")
             if (encoder.matches(login.password, it.password)){
                 println("login success")
-                return Jwt(jwtProvider2.generate(it.username).value)
+                return Jwt(jwtProvider.generate(it.username).value)
             }
         }
         throw ResponseStatusException(HttpStatus.UNAUTHORIZED)

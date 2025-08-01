@@ -31,7 +31,7 @@ class InvalidBearerToken(message: String?) : AuthenticationException(message)
 
 @Component
 class JwtAuthenticationManager(
-    private val jwtProvider2: JwtProvider2,
+    private val jwtProvider: JwtProvider,
     private val users: UserDetailsServiceImpl
 ) : ReactiveAuthenticationManager {
 
@@ -44,10 +44,10 @@ class JwtAuthenticationManager(
     }
 
     private suspend fun validate(token: BearerToken): Authentication {
-        val username = jwtProvider2.getUsername(token)
+        val username = jwtProvider.getUsername(token)
         val user = users.findByUsername(username).awaitFirstOrNull()
 
-        if (jwtProvider2.isValidWithUserMatches(token, user)) {
+        if (jwtProvider.isValidWithUserMatches(token, user)) {
             return UsernamePasswordAuthenticationToken(user!!.username, user.password, user.authorities)
         }
         throw IllegalArgumentException("Token is not valid.")

@@ -18,7 +18,7 @@ class BearerToken(val value: String) : AbstractAuthenticationToken(AuthorityUtil
 }
 
 @Component
-class JwtProvider2 (
+class JwtProvider (
     @Value("\${jwt.secret}")
     private val secret: String,
     @Value("\${jwt.access-expiration}")
