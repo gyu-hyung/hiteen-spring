@@ -1,17 +1,24 @@
 package kr.jiasoft.hiteen.feature.jwt
 
-import io.jsonwebtoken.Claims
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.security.Keys
-import org.springframework.beans.factory.annotation.Value
-import org.springframework.stereotype.Component
 import jakarta.annotation.PostConstruct
-import kr.jiasoft.hiteen.feature.user.UserEntity
-import java.util.*
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.security.authentication.AbstractAuthenticationToken
+import org.springframework.security.core.authority.AuthorityUtils
+import org.springframework.security.core.userdetails.UserDetails
+import org.springframework.stereotype.Component
+import java.util.Date
 import javax.crypto.SecretKey
 
+
+class BearerToken(val value: String) : AbstractAuthenticationToken(AuthorityUtils.NO_AUTHORITIES) {
+    override fun getCredentials(): Any = value
+    override fun getPrincipal(): Any = value
+}
+
 @Component
-class JwtProvider(
+class JwtProvider2 (
     @Value("\${jwt.secret}")
     private val secret: String,
     @Value("\${jwt.access-expiration}")
@@ -27,50 +34,80 @@ class JwtProvider(
         key = Keys.hmacShaKeyFor(secret.toByteArray())
     }
 
-    /** 액세스 토큰 생성 */
-    fun createAccessToken(claims: Map<String, Any?>): String =
-        createToken(claims, accessExpiration)
 
-    /** 액세스 토큰 생성 */
-    fun createRefreshToken(claims: Map<String, Any?>): String =
-        createToken(claims, refreshExpiration)
 
-    /** 토큰 생성 공통 */
-    private fun createToken(claims: Map<String, Any?>, expiration: Long): String {
-        val now = System.currentTimeMillis()
-        return Jwts.builder()
-            .claims(claims)
-            .issuedAt(Date(now))
-            .expiration(Date(now + expiration))
+    /** username으로 BearerToken(AccessToken) 발급 */
+    fun generate(username: String): BearerToken {
+        val now = Date()
+        val token = Jwts.builder()
+            .subject(username)
+            .issuedAt(now)
+            .expiration(Date(now.time + accessExpiration))
             .signWith(key)
             .compact()
+        return BearerToken(token)
     }
 
-    /** Claims 추출 */
-    fun parseClaims(token: String): Claims =
-        Jwts.parser()
-            .verifyWith(key)
-            .build()
-            .parseSignedClaims(token)
-            .payload
-
-
-
-
-
-
-
-
-    /** 토큰 유효성 검사 (만료/구조/시그니처 등) */
-    fun validateToken(token: String): Boolean = try {
-        parseClaims(token)
-        true
-    } catch (e: Exception) {
-        false
+    fun generateExpiredToken(): BearerToken {
+        val now = Date()
+        val token = Jwts.builder()
+            .subject("test")
+            .issuedAt(now)
+            .expiration(Date(now.time - accessExpiration))
+            .signWith(key)
+            .compact()
+        return BearerToken(token)
     }
 
-    /** 이메일(subject) 추출 */
-    fun getEmail(token: String): String? =
-        parseClaims(token).subject
+    /** BearerToken에서 username(subject) 추출 */
+    fun getUsername(token: BearerToken): String {
+        return try {
+            Jwts.parser()
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(token.value)
+                .payload
+                .subject
+        } catch (e: Exception) {
+            e.printStackTrace()
+            ""
+        }
+    }
+
+
+    /** BearerToken 유효성 검사 및 사용자 체크 */
+    fun isValid(token: BearerToken): Boolean {
+        return try {
+            Jwts.parser()
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(token.value)
+                .payload
+            true
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
+    }
+
+
+    /** BearerToken 유효성 검사 및 사용자 체크 */
+    fun isValidWithUserMatches(token: BearerToken, user: UserDetails?): Boolean {
+        return try {
+            val claims = Jwts.parser()
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(token.value)
+                .payload
+            // 토큰 만료 확인 및 username(UserDetails) 일치 확인
+            val expired = claims.expiration.before(Date())
+            val matches = user?.username == claims.subject
+            !expired && matches
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
+    }
+
+
 }
-
