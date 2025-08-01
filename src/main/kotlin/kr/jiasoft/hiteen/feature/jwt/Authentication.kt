@@ -2,7 +2,7 @@ package kr.jiasoft.hiteen.feature.jwt
 
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.mono
-import kr.jiasoft.hiteen.feature.user.UserDetailsServiceImpl
+import kr.jiasoft.hiteen.feature.user.UserService
 import org.springframework.http.HttpHeaders
 import org.springframework.security.authentication.ReactiveAuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
@@ -32,7 +32,7 @@ class InvalidBearerToken(message: String?) : AuthenticationException(message)
 @Component
 class JwtAuthenticationManager(
     private val jwtProvider: JwtProvider,
-    private val users: UserDetailsServiceImpl
+    private val userService: UserService
 ) : ReactiveAuthenticationManager {
 
     override fun authenticate(authentication: Authentication?): Mono<Authentication> {
@@ -45,10 +45,10 @@ class JwtAuthenticationManager(
 
     private suspend fun validate(token: BearerToken): Authentication {
         val username = jwtProvider.getUsername(token)
-        val user = users.findByUsername(username).awaitFirstOrNull()
+        val userDetails = userService.findByUsername(username).awaitFirstOrNull()
 
-        if (jwtProvider.isValidWithUserMatches(token, user)) {
-            return UsernamePasswordAuthenticationToken(user!!.username, user.password, user.authorities)
+        if (jwtProvider.isValidWithUserMatches(token, userDetails)) {
+            return UsernamePasswordAuthenticationToken(userDetails, userDetails!!.password, userDetails.authorities)
         }
         throw IllegalArgumentException("Token is not valid.")
     }

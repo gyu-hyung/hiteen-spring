@@ -5,16 +5,17 @@ import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.stereotype.Service
 import com.fasterxml.jackson.module.kotlin.readValue
+import kotlinx.coroutines.reactive.awaitFirst
 
 @Service
 class LocationService(
     private val mongoTemplate: ReactiveMongoTemplate,
-    private val locationHistoryRepository: LocationHistoryRepository,
+    private val locationHistoryMongoRepository: LocationHistoryMongoRepository,
     private val objectMapper: ObjectMapper
 ) {
     suspend fun saveLocationAsyncFromJson(json: String) {
         val entity = parseJsonToEntity(json)
-        locationHistoryRepository.save(entity).awaitFirstOrNull()
+        locationHistoryMongoRepository.save(entity).awaitFirstOrNull()
     }
 
     private fun parseJsonToEntity(json: String): LocationHistory {
@@ -25,8 +26,16 @@ class LocationService(
         }
     }
 
+    suspend fun findAllByUserId(userId: String) : List<LocationHistory> =
+        locationHistoryMongoRepository.findAllByUserId(userId).collectList().awaitFirst()
 
 
+
+
+
+
+
+    // ==================    ReactiveMongoTemplate ==================
     suspend fun saveLocationAsync(payload: ByteArray) {
         val location = parsePayload(payload) // JSON 역직렬화 등
         mongoTemplate.save(location).awaitFirstOrNull()
@@ -39,4 +48,5 @@ class LocationService(
             throw IllegalArgumentException("Invalid payload: ${payload.decodeToString()}", e)
         }
     }
+    // ==================    ReactiveMongoTemplate ==================
 }

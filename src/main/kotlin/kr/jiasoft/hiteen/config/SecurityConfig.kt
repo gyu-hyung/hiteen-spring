@@ -24,20 +24,6 @@ class SecurityConfig(
     @Bean
     fun passwordEncoder (): PasswordEncoder = BCryptPasswordEncoder()
 
-//    @Bean
-//    fun userDetailsService(userRepository: UserRepository): ReactiveUserDetailsService = UserDetailsServiceImpl(userRepository)
-
-//    @Bean
-//    fun userDetailsService(encoder: PasswordEncoder) : MapReactiveUserDetailsService {
-//        val user = User.builder()
-//            .username("test")
-//            .password(encoder.encode("1234"))
-//            .roles("USER")
-//            .build()
-//
-//        return MapReactiveUserDetailsService(user)
-//    }
-
 
     @Bean
     fun securityWebFilterChain(

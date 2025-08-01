@@ -13,13 +13,13 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 
 class LocationServiceTest {
 
-    private val locationHistoryRepository = mock<LocationHistoryRepository>()
+    private val locationHistoryMongoRepository = mock<LocationHistoryMongoRepository>()
     private val objectMapper = jacksonObjectMapper()
 
 
     private val mongoTemplate = mock<org.springframework.data.mongodb.core.ReactiveMongoTemplate>() // 사용 안해도 OK
 
-    private val locationService = LocationService(mongoTemplate, locationHistoryRepository, objectMapper)
+    private val locationService = LocationService(mongoTemplate, locationHistoryMongoRepository, objectMapper)
 
     @Test
     fun `정상적인 JSON이면 LocationHistory 저장`() {
@@ -40,14 +40,14 @@ class LocationServiceTest {
                 timestamp = 1722432318000
             )
 
-            whenever(locationHistoryRepository.save(any())).thenReturn(Mono.just(entity))
+            whenever(locationHistoryMongoRepository.save(any())).thenReturn(Mono.just(entity))
 
 
             // when
             locationService.saveLocationAsyncFromJson(json)
 
             // then
-            verify(locationHistoryRepository, times(1)).save(argThat {
+            verify(locationHistoryMongoRepository, times(1)).save(argThat {
                 this.userId == "userId123"
                         && this.lat == 37.123
                         && this.lng == 127.456
