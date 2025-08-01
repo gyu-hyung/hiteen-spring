@@ -56,18 +56,7 @@ class JwtProvider(
 
 
 
-    /** Account-like 객체로 파싱 예시 */
-    fun parseAccount(token: String): UserEntity =
-        parseClaims(token).let { claims ->
-            UserEntity(
-                id = claims["id"]?.toString()?.toLongOrNull(),
-                name = claims["name"]?.toString(),
-//                email = claims["email"]?.toString() ?: claims.subject,
-//                provider = claims["provider"]?.toString(),
-//                profileImage = claims["profileImage"]?.toString(),
-                role = claims["role"]?.toString() ?: "USER"
-            )
-        }
+
 
 
 

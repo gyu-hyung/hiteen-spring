@@ -2,6 +2,8 @@ package kr.jiasoft.hiteen.feature.user
 
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Table
+import org.springframework.security.core.userdetails.User
+import org.springframework.security.core.userdetails.UserDetails
 
 
 @Table(name = "tb_users")
@@ -9,8 +11,19 @@ data class UserEntity(
     @Id
     val id: Long? = null,
     val name: String?,
+    val password: String?,
     val role: String?,
 )
+
+fun UserEntity.toUserDetails(): UserDetails {
+    return User.builder()
+        .username(name ?: "")
+        .password(password ?:"")
+        .roles(role ?: "USER")
+        .build()
+}
+
+
 
 fun UserEntity.toClaims(): Map<String, Any?> = mapOf(
     "id" to id,
