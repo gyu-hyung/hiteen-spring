@@ -30,15 +30,6 @@ services:
       - "18083:18083"   # EMQX 대시보드
       - "8083:8083"     # MQTT WebSocket
 
-#  DB GUI
-#  pgadmin:
-#    image: dpage/pgadmin4
-#    ports:
-#      - "5050:8081"
-#    environment:
-#      PGADMIN_DEFAULT_EMAIL: admin@admin.com
-#      PGADMIN_DEFAULT_PASSWORD: admin
-
 volumes:
   mongo_data:
   postgres_data:
