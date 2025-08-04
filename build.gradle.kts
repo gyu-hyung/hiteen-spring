@@ -79,7 +79,8 @@ dependencies {
 	implementation("io.jsonwebtoken:jjwt-impl:$jjwtVersion")
 	implementation("io.jsonwebtoken:jjwt-jackson:$jjwtVersion")
 
-
+	// Bean Validation
+	implementation("org.springframework.boot:spring-boot-starter-validation")
 }
 
 
