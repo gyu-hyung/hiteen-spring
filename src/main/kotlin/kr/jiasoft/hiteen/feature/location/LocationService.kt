@@ -6,6 +6,7 @@ import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.stereotype.Service
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.reactive.awaitFirst
+import kr.jiasoft.hiteen.feature.mqtt.MqttResponse
 
 @Service
 class LocationService(
@@ -13,6 +14,17 @@ class LocationService(
     private val locationHistoryMongoRepository: LocationHistoryMongoRepository,
     private val objectMapper: ObjectMapper
 ) {
+
+    suspend fun saveLocationFromMqtt(mqttResponse: MqttResponse) {
+        val entity = LocationHistory(
+            userId = mqttResponse.userId,
+            lat = mqttResponse.lat,
+            lng = mqttResponse.lng,
+            timestamp = mqttResponse.timestamp
+        )
+        locationHistoryMongoRepository.save(entity).awaitFirstOrNull()
+    }
+
     suspend fun saveLocationAsyncFromJson(json: String) {
         val entity = parseJsonToEntity(json)
         locationHistoryMongoRepository.save(entity).awaitFirstOrNull()
@@ -32,10 +44,7 @@ class LocationService(
 
 
 
-
-
-
-    // ==================    ReactiveMongoTemplate ==================
+    // ================== ReactiveMongoTemplate ==================
     suspend fun saveLocationAsync(payload: ByteArray) {
         val location = parsePayload(payload) // JSON 역직렬화 등
         mongoTemplate.save(location).awaitFirstOrNull()
@@ -48,5 +57,4 @@ class LocationService(
             throw IllegalArgumentException("Invalid payload: ${payload.decodeToString()}", e)
         }
     }
-    // ==================    ReactiveMongoTemplate ==================
 }

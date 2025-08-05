@@ -9,7 +9,8 @@ services:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: example
     volumes:
-      - mongo_data:/data/mongodb
+#      - mongo_data:/data/mongodb
+      - /home/jgh/mongodb:/data/mongodb
 
   postgresql:
     image: postgres:15-alpine
@@ -20,7 +21,8 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/data/postgresdb
+#      - postgres_data:/data/postgresdb
+      - /home/jgh/postgresql:/data/postgresdb
 
   emqx:
     image: emqx/emqx:latest
@@ -30,6 +32,6 @@ services:
       - "18083:18083"   # EMQX 대시보드
       - "8083:8083"     # MQTT WebSocket
 
-volumes:
-  mongo_data:
-  postgres_data:
+#volumes:
+#  mongo_data:
+#  postgres_data:

@@ -10,5 +10,5 @@ data class LocationHistory(
     val userId: String,
     val lat: Double,
     val lng: Double,
-    val timestamp: Long
+    val timestamp: Long,
 )
