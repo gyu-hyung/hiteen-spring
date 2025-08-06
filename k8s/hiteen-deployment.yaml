@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hiteen-spring
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: hiteen-spring
+  template:
+    metadata:
+      labels:
+        app: hiteen-spring
+    spec:
+      containers:
+      - name: hiteen-spring
+        image: hiteen-spring:1.0.0
+        env:
+        - name: MQTT_BROKER_URI
+          value: tcp://emqx:1883
+        - name: MQTT_TOPIC
+          value: $share/mygroup/hiteen/location
+        - name: MQTT_CLIENT_ID
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+

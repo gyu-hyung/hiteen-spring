@@ -2,11 +2,13 @@ package kr.jiasoft.hiteen.feature.user
 
 import jakarta.validation.Valid
 import kotlinx.coroutines.reactive.awaitFirstOrNull
+import kr.jiasoft.hiteen.feature.jwt.BearerToken
 import kr.jiasoft.hiteen.feature.jwt.JwtProvider
 import kr.jiasoft.hiteen.feature.user.dto.UserRegisterForm
 import kr.jiasoft.hiteen.feature.user.dto.UserResponse
 import kr.jiasoft.hiteen.feature.user.dto.UserUpdateForm
 import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.web.bind.annotation.*
@@ -57,7 +59,21 @@ class UserController(
         @Valid userUpdateForm: UserUpdateForm
     ): Profile = Profile(userService.updateUser(user, userUpdateForm))
 
-
+    @PostMapping("/auth")
+    fun authenticate(@RequestBody body: Map<String, String>): ResponseEntity<Map<String, Any>> {
+        println("@@@@@@@@@@ /auth")
+        val jwt: String? = body["password"]
+        return try {
+            if (jwt.isNullOrBlank()) throw IllegalArgumentException("No JWT provided")
+            jwtProvider.isValid(BearerToken(jwt))
+            println("@@@@@@@@@@ /auth success")
+            ResponseEntity.ok(mapOf("result" to "ok", "is_superuser" to false))
+        } catch (e: Exception) {
+            println("@@@@@@@@@@ /auth fail")
+            e.printStackTrace()
+            ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(mapOf("result" to "deny"))
+        }
+    }
 
 
 }

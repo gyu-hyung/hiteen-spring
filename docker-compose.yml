@@ -1,4 +1,3 @@
-version: "3.8"
 services:
   mongodb:
     image: mongo:7.0
@@ -18,19 +17,14 @@ services:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
       POSTGRES_DB: hiteen
-    ports:
-      - "5432:5432"
+#    ports:
+#      - "5432:5432"
     volumes:
 #      - postgres_data:/data/postgresdb
       - /home/jgh/postgresql:/data/postgresdb
 
-  emqx:
-    image: emqx/emqx:latest
-    container_name: emqx
-    ports:
-      - "1883:1883"     # MQTT
-      - "18083:18083"   # EMQX 대시보드
-      - "8083:8083"     # MQTT WebSocket
+
+
 
 #volumes:
 #  mongo_data:
