@@ -1,0 +1,61 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: hiteen-postgres-pvc
+  namespace: hiteen
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hiteen-postgres
+  namespace: hiteen
+spec:
+#  type: ClusterIP
+  type: NodePort
+  ports:
+    - port: 5432
+      targetPort: 5432
+      name: postgres
+  selector:
+    app: hiteen-postgres
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hiteen-postgres
+  namespace: hiteen
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hiteen-postgres
+  template:
+    metadata:
+      labels:
+        app: hiteen-postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:16
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_DB
+              value: "hiteen"
+            - name: POSTGRES_USER
+              value: "hiteen"
+            - name: POSTGRES_PASSWORD
+              value: "1234"
+          volumeMounts:
+            - name: postgres-storage
+              mountPath: /var/lib/postgresql/data
+      volumes:
+        - name: postgres-storage
+          persistentVolumeClaim:
+            claimName: hiteen-postgres-pvc

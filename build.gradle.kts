@@ -63,7 +63,7 @@ dependencies {
 //	basic authentication
 //	mqtt upgrade for security(scram)
 // https://mvnrepository.com/artifact/org.eclipse.paho/org.eclipse.paho.mqttv5.client
-//	implementation("org.eclipse.paho:org.eclipse.paho.mqttv5.client:1.2.5")
+	implementation("org.eclipse.paho:org.eclipse.paho.mqttv5.client:1.2.5")
 	implementation("org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.5")
 	implementation("org.springframework.integration:spring-integration-mqtt")
 
