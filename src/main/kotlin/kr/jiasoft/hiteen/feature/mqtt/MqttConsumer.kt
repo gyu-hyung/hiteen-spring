@@ -1,6 +1,5 @@
-package kr.jiasoft.hiteen.config
+package kr.jiasoft.hiteen.feature.mqtt
 
-import kr.jiasoft.hiteen.feature.mqtt.LocationMessageProcessor
 import org.apache.camel.builder.RouteBuilder
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
@@ -12,7 +11,12 @@ class MqttConsumers(
     @Value("\${mqtt.broker.uri}") private val brokerUri: String,
     @Value("\${mqtt.client.id}") private val clientId: String,
     @Value("\${mqtt.username}") private val username: String,
-    @Value("\${mqtt.password}") private val password: String
+    @Value("\${mqtt.password}") private val password: String,
+    @Value("\${mqtt.cleanStart}") private val cleanStart: String,
+    @Value("\${mqtt.automaticReconnect}") private val automaticReconnect: String,
+    @Value("\${mqtt.sessionExpiryInterval}") private val sessionExpiryInterval: String,
+    @Value("\${mqtt.keepAliveInterval}") private val keepAliveInterval: String,
+    @Value("\${mqtt.qos}") private val qos: String
 ) : RouteBuilder() {
 
     override fun configure() {
@@ -32,14 +36,14 @@ class MqttConsumers(
         from(
             "paho-mqtt5:$topic" +
                     "?brokerUrl=$brokerUri" +
-                    "&clientId=${clientId}" +
+                    "&clientId=$clientId" +
                     "&userName=$username" +
                     "&password=$password" +
-                    "&automaticReconnect=true" +
-                    "&cleanStart=false" +
-                    "&sessionExpiryInterval=86400" +
-                    "&keepAliveInterval=60" +
-                    "&qos=1"
+                    "&automaticReconnect=$automaticReconnect" +
+                    "&cleanStart=$cleanStart" +
+                    "&sessionExpiryInterval=$sessionExpiryInterval" +
+                    "&keepAliveInterval=$keepAliveInterval" +
+                    "&qos=$qos"
         )
             .routeId("mqtt-a1")
             .to("direct:processLocation")

@@ -38,7 +38,6 @@ class UserController(
         val user = userService.findByUsername(loginForm.username).awaitFirstOrNull()
         user?.let {
             if (encoder.matches(loginForm.password, it.password)){
-                println("login success")
                 return Jwt(jwtProvider.generate(it.username).value)
             }
         }
@@ -48,7 +47,6 @@ class UserController(
     /* 회원정보조회 */
     @GetMapping("/me")
     suspend fun me(@AuthenticationPrincipal(expression = "user")  user: UserEntity): Profile {
-        println("principal = ${user}")
         return Profile(user.toResponse())
     }
 
@@ -61,15 +59,12 @@ class UserController(
 
     @PostMapping("/auth")
     fun authenticate(@RequestBody body: Map<String, String>): ResponseEntity<Map<String, Any>> {
-        println("@@@@@@@@@@ /auth")
         val jwt: String? = body["password"]
         return try {
             if (jwt.isNullOrBlank()) throw IllegalArgumentException("No JWT provided")
             jwtProvider.isValid(BearerToken(jwt))
-            println("@@@@@@@@@@ /auth success")
             ResponseEntity.ok(mapOf("result" to "ok", "is_superuser" to false))
         } catch (e: Exception) {
-            println("@@@@@@@@@@ /auth fail")
             e.printStackTrace()
             ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(mapOf("result" to "deny"))
         }
