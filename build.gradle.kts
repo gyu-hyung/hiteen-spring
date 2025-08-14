@@ -63,9 +63,12 @@ dependencies {
 //	basic authentication
 //	mqtt upgrade for security(scram)
 // https://mvnrepository.com/artifact/org.eclipse.paho/org.eclipse.paho.mqttv5.client
-	implementation("org.eclipse.paho:org.eclipse.paho.mqttv5.client:1.2.5")
-	implementation("org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.5")
-	implementation("org.springframework.integration:spring-integration-mqtt")
+//	implementation("org.eclipse.paho:org.eclipse.paho.mqttv5.client:1.2.5")
+//	implementation("org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.5")
+//	implementation("org.springframework.integration:spring-integration-mqtt")
+	implementation("org.apache.camel.springboot:camel-spring-boot-starter:4.6.0")
+	implementation("org.apache.camel.springboot:camel-paho-mqtt5-starter:4.6.0")
+
 
 	// Redis
 	implementation("org.springframework.boot:spring-boot-starter-data-redis")
