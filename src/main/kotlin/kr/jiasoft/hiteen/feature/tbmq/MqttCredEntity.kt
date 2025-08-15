@@ -9,6 +9,7 @@ data class MqttCredEntity(
     @Id val id: Long? = null,
     val userId: Long,
     val credentialsId: String,
+    val clientId: String,
     val username: String,
     val password: String,
     val issuedAt: Instant,
