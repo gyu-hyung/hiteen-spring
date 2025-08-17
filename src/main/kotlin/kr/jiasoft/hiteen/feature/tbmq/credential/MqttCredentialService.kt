@@ -30,18 +30,20 @@ class MqttCredentialService(
     suspend fun issueForUser(userId: Long, usernameForTopic: String, deviceId: String): IssueResult {
         // 회전 정책: 기존 정보가 있으면 삭제 후 재발급(TODO: 혹은 유효하면 재사용하도록 분기)
         repository.findByUserId(userId)?.let { old ->
+            //TODO tbmq 삭제요청이 실패할경우 tbmq 인증정보만 남게됨.
             runCatching { client.deleteCredentials(old.credentialsId) }
             repository.delete(old)
         }
 
+        val mqttNickname = "u_${usernameForTopic}_${shortRand()}"
         val mqttClientId = deviceId
-        val mqttUsername = "u_${usernameForTopic}_${shortRand()}"
+        val mqttUsername = usernameForTopic
         val mqttPassword = longRand()
 
         val pubTopic = "location/$usernameForTopic"
         // TBMQ REST로 MQTT_BASIC 자격증명 생성.
         val res = client.createBasicCredentials(
-            name = mqttClientId,
+            name = mqttNickname,
             clientId = mqttClientId,
             userName = mqttUsername,
             password = mqttPassword,
