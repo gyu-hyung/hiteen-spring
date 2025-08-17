@@ -1,4 +1,4 @@
-package kr.jiasoft.hiteen.feature.tbmq
+package kr.jiasoft.hiteen.feature.tbmq.credential
 
 import jakarta.validation.constraints.NotBlank
 import kr.jiasoft.hiteen.feature.user.UserEntity

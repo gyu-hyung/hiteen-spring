@@ -1,12 +1,15 @@
-package kr.jiasoft.hiteen.feature.tbmq
+package kr.jiasoft.hiteen.feature.tbmq.credential
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kr.jiasoft.hiteen.feature.tbmq.TbmqAdminClient
+import kr.jiasoft.hiteen.feature.tbmq.TbmqProperties
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import java.security.SecureRandom
 import java.time.Instant
 import java.time.temporal.ChronoUnit
+import java.util.Base64
 
 @Service
 class MqttCredentialService(
@@ -50,7 +53,8 @@ class MqttCredentialService(
         repository.save(
             MqttCredEntity(
                 userId = userId,
-                credentialsId = mqttClientId,
+                credentialsId = res.id,
+                clientId = mqttClientId,
                 username = mqttUsername,
                 password = encoder.encode(mqttPassword),
                 issuedAt = Instant.now(),
@@ -80,10 +84,10 @@ class MqttCredentialService(
 
     private suspend fun shortRand(): String = withContext(Dispatchers.Default) {
         val b = ByteArray(4).also { rnd.nextBytes(it) }
-        java.util.Base64.getUrlEncoder().withoutPadding().encodeToString(b)
+        Base64.getUrlEncoder().withoutPadding().encodeToString(b)
     }
     private suspend fun longRand(): String = withContext(Dispatchers.Default) {
         val b = ByteArray(18).also { rnd.nextBytes(it) }
-        java.util.Base64.getUrlEncoder().withoutPadding().encodeToString(b)
+        Base64.getUrlEncoder().withoutPadding().encodeToString(b)
     }
 }
