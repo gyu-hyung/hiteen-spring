@@ -1,0 +1,73 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: hiteen-redis-pvc
+  namespace: hiteen
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hiteen-redis
+  namespace: hiteen
+spec:
+  type: NodePort
+  ports:
+    - port: 6379
+      targetPort: 6379
+      name: redis
+  selector:
+    app: hiteen-redis
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hiteen-redis
+  namespace: hiteen
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hiteen-redis
+  template:
+    metadata:
+      labels:
+        app: hiteen-redis
+    spec:
+      containers:
+        - name: redis
+          image: redis:7-alpine
+          ports:
+            - containerPort: 6379
+          env:
+            - name: REDIS_PASSWORD
+              value: "hiteen1234"
+          args:
+            - sh
+            - -c
+            - |
+              exec redis-server \
+                --appendonly yes \
+                --requirepass "$REDIS_PASSWORD"
+          livenessProbe:
+            tcpSocket:
+              port: 6379
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            tcpSocket:
+              port: 6379
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          volumeMounts:
+            - name: redis-storage
+              mountPath: /data
+      volumes:
+        - name: redis-storage
+          persistentVolumeClaim:
+            claimName: hiteen-redis-pvc

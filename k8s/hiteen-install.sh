@@ -29,11 +29,31 @@ kubectl apply -f hiteen-mongo.yml
 # 6. MongoDB Pod 올라올 때까지 대기 (Deployment 기준)
 kubectl rollout status deployment/hiteen-mongo
 
+# 7. Redis 배포
+kubectl apply -f hiteen-redis.yml
+
+# 8. Redis Pod 올라올 때까지 대기 (Deployment 기준)
+kubectl rollout status deployment/hiteen-redis
+
+# (선택) NodePort 정보 출력용 변수
+REDIS_NODEPORT=$(kubectl get svc hiteen-redis -o jsonpath='{.spec.ports[0].nodePort}' || echo "N/A")
+MINIKUBE_IP=$(minikube ip 2>/dev/null || echo "N/A")
+
 echo "=========================================="
-echo "HITEEN 서비스용 PostgreSQL & MongoDB 배포 완료!"
-echo "각각의 서비스 접속정보는 아래와 같습니다:"
+echo "HITEEN 서비스용 PostgreSQL, MongoDB, Redis 배포 완료!"
+echo ""
+echo "네임스페이스: hiteen"
 echo ""
 echo "PostgreSQL: hiteen-postgres.hiteen.svc.cluster.local:55432"
 echo "MongoDB   : hiteen-mongo.hiteen.svc.cluster.local:27017"
-echo "네임스페이스: hiteen"
+echo "Redis     : hiteen-redis.hiteen.svc.cluster.local:6379"
+echo ""
+echo "로컬 포워딩 예시:"
+echo "  kubectl -n hiteen port-forward svc/hiteen-redis 6379:6379"
+echo "  redis-cli -h 127.0.0.1 -p 6379 -a hiteen1234 ping"
+echo ""
+echo "Minikube NodePort 접속:"
+echo "  IP       : ${MINIKUBE_IP}"
+echo "  NodePort : ${REDIS_NODEPORT}"
+echo "  redis-cli -h ${MINIKUBE_IP} -p ${REDIS_NODEPORT} -a hiteen1234 ping"
 echo "=========================================="

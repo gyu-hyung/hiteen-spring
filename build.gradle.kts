@@ -61,9 +61,8 @@ dependencies {
 	implementation("org.apache.camel.springboot:camel-spring-boot-starter:4.8.5")
 	implementation("org.apache.camel.springboot:camel-paho-mqtt5-starter:4.8.5")
 
-	// Redis
-	implementation("org.springframework.boot:spring-boot-starter-data-redis")
-	implementation("org.springframework.data:spring-data-redis:3.3.0")
+	// Reactive Redis
+	implementation("org.springframework.boot:spring-boot-starter-data-redis-reactive")
 
 	// Mongo DB
 	implementation("org.springframework.data:spring-data-mongodb:4.3.0")
@@ -71,6 +70,9 @@ dependencies {
 
 	// JSON
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+
+	// WebSocket & STOMP
+//	implementation("org.springframework.boot:spring-boot-starter-websocket")
 
 
 	// JWT
