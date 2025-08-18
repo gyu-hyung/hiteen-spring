@@ -122,7 +122,7 @@ class JwtProvider (
             val matches = user?.username == claims.subject
             !expired && matches
         } catch (e: Exception) {
-            e.printStackTrace()
+//            e.printStackTrace()
             false
         }
     }

@@ -70,7 +70,7 @@ class JwtAuthenticationManager(
         val userDetails = userService.findByUsername(username).awaitFirstOrNull()
             ?: throw InvalidBearerToken("user_not_found")
 
-        if (jwtProvider.isValidWithUserMatches(token, userDetails)) {
+        if (!jwtProvider.isValidWithUserMatches(token, userDetails)) {
             throw InvalidBearerToken("mismatch")
         }
         return UsernamePasswordAuthenticationToken(
