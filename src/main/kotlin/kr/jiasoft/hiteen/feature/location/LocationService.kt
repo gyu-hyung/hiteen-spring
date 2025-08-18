@@ -12,8 +12,13 @@ import kr.jiasoft.hiteen.feature.mqtt.MqttResponse
 class LocationService(
     private val mongoTemplate: ReactiveMongoTemplate,
     private val locationHistoryMongoRepository: LocationHistoryMongoRepository,
-    private val objectMapper: ObjectMapper
+    private val objectMapper: ObjectMapper,
 ) {
+
+    //HTTP로 위치정보 이력 저장
+    suspend fun saveLocation(entity: LocationHistory): LocationHistory? {
+        return locationHistoryMongoRepository.save(entity).awaitFirstOrNull()
+    }
 
     suspend fun saveLocationFromMqtt(mqttResponse: MqttResponse) {
         val entity = LocationHistory(
