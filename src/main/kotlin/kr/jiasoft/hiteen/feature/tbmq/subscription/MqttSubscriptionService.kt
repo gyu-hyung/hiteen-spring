@@ -16,7 +16,8 @@ class MqttSubscriptionService(
 
     suspend fun add(command: AddSubsCommand) {
 //         (선택) clientId 검증: 우리 DB에 등록된 clientId인지 확인
-         credRepository.findByClientIdOrThrow(command.clientId)
+         credRepository.findByClientId(command.clientId)
+            ?: throw IllegalStateException("Invalid clientId: $command.clientId")
 
         // (선택) 토픽 유효성/개수 제한
         // validateTopics(command.subscriptions.map { it.topicFilter })

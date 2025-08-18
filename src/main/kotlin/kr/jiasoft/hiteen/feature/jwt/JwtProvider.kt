@@ -1,5 +1,9 @@
 package kr.jiasoft.hiteen.feature.jwt
 
+import io.jsonwebtoken.Claims
+import io.jsonwebtoken.Jws
+import io.jsonwebtoken.JwtException
+import io.jsonwebtoken.JwtParser
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.security.Keys
 import jakarta.annotation.PostConstruct
@@ -28,10 +32,12 @@ class JwtProvider (
 ) {
 
     private lateinit var key: SecretKey
+    private lateinit var parser: JwtParser
 
     @PostConstruct
     fun init() {
         key = Keys.hmacShaKeyFor(secret.toByteArray())
+        parser = Jwts.parser().verifyWith(key).build()
     }
 
 
@@ -69,10 +75,22 @@ class JwtProvider (
                 .payload
                 .subject
         } catch (e: Exception) {
-            e.printStackTrace()
+//            e.printStackTrace()
             ""
         }
     }
+
+
+    /** 토큰을 완전 검증(서명/exp/nbf)하고 Claims를 반환. 실패 시 JwtException 계열을 던짐 */
+    fun parseAndValidateOrThrow(token: BearerToken): Jws<Claims> {
+        return parser.parseSignedClaims(token.value)
+    }
+
+    /** 로깅 전용: 안전하게 subject를 꺼내되 실패하면 null */
+    fun tryGetSubjectSafely(token: BearerToken): String? =
+        try { parser.parseSignedClaims(token.value).payload.subject }
+        catch (_: JwtException) { null }
+        catch (_: IllegalArgumentException) { null }
 
 
     /** BearerToken 유효성 검사 및 사용자 체크 */

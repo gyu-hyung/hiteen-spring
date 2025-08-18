@@ -4,5 +4,5 @@ import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 
 interface MqttCredRepository : CoroutineCrudRepository<MqttCredEntity, Long> {
     suspend fun findByUserId(userId: Long): MqttCredEntity?
-    suspend fun findByClientIdOrThrow(credentialsId: String): MqttCredEntity?
+    suspend fun findByClientId(credentialsId: String): MqttCredEntity?
 }
