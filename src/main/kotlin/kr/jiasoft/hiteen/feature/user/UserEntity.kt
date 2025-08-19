@@ -1,6 +1,7 @@
 package kr.jiasoft.hiteen.feature.user
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import kr.jiasoft.hiteen.feature.user.dto.CustomUserDetails
 import kr.jiasoft.hiteen.feature.user.dto.UserResponse
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Table
