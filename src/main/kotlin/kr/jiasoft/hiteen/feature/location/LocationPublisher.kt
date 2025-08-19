@@ -18,6 +18,7 @@ data class LocationEvent(
     }
 }
 
+//실시간 브로드캐스팅
 @Service
 class LocationPublisher(
     private val redisTemplate: ReactiveStringRedisTemplate,
