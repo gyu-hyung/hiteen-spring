@@ -65,7 +65,7 @@ class JwtAuthenticationManager(
     private suspend fun validate(token: BearerToken): Authentication {
         val jws = jwtProvider.parseAndValidateOrThrow(token)
 
-        val username = jws.payload.subject ?: throw InvalidBearerToken("no_subject")
+        val username = jws.payload.subject
 
         val userDetails = userService.findByUsername(username).awaitFirstOrNull()
             ?: throw InvalidBearerToken("user_not_found")
