@@ -1,12 +1,13 @@
-package kr.jiasoft.hiteen.feature.user
+package kr.jiasoft.hiteen.feature.user.dto
 
+import kr.jiasoft.hiteen.feature.user.UserEntity
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
 
 class CustomUserDetails(
     val user: UserEntity
-) : UserDetails{
+) : UserDetails {
     override fun getUsername(): String = user.username
 
     override fun getPassword(): String = user.password
