@@ -18,6 +18,7 @@ class LocationRedisService(
     private val ttl: Duration = Duration.ofHours(24)
 
 
+    //최신 위치 갱신
     suspend fun cacheLatest(entity: LocationHistory) {
         val json = objectMapper.writeValueAsString(entity)
         // TTL을 쓰고 싶지 않다면 expire 부분 제거
