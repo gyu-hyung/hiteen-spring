@@ -1,4 +1,4 @@
-package kr.jiasoft.hiteen.feature.mqtt
+package kr.jiasoft.hiteen.feature.location
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import jakarta.annotation.PreDestroy
@@ -7,7 +7,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
-import kr.jiasoft.hiteen.feature.location.LocationService
+import kr.jiasoft.hiteen.feature.mqtt.MqttResponse
 import org.apache.camel.Exchange
 import org.apache.camel.Processor
 import org.slf4j.LoggerFactory

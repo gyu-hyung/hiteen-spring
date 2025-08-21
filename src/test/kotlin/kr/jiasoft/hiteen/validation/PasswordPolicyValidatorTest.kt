@@ -17,7 +17,7 @@ class PasswordPolicyValidatorTest {
     fun setUp() {
         validator = PasswordPolicyValidator()
         context = mock(ConstraintValidatorContext::class.java)
-        builder = mock(ConstraintValidatorContext.ConstraintViolationBuilder::class.java)
+        builder = mock(ConstraintViolationBuilder::class.java)
         `when`(context.buildConstraintViolationWithTemplate(anyString())).thenReturn(builder)
         `when`(builder.addConstraintViolation()).thenReturn(context)
     }
