@@ -4,6 +4,7 @@ import java.time.LocalDateTime
 
 data class UserResponse(
     val id: Long?,
+    val uid: String?,
     val username: String,
     val email: String?,
     val nickname: String?,
