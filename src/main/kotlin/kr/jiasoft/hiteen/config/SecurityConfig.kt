@@ -1,7 +1,7 @@
 package kr.jiasoft.hiteen.config
 
-import kr.jiasoft.hiteen.feature.jwt.JwtAuthenticationManager
-import kr.jiasoft.hiteen.feature.jwt.JwtServerAuthenticationConverter
+import kr.jiasoft.hiteen.feature.auth.infra.JwtAuthenticationManager
+import kr.jiasoft.hiteen.feature.auth.infra.JwtAuthenticationConverter
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpHeaders
@@ -29,7 +29,7 @@ class SecurityConfig(
     fun securityWebFilterChain(
         http: ServerHttpSecurity,
         authManager: JwtAuthenticationManager,
-        converter: JwtServerAuthenticationConverter,): SecurityWebFilterChain {
+        converter: JwtAuthenticationConverter,): SecurityWebFilterChain {
 
         val filter = AuthenticationWebFilter(authManager)
         filter.setServerAuthenticationConverter(converter)

@@ -1,16 +1,12 @@
 package kr.jiasoft.hiteen.feature.user
 
-import kotlinx.coroutines.runBlocking
-import kr.jiasoft.hiteen.feature.user.dto.UserRegisterForm
-import kr.jiasoft.hiteen.feature.user.dto.UserUpdateForm
+import kr.jiasoft.hiteen.feature.user.app.UserService
+import kr.jiasoft.hiteen.feature.user.infra.UserRepository
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
-import java.time.LocalDateTime
 
 class UserServiceTest {
 

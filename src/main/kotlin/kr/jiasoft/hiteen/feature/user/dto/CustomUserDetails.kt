@@ -1,6 +1,6 @@
 package kr.jiasoft.hiteen.feature.user.dto
 
-import kr.jiasoft.hiteen.feature.user.UserEntity
+import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails

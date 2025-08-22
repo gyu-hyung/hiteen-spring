@@ -3,7 +3,7 @@ package kr.jiasoft.hiteen.feature.user.dto
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size
-import kr.jiasoft.hiteen.feature.user.UserEntity
+import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import kr.jiasoft.hiteen.validation.ValidPassword
 import java.time.LocalDateTime
 
@@ -25,6 +25,7 @@ data class UserRegisterForm(
     val password: String? = null,
 ) {
     fun toEntity(encodedPassword: String): UserEntity = UserEntity(
+        uid = "",
         username = username?:"",
         email = email,
         nickname = nickname,
