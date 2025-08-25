@@ -22,7 +22,9 @@ class LocationAppService(
         req: LocationController.LocationRequest
     ): LocationHistory? {
         val entity = LocationHistory(
-            userId = user.uid,
+            //TODO uid? or id?
+//            userId = user.uid.toString(),
+            userId = user.id.toString(),
             lat = req.lat,
             lng = req.lng,
             timestamp = req.timestamp

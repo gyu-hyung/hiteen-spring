@@ -14,7 +14,7 @@ class AuthController(
 
 
     @PostMapping("/login")
-    suspend fun login(@RequestBody form: LoginForm): JwtResponse =
+    suspend fun login(form: LoginForm): JwtResponse =
         try { JwtResponse(authService.login(form.username, form.password)) }
         catch (e: IllegalArgumentException) { throw ResponseStatusException(HttpStatus.UNAUTHORIZED) }
 

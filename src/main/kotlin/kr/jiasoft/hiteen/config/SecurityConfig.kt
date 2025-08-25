@@ -40,7 +40,7 @@ class SecurityConfig(
             .formLogin { it.disable() }
             .addFilterAt(filter, SecurityWebFiltersOrder.AUTHENTICATION)
             .authorizeExchange {
-                it.pathMatchers(HttpMethod.POST,"/api/user/login", "/api/user", "/favicon.ico", "/swagger-ui/**", "/api-docs/**").permitAll()
+                it.pathMatchers(HttpMethod.POST,"/api/auth/login", "/api/user", "/favicon.ico", "/swagger-ui/**", "/api-docs/**").permitAll()
                 it.anyExchange().authenticated()
             }
             .exceptionHandling { ex ->
