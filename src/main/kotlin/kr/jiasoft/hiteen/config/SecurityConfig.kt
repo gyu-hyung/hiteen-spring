@@ -40,7 +40,22 @@ class SecurityConfig(
             .formLogin { it.disable() }
             .addFilterAt(filter, SecurityWebFiltersOrder.AUTHENTICATION)
             .authorizeExchange {
-                it.pathMatchers(HttpMethod.POST,"/api/auth/login", "/api/user", "/favicon.ico", "/swagger-ui/**", "/api-docs/**").permitAll()
+                it.pathMatchers(
+                    HttpMethod.POST,
+                    "/api/auth/login",
+                    "/api/user",
+                    "/favicon.ico",
+                    "/swagger-ui/**",
+                    "/api-docs/**",   // 보통은 "/v3/api-docs/**" 인 경우가 많음
+                    "/v3/api-docs/**",
+                ).permitAll()
+
+                // 다운로드는 GET 허용
+                it.pathMatchers(
+                    HttpMethod.GET,
+                    "/api/assets/{uid}/download"
+                ).permitAll()
+
                 it.anyExchange().authenticated()
             }
             .exceptionHandling { ex ->
