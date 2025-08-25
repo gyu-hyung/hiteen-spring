@@ -46,7 +46,7 @@ class SecurityConfig(
                     "/api/user",
                     "/favicon.ico",
                     "/swagger-ui/**",
-                    "/api-docs/**",   // 보통은 "/v3/api-docs/**" 인 경우가 많음
+                    "/api-docs/**",
                     "/v3/api-docs/**",
                 ).permitAll()
 
