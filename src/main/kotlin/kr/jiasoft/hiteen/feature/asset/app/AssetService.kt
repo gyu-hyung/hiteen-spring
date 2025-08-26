@@ -1,5 +1,8 @@
 package kr.jiasoft.hiteen.feature.asset.app
 
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kr.jiasoft.hiteen.feature.asset.domain.AssetEntity
 import kr.jiasoft.hiteen.feature.asset.dto.AssetResponse
@@ -36,22 +39,8 @@ class AssetService(
     private val root: Path = Path.of(storageRoot).also { Files.createDirectories(it) }
     private val storage = AssetStorage(root)
 
-//    suspend fun upload(file: FilePart, originFileName: String?, currentUserId: Long): AssetResponse {
-//        val stored = storage.save(file, allowedExts, maxSizeBytes)
-//        val entity = AssetEntity(
-//            originFileName = originFileName ?: file.filename(),
-//            storeFileName = stored.absolutePath.fileName.toString(),
-//            filePath = stored.relativePath,
-//            type = stored.mimeTypeGuess,
-//            size = stored.size,
-//            width = stored.width,
-//            height = stored.height,
-//            ext = stored.ext,
-//            createdId = currentUserId
-//        )
-//        val saved = assetRepository.save(entity)
-//        return saved.toResponse()
-//    }
+
+
 
 
     suspend fun upload(file: FilePart, originFileName: String?, currentUserId: Long): AssetResponse {
@@ -65,6 +54,34 @@ class AssetService(
         ensureImageOrDelete(stored)
 
         return uploadStored(stored, originFileName, currentUserId)
+    }
+
+    /** 여러 파일 업로드 (일반 파일) */
+    suspend fun uploadAll(
+        files: List<FilePart>,
+        currentUserId: Long,
+        originFileNames: List<String>? = null
+    ): List<AssetResponse> = coroutineScope {
+        files.mapIndexed { idx, f ->
+            async {
+                val origin = originFileNames?.getOrNull(idx)
+                upload(f, origin, currentUserId)
+            }
+        }.awaitAll()
+    }
+
+    /** 여러 이미지 업로드 (이미지 유효성 검사 포함) */
+    suspend fun uploadImages(
+        files: List<FilePart>,
+        currentUserId: Long,
+        originFileNames: List<String>? = null
+    ): List<AssetResponse> = coroutineScope {
+        files.mapIndexed { idx, f ->
+            async {
+                val origin = originFileNames?.getOrNull(idx)
+                uploadImage(f, origin, currentUserId)  // 이미지 전용 wrapper 사용
+            }
+        }.awaitAll()
     }
 
     /** ⬇️ 저장/DB 로직을 한 곳에 모음: upload / uploadImage 둘 다 여기로 온다 */
