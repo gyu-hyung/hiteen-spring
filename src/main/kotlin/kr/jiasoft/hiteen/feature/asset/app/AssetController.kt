@@ -4,6 +4,7 @@ package kr.jiasoft.hiteen.feature.asset.app
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.reactor.awaitSingle
 import kr.jiasoft.hiteen.feature.asset.dto.AssetResponse
 import kr.jiasoft.hiteen.feature.asset.dto.toResponse
 import org.springframework.core.io.FileSystemResource
@@ -11,6 +12,8 @@ import org.springframework.http.*
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.server.ResponseStatusException
+import reactor.core.publisher.Flux
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 import java.util.*
@@ -21,17 +24,32 @@ class AssetController(
     private val assetService: AssetService
 ) {
 
-    /** TODO 여러 파일 업로드 */
-
     /** 업로드 (multipart/form-data: file, originFileName[opt]) */
     @PostMapping(consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     suspend fun upload(
         @RequestPart("file") file: FilePart,
         @RequestPart(name = "originFileName", required = false) originFileName: String?,
-        @AuthenticationPrincipal(expression = "user") user: UserEntity
+        @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ): AssetResponse {
         return assetService.upload(file, originFileName, currentUserId = user.id!!)
     }
+
+    /** 여러 파일 업로드 */
+    @PostMapping("/batch", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+    suspend fun uploadBatch(
+        @RequestPart(name = "files", required = false) filesFlux: Flux<FilePart>?,
+        @RequestPart(name = "originFileNames", required = false) originFileNames: List<String>?,
+        @AuthenticationPrincipal(expression = "user") user: UserEntity
+    ): List<AssetResponse> {
+        val flux = filesFlux ?: filesFlux
+        ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "files or file part is required")
+
+        val files: List<FilePart> = flux.collectList().awaitSingle()
+        if (files.isEmpty()) throw ResponseStatusException(HttpStatus.BAD_REQUEST, "no files")
+
+        return assetService.uploadAll(files, currentUserId = user.id!!, originFileNames = originFileNames)
+    }
+
 
     /** 단건 조회 (메타데이터) */
     @GetMapping("/{uid}")
