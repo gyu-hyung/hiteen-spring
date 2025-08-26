@@ -1,5 +1,6 @@
 package kr.jiasoft.hiteen.feature.user
 
+import kr.jiasoft.hiteen.feature.asset.app.AssetService
 import kr.jiasoft.hiteen.feature.user.app.UserService
 import kr.jiasoft.hiteen.feature.user.infra.UserRepository
 import org.junit.jupiter.api.Assertions.*
@@ -11,10 +12,11 @@ import org.springframework.security.crypto.password.PasswordEncoder
 class UserServiceTest {
 
     private val userRepository: UserRepository = mock()
+    private val assetService: AssetService = mock()
 //    private val encoder = BCryptPasswordEncoder()
     private val encoder: PasswordEncoder = mock()
 
-    private val userService = UserService(userRepository, encoder)
+    private val userService = UserService(assetService, userRepository, encoder)
 
 
     @Test

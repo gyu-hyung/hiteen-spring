@@ -3,22 +3,13 @@ package kr.jiasoft.hiteen.feature.asset.app
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kotlinx.coroutines.withContext
+import kr.jiasoft.hiteen.feature.asset.dto.StoredFile
 import org.springframework.http.codec.multipart.FilePart
 import java.nio.file.Files
 import java.nio.file.Path
 import java.time.LocalDate
 import java.util.*
 import javax.imageio.ImageIO
-
-data class StoredFile(
-    val relativePath: String,   // 예: 2025/08/25/xxxxxx.jpg
-    val absolutePath: Path,
-    val ext: String?,
-    val size: Long,
-    val width: Int?,
-    val height: Int?,
-    val mimeTypeGuess: String?
-)
 
 class AssetStorage(
     private val root: Path

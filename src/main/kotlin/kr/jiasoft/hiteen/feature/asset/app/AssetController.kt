@@ -21,6 +21,8 @@ class AssetController(
     private val assetService: AssetService
 ) {
 
+    /** TODO 여러 파일 업로드 */
+
     /** 업로드 (multipart/form-data: file, originFileName[opt]) */
     @PostMapping(consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     suspend fun upload(

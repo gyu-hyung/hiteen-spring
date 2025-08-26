@@ -13,8 +13,8 @@
 CREATE TABLE users (
   id            bigserial PRIMARY KEY,
   uid           uuid        NOT NULL DEFAULT gen_random_uuid(),
-  username      varchar(50) UNIQUE,
-  email         varchar(255) UNIQUE,
+  username      varchar(50),
+  email         varchar(255),
   nickname      varchar(50),
   password      varchar(255),
   role          varchar(30),
@@ -24,13 +24,23 @@ CREATE TABLE users (
   mood          varchar(30),
   tier          varchar(30),
   asset_uid     uuid, -- REFERENCES assets(uid),
-  created_id    bigint not null,
+  created_id    bigint,
   created_at    timestamptz not null DEFAULT now(),
   updated_id    bigint,
   updated_at    timestamptz,
   deleted_id    bigint,
   deleted_at    timestamptz
 );
+
+-- 이메일: 삭제되지 않은 사용자만 유니크, 대소문자 구분 없음
+CREATE UNIQUE INDEX users_email_key
+    ON users (lower(email))
+    WHERE deleted_at IS NULL;
+
+-- 사용자명: 삭제되지 않은 사용자만 유니크, 대소문자 구분 없음
+CREATE UNIQUE INDEX users_username_key
+    ON users (lower(username))
+    WHERE deleted_at IS NULL;
 
 
 -- ========================
@@ -43,7 +53,7 @@ CREATE TABLE codes (
   code_group_name varchar(100), -- 관심사 등
   code_group      varchar(50),
   status          varchar(20),
-  created_id      bigint not null,
+  created_id      bigint,
   created_at      timestamptz DEFAULT now(),
   updated_id      bigint,
   updated_at      timestamptz,
@@ -61,7 +71,7 @@ CREATE TABLE interests (
   topic      varchar(100) NOT NULL,
   category   varchar(50),
   status     varchar(20),
-  created_id bigint not NULL,
+  created_id bigint,
   created_at timestamptz DEFAULT now(),
   updated_id bigint,
   updated_at timestamptz,
@@ -98,7 +108,7 @@ CREATE TABLE assets (
   height           integer,
   ext              varchar(10),
   download_count   integer        DEFAULT 0,
-  created_id       bigint NOT NULL,
+  created_id       bigint,
   created_at       timestamptz    DEFAULT now(),
   updated_id       bigint,
   updated_at       timestamptz,
@@ -120,7 +130,7 @@ CREATE TABLE tiers (
   max_points  integer,
   min_points  integer,
   uid         uuid DEFAULT gen_random_uuid(),
-  created_id  bigint not null,
+  created_id  bigint,
   created_at  timestamptz DEFAULT now(),
   updated_id  bigint ,
   updated_at  timestamptz,
@@ -146,7 +156,7 @@ CREATE TABLE schools (
   latitude    numeric(9,6),
   longitude   numeric(9,6),
   coords      text,
-  created_id  bigint not null ,
+  created_id  bigint ,
   created_at  timestamptz DEFAULT now(),
   updated_id  bigint ,
   updated_at  timestamptz,
@@ -169,7 +179,7 @@ CREATE TABLE classes (
   major        varchar(50),
   grade        varchar(10),
   class        varchar(10),
-  created_id   bigint not null ,
+  created_id   bigint ,
   created_at   timestamptz DEFAULT now(),
   updated_id   bigint ,
   updated_at   timestamptz,
@@ -193,7 +203,7 @@ CREATE TABLE user_classes (
   grade        varchar(10),
   auth_school  boolean,
   auth_class   boolean,
-  created_id   bigint not null ,
+  created_id   bigint ,
   created_at   timestamptz DEFAULT now(),
   updated_id   bigint ,
   updated_at   timestamptz,
@@ -214,7 +224,7 @@ CREATE TABLE pin (
   lng          numeric(9,6),
   description  varchar(255),
   type         varchar(30),
-  created_id   bigint not null,
+  created_id   bigint,
   created_at   timestamptz DEFAULT now(),
   updated_id   bigint ,
   updated_at   timestamptz,
@@ -317,7 +327,7 @@ CREATE TABLE boards (
   status         varchar(20),
   address        varchar(255),
   detail_address varchar(255),
-  created_id     bigint NOT NULL ,
+  created_id     bigint ,
   created_at     timestamptz DEFAULT now(),
   updated_id     bigint ,
   updated_at     timestamptz,
@@ -348,7 +358,7 @@ CREATE TABLE board_comments (
   content      text,
   reply_count  integer DEFAULT 0,
   report_count integer DEFAULT 0,
-  created_id   bigint not null,
+  created_id   bigint,
   created_at   timestamptz DEFAULT now(),
   updated_id   bigint ,
   updated_at   timestamptz,
@@ -397,7 +407,7 @@ CREATE TABLE polls (
   report_count   integer DEFAULT 0,
   status         varchar(20),
   reply_at       timestamptz,
-  created_id     bigint NOT NULL ,
+  created_id     bigint ,
   created_at     timestamptz DEFAULT now(),
   updated_id     bigint ,
   updated_at     timestamptz,
@@ -442,7 +452,7 @@ CREATE TABLE poll_comments (
   content      text,
   reply_count  integer DEFAULT 0,
   report_count integer DEFAULT 0,
-  created_id   bigint not null,
+  created_id   bigint ,
   created_at   timestamptz DEFAULT now(),
   updated_id   bigint ,
   updated_at   timestamptz,
@@ -473,7 +483,7 @@ CREATE TABLE chat_rooms (
   uid             uuid DEFAULT gen_random_uuid(),
   last_user_id    bigint ,
   last_message_id bigint, -- REFERENCES chat_messages(id), -- 후술 FK 추가 예정
-  created_id   bigint not null,
+  created_id   bigint ,
   created_at   timestamptz DEFAULT now(),
   updated_id   bigint ,
   updated_at   timestamptz,
@@ -539,7 +549,7 @@ CREATE TABLE point_rules (
   point  integer      NOT NULL,
   daily_cap    integer,
   cooldown_sec integer,
-  created_id   bigint not null,
+  created_id   bigint ,
   created_at   timestamptz DEFAULT now(),
   updated_id   bigint ,
   updated_at   timestamptz,
