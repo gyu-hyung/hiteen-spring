@@ -100,7 +100,7 @@ CREATE TABLE assets (
   id               bigserial PRIMARY KEY,
   uid              uuid        NOT NULL DEFAULT gen_random_uuid(),
   origin_file_name varchar(255),
-  name_file_name   varchar(255),
+  store_file_name   varchar(255),
   file_path        varchar(500),
   type             varchar(50),
   size             bigint,        -- bytes
@@ -279,6 +279,10 @@ CREATE TABLE friends (
   UNIQUE (user_id, friend_id)
 );
 
+--CREATE INDEX idx_friends_user ON friends(user_id);
+--CREATE INDEX idx_friends_friend ON friends(friend_id);
+--CREATE INDEX idx_friends_status_user ON friends(status, user_id);
+--CREATE INDEX idx_friends_status_friend ON friends(status, friend_id);
 
 -- ========================
 --팔로우
@@ -341,8 +345,8 @@ CREATE TABLE boards (
 -- ========================
 CREATE TABLE board_assets (
   id        bigserial PRIMARY KEY,
-  uid       uuid NOT NULL DEFAULT gen_random_uuid(),
   board_id  bigint NOT NULL REFERENCES boards(id) ON DELETE CASCADE,
+  uid       uuid NOT NULL,
   UNIQUE (board_id, uid)
 );
 
@@ -358,7 +362,7 @@ CREATE TABLE board_comments (
   content      text,
   reply_count  integer DEFAULT 0,
   report_count integer DEFAULT 0,
-  created_id   bigint,
+  created_id   bigint not null,
   created_at   timestamptz DEFAULT now(),
   updated_id   bigint ,
   updated_at   timestamptz,
@@ -393,6 +397,16 @@ CREATE TABLE board_comment_likes (
   deleted_at timestamptz,
   UNIQUE (comment_id, user_id)
 );
+
+
+--CREATE UNIQUE INDEX IF NOT EXISTS ux_boards_uid ON boards(uid);
+--CREATE INDEX IF NOT EXISTS ix_boards_created_at ON boards(created_at DESC);
+--CREATE INDEX IF NOT EXISTS ix_boards_category ON boards(category);
+--CREATE INDEX IF NOT EXISTS ix_bc_board_id ON board_comments(board_id);
+--CREATE INDEX IF NOT EXISTS ix_bc_parent_id ON board_comments(parent_id);
+--CREATE UNIQUE INDEX IF NOT EXISTS ux_board_likes ON board_likes(board_id, user_id);
+--CREATE UNIQUE INDEX IF NOT EXISTS ux_comment_likes ON board_comment_likes(comment_id, user_id);
+
 
 
 -- ========================
@@ -588,7 +602,7 @@ CREATE TABLE user_photos (
 -- ========================
 --CREATE TABLE mqtt_credentials (
 --    id bigserial PRIMARY KEY,
---    user_id bigint not null references users(id) on delete cascade,
+--    user_uid bigint not null references users(id) on delete cascade,
 --    credentials_id VARCHAR(255) NOT NULL,
 --    client_id VARCHAR(255) NOT NULL,
 --    username VARCHAR(255) NOT NULL,
@@ -726,7 +740,7 @@ COMMENT ON TABLE assets IS '업로드 자산(파일/이미지)';
 COMMENT ON COLUMN assets.id IS '자동 증가 기본키';
 COMMENT ON COLUMN assets.uid IS '자산 UUID(고유)';
 COMMENT ON COLUMN assets.origin_file_name IS '원본 파일명';
-COMMENT ON COLUMN assets.name_file_name IS '저장 파일명';
+COMMENT ON COLUMN assets.store_file_name IS '저장 파일명';
 COMMENT ON COLUMN assets.file_path IS '저장 경로';
 COMMENT ON COLUMN assets.type IS 'MIME 타입 등 파일 유형';
 COMMENT ON COLUMN assets.size IS '파일 크기(bytes)';
