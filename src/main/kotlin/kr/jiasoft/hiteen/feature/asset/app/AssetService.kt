@@ -3,6 +3,7 @@ package kr.jiasoft.hiteen.feature.asset.app
 import kotlinx.coroutines.flow.Flow
 import kr.jiasoft.hiteen.feature.asset.domain.AssetEntity
 import kr.jiasoft.hiteen.feature.asset.dto.AssetResponse
+import kr.jiasoft.hiteen.feature.asset.dto.StoredFile
 import kr.jiasoft.hiteen.feature.asset.dto.toResponse
 import kr.jiasoft.hiteen.feature.asset.infra.AssetRepository
 import org.springframework.beans.factory.annotation.Value
@@ -25,24 +26,74 @@ class AssetService(
     private val allowedExts: List<String> =
         allowedExtsCsv.split(',').mapNotNull { it.trim().lowercase().ifBlank { null } }
 
+    // ✅ 이미지 전용 확장자
+    private val imageExts = setOf("jpg","jpeg","png","gif","webp","bmp","svg")
+
+    // allowedExts 중 이미지에 해당하는 것만 허용
+    private val allowedImageExts: List<String> =
+        allowedExts.filter { it in imageExts }.ifEmpty { imageExts.toList() } // 설정이 비어있으면 기본 이미지 확장자 사용
+
     private val root: Path = Path.of(storageRoot).also { Files.createDirectories(it) }
     private val storage = AssetStorage(root)
 
+//    suspend fun upload(file: FilePart, originFileName: String?, currentUserId: Long): AssetResponse {
+//        val stored = storage.save(file, allowedExts, maxSizeBytes)
+//        val entity = AssetEntity(
+//            originFileName = originFileName ?: file.filename(),
+//            storeFileName = stored.absolutePath.fileName.toString(),
+//            filePath = stored.relativePath,
+//            type = stored.mimeTypeGuess,
+//            size = stored.size,
+//            width = stored.width,
+//            height = stored.height,
+//            ext = stored.ext,
+//            createdId = currentUserId
+//        )
+//        val saved = assetRepository.save(entity)
+//        return saved.toResponse()
+//    }
+
+
     suspend fun upload(file: FilePart, originFileName: String?, currentUserId: Long): AssetResponse {
         val stored = storage.save(file, allowedExts, maxSizeBytes)
+        return uploadStored(stored, originFileName, currentUserId) // 저장/DB 로직 단일화
+    }
+
+    suspend fun uploadImage(file: FilePart, originFileName: String?, currentUserId: Long): AssetResponse {
+        val stored = storage.save(file, allowedImageExts, maxSizeBytes)
+
+        ensureImageOrDelete(stored)
+
+        return uploadStored(stored, originFileName, currentUserId)
+    }
+
+    /** ⬇️ 저장/DB 로직을 한 곳에 모음: upload / uploadImage 둘 다 여기로 온다 */
+    private suspend fun uploadStored(stored: StoredFile, originFileName: String?, currentUserId: Long): AssetResponse {
         val entity = AssetEntity(
-            originFileName = originFileName ?: file.filename(),
-            storeFileName = stored.absolutePath.fileName.toString(),
-            filePath = stored.relativePath,
-            type = stored.mimeTypeGuess,
-            size = stored.size,
-            width = stored.width,
-            height = stored.height,
-            ext = stored.ext,
-            createdId = currentUserId
+            originFileName = originFileName ?: stored.absolutePath.fileName.toString(),
+            storeFileName  = stored.absolutePath.fileName.toString(), // @Column("name_file_name") 매핑 확인
+            filePath       = stored.relativePath,
+            type           = stored.mimeTypeGuess,
+            size           = stored.size,
+            width          = stored.width,
+            height         = stored.height,
+            ext            = stored.ext,
+            createdId      = currentUserId
         )
         val saved = assetRepository.save(entity)
         return saved.toResponse()
+    }
+
+    /** 이미지 판별: 실패 시 물리 파일 삭제 후 예외 */
+    private fun ensureImageOrDelete(stored: StoredFile) {
+        val isImageMime = stored.mimeTypeGuess?.lowercase()?.startsWith("image/") == true
+        val hasDims = stored.width != null && stored.height != null
+        val isSvg = stored.ext?.lowercase() == "svg"
+
+        if (!isImageMime && !hasDims && !isSvg) {
+            Files.deleteIfExists(stored.absolutePath)
+            throw IllegalArgumentException("이미지 파일만 업로드할 수 있습니다.")
+        }
     }
 
     suspend fun get(uid: UUID): AssetEntity? =
