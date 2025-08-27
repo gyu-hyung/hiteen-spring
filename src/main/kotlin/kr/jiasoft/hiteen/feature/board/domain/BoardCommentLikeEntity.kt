@@ -11,6 +11,6 @@ data class BoardCommentLikeEntity (
     val commentId: Long,
     val userId: Long,
     val createdAt: OffsetDateTime? = null,
-    val updatedAt: OffsetDateTime? = null,
-    val deletedAt: OffsetDateTime? = null,
+//    val updatedAt: OffsetDateTime? = null,
+//    val deletedAt: OffsetDateTime? = null,
 )

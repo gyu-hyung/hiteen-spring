@@ -12,6 +12,7 @@ import kr.jiasoft.hiteen.feature.board.domain.BoardEntity
 import kr.jiasoft.hiteen.feature.board.domain.BoardLikeEntity
 import kr.jiasoft.hiteen.feature.board.dto.BoardCommentCreateRequest
 import kr.jiasoft.hiteen.feature.board.dto.BoardCommentResponse
+import kr.jiasoft.hiteen.feature.board.dto.BoardCommentUpdateRequest
 import kr.jiasoft.hiteen.feature.board.dto.BoardCreateRequest
 import kr.jiasoft.hiteen.feature.board.dto.BoardDetailResponse
 import kr.jiasoft.hiteen.feature.board.dto.BoardSummaryResponse
@@ -174,11 +175,9 @@ class BoardService(
         }
 
         // 2) 파일 업로드 -> 매핑 추가 + 대표이미지 후보(첫 번째 업로드)
-//        var representativeUidFromFiles: UUID? = null
         if (files.isNotEmpty()) {
             val uploadedFiles = assetService.uploadImages(files, currentUserId)
             uploadedFiles.forEachIndexed { idx, a ->
-//                if (idx == 0) representativeUidFromFiles = a.uid   // 첫 번째 파일을 대표이미지로
                 boardAssetRepository.save(
                     BoardAssetEntity(
                         boardId = boardId,
@@ -187,27 +186,6 @@ class BoardService(
                 )
             }
         }
-
-//        // 3) 대표 이미지 결정
-//        val currentRep = b.assetUid
-//        val repDeletedByReplace = (replaceAssets == true)
-//        val repDeletedByPartial = (!repDeletedByReplace && currentRep != null && toDelete.contains(currentRep))
-//
-//        val newAssetUid: UUID? = when {
-//            // 업로드 파일이 있으면 무조건 그 첫 번째로
-//            representativeUidFromFiles != null -> representativeUidFromFiles
-//
-//            // 전체 교체인데 업로드가 없으면 대표 제거
-//            repDeletedByReplace && files.isEmpty() -> null
-//
-//            // 부분 삭제로 기존 대표가 지워졌고 업로드도 없으면 남은 자산 중 하나로 대체 선택
-//            repDeletedByPartial && files.isEmpty() -> {
-//                boardAssetRepository.findTopUidByBoardIdOrderByIdDesc(boardId)
-//            }
-//
-//            // 그 외에는 기존 대표 유지
-//            else -> currentRep
-//        }
 
         // 4) 본문/메타 갱신 저장
         val merged = b.copy(
@@ -229,7 +207,6 @@ class BoardService(
     }
 
 
-    //    @Transactional
     suspend fun softDeleteBoard(uid: UUID, currentUserId: Long) {
         val b = boards.findByUid(uid) ?: throw notFound("board")
         val updated = b.copy(deletedId = currentUserId, deletedAt = OffsetDateTime.now())
@@ -237,7 +214,6 @@ class BoardService(
     }
 
     // ---------------------- Likes ----------------------
-//    @Transactional
     suspend fun likeBoard(uid: UUID, currentUserId: Long) {
         val b = boards.findByUid(uid) ?: throw notFound("board")
         try {
@@ -253,7 +229,6 @@ class BoardService(
     }
 
     // ---------------------- Comments ----------------------
-//    @Transactional
     suspend fun createComment(boardUid: UUID, req: BoardCommentCreateRequest, currentUserId: Long): UUID {
         val b = boards.findByUid(boardUid) ?: throw notFound("board")
         val parent: BoardCommentEntity? = req.parentUid?.let { comments.findByUid(it) }
@@ -267,6 +242,34 @@ class BoardService(
         )
         if (parent != null) comments.increaseReplyCount(parent.id!!)
         return saved.uid
+    }
+
+    suspend fun updateComment(
+        boardUid: UUID,
+        commentUid: UUID,
+        req: BoardCommentUpdateRequest,
+        currentUserId: Long
+    ): UUID {
+        val board = boards.findByUid(boardUid) ?: throw notFound("board")
+        val comment = comments.findByUid(commentUid) ?: throw notFound("comment")
+
+        // 보드 소속 검증 + 삭제된 댓글 제외(DDL/엔티티에 deletedAt 있음을 가정)
+        if (comment.boardId != board.id) throw badRequest("comment does not belong to this board")
+        if (comment.deletedAt != null) throw badRequest("comment already deleted")
+
+        // 권한: 작성자만 수정 (관리자 허용하고 싶으면 role 체크 추가)
+        if (comment.createdId != currentUserId) throw forbidden("you are not the author")
+
+        val trimmed = req.content.trim()
+        if (trimmed.isEmpty()) throw badRequest("content must not be blank")
+
+        val merged = comment.copy(
+            content = trimmed,
+            updatedId = currentUserId,
+            updatedAt = OffsetDateTime.now()
+        )
+        comments.save(merged)
+        return merged.uid
     }
 
     fun listTopComments(boardUid: UUID, currentUserId: Long?): Flow<BoardCommentResponse> =
@@ -297,7 +300,6 @@ class BoardService(
             )
         }
 
-    //    @Transactional
     suspend fun likeComment(commentUid: UUID, currentUserId: Long) {
         val c = comments.findByUid(commentUid) ?: throw notFound("comment")
         try {
@@ -315,5 +317,8 @@ class BoardService(
 
 
     private fun notFound(what: String) = ResponseStatusException(HttpStatus.NOT_FOUND, "$what not found")
+    private fun badRequest(msg: String) = ResponseStatusException(HttpStatus.BAD_REQUEST, msg)
+    private fun forbidden(msg: String) = ResponseStatusException(HttpStatus.FORBIDDEN, msg)
+
 
 }
