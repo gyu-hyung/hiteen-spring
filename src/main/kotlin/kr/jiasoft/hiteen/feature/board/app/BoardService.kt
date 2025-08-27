@@ -272,6 +272,31 @@ class BoardService(
         return merged.uid
     }
 
+    suspend fun deleteComment(
+        boardUid: UUID,
+        commentUid: UUID,
+        currentUserId: Long
+    ): UUID {
+        val board = boards.findByUid(boardUid) ?: throw notFound("board")
+        val comment = comments.findByUid(commentUid) ?: throw notFound("comment")
+
+        // 보드 소속 검증 + 중복 삭제 방지
+        if (comment.boardId != board.id) throw badRequest("comment does not belong to this board")
+        if (comment.deletedAt != null) throw badRequest("comment already deleted")
+        if (comment.createdId != currentUserId) throw forbidden("you are not the author")
+
+        val deleted = comment.copy(
+            deletedId = currentUserId,
+            deletedAt = OffsetDateTime.now()
+        )
+        comments.save(deleted)
+        comment.parentId?.let { pid ->
+            comments.decreaseReplyCount(pid)
+        }
+
+        return deleted.uid
+    }
+
     fun listTopComments(boardUid: UUID, currentUserId: Long?): Flow<BoardCommentResponse> =
         comments.findTopCommentRows(boardUid, (currentUserId ?: -1L)).map { row ->
             BoardCommentResponse(
