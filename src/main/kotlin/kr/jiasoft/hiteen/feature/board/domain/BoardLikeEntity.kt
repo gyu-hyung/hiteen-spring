@@ -12,6 +12,6 @@ data class BoardLikeEntity (
     val boardId: Long,
     val userId: Long,
     val createdAt: OffsetDateTime? = null,
-    val updatedAt: OffsetDateTime? = null,
-    val deletedAt: OffsetDateTime? = null,
+//    val updatedAt: OffsetDateTime? = null,
+//    val deletedAt: OffsetDateTime? = null,
 )

@@ -379,8 +379,8 @@ CREATE TABLE board_likes (
   board_id   bigint NOT NULL REFERENCES boards(id) ON DELETE CASCADE,
   user_id    bigint NOT NULL REFERENCES users(id)  ON DELETE CASCADE,
   created_at timestamptz DEFAULT now(),
-  updated_at timestamptz,
-  deleted_at timestamptz,
+--  updated_at timestamptz,
+--  deleted_at timestamptz,
   UNIQUE (board_id, user_id)
 );
 
@@ -393,8 +393,8 @@ CREATE TABLE board_comment_likes (
   comment_id bigint NOT NULL REFERENCES board_comments(id) ON DELETE CASCADE,
   user_id    bigint NOT NULL REFERENCES users(id)          ON DELETE CASCADE,
   created_at timestamptz DEFAULT now(),
-  updated_at timestamptz,
-  deleted_at timestamptz,
+--  updated_at timestamptz,
+--  deleted_at timestamptz,
   UNIQUE (comment_id, user_id)
 );
 

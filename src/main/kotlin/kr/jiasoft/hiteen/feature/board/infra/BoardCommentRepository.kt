@@ -21,33 +21,47 @@ interface BoardCommentRepository : CoroutineCrudRepository<BoardCommentEntity, L
     suspend fun increaseReplyCount(parentId: Long): Int
 
     @Query("""
-        SELECT c.uid,
-               c.content,
-               c.created_at AS createdAt,
-               c.created_id AS createdId,
-               c.reply_count AS replyCount,
-               (SELECT COUNT(*) FROM board_comment_likes l WHERE l.comment_id = c.id) AS likeCount,
-               EXISTS (SELECT 1 FROM board_comment_likes l2 WHERE l2.comment_id = c.id AND l2.user_id = :userId) AS likedByMe
+        SELECT
+            c.uid,
+            c.content,
+            c.created_at  AS created_at,
+            c.created_id  AS created_id,
+            c.reply_count AS reply_count,
+            (SELECT COUNT(*)::bigint FROM board_comment_likes l 
+               WHERE l.comment_id = c.id) AS like_count,
+            EXISTS (SELECT 1 FROM board_comment_likes l2 
+                      WHERE l2.comment_id = c.id AND l2.user_id = :userId) AS liked_by_me,
+            NULL::uuid AS parent_uid     -- DTO의 parentUid(UUID?)와 타입 일치
         FROM board_comments c
         JOIN boards b ON b.id = c.board_id
-        WHERE b.uid = :boardUid AND c.deleted_at IS NULL AND c.parent_id IS NULL
-        ORDER BY c.id ASC
+        WHERE b.uid = :boardUid
+          AND c.deleted_at IS NULL
+          AND c.parent_id IS NULL
+        ORDER BY c.id DESC
     """)
     fun findTopCommentRows(boardUid: UUID, userId: Long): Flow<BoardCommentRow>
 
     @Query("""
-        SELECT c.uid,
-               c.content,
-               c.created_at AS createdAt,
-               c.created_id AS createdId,
-               c.reply_count AS replyCount,
-               (SELECT COUNT(*) FROM board_comment_likes l WHERE l.comment_id = c.id) AS likeCount,
-               EXISTS (SELECT 1 FROM board_comment_likes l2 WHERE l2.comment_id = c.id AND l2.user_id = :userId) AS likedByMe,
-               p.uid AS parentUid
+        SELECT
+            c.uid,
+            c.content,
+            c.created_at  AS created_at,
+            c.created_id  AS created_id,
+            c.reply_count AS reply_count,
+            (SELECT COUNT(*)::bigint 
+               FROM board_comment_likes l 
+              WHERE l.comment_id = c.id)                 AS like_count,
+            EXISTS (SELECT 1 
+                      FROM board_comment_likes l2 
+                     WHERE l2.comment_id = c.id 
+                       AND l2.user_id = :userId)         AS liked_by_me,
+            p.uid                                         AS parent_uid
         FROM board_comments c
         JOIN board_comments p ON c.parent_id = p.id
-        WHERE p.uid = :parentUid AND c.deleted_at IS NULL
-        ORDER BY c.id ASC
+        WHERE p.uid = :parentUid
+          AND c.deleted_at IS NULL
+          -- AND p.deleted_at IS NULL
+        ORDER BY c.id DESC
     """)
     fun findReplyRows(parentUid: UUID, userId: Long): Flow<BoardCommentRow>
 }
