@@ -324,7 +324,7 @@ CREATE TABLE boards (
   link           varchar(500),
   ip             inet,
   hits           integer DEFAULT 0,
-  asset_uid     uuid, -- REFERENCES assets(uid),
+  asset_uid      uuid, -- REFERENCES assets(uid),
   start_date     date,
   end_date       date,
   report_count   integer DEFAULT 0,
@@ -547,7 +547,8 @@ ALTER TABLE chat_rooms
 
 CREATE TABLE chat_messages_assets (
   id         bigserial PRIMARY KEY,
-  uid        uuid NOT NULL DEFAULT gen_random_uuid(),
+  uid        uuid NOT NULL,
+--  uid        uuid NOT NULL DEFAULT gen_random_uuid(),
   message_id bigint NOT NULL REFERENCES chat_messages(id) ON DELETE CASCADE,
   width      integer,
   height     integer
@@ -591,7 +592,8 @@ CREATE TABLE point_histories (
 CREATE TABLE user_photos (
   id      bigserial PRIMARY KEY,
   user_id bigint NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  uid     uuid   NOT NULL DEFAULT gen_random_uuid(),
+  uid     uuid NOT NULL,
+--  uid     uuid   NOT NULL DEFAULT gen_random_uuid(),
   UNIQUE (uid),
   UNIQUE (user_id, uid)
 );

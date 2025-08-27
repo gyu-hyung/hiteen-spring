@@ -20,6 +20,9 @@ interface BoardCommentRepository : CoroutineCrudRepository<BoardCommentEntity, L
     @Query("UPDATE board_comments SET reply_count = reply_count + 1 WHERE id = :parentId")
     suspend fun increaseReplyCount(parentId: Long): Int
 
+    @Query("UPDATE board_comments SET reply_count = GREATEST(reply_count - 1, 0) WHERE id = :parentId")
+    suspend fun decreaseReplyCount(parentId: Long): Int?
+
     @Query("""
         SELECT
             c.uid,

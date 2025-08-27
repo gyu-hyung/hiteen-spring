@@ -153,6 +153,16 @@ class BoardController(
         "uid" to service.updateComment(boardUid, commentUid, req, user.id!!)
     )
 
+    /** 댓글 삭제 */
+    @DeleteMapping("/{boardUid}/comments/{commentUid}")
+    suspend fun deleteComment(
+        @PathVariable boardUid: UUID,
+        @PathVariable commentUid: UUID,
+        @AuthenticationPrincipal(expression = "user") user: UserEntity,
+    ): Map<String, Any> = mapOf(
+        "uid" to service.deleteComment(boardUid, commentUid, user.id!!)
+    )
+
 
     /** 댓글 좋아요 / 취소 */
     @PostMapping("/comments/{commentUid}/like")
