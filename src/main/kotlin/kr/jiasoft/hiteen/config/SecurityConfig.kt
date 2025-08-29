@@ -56,6 +56,8 @@ class SecurityConfig(
                     "/api/assets/{uid}/download"
                 ).permitAll()
 
+                it.pathMatchers("/ws/**").permitAll()
+
                 it.anyExchange().authenticated()
             }
             .exceptionHandling { ex ->

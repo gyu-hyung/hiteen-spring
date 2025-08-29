@@ -4,6 +4,7 @@ import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import kr.jiasoft.hiteen.feature.user.dto.PublicUser
 import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
+import java.util.UUID
 
 interface UserRepository : CoroutineCrudRepository<UserEntity, Long> {
     suspend fun findByUsername(name: String): UserEntity?
@@ -48,4 +49,33 @@ interface UserRepository : CoroutineCrudRepository<UserEntity, Long> {
         )
     """)
     suspend fun existsByUsernameIgnoreCaseAndActiveAndIdNot(username: String, excludeId: Long): Boolean
+
+    @Query(
+        """
+        SELECT id
+        FROM users
+        WHERE deleted_at IS NULL
+          AND lower(username) = lower(:username)
+        LIMIT 1
+        """
+    )
+    suspend fun findIdByUsername(username: String): Long?
+
+    @Query("""
+        SELECT uid
+        FROM users
+        WHERE deleted_at IS NULL
+          AND lower(username) = lower(:username)
+        LIMIT 1
+        """)
+    suspend fun findUidByUsername(username: String): UUID?
+
+    @Query("""
+        SELECT uid
+        FROM users
+        WHERE deleted_at IS NULL
+          AND id = :id
+        LIMIT 1
+        """)
+    suspend fun findUidById(id: Long): UUID?
 }
