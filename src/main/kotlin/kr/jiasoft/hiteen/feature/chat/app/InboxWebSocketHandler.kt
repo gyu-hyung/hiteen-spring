@@ -41,6 +41,7 @@ class InboxWebSocketHandler(
         return authMono.flatMap { a ->
             val hello = mapper.writeValueAsString(mapOf(
                 "type" to "hello",
+//                "userId" to a.userId,
                 "userUid" to a.userUid,
             ))
             val greetings = Mono.just(hello)

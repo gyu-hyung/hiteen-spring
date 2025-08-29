@@ -123,8 +123,8 @@ class ChatService(
 
         // ★ 목록 실시간 델타 발행: userUid로 교체
         val lastSummary = mapOf(
-            "uid" to savedMsg.uid,                // UUID면 그대로; 문자열 원하면 .toString()
-            "userUid" to senderUid,               // ← 여기! (userId → userUid)
+            "uid" to savedMsg.uid,
+            "userUid" to senderUid,
             "content" to req.content,
             "createdAt" to savedMsg.createdAt
         )
@@ -151,17 +151,41 @@ class ChatService(
     /** 메세지 페이징 조회 */
     suspend fun pageMessages(roomUid: UUID, cursor: OffsetDateTime?, size: Int): List<MessageSummary> {
         val room = rooms.findByUid(roomUid) ?: error("room not found")
-        return messages.pageByRoom(room.id!!, cursor, size).map { m ->
+
+        // 최신 페이지 (DESC)
+        val page = messages.pageByRoom(room.id!!, cursor, size).toList()
+        if (page.isEmpty()) return emptyList()
+
+        val memberCount = chatUsers.countActiveByRoom(room.id).toInt()
+
+        val minId = page.minOf { it.id!! }
+        val maxId = page.maxOf { it.id!! }
+        val readersMap = chatUsers.countReadersInIdRange(room.id, minId, maxId)
+            .toList()
+            .associate { it.messageId to it.readerCount }
+
+        return page.map { m ->
             val assets = msgAssets.listByMessage(m.id!!).map { a ->
                 MessageAssetSummary(a.uid, a.assetUid, a.width, a.height)
             }.toList()
 
-            val senderUID: UUID = users.findById(m.userId)?.uid
-                ?: throw IllegalStateException("sender user not found: ${m.userId}")//TODO 성능
+            val senderUid: UUID = users.findById(m.userId)?.uid
+                ?: throw IllegalStateException("sender user not found: ${m.userId}")
 
-            MessageSummary(m.uid, senderUID, m.content, m.createdAt, assets)
-        }.toList()
+            val readers = readersMap[m.id] ?: 0L
+            val unread = (memberCount - 1 - readers).coerceAtLeast(0L).toInt()
+
+            MessageSummary(
+                messageUid = m.uid,
+                senderUserUid = senderUid,
+                content = m.content,
+                createdAt = m.createdAt,
+                assets = assets,
+                unreadCount = unread
+            )
+        }
     }
+
 
     /** 방 탈퇴 */
     suspend fun leaveRoom(roomUid: UUID, currentUserId: Long) {
@@ -246,7 +270,7 @@ class ChatService(
                         senderUserUid = senderUid,
                         content = lm.content,
                         createdAt = lm.createdAt,
-                        assets = lastAssets
+                        assets = lastAssets,
                     )
                 },
                 memberCount = memberCount.toInt(),
