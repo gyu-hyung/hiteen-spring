@@ -1,5 +1,6 @@
 package kr.jiasoft.hiteen.feature.chat.dto
 
+import org.springframework.data.relational.core.mapping.Column
 import java.time.OffsetDateTime
 import java.util.UUID
 
@@ -29,7 +30,14 @@ data class MessageSummary(
     val content: String?,
     val createdAt: OffsetDateTime?,
     val assets: List<MessageAssetSummary> = emptyList(),
+    val unreadCount: Int? = null,
 )
+
+data class ReadersCountRow(
+    @Column("message_id") val messageId: Long,
+    @Column("reader_count") val readerCount: Long
+)
+
 
 data class MessageAssetSummary(
     val uid: UUID,
