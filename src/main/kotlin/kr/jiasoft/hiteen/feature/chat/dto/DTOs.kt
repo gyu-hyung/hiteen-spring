@@ -13,7 +13,9 @@ data class TogglePushRequest(val enabled: Boolean)
 
 data class SendMessageRequest(
     val content: String? = null,
-    val assetUids: List<UUID>? = null   // (선택) 자산 도메인 uid
+    val assetUids: List<UUID>? = null,
+    val kind: Short = 0,
+    val emojiCode: String? = null,
 )
 
 data class RoomSummaryResponse(

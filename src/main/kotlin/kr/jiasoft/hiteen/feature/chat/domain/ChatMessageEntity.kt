@@ -22,8 +22,8 @@ data class ChatMessageEntity(
 
     val content: String? = null,
 
-    @Column("read_count")
-    val readCount: Int? = 0,
+//    @Column("read_count")
+//    val readCount: Int? = 0,
 
     @Column("created_at")
     val createdAt: OffsetDateTime? = null,
@@ -33,5 +33,10 @@ data class ChatMessageEntity(
 
     @Column("deleted_at")
     val deletedAt: OffsetDateTime? = null,
+
+    val kind: Short = 0,
+
+    @Column("emoji_code")
+    val emojiCode: String? = null,
 
 )

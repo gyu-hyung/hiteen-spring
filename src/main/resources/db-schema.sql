@@ -510,18 +510,19 @@ CREATE TABLE chat_rooms (
 -- 채팅 > 참여자
 -- ========================
 CREATE TABLE chat_users (
-  id          bigserial PRIMARY KEY,
-  chat_room_id bigint NOT NULL REFERENCES chat_rooms(id) ON DELETE CASCADE,
-  user_id     bigint NOT NULL REFERENCES users(id)       ON DELETE CASCADE,
-  status      smallint,    -- 예: 0=정상, 1=뮤트, 2=차단...
-  push        boolean,
-  push_at     timestamptz,
-  joining_at  timestamptz,
-  leaving_at  timestamptz,
-  deleted_at  timestamptz,
+  id          			bigserial PRIMARY KEY,
+  chat_room_id 			bigint NOT NULL REFERENCES chat_rooms(id) ON DELETE CASCADE,
+  user_id     			bigint NOT NULL REFERENCES users(id)       ON DELETE CASCADE,
+  last_read_message_id 	bigint,
+  last_read_at 			timestamptz,
+  status      			smallint,    -- 예: 0=정상, 1=뮤트, 2=차단...
+  push        			boolean,
+  push_at     			timestamptz,
+  joining_at  			timestamptz,
+  leaving_at  			timestamptz,
+  deleted_at  			timestamptz,
   UNIQUE (chat_room_id, user_id)
 );
-
 
 -- ========================
 -- 채팅 > 메세지
@@ -532,11 +533,24 @@ CREATE TABLE chat_messages (
   user_id      bigint NOT NULL REFERENCES users(id)       ON DELETE CASCADE,
   uid          uuid  NOT NULL DEFAULT gen_random_uuid(),
   content      text,
-  read_count   integer DEFAULT 0,
+  kind         smallint not null default 0,
+  emoji_code   varchar(64),
+--  read_count   integer DEFAULT 0,
   created_at   timestamptz DEFAULT now(),
   updated_at   timestamptz,
   deleted_at   timestamptz
 );
+
+
+-- 히스토리(이모지 제외) 조회 최적화 인덱스
+--CREATE INDEX IF NOT EXISTS chat_msg_room_created_hist_idx
+--  ON chat_messages (chat_room_id, created_at DESC)
+--  WHERE deleted_at IS NULL AND kind <> 2;
+
+-- 필요 시 일반 전체 인덱스도 유지
+--CREATE INDEX IF NOT EXISTS chat_msg_room_created_all_idx
+--  ON chat_messages (chat_room_id, created_at DESC)
+--  WHERE deleted_at IS NULL;
 
 
 -- 이제 chat_rooms.last_message_id FK 연결(순환 참조 방지 위해 나중에 추가)
@@ -544,7 +558,9 @@ ALTER TABLE chat_rooms
   ADD CONSTRAINT chat_rooms_last_msg_fk
   FOREIGN KEY (last_message_id) REFERENCES chat_messages(id) ON DELETE SET NULL;
 
-
+-- ========================
+-- 채팅 > 메세지 > 파일
+-- ========================
 CREATE TABLE chat_messages_assets (
   id         bigserial PRIMARY KEY,
   uid        uuid NOT NULL,
@@ -555,14 +571,8 @@ CREATE TABLE chat_messages_assets (
 );
 
 
-ALTER TABLE chat_users
-  ADD COLUMN last_read_message_id bigint,
-  ADD COLUMN last_read_at         timestamptz;
-
 -- 활성 멤버 조회/갱신 최적화
-CREATE INDEX IF NOT EXISTS idx_chat_users_room_user_active
-  ON chat_users (chat_room_id, user_id)
-  WHERE deleted_at IS NULL;
+CREATE INDEX IF NOT EXISTS idx_chat_users_room_user_active ON chat_users (chat_room_id, user_id) WHERE deleted_at IS NULL;
 
 
 
@@ -641,7 +651,7 @@ CREATE TABLE user_photos (
 --===========================================drop==================================================
 
 
---DROP TABLE IF EXISTS
+DROP TABLE IF EXISTS
 --  user_photos,
 --  point_histories,
 --  point_rules,
@@ -675,4 +685,3 @@ CREATE TABLE user_photos (
 --  codes,
 --  users
 --CASCADE;
-
