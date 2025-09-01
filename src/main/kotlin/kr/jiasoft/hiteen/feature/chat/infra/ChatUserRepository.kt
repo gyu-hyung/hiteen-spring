@@ -8,16 +8,24 @@ import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 import java.time.OffsetDateTime
 
 interface ChatUserRepository : CoroutineCrudRepository<ChatUserEntity, Long> {
+
+    /** 방 멤버 목록 (나간사람 제외) */
     @Query("SELECT * FROM chat_users WHERE chat_room_id=:roomId AND deleted_at IS NULL")
     fun listByRoom(roomId: Long): Flow<ChatUserEntity>
 
+    /** 방 활성 멤버 수 (나간사람 제외) */
     @Query("SELECT COUNT(*) FROM chat_users WHERE chat_room_id=:roomId AND deleted_at IS NULL")
     suspend fun countActiveByRoom(roomId: Long): Long
 
+    /** 방 활성 멤버 ID 목록 (나간사람 제외) */
+    @Query("SELECT user_id FROM chat_users WHERE chat_room_id=:roomId AND deleted_at IS NULL")
+    fun listActiveUserIds(roomId: Long): Flow<Long>
+
+    /** 방 활성 멤버 중 한 명 찾기 (나간사람 제외) */
     @Query("SELECT * FROM chat_users WHERE chat_room_id=:roomId AND user_id=:userId AND deleted_at IS NULL")
     suspend fun findActive(roomId: Long, userId: Long): ChatUserEntity?
 
-    /** 단조 증가(앞으로만 전진) */
+    /** 메세지 읽음 커서 업데이트 (단조 증가 앞으로만 전진) */
     @Query("""
         UPDATE chat_users
         SET 
@@ -34,8 +42,7 @@ interface ChatUserRepository : CoroutineCrudRepository<ChatUserEntity, Long> {
         WHERE chat_room_id = :chatRoomId
           AND user_id      = :userId
           AND deleted_at IS NULL
-    """
-    )
+    """)
     suspend fun updateReadCursor(
         chatRoomId: Long,
         userId: Long,
@@ -43,13 +50,7 @@ interface ChatUserRepository : CoroutineCrudRepository<ChatUserEntity, Long> {
         readAt: OffsetDateTime
     ): Int
 
-
-    @Query("""
-        SELECT user_id FROM chat_users
-        WHERE chat_room_id=:roomId AND deleted_at IS NULL
-    """)
-    fun listActiveUserIds(roomId: Long): Flow<Long>
-
+    /** 방 안읽은 메세지 수 */
     @Query("""
         SELECT COUNT(*)
         FROM chat_messages m
@@ -64,9 +65,7 @@ interface ChatUserRepository : CoroutineCrudRepository<ChatUserEntity, Long> {
     """)
     suspend fun countUnread(roomId: Long, userId: Long): Long
 
-
-
-
+    /** min ~ max 까지 메세지 목록에서 message_id, reader_count 조회 */
     @Query("""
         SELECT m.id AS message_id,
                SUM(CASE WHEN cu.last_read_message_id >= m.id AND cu.user_id <> m.user_id THEN 1 ELSE 0 END) AS reader_count

@@ -130,7 +130,7 @@ class ChatWebSocketHandler(
                         "roomUid" to ctx.roomUid.toString(),
                         "messageUid" to msgUid.toString(),
 //                        "userId" to ctx.userId,
-                        "userUid" to ctx.userUid.toString(),
+                        "senderUid" to ctx.userUid.toString(),
                         "content" to content,
                         "assetUids" to assetUids.map { it.toString() },
                         "clientMsgId" to clientMsgId

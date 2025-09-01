@@ -26,7 +26,7 @@ data class RoomSummaryResponse(
 
 data class MessageSummary(
     val messageUid: UUID,
-    val senderUserUid: UUID,
+    val senderUid: UUID,
     val content: String?,
     val createdAt: OffsetDateTime?,
     val assets: List<MessageAssetSummary> = emptyList(),

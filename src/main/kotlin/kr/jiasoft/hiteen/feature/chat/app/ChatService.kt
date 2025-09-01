@@ -153,18 +153,18 @@ class ChatService(
         val room = rooms.findByUid(roomUid) ?: error("room not found")
 
         // 최신 페이지 (DESC)
-        val page = messages.pageByRoom(room.id!!, cursor, size).toList()
-        if (page.isEmpty()) return emptyList()
+        val messagePage = messages.pageByRoom(room.id!!, cursor, size).toList()
+        if (messagePage.isEmpty()) return emptyList()
 
         val memberCount = chatUsers.countActiveByRoom(room.id).toInt()
 
-        val minId = page.minOf { it.id!! }
-        val maxId = page.maxOf { it.id!! }
+        val minId = messagePage.minOf { it.id!! }
+        val maxId = messagePage.maxOf { it.id!! }
         val readersMap = chatUsers.countReadersInIdRange(room.id, minId, maxId)
             .toList()
             .associate { it.messageId to it.readerCount }
 
-        return page.map { m ->
+        return messagePage.map { m ->
             val assets = msgAssets.listByMessage(m.id!!).map { a ->
                 MessageAssetSummary(a.uid, a.assetUid, a.width, a.height)
             }.toList()
@@ -173,11 +173,11 @@ class ChatService(
                 ?: throw IllegalStateException("sender user not found: ${m.userId}")
 
             val readers = readersMap[m.id] ?: 0L
-            val unread = (memberCount - 1 - readers).coerceAtLeast(0L).toInt()
+            val unread = ((memberCount - 1) - readers).coerceAtLeast(0L).toInt()
 
             MessageSummary(
                 messageUid = m.uid,
-                senderUserUid = senderUid,
+                senderUid = senderUid,
                 content = m.content,
                 createdAt = m.createdAt,
                 assets = assets,
@@ -267,7 +267,7 @@ class ChatService(
                         ?: throw IllegalStateException("sender user not found: ${lm.userId}")
                     MessageSummary(
                         messageUid = lm.uid,
-                        senderUserUid = senderUid,
+                        senderUid = senderUid,
                         content = lm.content,
                         createdAt = lm.createdAt,
                         assets = lastAssets,
