@@ -25,7 +25,7 @@ import java.util.*
 @Component
 class ChatWebSocketHandler(
     private val jwt: JwtProvider,
-    private val hub: ChatHub,
+    private val chatHub: ChatHub,
     private val chatService: ChatService,
     private val userReader: UserReader,
 ) : WebSocketHandler {
@@ -70,17 +70,17 @@ class ChatWebSocketHandler(
                     "type" to "hello",
                     "roomUid" to ctx.roomUid.toString(),
                     "userUid" to ctx.userUid.toString(),
-                    "members" to hub.memberCount(ctx.roomUid)
+                    "members" to chatHub.memberCount(ctx.roomUid)
                 )
             )
             val greetings: Mono<String> = Mono.just(helloJson)
-            val broadcast: Flux<String> = hub.subscribe(ctx.roomUid)
+            val broadcast: Flux<String> = chatHub.subscribe(ctx.roomUid)
 
             val outgoing: Flux<WebSocketMessage> =
                 Flux.concat(greetings, broadcast)   // Flux<String>
                     .map { session.textMessage(it) } // -> Flux<WebSocketMessage>
-                    .doOnSubscribe { hub.join(ctx.roomUid, ctx.userId) }
-                    .doFinally { hub.leave(ctx.roomUid, ctx.userId) }
+                    .doOnSubscribe { chatHub.join(ctx.roomUid, ctx.userId, ctx.userUid) }
+                    .doFinally { chatHub.leave(ctx.roomUid, ctx.userId, ctx.userUid) }
 
             val incoming = session.receive()
                 .map(WebSocketMessage::getPayloadAsText)
@@ -139,7 +139,7 @@ class ChatWebSocketHandler(
                         "clientMsgId" to clientMsgId
                     )
                 )
-                hub.publish(ctx.roomUid, payload)
+                chatHub.publish(ctx.roomUid, payload)
             }
 
             //{"type":"emoji","emojiCode":"party_popper"}
@@ -164,7 +164,7 @@ class ChatWebSocketHandler(
                         "emojiCode" to code
                     )
                 )
-                hub.publish(ctx.roomUid, payload)
+                chatHub.publish(ctx.roomUid, payload)
             }
 
             //{"type":"typing","isTyping":true}
@@ -179,7 +179,7 @@ class ChatWebSocketHandler(
                         "isTyping" to isTyping
                     )
                 )
-                hub.publish(ctx.roomUid, payload)
+                chatHub.publish(ctx.roomUid, payload)
             }
 
             //{"type":"read","lastMessageUid":"8d0c9302-5382-449f-9cdb-ec40d0bb9251"}
@@ -195,7 +195,7 @@ class ChatWebSocketHandler(
                         "lastMessageUid" to lastMessageUid
                     )
                 )
-                hub.publish(ctx.roomUid, payload)
+                chatHub.publish(ctx.roomUid, payload)
             }
 
             "ping" -> {

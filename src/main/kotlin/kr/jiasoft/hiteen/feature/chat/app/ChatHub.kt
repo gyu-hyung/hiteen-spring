@@ -25,15 +25,15 @@ class ChatHub {
     }
 
     /** 접속자 수 관리 (옵션) */
-    fun join(roomUid: UUID, userId: Long) {
+    fun join(roomUid: UUID, userId: Long, userUid: UUID) {
         channel(roomUid).members.add(userId)
-        publishSystem(roomUid, "join", userId)
+        publishSystem(roomUid, "join", userUid)
     }
 
-    fun leave(roomUid: UUID, userId: Long) {
+    fun leave(roomUid: UUID, userId: Long, userUid: UUID) {
         rooms[roomUid]?.let {
             it.members.remove(userId)
-            publishSystem(roomUid, "leave", userId)
+            publishSystem(roomUid, "leave", userUid)
             // 아무도 없으면 정리
             if (it.members.isEmpty()) {
                 rooms.remove(roomUid)?.sink?.tryEmitComplete()
@@ -48,9 +48,9 @@ class ChatHub {
             RoomChannel(Sinks.many().multicast().onBackpressureBuffer())
         }
 
-    private fun publishSystem(roomUid: UUID, event: String, userId: Long) {
+    private fun publishSystem(roomUid: UUID, event: String, userUid: UUID) {
         val json = """
-            {"type":"system","event":"$event","userId":$userId,"at":"${OffsetDateTime.now()}"}
+            {"type":"system","event":"$event","userUid":$userUid,"at":"${OffsetDateTime.now()}"}
         """.trimIndent()
         publish(roomUid, json)
     }
