@@ -91,7 +91,7 @@ class ChatService(
     }
 
 
-    /** 방 조회 */
+    /** 방 조회 TODO 상세 구현(메세지 목록?, 참여 멤버?)*/
     suspend fun getRoomByUid(roomUid: UUID): ChatRoomEntity =
         rooms.findByUid(roomUid) ?: error("room not found")
 
@@ -101,45 +101,52 @@ class ChatService(
         val room = rooms.findByUid(roomUid) ?: error("room not found")
         chatUsers.findActive(room.id!!, currentUserId) ?: error("not a member")
 
+        // 메세지 저장
         val savedMsg = messages.save(
             ChatMessageEntity(
                 chatRoomId = room.id,
                 userId = currentUserId,
                 content = req.content,
-                createdAt = OffsetDateTime.now()
+                createdAt = OffsetDateTime.now(),
+                kind = req.kind,
+                emojiCode = req.emojiCode,
             )
         )
+
+        // 메세지에 대한 asset 저장
         req.assetUids?.forEach { au ->
             msgAssets.save(ChatMessageAssetEntity(messageId = savedMsg.id!!, assetUid = au))
         }
+
+        // 채팅방 업데이트
         rooms.save(room.copy(
             lastUserId = currentUserId, lastMessageId = savedMsg.id,
             updatedId = currentUserId, updatedAt = savedMsg.createdAt
         ))
 
-        // ★ sender userUid 조회
+        // 보낸사람 uid 조회
         val senderUid = users.findById(currentUserId)?.uid
             ?: throw IllegalStateException("sender not found: $currentUserId")
 
-        // ★ 목록 실시간 델타 발행: userUid로 교체
-        val lastSummary = mapOf(
+        // 마지막 메세지 summary
+        val lastMessageSummary = mapOf(
             "uid" to savedMsg.uid,
             "userUid" to senderUid,
             "content" to req.content,
             "createdAt" to savedMsg.createdAt
         )
 
-        // 방 멤버 조회
+        // 방 멤버 조회해서 inbox publish
         val memberIds = chatUsers.listActiveUserIds(room.id).toList()
         for (memberId in memberIds) {
-            val unread = chatUsers.countUnread(room.id, memberId).toInt()
+            val unreadCount = messages.countUnread(room.id, memberId).toInt()
             val payload = mapper.writeValueAsString(
                 mapOf(
                     "type" to "room-updated",
                     "cursor" to (savedMsg.id ?: 0L),
                     "roomUid" to room.uid.toString(),
-                    "lastMessage" to lastSummary,
-                    "unreadCount" to unread
+                    "lastMessage" to lastMessageSummary,
+                    "unreadCount" to unreadCount
                 )
             )
             inbox.publishTo(memberId, payload)
@@ -153,14 +160,15 @@ class ChatService(
         val room = rooms.findByUid(roomUid) ?: error("room not found")
 
         // 최신 페이지 (DESC)
-        val messagePage = messages.pageByRoom(room.id!!, cursor, size).toList()
+//        val messagePage = messages.pageByRoom(room.id!!, cursor, size).toList()
+        val messagePage = messages.pageByRoomWithEmoji(room.id!!, cursor, size).toList()
         if (messagePage.isEmpty()) return emptyList()
 
         val memberCount = chatUsers.countActiveByRoom(room.id).toInt()
 
         val minId = messagePage.minOf { it.id!! }
         val maxId = messagePage.maxOf { it.id!! }
-        val readersMap = chatUsers.countReadersInIdRange(room.id, minId, maxId)
+        val readersMap = messages.countReadersInIdRange(room.id, minId, maxId)
             .toList()
             .associate { it.messageId to it.readerCount }
 
@@ -194,6 +202,7 @@ class ChatService(
         chatUsers.save(me.copy(leavingAt = OffsetDateTime.now(), deletedAt = OffsetDateTime.now()))
     }
 
+
     /** 푸시 설정 변경 TODO history? */
     suspend fun togglePush(roomUid: UUID, currentUserId: Long, enabled: Boolean) {
         val room = rooms.findByUid(roomUid) ?: error("room not found")
@@ -210,6 +219,7 @@ class ChatService(
         }
     }
 
+
     suspend fun markRead(roomUid: UUID, userId: Long, lastMessageUid: UUID) {
         val room = rooms.findByUid(roomUid) ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "room not found")
         chatUsers.findActive(room.id!!, userId) ?: throw ResponseStatusException(HttpStatus.FORBIDDEN, "not a member")
@@ -217,10 +227,10 @@ class ChatService(
         val msg = messages.findByUid(lastMessageUid) ?: return
         chatUsers.updateReadCursor(room.id, userId, msg.id!!, OffsetDateTime.now())
 
-        val last = messages.findLastMessage(room.id)
+        val lastMessage = messages.findLastMessage(room.id)
 
         // ★ lastMessage.userUid로 변환
-        val lastSummary = last?.let {
+        val lastSummary = lastMessage?.let {
             val lastSenderUid = users.findById(it.userId)?.uid
                 ?: throw IllegalStateException("sender user not found: ${it.userId}")
             mapOf(
@@ -231,33 +241,35 @@ class ChatService(
             )
         } ?: mapOf<String, Any>()
 
-        val unreadNow = chatUsers.countUnread(room.id, userId).toInt()
+        val unreadCount = messages.countUnread(room.id, userId).toInt()
         val payload = mapper.writeValueAsString(
             mapOf(
                 "type" to "room-updated",
-                "cursor" to (last?.id ?: msg.id),
+                "cursor" to (lastMessage?.id ?: msg.id),
                 "roomUid" to room.uid.toString(),
                 "lastMessage" to lastSummary,
-                "unreadCount" to unreadNow
+                "unreadCount" to unreadCount
             )
         )
         inbox.publishTo(userId, payload)
     }
 
 
-
     /** 목록 스냅샷: cursor + rooms(with unreadCount) */
     suspend fun listRoomsSnapshot(currentUserId: Long, limit: Int, offset: Int): RoomsSnapshotResponse {
-        val cursor = messages.currentCursorForUser(currentUserId)
+        val cursor = messages.findCurrentCursorByUserId(currentUserId)
 
         val roomsList = rooms.listRooms(currentUserId, limit, offset).map { r ->
+            //멤버수
             val memberCount = chatUsers.countActiveByRoom(r.id!!)
-            val last = messages.findLastMessage(r.id)//TODO 성능
+            //마지막 메세지
+            val last = messages.findLastMessage(r.id)
+            //마지막 메세지의 asset
             val lastAssets = last?.id?.let { msgAssets.listByMessage(it).map { a ->
                 MessageAssetSummary(a.uid, a.assetUid, a.width, a.height)
             }.toList() } ?: emptyList()
-
-            val unread = chatUsers.countUnread(r.id, currentUserId).toInt()
+            //읽지 않은 메세지 수
+            val unreadCount = messages.countUnread(r.id, currentUserId).toInt()
 
             RoomSummaryResponse(
                 roomUid = r.uid,
@@ -274,7 +286,7 @@ class ChatService(
                     )
                 },
                 memberCount = memberCount.toInt(),
-                unreadCount = unread,
+                unreadCount = unreadCount,
                 updatedAt = r.updatedAt ?: r.createdAt
             )
 

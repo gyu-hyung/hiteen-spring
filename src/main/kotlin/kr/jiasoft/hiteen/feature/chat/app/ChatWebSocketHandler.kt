@@ -105,6 +105,9 @@ class ChatWebSocketHandler(
         val type = node.get("type")?.asText() ?: return@mono
 
         when (type) {
+
+            //{"type":"send","content":"채팅!!!","clientMsgId":"ibox-1","assetUids":[]}
+            // TODO 안읽은 메세지가 있는 상태에서 메세지를 보냈을때 unread를 0으로 갱신할것인지?
             "send" -> {
                 val content = node.get("content")?.asText()
 
@@ -139,6 +142,32 @@ class ChatWebSocketHandler(
                 hub.publish(ctx.roomUid, payload)
             }
 
+            //{"type":"emoji","emojiCode":"party_popper"}
+            //{"type":"emoji","emojiCode":"laugh","clientMsgId":"123e4567-e89b-12d3-a456-426614174000"}
+            //{"type":"emoji","emojiCode":"heart","meta":{"color":"red","size":"large"}}
+            "emoji" -> {
+                val code = node.get("emojiCode")?.asText() ?: return@mono
+
+                val msgUid = chatService.sendMessage(
+                    ctx.roomUid,
+                    ctx.userId,
+                    SendMessageRequest(kind = 2, emojiCode = code)
+                )
+
+                // 즉시 WS 브로드캐스트(서버에서 이미 이모지 전용 payload를 publish했으면 생략 가능)
+                val payload = mapper.writeValueAsString(
+                    mapOf(
+                        "type" to "emoji",
+                        "roomUid" to ctx.roomUid.toString(),
+                        "messageUid" to msgUid.toString(),
+                        "senderUid" to ctx.userUid.toString(),
+                        "emojiCode" to code
+                    )
+                )
+                hub.publish(ctx.roomUid, payload)
+            }
+
+            //{"type":"typing","isTyping":true}
             "typing" -> {
                 val isTyping = node.get("isTyping")?.asBoolean() ?: true
                 val payload = mapper.writeValueAsString(
@@ -153,6 +182,7 @@ class ChatWebSocketHandler(
                 hub.publish(ctx.roomUid, payload)
             }
 
+            //{"type":"read","lastMessageUid":"8d0c9302-5382-449f-9cdb-ec40d0bb9251"}
             "read" -> {
                 val lastMessageUid = node.get("lastMessageUid")?.asText() ?: return@mono
                 chatService.markRead(ctx.roomUid, ctx.userId, UUID.fromString(lastMessageUid))

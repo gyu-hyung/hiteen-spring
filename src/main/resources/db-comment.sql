@@ -1,3 +1,6 @@
+--===========================================comment==================================================
+
+
 -- ========================
 -- users
 -- ========================
@@ -428,7 +431,7 @@ COMMENT ON COLUMN chat_messages.chat_room_id IS '채팅방 ID(FK)';
 COMMENT ON COLUMN chat_messages.user_id IS '작성 사용자 ID(FK)';
 COMMENT ON COLUMN chat_messages.uid IS '메시지 UUID';
 COMMENT ON COLUMN chat_messages.content IS '메시지 본문';
-COMMENT ON COLUMN chat_messages.read_count IS '읽음 수';
+--COMMENT ON COLUMN chat_messages.read_count IS '읽음 수';
 COMMENT ON COLUMN chat_messages.created_at IS '작성 일시';
 COMMENT ON COLUMN chat_messages.updated_at IS '수정 일시';
 COMMENT ON COLUMN chat_messages.deleted_at IS '삭제 일시';
