@@ -11,30 +11,25 @@ interface ChatMessageRepository : CoroutineCrudRepository<ChatMessageEntity, Lon
     suspend fun findByUid(uid: UUID): ChatMessageEntity?
 
     /** 채팅방 메시지 페이징 (keyset) */
-    @Query(
-        """
+    @Query("""
         SELECT * FROM chat_messages
         WHERE chat_room_id = :roomId
           AND (:cursor IS NULL OR created_at < :cursor)
         ORDER BY created_at DESC
         LIMIT :size
-        """
-    )
+    """)
     fun pageByRoom(roomId: Long, cursor: OffsetDateTime?, size: Int): Flow<ChatMessageEntity>
 
-    @Query(
-        """
+    /** 방 최신 메세지 1건 조회 */
+    @Query("""
         SELECT * FROM chat_messages
         WHERE chat_room_id = :roomId
         ORDER BY created_at DESC
         LIMIT 1
-        """
-    )
+    """)
     suspend fun findLastMessage(roomId: Long): ChatMessageEntity?
 
-//    @Query("SELECT COALESCE(MAX(id), 0) FROM chat_messages WHERE deleted_at IS NULL")
-//    suspend fun currentCursor(): Long
-
+    /** 특정 방에서 사용자 ID로 cursor 조회 */
     @Query("""
         SELECT COALESCE(MAX(m.id), 0)
         FROM chat_messages m
