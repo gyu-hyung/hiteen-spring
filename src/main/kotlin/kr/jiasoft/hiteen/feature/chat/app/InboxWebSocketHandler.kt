@@ -11,6 +11,7 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
+import java.util.UUID
 
 @Component
 class InboxWebSocketHandler(
@@ -20,6 +21,8 @@ class InboxWebSocketHandler(
 ) : WebSocketHandler {
 
     private val mapper = jacksonObjectMapper()
+
+    private data class Auth(val userId: Long, val userUid: UUID)
 
     override fun handle(session: WebSocketSession): Mono<Void> {
         val params = session.handshakeInfo.uri.query?.let { parseQuery(it) } ?: emptyMap()
@@ -31,7 +34,7 @@ class InboxWebSocketHandler(
             val username = jws.payload.subject ?: error("no-subject")
             val userId = userReader.findIdByUsername(username) ?: error("user not found: $username")
             val userUid = userReader.findUidById(username) ?: error("user uid not found: $username")
-            Auth(userId = userId, userUid = userUid.toString())
+            Auth(userId = userId, userUid = userUid)
         }.onErrorResume {
             session.send(Mono.just(session.textMessage(error("auth_failed", it.message))))
                 .then(session.close(CloseStatus.POLICY_VIOLATION))
@@ -45,7 +48,7 @@ class InboxWebSocketHandler(
                 "userUid" to a.userUid,
             ))
             val greetings = Mono.just(hello)
-            val stream: Flux<String> = inbox.subscribe(a.userId)
+            val stream: Flux<String> = inbox.subscribe(a.userUid)
 
             val outgoing = Flux.concat(greetings, stream).map { session.textMessage(it) }
             val incoming = session.receive()
@@ -65,8 +68,6 @@ class InboxWebSocketHandler(
             session.send(outgoing).and(incoming)
         }
     }
-
-    private data class Auth(val userId: Long, val userUid: String)
 
 
     private fun parseQuery(q: String): Map<String, List<String>> =

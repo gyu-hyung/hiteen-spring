@@ -137,9 +137,9 @@ class ChatService(
         )
 
         // 방 멤버 조회해서 inbox publish
-        val memberIds = chatUsers.listActiveUserIds(room.id).toList()
-        for (memberId in memberIds) {
-            val unreadCount = messages.countUnread(room.id, memberId).toInt()
+        val activeMembers = chatUsers.listActiveUserUids(room.id).toList()
+        for (user in activeMembers) {
+            val unreadCount = messages.countUnread(room.id, user.userId).toInt()
             val payload = mapper.writeValueAsString(
                 mapOf(
                     "type" to "room-updated",
@@ -149,7 +149,7 @@ class ChatService(
                     "unreadCount" to unreadCount
                 )
             )
-            inbox.publishTo(memberId, payload)
+            inbox.publishTo(user.userUid, payload)
         }
         return savedMsg.uid
     }
@@ -222,7 +222,7 @@ class ChatService(
 
     suspend fun markRead(roomUid: UUID, userId: Long, lastMessageUid: UUID) {
         val room = rooms.findByUid(roomUid) ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "room not found")
-        chatUsers.findActive(room.id!!, userId) ?: throw ResponseStatusException(HttpStatus.FORBIDDEN, "not a member")
+        val userUid = chatUsers.findUidOfActiveUser(room.id!!, userId) ?: throw ResponseStatusException(HttpStatus.FORBIDDEN, "not a member")
 
         val msg = messages.findByUid(lastMessageUid) ?: return
         chatUsers.updateReadCursor(room.id, userId, msg.id!!, OffsetDateTime.now())
@@ -251,7 +251,7 @@ class ChatService(
                 "unreadCount" to unreadCount
             )
         )
-        inbox.publishTo(userId, payload)
+        inbox.publishTo(userUid, payload)
     }
 
 

@@ -40,6 +40,11 @@ data class ReadersCountRow(
     @Column("reader_count") val readerCount: Long
 )
 
+data class ActiveUsersRow(
+    @Column("user_id") val userId: Long,
+    @Column("user_uid") val userUid: UUID,
+)
+
 
 data class MessageAssetSummary(
     val uid: UUID,

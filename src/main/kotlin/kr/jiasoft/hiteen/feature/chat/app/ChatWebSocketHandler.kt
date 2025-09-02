@@ -28,9 +28,9 @@ class ChatWebSocketHandler(
     private val chatHub: ChatHub,
     private val chatService: ChatService,
     private val userReader: UserReader,
+    private val mapper: ObjectMapper = jacksonObjectMapper()
 ) : WebSocketHandler {
 
-    private val mapper: ObjectMapper = jacksonObjectMapper()
 
     //socket 연결 시
     override fun handle(session: WebSocketSession): Mono<Void> {
@@ -65,20 +65,24 @@ class ChatWebSocketHandler(
         }
 
         return authMono.flatMap { ctx ->
-            val helloJson = mapper.writeValueAsString(
-                mapOf(
-                    "type" to "hello",
-                    "roomUid" to ctx.roomUid.toString(),
-                    "userUid" to ctx.userUid.toString(),
-                    "members" to chatHub.memberCount(ctx.roomUid)
-                )
-            )
-            val greetings: Mono<String> = Mono.just(helloJson)
+            val greetings: Mono<String> =
+                chatHub.memberCountMono(ctx.roomUid)
+                    .map { mc ->
+                        mapper.writeValueAsString(
+                            mapOf(
+                                "type" to "hello",
+                                "roomUid" to ctx.roomUid.toString(),
+                                "userUid" to ctx.userUid.toString(),
+                                "members" to mc
+                            )
+                        )
+                    }
+
             val broadcast: Flux<String> = chatHub.subscribe(ctx.roomUid)
 
             val outgoing: Flux<WebSocketMessage> =
-                Flux.concat(greetings, broadcast)   // Flux<String>
-                    .map { session.textMessage(it) } // -> Flux<WebSocketMessage>
+                Flux.concat(greetings, broadcast)
+                    .map { session.textMessage(it) }
                     .doOnSubscribe { chatHub.join(ctx.roomUid, ctx.userId, ctx.userUid) }
                     .doFinally { chatHub.leave(ctx.roomUid, ctx.userId, ctx.userUid) }
 

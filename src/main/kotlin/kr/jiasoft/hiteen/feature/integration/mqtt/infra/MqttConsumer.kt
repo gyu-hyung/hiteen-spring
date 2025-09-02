@@ -1,13 +1,13 @@
 package kr.jiasoft.hiteen.feature.integration.mqtt.infra
 
-import kr.jiasoft.hiteen.feature.location.app.LocationMessageProcessor
+import kr.jiasoft.hiteen.feature.location.app.LocationMessageMqttProcessor
 import org.apache.camel.builder.RouteBuilder
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 
 @Component
 class MqttConsumers(
-    private val processor: LocationMessageProcessor,
+    private val processor: LocationMessageMqttProcessor,
     @Value("\${mqtt.topic}") private val topic: String,
     @Value("\${mqtt.broker.uri}") private val brokerUri: String,
     @Value("\${mqtt.client.id}") private val clientId: String,

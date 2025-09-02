@@ -2,9 +2,11 @@ package kr.jiasoft.hiteen.feature.chat.infra
 
 import kotlinx.coroutines.flow.Flow
 import kr.jiasoft.hiteen.feature.chat.domain.ChatUserEntity
+import kr.jiasoft.hiteen.feature.chat.dto.ActiveUsersRow
 import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 import java.time.OffsetDateTime
+import java.util.UUID
 
 interface ChatUserRepository : CoroutineCrudRepository<ChatUserEntity, Long> {
 
@@ -20,9 +22,17 @@ interface ChatUserRepository : CoroutineCrudRepository<ChatUserEntity, Long> {
     @Query("SELECT user_id FROM chat_users WHERE chat_room_id=:roomId AND deleted_at IS NULL")
     fun listActiveUserIds(roomId: Long): Flow<Long>
 
+    /** 방 활성 멤버 UID 목록 (나간사람 제외) */
+    @Query("SELECT (select uid from users u where u.id = cu.user_id) user_uid, cu.user_id FROM chat_users cu WHERE cu.chat_room_id = :roomId AND cu.deleted_at IS NULL")
+    fun listActiveUserUids(roomId: Long): Flow<ActiveUsersRow>
+
     /** 방 활성 멤버 중 한 명 찾기 (나간사람 제외) */
     @Query("SELECT * FROM chat_users WHERE chat_room_id=:roomId AND user_id=:userId AND deleted_at IS NULL")
     suspend fun findActive(roomId: Long, userId: Long): ChatUserEntity?
+
+    /** 방 활성 멤버 중 한 명 찾기 (나간사람 제외) */
+    @Query("SELECT (select u.uid from users u where u.id = cu.user_id ) FROM chat_users cu WHERE cu.chat_room_id= :roomId  AND cu.user_id= :userId AND cu.deleted_at IS null")
+    suspend fun findUidOfActiveUser(roomId: Long, userId: Long): UUID?
 
     /** 메세지 읽음 커서 업데이트 (단조 증가 앞으로만 전진) */
     @Query("""
