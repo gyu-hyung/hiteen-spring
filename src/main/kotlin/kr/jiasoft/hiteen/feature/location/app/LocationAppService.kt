@@ -3,20 +3,20 @@ package kr.jiasoft.hiteen.feature.location.app
 import kr.jiasoft.hiteen.feature.location.domain.LocationHistory
 import kr.jiasoft.hiteen.feature.location.dto.LocationEvent
 import kr.jiasoft.hiteen.feature.location.dto.LocationRequest
-import kr.jiasoft.hiteen.feature.location.infra.messaging.LocationBroadcaster
-import kr.jiasoft.hiteen.feature.location.infra.cache.LocationRedisService
+import kr.jiasoft.hiteen.feature.location.infra.realtime.LocationBroadcaster
+import kr.jiasoft.hiteen.feature.location.infra.cache.LocationCacheRedisService
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import org.springframework.stereotype.Service
 
 @Service
 class LocationAppService(
     private val locationService: LocationService,
-    private val locationRedisService: LocationRedisService,
+    private val locationCacheRedisService: LocationCacheRedisService,
     private val broadcaster: LocationBroadcaster
 ) {
 
     suspend fun getLatest(userId: String): LocationHistory? =
-        locationRedisService.getLatest(userId)
+        locationCacheRedisService.getLatest(userId)
 
     suspend fun saveLocation(
         user: UserEntity,
@@ -41,7 +41,7 @@ class LocationAppService(
                 source = "http"
             )
             broadcaster.publishToUser(userUid, event)
-            locationRedisService.cacheLatest(saved)
+            locationCacheRedisService.cacheLatest(saved)
         }
         return saved
     }

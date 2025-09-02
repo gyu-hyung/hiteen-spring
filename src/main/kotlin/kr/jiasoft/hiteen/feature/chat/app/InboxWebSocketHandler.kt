@@ -4,7 +4,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotlinx.coroutines.reactor.mono
 import kr.jiasoft.hiteen.feature.auth.infra.BearerToken
 import kr.jiasoft.hiteen.feature.auth.infra.JwtProvider
-import kr.jiasoft.hiteen.feature.chat.domain.UserReader
+import kr.jiasoft.hiteen.feature.user.app.UserReader
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.socket.*
 import reactor.core.publisher.Flux

@@ -1,6 +1,5 @@
-package kr.jiasoft.hiteen.feature.chat.infra
+package kr.jiasoft.hiteen.feature.user.app
 
-import kr.jiasoft.hiteen.feature.chat.domain.UserReader
 import kr.jiasoft.hiteen.feature.user.infra.UserRepository
 import org.springframework.stereotype.Component
 import java.util.UUID

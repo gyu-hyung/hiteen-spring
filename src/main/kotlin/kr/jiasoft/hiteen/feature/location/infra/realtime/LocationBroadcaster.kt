@@ -1,4 +1,4 @@
-package kr.jiasoft.hiteen.feature.location.infra.messaging
+package kr.jiasoft.hiteen.feature.location.infra.realtime
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import kotlinx.coroutines.reactive.awaitFirstOrNull
