@@ -1,4 +1,4 @@
-package kr.jiasoft.hiteen.feature.chat.domain
+package kr.jiasoft.hiteen.feature.user.app
 
 import java.util.UUID
 
