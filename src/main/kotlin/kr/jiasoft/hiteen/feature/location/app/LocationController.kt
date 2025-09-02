@@ -1,9 +1,7 @@
 package kr.jiasoft.hiteen.feature.location.app
 
-import jakarta.validation.constraints.Max
-import jakarta.validation.constraints.Min
-import jakarta.validation.constraints.Positive
 import kr.jiasoft.hiteen.feature.location.domain.LocationHistory
+import kr.jiasoft.hiteen.feature.location.dto.LocationRequest
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -17,14 +15,6 @@ import org.springframework.web.bind.annotation.*
 class LocationController(
     private val locationAppService: LocationAppService
 ) {
-    data class LocationRequest(
-        @field:Min(-90) @field:Max(90)
-        val lat: Double,
-        @field:Min(-180) @field:Max(180)
-        val lng: Double,
-        @field:Positive
-        val timestamp: Long
-    )
 
     @GetMapping("/latest")
     suspend fun getLatest(@RequestParam userId: String): LocationHistory? =
@@ -44,4 +34,5 @@ class LocationController(
         @AuthenticationPrincipal(expression = "user") user: UserEntity
     ): List<LocationHistory> =
         locationAppService.getMyLocations(user)
+
 }

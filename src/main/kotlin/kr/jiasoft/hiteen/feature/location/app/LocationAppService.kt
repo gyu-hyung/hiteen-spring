@@ -1,7 +1,8 @@
 package kr.jiasoft.hiteen.feature.location.app
 
 import kr.jiasoft.hiteen.feature.location.domain.LocationHistory
-import kr.jiasoft.hiteen.feature.location.infra.messaging.LocationEvent
+import kr.jiasoft.hiteen.feature.location.dto.LocationEvent
+import kr.jiasoft.hiteen.feature.location.dto.LocationRequest
 import kr.jiasoft.hiteen.feature.location.infra.messaging.LocationBroadcaster
 import kr.jiasoft.hiteen.feature.location.infra.cache.LocationRedisService
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
@@ -19,19 +20,27 @@ class LocationAppService(
 
     suspend fun saveLocation(
         user: UserEntity,
-        req: LocationController.LocationRequest
+        req: LocationRequest
     ): LocationHistory? {
+        val userUid = user.uid.toString()
+
         val entity = LocationHistory(
-            //TODO uid? or id?
-//            userId = user.uid.toString(),
-            userId = user.id.toString(),
+            userId = userUid,
             lat = req.lat,
             lng = req.lng,
             timestamp = req.timestamp
         )
+
         val saved = locationService.saveLocation(entity)
         if (saved != null) {
-            broadcaster.publishToUser(saved.userId, LocationEvent.from(saved))
+            val event = LocationEvent(
+                userId = userUid,
+                lat = req.lat,
+                lng = req.lng,
+                timestamp = req.timestamp,
+                source = "http"
+            )
+            broadcaster.publishToUser(userUid, event)
             locationRedisService.cacheLatest(saved)
         }
         return saved
