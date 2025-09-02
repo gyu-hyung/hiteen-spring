@@ -5,5 +5,3 @@ This folder containing scripts and Kubernetes resources configurations to run TB
 You can find the deployment guide by the [**link**](https://thingsboard.io/docs/mqtt-broker/install/cluster/minikube-cluster-setup/).
 
 
-첨부파일 환경설정
- - 
