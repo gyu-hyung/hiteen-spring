@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
-class LocationMessageProcessor(
+class LocationMessageMqttProcessor(
     private val objectMapper: ObjectMapper,
     private val locationService: LocationService
 ) : Processor {

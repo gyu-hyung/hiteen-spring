@@ -16,7 +16,7 @@ class LocationRedisService(
 ) {
     private val ttl: Duration = Duration.ofHours(24)
 
-    fun latestKey(userId: String) = "loc:latest:user:{$userId}"
+    fun latestKey(userId: String) = "loc:latest:user:$userId"
 
     suspend fun cacheLatest(entity: LocationHistory) {
         val key = latestKey(entity.userId)

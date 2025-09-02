@@ -60,7 +60,7 @@ class ChatWebSocketHandler(
         }.onErrorResume {
             session.send(Mono.just(session.textMessage(errorJson("auth_failed", it.message))))
                 .then(session.close(CloseStatus.POLICY_VIOLATION))
-                .then(Mono.error<AuthContext>(it))
+                .then(Mono.error(it))
 
         }
 
