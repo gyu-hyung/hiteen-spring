@@ -17,8 +17,8 @@ import java.util.concurrent.ConcurrentHashMap
  */
 @Component
 class InboxHub(
-    private val redis: ReactiveStringRedisTemplate,
-    private val container: ReactiveRedisMessageListenerContainer
+    private val publisher: ReactiveStringRedisTemplate,
+    private val subscriber: ReactiveRedisMessageListenerContainer
 ) {
     private val log = LoggerFactory.getLogger(javaClass)
 
@@ -27,7 +27,7 @@ class InboxHub(
     fun subscribe(userUid: UUID): Flux<String> =
         localBridges.computeIfAbsent(userUid) { uid ->
             val topic = ChannelTopic(inboxTopic(uid))
-            container.receive(topic)
+            subscriber.receive(topic)
                 .map { it.message }
                 .doOnSubscribe { log.debug("inbox subscribe userUid={}", uid) }
                 .doFinally { signal ->
@@ -38,7 +38,7 @@ class InboxHub(
         }
 
     fun publishTo(userUid: UUID, json: String) {
-        redis.convertAndSend(inboxTopic(userUid), json)
+        publisher.convertAndSend(inboxTopic(userUid), json)
             .doOnError { e -> log.error("inbox publish error userUid={}", userUid, e) }
             .subscribe()
     }

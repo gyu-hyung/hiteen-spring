@@ -12,7 +12,7 @@ import java.util.concurrent.ConcurrentHashMap
  */
 @Component
 class LocationHub(
-    private val container: ReactiveRedisMessageListenerContainer
+    private val subscriber: ReactiveRedisMessageListenerContainer
 ) {
     private val localBridges = ConcurrentHashMap<String, Flux<String>>()
 
@@ -20,7 +20,7 @@ class LocationHub(
     fun subscribeUser(userUid: String): Flux<String> =
         localBridges.computeIfAbsent(userUid) { uid ->
             val topic = ChannelTopic(userTopic(uid))
-            container.receive(topic)          // Redis Pub/Sub 구독
+            subscriber.receive(topic)          // Redis Pub/Sub 구독
                 .map { it.message }           // payload(String, JSON 가정)
                 .share()                      // 동일 userUid 다중 세션 공유
         }
