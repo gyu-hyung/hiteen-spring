@@ -14,8 +14,8 @@ import javax.crypto.spec.SecretKeySpec
 @RequestMapping("/broadcasting")
 class SoketiAuthController(
     private val jwtProvider: JwtProvider,
-    @field:Value("\${soketi.app-key}") private val appKey: String,
-    @field:Value("\${soketi.app-secret}") private val appSecret: String,
+    @Value("\${soketi.app-key}") private val appKey: String,
+    @Value("\${soketi.app-secret}") private val appSecret: String,
 ) {
 
     data class AuthRequest(
