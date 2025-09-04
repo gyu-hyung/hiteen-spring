@@ -12,7 +12,7 @@ import kr.jiasoft.hiteen.feature.chat.infra.ChatMessageAssetRepository
 import kr.jiasoft.hiteen.feature.chat.infra.ChatMessageRepository
 import kr.jiasoft.hiteen.feature.chat.infra.ChatRoomRepository
 import kr.jiasoft.hiteen.feature.chat.infra.ChatUserRepository
-import kr.jiasoft.hiteen.feature.soketi.service.SoketiBroadcaster
+import kr.jiasoft.hiteen.feature.soketi.SoketiBroadcaster
 import kr.jiasoft.hiteen.feature.user.infra.UserRepository
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
