@@ -1,9 +1,9 @@
-package kr.jiasoft.hiteen.feature.soketi.controller
+package kr.jiasoft.hiteen.feature.soketi
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import kr.jiasoft.hiteen.feature.auth.infra.BearerToken
 import kr.jiasoft.hiteen.feature.auth.infra.JwtProvider
-import kr.jiasoft.hiteen.feature.soketi.config.SoketiProperties
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import reactor.core.publisher.Mono
@@ -13,12 +13,10 @@ import javax.crypto.spec.SecretKeySpec
 @RestController
 @RequestMapping("/broadcasting")
 class SoketiAuthController(
-    props: SoketiProperties,
     private val jwtProvider: JwtProvider,
+    @field:Value("\${soketi.app-key}") private val appKey: String,
+    @field:Value("\${soketi.app-secret}") private val appSecret: String,
 ) {
-    private val appKey: String = props.appKey
-    private val appSecret: String = props.appSecret   // 이미 non-nullable
-    private val jwtSecret: String? = props.jwtSecret  // 필요하면 nullable로 둬도 됨
 
     data class AuthRequest(
         @param:JsonProperty("channel_name")

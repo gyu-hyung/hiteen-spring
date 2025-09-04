@@ -1,6 +1,5 @@
-package kr.jiasoft.hiteen.feature.soketi.controller
+package kr.jiasoft.hiteen.feature.soketi
 
-import kr.jiasoft.hiteen.feature.soketi.service.SoketiBroadcaster
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -11,7 +10,7 @@ import reactor.core.publisher.Mono
 
 @RestController
 @RequestMapping("/api/send")
-class SoketiBroadcastController(
+class SoketiBroadcastTestController(
     private val broadcaster: SoketiBroadcaster
 ) {
     private val log = LoggerFactory.getLogger(javaClass)
