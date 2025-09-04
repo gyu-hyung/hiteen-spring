@@ -4,7 +4,7 @@ import kr.jiasoft.hiteen.feature.location.domain.LocationHistory
 import kr.jiasoft.hiteen.feature.location.dto.LocationEvent
 import kr.jiasoft.hiteen.feature.location.dto.LocationRequest
 import kr.jiasoft.hiteen.feature.location.infra.cache.LocationCacheRedisService
-import kr.jiasoft.hiteen.feature.soketi.SoketiBroadcaster
+import kr.jiasoft.hiteen.feature.soketi.app.SoketiBroadcaster
 import kr.jiasoft.hiteen.feature.soketi.domain.SoketiChannelPattern
 import kr.jiasoft.hiteen.feature.soketi.domain.SoketiEventType
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity

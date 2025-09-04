@@ -12,12 +12,11 @@ import kr.jiasoft.hiteen.feature.chat.infra.ChatMessageAssetRepository
 import kr.jiasoft.hiteen.feature.chat.infra.ChatMessageRepository
 import kr.jiasoft.hiteen.feature.chat.infra.ChatRoomRepository
 import kr.jiasoft.hiteen.feature.chat.infra.ChatUserRepository
-import kr.jiasoft.hiteen.feature.soketi.SoketiBroadcaster
+import kr.jiasoft.hiteen.feature.soketi.app.SoketiBroadcaster
 import kr.jiasoft.hiteen.feature.soketi.domain.SoketiChannelPattern
 import kr.jiasoft.hiteen.feature.soketi.domain.SoketiEventType
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import kr.jiasoft.hiteen.feature.user.infra.UserRepository
-import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
