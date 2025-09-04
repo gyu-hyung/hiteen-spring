@@ -13,7 +13,7 @@ import java.util.*
 @RestController
 @RequestMapping("/api/chats")
 class ChatController(
-    private val service: ChatService
+    private val service: ChatService,
 ) {
 
     /** 내가 속한 채팅방 목록 (최근순) */
@@ -47,7 +47,7 @@ class ChatController(
     suspend fun getRoom(@PathVariable roomUid: UUID) = service.getRoomByUid(roomUid)
 
 
-    /** 메시지 페이징 (무한스크롤, cursor=이전 마지막 createdAt) */
+    /** 메시지 페이징 (무한스크롤, cursor=이전 마지막 메세지의 createdAt) */
     @GetMapping("/rooms/{roomUid}/messages")
     suspend fun listMessages(
         @PathVariable roomUid: UUID,
@@ -56,14 +56,21 @@ class ChatController(
     ) = service.pageMessages(roomUid, cursor, size.coerceIn(1, 100))
 
 
-    /** 텍스트/이미지 전송 */
+    /** 메세지 전송 */
     @PostMapping("/rooms/{roomUid}/messages")
     suspend fun sendMessage(
         @PathVariable roomUid: UUID,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
-         req: SendMessageRequest
+        req: SendMessageRequest
     ): Map<String, Any> = mapOf("messageUid" to service.sendMessage(roomUid, user.id!!, req))
 
+    /** 메세지 읽음 처리 */
+    @PostMapping("/rooms/{roomUid}/messages/{messageUid}/read")
+    suspend fun markRead(
+        @PathVariable roomUid: UUID,
+        @PathVariable messageUid: UUID,
+        @AuthenticationPrincipal(expression = "user") user: UserEntity,
+    ) = service.markRead(roomUid, user.id!!, messageUid).let { mapOf("ok" to true) }
 
     /** 알림 on/off */
     @PostMapping("/rooms/{roomUid}/push")

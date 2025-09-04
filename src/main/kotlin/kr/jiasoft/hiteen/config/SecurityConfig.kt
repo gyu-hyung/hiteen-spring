@@ -14,16 +14,15 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.server.SecurityWebFilterChain
 import org.springframework.security.web.server.authentication.AuthenticationWebFilter
+import org.springframework.web.cors.CorsConfiguration
+import org.springframework.web.cors.reactive.CorsConfigurationSource
+import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource
 import reactor.core.publisher.Mono
 
 @Configuration
 @EnableWebFluxSecurity
 class SecurityConfig(
 ) {
-
-    @Bean
-    fun passwordEncoder (): PasswordEncoder = BCryptPasswordEncoder()
-
 
     @Bean
     fun securityWebFilterChain(
@@ -36,13 +35,16 @@ class SecurityConfig(
 
         return http
             .csrf { it.disable() }
+            .cors {  }
             .httpBasic { it.disable() }
             .formLogin { it.disable() }
             .addFilterAt(filter, SecurityWebFiltersOrder.AUTHENTICATION)
             .authorizeExchange {
+                //it.pathMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 it.pathMatchers(
                     HttpMethod.POST,
                     "/api/auth/login",
+                    "/broadcasting/auth",
                     "/api/user",
                     "/favicon.ico",
                     "/swagger-ui/**",
@@ -53,7 +55,7 @@ class SecurityConfig(
                 // 다운로드는 GET 허용
                 it.pathMatchers(
                     HttpMethod.GET,
-                    "/api/assets/{uid}/download"
+                    "/api/assets/{uid}/download",
                 ).permitAll()
 
                 it.pathMatchers("/ws/**").permitAll()
@@ -69,5 +71,23 @@ class SecurityConfig(
                 }
             }
             .build()
+    }
+
+
+    @Bean
+    fun passwordEncoder (): PasswordEncoder = BCryptPasswordEncoder()
+
+
+    @Bean
+    fun corsConfigurationSource(): CorsConfigurationSource {
+        val config = CorsConfiguration().apply {
+            allowedOriginPatterns = listOf("http://localhost:3000")
+            allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "OPTIONS")
+            allowedHeaders = listOf("*")
+            allowCredentials = true
+        }
+        val source = UrlBasedCorsConfigurationSource()
+        source.registerCorsConfiguration("/**", config)
+        return source
     }
 }

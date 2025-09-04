@@ -20,7 +20,7 @@ class UserController(
 
     /* 회원가입 */
     @PostMapping
-    suspend fun register(@Valid userRegisterFrom: UserRegisterForm, @RequestPart("file") file: FilePart?): Profile =
+    suspend fun register(@Valid userRegisterFrom: UserRegisterForm, @RequestPart("file", required = false) file: FilePart?): Profile =
         Profile(userService.register(userRegisterFrom, file) )
 
     /* 회원정보조회 */

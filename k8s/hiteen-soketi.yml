@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hiteen-soketi
+  namespace: hiteen
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hiteen-soketi
+  template:
+    metadata:
+      labels:
+        app: hiteen-soketi
+    spec:
+      containers:
+        - name: soketi
+          image: quay.io/soketi/soketi:1.4-16-debian
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 6001   # WebSocket
+            - containerPort: 9601   # Metrics
+          env:
+            - name: SOKETI_DEBUG
+              value: "1"
+            - name: SOKETI_METRICS_ENABLED
+              value: "true"
+
+            # soketi app 설정
+            - name: SOKETI_DEFAULT_APP_ID
+              value: "hiteen-app"
+            - name: SOKETI_DEFAULT_APP_KEY
+              value: "hiteen-key"
+            - name: SOKETI_DEFAULT_APP_SECRET
+              value: "hiteen-secret"
+            - name: SOKETI_DEFAULT_APP_NAME
+              value: "Hiteen"
+
+            # Redis 연결 설정
+            - name: SOKETI_REDIS_ENABLED
+              value: "true"
+            - name: SOKETI_REDIS_HOST
+              value: "hiteen-redis.hiteen.svc.cluster.local"
+            - name: SOKETI_REDIS_PORT
+              value: "6379"
+            - name: SOKETI_REDIS_PASSWORD
+              value: "xxxxxxxx"
+            - name: SOKETI_REDIS_DB
+              value: "0"
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
