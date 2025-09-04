@@ -1,4 +1,4 @@
-package kr.jiasoft.hiteen.feature.soketi
+package kr.jiasoft.hiteen.feature.soketi.app
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import kr.jiasoft.hiteen.feature.auth.infra.BearerToken
@@ -31,43 +31,6 @@ class SoketiAuthController(
         val socket_id: String? = null
     )
 
-    @PostMapping("/auth2")
-    fun authorize2(
-        @ModelAttribute formReq: AuthRequest,
-        @RequestBody(required = false) jsonReq: AuthRequest?
-    ): Mono<ResponseEntity<Map<String, String>>> {
-        val channelName = formReq.channelName ?: jsonReq?.channelName
-        val socketId = formReq.socketId ?: jsonReq?.socketId
-        var channelData = formReq.channelData ?: jsonReq?.channelData
-
-        if (channelName.isNullOrBlank() || socketId.isNullOrBlank()) {
-            return Mono.just(
-                ResponseEntity.badRequest().body(mapOf("error" to "Missing channel_name or socket_id"))
-            )
-        }
-
-        // Presence 채널일 경우 기본 channelData
-        if (channelName.startsWith("presence-") && channelData.isNullOrBlank()) {
-            channelData = """{"user_id":1,"user_info":{"name":"Test User","role":"tester"}}"""
-        }
-
-        val stringToSign =
-            "$socketId:$channelName" + if (!channelData.isNullOrBlank()) ":$channelData" else ""
-
-        // appSecret은 non-null → 바로 사용
-        val mac = Mac.getInstance("HmacSHA256")
-        mac.init(SecretKeySpec(appSecret.toByteArray(), "HmacSHA256"))
-        val signature = mac.doFinal(stringToSign.toByteArray())
-            .joinToString("") { "%02x".format(it) }
-
-        val result = if (!channelData.isNullOrBlank()) {
-            mapOf("auth" to "$appKey:$signature", "channel_data" to channelData)
-        } else {
-            mapOf("auth" to "$appKey:$signature")
-        }
-
-        return Mono.just(ResponseEntity.ok(result))
-    }
 
     @PostMapping("/auth")
     fun authorize(
@@ -118,4 +81,45 @@ class SoketiAuthController(
 
         return Mono.just(ResponseEntity.ok(result))
     }
+
+
+    @PostMapping("/auth2")
+    fun authorize2(
+        @ModelAttribute formReq: AuthRequest,
+        @RequestBody(required = false) jsonReq: AuthRequest?
+    ): Mono<ResponseEntity<Map<String, String>>> {
+        val channelName = formReq.channelName ?: jsonReq?.channelName
+        val socketId = formReq.socketId ?: jsonReq?.socketId
+        var channelData = formReq.channelData ?: jsonReq?.channelData
+
+        if (channelName.isNullOrBlank() || socketId.isNullOrBlank()) {
+            return Mono.just(
+                ResponseEntity.badRequest().body(mapOf("error" to "Missing channel_name or socket_id"))
+            )
+        }
+
+        // Presence 채널일 경우 기본 channelData
+        if (channelName.startsWith("presence-") && channelData.isNullOrBlank()) {
+            channelData = """{"user_id":1,"user_info":{"name":"Test User","role":"tester"}}"""
+        }
+
+        val stringToSign =
+            "$socketId:$channelName" + if (!channelData.isNullOrBlank()) ":$channelData" else ""
+
+        // appSecret은 non-null → 바로 사용
+        val mac = Mac.getInstance("HmacSHA256")
+        mac.init(SecretKeySpec(appSecret.toByteArray(), "HmacSHA256"))
+        val signature = mac.doFinal(stringToSign.toByteArray())
+            .joinToString("") { "%02x".format(it) }
+
+        val result = if (!channelData.isNullOrBlank()) {
+            mapOf("auth" to "$appKey:$signature", "channel_data" to channelData)
+        } else {
+            mapOf("auth" to "$appKey:$signature")
+        }
+
+        return Mono.just(ResponseEntity.ok(result))
+    }
+
+
 }

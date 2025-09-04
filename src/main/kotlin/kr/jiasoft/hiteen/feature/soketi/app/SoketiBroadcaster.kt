@@ -1,4 +1,4 @@
-package kr.jiasoft.hiteen.feature.soketi
+package kr.jiasoft.hiteen.feature.soketi.app
 
 import com.pusher.rest.Pusher
 import com.pusher.rest.data.Result
