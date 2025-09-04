@@ -3,8 +3,10 @@ package kr.jiasoft.hiteen.feature.location.app
 import kr.jiasoft.hiteen.feature.location.domain.LocationHistory
 import kr.jiasoft.hiteen.feature.location.dto.LocationEvent
 import kr.jiasoft.hiteen.feature.location.dto.LocationRequest
-import kr.jiasoft.hiteen.feature.location.infra.realtime.LocationBroadcaster
 import kr.jiasoft.hiteen.feature.location.infra.cache.LocationCacheRedisService
+import kr.jiasoft.hiteen.feature.soketi.SoketiBroadcaster
+import kr.jiasoft.hiteen.feature.soketi.domain.SoketiChannelPattern
+import kr.jiasoft.hiteen.feature.soketi.domain.SoketiEventType
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import org.springframework.stereotype.Service
 
@@ -12,7 +14,7 @@ import org.springframework.stereotype.Service
 class LocationAppService(
     private val locationService: LocationService,
     private val locationCacheRedisService: LocationCacheRedisService,
-    private val broadcaster: LocationBroadcaster
+    private val soketiBroadcaster: SoketiBroadcaster,
 ) {
 
     suspend fun getLatest(userId: String): LocationHistory? =
@@ -40,9 +42,23 @@ class LocationAppService(
                 timestamp = req.timestamp,
                 source = "http"
             )
-            broadcaster.publishToUser(userUid, event)
+
+            val payload = mapOf(
+                "userId" to event.userId,
+                "lat" to event.lat,
+                "lng" to event.lng,
+                "timestamp" to event.timestamp.toString(),
+                "source" to event.source
+            )
+
+            soketiBroadcaster.broadcast(
+                SoketiChannelPattern.PRIVATE_USER.format(userUid),
+                SoketiEventType.LOCATION,
+                payload
+            )
             locationCacheRedisService.cacheLatest(saved)
         }
+
         return saved
     }
 

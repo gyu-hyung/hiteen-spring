@@ -62,7 +62,8 @@ class ChatController(
         @PathVariable roomUid: UUID,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
         req: SendMessageRequest
-    ): Map<String, Any> = mapOf("messageUid" to service.sendMessage(roomUid, user.id!!, req))
+    ): Map<String, Any> = mapOf("messageUid" to service.sendMessage(roomUid, user, req))
+
 
     /** 메세지 읽음 처리 */
     @PostMapping("/rooms/{roomUid}/messages/{messageUid}/read")
@@ -70,7 +71,8 @@ class ChatController(
         @PathVariable roomUid: UUID,
         @PathVariable messageUid: UUID,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
-    ) = service.markRead(roomUid, user.id!!, messageUid).let { mapOf("ok" to true) }
+    ) = service.markRead(roomUid, user, messageUid).let { mapOf("ok" to true) }
+
 
     /** 알림 on/off */
     @PostMapping("/rooms/{roomUid}/push")

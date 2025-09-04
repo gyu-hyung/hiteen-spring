@@ -13,7 +13,11 @@ import kr.jiasoft.hiteen.feature.chat.infra.ChatMessageRepository
 import kr.jiasoft.hiteen.feature.chat.infra.ChatRoomRepository
 import kr.jiasoft.hiteen.feature.chat.infra.ChatUserRepository
 import kr.jiasoft.hiteen.feature.soketi.SoketiBroadcaster
+import kr.jiasoft.hiteen.feature.soketi.domain.SoketiChannelPattern
+import kr.jiasoft.hiteen.feature.soketi.domain.SoketiEventType
+import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import kr.jiasoft.hiteen.feature.user.infra.UserRepository
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
@@ -96,15 +100,15 @@ class ChatService(
 
 
     /** 메시지 전송 */
-    suspend fun sendMessage(roomUid: UUID, currentUserId: Long, req: SendMessageRequest): UUID {
+    suspend fun sendMessage(roomUid: UUID, sendUser: UserEntity, req: SendMessageRequest): UUID {
         val room = rooms.findByUidAndDeletedAtIsNull(roomUid) ?: error("room not found")
-        chatUsers.findActive(room.id!!, currentUserId) ?: error("not a member")
+        chatUsers.findActive(room.id!!, sendUser.id!!) ?: error("not a member")
 
-        // 메세지 저장
+        // 메시지 저장
         val savedMsg = messages.save(
             ChatMessageEntity(
                 chatRoomId = room.id,
-                userId = currentUserId,
+                userId = sendUser.id,
                 content = req.content,
                 createdAt = OffsetDateTime.now(),
                 kind = req.kind,
@@ -118,19 +122,19 @@ class ChatService(
         }
 
         // 채팅방 업데이트
-        rooms.save(room.copy(
-            lastUserId = currentUserId, lastMessageId = savedMsg.id,
-            updatedId = currentUserId, updatedAt = savedMsg.createdAt
-        ))
-
-        // 보낸사람 uid 조회
-        val senderUid = users.findById(currentUserId)?.uid
-            ?: throw IllegalStateException("sender not found: $currentUserId")
+        rooms.save(
+            room.copy(
+                lastUserId = sendUser.id,
+                lastMessageId = savedMsg.id,
+                updatedId = sendUser.id,
+                updatedAt = savedMsg.createdAt
+            )
+        )
 
         // 마지막 메시지 요약
         val lastMessageSummary = mapOf(
             "messageUid" to savedMsg.uid,
-            "userUid" to senderUid,
+            "userUid" to sendUser.uid,
             "content" to req.content,
             "kind" to req.kind,
             "emojiCode" to req.emojiCode,
@@ -139,25 +143,37 @@ class ChatService(
 
         // 채팅방 채널 broadcast (message-created)
         val messagePayload = mapOf(
-            "type" to "message-created",
             "roomUid" to room.uid.toString(),
             "message" to lastMessageSummary
         )
-        soketiBroadcaster.broadcast("private-chat-room.${room.uid}", "message-created", messagePayload)
+        soketiBroadcaster.broadcast(
+            SoketiChannelPattern.PRIVATE_CHAT_ROOM.format(room.uid),
+            SoketiEventType.MESSAGE_CREATED,
+            messagePayload
+        )
 
-        // 채팅방 멤버들에게 broadcast (room-updated)
+        // 채팅방 멤버들에게 broadcast (ROOM_UPDATED + unreadCount)
         val activeMembers = chatUsers.listActiveUserUids(room.id).toList()
         for (member in activeMembers) {
+
+            val unreadCount = messages.countUnread(room.id, member.userId)
+
             val payload = mapOf(
-                "type" to "room-updated",
                 "roomUid" to room.uid.toString(),
-                "lastMessage" to lastMessageSummary
+                "lastMessage" to lastMessageSummary,
+                "unreadCount" to unreadCount.toString()
             )
-            soketiBroadcaster.broadcast("private-user.${member.userUid}", "room-updated", payload)
+
+            soketiBroadcaster.broadcast(
+                SoketiChannelPattern.PRIVATE_USER.format(member.userUid),
+                SoketiEventType.ROOM_UPDATED,
+                payload
+            )
         }
 
         return savedMsg.uid
     }
+
 
 
 
@@ -226,40 +242,44 @@ class ChatService(
     }
 
 
-    suspend fun markRead(roomUid: UUID, userId: Long, lastMessageUid: UUID) {
-        val room = rooms.findByUid(roomUid) ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "room not found")
-        chatUsers.findActive(room.id!!, userId) ?: throw ResponseStatusException(HttpStatus.FORBIDDEN, "not a member")
-//        val userUid = chatUsers.findUidOfActiveUser(room.id!!, userId) ?: throw ResponseStatusException(HttpStatus.FORBIDDEN, "not a member")
+    suspend fun markRead(roomUid: UUID, currentUser: UserEntity, lastMessageUid: UUID) {
+        val room = rooms.findByUid(roomUid)
+            ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "room not found")
+        chatUsers.findActive(room.id!!, currentUser.id!!)
+            ?: throw ResponseStatusException(HttpStatus.FORBIDDEN, "not a member")
 
         val msg = messages.findByUid(lastMessageUid) ?: return
-        chatUsers.updateReadCursor(room.id, userId, msg.id!!, OffsetDateTime.now())
+        chatUsers.updateReadCursor(room.id, currentUser.id, msg.id!!, OffsetDateTime.now())
 
-//        val lastMessage = messages.findLastMessage(room.id)
+        // ✅ 마지막 메시지 요약
+        val lastMsgEntity = messages.findById(msg.id) ?: return
+        val senderUid = users.findById(lastMsgEntity.userId)?.uid
 
-//        val lastSummary = lastMessage?.let {
-//            val lastSenderUid = users.findById(it.userId)?.uid
-//                ?: throw IllegalStateException("sender user not found: ${it.userId}")
-//            mapOf(
-//                "uid" to it.uid,
-//                "userUid" to lastSenderUid,
-//                "content" to it.content,
-//                "createdAt" to it.createdAt
-//            )
-//        } ?: emptyMap<String, Any>()
+        val lastMessageSummary = mapOf(
+            "messageUid" to lastMsgEntity.uid,
+            "userUid" to senderUid,
+            "content" to lastMsgEntity.content,
+            "kind" to lastMsgEntity.kind,
+            "emojiCode" to lastMsgEntity.emojiCode,
+            "createdAt" to lastMsgEntity.createdAt.toString()
+        )
 
-//        val unreadCount = messages.countUnread(room.id, userId).toInt()
+        val unreadCount = messages.countUnread(room.id, currentUser.id)
 
-//        val payload = mapOf(
-//            "type" to "room-updated",
-//            "cursor" to (lastMessage?.id ?: msg.id),
-//            "roomUid" to room.uid.toString(),
-//            "lastMessage" to lastSummary,
-//            "unreadCount" to unreadCount
-//        )
+        val payload = mapOf(
+            "roomUid" to room.uid.toString(),
+            "lastMessage" to lastMessageSummary,
+            "unreadCount" to unreadCount.toString()
+        )
 
-        //TODO chatPublisher.publishToUser(userUid, "room-updated", payload)
-//        soketiBroadcaster.broadcast()
+        soketiBroadcaster.broadcast(
+            SoketiChannelPattern.PRIVATE_USER.format(currentUser.uid),
+            SoketiEventType.ROOM_UPDATED,
+            payload
+        )
     }
+
+
 
 
     /** 목록 스냅샷: cursor + rooms(with unreadCount) */
