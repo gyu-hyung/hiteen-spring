@@ -46,8 +46,11 @@ class JwtAuthenticationManager(
 
     private suspend fun validate(token: BearerToken): Authentication {
         val jws = jwtProvider.parseAndValidateOrThrow(token)
+
+        // TODO 사용자 정보 갖고있게
         val username = jws.payload.subject
 
+        // TODO 성능
         val userDetails = reactiveUserDetailsService.findByUsername(username).awaitFirstOrNull()
             ?: throw InvalidBearerToken("user_not_found")
 

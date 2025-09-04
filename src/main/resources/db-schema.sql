@@ -565,11 +565,10 @@ CREATE TABLE chat_messages_assets (
   id         bigserial PRIMARY KEY,
   uid        uuid NOT NULL,
 --  uid        uuid NOT NULL DEFAULT gen_random_uuid(),
-  message_id bigint NOT NULL REFERENCES chat_messages(id) ON DELETE CASCADE,
+  message_id bigint NOT NULL,
   width      integer,
   height     integer
 );
-
 
 -- 활성 멤버 조회/갱신 최적화
 CREATE INDEX IF NOT EXISTS idx_chat_users_room_user_active ON chat_users (chat_room_id, user_id) WHERE deleted_at IS NULL;
@@ -651,7 +650,7 @@ CREATE TABLE user_photos (
 --===========================================drop==================================================
 
 
-DROP TABLE IF EXISTS
+--DROP TABLE IF EXISTS
 --  user_photos,
 --  point_histories,
 --  point_rules,

@@ -71,9 +71,9 @@ dependencies {
 	// JSON
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 
-	// WebSocket & STOMP
-//	implementation("org.springframework.boot:spring-boot-starter-websocket")
-
+    // Soketi
+    implementation("com.pusher:pusher-http-java:1.3.4")
+//    implementation("com.pusher:pusher-http-java:1.2.2")
 
 	// JWT
 	val jjwtVersion = "0.12.6"

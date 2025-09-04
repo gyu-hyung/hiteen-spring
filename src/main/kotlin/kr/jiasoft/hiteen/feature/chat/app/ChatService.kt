@@ -1,6 +1,5 @@
 package kr.jiasoft.hiteen.feature.chat.app
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kr.jiasoft.hiteen.feature.chat.domain.*
@@ -13,6 +12,7 @@ import kr.jiasoft.hiteen.feature.chat.infra.ChatMessageAssetRepository
 import kr.jiasoft.hiteen.feature.chat.infra.ChatMessageRepository
 import kr.jiasoft.hiteen.feature.chat.infra.ChatRoomRepository
 import kr.jiasoft.hiteen.feature.chat.infra.ChatUserRepository
+import kr.jiasoft.hiteen.feature.soketi.service.SoketiBroadcaster
 import kr.jiasoft.hiteen.feature.user.infra.UserRepository
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -27,8 +27,7 @@ class ChatService(
     private val messages: ChatMessageRepository,
     private val msgAssets: ChatMessageAssetRepository,
     private val users: UserRepository,
-    private val inbox: InboxHub,
-    private val mapper: ObjectMapper,
+    private val soketiBroadcaster: SoketiBroadcaster,
 ) {
 
     /** DM 방 생성 */
@@ -98,7 +97,7 @@ class ChatService(
 
     /** 메시지 전송 */
     suspend fun sendMessage(roomUid: UUID, currentUserId: Long, req: SendMessageRequest): UUID {
-        val room = rooms.findByUid(roomUid) ?: error("room not found")
+        val room = rooms.findByUidAndDeletedAtIsNull(roomUid) ?: error("room not found")
         chatUsers.findActive(room.id!!, currentUserId) ?: error("not a member")
 
         // 메세지 저장
@@ -113,9 +112,9 @@ class ChatService(
             )
         )
 
-        // 메세지에 대한 asset 저장
+        // 첨부 파일 저장
         req.assetUids?.forEach { au ->
-            msgAssets.save(ChatMessageAssetEntity(messageId = savedMsg.id!!, assetUid = au))
+            msgAssets.save(ChatMessageAssetEntity(uid = au, messageId = savedMsg.id!!))
         }
 
         // 채팅방 업데이트
@@ -128,31 +127,38 @@ class ChatService(
         val senderUid = users.findById(currentUserId)?.uid
             ?: throw IllegalStateException("sender not found: $currentUserId")
 
-        // 마지막 메세지 summary
+        // 마지막 메시지 요약
         val lastMessageSummary = mapOf(
-            "uid" to savedMsg.uid,
+            "messageUid" to savedMsg.uid,
             "userUid" to senderUid,
             "content" to req.content,
-            "createdAt" to savedMsg.createdAt
+            "kind" to req.kind,
+            "emojiCode" to req.emojiCode,
+            "createdAt" to savedMsg.createdAt.toString()
         )
 
-        // 방 멤버 조회해서 inbox publish
+        // 채팅방 채널 broadcast (message-created)
+        val messagePayload = mapOf(
+            "type" to "message-created",
+            "roomUid" to room.uid.toString(),
+            "message" to lastMessageSummary
+        )
+        soketiBroadcaster.broadcast("private-chat-room.${room.uid}", "message-created", messagePayload)
+
+        // 채팅방 멤버들에게 broadcast (room-updated)
         val activeMembers = chatUsers.listActiveUserUids(room.id).toList()
-        for (user in activeMembers) {
-            val unreadCount = messages.countUnread(room.id, user.userId).toInt()
-            val payload = mapper.writeValueAsString(
-                mapOf(
-                    "type" to "room-updated",
-                    "cursor" to (savedMsg.id ?: 0L),
-                    "roomUid" to room.uid.toString(),
-                    "lastMessage" to lastMessageSummary,
-                    "unreadCount" to unreadCount
-                )
+        for (member in activeMembers) {
+            val payload = mapOf(
+                "type" to "room-updated",
+                "roomUid" to room.uid.toString(),
+                "lastMessage" to lastMessageSummary
             )
-            inbox.publishTo(user.userUid, payload)
+            soketiBroadcaster.broadcast("private-user.${member.userUid}", "room-updated", payload)
         }
+
         return savedMsg.uid
     }
+
 
 
     /** 메세지 페이징 조회 */
@@ -174,7 +180,7 @@ class ChatService(
 
         return messagePage.map { m ->
             val assets = msgAssets.listByMessage(m.id!!).map { a ->
-                MessageAssetSummary(a.uid, a.assetUid, a.width, a.height)
+                MessageAssetSummary(a.id, a.uid, m.id, a.width, a.height)
             }.toList()
 
             val senderUid: UUID = users.findById(m.userId)?.uid
@@ -222,36 +228,37 @@ class ChatService(
 
     suspend fun markRead(roomUid: UUID, userId: Long, lastMessageUid: UUID) {
         val room = rooms.findByUid(roomUid) ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "room not found")
-        val userUid = chatUsers.findUidOfActiveUser(room.id!!, userId) ?: throw ResponseStatusException(HttpStatus.FORBIDDEN, "not a member")
+        chatUsers.findActive(room.id!!, userId) ?: throw ResponseStatusException(HttpStatus.FORBIDDEN, "not a member")
+//        val userUid = chatUsers.findUidOfActiveUser(room.id!!, userId) ?: throw ResponseStatusException(HttpStatus.FORBIDDEN, "not a member")
 
         val msg = messages.findByUid(lastMessageUid) ?: return
         chatUsers.updateReadCursor(room.id, userId, msg.id!!, OffsetDateTime.now())
 
-        val lastMessage = messages.findLastMessage(room.id)
+//        val lastMessage = messages.findLastMessage(room.id)
 
-        // ★ lastMessage.userUid로 변환
-        val lastSummary = lastMessage?.let {
-            val lastSenderUid = users.findById(it.userId)?.uid
-                ?: throw IllegalStateException("sender user not found: ${it.userId}")
-            mapOf(
-                "uid" to it.uid,
-                "userUid" to lastSenderUid,
-                "content" to it.content,
-                "createdAt" to it.createdAt
-            )
-        } ?: mapOf<String, Any>()
+//        val lastSummary = lastMessage?.let {
+//            val lastSenderUid = users.findById(it.userId)?.uid
+//                ?: throw IllegalStateException("sender user not found: ${it.userId}")
+//            mapOf(
+//                "uid" to it.uid,
+//                "userUid" to lastSenderUid,
+//                "content" to it.content,
+//                "createdAt" to it.createdAt
+//            )
+//        } ?: emptyMap<String, Any>()
 
-        val unreadCount = messages.countUnread(room.id, userId).toInt()
-        val payload = mapper.writeValueAsString(
-            mapOf(
-                "type" to "room-updated",
-                "cursor" to (lastMessage?.id ?: msg.id),
-                "roomUid" to room.uid.toString(),
-                "lastMessage" to lastSummary,
-                "unreadCount" to unreadCount
-            )
-        )
-        inbox.publishTo(userUid, payload)
+//        val unreadCount = messages.countUnread(room.id, userId).toInt()
+
+//        val payload = mapOf(
+//            "type" to "room-updated",
+//            "cursor" to (lastMessage?.id ?: msg.id),
+//            "roomUid" to room.uid.toString(),
+//            "lastMessage" to lastSummary,
+//            "unreadCount" to unreadCount
+//        )
+
+        //TODO chatPublisher.publishToUser(userUid, "room-updated", payload)
+//        soketiBroadcaster.broadcast()
     }
 
 
@@ -266,7 +273,7 @@ class ChatService(
             val last = messages.findLastMessage(r.id)
             //마지막 메세지의 asset
             val lastAssets = last?.id?.let { msgAssets.listByMessage(it).map { a ->
-                MessageAssetSummary(a.uid, a.assetUid, a.width, a.height)
+                MessageAssetSummary(a.id, a.uid, last.id, a.width, a.height)
             }.toList() } ?: emptyList()
             //읽지 않은 메세지 수
             val unreadCount = messages.countUnread(r.id, currentUserId).toInt()

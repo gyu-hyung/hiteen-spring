@@ -11,13 +11,10 @@ data class ChatMessageAssetEntity(
     @Id
     val id: Long? = null,
 
-    val uid: UUID = UUID.randomUUID(),
+    val uid: UUID? = null,
 
     @Column("message_id")
     val messageId: Long,
-
-    @Column("asset_uid")
-    val assetUid: UUID? = null,
 
     val width: Int? = null,
 

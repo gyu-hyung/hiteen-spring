@@ -5,7 +5,8 @@ import org.apache.camel.builder.RouteBuilder
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 
-@Component
+/** not used */
+//@Component
 class MqttConsumers(
     private val processor: LocationMessageMqttProcessor,
     @Value("\${mqtt.topic}") private val topic: String,
