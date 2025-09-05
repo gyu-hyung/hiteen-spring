@@ -9,11 +9,12 @@ import java.util.UUID
 interface UserRepository : CoroutineCrudRepository<UserEntity, Long> {
     suspend fun findByUsername(name: String): UserEntity?
     suspend fun findByNickname(name: String): UserEntity?
+    suspend fun findByPhone(phone: String): UserEntity?
     suspend fun findByUid(uid: String): UserEntity?
 
     /* 간단 검색: username/nickname/email 에 like (필요시 정규화/풀텍스트로 교체) */
     @Query("""
-        SELECT uid, username, nickname, telno, address, detail_address, mood, tier, asset_uid
+        SELECT uid, username, nickname, phone, address, detail_address, mood, tier, asset_uid
         FROM users
         WHERE (LOWER(username) LIKE LOWER(CONCAT('%', :q, '%'))
            OR  LOWER(COALESCE(nickname,'')) LIKE LOWER(CONCAT('%', :q, '%'))
@@ -24,7 +25,7 @@ interface UserRepository : CoroutineCrudRepository<UserEntity, Long> {
 
     /* 친구/팔로우 사용자 정보회 */
     @Query("""
-        SELECT uid, username, nickname, telno, address, detail_address, mood, tier, asset_uid 
+        SELECT uid, username, nickname, phone, address, detail_address, mood, tier, asset_uid 
         FROM users WHERE id = :id
     """)
     suspend fun findPublicById(id: Long): PublicUser?

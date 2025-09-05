@@ -86,7 +86,7 @@ class UserService (
         val newPassword    = param.password?.let { encoder.encode(it) } ?: existing.password
         val newAddress     = param.address ?: existing.address
         val newDetailAddr  = param.detailAddress ?: existing.detailAddress
-        val newTelno       = param.telno ?: existing.telno
+        val newPhone       = param.phone ?: existing.phone
         val newMood        = param.mood ?: existing.mood
         val newTier        = param.tier ?: existing.tier
 
@@ -109,7 +109,7 @@ class UserService (
             password      = newPassword,
             address       = newAddress,
             detailAddress = newDetailAddr,
-            telno         = newTelno,
+            phone         = newPhone,
             mood          = newMood,
             tier          = newTier,
             assetUid      = newAssetUid,

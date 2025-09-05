@@ -42,7 +42,7 @@ data class UserEntity(
     val detailAddress: String? = null,
 
     /* 전화번호 */
-    val telno: String? = null,
+    val phone: String? = null,
 
     /* 사용자 상태/기분 코드 */
     val mood: String? = null,
@@ -82,7 +82,7 @@ fun UserEntity.toResponse(): UserResponse = UserResponse(
     role = this.role,
     address = this.address,
     detailAddress = this.detailAddress,
-    telno = this.telno,
+    phone = this.phone,
     mood = this.mood,
     tier = this.tier,
     assetUid = this.assetUid?.toString(),

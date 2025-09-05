@@ -6,7 +6,7 @@ data class FollowSummary(
     val uid: String,
     val username: String,
     val nickname: String?,
-    val telno: String?,
+    val phone: String?,
     val address: String?,
     val detailAddress: String?,
     val mood: String?,
