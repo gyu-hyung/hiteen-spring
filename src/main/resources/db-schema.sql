@@ -156,6 +156,7 @@ CREATE TABLE schools (
   latitude    numeric(9,6),
   longitude   numeric(9,6),
   coords      text,
+  found_date  date,
   created_id  bigint ,
   created_at  timestamptz DEFAULT now(),
   updated_id  bigint ,
@@ -164,7 +165,6 @@ CREATE TABLE schools (
   deleted_at  timestamptz
 );
 
-
 -- ========================
 -- 학급
 -- ========================
@@ -172,7 +172,7 @@ CREATE TABLE classes (
   id           bigserial PRIMARY KEY,
   code         varchar(50),
   year         smallint,
-  school_id    bigint REFERENCES schools(id),
+  school_id    bigint,
   school_name  varchar(100),
   school_type  varchar(20),
   class_name   varchar(50),
@@ -195,8 +195,8 @@ CREATE TABLE user_classes (
   id           bigserial PRIMARY KEY,
   user_id      bigint  NOT NULL REFERENCES users(id)   ON DELETE CASCADE,
   year         smallint,
-  school_id    bigint  REFERENCES schools(id),
-  class_id     bigint  REFERENCES classes(id),
+  school_id    bigint  ,
+  class_id     bigint  ,
   school_type  varchar(20),
   school_name  varchar(100),
   class_name   varchar(50),
