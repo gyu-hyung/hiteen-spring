@@ -8,6 +8,7 @@ import java.util.UUID
 
 interface UserRepository : CoroutineCrudRepository<UserEntity, Long> {
     suspend fun findByUsername(name: String): UserEntity?
+    suspend fun findByNickname(name: String): UserEntity?
     suspend fun findByUid(uid: String): UserEntity?
 
     /* 간단 검색: username/nickname/email 에 like (필요시 정규화/풀텍스트로 교체) */

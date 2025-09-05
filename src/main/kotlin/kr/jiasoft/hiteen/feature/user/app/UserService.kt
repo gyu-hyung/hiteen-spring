@@ -16,7 +16,6 @@ import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 import reactor.core.publisher.Mono
 import java.time.OffsetDateTime
 import java.util.UUID
@@ -31,6 +30,11 @@ class UserService (
     override fun findByUsername(username: String): Mono<UserDetails> = mono {
         val user = userRepository.findByUsername(username)
         user?.toUserDetails() ?: throw UsernameNotFoundException("User not found: $username")
+    }
+
+    suspend fun nicknameDuplicationCheck(nickname: String): Boolean {
+        val user = userRepository.findByNickname(nickname)
+        return user != null
     }
 
 //    @Transactional
