@@ -23,7 +23,7 @@ data class UserUpdateForm(
 
     val detailAddress: String? = null,
 
-    val telno: String? = null,
+    val phone: String? = null,
 
     val mood: String? = null,
 

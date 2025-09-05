@@ -14,7 +14,7 @@ COMMENT ON COLUMN users.password IS '비밀번호 해시';
 COMMENT ON COLUMN users.role IS '권한(예: ADMIN/USER)';
 COMMENT ON COLUMN users.address IS '주소';
 COMMENT ON COLUMN users.detail_address IS '상세 주소';
-COMMENT ON COLUMN users.telno IS '전화번호';
+COMMENT ON COLUMN users.phone IS '전화번호';
 COMMENT ON COLUMN users.mood IS '사용자 상태/기분 코드';
 COMMENT ON COLUMN users.tier IS '티어 코드 문자열';
 COMMENT ON COLUMN users.asset_uid IS '프로필 썸네일 Asset UID(assets.uid)';
@@ -131,6 +131,7 @@ COMMENT ON COLUMN schools.updated_at IS '수정 일시';
 COMMENT ON COLUMN schools.deleted_id IS '삭제자 사용자 ID';
 COMMENT ON COLUMN schools.deleted_at IS '삭제 일시';
 
+
 -- ========================
 -- classes
 -- ========================
@@ -173,6 +174,52 @@ COMMENT ON COLUMN user_classes.updated_id IS '수정자 사용자 ID';
 COMMENT ON COLUMN user_classes.updated_at IS '수정 일시';
 COMMENT ON COLUMN user_classes.deleted_id IS '삭제자 사용자 ID';
 COMMENT ON COLUMN user_classes.deleted_at IS '삭제 일시';
+
+
+-- ========================
+-- 문자 > 전송내역
+-- ========================
+COMMENT ON TABLE messages IS '문자 > 전송내역';
+COMMENT ON COLUMN messages.id IS '자동 증가 기본키';
+COMMENT ON COLUMN messages.title IS '제목';
+COMMENT ON COLUMN messages.content IS '내용';
+COMMENT ON COLUMN messages.callback IS '회신번호';
+COMMENT ON COLUMN messages.total IS '전송건수';
+COMMENT ON COLUMN messages.success IS '성공건수';
+COMMENT ON COLUMN messages.failure IS '실패건수';
+COMMENT ON COLUMN messages.created_id IS '전송 회원번호';
+COMMENT ON COLUMN messages.created_at IS '전송일시';
+COMMENT ON COLUMN messages.updated_at IS '수정일시';
+COMMENT ON COLUMN messages.deleted_at IS '삭제일시';
+
+
+-- ========================
+-- 문자 > 전송상세
+-- ========================
+COMMENT ON TABLE message_details IS '문자 > 전송상세';
+COMMENT ON COLUMN message_details.id IS '자동 증가 기본키';
+COMMENT ON COLUMN message_details.sms_id IS '전송번호';
+COMMENT ON COLUMN message_details.phone IS '전화번호';
+COMMENT ON COLUMN message_details.success IS '성공여부';
+COMMENT ON COLUMN message_details.error IS '에러내용';
+COMMENT ON COLUMN message_details.created_at IS '전송일시';
+COMMENT ON COLUMN message_details.updated_at IS '수정일시';
+COMMENT ON COLUMN message_details.deleted_at IS '삭제일시';
+
+
+-- ========================
+-- 문자 > 인증내역
+-- ========================
+COMMENT ON TABLE message_verifications IS '문자 > 인증내역';
+COMMENT ON COLUMN message_verifications.id IS '자동 증가 기본키';
+COMMENT ON COLUMN message_verifications.sms_id IS '전송번호';
+COMMENT ON COLUMN message_verifications.phone IS '전화번호';
+COMMENT ON COLUMN message_verifications.code IS '인증코드';
+COMMENT ON COLUMN message_verifications.status IS '인증상태';
+COMMENT ON COLUMN message_verifications.created_at IS '전송일시';
+COMMENT ON COLUMN message_verifications.updated_at IS '수정일시';
+COMMENT ON COLUMN message_verifications.deleted_at IS '삭제일시';
+
 
 -- ========================
 -- pin

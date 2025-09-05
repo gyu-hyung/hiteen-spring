@@ -28,8 +28,8 @@ data class UserResponse(
     /* detail_address */
     val detailAddress: String? = null,
 
-    /* telno */
-    val telno: String? = null,
+    /* phone */
+    val phone: String? = null,
 
     /* mood */
     val mood: String? = null,

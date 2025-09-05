@@ -20,7 +20,7 @@ CREATE TABLE users (
   role          varchar(30),
   address       varchar(255),
   detail_address varchar(255),
-  telno         varchar(30),
+  phone         varchar(30),
   mood          varchar(30),
   tier          varchar(30),
   asset_uid     uuid, -- REFERENCES assets(uid),
@@ -210,6 +210,51 @@ CREATE TABLE user_classes (
   deleted_id   bigint ,
   deleted_at   timestamptz,
   UNIQUE (user_id, class_id)
+);
+
+
+-- ========================
+-- SMS 전송내역
+-- ========================
+create table sms (
+    id bigserial primary key,
+    title varchar(255),
+    content varchar(255),
+    callback varchar(30),
+    total bigint,
+    success bigint,
+    failure bigint,
+    created_id bigint,
+    created_at timestamptz not null default now(),
+    updated_at timestamptz
+);
+
+-- ========================
+-- SMS 전송상세
+-- ========================
+create table sms_details (
+    id bigserial primary key,
+    sms_id bigint not null,
+    phone varchar(500) not null,
+    success smallint not null default 0,
+    error varchar(300),
+    created_at timestamptz not null default now(),
+    updated_at timestamptz,
+    deleted_at timestamptz
+);
+
+-- ========================
+-- SMS 인증내역
+-- ========================
+create table sms_auth (
+    id bigserial PRIMARY KEY,
+    sms_id bigint not null,
+    phone varchar(30) not null,
+    code varchar(255) not null,
+    status varchar(255) not null,
+    created_at timestamptz not null default not(),
+    updated_at timestamptz,
+    deleted_at timestamptz
 );
 
 
@@ -682,5 +727,8 @@ CREATE TABLE user_photos (
 --  interest_user,
 --  interests,
 --  codes,
---  users
+--  users,
+--  sms,
+--  sms_details,
+--  sms_auth
 --CASCADE;

@@ -34,7 +34,7 @@ class FriendService(
             uid = otherUid,
             username = other?.username ?: "",
             nickname = other?.nickname,
-            telno = other?.telno,
+            phone = other?.phone,
             address = other?.address,
             detailAddress = other?.detailAddress,
             mood = other?.mood,

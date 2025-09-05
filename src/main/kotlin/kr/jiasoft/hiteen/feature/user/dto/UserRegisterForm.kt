@@ -28,7 +28,7 @@ data class UserRegisterForm(
 
     val detailAddress: String? = null,
 
-    val telno: String? = null,
+    val phone: String? = null,
 
     val mood: String? = null,
 
@@ -44,7 +44,7 @@ data class UserRegisterForm(
         role = "USER",
         address = address,
         detailAddress = detailAddress,
-        telno = telno,
+        phone = phone,
         mood = mood,
         tier = tier,
         assetUid = assetUid,

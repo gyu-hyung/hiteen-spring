@@ -43,7 +43,7 @@ class SecurityConfig(
                 //it.pathMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 it.pathMatchers(
                     HttpMethod.POST,
-                    "/api/auth/login",
+                    "/api/auth/**",
                     "/broadcasting/auth",
                     "/api/user",
                     "/favicon.ico",
