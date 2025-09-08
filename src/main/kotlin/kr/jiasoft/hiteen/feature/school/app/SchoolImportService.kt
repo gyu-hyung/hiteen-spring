@@ -12,6 +12,9 @@ import org.springframework.web.reactive.function.client.ExchangeStrategies
 import org.springframework.web.reactive.function.client.WebClient
 import java.time.LocalDate
 
+/**
+ * TODO kakao api로 학교 좌표 변환
+ */
 @Component
 class SchoolImportService(
     private val schoolRepository: SchoolRepository,
