@@ -54,6 +54,7 @@ class AuthController(
         val limit = 5//기본 5분
         val phone = req.phone.filter { it.isDigit() }
 
+        // TODO: 회원가입 휴대폰 인증목적으로 요청한 코드인지 확인해야하나?
         val data = smsAuthRepository.findValidAuthCode(phone, limit) ?: return ResponseEntity.badRequest()
             .body(mapOf("code" to listOf("인증번호가 만료되었거나 유효하지 않아~")))
 
