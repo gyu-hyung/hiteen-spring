@@ -4,9 +4,9 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.toList
 import kr.jiasoft.hiteen.feature.relationship.domain.FriendEntity
 import kr.jiasoft.hiteen.feature.relationship.domain.FriendStatus
-import kr.jiasoft.hiteen.feature.relationship.dto.FriendListResponse
-import kr.jiasoft.hiteen.feature.relationship.dto.FriendSearchItem
-import kr.jiasoft.hiteen.feature.relationship.dto.FriendSummary
+import kr.jiasoft.hiteen.feature.relationship.dto.friend.FriendListResponse
+import kr.jiasoft.hiteen.feature.relationship.dto.friend.FriendSearchItem
+import kr.jiasoft.hiteen.feature.relationship.dto.friend.FriendSummary
 import kr.jiasoft.hiteen.feature.relationship.infra.FriendRepository
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import kr.jiasoft.hiteen.feature.user.dto.PublicUser
@@ -178,7 +178,7 @@ class FriendService(
         val meId = me.id!!
         val otherId = requireUserIdByUid(otherUid)
         val rel = friendRepository.findBetween(meId, otherId)
-            ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "not friends")
+            ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "not friends")
         if (rel.status != FriendStatus.ACCEPTED.name) {
             throw ResponseStatusException(HttpStatus.CONFLICT, "not accepted")
         }
