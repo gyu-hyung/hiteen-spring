@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import kr.jiasoft.hiteen.validation.ValidPassword
+import java.time.LocalDate
 import java.util.UUID
 
 data class UserRegisterForm(
@@ -35,6 +36,14 @@ data class UserRegisterForm(
     val tier: String? = null,
 
     val assetUid: UUID? = null,
+
+    val schoolId: Long? = null,
+
+    val grade: String? = null,
+
+    val gender: String? = null,
+
+    val birthday: LocalDate? = null,
 ) {
     fun toEntity(encodedPassword: String): UserEntity = UserEntity(
         username = username ?: "",
@@ -48,5 +57,9 @@ data class UserRegisterForm(
         mood = mood,
         tier = tier,
         assetUid = assetUid,
+        schoolId = schoolId,
+        grade = grade,
+        gender = gender,
+        birthday = birthday,
     )
 }

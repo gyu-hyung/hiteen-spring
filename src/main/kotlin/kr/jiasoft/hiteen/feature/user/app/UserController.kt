@@ -43,11 +43,15 @@ class UserController(
 
     /** 회원정보 조회 */
     @GetMapping("/me")
-    suspend fun me(@AuthenticationPrincipal(expression = "user") user: UserEntity): ResponseEntity<ApiResult<UserResponse>> {
+    suspend fun me(
+        @AuthenticationPrincipal(expression = "user") user: UserEntity
+    ): ResponseEntity<ApiResult<UserResponse>> {
+        val userResponse = userService.findMe(user.id!!)
         return ResponseEntity.ok(
-            ApiResult(success = true, data = user.toResponse(), message = "회원정보 조회 성공")
+            ApiResult(success = true, data = userResponse, message = "회원정보 조회 성공")
         )
     }
+
 
     /** 회원정보 수정 */
     @PostMapping("/me/update")

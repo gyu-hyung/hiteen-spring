@@ -1,5 +1,7 @@
 package kr.jiasoft.hiteen.feature.user.dto
 
+import kr.jiasoft.hiteen.feature.school.dto.SchoolDto
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 data class UserResponse(
@@ -39,6 +41,14 @@ data class UserResponse(
 
     /* asset_uid */
     val assetUid: String? = null,
+
+    val school: SchoolDto? = null,
+
+    val grade: String? = null,
+
+    val gender: String? = null,
+
+    val birthday: LocalDate? = null,
 
     /* created_at */
     val createdAt: LocalDateTime,

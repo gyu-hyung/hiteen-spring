@@ -1,6 +1,7 @@
 package kr.jiasoft.hiteen.feature.user
 
 import kr.jiasoft.hiteen.feature.asset.app.AssetService
+import kr.jiasoft.hiteen.feature.school.infra.SchoolRepository
 import kr.jiasoft.hiteen.feature.user.app.UserService
 import kr.jiasoft.hiteen.feature.user.infra.UserRepository
 import org.junit.jupiter.api.Assertions.*
@@ -15,8 +16,9 @@ class UserServiceTest {
     private val assetService: AssetService = mock()
 //    private val encoder = BCryptPasswordEncoder()
     private val encoder: PasswordEncoder = mock()
+    private val schoolRepository: SchoolRepository = mock()
 
-    private val userService = UserService(assetService, userRepository, encoder)
+    private val userService = UserService(assetService, userRepository, encoder, schoolRepository)
 
 
     @Test
