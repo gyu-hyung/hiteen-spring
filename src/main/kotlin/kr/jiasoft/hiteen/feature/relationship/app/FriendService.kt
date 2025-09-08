@@ -1,10 +1,11 @@
 package kr.jiasoft.hiteen.feature.relationship.app
 
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.toList
 import kr.jiasoft.hiteen.feature.relationship.domain.FriendEntity
 import kr.jiasoft.hiteen.feature.relationship.domain.FriendStatus
 import kr.jiasoft.hiteen.feature.relationship.dto.FriendListResponse
 import kr.jiasoft.hiteen.feature.relationship.dto.FriendSearchItem
-import kr.jiasoft.hiteen.feature.relationship.dto.FriendSearchResponse
 import kr.jiasoft.hiteen.feature.relationship.dto.FriendSummary
 import kr.jiasoft.hiteen.feature.relationship.infra.FriendRepository
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
@@ -50,7 +51,7 @@ class FriendService(
         val items = rows.map { e ->
             val otherId = if (e.userId == me.id) e.friendId else e.userId
             val other = userRepository.findPublicById(otherId)
-            toSummary(me.id!!, e, other)
+            toSummary(me.id, e, other)
         }
         return FriendListResponse(items)
     }
@@ -59,7 +60,7 @@ class FriendService(
         val rows = friendRepository.findAllOutgoingPending(me.id!!)
         val items = rows.map { e ->
             val other = userRepository.findPublicById(e.friendId)
-            toSummary(me.id!!, e, other)
+            toSummary(me.id, e, other)
         }
         return FriendListResponse(items)
     }
@@ -68,7 +69,7 @@ class FriendService(
         val rows = friendRepository.findAllIncomingPending(me.id!!)
         val items = rows.map { e ->
             val other = userRepository.findPublicById(e.userId)
-            toSummary(me.id!!, e, other)
+            toSummary(me.id, e, other)
         }
         return FriendListResponse(items)
     }
@@ -187,10 +188,14 @@ class FriendService(
     /**
      * 검색: 결과에 현재 관계도 함께 태깅
      */
-    suspend fun search(me: UserEntity, q: String, limit: Int = 30): FriendSearchResponse {
+    suspend fun search(me: UserEntity, q: String, limit: Int = 30): List<FriendSearchItem> {
         val meId = me.id!!
-        val publics = userRepository.searchPublic(q, limit).filter { it.uid != me.uid.toString() }
-        val results = publics.map { pu ->
+
+        val publics = userRepository.searchPublic(q, limit)
+            .filter { it.uid != me.uid.toString() }
+            .toList()
+
+        return publics.map { pu ->
             val otherId = requireUserIdByUid(pu.uid)
             val rel = friendRepository.findBetween(meId, otherId)
             val relation = when {
@@ -202,9 +207,12 @@ class FriendService(
                 else -> rel.status
             }
             FriendSearchItem(
-                uid = pu.uid, username = pu.username, nickname = pu.nickname, relation = relation
+                uid = pu.uid,
+                username = pu.username,
+                nickname = pu.nickname,
+                relation = relation
             )
         }
-        return FriendSearchResponse(results)
     }
+
 }

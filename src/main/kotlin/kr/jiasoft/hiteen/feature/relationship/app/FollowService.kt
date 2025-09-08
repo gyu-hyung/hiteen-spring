@@ -1,5 +1,7 @@
 package kr.jiasoft.hiteen.feature.relationship.app
 
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.toList
 import kr.jiasoft.hiteen.feature.relationship.domain.FollowEntity
 import kr.jiasoft.hiteen.feature.relationship.domain.FollowStatus
 import kr.jiasoft.hiteen.feature.relationship.dto.FollowListResponse
@@ -51,7 +53,7 @@ class FollowService(
         val items = rows.map { e ->
             val otherId = if (e.userId == me.id) e.followId else e.userId
             val other = userRepository.findPublicById(otherId)
-            toSummary(me.id!!, e, other)
+            toSummary(me.id, e, other)
         }
         return FollowListResponse(items)
     }
@@ -60,7 +62,7 @@ class FollowService(
         val rows = followRepository.findAllOutgoingPending(me.id!!)
         val items = rows.map { e ->
             val other = userRepository.findPublicById(e.followId)
-            toSummary(me.id!!, e, other)
+            toSummary(me.id, e, other)
         }
         return FollowListResponse(items)
     }
@@ -69,7 +71,7 @@ class FollowService(
         val rows = followRepository.findAllIncomingPending(me.id!!)
         val items = rows.map { e ->
             val other = userRepository.findPublicById(e.userId)
-            toSummary(me.id!!, e, other)
+            toSummary(me.id, e, other)
         }
         return FollowListResponse(items)
     }
@@ -189,7 +191,10 @@ class FollowService(
      */
     suspend fun search(me: UserEntity, q: String, limit: Int = 30): FollowSearchResponse {
         val meId = me.id!!
-        val publics = userRepository.searchPublic(q, limit).filter { it.uid != me.uid.toString() }
+        val publics = userRepository.searchPublic(q, limit)
+            .filter { it.uid != me.uid.toString() }
+            .toList()
+
         val results = publics.map { pu ->
             val otherId = requireUserIdByUid(pu.uid)
             val rel = followRepository.findBetween(meId, otherId)
@@ -202,9 +207,13 @@ class FollowService(
                 else -> rel.status
             }
             FollowSearchItem(
-                uid = pu.uid, username = pu.username, nickname = pu.nickname, relation = relation
+                uid = pu.uid,
+                username = pu.username,
+                nickname = pu.nickname,
+                relation = relation
             )
         }
+
         return FollowSearchResponse(results)
     }
 }

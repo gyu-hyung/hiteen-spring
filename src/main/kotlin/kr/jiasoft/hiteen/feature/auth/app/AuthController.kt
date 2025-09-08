@@ -14,10 +14,10 @@ import org.springframework.web.server.ResponseStatusException
 @RestController
 @RequestMapping("/api/auth")
 class AuthController(
-    private val smsService: SmsService,
-    private val authService: AuthService,
-    private val userRepository: UserRepository,
-    private val smsAuthRepository: SmsAuthRepository,
+        private val smsService: SmsService,
+        private val authService: AuthService,
+        private val userRepository: UserRepository,
+        private val smsAuthRepository: SmsAuthRepository,
     ) {
     data class LoginForm(val username: String, val password: String)
     data class JwtResponse(val token: String)
