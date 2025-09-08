@@ -1,4 +1,4 @@
-package kr.jiasoft.hiteen.feature.school.app
+package kr.jiasoft.hiteen.feature.school
 
 import kotlinx.coroutines.flow.toList
 import kr.jiasoft.hiteen.common.dto.ApiPageCursor

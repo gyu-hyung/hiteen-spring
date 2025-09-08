@@ -3,6 +3,7 @@ package kr.jiasoft.hiteen.feature.user.dto
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.Size
 import kr.jiasoft.hiteen.validation.ValidPassword
+import java.time.LocalDate
 import java.util.UUID
 
 data class UserUpdateForm(
@@ -30,4 +31,12 @@ data class UserUpdateForm(
     val tier: String? = null,
 
     val assetUid: UUID? = null,
+
+    val schoolId: Long? = null,
+
+    val grade: String? = null,
+
+    val gender: String? = null,
+
+    val birthday: LocalDate? = null,
 )

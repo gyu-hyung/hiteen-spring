@@ -1,4 +1,4 @@
-package kr.jiasoft.hiteen.feature.school.app
+package kr.jiasoft.hiteen.feature.school
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.ExchangeStrategies
 import org.springframework.web.reactive.function.client.WebClient
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 /**
  * TODO kakao api로 학교 좌표 변환
@@ -21,6 +22,9 @@ class SchoolImportService(
 ) {
 
     private val logger = LoggerFactory.getLogger(SchoolImportService::class.java)
+
+
+    private val apiKey = "458d6485b25c46009758a4ab53413497"
 
     private val client = WebClient.builder()
         .baseUrl("https://open.neis.go.kr/hub")
@@ -33,7 +37,6 @@ class SchoolImportService(
         )
         .build()
 
-    private val apiKey = "458d6485b25c46009758a4ab53413497"
 
     suspend fun fetchAndSaveSchools() {
         val start = System.currentTimeMillis()
@@ -145,7 +148,7 @@ class SchoolImportService(
     private fun parseDate(date: String?): LocalDate? {
         return try {
             if (date.isNullOrBlank()) null
-            else LocalDate.parse(date, java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd"))
+            else LocalDate.parse(date, DateTimeFormatter.ofPattern("yyyyMMdd"))
         } catch (e: Exception) {
             null
         }
