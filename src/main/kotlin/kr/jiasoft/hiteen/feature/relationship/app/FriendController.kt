@@ -1,8 +1,11 @@
 package kr.jiasoft.hiteen.feature.relationship.app
 
+import kr.jiasoft.hiteen.common.dto.ApiResult
+import kr.jiasoft.hiteen.feature.relationship.dto.FriendSearchItem
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
+import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
 
@@ -36,8 +39,15 @@ class FriendController(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
         @RequestParam q: String,
         @RequestParam(required = false, defaultValue = "30") limit: Int
-    ) = friendService.search(user, q, limit)
-
+    ): ResponseEntity<ApiResult<List<FriendSearchItem>>> {
+        val results = friendService.search(user, q, limit)
+        return ResponseEntity.ok(
+            ApiResult(
+                success = true,
+                data = results
+            )
+        )
+    }
 
     /** 친구 요청 보내기: me -> {uid} */
     @PostMapping("/request")

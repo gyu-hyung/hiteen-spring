@@ -1,5 +1,6 @@
 package kr.jiasoft.hiteen.feature.user.infra
 
+import kotlinx.coroutines.flow.Flow
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import kr.jiasoft.hiteen.feature.user.dto.PublicUser
 import org.springframework.data.r2dbc.repository.Query
@@ -11,6 +12,7 @@ interface UserRepository : CoroutineCrudRepository<UserEntity, Long> {
     suspend fun findByNickname(name: String): UserEntity?
     suspend fun findByPhone(phone: String): UserEntity?
     suspend fun findByUid(uid: String): UserEntity?
+    suspend fun findAllByNickname(nickname: String): Flow<UserEntity>
 
     /* 간단 검색: username/nickname/email 에 like (필요시 정규화/풀텍스트로 교체) */
     @Query("""
@@ -21,7 +23,7 @@ interface UserRepository : CoroutineCrudRepository<UserEntity, Long> {
            OR  LOWER(COALESCE(email,'')) LIKE LOWER(CONCAT('%', :q, '%')))
         LIMIT :limit
     """)
-    suspend fun searchPublic(q: String, limit: Int = 30): List<PublicUser>
+    suspend fun searchPublic(q: String, limit: Int = 30): Flow<PublicUser>
 
     /* 친구/팔로우 사용자 정보회 */
     @Query("""

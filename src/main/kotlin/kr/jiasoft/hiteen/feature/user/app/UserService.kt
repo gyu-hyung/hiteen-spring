@@ -1,5 +1,6 @@
 package kr.jiasoft.hiteen.feature.user.app
 
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.reactor.mono
 import kr.jiasoft.hiteen.common.exception.BusinessValidationException
 import kr.jiasoft.hiteen.feature.asset.app.AssetService
@@ -33,12 +34,16 @@ class UserService (
     }
 
     suspend fun nicknameDuplicationCheck(nickname: String): Boolean {
-        val user = userRepository.findByNickname(nickname)
+        val user = userRepository.findAllByNickname(nickname).firstOrNull()
         return user != null
     }
 
 //    @Transactional
     suspend fun register(param: UserRegisterForm, file: FilePart?): UserResponse {
+        val exists = nicknameDuplicationCheck(param.nickname!!)
+        if (exists) {
+            throw BusinessValidationException(mapOf("nickname" to "이미 사용 중인 닉네임입니다."))
+        }
         val toEntity = param.toEntity(encoder.encode(param.password))
         val saved = userRepository.save(toEntity)
 
