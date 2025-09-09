@@ -131,7 +131,6 @@ COMMENT ON COLUMN schools.updated_at IS '수정 일시';
 COMMENT ON COLUMN schools.deleted_id IS '삭제자 사용자 ID';
 COMMENT ON COLUMN schools.deleted_at IS '삭제 일시';
 
-
 -- ========================
 -- classes
 -- ========================
@@ -359,8 +358,8 @@ COMMENT ON COLUMN board_likes.id IS '자동 증가 기본키';
 COMMENT ON COLUMN board_likes.board_id IS '게시글 ID(FK)';
 COMMENT ON COLUMN board_likes.user_id IS '사용자 ID(FK)';
 COMMENT ON COLUMN board_likes.created_at IS '생성 일시';
-COMMENT ON COLUMN board_likes.updated_at IS '수정 일시';
-COMMENT ON COLUMN board_likes.deleted_at IS '삭제 일시';
+--COMMENT ON COLUMN board_likes.updated_at IS '수정 일시';
+--COMMENT ON COLUMN board_likes.deleted_at IS '삭제 일시';
 
 -- ========================
 -- board_comment_likes
@@ -370,8 +369,8 @@ COMMENT ON COLUMN board_comment_likes.id IS '자동 증가 기본키';
 COMMENT ON COLUMN board_comment_likes.comment_id IS '댓글 ID(FK)';
 COMMENT ON COLUMN board_comment_likes.user_id IS '사용자 ID(FK)';
 COMMENT ON COLUMN board_comment_likes.created_at IS '생성 일시';
-COMMENT ON COLUMN board_comment_likes.updated_at IS '수정 일시';
-COMMENT ON COLUMN board_comment_likes.deleted_at IS '삭제 일시';
+--COMMENT ON COLUMN board_comment_likes.updated_at IS '수정 일시';
+--COMMENT ON COLUMN board_comment_likes.deleted_at IS '삭제 일시';
 
 -- ========================
 -- polls
