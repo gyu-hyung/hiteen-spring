@@ -37,9 +37,9 @@ CREATE TABLE users (
 );
 
 -- 이메일: 삭제되지 않은 사용자만 유니크, 대소문자 구분 없음
-CREATE UNIQUE INDEX users_email_key
-    ON users (lower(email))
-    WHERE deleted_at IS NULL;
+--CREATE UNIQUE INDEX users_email_key
+--    ON users (lower(email))
+--    WHERE deleted_at IS NULL;
 
 -- 사용자명: 삭제되지 않은 사용자만 유니크, 대소문자 구분 없음
 CREATE UNIQUE INDEX users_username_key
