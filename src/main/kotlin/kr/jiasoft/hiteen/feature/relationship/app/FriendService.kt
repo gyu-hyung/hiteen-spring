@@ -5,11 +5,14 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kr.jiasoft.hiteen.feature.location.domain.LocationHistory
 import kr.jiasoft.hiteen.feature.location.infra.cache.LocationCacheRedisService
+import kr.jiasoft.hiteen.feature.relationship.domain.FollowEntity
+import kr.jiasoft.hiteen.feature.relationship.domain.FollowStatus
 import kr.jiasoft.hiteen.feature.relationship.domain.FriendEntity
 import kr.jiasoft.hiteen.feature.relationship.domain.FriendStatus
 import kr.jiasoft.hiteen.feature.relationship.dto.ContactResponse
 import kr.jiasoft.hiteen.feature.relationship.dto.RelationshipSummary
 import kr.jiasoft.hiteen.feature.relationship.dto.RelationshipSearchItem
+import kr.jiasoft.hiteen.feature.relationship.infra.FollowRepository
 import kr.jiasoft.hiteen.feature.relationship.infra.FriendRepository
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import kr.jiasoft.hiteen.feature.user.dto.UserSummary
@@ -23,6 +26,7 @@ import java.time.ZoneOffset
 @Service
 class FriendService(
     private val friendRepository: FriendRepository,
+    private val followRepository: FollowRepository,
     private val userRepository: UserRepository,
     private val locationCacheRedisService: LocationCacheRedisService
 ) {
@@ -110,7 +114,7 @@ class FriendService(
 
 
     /**
-     * 친구 요청 보내기 (me -> targetUid)
+     * 친구 요청 보내기 (me -> targetUid) / 친구 성사되면 팔로우도 함께 등록
      */
     suspend fun request(me: UserEntity, targetUid: String) {
         val meId = me.id!!
@@ -122,11 +126,9 @@ class FriendService(
             existing == null -> {
                 friendRepository.save(
                     FriendEntity(
-                        userId = meId,
-                        friendId = targetId,
+                        userId = meId, friendId = targetId,
                         status = FriendStatus.PENDING.name,
-                        statusAt = now,
-                        createdAt = now,
+                        statusAt = now, createdAt = now,
                     )
                 )
             }
@@ -139,6 +141,22 @@ class FriendService(
                         updatedAt = now
                     )
                     friendRepository.save(accepted)
+
+                    // === 팔로우 등록 (양방향) ===
+                    followRepository.save(
+                        FollowEntity(
+                            userId = meId, followId = targetId,
+                            status = FollowStatus.ACCEPTED.name,
+                            statusAt = now, createdAt = now
+                        )
+                    )
+                    followRepository.save(
+                        FollowEntity(
+                            userId = targetId, followId = meId,
+                            status = FollowStatus.ACCEPTED.name,
+                            statusAt = now, createdAt = now
+                        )
+                    )
                 } else {
                     // 내가 이미 보낸 상태면 중복요청
                     throw ResponseStatusException(HttpStatus.CONFLICT, "already requested")
@@ -171,6 +189,18 @@ class FriendService(
                 statusAt = now,
                 updatedAt = now
             )
+        )
+
+        // === 팔로우 등록 (양방향) ===
+        followRepository.save(
+            FollowEntity(userId = meId, followId = requesterId,
+                status = FollowStatus.ACCEPTED.name,
+                statusAt = now, createdAt = now)
+        )
+        followRepository.save(
+            FollowEntity(userId = requesterId, followId = meId,
+                status = FollowStatus.ACCEPTED.name,
+                statusAt = now, createdAt = now)
         )
     }
 
@@ -218,6 +248,10 @@ class FriendService(
             throw ResponseStatusException(HttpStatus.CONFLICT, "not accepted")
         }
         friendRepository.delete(rel)
+
+        // === 팔로우 관계도 제거 (양방향) ===
+        followRepository.findBetween(meId, otherId)?.let { followRepository.delete(it) }
+        followRepository.findBetween(otherId, meId)?.let { followRepository.delete(it) }
     }
 
     /**
