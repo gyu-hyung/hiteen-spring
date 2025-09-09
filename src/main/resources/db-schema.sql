@@ -27,7 +27,7 @@ CREATE TABLE users (
   school_id     bigint,
   grade         varchar(30),
   gender        varchar(30),
-  birthday      date,
+  birthday		date,
   created_id    bigint,
   created_at    timestamptz not null DEFAULT now(),
   updated_id    bigint,
@@ -45,6 +45,10 @@ CREATE UNIQUE INDEX users_email_key
 CREATE UNIQUE INDEX users_username_key
     ON users (lower(username))
     WHERE deleted_at IS NULL;
+
+
+
+
 
 
 -- ========================
@@ -256,7 +260,7 @@ create table sms_auth (
     phone varchar(30) not null,
     code varchar(255) not null,
     status varchar(255) not null,
-    created_at timestamptz not null default not(),
+    created_at timestamptz not null default now(),
     updated_at timestamptz,
     deleted_at timestamptz
 );
