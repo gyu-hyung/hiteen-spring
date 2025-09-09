@@ -2,6 +2,7 @@ package kr.jiasoft.hiteen.feature.user.dto
 
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Size
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import kr.jiasoft.hiteen.validation.ValidPassword
@@ -29,6 +30,11 @@ data class UserRegisterForm(
 
     val detailAddress: String? = null,
 
+    @field:NotBlank(message = "연락처는 필수입니다.")
+    @field:Pattern(
+        regexp = "^01[0-9]{8,9}$",
+        message = "올바른 휴대폰 번호 형식이어야 합니다. (예: 01012345678)"
+    )
     val phone: String? = null,
 
     val mood: String? = null,
