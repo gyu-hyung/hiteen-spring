@@ -6,9 +6,7 @@ import kr.jiasoft.hiteen.common.exception.BusinessValidationException
 import kr.jiasoft.hiteen.feature.asset.app.AssetService
 import kr.jiasoft.hiteen.feature.school.infra.SchoolRepository
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
-import kr.jiasoft.hiteen.feature.user.domain.toResponse
-import kr.jiasoft.hiteen.feature.user.domain.toResponseWithSchool
-import kr.jiasoft.hiteen.feature.user.domain.toUserDetails
+import kr.jiasoft.hiteen.feature.user.dto.CustomUserDetails
 import kr.jiasoft.hiteen.feature.user.dto.UserRegisterForm
 import kr.jiasoft.hiteen.feature.user.dto.UserResponse
 import kr.jiasoft.hiteen.feature.user.dto.UserUpdateForm
@@ -33,8 +31,11 @@ class UserService (
 
     override fun findByUsername(username: String): Mono<UserDetails> = mono {
         val user = userRepository.findByUsername(username)
-        user?.toUserDetails() ?: throw UsernameNotFoundException("User not found: $username")
+            ?: throw UsernameNotFoundException("User not found: $username")
+
+        CustomUserDetails.from(user)
     }
+
 
     suspend fun nicknameDuplicationCheck(nickname: String): Boolean {
         val user = userRepository.findAllByNickname(nickname).firstOrNull()
@@ -63,7 +64,7 @@ class UserService (
         }
 
         val school = updated.schoolId?.let { id -> schoolRepository.findById(id) }
-        return updated.toResponseWithSchool(school)
+        return UserResponse.from(updated, school)
     }
 
 
@@ -72,7 +73,7 @@ class UserService (
             ?: throw UsernameNotFoundException("User not found: $userId")
 
         val school = user.schoolId?.let { id -> schoolRepository.findById(id) }
-        return user.toResponseWithSchool(school)
+        return UserResponse.from(user, school)
     }
 
 
@@ -150,7 +151,7 @@ class UserService (
 
         // 5) schoolId 있으면 조회해서 DTO 변환
         val school = saved.schoolId?.let { id -> schoolRepository.findById(id) }
-        return saved.toResponseWithSchool(school)
+        return UserResponse.from(saved, school)
     }
 
 

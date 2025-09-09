@@ -1,5 +1,6 @@
 package kr.jiasoft.hiteen.feature.relationship.infra
 
+import kotlinx.coroutines.flow.Flow
 import kr.jiasoft.hiteen.feature.relationship.domain.FriendEntity
 import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
@@ -25,7 +26,7 @@ interface FriendRepository : CoroutineCrudRepository<FriendEntity, Long> {
           AND status = 'ACCEPTED'
         ORDER BY status_at DESC NULLS LAST, created_at DESC NULLS LAST
     """)
-    suspend fun findAllAccepted(me: Long): List<FriendEntity>
+    suspend fun findAllAccepted(me: Long): Flow<FriendEntity>
 
     // 내가 보낸 대기중 요청(PENDING, 내가 요청자)
     @Query("""
@@ -33,7 +34,7 @@ interface FriendRepository : CoroutineCrudRepository<FriendEntity, Long> {
         WHERE user_id = :me AND status = 'PENDING'
         ORDER BY created_at DESC NULLS LAST
     """)
-    suspend fun findAllOutgoingPending(me: Long): List<FriendEntity>
+    suspend fun findAllOutgoingPending(me: Long): Flow<FriendEntity>
 
     // 내가 받은 대기중 요청(PENDING, 내가 수신자)
     @Query("""
@@ -41,5 +42,8 @@ interface FriendRepository : CoroutineCrudRepository<FriendEntity, Long> {
         WHERE friend_id = :me AND status = 'PENDING'
         ORDER BY created_at DESC NULLS LAST
     """)
-    suspend fun findAllIncomingPending(me: Long): List<FriendEntity>
+    suspend fun findAllIncomingPending(me: Long): Flow<FriendEntity>
+
+    suspend fun findByUserIdOrFriendId(userId: Long, friendId: Long): Flow<FriendEntity>
+
 }

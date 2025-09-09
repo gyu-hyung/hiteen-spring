@@ -5,7 +5,7 @@ package kr.jiasoft.hiteen.common.dto
  */
 data class ApiResult<T>(
     val success: Boolean,
-    val message: String? = null,
     val data: T? = null,
+    val message: String? = null,
     val errors: Map<String, List<String>>? = null
 )

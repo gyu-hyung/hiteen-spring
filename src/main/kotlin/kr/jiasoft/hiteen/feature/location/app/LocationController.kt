@@ -16,10 +16,6 @@ class LocationController(
     private val locationAppService: LocationAppService
 ) {
 
-    @GetMapping("/latest")
-    suspend fun getLatest(@RequestParam userId: String): LocationHistory? =
-        locationAppService.getLatest(userId)
-
     @PostMapping
     suspend fun saveLocation(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
@@ -28,6 +24,12 @@ class LocationController(
         val saved = locationAppService.saveLocation(user, request)
         return ResponseEntity.status(HttpStatus.CREATED).body(saved)
     }
+
+
+    @GetMapping("/latest")
+    suspend fun getLatest(@RequestParam userId: String): LocationHistory? =
+        locationAppService.getLatest(userId)
+
 
     @GetMapping("/my")
     suspend fun getMy(

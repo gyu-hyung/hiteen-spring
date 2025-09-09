@@ -1,16 +1,15 @@
 package kr.jiasoft.hiteen.feature.relationship.app
 
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kr.jiasoft.hiteen.feature.relationship.domain.FollowEntity
 import kr.jiasoft.hiteen.feature.relationship.domain.FollowStatus
-import kr.jiasoft.hiteen.feature.relationship.dto.FollowListResponse
-import kr.jiasoft.hiteen.feature.relationship.dto.FollowSearchItem
-import kr.jiasoft.hiteen.feature.relationship.dto.FollowSearchResponse
-import kr.jiasoft.hiteen.feature.relationship.dto.FollowSummary
+import kr.jiasoft.hiteen.feature.relationship.dto.RelationshipSearchItem
+import kr.jiasoft.hiteen.feature.relationship.dto.RelationshipSummary
 import kr.jiasoft.hiteen.feature.relationship.infra.FollowRepository
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
-import kr.jiasoft.hiteen.feature.user.dto.PublicUser
+import kr.jiasoft.hiteen.feature.user.dto.UserSummary
 import kr.jiasoft.hiteen.feature.user.infra.UserRepository
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -28,52 +27,42 @@ class FollowService(
 
     private suspend fun requireUserIdByUid(uid: String): Long {
         return userRepository.findByUid(uid)?.id
-            ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "user not found: $uid")
+            ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "user not found: $uid")
     }
 
-    private fun toSummary(meId: Long, e: FollowEntity, other: PublicUser?): FollowSummary {
-        val otherUid = other?.uid ?: ""
-        return FollowSummary(
-            uid = otherUid,
-            username = other?.username ?: "",
-            nickname = other?.nickname,
-            phone = other?.phone,
-            address = other?.address,
-            detailAddress = other?.detailAddress,
-            mood = other?.mood,
-            tier = other?.tier,
-            assetUid = other?.assetUid,
+    private fun toFollowSummary(e: FollowEntity, other: UserSummary?): RelationshipSummary {
+        return RelationshipSummary(
+            userSummary = other ?: UserSummary.empty(),
             status = e.status,
             statusAt = e.statusAt
         )
     }
 
-    suspend fun listFriends(me: UserEntity): FollowListResponse {
-        val rows = followRepository.findAllAccepted(me.id!!)
-        val items = rows.map { e ->
-            val otherId = if (e.userId == me.id) e.followId else e.userId
-            val other = userRepository.findPublicById(otherId)
-            toSummary(me.id, e, other)
-        }
-        return FollowListResponse(items)
+    suspend fun listFriends(me: UserEntity): List<RelationshipSummary> {
+        return followRepository.findAllAccepted(me.id!!)
+            .map { e ->
+                val otherId = if (e.userId == me.id) e.followId else e.userId
+                val other = userRepository.findSummaryInfoById(otherId)
+                toFollowSummary(e, other)
+            }.toList()
     }
 
-    suspend fun listOutgoing(me: UserEntity): FollowListResponse {
-        val rows = followRepository.findAllOutgoingPending(me.id!!)
-        val items = rows.map { e ->
-            val other = userRepository.findPublicById(e.followId)
-            toSummary(me.id, e, other)
-        }
-        return FollowListResponse(items)
+
+    suspend fun listOutgoing(me: UserEntity): List<RelationshipSummary> {
+        return followRepository.findAllOutgoingPending(me.id!!)
+            .map { e ->
+                val other = userRepository.findSummaryInfoById(e.followId)
+                toFollowSummary(e, other)
+            }.toList()
     }
 
-    suspend fun listIncoming(me: UserEntity): FollowListResponse {
-        val rows = followRepository.findAllIncomingPending(me.id!!)
-        val items = rows.map { e ->
-            val other = userRepository.findPublicById(e.userId)
-            toSummary(me.id, e, other)
-        }
-        return FollowListResponse(items)
+
+    suspend fun listIncoming(me: UserEntity): List<RelationshipSummary> {
+        return followRepository.findAllIncomingPending(me.id!!)
+            .map { e ->
+                val other = userRepository.findSummaryInfoById(e.userId)
+                toFollowSummary(e, other)
+            }.toList()
     }
 
     /**
@@ -94,7 +83,6 @@ class FollowService(
                         status = FollowStatus.PENDING.name,
                         statusAt = now,
                         createdAt = now,
-                        updatedAt = now
                     )
                 )
             }
@@ -189,7 +177,7 @@ class FollowService(
     /**
      * 검색: 결과에 현재 관계도 함께 태깅
      */
-    suspend fun search(me: UserEntity, q: String, limit: Int = 30): FollowSearchResponse {
+    suspend fun search(me: UserEntity, q: String, limit: Int = 30): List<RelationshipSearchItem> {
         val meId = me.id!!
         val publics = userRepository.searchPublic(q, limit)
             .filter { it.uid != me.uid.toString() }
@@ -206,7 +194,7 @@ class FollowService(
                 rel.status == FollowStatus.BLOCKED.name -> "BLOCKED"
                 else -> rel.status
             }
-            FollowSearchItem(
+            RelationshipSearchItem(
                 uid = pu.uid,
                 username = pu.username,
                 nickname = pu.nickname,
@@ -214,6 +202,6 @@ class FollowService(
             )
         }
 
-        return FollowSearchResponse(results)
+        return results
     }
 }

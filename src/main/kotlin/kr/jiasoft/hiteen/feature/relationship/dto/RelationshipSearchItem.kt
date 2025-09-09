@@ -1,6 +1,6 @@
 package kr.jiasoft.hiteen.feature.relationship.dto
 
-data class FriendSearchItem(
+data class RelationshipSearchItem(
     val uid: String,
     val username: String,
     val nickname: String?,

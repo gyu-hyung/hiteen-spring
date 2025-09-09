@@ -2,7 +2,7 @@ package kr.jiasoft.hiteen.feature.user.infra
 
 import kotlinx.coroutines.flow.Flow
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
-import kr.jiasoft.hiteen.feature.user.dto.PublicUser
+import kr.jiasoft.hiteen.feature.user.dto.UserSummary
 import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 import java.util.UUID
@@ -23,14 +23,14 @@ interface UserRepository : CoroutineCrudRepository<UserEntity, Long> {
            OR  LOWER(COALESCE(email,'')) LIKE LOWER(CONCAT('%', :q, '%')))
         LIMIT :limit
     """)
-    suspend fun searchPublic(q: String, limit: Int = 30): Flow<PublicUser>
+    suspend fun searchPublic(q: String, limit: Int = 30): Flow<UserSummary>
 
     /* 친구/팔로우 사용자 정보회 */
     @Query("""
         SELECT uid, username, nickname, phone, address, detail_address, mood, tier, asset_uid 
         FROM users WHERE id = :id
     """)
-    suspend fun findPublicById(id: Long): PublicUser?
+    suspend fun findSummaryInfoById(id: Long): UserSummary?
 
     @Query("""
         SELECT EXISTS (
@@ -82,4 +82,9 @@ interface UserRepository : CoroutineCrudRepository<UserEntity, Long> {
         LIMIT 1
         """)
     suspend fun findUidById(id: Long): UUID?
+
+
+   suspend fun findAllByPhoneIn(phones: Set<String>): Flow<UserEntity>
+
+
 }

@@ -1,13 +1,8 @@
 package kr.jiasoft.hiteen.feature.user.domain
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import kr.jiasoft.hiteen.feature.school.domain.SchoolEntity
-import kr.jiasoft.hiteen.feature.school.dto.SchoolDto
-import kr.jiasoft.hiteen.feature.user.dto.CustomUserDetails
-import kr.jiasoft.hiteen.feature.user.dto.UserResponse
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Table
-import org.springframework.security.core.userdetails.UserDetails
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.util.UUID
@@ -85,47 +80,4 @@ data class UserEntity(
 
     /* 삭제 일시 */
     val deletedAt: OffsetDateTime? = null,
-)
-
-fun UserEntity.toUserDetails(): UserDetails = CustomUserDetails(this)
-
-fun UserEntity.toResponse(): UserResponse = UserResponse(
-    uid = this.uid.toString(),
-    username = this.username,
-    email = this.email,
-    nickname = this.nickname,
-    role = this.role,
-    address = this.address,
-    detailAddress = this.detailAddress,
-    phone = this.phone,
-    mood = this.mood,
-    tier = this.tier,
-    assetUid = this.assetUid?.toString(),
-    grade = this.grade,
-    gender = this.gender,
-    birthday = this.birthday,
-    createdAt = this.createdAt.toLocalDateTime(),
-    updatedAt = this.updatedAt?.toLocalDateTime(),
-    deletedAt = this.deletedAt?.toLocalDateTime(),
-)
-
-fun UserEntity.toResponseWithSchool(school: SchoolEntity? = null): UserResponse = UserResponse(
-    uid = this.uid.toString(),
-    username = this.username,
-    email = this.email,
-    nickname = this.nickname,
-    role = this.role,
-    address = this.address,
-    detailAddress = this.detailAddress,
-    phone = this.phone,
-    mood = this.mood,
-    tier = this.tier,
-    assetUid = this.assetUid?.toString(),
-    school = school?.let { SchoolDto(it.id!!, it.name) },
-    grade = this.grade,
-    gender = this.gender,
-    birthday = this.birthday,
-    createdAt = this.createdAt.toLocalDateTime(),
-    updatedAt = this.updatedAt?.toLocalDateTime(),
-    deletedAt = this.deletedAt?.toLocalDateTime(),
 )

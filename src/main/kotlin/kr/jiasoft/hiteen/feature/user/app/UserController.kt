@@ -3,7 +3,6 @@ package kr.jiasoft.hiteen.feature.user.app
 import jakarta.validation.Valid
 import kr.jiasoft.hiteen.common.dto.ApiResult
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
-import kr.jiasoft.hiteen.feature.user.domain.toResponse
 import kr.jiasoft.hiteen.feature.user.dto.UserRegisterForm
 import kr.jiasoft.hiteen.feature.user.dto.UserResponse
 import kr.jiasoft.hiteen.feature.user.dto.UserUpdateForm

@@ -1,61 +1,52 @@
 package kr.jiasoft.hiteen.feature.user.dto
 
+import kr.jiasoft.hiteen.feature.school.domain.SchoolEntity
 import kr.jiasoft.hiteen.feature.school.dto.SchoolDto
+import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import java.time.LocalDate
 import java.time.LocalDateTime
 
 data class UserResponse(
-
-    /* id */
-//    val id: Long?,
-
-    /* uid */
-    val uid: String?,
-
-    /* username */
+    val uid: String,
     val username: String,
-
-    /* email */
     val email: String?,
-
-    /* nickname */
     val nickname: String?,
-
-    /* role */
     val role: String,
-
-    /* address */
-    val address: String? = null,
-
-    /* detail_address */
-    val detailAddress: String? = null,
-
-    /* phone */
-    val phone: String? = null,
-
-    /* mood */
-    val mood: String? = null,
-
-    /* tier */
-    val tier: String? = null,
-
-    /* asset_uid */
-    val assetUid: String? = null,
-
+    val address: String?,
+    val detailAddress: String?,
+    val phone: String?,
+    val mood: String?,
+    val tier: String?,
+    val assetUid: String?,
     val school: SchoolDto? = null,
-
-    val grade: String? = null,
-
-    val gender: String? = null,
-
-    val birthday: LocalDate? = null,
-
-    /* created_at */
+    val grade: String?,
+    val gender: String?,
+    val birthday: LocalDate?,
     val createdAt: LocalDateTime,
-
-    /* updated_at */
     val updatedAt: LocalDateTime?,
-
-    /* deleted_at */
-    val deletedAt: LocalDateTime? = null,
-)
+    val deletedAt: LocalDateTime?
+) {
+    companion object {
+        fun from(entity: UserEntity, school: SchoolEntity? = null): UserResponse =
+            UserResponse(
+                uid = entity.uid.toString(),
+                username = entity.username,
+                email = entity.email,
+                nickname = entity.nickname,
+                role = entity.role,
+                address = entity.address,
+                detailAddress = entity.detailAddress,
+                phone = entity.phone,
+                mood = entity.mood,
+                tier = entity.tier,
+                assetUid = entity.assetUid?.toString(),
+                school = school?.let { SchoolDto(it.id!!, it.name) },
+                grade = entity.grade,
+                gender = entity.gender,
+                birthday = entity.birthday,
+                createdAt = entity.createdAt.toLocalDateTime(),
+                updatedAt = entity.updatedAt?.toLocalDateTime(),
+                deletedAt = entity.deletedAt?.toLocalDateTime()
+            )
+    }
+}
