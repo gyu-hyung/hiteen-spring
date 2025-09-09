@@ -22,4 +22,10 @@ class CustomUserDetails(
     override fun isCredentialsNonExpired(): Boolean = true
 
     override fun isEnabled(): Boolean = true
+
+    companion object {
+        fun from(entity: UserEntity): CustomUserDetails =
+            CustomUserDetails(entity)
+    }
+
 }
