@@ -276,7 +276,7 @@ CREATE TABLE pin (
   lat          numeric(9,6),
   lng          numeric(9,6),
   description  varchar(255),
-  type         varchar(30),
+  visibility   varchar(20) DEFAULT 'PUBLIC',
   created_id   bigint,
   created_at   timestamptz DEFAULT now(),
   updated_id   bigint ,
@@ -291,8 +291,8 @@ CREATE TABLE pin (
 -- ========================
 CREATE TABLE pin_users (
   id         bigserial PRIMARY KEY,
-  pin_id     bigint   NOT NULL REFERENCES pin(id)   ON DELETE CASCADE,
-  user_id    bigint   NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  pin_id     bigint   NOT NULL,
+  user_id    bigint   NOT NULL,
   created_at timestamptz DEFAULT now(),
   deleted_at timestamptz,
   UNIQUE (pin_id, user_id)
