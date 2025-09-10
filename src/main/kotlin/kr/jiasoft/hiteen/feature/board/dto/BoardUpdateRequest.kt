@@ -1,15 +1,19 @@
 package kr.jiasoft.hiteen.feature.board.dto
 
+import jakarta.validation.constraints.NotNull
+import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.util.UUID
 
 data class BoardUpdateRequest(
+    @field:NotNull
+    val uid: UUID? = null,
     val subject: String? = null,
     val content: String? = null,
     val category: String? = null,
     val link: String? = null,
-    val startDate: OffsetDateTime? = null,
-    val endDate: OffsetDateTime? = null,
+    val startDate: LocalDate? = null,
+    val endDate: LocalDate? = null,
     val status: String? = null,
     val address: String? = null,
     val detailAddress: String? = null,

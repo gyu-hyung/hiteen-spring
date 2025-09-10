@@ -83,6 +83,8 @@ dependencies {
 
 	// Bean Validation
 	implementation("org.springframework.boot:spring-boot-starter-validation")
+
+    implementation(project(":coroutine-eloquent"))
 }
 
 

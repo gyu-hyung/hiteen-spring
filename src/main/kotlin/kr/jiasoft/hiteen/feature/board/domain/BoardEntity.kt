@@ -2,6 +2,7 @@ package kr.jiasoft.hiteen.feature.board.domain
 
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Table
+import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.util.UUID
 
@@ -17,13 +18,13 @@ data class BoardEntity (
     val ip: String? = null,
     val hits: Int = 0,
     val assetUid: UUID? = null,
-    val startDate: OffsetDateTime? = null,
-    val endDate: OffsetDateTime? = null,
+    val startDate: LocalDate? = null,
+    val endDate: LocalDate? = null,
     val reportCount: Int = 0,
     val status: String? = null,
     val address: String? = null,
     val detailAddress: String? = null,
-    val createdId: Long,
+    val createdId: Long ? = null,
     val createdAt: OffsetDateTime? = null,
     val updatedId: Long? = null,
     val updatedAt: OffsetDateTime? = null,
