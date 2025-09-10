@@ -2,7 +2,7 @@ package kr.jiasoft.hiteen.feature.board.infra
 
 import kotlinx.coroutines.flow.Flow
 import kr.jiasoft.hiteen.feature.board.domain.BoardEntity
-import kr.jiasoft.hiteen.feature.board.dto.BoardSummaryRow
+import kr.jiasoft.hiteen.feature.board.dto.BoardResponse
 import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 import org.springframework.stereotype.Repository
@@ -53,6 +53,6 @@ interface BoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
         limit: Int,
         offset: Int,
         userId: Long
-    ): Flow<BoardSummaryRow>
+    ): Flow<BoardResponse>
 
 }

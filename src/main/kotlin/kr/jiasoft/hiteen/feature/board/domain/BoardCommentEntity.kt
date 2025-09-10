@@ -9,13 +9,13 @@ import java.util.UUID
 data class BoardCommentEntity (
     @Id
     val id: Long? = null,
-    val boardId: Long,
+    val boardId: Long? = null,
     val uid: UUID = UUID.randomUUID(),
     val parentId: Long? = null,
-    val content: String,
+    val content: String? = null,
     val replyCount: Int = 0,
     val reportCount: Int = 0,
-    val createdId: Long,
+    val createdId: Long? = null,
     val createdAt: OffsetDateTime? = null,
     val updatedId: Long? = null,
     val updatedAt: OffsetDateTime? = null,

@@ -1,11 +1,13 @@
 package kr.jiasoft.hiteen.feature.pin.app
 
 import PinResponse
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.launch
 import kr.jiasoft.hiteen.feature.pin.domain.PinEntity
 import kr.jiasoft.hiteen.feature.pin.domain.PinUsersEntity
 import kr.jiasoft.hiteen.feature.pin.dto.AllowedFriend
@@ -100,7 +102,6 @@ class PinService(
         }
     }
 
-
     suspend fun register(user: UserEntity, dto: PinRegisterRequest): PinEntity {
         val pin = pinRepository.save(
             PinEntity(
@@ -114,13 +115,19 @@ class PinService(
             )
         )
 
+
+        //TODO 해당 uid 가 친구가 맞는지?
         if (dto.visibility == "FRIENDS" && !dto.friendUids.isNullOrEmpty()) {
             // uid -> id 매핑을 한번에 조회
             val users = userRepository.findAllByUidIn(dto.friendUids)
-            users.forEach { u ->
-                pinUsersRepository.save(
-                    PinUsersEntity(pinId = pin.id!!, userId = u.id!!)
-                )
+            coroutineScope {
+                users.forEach { u ->
+                    launch {
+                        pinUsersRepository.save(
+                            PinUsersEntity(pinId = pin.id!!, userId = u.id!!)
+                        )
+                    }
+                }
             }
         }
 
@@ -158,7 +165,7 @@ class PinService(
                     val users = userRepository.findAllByUidIn(dto.friendUids)
                     users.forEach { u ->
                         pinUsersRepository.save(
-                            PinUsersEntity(pinId = pin.id!!, userId = u.id!!)
+                            PinUsersEntity(pinId = pin.id, userId = u.id!!)
                         )
                     }
                 }

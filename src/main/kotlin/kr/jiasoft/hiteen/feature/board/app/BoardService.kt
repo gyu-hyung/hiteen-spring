@@ -3,6 +3,8 @@ package kr.jiasoft.hiteen.feature.board.app
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
+import kr.jiasoft.hiteen.common.dto.ApiPageCursor
+import kr.jiasoft.hiteen.eloquent.CoroutineEloquent
 import kr.jiasoft.hiteen.feature.asset.app.AssetService
 import kr.jiasoft.hiteen.feature.asset.dto.AssetResponse
 import kr.jiasoft.hiteen.feature.board.domain.BoardAssetEntity
@@ -10,12 +12,10 @@ import kr.jiasoft.hiteen.feature.board.domain.BoardCommentEntity
 import kr.jiasoft.hiteen.feature.board.domain.BoardCommentLikeEntity
 import kr.jiasoft.hiteen.feature.board.domain.BoardEntity
 import kr.jiasoft.hiteen.feature.board.domain.BoardLikeEntity
-import kr.jiasoft.hiteen.feature.board.dto.BoardCommentCreateRequest
+import kr.jiasoft.hiteen.feature.board.dto.BoardCommentRegisterRequest
 import kr.jiasoft.hiteen.feature.board.dto.BoardCommentResponse
-import kr.jiasoft.hiteen.feature.board.dto.BoardCommentUpdateRequest
 import kr.jiasoft.hiteen.feature.board.dto.BoardCreateRequest
-import kr.jiasoft.hiteen.feature.board.dto.BoardDetailResponse
-import kr.jiasoft.hiteen.feature.board.dto.BoardSummaryResponse
+import kr.jiasoft.hiteen.feature.board.dto.BoardResponse
 import kr.jiasoft.hiteen.feature.board.dto.BoardUpdateRequest
 import kr.jiasoft.hiteen.feature.board.infra.BoardAssetRepository
 import kr.jiasoft.hiteen.feature.board.infra.BoardCommentLikeRepository
@@ -38,17 +38,48 @@ class BoardService(
     private val likes: BoardLikeRepository,
     private val commentLikes: BoardCommentLikeRepository,
     private val assetService: AssetService,
+    private val eloquent: CoroutineEloquent,
 ) {
 
-    suspend fun getBoard(uid: UUID, currentUserId: Long?): BoardDetailResponse {
+//    suspend fun getUserBoards(userId: Long?): CursorResult<BoardResponse, Long> {
+//        return eloquent.forEntity(BoardResponse::class.java)
+//            .where("created_id", "=", userId!!)
+//            .with("user")
+//            .cursorPaginate(10,0)
+////            ?.boards.orEmpty()
+//    }
+
+        suspend fun getUserBoards(userId: Long?): BoardResponse? {
+            return eloquent.forEntity(BoardResponse::class.java)
+                .where("created_id", "=", userId!!)
+                .with("user")
+                .first()
+        }
+
+
+    suspend fun getBoard(uid: UUID, currentUserId: Long?): BoardResponse {
         val b = boards.findByUid(uid) ?: throw IllegalArgumentException("board not found")
         val boardId = b.id!!
         val likeCount = likes.countByBoardId(boardId)
         val commentCount = comments.countActiveByBoardId(boardId)
         val likedByMe = currentUserId?.let { likes.findByBoardIdAndUserId(boardId, it) != null } ?: false
-        val attachments = boardAssetRepository.findAllByBoardId(boardId).map { it.uid }.toList().filterNotNull()
+        val attachments = boardAssetRepository.findAllByBoardId(boardId).map { it.uid }.toList()
         boards.increaseHits(boardId)
-        return BoardDetailResponse(
+
+        val perPage = 15
+        val commentList = comments.findComments(b.uid, null, currentUserId ?: -1L, null, perPage + 1).toList()
+
+        val hasMore = commentList.size > perPage
+        val items = if (hasMore) commentList.dropLast(1) else commentList
+        val nextCursor = if (hasMore) commentList.lastOrNull()?.uid?.toString() else null
+
+        val commentPage = ApiPageCursor(
+            nextCursor = nextCursor,
+            items = items,
+            perPage = perPage
+        )
+
+        return BoardResponse(
             uid = b.uid,
             category = b.category,
             subject = b.subject ?: "",
@@ -68,23 +99,25 @@ class BoardService(
             likeCount = likeCount,
             commentCount = commentCount,
             likedByMe = likedByMe,
+            comments = commentPage,
         )
     }
 
+
     fun listBoards(
         category: String?, q: String?, page: Int, size: Int, currentUserId: Long?
-    ): Flow<BoardSummaryResponse> {
+    ): Flow<BoardResponse> {
         val p = page.coerceAtLeast(0)
         val s = size.coerceIn(1, 100)
         val offset = p * s
         val uid = currentUserId ?: -1L
         return boards.searchSummaries(category, q, s, offset, uid)
             .map { row ->
-                BoardSummaryResponse(
+                BoardResponse(
                     uid = row.uid,
                     category = row.category,
                     subject = row.subject ?: "",
-                    contentPreview = (row.content ?: "").take(160),
+                    content = (row.content ?: "").take(160),
                     link = row.link,
                     hits = row.hits ?: 0,
                     assetUid = row.assetUid,
@@ -177,7 +210,7 @@ class BoardService(
         // 2) 파일 업로드 -> 매핑 추가 + 대표이미지 후보(첫 번째 업로드)
         if (files.isNotEmpty()) {
             val uploadedFiles = assetService.uploadImages(files, currentUserId)
-            uploadedFiles.forEachIndexed { idx, a ->
+            uploadedFiles.forEach { a ->
                 boardAssetRepository.save(
                     BoardAssetEntity(
                         boardId = boardId,
@@ -229,7 +262,7 @@ class BoardService(
     }
 
     // ---------------------- Comments ----------------------
-    suspend fun createComment(boardUid: UUID, req: BoardCommentCreateRequest, currentUserId: Long): UUID {
+    suspend fun createComment(boardUid: UUID, req: BoardCommentRegisterRequest, currentUserId: Long): UUID {
         val b = boards.findByUid(boardUid) ?: throw notFound("board")
         val parent: BoardCommentEntity? = req.parentUid?.let { comments.findByUid(it) }
         val saved = comments.save(
@@ -247,7 +280,7 @@ class BoardService(
     suspend fun updateComment(
         boardUid: UUID,
         commentUid: UUID,
-        req: BoardCommentUpdateRequest,
+        req: BoardCommentRegisterRequest,
         currentUserId: Long
     ): UUID {
         val board = boards.findByUid(boardUid) ?: throw notFound("board")
@@ -260,8 +293,8 @@ class BoardService(
         // 권한: 작성자만 수정 (관리자 허용하고 싶으면 role 체크 추가)
         if (comment.createdId != currentUserId) throw forbidden("you are not the author")
 
-        val trimmed = req.content.trim()
-        if (trimmed.isEmpty()) throw badRequest("content must not be blank")
+        val trimmed = req.content?.trim()
+        trimmed?.let { if (it.isEmpty()) throw badRequest("content must not be blank") }
 
         val merged = comment.copy(
             content = trimmed,
@@ -297,33 +330,20 @@ class BoardService(
         return deleted.uid
     }
 
-    fun listTopComments(boardUid: UUID, currentUserId: Long?): Flow<BoardCommentResponse> =
-        comments.findTopCommentRows(boardUid, (currentUserId ?: -1L)).map { row ->
-            BoardCommentResponse(
-                uid = row.uid,
-                content = row.content ?: "",
-                createdAt = row.createdAt,
-                createdId = row.createdId,
-                replyCount = row.replyCount,
-                likeCount = row.likeCount,
-                likedByMe = row.likedByMe,
-                parentUid = null,
-            )
-        }
 
-    fun listReplies(parentCommentUid: UUID, currentUserId: Long?): Flow<BoardCommentResponse> =
-        comments.findReplyRows(parentCommentUid, (currentUserId ?: -1L)).map { row ->
-            BoardCommentResponse(
-                uid = row.uid,
-                content = row.content ?: "",
-                createdAt = row.createdAt,
-                createdId = row.createdId,
-                replyCount = row.replyCount,
-                likeCount = row.likeCount,
-                likedByMe = row.likedByMe,
-                parentUid = row.parentUid,
-            )
-        }
+    suspend fun listComments(
+        boardUid: UUID,
+        parentUid: UUID?,
+        currentUserId: Long?,
+        cursor: UUID?,
+        perPage: Int
+    ): List<BoardCommentResponse> {
+        return comments.findComments(boardUid, parentUid, currentUserId ?: -1L, cursor, perPage)
+            .toList()
+    }
+
+
+
 
     suspend fun likeComment(commentUid: UUID, currentUserId: Long) {
         val c = comments.findByUid(commentUid) ?: throw notFound("comment")

@@ -1,12 +1,19 @@
 package kr.jiasoft.hiteen.feature.user.dto
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import kr.jiasoft.hiteen.feature.school.domain.SchoolEntity
 import kr.jiasoft.hiteen.feature.school.dto.SchoolDto
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
+import org.springframework.data.annotation.Id
+import org.springframework.data.relational.core.mapping.Table
 import java.time.LocalDate
 import java.time.LocalDateTime
 
+@Table("users")
 data class UserResponse(
+    @Id
+    @JsonIgnore
+    val id: Long?,
     val uid: String,
     val username: String,
     val email: String?,
@@ -18,7 +25,7 @@ data class UserResponse(
     val mood: String?,
     val tier: String?,
     val assetUid: String?,
-    val school: SchoolDto? = null,
+    val school: SchoolDto?,
     val grade: String?,
     val gender: String?,
     val birthday: LocalDate?,
@@ -29,6 +36,7 @@ data class UserResponse(
     companion object {
         fun from(entity: UserEntity, school: SchoolEntity? = null): UserResponse =
             UserResponse(
+                id = entity.id,
                 uid = entity.uid.toString(),
                 username = entity.username,
                 email = entity.email,
