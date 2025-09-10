@@ -287,7 +287,7 @@ CREATE TABLE pin (
 
 
 -- ========================
---사용자 참여
+-- 위치 핀 > 사용자 공개
 -- ========================
 CREATE TABLE pin_users (
   id         bigserial PRIMARY KEY,
