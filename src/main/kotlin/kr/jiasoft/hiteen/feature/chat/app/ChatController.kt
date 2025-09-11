@@ -61,7 +61,7 @@ class ChatController(
     suspend fun sendMessage(
         @PathVariable roomUid: UUID,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
-        req: SendMessageRequest
+        req: SendMessageRequest,
     ): Map<String, Any> = mapOf("messageUid" to service.sendMessage(roomUid, user, req))
 
 
