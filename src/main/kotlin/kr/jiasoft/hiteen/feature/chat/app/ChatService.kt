@@ -16,6 +16,7 @@ import kr.jiasoft.hiteen.feature.soketi.app.SoketiBroadcaster
 import kr.jiasoft.hiteen.feature.soketi.domain.SoketiChannelPattern
 import kr.jiasoft.hiteen.feature.soketi.domain.SoketiEventType
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
+import kr.jiasoft.hiteen.feature.user.dto.UserResponse
 import kr.jiasoft.hiteen.feature.user.infra.UserRepository
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -205,19 +206,21 @@ class ChatService(
                 )
             }.toList()
 
-            val senderUid: UUID = users.findById(m.userId)?.uid
+            val senderEntity = users.findById(m.userId)
                 ?: throw IllegalStateException("sender user not found: ${m.userId}")
+            val senderResponse = UserResponse.from(senderEntity)
+
 
             val readers = readersMap[m.id] ?: 0L
             val unread = ((memberCount - 1) - readers).coerceAtLeast(0L).toInt()
 
             MessageSummary(
                 messageUid = m.uid,
-                senderUid = senderUid,
                 content = m.content,
+                unreadCount = unread,
                 createdAt = m.createdAt,
+                sender = senderResponse,
                 assets = assets,
-                unreadCount = unread
             )
         }
     }
@@ -293,46 +296,44 @@ class ChatService(
         val cursor = messages.findCurrentCursorByUserId(currentUserId)
 
         val roomsList = rooms.listRooms(currentUserId, limit, offset).map { r ->
-            //멤버수
             val memberCount = chatUsers.countActiveByRoom(r.id!!)
-            //마지막 메세지
+
+            // 마지막 메시지 + 작성자 조회
             val last = messages.findLastMessage(r.id)
-            //마지막 메세지의 asset
+            val senderEntity = last?.userId?.let { uid -> users.findById(uid) }
+            val senderResponse = senderEntity?.let { UserResponse.from(it) }
+
+            // 마지막 메시지의 assets
             val lastAssets = last?.id?.let { msgAssets.listByMessage(it).map { a ->
                 MessageAssetSummary(
-//                    a.id,
                     a.uid,
-//                    m.id ,
                     a.width,
                     a.height
                 )
             }.toList() } ?: emptyList()
-            //읽지 않은 메세지 수
+
             val unreadCount = messages.countUnread(r.id, currentUserId).toInt()
 
             RoomSummaryResponse(
                 roomUid = r.uid,
-                lastMessage = last?.let { lm ->
-                    //TODO 성능
-                    val senderUid: UUID = users.findById(lm.userId)?.uid
-                        ?: throw IllegalStateException("sender user not found: ${lm.userId}")
+                lastMessage = if (last != null && senderResponse != null) {
                     MessageSummary(
-                        messageUid = lm.uid,
-                        senderUid = senderUid,
-                        content = lm.content,
-                        createdAt = lm.createdAt,
-                        assets = lastAssets,
+                        messageUid = last.uid,
+                        sender = senderResponse,
+                        content = last.content,
+                        createdAt = last.createdAt,
+                        assets = lastAssets
                     )
-                },
+                } else null,
                 memberCount = memberCount.toInt(),
                 unreadCount = unreadCount,
                 updatedAt = r.updatedAt ?: r.createdAt
             )
-
         }.toList()
 
         return RoomsSnapshotResponse(cursor = cursor, rooms = roomsList)
     }
+
 
 
 }
