@@ -23,7 +23,9 @@ class FriendController(
     private val friendService: FriendService
 ) {
 
-    /** 내 친구 목록 (수락됨) */
+    /** 내 친구 목록 (수락됨)
+     * TODO : 안개모드,
+     */
     @GetMapping
     suspend fun list(@AuthenticationPrincipal(expression = "user") user: UserEntity)
             = ResponseEntity.ok(ApiResult(true, friendService.listFriends(user)))
