@@ -89,7 +89,7 @@ CREATE TABLE interests (
 
 
 -- ========================
--- 사용자-관심사 매핑
+-- 사용자-관심사
 -- ========================
 CREATE TABLE interest_user (
   id          bigserial PRIMARY KEY,
@@ -98,6 +98,19 @@ CREATE TABLE interest_user (
   created_at  timestamptz DEFAULT now(),
   updated_at  timestamptz,
   UNIQUE (user_id, interest_id)
+);
+
+
+-- ========================
+-- 사용자 관심사 추천/매칭 이력
+-- ========================
+CREATE TABLE interest_match_history (
+  id          bigserial PRIMARY KEY,
+  user_id     bigint NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  target_id   bigint NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  status      varchar(20) NOT NULL,  -- PASSED, MATCHED, etc
+  created_at  timestamptz DEFAULT now(),
+  UNIQUE (user_id, target_id)
 );
 
 
@@ -743,8 +756,8 @@ CREATE TABLE user_photos (
 
 
 INSERT INTO users (uid,username,email,nickname,"password","role",address,detail_address,phone,mood,tier,asset_uid,school_id,grade,gender,birthday,created_id,created_at,updated_id,updated_at,deleted_id,deleted_at) VALUES
+	 ('c264013d-bb1d-4d66-8d34-10962c022056'::uuid,'chat5','qwe@chat','닉넴5','$2a$10$WZ67oFFBEFypJ28HGxudzuhFu3tS6N8P4.HKKLPYdiaCh7tsZvDva','USER','광주광역시 북구 시청로 1','2층','01055555555','기분좋음','브론즈 1','f580e8e8-adee-4285-b181-3fed545e7be0'::uuid,1,'1','M','1999-12-01',NULL,'2025-09-09 14:29:06.591',NULL,NULL,NULL,NULL),
 	 ('6f9b90d6-96ca-49de-b9c2-b123e51ca7db'::uuid,'chat1','qwe@chat','닉넴1','$2a$10$X2FQYkcsynbJJwExkHDiMenGylpHGW9cFWEgugqeQYW4ZniYoPolG','USER','광주광역시 북구 시청로 1','2층','01095393637','기분좋음','브론즈 1','a0e9f441-3669-4cfb-aac5-1c38533d87c1'::uuid,1,'1','M','1999-12-01',NULL,'2025-09-09 14:26:44.586',NULL,NULL,NULL,NULL),
 	 ('f55db2b7-c8f3-4ebf-94c7-577bc4a3939b'::uuid,'chat2','qwe@chat','닉넴2','$2a$10$J1ZORvmaZji6btaLrdxv0ewHHjO2i8ZsmOtR3MPz1VGrS/8RNkgyG','USER','광주광역시 북구 시청로 1','2층','01022222222','기분좋음','브론즈 1','9524f629-4885-4dcf-bc5c-1f02391a1f8b'::uuid,1,'1','M','1999-12-01',NULL,'2025-09-09 14:27:20.574',NULL,NULL,NULL,NULL),
 	 ('c2605174-08b8-4879-acab-3f7f122bb2ed'::uuid,'chat3','qwe@chat','닉넴3','$2a$10$iVcqM0RGK4uGwkDfHUr8NOaSwbwrXRPpowXpe4BL6XTFcPfL2bc/6','USER','광주광역시 북구 시청로 1','2층','01033333333','기분좋음','브론즈 1','f26d080f-6f9c-485a-a8fd-f1850d217a2f'::uuid,1,'1','M','1999-12-01',NULL,'2025-09-09 14:28:41.477',NULL,NULL,NULL,NULL),
 	 ('6fae6813-73bb-47c0-a775-af1c6ca9a79b'::uuid,'chat4','qwe@chat','닉넴4','$2a$10$CUooWUv/UP4HlgMYzW4IMujmSmUkEn4lMoP7GTqT4YEy0hfaQaW0.','USER','광주광역시 북구 시청로 1','2층','01044444444','기분좋음','브론즈 1','f0bceba2-e02b-4706-9f0f-743616d9d911'::uuid,1,'1','M','1999-12-01',NULL,'2025-09-09 14:28:54.742',NULL,NULL,NULL,NULL);
-	 ('c264013d-bb1d-4d66-8d34-10962c022056'::uuid,'chat5','qwe@chat','닉넴5','$2a$10$WZ67oFFBEFypJ28HGxudzuhFu3tS6N8P4.HKKLPYdiaCh7tsZvDva','USER','광주광역시 북구 시청로 1','2층','01055555555','기분좋음','브론즈 1','f580e8e8-adee-4285-b181-3fed545e7be0'::uuid,1,'1','M','1999-12-01',NULL,'2025-09-09 14:29:06.591',NULL,NULL,NULL,NULL),

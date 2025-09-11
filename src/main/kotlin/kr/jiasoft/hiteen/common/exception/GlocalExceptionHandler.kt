@@ -7,9 +7,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.bind.support.WebExchangeBindException
 
-class BusinessValidationException(
-    val errors: Map<String, String>
-) : RuntimeException("validation failed")
 
 @RestControllerAdvice
 class GlobalExceptionHandler {
