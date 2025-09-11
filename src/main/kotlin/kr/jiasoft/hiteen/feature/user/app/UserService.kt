@@ -1,15 +1,18 @@
 package kr.jiasoft.hiteen.feature.user.app
 
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactor.mono
 import kr.jiasoft.hiteen.common.exception.BusinessValidationException
 import kr.jiasoft.hiteen.feature.asset.app.AssetService
 import kr.jiasoft.hiteen.feature.school.infra.SchoolRepository
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
+import kr.jiasoft.hiteen.feature.user.domain.UserPhotosEntity
 import kr.jiasoft.hiteen.feature.user.dto.CustomUserDetails
 import kr.jiasoft.hiteen.feature.user.dto.UserRegisterForm
 import kr.jiasoft.hiteen.feature.user.dto.UserResponse
 import kr.jiasoft.hiteen.feature.user.dto.UserUpdateForm
+import kr.jiasoft.hiteen.feature.user.infra.UserPhotosRepository
 import kr.jiasoft.hiteen.feature.user.infra.UserRepository
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.security.core.userdetails.ReactiveUserDetailsService
@@ -25,6 +28,7 @@ import java.util.UUID
 class UserService (
     private val assetService: AssetService,
     private val userRepository: UserRepository,
+    private val userPhotosRepository: UserPhotosRepository,
     private val encoder: PasswordEncoder,
     private val schoolRepository: SchoolRepository,
 ) : ReactiveUserDetailsService {
@@ -152,6 +156,52 @@ class UserService (
         // 5) schoolId 있으면 조회해서 DTO 변환
         val school = saved.schoolId?.let { id -> schoolRepository.findById(id) }
         return UserResponse.from(saved, school)
+    }
+
+
+    suspend fun registerPhotos(user: UserEntity, files: List<FilePart>?) {
+        if (files.isNullOrEmpty()) {
+            throw BusinessValidationException(mapOf("file" to "이미지가 필요합니다."))
+        }
+
+        files.forEach { file ->
+            // 1) 에셋 업로드
+            val asset = assetService.uploadImage(
+                file = file,
+                originFileName = null,
+                currentUserId = user.id!!
+            )
+
+            // 2) user_photos row 생성
+            val photoEntity = UserPhotosEntity(
+                id = null,
+                userId = user.id,
+                uid = asset.uid
+            )
+
+            userPhotosRepository.save(photoEntity)
+        }
+    }
+
+
+    suspend fun deletePhoto(user: UserEntity, photoId: Long) {
+        val exist = userPhotosRepository.findByIdAndUserId(photoId, user.id!!)
+            ?: throw BusinessValidationException(mapOf("photo" to "존재하지 않거나 본인 소유가 아닌 사진입니다."))
+
+        // asset 파일도 소프트 삭제
+        try {
+            assetService.softDelete(exist.uid!!, user.id)
+        } catch (_: Throwable) {}
+
+        // user_photos row 삭제
+        userPhotosRepository.deleteById(exist.id!!)
+    }
+
+    suspend fun getPhotos(userUid: String): List<UserPhotosEntity> {
+        val userEntity = userRepository.findByUid(userUid)
+            ?: throw BusinessValidationException(mapOf("user" to "존재하지 않는 사용자입니다."))
+
+        return userPhotosRepository.findByUserId(userEntity.id!!).toList()
     }
 
 
