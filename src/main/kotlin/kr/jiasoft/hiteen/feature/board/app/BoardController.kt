@@ -25,7 +25,9 @@ class BoardController(
     private val service: BoardService,
 ) {
 
-    /** 프로필 조회 */
+    /** 프로필 조회
+     * TODO : 관심사, 학교, 학년,
+     */
     @GetMapping("/profile")
     suspend fun userBoards(@AuthenticationPrincipal(expression = "user") user: UserEntity?)
             : ResponseEntity<ApiResult<BoardResponse>> {
@@ -34,7 +36,11 @@ class BoardController(
     }
 
 
-    /** 게시글 목록 */
+    /** 게시글 목록
+     * TODO : 팔로우된 사용자 게시글만 조회
+     * TODO : 친구 상태인 사용자 게시글만 조회
+     * TODO : 같은 학교 사용자 게시글만 조회
+     * */
     @GetMapping
     suspend fun list(
         @RequestParam(required = false) category: String?,

@@ -35,7 +35,9 @@ class UserController(
         )
     }
 
-    /** 회원가입 */
+    /** 회원가입
+     * TODO : 학년 ex) 3 -> 고3
+     * */
     @PostMapping
     suspend fun register(
         @Valid userRegisterForm: UserRegisterForm,
