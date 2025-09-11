@@ -39,4 +39,20 @@ class InterestUserController(
     suspend fun clear(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ) = ResponseEntity.ok(ApiResult.success(service.clearUserInterests(user.id!!)))
+
+
+    /** 친구 추천 받기 */
+    @GetMapping("/recommend")
+    suspend fun recommend(@AuthenticationPrincipal(expression = "user") user: UserEntity) =
+        ResponseEntity.ok(ApiResult.success(service.recommendFriend(user)))
+
+
+    /** 추천 친구 패스 */
+    @PostMapping("/pass")
+    suspend fun pass(
+        @AuthenticationPrincipal(expression = "user") user: UserEntity,
+        @RequestParam targetUserId: Long
+    ) = ResponseEntity.ok(ApiResult.success(service.passFriend(user, targetUserId)))
+
+
 }
