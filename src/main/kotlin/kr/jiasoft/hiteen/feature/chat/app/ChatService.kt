@@ -31,9 +31,10 @@ class ChatService(
     private val msgAssets: ChatMessageAssetRepository,
     private val users: UserRepository,
     private val soketiBroadcaster: SoketiBroadcaster,
+
 ) {
 
-    /** DM 방 생성 */
+    /** DM 방 생성 TODO 친구가 맞는지? */
     suspend fun createDirectRoom(currentUserId: Long, peerUid: UUID): UUID {
         val peer = users.findByUid(peerUid.toString()) ?: error("peer not found")
         val existing = rooms.findDirectRoom(currentUserId, peer.id!!)
@@ -195,7 +196,13 @@ class ChatService(
 
         return messagePage.map { m ->
             val assets = msgAssets.listByMessage(m.id!!).map { a ->
-                MessageAssetSummary(a.id, a.uid, m.id, a.width, a.height)
+                MessageAssetSummary(
+//                    a.id,
+                    a.uid,
+//                    m.id ,
+                    a.width,
+                    a.height
+                )
             }.toList()
 
             val senderUid: UUID = users.findById(m.userId)?.uid
@@ -292,7 +299,13 @@ class ChatService(
             val last = messages.findLastMessage(r.id)
             //마지막 메세지의 asset
             val lastAssets = last?.id?.let { msgAssets.listByMessage(it).map { a ->
-                MessageAssetSummary(a.id, a.uid, last.id, a.width, a.height)
+                MessageAssetSummary(
+//                    a.id,
+                    a.uid,
+//                    m.id ,
+                    a.width,
+                    a.height
+                )
             }.toList() } ?: emptyList()
             //읽지 않은 메세지 수
             val unreadCount = messages.countUnread(r.id, currentUserId).toInt()

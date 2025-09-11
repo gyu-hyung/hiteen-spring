@@ -47,9 +47,9 @@ data class ActiveUsersRow(
 
 
 data class MessageAssetSummary(
-    val id: Long?,
+//    val id: Long?,
     val assetUid: UUID?,
-    val messageId: Long?,
+//    val messageId: Long?,
     val width: Int?,
     val height: Int?,
 )
