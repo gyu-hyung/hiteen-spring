@@ -1,15 +1,20 @@
 package kr.jiasoft.hiteen.feature.user.app
 
 import jakarta.validation.Valid
+import kotlinx.coroutines.reactor.awaitSingle
 import kr.jiasoft.hiteen.common.dto.ApiResult
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import kr.jiasoft.hiteen.feature.user.dto.UserRegisterForm
 import kr.jiasoft.hiteen.feature.user.dto.UserResponse
 import kr.jiasoft.hiteen.feature.user.dto.UserUpdateForm
+import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.server.ResponseStatusException
+import reactor.core.publisher.Flux
 
 @RestController
 @RequestMapping("/api/user")
@@ -64,4 +69,35 @@ class UserController(
             ApiResult(success = true, data = updated, message = "회원정보 수정 완료")
         )
     }
+
+
+    /** 회원정보 프로필 이미지 등록 */
+    @PostMapping("/photos", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+    suspend fun registerImages(
+        @AuthenticationPrincipal(expression = "user") user: UserEntity,
+        @RequestPart("files", required = false) filesFlux: Flux<FilePart>?
+    ) {
+        val flux = filesFlux ?: filesFlux
+        ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "files or file part is required")
+
+        val files: List<FilePart> = flux.collectList().awaitSingle()
+        userService.registerPhotos(user, files)
+    }
+
+    /** 사용자 사진 삭제 */
+    @PostMapping("/photos/delete/{photoId}")
+    suspend fun deletePhoto(
+        @AuthenticationPrincipal(expression = "user") user: UserEntity,
+        @PathVariable photoId: Long
+    ): ResponseEntity<ApiResult<Unit>> {
+        userService.deletePhoto(user, photoId)
+        return ResponseEntity.ok(ApiResult.success())
+    }
+
+
+    /** 사용자 사진 조회 */
+    @GetMapping("/photos")
+    suspend fun list(@RequestParam(required = true) userUid: String)
+            = ResponseEntity.ok(ApiResult.success(userService.getPhotos(userUid)))
+
 }
