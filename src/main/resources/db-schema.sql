@@ -463,7 +463,6 @@ CREATE TABLE board_comment_likes (
 );
 
 
-
 --CREATE UNIQUE INDEX IF NOT EXISTS ux_boards_uid ON boards(uid);
 --CREATE INDEX IF NOT EXISTS ix_boards_created_at ON boards(created_at DESC);
 --CREATE INDEX IF NOT EXISTS ix_boards_category ON boards(category);
@@ -473,7 +472,6 @@ CREATE TABLE board_comment_likes (
 --CREATE UNIQUE INDEX IF NOT EXISTS ux_comment_likes ON board_comment_likes(comment_id, user_id);
 
 
-
 -- ========================
 -- 투표
 -- ========================
@@ -481,30 +479,32 @@ CREATE TABLE polls (
   id             bigserial PRIMARY KEY,
   question       varchar(255),
   photo          varchar(255),
-  vote_count	   integer DEFAULT 0,
-  comment_count  integer DEFAULT 0,
-  report_count   integer DEFAULT 0,
+  selects        jsonb,
+  color_start    varchar(20),
+  color_end      varchar(20),
+  vote_count	 smallint DEFAULT 0,
+  comment_count  smallint DEFAULT 0,
+  report_count   smallint DEFAULT 0,
+  allow_comment  smallint DEFAULT 0,
   status         varchar(20),
-  reply_at       timestamptz,
   created_id     bigint ,
   created_at     timestamptz DEFAULT now(),
-  updated_id     bigint ,
   updated_at     timestamptz,
-  deleted_id     bigint ,
   deleted_at     timestamptz
 );
 
 
 -- ========================
--- 투표 > 항목
+-- 투표 > 좋아요
 -- ========================
-CREATE TABLE poll_items (
-  id       bigserial PRIMARY KEY,
-  poll_id  bigint   NOT NULL REFERENCES polls(id) ON DELETE CASCADE,
-  seq      smallint NOT NULL,
-  answer   varchar(255) NOT NULL,
-  votes    integer DEFAULT 0,
-  UNIQUE (poll_id, seq)
+CREATE TABLE poll_likes (
+  id         bigserial PRIMARY KEY,
+  poll_id    bigint NOT NULL REFERENCES polls(id) ON DELETE CASCADE,
+  user_id    bigint NOT NULL REFERENCES users(id)  ON DELETE CASCADE,
+  created_at timestamptz DEFAULT now(),
+--  updated_at timestamptz,
+--  deleted_at timestamptz,
+  UNIQUE (poll_id, user_id)
 );
 
 
@@ -515,6 +515,7 @@ CREATE TABLE poll_users (
   id        bigserial PRIMARY KEY,
   poll_id   bigint NOT NULL REFERENCES polls(id)  ON DELETE CASCADE,
   user_id   bigint NOT NULL REFERENCES users(id)  ON DELETE CASCADE,
+  seq       smallint NOT NULL,
   voted_at  timestamptz DEFAULT now(),
   UNIQUE (poll_id, user_id)
 );
@@ -533,9 +534,7 @@ CREATE TABLE poll_comments (
   report_count integer DEFAULT 0,
   created_id   bigint ,
   created_at   timestamptz DEFAULT now(),
-  updated_id   bigint ,
   updated_at   timestamptz,
-  deleted_id   bigint ,
   deleted_at   timestamptz
 );
 
@@ -544,13 +543,27 @@ CREATE TABLE poll_comments (
 -- 투표 > 댓글 > 좋아요
 -- ========================
 CREATE TABLE poll_comment_likes (
-  id              bigserial PRIMARY KEY,
-  poll_comment_id bigint NOT NULL REFERENCES poll_comments(id) ON DELETE CASCADE,
-  user_id         bigint NOT NULL REFERENCES users(id)         ON DELETE CASCADE,
-  created_at      timestamptz DEFAULT now(),
-  updated_at      timestamptz,
-  deleted_at      timestamptz,
-  UNIQUE (poll_comment_id, user_id)
+  id              	bigserial PRIMARY KEY,
+  comment_id 		bigint NOT NULL REFERENCES poll_comments(id) ON DELETE CASCADE,
+  user_id    	    bigint NOT NULL REFERENCES users(id)         ON DELETE CASCADE,
+  created_at      	timestamptz DEFAULT now(),
+--  updated_at      timestamptz,
+--  deleted_at      timestamptz,
+  UNIQUE (comment_id, user_id)
+);
+
+
+-- ========================
+-- 투표 > 템플릿
+-- ========================
+CREATE TABLE poll_templates (
+  id            bigserial PRIMARY KEY,
+  question      text,
+  answers       text,
+  state         smallint,
+  created_at    timestamptz DEFAULT now(),
+  updated_at    timestamptz,
+  deleted_at    timestamptz
 );
 
 
@@ -724,10 +737,10 @@ CREATE TABLE user_photos (
 --  chat_messages,
 --  chat_users,
 --  chat_rooms,
+--  poll_templates,
 --  poll_comment_likes,
 --  poll_comments,
 --  poll_users,
---  poll_items,
 --  polls,
 --  board_comment_likes,
 --  board_likes,

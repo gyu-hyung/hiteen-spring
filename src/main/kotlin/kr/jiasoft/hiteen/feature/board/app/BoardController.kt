@@ -1,6 +1,5 @@
 package kr.jiasoft.hiteen.feature.board.app
 
-import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.awaitSingle
 import kr.jiasoft.hiteen.common.dto.ApiPageCursor
 import kr.jiasoft.hiteen.common.dto.ApiResult
@@ -40,6 +39,7 @@ class BoardController(
      * TODO : 팔로우된 사용자 게시글만 조회
      * TODO : 친구 상태인 사용자 게시글만 조회
      * TODO : 같은 학교 사용자 게시글만 조회
+     * TODO : 첨부파일 목록조회
      * */
     @GetMapping
     suspend fun list(
@@ -49,7 +49,7 @@ class BoardController(
         @RequestParam(defaultValue = "20") size: Int,
         @AuthenticationPrincipal(expression = "user") user: UserEntity?
     ): ResponseEntity<ApiResult<List<BoardResponse>>> {
-        val boards = service.listBoards(category, q, page, size, user?.id).toList()
+        val boards = service.listBoards(category, q, page, size, user?.id)
         return ResponseEntity.ok(ApiResult.success(boards))
     }
 
@@ -68,14 +68,14 @@ class BoardController(
     /** 게시글 작성 */
     @PostMapping(consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     suspend fun create(
-        req: BoardCreateRequest, // 👈 JSON 파트 지정
+        req: BoardCreateRequest,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
         @RequestPart(name = "files", required = false) filesFlux: Flux<FilePart>?,
         request: ServerHttpRequest
     ): ResponseEntity<ApiResult<Map<String, Any>>> {
         val ip = request.remoteAddress?.address?.hostAddress
         val files: List<FilePart> = filesFlux?.collectList()?.awaitSingle().orEmpty()
-        val uid = service.createBoard(req, user.id!!, files, ip)
+        val uid = service.create(req, user.id!!, files, ip)
         return ResponseEntity.ok(ApiResult.success(mapOf("uid" to uid)))
     }
 
@@ -83,14 +83,15 @@ class BoardController(
     /** 게시글 수정 */
     @PostMapping("/{uid}", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     suspend fun update(
-        @RequestPart("data") req: BoardUpdateRequest, // 👈 JSON 파트 지정
+        @PathVariable uid: UUID,
+        req: BoardUpdateRequest,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
         @RequestPart(name = "files", required = false) filesFlux: Flux<FilePart>?,
         request: ServerHttpRequest
     ): ResponseEntity<ApiResult<Unit>> {
         val ip = request.remoteAddress?.address?.hostAddress
         val files: List<FilePart> = filesFlux?.collectList()?.awaitSingle().orEmpty()
-        service.updateBoard(req.uid!!, req, user.id!!, files, ip, req.replaceAssets, req.deleteAssetUids)
+        service.update(uid, req, user.id!!, files, ip, req.replaceAssets, req.deleteAssetUids)
         return ResponseEntity.ok(ApiResult.success(Unit))
     }
 
@@ -101,37 +102,38 @@ class BoardController(
         @PathVariable uid: UUID,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ): ResponseEntity<ApiResult<Unit>> {
-        service.softDeleteBoard(uid, currentUserId = user.id!!)
+        service.softDelete(uid, currentUserId = user.id!!)
         return ResponseEntity.ok(ApiResult.success(Unit))
     }
 
 
-    /** 좋아요 */
+    /** 게시글 좋아요 */
     @PostMapping("/{uid}/like")
     suspend fun like(
         @PathVariable uid: UUID,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ): ResponseEntity<ApiResult<Unit>> {
-        service.likeBoard(uid, currentUserId = user.id!!)
+        service.like(uid, currentUserId = user.id!!)
         return ResponseEntity.ok(ApiResult.success(Unit))
     }
 
 
-    /** 좋아요 취소 */
-    @DeleteMapping("/{uid}/like")
+    /** 게시글 좋아요 취소 */
+    @DeleteMapping("/like/{uid}")
     suspend fun unlike(
         @PathVariable uid: UUID,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ): ResponseEntity<ApiResult<Unit>> {
-        service.unlikeBoard(uid, currentUserId = user.id!!)
+        service.unlike(uid, currentUserId = user.id!!)
         return ResponseEntity.ok(ApiResult.success(Unit))
     }
 
 
     /**
-     * 댓글 목록 (parentUid 없으면 최상위, 있으면 대댓글)
+     * - 댓글 목록 (parentUid 없으면 최상위, 있으면 대댓글)
      * - cursor: 마지막 댓글 uid (커서 기반 페이지네이션)
      * - perPage: 페이지당 개수
+     * TODO : 작성자 닉네임, 썸네일
      */
     @GetMapping("/comments")
     suspend fun comments(
@@ -154,10 +156,8 @@ class BoardController(
             items = items,
             perPage = perPage
         )
-
         return ResponseEntity.ok(ApiResult.success(result))
     }
-
 
 
     /** 댓글 작성 */
@@ -172,7 +172,7 @@ class BoardController(
 
 
     /** 댓글 수정 */
-    @PostMapping("/comments/update")
+    @PostMapping("/comments/{boardId}/{commentUid}")
     suspend fun updateComment(
         req: BoardCommentRegisterRequest,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
@@ -183,7 +183,7 @@ class BoardController(
 
 
     /** 댓글 삭제 */
-    @DeleteMapping("/comments/delete")
+    @DeleteMapping("/comments/{boardId}/{commentUid}")
     suspend fun deleteComment(
         req: BoardCommentRegisterRequest,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
@@ -194,7 +194,7 @@ class BoardController(
 
 
     /** 댓글 좋아요 */
-    @PostMapping("/comments/like")
+    @PostMapping("/comments/like/{commentUid}")
     suspend fun likeComment(
         req: BoardCommentRegisterRequest,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
@@ -205,7 +205,7 @@ class BoardController(
 
 
     /** 댓글 좋아요 취소 */
-    @DeleteMapping("/comments/like")
+    @DeleteMapping("/comments/like/{commentUid}")
     suspend fun unlikeComment(
         req: BoardCommentRegisterRequest,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
