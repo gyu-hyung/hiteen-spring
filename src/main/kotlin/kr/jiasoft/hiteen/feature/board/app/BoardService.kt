@@ -1,6 +1,5 @@
 package kr.jiasoft.hiteen.feature.board.app
 
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kr.jiasoft.hiteen.common.dto.ApiPageCursor
@@ -66,7 +65,7 @@ class BoardService(
         val attachments = boardAssetRepository.findAllByBoardId(boardId).map { it.uid }.toList()
         boards.increaseHits(boardId)
 
-        val perPage = 15
+        val perPage = 15// 기본 댓글 조회 개수
         val commentList = comments.findComments(b.uid, null, currentUserId ?: -1L, null, perPage + 1).toList()
 
         val hasMore = commentList.size > perPage
@@ -104,9 +103,9 @@ class BoardService(
     }
 
 
-    fun listBoards(
+    suspend fun listBoards(
         category: String?, q: String?, page: Int, size: Int, currentUserId: Long?
-    ): Flow<BoardResponse> {
+    ): List<BoardResponse> {
         val p = page.coerceAtLeast(0)
         val s = size.coerceIn(1, 100)
         val offset = p * s
@@ -127,10 +126,10 @@ class BoardService(
                     commentCount = row.commentCount,
                     likedByMe = row.likedByMe,
                 )
-            }
+            }.toList()
     }
 
-    suspend fun createBoard(
+    suspend fun create(
         req: BoardCreateRequest,
         currentUserId: Long,
         files: List<FilePart>,
@@ -186,7 +185,7 @@ class BoardService(
      *  - replaceAssets=false 에서 부분삭제로 기존 대표가 지워졌고 files도 없으면
      *      남아있는 자산 중 하나(가장 최근/가장 오래된 등 정책)에 맞춰 대표를 재지정
      */
-    suspend fun updateBoard(
+    suspend fun update(
         uid: UUID,
         req: BoardUpdateRequest,
         currentUserId: Long,
@@ -239,14 +238,14 @@ class BoardService(
     }
 
 
-    suspend fun softDeleteBoard(uid: UUID, currentUserId: Long) {
+    suspend fun softDelete(uid: UUID, currentUserId: Long) {
         val b = boards.findByUid(uid) ?: throw notFound("board")
         val updated = b.copy(deletedId = currentUserId, deletedAt = OffsetDateTime.now())
         boards.save(updated)
     }
 
     // ---------------------- Likes ----------------------
-    suspend fun likeBoard(uid: UUID, currentUserId: Long) {
+    suspend fun like(uid: UUID, currentUserId: Long) {
         val b = boards.findByUid(uid) ?: throw notFound("board")
         try {
             likes.save(BoardLikeEntity(boardId = b.id!!, userId = currentUserId))
@@ -255,12 +254,25 @@ class BoardService(
     }
 
     //    @Transactional
-    suspend fun unlikeBoard(uid: UUID, currentUserId: Long) {
+    suspend fun unlike(uid: UUID, currentUserId: Long) {
         val b = boards.findByUid(uid) ?: throw notFound("board")
-        likes.deleteByBoardIdAndUserId(b.id!!, currentUserId)
+        try {
+            likes.deleteByBoardIdAndUserId(b.id!!, currentUserId)
+        } catch (_: DuplicateKeyException) {
+        }
     }
 
     // ---------------------- Comments ----------------------
+    suspend fun listComments(
+        boardUid: UUID,
+        parentUid: UUID?,
+        currentUserId: Long?,
+        cursor: UUID?,
+        perPage: Int
+    ): List<BoardCommentResponse>
+            = comments.findComments(boardUid, parentUid, currentUserId ?: -1L, cursor, perPage).toList()
+
+
     suspend fun createComment(boardUid: UUID, req: BoardCommentRegisterRequest, currentUserId: Long): UUID {
         val b = boards.findByUid(boardUid) ?: throw notFound("board")
         val parent: BoardCommentEntity? = req.parentUid?.let { comments.findByUid(it) }
@@ -275,6 +287,7 @@ class BoardService(
         if (parent != null) comments.increaseReplyCount(parent.id!!)
         return saved.uid
     }
+
 
     suspend fun updateComment(
         boardUid: UUID,
@@ -304,6 +317,7 @@ class BoardService(
         return merged.uid
     }
 
+
     suspend fun deleteComment(
         boardUid: UUID,
         commentUid: UUID,
@@ -330,20 +344,6 @@ class BoardService(
     }
 
 
-    suspend fun listComments(
-        boardUid: UUID,
-        parentUid: UUID?,
-        currentUserId: Long?,
-        cursor: UUID?,
-        perPage: Int
-    ): List<BoardCommentResponse> {
-        return comments.findComments(boardUid, parentUid, currentUserId ?: -1L, cursor, perPage)
-            .toList()
-    }
-
-
-
-
     suspend fun likeComment(commentUid: UUID, currentUserId: Long) {
         val c = comments.findByUid(commentUid) ?: throw notFound("comment")
         try {
@@ -353,14 +353,13 @@ class BoardService(
     }
 
 
-    //    @Transactional
     suspend fun unlikeComment(commentUid: UUID, currentUserId: Long) {
         val c = comments.findByUid(commentUid) ?: throw notFound("comment")
         commentLikes.deleteByCommentIdAndUserId(c.id!!, currentUserId)
     }
 
 
-    private fun notFound(what: String) = ResponseStatusException(HttpStatus.NOT_FOUND, "$what not found")
+    private fun notFound(what: String) = ResponseStatusException(HttpStatus.BAD_REQUEST, "$what not found")
     private fun badRequest(msg: String) = ResponseStatusException(HttpStatus.BAD_REQUEST, msg)
     private fun forbidden(msg: String) = ResponseStatusException(HttpStatus.FORBIDDEN, msg)
 

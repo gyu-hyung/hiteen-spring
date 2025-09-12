@@ -29,12 +29,9 @@ interface BoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
             b.asset_uid      AS asset_uid,
             b.created_at     AS created_at,
             b.created_id     AS created_id,
-            (SELECT COUNT(*)::bigint FROM board_likes bl 
-               WHERE bl.board_id = b.id)                                       AS like_count,
-            (SELECT COUNT(*)::bigint FROM board_comments bc 
-               WHERE bc.board_id = b.id AND bc.deleted_at IS NULL)             AS comment_count,
-            EXISTS (SELECT 1 FROM board_likes bl2 
-                      WHERE bl2.board_id = b.id AND bl2.user_id = :userId)     AS liked_by_me
+            (SELECT COUNT(*)::bigint FROM board_likes bl WHERE bl.board_id = b.id) AS like_count,
+            (SELECT COUNT(*)::bigint FROM board_comments bc WHERE bc.board_id = b.id AND bc.deleted_at IS NULL) AS comment_count,
+            EXISTS (SELECT 1 FROM board_likes bl2 WHERE bl2.board_id = b.id AND bl2.user_id = :userId) AS liked_by_me
         FROM boards b
         WHERE b.deleted_at IS NULL
           AND (:category IS NULL OR b.category = :category)

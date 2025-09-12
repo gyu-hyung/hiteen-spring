@@ -6,7 +6,5 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface BoardCommentLikeRepository : CoroutineCrudRepository<BoardCommentLikeEntity, Long> {
-    suspend fun findByCommentIdAndUserId(commentId: Long, userId: Long): BoardCommentLikeEntity?
     suspend fun deleteByCommentIdAndUserId(commentId: Long, userId: Long)
-    suspend fun countByCommentId(commentId: Long): Long
 }
