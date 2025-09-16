@@ -27,7 +27,7 @@ interface UserRepository : CoroutineCrudRepository<UserEntity, Long> {
 
     /* 친구/팔로우 사용자 정보회 */
     @Query("""
-        SELECT uid, username, nickname, phone, address, detail_address, mood, tier, asset_uid 
+        SELECT uid, username, nickname, phone, address, detail_address, mood, tier, asset_uid, mbti
         FROM users WHERE id = :id
     """)
     suspend fun findSummaryInfoById(id: Long): UserSummary

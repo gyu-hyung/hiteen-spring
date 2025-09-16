@@ -107,13 +107,13 @@ class BoardService(
     suspend fun listBoardsByCursor(
         category: String?, q: String?, size: Int, currentUserId: Long?,
         followOnly: Boolean, friendOnly: Boolean, sameSchoolOnly: Boolean,
-        cursorUid: UUID?
+        cursorUid: UUID?, authorUid: UUID?
     ): ApiPageCursor<BoardResponse> {
         val s = size.coerceIn(1, 100)
         val uid = currentUserId ?: -1L
 
         val rows = boards.searchSummariesByCursor(
-            category, q, s + 1, uid, followOnly, friendOnly, sameSchoolOnly, cursorUid
+            category, q, s + 1, uid, followOnly, friendOnly, sameSchoolOnly, cursorUid, authorUid
         ).toList()
 
         val hasMore = rows.size > s
@@ -125,13 +125,14 @@ class BoardService(
             items = items.map { row ->
                 row.copy(
                     subject = row.subject,
-                    content = (row.content).take(160),
+                    content = row.content.take(160),
                     user = userService.findUserSummary(row.createdId)
                 )
             },
             perPage = s
         )
     }
+
 
 
     suspend fun create(

@@ -17,7 +17,6 @@ import kr.jiasoft.hiteen.feature.soketi.app.SoketiBroadcaster
 import kr.jiasoft.hiteen.feature.soketi.domain.SoketiChannelPattern
 import kr.jiasoft.hiteen.feature.soketi.domain.SoketiEventType
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
-import kr.jiasoft.hiteen.feature.user.dto.UserResponse
 import kr.jiasoft.hiteen.feature.user.infra.UserRepository
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -33,7 +32,6 @@ class ChatService(
     private val msgAssets: ChatMessageAssetRepository,
     private val users: UserRepository,
     private val soketiBroadcaster: SoketiBroadcaster,
-
 ) {
 
     /** DM 방 생성 TODO 친구가 맞는지? */
@@ -303,18 +301,20 @@ class ChatService(
 
             RoomSummaryResponse(
                 roomUid = r.uid,
+                memberCount = memberCount.toInt(),
+                unreadCount = unreadCount,
+                updatedAt = r.updatedAt ?: r.createdAt,
                 lastMessage = if (last != null) {
                     MessageSummary(
                         messageUid = last.uid,
                         sender = sender,
                         content = last.content,
+                        kind = last.kind,
+                        emojiCode = last.emojiCode,
                         createdAt = last.createdAt,
                         assets = lastAssets
                     )
                 } else null,
-                memberCount = memberCount.toInt(),
-                unreadCount = unreadCount,
-                updatedAt = r.updatedAt ?: r.createdAt
             )
         }.toList()
 

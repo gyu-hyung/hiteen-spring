@@ -22,10 +22,10 @@ data class SendMessageRequest(
 
 data class RoomSummaryResponse(
     val roomUid: UUID,
-    val lastMessage: MessageSummary?,
     val memberCount: Int,
     val unreadCount: Int,
-    val updatedAt: OffsetDateTime?
+    val updatedAt: OffsetDateTime?,
+    val lastMessage: MessageSummary?
 )
 
 data class MessageSummary(

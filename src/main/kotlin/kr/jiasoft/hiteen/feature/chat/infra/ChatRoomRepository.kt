@@ -25,7 +25,10 @@ interface ChatRoomRepository : CoroutineCrudRepository<ChatRoomEntity, Long> {
     @Query("""
         SELECT r.* FROM chat_rooms r
         JOIN chat_users cu ON cu.chat_room_id = r.id
-        WHERE cu.user_id = :userId AND cu.deleted_at IS NULL AND r.deleted_at IS NULL
+        WHERE cu.user_id = :userId
+        AND r.last_message_id IS NOT NULL
+        AND cu.deleted_at IS NULL 
+        AND r.deleted_at IS NULL
         ORDER BY COALESCE(r.updated_at, r.created_at) DESC NULLS LAST
         LIMIT :limit OFFSET :offset
     """)
