@@ -25,6 +25,7 @@ interface BoardCommentRepository : CoroutineCrudRepository<BoardCommentEntity, L
 
     @Query("""
         SELECT
+            c.id,
             c.uid,
             c.content,
             c.created_at  AS created_at,

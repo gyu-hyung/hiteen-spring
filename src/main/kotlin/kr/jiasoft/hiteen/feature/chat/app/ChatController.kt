@@ -83,7 +83,7 @@ class ChatController(
     suspend fun togglePush(
         @PathVariable roomUid: UUID,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
-         req: TogglePushRequest
+        req: TogglePushRequest
     ) = ResponseEntity.ok(ApiResult.success(service.togglePush(roomUid, user.id, req.enabled)))
 
 

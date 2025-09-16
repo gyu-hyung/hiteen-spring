@@ -24,16 +24,6 @@ class BoardController(
     private val service: BoardService,
 ) {
 
-    /** 프로필 조회
-     * TODO : 관심사, 학교, 학년,
-     */
-    @GetMapping("/profile")
-    suspend fun userBoards(@AuthenticationPrincipal(expression = "user") user: UserEntity?)
-            : ResponseEntity<ApiResult<BoardResponse>> {
-        val result = service.getUserBoards(user?.id)
-        return ResponseEntity.ok(ApiResult.success(result))
-    }
-
 
     /** 게시글 목록 Page */
 //    @GetMapping
@@ -159,7 +149,6 @@ class BoardController(
      * - 댓글 목록 (parentUid 없으면 최상위, 있으면 대댓글)
      * - cursor: 마지막 댓글 uid (커서 기반 페이지네이션)
      * - perPage: 페이지당 개수
-     * TODO : 작성자 닉네임, 썸네일
      */
     @GetMapping("/comments")
     suspend fun comments(

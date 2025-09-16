@@ -38,8 +38,8 @@ class BoardService(
     private val likes: BoardLikeRepository,
     private val commentLikes: BoardCommentLikeRepository,
     private val assetService: AssetService,
-    private val eloquent: CoroutineEloquent,
     private val userService: UserService,
+//    private val eloquent: CoroutineEloquent,
 ) {
 
 //    suspend fun getUserBoards(userId: Long?): CursorResult<BoardResponse, Long> {
@@ -49,13 +49,6 @@ class BoardService(
 //            .cursorPaginate(10,0)
 ////            ?.boards.orEmpty()
 //    }
-
-    suspend fun getUserBoards(userId: Long?): BoardResponse? {
-        return eloquent.forEntity(BoardResponse::class.java)
-            .where("created_id", "=", userId!!)
-            .with("user")
-            .first()
-    }
 
 
     suspend fun getBoard(uid: UUID, currentUserId: Long?): BoardResponse {
