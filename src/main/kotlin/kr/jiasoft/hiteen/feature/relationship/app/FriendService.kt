@@ -80,7 +80,6 @@ class FriendService(
     }
 
     suspend fun listFriends(me: UserEntity): List<RelationshipSummary> {
-        // TODO Query UserInfo++
         return friendRepository.findAllAccepted(me.id)
             .map { e ->
                 val otherId = if (e.userId == me.id) e.friendId else e.userId

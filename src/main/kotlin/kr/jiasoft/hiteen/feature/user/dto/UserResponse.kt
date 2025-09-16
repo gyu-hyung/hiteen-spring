@@ -6,6 +6,7 @@ import kr.jiasoft.hiteen.feature.relationship.dto.RelationshipCounts
 import kr.jiasoft.hiteen.feature.school.domain.SchoolEntity
 import kr.jiasoft.hiteen.feature.school.dto.SchoolDto
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
+import kr.jiasoft.hiteen.feature.user.domain.UserPhotosEntity
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Table
 import java.time.LocalDate
@@ -38,9 +39,16 @@ data class UserResponse(
 
     val relationshipCounts: RelationshipCounts?,
     val interests: List<InterestUserResponse>?,
+    val photos: List<UserPhotosEntity>?,
 ) {
     companion object {
-        fun from(entity: UserEntity, school: SchoolEntity? = null, interests: List<InterestUserResponse>? = null, relationshipCounts: RelationshipCounts? = null): UserResponse =
+        fun from(
+            entity: UserEntity,
+            school: SchoolEntity? = null,
+            interests: List<InterestUserResponse>? = null,
+            relationshipCounts: RelationshipCounts? = null,
+            photos: List<UserPhotosEntity>? = null,
+        ): UserResponse =
             UserResponse(
                 id = entity.id,
                 uid = entity.uid.toString(),
@@ -64,6 +72,7 @@ data class UserResponse(
                 deletedAt = entity.deletedAt?.toLocalDateTime(),
                 relationshipCounts = relationshipCounts,
                 interests = interests,
+                photos = photos
             )
     }
 }

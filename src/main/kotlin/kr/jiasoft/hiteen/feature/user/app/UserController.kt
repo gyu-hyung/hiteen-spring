@@ -57,8 +57,7 @@ class UserController(
     }
 
 
-    /** 회원 프로필 조회
-     * TODO : 학교, 관심사, 티어 */
+    /** 회원 프로필 조회 */
     @GetMapping("/profile/{uid}")
     suspend fun profile(
         @PathVariable uid: UUID

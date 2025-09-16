@@ -90,7 +90,7 @@ class InterestUserService(
         val interests = interestUserRepository.getInterestResponseById(null, targetUserId).toList()
 
         // 5) 추천 대상자의 사진 목록
-        val photos = userPhotosRepository.findByUserId(targetUserId).toList()
+        val photos = userPhotosRepository.findByUserId(targetUserId)?.toList() ?: emptyList()
 
         // 추천 이력 저장
         interestMatchHistoryRepository.save(

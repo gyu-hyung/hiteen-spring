@@ -79,8 +79,9 @@ class UserService (
         val relationshipCounts = followService.getRelationshipCounts(updated.id).copy(
             postCount = boardRepository.countByCreatedId(updated.id)
         )
+        val photos = getPhotos(updated.uid.toString())
 
-        return UserResponse.from(updated, school, interests, relationshipCounts)
+        return UserResponse.from(updated, school, interests, relationshipCounts, photos)
     }
 
 
@@ -93,8 +94,9 @@ class UserService (
         val relationshipCounts = followService.getRelationshipCounts(user.id).copy(
             postCount = boardRepository.countByCreatedId(user.id)
         )
+        val photos = getPhotos(user.uid.toString())
 
-        return UserResponse.from(user, school, interests, relationshipCounts)
+        return UserResponse.from(user, school, interests, relationshipCounts, photos)
     }
 
 
@@ -179,8 +181,9 @@ class UserService (
         val school = saved.schoolId?.let { id -> schoolRepository.findById(id) }
         val interests = interestUserRepository.getInterestResponseById(null, saved.id).toList()
         val relationshipCounts = followService.getRelationshipCounts(saved.id)
+        val photos = getPhotos(saved.uid.toString())
 
-        return UserResponse.from(saved, school, interests, relationshipCounts)
+        return UserResponse.from(saved, school, interests, relationshipCounts, photos)
     }
 
 
@@ -225,7 +228,7 @@ class UserService (
         val userEntity = userRepository.findByUid(userUid)
             ?: throw BusinessValidationException(mapOf("user" to "존재하지 않는 사용자입니다."))
 
-        return userPhotosRepository.findByUserId(userEntity.id).toList()
+        return userPhotosRepository.findByUserId(userEntity.id)?.toList() ?: emptyList()
     }
 
 

@@ -37,6 +37,7 @@ CREATE TABLE users (
   deleted_at    timestamptz
 );
 
+
 -- 이메일: 삭제되지 않은 사용자만 유니크, 대소문자 구분 없음
 --CREATE UNIQUE INDEX users_email_key
 --    ON users (lower(email))
@@ -48,8 +49,28 @@ CREATE UNIQUE INDEX users_username_key
     WHERE deleted_at IS NULL;
 
 
-
-
+-- ========================
+-- 사용자 상세정보
+-- ========================
+CREATE TABLE user_details (
+  id            bigserial PRIMARY KEY,
+  user_id       bigint NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  device_id     VARCHAR(300),
+  device_os     VARCHAR(30),
+  device_version VARCHAR(20),
+  device_detail text,
+  device_token  VARCHAR(300),
+  location_token VARCHAR(300),
+  aqns_token    VARCHAR(300),
+  api_token     VARCHAR(300),
+  agree_service VARCHAR(100),
+  agree_privacy VARCHAR(100),
+  agree_finance VARCHAR(100),
+  agree_marketing VARCHAR(100),
+  push_service  VARCHAR(100),
+  push_marketing VARCHAR(100),
+  memo          text
+)
 
 
 -- ========================
@@ -762,6 +783,7 @@ CREATE TABLE user_photos (
 --  interest_user,
 --  interests,
 --  codes,
+--  user_details,
 --  users,
 --  sms,
 --  sms_details,

@@ -22,5 +22,5 @@ data class BoardCommentResponse(
     @JsonIgnore
     val createdId: Long,
     val createdAt: OffsetDateTime,
-    val user: UserSummary,
+    val user: UserSummary?,
 )
