@@ -113,7 +113,7 @@ class ChatService(
                 userId = sendUser.id,
                 content = req.content,
                 createdAt = OffsetDateTime.now(),
-                kind = req.kind,
+                kind = if (req.emojiCode != null) 1 else 0,
                 emojiCode = req.emojiCode,
             )
         )
@@ -177,8 +177,6 @@ class ChatService(
     }
 
 
-
-
     /** 메세지 페이징 조회 */
     suspend fun pageMessages(roomUid: UUID, cursor: OffsetDateTime?, size: Int): List<MessageSummary> {
         val room = rooms.findByUid(roomUid) ?: error("room not found")
@@ -207,22 +205,11 @@ class ChatService(
                 )
             }.toList()
 
-            val senderEntity = users.findById(m.userId)
-                ?: throw IllegalStateException("sender user not found: ${m.userId}")
-            val senderResponse = UserResponse.from(senderEntity)
-
-
+            val sender = users.findSummaryInfoById(m.userId)
             val readers = readersMap[m.id] ?: 0L
             val unread = ((memberCount - 1) - readers).coerceAtLeast(0L).toInt()
 
-            MessageSummary(
-                messageUid = m.uid,
-                content = m.content,
-                unreadCount = unread,
-                createdAt = m.createdAt,
-                sender = senderResponse,
-                assets = assets,
-            )
+            MessageSummary.from(m, sender, assets, unread)
         }
     }
 
@@ -301,8 +288,7 @@ class ChatService(
 
             // 마지막 메시지 + 작성자 조회
             val last = messages.findLastMessage(r.id)
-            val senderEntity = last?.userId?.let { uid -> users.findById(uid) }
-            val senderResponse = senderEntity?.let { UserResponse.from(it) }
+            val sender = last?.userId?.let { uid -> users.findSummaryInfoById(uid) }
 
             // 마지막 메시지의 assets
             val lastAssets = last?.id?.let { msgAssets.listByMessage(it).map { a ->
@@ -317,10 +303,10 @@ class ChatService(
 
             RoomSummaryResponse(
                 roomUid = r.uid,
-                lastMessage = if (last != null && senderResponse != null) {
+                lastMessage = if (last != null) {
                     MessageSummary(
                         messageUid = last.uid,
-                        sender = senderResponse,
+                        sender = sender,
                         content = last.content,
                         createdAt = last.createdAt,
                         assets = lastAssets

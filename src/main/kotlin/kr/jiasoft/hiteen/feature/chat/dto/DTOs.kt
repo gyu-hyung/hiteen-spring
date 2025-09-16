@@ -1,6 +1,7 @@
 package kr.jiasoft.hiteen.feature.chat.dto
 
-import kr.jiasoft.hiteen.feature.user.dto.UserResponse
+import kr.jiasoft.hiteen.feature.chat.domain.ChatMessageEntity
+import kr.jiasoft.hiteen.feature.user.dto.UserSummary
 import org.springframework.data.relational.core.mapping.Column
 import java.time.OffsetDateTime
 import java.util.UUID
@@ -32,9 +33,26 @@ data class MessageSummary(
     val content: String?,
     val unreadCount: Int? = null,
     val createdAt: OffsetDateTime?,
-    val sender: UserResponse?,
-    val assets: List<MessageAssetSummary> = emptyList(),
-)
+    val kind: Short = 0,
+    val emojiCode: String? = null,
+    val sender: UserSummary?,
+    val assets: List<MessageAssetSummary>?,
+) {
+    companion object {
+            fun from(entity: ChatMessageEntity, sender: UserSummary?, assets: List<MessageAssetSummary>?, unreadCount: Int? = null): MessageSummary {
+            return MessageSummary(
+                messageUid = entity.uid,
+                content = entity.content,
+                unreadCount = unreadCount,
+                createdAt = entity.createdAt,
+                kind = entity.kind,
+                emojiCode = entity.emojiCode,
+                sender = sender,
+                assets = assets,
+            )
+        }
+    }
+}
 
 data class ReadersCountRow(
     @Column("message_id") val messageId: Long,
@@ -48,7 +66,6 @@ data class ActiveUsersRow(
 
 
 data class MessageAssetSummary(
-//    val id: Long?,
     val assetUid: UUID?,
 //    val messageId: Long?,
     val width: Int?,
