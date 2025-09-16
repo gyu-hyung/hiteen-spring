@@ -3,9 +3,9 @@ package kr.jiasoft.hiteen.feature.poll.dto
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import jakarta.validation.constraints.NotBlank
 import kr.jiasoft.hiteen.feature.poll.domain.PollEntity
-import kr.jiasoft.hiteen.feature.user.dto.UserResponse
+import kr.jiasoft.hiteen.feature.user.dto.UserSummary
+import java.time.OffsetDateTime
 import java.util.UUID
 
 data class PollCreateRequest(
@@ -18,6 +18,7 @@ data class PollCreateRequest(
 )
 
 data class PollUpdateRequest(
+    val id: Long?,
     val question: String?,
     val answers: List<String>?, // 선택지 수정
     val colorStart: String?,
@@ -28,7 +29,8 @@ data class PollUpdateRequest(
 
 
 data class PollVoteRequest(
-    val seq: Int?
+    val pollId: Long,
+    val seq: Int
 )
 
 
@@ -40,42 +42,43 @@ data class PollSelectResponse(
 
 
 data class PollSummaryRow(
-    val id: Long?,
-    val question: String?,
+    val id: Long,
+    val question: String,
     val photo: String?,
     val selects: String?, // jsonb를 String으로 받음
     val colorStart: String?,
     val colorEnd: String?,
-    val voteCount: Int?,
-    val commentCount: Int?,
-    val votedByMe: Boolean?,
-    val userId: Long?,
-//    val username: String?, // UserResponse정보 함께 조회?
-//    val nickname: String?,
-//    val profileImage: String?
+    val voteCount: Int = 0,
+    val commentCount: Int = 0,
+    val votedByMe: Boolean = false,
+    val votedSeq: Int? = null,
+    val createdId: Long,
+    val createdAt: OffsetDateTime,
 )
 
 
 data class PollResponse(
-    val id: Long?,
-    val question: String?,
+    val id: Long,
+    val question: String,
     val photo: String?,
     val selects: List<PollSelectResponse>?,
     val colorStart: String?,
     val colorEnd: String?,
-    val voteCount: Int?,
+    val voteCount: Int = 0,
 //    val likeCount: Int?,// TODO
-    val commentCount: Int?,
-    val votedByMe: Boolean?,
+    val commentCount: Int = 0,
+    val votedByMe: Boolean = false,
+    val votedSeq: Int? = null,
+    val createdAt: OffsetDateTime,
 //    val likedByMe: Boolean?,// TODO
-    val user: UserResponse?,
+    val user: UserSummary?,
 //    val comments: ApiPageCursor<PollCommentResponse>?,// TODO
 ) {
     companion object {
-        fun of(entity: PollEntity, votedByMe: Boolean, user: UserResponse): PollResponse {
+        fun of(entity: PollEntity, votedSeq: Int?, user: UserSummary): PollResponse {
             val selects: List<PollSelectResponse> =
                 try {
-                    val raw = entity.selects?.asString() ?: "[]"
+                    val raw = entity.selects.asString()
                     jacksonObjectMapper().readValue(raw, object : TypeReference<List<PollSelectResponse>>() {})
                 } catch (_: Exception) {
                     emptyList()
@@ -89,7 +92,32 @@ data class PollResponse(
                 colorEnd = entity.colorEnd,
                 voteCount = entity.voteCount,
                 commentCount = entity.commentCount,
-                votedByMe = votedByMe,
+                votedByMe = votedSeq != null,
+                votedSeq = votedSeq,
+                createdAt = entity.createdAt,
+                user = user
+            )
+        }
+
+        fun from(res: PollSummaryRow, user: UserSummary): PollResponse {
+            val selects: List<PollSelectResponse> =
+                try {
+                    jacksonObjectMapper().readValue(res.selects, object : TypeReference<List<PollSelectResponse>>() {})
+                } catch (_: Exception) {
+                    emptyList()
+                }
+            return PollResponse(
+                id = res.id,
+                question = res.question,
+                photo = res.photo,
+                selects = selects,
+                colorStart = res.colorStart,
+                colorEnd = res.colorEnd,
+                voteCount = res.voteCount,
+                commentCount = res.commentCount,
+                votedByMe = res.votedByMe,
+                votedSeq = res.votedSeq,
+                createdAt = res.createdAt,
                 user = user
             )
         }
@@ -101,16 +129,22 @@ data class PollCommentRegisterRequest(
     val pollId: Long? = null,
     val commentUid: UUID? = null,
 //    @field:NotBlank
-    val content: String?,
+    val content: String,
     val parentId: Long? = null
 )
 
 
 data class PollCommentResponse(
     @JsonIgnore
-    val id: Long? = null,
-    val uid: UUID? = null,
-    val content: String?,
-    val replyCount: Int,
-    val likedByMe: Boolean
+    val id: Long,
+    val uid: UUID,
+    val content: String,
+    val replyCount: Int = 0,
+    val likeCount: Long = 0,
+    val likedByMe: Boolean = false,
+    val parentUid: UUID? = null,
+    @JsonIgnore
+    val createdId: Long,
+    val createdAt: OffsetDateTime,
+    val user: UserSummary? = null,
 )

@@ -7,18 +7,18 @@ import java.time.OffsetDateTime
 @Table(name = "pin")
 data class PinEntity(
     @Id
-    val id: Long? = null,
+    val id: Long = 0,
     val userId: Long,
-    val zipcode: String? = null,
-    val lat: Double? = null,
-    val lng: Double? = null,
-    val description: String? = null,
-    val visibility: String? = null,
-    val createdId: Long? = null,
-    val createdAt: OffsetDateTime = OffsetDateTime.now(),
+    val zipcode: String?,
+    val lat: Double,
+    val lng: Double,
+    val description: String,
+    val visibility: String,
+    val createdId: Long,
+    val createdAt: OffsetDateTime,
     val updatedId: Long? = null,
     val updatedAt: OffsetDateTime? = null,
     val deletedId: Long? = null,
-    val deletedAt: OffsetDateTime? = null
+    val deletedAt: OffsetDateTime? = null,
 )
 

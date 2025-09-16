@@ -28,9 +28,9 @@ class InterestUserService(
 
     /** 특정 사용자 관심사 등록 */
     suspend fun addInterestToUser(user: UserEntity, interestId: Long): InterestUserResponse? {
-        val exist = interestUserRepository.findByUserIdAndInterestId(user.id!!, interestId)
+        val exist = interestUserRepository.findByUserIdAndInterestId(user.id, interestId)
         if (exist != null) {
-            return interestUserRepository.getInterestResponseById(exist.id!!, null).firstOrNull()
+            return interestUserRepository.getInterestResponseById(exist.id, null).firstOrNull()
         }
 
         val entity = InterestUserEntity(
@@ -39,7 +39,7 @@ class InterestUserService(
             createdAt = OffsetDateTime.now()
         )
         val saved = interestUserRepository.save(entity)
-        return interestUserRepository.getInterestResponseById(saved.id!!, null).firstOrNull()
+        return interestUserRepository.getInterestResponseById(saved.id, null).firstOrNull()
     }
 
     /** 특정 사용자의 모든 관심사 조회 */
@@ -62,7 +62,7 @@ class InterestUserService(
 
     /** 오늘의 추천 친구 1명 뽑기 */
     suspend fun recommendFriend(user: UserEntity, dailyLimit: Int = 1): FriendRecommendationResponse? {
-        val todayCount = interestMatchHistoryRepository.countTodayRecommendations(user.id!!)
+        val todayCount = interestMatchHistoryRepository.countTodayRecommendations(user.id)
         if (todayCount >= dailyLimit) {
             return null
         }
@@ -95,9 +95,8 @@ class InterestUserService(
         // 추천 이력 저장
         interestMatchHistoryRepository.save(
             InterestMatchHistoryEntity(
-                id = null,
                 userId = user.id,
-                targetId = targetUser.id!!,
+                targetId = targetUser.id,
                 status = "RECOMMENDED",
                 createdAt = OffsetDateTime.now(),
             )
@@ -117,8 +116,7 @@ class InterestUserService(
     suspend fun passFriend(user: UserEntity, targetUserId: Long) {
         interestMatchHistoryRepository.save(
             InterestMatchHistoryEntity(
-                id = null,
-                userId = user.id!!,
+                userId = user.id,
                 targetId = targetUserId,
                 status = "PASSED",
                 createdAt = OffsetDateTime.now()

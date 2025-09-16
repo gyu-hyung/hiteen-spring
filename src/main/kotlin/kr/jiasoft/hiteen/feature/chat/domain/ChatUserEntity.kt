@@ -9,7 +9,7 @@ import java.time.OffsetDateTime
 data class ChatUserEntity(
 
     @Id
-    val id: Long? = null,
+    val id: Long = 0,
 
     @Column("chat_room_id")
     val chatRoomId: Long,
@@ -19,7 +19,7 @@ data class ChatUserEntity(
 
     val status: Short? = 0,       // 0=정상, 1=뮤트, 2=차단...
 
-    val push: Boolean? = true,
+    val push: Boolean = true,
 
     @Column("push_at")
     val pushAt: OffsetDateTime? = null,

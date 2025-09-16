@@ -40,8 +40,9 @@ class PinController(
         dto: PinRegisterRequest
     ) = ResponseEntity.ok(ApiResult(true, pinService.register(user, dto)))
 
+
     /** 핀 수정 */
-    @PostMapping("/update")
+    @PostMapping("/{id}")
     suspend fun update(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
         dto: PinUpdateRequest
@@ -49,11 +50,11 @@ class PinController(
 
 
     /** 핀 삭제 */
-    @DeleteMapping("/{pinId}")
+    @DeleteMapping("/{id}")
     suspend fun delete(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
-        @PathVariable pinId: Long
-    ) = ResponseEntity.ok(ApiResult(true, pinService.delete(user, pinId)))
+        @PathVariable id: Long
+    ) = ResponseEntity.ok(ApiResult(true, pinService.delete(user, id)))
 
 
 }

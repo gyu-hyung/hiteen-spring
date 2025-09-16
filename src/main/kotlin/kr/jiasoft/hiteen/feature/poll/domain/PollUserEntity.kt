@@ -7,9 +7,9 @@ import java.time.OffsetDateTime
 @Table("poll_users")
 data class PollUserEntity (
     @Id
-    val id: Long? = null,
+    val id: Long = 0,
     val pollId: Long,
     val userId: Long,
-    val seq: Int?,
+    val seq: Int,
     val votedAt: OffsetDateTime,
 )

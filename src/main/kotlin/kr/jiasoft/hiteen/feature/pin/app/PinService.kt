@@ -31,10 +31,10 @@ class PinService(
 
     /** 내가 등록한 핀 목록 */
     suspend fun listMyPins(user: UserEntity): List<PinResponse> {
-        val myPins = pinRepository.findAllByUserId(user.id!!).toList()
+        val myPins = pinRepository.findAllByUserId(user.id).toList()
 
         // pinId → 허용된 userId 리스트
-        val pinUsersMap: Map<Long, List<Long>> = pinUsersRepository.findAllByPinIdIn(myPins.mapNotNull { it.id })
+        val pinUsersMap: Map<Long, List<Long>> = pinUsersRepository.findAllByPinIdIn(myPins.map { it.id })
             .toList()
             .groupBy({ it.pinId }, { it.userId })
 
@@ -60,7 +60,7 @@ class PinService(
      * - 일부공개 (FRIENDS)
      */
     suspend fun listVisiblePins(user: UserEntity): List<PinResponse> {
-        val userId = user.id!!
+        val userId = user.id
 
         // 1. 전체 공개 핀 TODO 근처 핀만 조회로 변경해야함
         val publicPins = pinRepository.findAllByVisibilityOrderByIdDesc("PUBLIC")
@@ -85,7 +85,7 @@ class PinService(
         val userIds = pins.map { it.userId }.distinct()
 
         // 핀별 허용된 친구 매핑
-        val pinUsers = pinUsersRepository.findAllByPinIdIn(pins.mapNotNull { it.id }).toList()
+        val pinUsers = pinUsersRepository.findAllByPinIdIn(pins.map { it.id }).toList()
         val allowedUserIds = pinUsers.groupBy({ it.pinId }, { it.userId })
 
         // 전체 user 조회
@@ -105,13 +105,14 @@ class PinService(
     suspend fun register(user: UserEntity, dto: PinRegisterRequest): PinEntity {
         val pin = pinRepository.save(
             PinEntity(
-                userId = user.id!!,
+                userId = user.id,
                 zipcode = dto.zipcode,
                 lat = dto.lat,
                 lng = dto.lng,
                 description = dto.description,
                 visibility = dto.visibility,
-                createdId = user.id
+                createdId = user.id,
+                createdAt = OffsetDateTime.now(),
             )
         )
 
@@ -124,7 +125,7 @@ class PinService(
                 users.forEach { u ->
                     launch {
                         pinUsersRepository.save(
-                            PinUsersEntity(pinId = pin.id!!, userId = u.id!!)
+                            PinUsersEntity(pinId = pin.id, userId = u.id, createdAt = OffsetDateTime.now())
                         )
                     }
                 }
@@ -160,12 +161,12 @@ class PinService(
         // 4. 공개 친구 수정
         if (dto.visibility == "FRIENDS") {
             if (dto.friendUids != null) {
-                pinUsersRepository.deleteAllByPinId(pin.id!!)
+                pinUsersRepository.deleteAllByPinId(pin.id)
                 if (dto.friendUids.isNotEmpty()) {
                     val users = userRepository.findAllByUidIn(dto.friendUids)
                     users.forEach { u ->
                         pinUsersRepository.save(
-                            PinUsersEntity(pinId = pin.id, userId = u.id!!)
+                            PinUsersEntity(pinId = pin.id, userId = u.id, createdAt = OffsetDateTime.now())
                         )
                     }
                 }

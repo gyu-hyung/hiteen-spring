@@ -2,6 +2,7 @@ package kr.jiasoft.hiteen.feature.chat.app
 
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
+import kr.jiasoft.hiteen.common.exception.BusinessValidationException
 import kr.jiasoft.hiteen.feature.chat.domain.*
 import kr.jiasoft.hiteen.feature.chat.dto.MessageAssetSummary
 import kr.jiasoft.hiteen.feature.chat.dto.MessageSummary
@@ -38,7 +39,7 @@ class ChatService(
     /** DM 방 생성 TODO 친구가 맞는지? */
     suspend fun createDirectRoom(currentUserId: Long, peerUid: UUID): UUID {
         val peer = users.findByUid(peerUid.toString()) ?: error("peer not found")
-        val existing = rooms.findDirectRoom(currentUserId, peer.id!!)
+        val existing = rooms.findDirectRoom(currentUserId, peer.id)
         if (existing != null) return existing.uid
 
         val saved = rooms.save(
@@ -48,7 +49,7 @@ class ChatService(
                 updatedAt = OffsetDateTime.now()
             )
         )
-        chatUsers.save(ChatUserEntity(chatRoomId = saved.id!!, userId = currentUserId, push = true, pushAt = OffsetDateTime.now(), joiningAt = OffsetDateTime.now()))
+        chatUsers.save(ChatUserEntity(chatRoomId = saved.id, userId = currentUserId, push = true, pushAt = OffsetDateTime.now(), joiningAt = OffsetDateTime.now()))
         chatUsers.save(ChatUserEntity(chatRoomId = saved.id, userId = peer.id, push = true, pushAt = OffsetDateTime.now(), joiningAt = OffsetDateTime.now()))
         return saved.uid
     }
@@ -82,7 +83,7 @@ class ChatService(
         memberIds.forEach { uid ->
             chatUsers.save(
                 ChatUserEntity(
-                    chatRoomId = saved.id!!,
+                    chatRoomId = saved.id,
                     userId = uid,
                     push = true,
                     pushAt = OffsetDateTime.now(),
@@ -103,7 +104,7 @@ class ChatService(
     /** 메시지 전송 */
     suspend fun sendMessage(roomUid: UUID, sendUser: UserEntity, req: SendMessageRequest): UUID {
         val room = rooms.findByUidAndDeletedAtIsNull(roomUid) ?: error("room not found")
-        chatUsers.findActive(room.id!!, sendUser.id!!) ?: error("not a member")
+        chatUsers.findActive(room.id, sendUser.id) ?: error("not a member")
 
         // 메시지 저장
         val savedMsg = messages.save(
@@ -119,7 +120,7 @@ class ChatService(
 
         // 첨부 파일 저장
         req.assetUids?.forEach { au ->
-            msgAssets.save(ChatMessageAssetEntity(uid = au, messageId = savedMsg.id!!))
+            msgAssets.save(ChatMessageAssetEntity(uid = au, messageId = savedMsg.id))
         }
 
         // 채팅방 업데이트
@@ -184,19 +185,19 @@ class ChatService(
 
         // 최신 페이지 (DESC)
 //        val messagePage = messages.pageByRoom(room.id!!, cursor, size).toList()
-        val messagePage = messages.pageByRoomWithEmoji(room.id!!, cursor, size).toList()
+        val messagePage = messages.pageByRoomWithEmoji(room.id, cursor, size).toList()
         if (messagePage.isEmpty()) return emptyList()
 
         val memberCount = chatUsers.countActiveByRoom(room.id).toInt()
 
-        val minId = messagePage.minOf { it.id!! }
-        val maxId = messagePage.maxOf { it.id!! }
+        val minId = messagePage.minOf { it.id}
+        val maxId = messagePage.maxOf { it.id}
         val readersMap = messages.countReadersInIdRange(room.id, minId, maxId)
             .toList()
             .associate { it.messageId to it.readerCount }
 
         return messagePage.map { m ->
-            val assets = msgAssets.listByMessage(m.id!!).map { a ->
+            val assets = msgAssets.listByMessage(m.id).map { a ->
                 MessageAssetSummary(
 //                    a.id,
                     a.uid,
@@ -229,7 +230,7 @@ class ChatService(
     /** 방 탈퇴 */
     suspend fun leaveRoom(roomUid: UUID, currentUserId: Long) {
         val room = rooms.findByUid(roomUid) ?: error("room not found")
-        val me = chatUsers.findActive(room.id!!, currentUserId) ?: return
+        val me = chatUsers.findActive(room.id, currentUserId) ?: return
         chatUsers.save(me.copy(leavingAt = OffsetDateTime.now(), deletedAt = OffsetDateTime.now()))
     }
 
@@ -237,14 +238,14 @@ class ChatService(
     /** 푸시 설정 변경 TODO history? */
     suspend fun togglePush(roomUid: UUID, currentUserId: Long, enabled: Boolean) {
         val room = rooms.findByUid(roomUid) ?: error("room not found")
-        val me = chatUsers.findActive(room.id!!, currentUserId) ?: error("not a member")
+        val me = chatUsers.findActive(room.id, currentUserId) ?: throw BusinessValidationException(mapOf("error" to "not a member"))
         chatUsers.save(me.copy(push = enabled, pushAt = OffsetDateTime.now()))
     }
 
 
     suspend fun assertMember(roomUid: UUID, userId: Long) {
         val room = rooms.findByUid(roomUid) ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "room not found")
-        val me = chatUsers.findActive(room.id!!, userId)
+        val me = chatUsers.findActive(room.id, userId)
         if (me == null) {
             throw ResponseStatusException(HttpStatus.FORBIDDEN, "not a member")
         }
@@ -254,11 +255,11 @@ class ChatService(
     suspend fun markRead(roomUid: UUID, currentUser: UserEntity, lastMessageUid: UUID) {
         val room = rooms.findByUid(roomUid)
             ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "room not found")
-        chatUsers.findActive(room.id!!, currentUser.id!!)
+        chatUsers.findActive(room.id, currentUser.id)
             ?: throw ResponseStatusException(HttpStatus.FORBIDDEN, "not a member")
 
         val msg = messages.findByUid(lastMessageUid) ?: return
-        chatUsers.updateReadCursor(room.id, currentUser.id, msg.id!!, OffsetDateTime.now())
+        chatUsers.updateReadCursor(room.id, currentUser.id, msg.id, OffsetDateTime.now())
 
         // ✅ 마지막 메시지 요약
         val lastMsgEntity = messages.findById(msg.id) ?: return
@@ -296,7 +297,7 @@ class ChatService(
         val cursor = messages.findCurrentCursorByUserId(currentUserId)
 
         val roomsList = rooms.listRooms(currentUserId, limit, offset).map { r ->
-            val memberCount = chatUsers.countActiveByRoom(r.id!!)
+            val memberCount = chatUsers.countActiveByRoom(r.id)
 
             // 마지막 메시지 + 작성자 조회
             val last = messages.findLastMessage(r.id)

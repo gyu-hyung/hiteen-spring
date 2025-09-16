@@ -7,11 +7,11 @@ import java.time.OffsetDateTime
 @Table(name = "sms_details")
 data class SmsDetailEntity (
     @Id
-    val id: Long? = null,
-    val smsId: Long? = null,
-    val phone: String? = null,
-    val success: Boolean? = null,
+    val id: Long = 0,
+    val smsId: Long,
+    val phone: String,
+    val success: Boolean,
     val error: String? = null,
-    val createdAt: OffsetDateTime? = null,
+    val createdAt: OffsetDateTime,
     val updatedAt: OffsetDateTime? = null,
 )

@@ -6,16 +6,16 @@ import java.util.*
 
 data class AssetResponse(
     val uid: UUID,
-    val originFileName: String?,
-    val storedFileName: String?,  // nameFileName
-    val filePath: String?,
+    val originFileName: String,
+    val storedFileName: String,  // nameFileName
+    val filePath: String,
     val mimeType: String?,
-    val size: Long?,
+    val size: Long,
     val width: Int?,
     val height: Int?,
     val ext: String?,
     val downloadCount: Int,
-    val createdAt: OffsetDateTime?,
+    val createdAt: OffsetDateTime,
 )
 
 fun AssetEntity.toResponse() = AssetResponse(
@@ -28,6 +28,6 @@ fun AssetEntity.toResponse() = AssetResponse(
     width = width,
     height = height,
     ext = ext,
-    downloadCount = downloadCount ?: 0,
+    downloadCount = downloadCount,
     createdAt = createdAt
 )

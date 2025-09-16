@@ -14,6 +14,7 @@ import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
 import java.nio.file.Files
 import java.nio.file.Path
+import java.time.OffsetDateTime
 import java.util.*
 
 @Service
@@ -88,14 +89,15 @@ class AssetService(
     private suspend fun uploadStored(stored: StoredFile, originFileName: String?, currentUserId: Long): AssetResponse {
         val entity = AssetEntity(
             originFileName = originFileName ?: stored.absolutePath.fileName.toString(),
-            storeFileName  = stored.absolutePath.fileName.toString(), // @Column("name_file_name") 매핑 확인
-            filePath       = stored.relativePath,
-            type           = stored.mimeTypeGuess,
-            size           = stored.size,
-            width          = stored.width,
-            height         = stored.height,
-            ext            = stored.ext,
-            createdId      = currentUserId
+            storeFileName = stored.absolutePath.fileName.toString(), // @Column("name_file_name") 매핑 확인
+            filePath = stored.relativePath,
+            type = stored.mimeTypeGuess,
+            size = stored.size,
+            width = stored.width,
+            height = stored.height,
+            ext = stored.ext,
+            createdId = currentUserId,
+            createdAt = OffsetDateTime.now(),
         )
         val saved = assetRepository.save(entity)
         return saved.toResponse()

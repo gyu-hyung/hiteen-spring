@@ -60,7 +60,7 @@ class FriendService(
         val registeredUsers = userRepository.findAllByPhoneIn(phones).toList()
 
         // 3. 친구 관계 조회 (내가 user_id 또는 friend_id 인 경우)
-        val friends = friendRepository.findByUserIdOrFriendId(user.id!!, user.id).toList()
+        val friends = friendRepository.findByUserIdOrFriendId(user.id, user.id).toList()
 
         // 3-1. 친구 userId 집합 만들기 (내 친구들의 userId)
         val friendIds = friends.map {
@@ -80,13 +80,14 @@ class FriendService(
     }
 
     suspend fun listFriends(me: UserEntity): List<RelationshipSummary> {
-        return friendRepository.findAllAccepted(me.id!!)
+        // TODO Query UserInfo++
+        return friendRepository.findAllAccepted(me.id)
             .map { e ->
                 val otherId = if (e.userId == me.id) e.friendId else e.userId
                 val other = userRepository.findSummaryInfoById(otherId)
 
                 // Redis/Mongo에서 최신 위치 조회 (uid기준)
-                val latestLocation = other?.uid?.let { uid ->
+                val latestLocation = other.uid.let { uid ->
                     locationCacheRedisService.getLatest(uid)
                 }
 
@@ -96,7 +97,7 @@ class FriendService(
 
 
     suspend fun listOutgoing(me: UserEntity): List<RelationshipSummary> {
-        return friendRepository.findAllOutgoingPending(me.id!!)
+        return friendRepository.findAllOutgoingPending(me.id)
             .map { e ->
                 val other = userRepository.findSummaryInfoById(e.friendId)
                 toRelationshipSummary(e, other, null)
@@ -105,7 +106,7 @@ class FriendService(
 
 
     suspend fun listIncoming(me: UserEntity): List<RelationshipSummary> {
-        return friendRepository.findAllIncomingPending(me.id!!)
+        return friendRepository.findAllIncomingPending(me.id)
             .map { e ->
                 val other = userRepository.findSummaryInfoById(e.userId)
                 toRelationshipSummary(e, other, null)
@@ -117,7 +118,7 @@ class FriendService(
      * 친구 요청 보내기 (me -> targetUid) / 친구 성사되면 팔로우도 함께 등록
      */
     suspend fun request(me: UserEntity, targetUid: String) {
-        val meId = me.id!!
+        val meId = me.id
         val targetId = requireUserIdByUid(targetUid)
         if (meId == targetId) throw ResponseStatusException(HttpStatus.BAD_REQUEST, "cannot friend yourself")
 
@@ -175,7 +176,7 @@ class FriendService(
      * 받은 요청 수락 (requesterUid -> me)
      */
     suspend fun accept(me: UserEntity, requesterUid: String) {
-        val meId = me.id!!
+        val meId = me.id
         val requesterId = requireUserIdByUid(requesterUid)
         val rel = friendRepository.findBetween(meId, requesterId)
             ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "no request")
@@ -210,7 +211,7 @@ class FriendService(
      * TODO 거절이력?
      */
     suspend fun reject(me: UserEntity, requesterUid: String) {
-        val meId = me.id!!
+        val meId = me.id
         val requesterId = requireUserIdByUid(requesterUid)
         val rel = friendRepository.findBetween(meId, requesterId)
             ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "no request")
@@ -225,7 +226,7 @@ class FriendService(
      * 내가 보낸 요청 취소 (me -> targetUid)
      */
     suspend fun cancel(me: UserEntity, requesterUid: String) {
-        val meId = me.id!!
+        val meId = me.id
         val requesterId = requireUserIdByUid(requesterUid)
         val rel = friendRepository.findBetween(meId, requesterId)
             ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "no request")
@@ -240,7 +241,7 @@ class FriendService(
      * 친구 끊기 (양쪽 누구든 가능)
      */
     suspend fun unfriend(me: UserEntity, otherUid: String) {
-        val meId = me.id!!
+        val meId = me.id
         val otherId = requireUserIdByUid(otherUid)
         val rel = friendRepository.findBetween(meId, otherId)
             ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "not friends")
@@ -258,9 +259,9 @@ class FriendService(
      * 검색: 결과에 현재 관계도 함께 태깅
      */
     suspend fun search(me: UserEntity, q: String, limit: Int = 30): List<RelationshipSearchItem> {
-        val meId = me.id!!
+        val meId = me.id
 
-        val publics = userRepository.searchPublic(q, limit)
+        val publics = userRepository.searchSummary(q, limit)
             .filter { it.uid != me.uid.toString() }
             .toList()
 

@@ -1,8 +1,6 @@
 package kr.jiasoft.hiteen.feature.poll.app
 
-import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.r2dbc.postgresql.codec.Json
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
@@ -10,8 +8,7 @@ import kr.jiasoft.hiteen.feature.asset.app.AssetService
 import kr.jiasoft.hiteen.feature.poll.domain.*
 import kr.jiasoft.hiteen.feature.poll.dto.*
 import kr.jiasoft.hiteen.feature.poll.infra.*
-import kr.jiasoft.hiteen.feature.user.dto.UserResponse
-import kr.jiasoft.hiteen.feature.user.infra.UserRepository
+import kr.jiasoft.hiteen.feature.user.app.UserService
 import org.springframework.dao.DuplicateKeyException
 import org.springframework.http.HttpStatus
 import org.springframework.http.codec.multipart.FilePart
@@ -26,10 +23,10 @@ class PollService(
     private val pollUsers: PollUserRepository,
     private val comments: PollCommentRepository,
     private val commentLikes: PollCommentLikeRepository,
-    private val userRepository: UserRepository,
     private val assetService: AssetService,
     private val objectMapper: ObjectMapper,
     private val pollLikes: PollLikeRepository,
+    private val userService: UserService
 ) {
 
     private enum class PollStatus {
@@ -39,46 +36,23 @@ class PollService(
 
 
     open suspend fun listPollsByCursor(
-        cursor: Long?, // 마지막 id
+        cursor: Long?,
         size: Int,
         currentUserId: Long?
-    ): List<PollResponse> {
-
-        return polls.findSummariesByCursor(cursor, size, currentUserId)
+    ): List<PollResponse> =
+        polls.findSummariesByCursor(cursor, size, currentUserId)
             .map { row ->
-                val selects: List<PollSelectResponse> = try {
-                    jacksonObjectMapper().readValue(
-                        row.selects ?: "[]",
-                        object : TypeReference<List<PollSelectResponse>>() {}
-                    )
-                } catch (_: Exception) {
-                    emptyList()
-                }
+                val user = userService.findSummary(row.createdId)
 
-                val senderEntity = userRepository.findById(row.userId!!)
-                val senderResponse = UserResponse.from(senderEntity!!)
-
-                PollResponse(
-                    id = row.id,
-                    question = row.question,
-                    photo = row.photo,
-                    selects = selects,
-                    colorStart = row.colorStart,
-                    colorEnd = row.colorEnd,
-                    voteCount = row.voteCount,
-                    commentCount = row.commentCount,
-                    votedByMe = row.votedByMe,
-                    user = senderResponse
-                )
+                PollResponse.from(row, user)
             }.toList()
-    }
 
 
     suspend fun getPoll(id: Long, currentUserId: Long?): PollResponse {
         val poll = polls.findById(id) ?: throw notFound("poll")
-        val voted = currentUserId?.let { pollUsers.findByPollIdAndUserId(id, it) != null } ?: false
-        val registeredUser = userRepository.findById(poll.createdId!!) ?: throw notFound("user")
-        return PollResponse.of(poll, voted, UserResponse.from(registeredUser))
+        val votedSeq = pollUsers.findByPollIdAndUserId(id, currentUserId!!)?.seq
+        val user = userService.findSummary(poll.createdId)
+        return PollResponse.of(poll, votedSeq, user)
     }
 
 
@@ -112,12 +86,12 @@ class PollService(
                 createdAt = OffsetDateTime.now()
             )
         )
-        return saved.id!!
+        return saved.id
     }
 
 
-    suspend fun update(id: Long, req: PollUpdateRequest, userId: Long, file: FilePart?): Long {
-        val poll = polls.findById(id) ?: throw notFound("poll")
+    suspend fun update(id: Long?, req: PollUpdateRequest, userId: Long, file: FilePart?): Long {
+        val poll = polls.findById(id!!) ?: throw notFound("poll")
 
         if (poll.createdId != userId) {
             throw ResponseStatusException(HttpStatus.FORBIDDEN, "only owner can update poll")
@@ -148,7 +122,7 @@ class PollService(
         )
 
         polls.save(updated)
-        return updated.id!!
+        return updated.id
     }
 
 
@@ -162,9 +136,9 @@ class PollService(
     }
 
 
-    suspend fun vote(pollId: Long, seq: Int?, userId: Long) {
+    suspend fun vote(pollId: Long?, seq: Int, userId: Long) {
         try {
-            pollUsers.save(PollUserEntity(pollId = pollId, userId = userId, seq = seq, votedAt = OffsetDateTime.now()))
+            pollUsers.save(PollUserEntity(pollId = pollId!!, userId = userId, seq = seq, votedAt = OffsetDateTime.now()))
             polls.increaseVoteCount(pollId)
         } catch (_: DuplicateKeyException) {
             throw badRequest("already voted")
@@ -176,7 +150,7 @@ class PollService(
     suspend fun like(id: Long, currentUserId: Long) {
         val p = polls.findById(id) ?: throw notFound("board")
         try {
-            pollLikes.save(PollLikeEntity(pollId = p.id!!, userId = currentUserId))
+            pollLikes.save(PollLikeEntity(pollId = p.id, userId = currentUserId, createdAt = OffsetDateTime.now()))
         } catch (_: DuplicateKeyException) {
         }
     }
@@ -185,7 +159,7 @@ class PollService(
     suspend fun unlike(id: Long, currentUserId: Long) {
         val b = polls.findById(id) ?: throw notFound("board")
         try {
-            pollLikes.deleteByPollIdAndUserId(b.id!!, currentUserId)
+            pollLikes.deleteByPollIdAndUserId(b.id, currentUserId)
         } catch (_: DuplicateKeyException) {
         }
     }
@@ -198,22 +172,28 @@ class PollService(
         cursor: UUID?,
         perPage: Int
     ): List<PollCommentResponse>
-            = comments.findComments(pollId, parentUid, currentUserId ?: -1L, cursor, perPage + 1).toList()
+            = comments.findComments(pollId, parentUid, currentUserId ?: -1L, cursor, perPage + 1)
+                .map { comment ->
+                        comment.copy(
+                            user = userService.findSummary(comment.createdId)
+                        )
+                    }.toList()
 
 
     suspend fun createComment(req: PollCommentRegisterRequest, userId: Long): Long {
-        val p = polls.findById(req.pollId!!)
+        val p = polls.findById(req.pollId!!)!!
         val parent: PollCommentEntity? = req.parentId?.let { comments.findById(it) }
         val saved = comments.save(
             PollCommentEntity(
-                pollId = p?.id,
+                pollId = p.id,
                 parentId = req.parentId,
                 content = req.content,
-                createdId = userId
+                createdId = userId,
+                createdAt = OffsetDateTime.now(),
             )
         )
-        if (parent != null) comments.increaseReplyCount(parent.id!!)
-        return saved.id!!
+        if (parent != null) comments.increaseReplyCount(parent.id)
+        return saved.id
     }
 
 
@@ -233,8 +213,8 @@ class PollService(
         // 권한: 작성자만 수정 (관리자 허용하고 싶으면 role 체크 추가)
         if (comment.createdId != currentUserId) throw forbidden("you are not the author")
 
-        val trimmed = req.content?.trim()
-        trimmed?.let { if (it.isEmpty()) throw badRequest("content must not be blank") }
+        val trimmed = req.content.trim()
+        trimmed.let { if (it.isEmpty()) throw badRequest("content must not be blank") }
 
         val merged = comment.copy(
             content = trimmed,
@@ -273,14 +253,14 @@ class PollService(
     suspend fun likeComment(commentUid: UUID, currentUserId: Long) {
         val c = comments.findByUid(commentUid) ?: throw notFound("comment")
         try {
-            commentLikes.save(PollCommentLikeEntity(commentId = c.id!!, userId = currentUserId))
+            commentLikes.save(PollCommentLikeEntity(commentId = c.id, userId = currentUserId, createdAt = OffsetDateTime.now()))
         } catch (_: DuplicateKeyException) {
         }
     }
 
     suspend fun unlikeComment(commentUid: UUID, currentUserId: Long) {
         val c = comments.findByUid(commentUid) ?: throw notFound("comment")
-        commentLikes.deleteByCommentIdAndUserId(c.id!!, currentUserId)
+        commentLikes.deleteByCommentIdAndUserId(c.id, currentUserId)
     }
 
 

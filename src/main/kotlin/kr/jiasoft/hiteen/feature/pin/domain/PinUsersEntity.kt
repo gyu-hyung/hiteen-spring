@@ -8,7 +8,7 @@ import java.time.OffsetDateTime
 @Table(name = "pin_users")
 data class PinUsersEntity(
     @Id
-    val id: Long? = null,
+    val id: Long = 0,
 
     @Column("pin_id")
     val pinId: Long,
@@ -17,5 +17,5 @@ data class PinUsersEntity(
     val userId: Long,
 
     @Column("created_at")
-    val createdAt: OffsetDateTime = OffsetDateTime.now()
+    val createdAt: OffsetDateTime,
 )

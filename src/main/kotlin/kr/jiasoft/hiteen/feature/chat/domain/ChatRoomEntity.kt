@@ -10,7 +10,7 @@ import java.util.UUID
 data class ChatRoomEntity(
 
     @Id
-    val id: Long? = null,
+    val id: Long = 0,
 
     val uid: UUID = UUID.randomUUID(),
 
@@ -21,10 +21,10 @@ data class ChatRoomEntity(
     val lastMessageId: Long? = null,
 
     @Column("created_id")
-    val createdId: Long? = null,
+    val createdId: Long,
 
     @Column("created_at")
-    val createdAt: OffsetDateTime? = null,
+    val createdAt: OffsetDateTime,
 
     @Column("updated_id")
     val updatedId: Long? = null,
