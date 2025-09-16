@@ -4,6 +4,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kr.jiasoft.hiteen.feature.relationship.domain.FollowEntity
 import kr.jiasoft.hiteen.feature.relationship.domain.FollowStatus
+import kr.jiasoft.hiteen.feature.relationship.dto.RelationshipCounts
 import kr.jiasoft.hiteen.feature.relationship.dto.RelationshipSummary
 import kr.jiasoft.hiteen.feature.relationship.infra.FollowRepository
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
@@ -23,7 +24,7 @@ class FollowService(
     private val now: OffsetDateTime get() = OffsetDateTime.now(ZoneOffset.UTC)
 
     private suspend fun resolveIds(me: UserEntity, otherUid: String): Pair<Long, Long> {
-        val meId = me.id!!
+        val meId = me.id
         val otherId = userRepository.findByUid(otherUid)?.id
             ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "user not found: $otherUid")
         if (meId == otherId) throw ResponseStatusException(HttpStatus.BAD_REQUEST, "cannot follow yourself")
@@ -42,9 +43,18 @@ class FollowService(
             statusAt = e.statusAt
         )
 
+
+    /** 게시물, 팔로잉, 팔로워 COUNT */
+    suspend fun getRelationshipCounts(id: Long): RelationshipCounts {
+        return RelationshipCounts(
+            followerCount = followRepository.countByFollowIdAndStatus(id, FollowStatus.ACCEPTED.name),
+            followingCount = followRepository.countByUserIdAndStatus(id, FollowStatus.ACCEPTED.name),
+        )
+    }
+
     /** 내가 팔로우하고 있는 목록 (Following) */
     suspend fun listFollowing(me: UserEntity): List<RelationshipSummary> {
-        return followRepository.findAllByUserIdAndStatus(me.id!!, FollowStatus.ACCEPTED.name)
+        return followRepository.findAllByUserIdAndStatus(me.id, FollowStatus.ACCEPTED.name)
             .map { e ->
                 val other = userRepository.findSummaryInfoById(e.followId)
                 toFollowSummary(e, other)
@@ -53,7 +63,7 @@ class FollowService(
 
     /** 나를 팔로우하는 목록 (Followers) */
     suspend fun listFollowers(me: UserEntity): List<RelationshipSummary> {
-        return followRepository.findAllByFollowIdAndStatus(me.id!!, FollowStatus.ACCEPTED.name)
+        return followRepository.findAllByFollowIdAndStatus(me.id, FollowStatus.ACCEPTED.name)
             .map { e ->
                 val other = userRepository.findSummaryInfoById(e.userId)
                 toFollowSummary(e, other)
@@ -62,7 +72,7 @@ class FollowService(
 
     /** 내가 보낸 팔로우 요청 (아직 수락 안 됨) */
     suspend fun listOutgoing(me: UserEntity): List<RelationshipSummary> {
-        return followRepository.findAllByUserIdAndStatus(me.id!!, FollowStatus.PENDING.name)
+        return followRepository.findAllByUserIdAndStatus(me.id, FollowStatus.PENDING.name)
             .map { e ->
                 val other = userRepository.findSummaryInfoById(e.followId)
                 toFollowSummary(e, other)
@@ -71,7 +81,7 @@ class FollowService(
 
     /** 내가 받은 팔로우 요청 (아직 수락 안 됨) */
     suspend fun listIncoming(me: UserEntity): List<RelationshipSummary> {
-        return followRepository.findAllByFollowIdAndStatus(me.id!!, FollowStatus.PENDING.name)
+        return followRepository.findAllByFollowIdAndStatus(me.id, FollowStatus.PENDING.name)
             .map { e ->
                 val other = userRepository.findSummaryInfoById(e.userId)
                 toFollowSummary(e, other)
@@ -159,7 +169,7 @@ class FollowService(
 
     /** 나를 팔로우하는 사람 강제 제거 (내 follower 끊기) */
     suspend fun removeFollower(me: UserEntity, otherUid: String) {
-        val meId = me.id!!
+        val meId = me.id
         val otherId = userRepository.findByUid(otherUid)?.id
             ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "user not found: $otherUid")
 

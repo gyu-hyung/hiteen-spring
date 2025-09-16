@@ -15,6 +15,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ResponseStatusException
 import reactor.core.publisher.Flux
+import java.util.UUID
 
 @RestController
 @RequestMapping("/api/user")
@@ -52,11 +53,19 @@ class UserController(
     suspend fun me(
         @AuthenticationPrincipal(expression = "user") user: UserEntity
     ): ResponseEntity<ApiResult<UserResponse>> {
-        val userResponse = userService.findMe(user.id!!)
-        return ResponseEntity.ok(
-            ApiResult(success = true, data = userResponse, message = "회원정보 조회 성공")
-        )
+        return ResponseEntity.ok(ApiResult.success(userService.findUserResponse(user.uid)))
     }
+
+
+    /** 회원 프로필 조회
+     * TODO : 학교, 관심사, 티어 */
+    @GetMapping("/profile/{uid}")
+    suspend fun profile(
+        @PathVariable uid: UUID
+    ): ResponseEntity<ApiResult<UserResponse>> {
+        return ResponseEntity.ok(ApiResult.success(userService.findUserResponse(uid)))
+    }
+
 
 
     /** 회원정보 수정 */
@@ -65,12 +74,8 @@ class UserController(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
         @Valid userUpdateForm: UserUpdateForm,
         @RequestPart("file", required = false) file: FilePart?
-    ): ResponseEntity<ApiResult<UserResponse>> {
-        val updated = userService.updateUser(user, userUpdateForm, file)
-        return ResponseEntity.ok(
-            ApiResult(success = true, data = updated, message = "회원정보 수정 완료")
-        )
-    }
+    ): ResponseEntity<ApiResult<UserResponse>>
+        = ResponseEntity.ok(ApiResult.success(userService.updateUser(user, userUpdateForm, file)))
 
 
     /** 회원정보 프로필 이미지 등록 */
@@ -91,10 +96,7 @@ class UserController(
     suspend fun deletePhoto(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
         @PathVariable photoId: Long
-    ): ResponseEntity<ApiResult<Unit>> {
-        userService.deletePhoto(user, photoId)
-        return ResponseEntity.ok(ApiResult.success())
-    }
+    ) = ResponseEntity.ok(ApiResult.success(userService.deletePhoto(user, photoId)))
 
 
     /** 사용자 사진 조회 */

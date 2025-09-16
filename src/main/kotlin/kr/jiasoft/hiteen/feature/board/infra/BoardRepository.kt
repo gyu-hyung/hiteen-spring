@@ -18,6 +18,9 @@ interface BoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
     """)
     suspend fun increaseHits(id: Long): Int
 
+    suspend fun countByCreatedId(id: Long): Int
+
+
     @Query("""
         SELECT 
             b.uid,
@@ -169,6 +172,7 @@ interface BoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
           AND b.deleted_at IS NULL
     """)
     suspend fun findDetailByUid(uid: UUID, userId: Long): BoardResponse?
+
 
 
 }

@@ -24,7 +24,7 @@ data class UserEntity(
     val email: String? = null,
 
     /* 닉네임 */
-    val nickname: String? = null,
+    val nickname: String,
 
     /* 비밀번호 해시 */
     @JsonIgnore
@@ -40,10 +40,13 @@ data class UserEntity(
     val detailAddress: String? = null,
 
     /* 전화번호 */
-    val phone: String? = null,
+    val phone: String,
 
     /* 사용자 상태/기분 코드 */
     val mood: String? = null,
+
+    /* 사용자 MBTI */
+    val mbti: String? = null,
 
     /* 티어 코드 문자열 */
     val tier: String? = null,

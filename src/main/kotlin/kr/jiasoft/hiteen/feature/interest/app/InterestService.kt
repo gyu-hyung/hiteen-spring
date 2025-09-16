@@ -38,13 +38,13 @@ class InterestService(
     suspend fun updateInterest(
         user: UserEntity, updated: InterestRegisterRequest
     ): InterestEntity? {
-        val exist = interestRepository.findById(updated.id!!) ?: return null
+        val exist = interestRepository.findById(updated.id) ?: return null
 
         val merged = exist.copy(
             id = updated.id,
-            topic = updated.topic?.takeIf { it.isNotBlank() } ?: exist.topic,
-            category = updated.category?.takeIf { it.isNotBlank() } ?: exist.category,
-            status = updated.status?.takeIf { it.isNotBlank() } ?: exist.status,
+            topic = updated.topic.takeIf { it.isNotBlank() } ?: exist.topic,
+            category = updated.category.takeIf { it.isNotBlank() } ?: exist.category,
+            status = updated.status.takeIf { it.isNotBlank() } ?: exist.status,
             updatedId = user.id,
             updatedAt = OffsetDateTime.now()
         )

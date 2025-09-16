@@ -13,5 +13,7 @@ interface FollowRepository : CoroutineCrudRepository<FollowEntity, Long> {
     suspend fun findBetween(userId: Long, followId: Long): FollowEntity?
     suspend fun findAllByUserIdAndStatus(userId: Long, status: String): Flow<FollowEntity>
     suspend fun findAllByFollowIdAndStatus(followId: Long, status: String): Flow<FollowEntity>
+    suspend fun countByFollowIdAndStatus(id: Long, name: String): Int
+    suspend fun countByUserIdAndStatus(id: Long, name: String): Int
 
 }

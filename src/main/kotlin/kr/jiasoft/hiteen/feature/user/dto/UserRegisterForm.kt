@@ -20,7 +20,7 @@ data class UserRegisterForm(
 
     @field:NotBlank(message = "닉네임은 필수입니다.")
     @field:Size(min = 2, max = 20, message = "닉네임은 2~20자여야 합니다.")
-    val nickname: String? = null,
+    val nickname: String,
 
     @field:NotBlank(message = "비밀번호는 필수입니다.")
     @field:ValidPassword
@@ -35,9 +35,11 @@ data class UserRegisterForm(
         regexp = "^01[0-9]{8,9}$",
         message = "올바른 휴대폰 번호 형식이어야 합니다. (예: 01012345678)"
     )
-    val phone: String? = null,
+    val phone: String,
 
     val mood: String? = null,
+
+    val mbti: String? = null,
 
     val tier: String? = null,
 
@@ -61,6 +63,7 @@ data class UserRegisterForm(
         detailAddress = detailAddress,
         phone = phone,
         mood = mood,
+        mbti = mbti,
         tier = tier,
         assetUid = assetUid,
         schoolId = schoolId,

@@ -25,7 +25,7 @@ class MqttCredentialController(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
         req: IssueReq
     ): IssueRes {
-        val r = service.issueForUser(user.id!!, user.username, req.deviceId)
+        val r = service.issueForUser(user.id, user.username, req.deviceId)
         return IssueRes(
             host = r.host, port = r.port, tls = r.tls,
             clientId = r.clientId, username = r.username, password = r.password,
@@ -36,6 +36,6 @@ class MqttCredentialController(
     @DeleteMapping
     @ResponseStatus(HttpStatus.NO_CONTENT)
     suspend fun revoke(@AuthenticationPrincipal(expression = "user") user: UserEntity) {
-        service.revokeForUser(user.id!!)
+        service.revokeForUser(user.id)
     }
 }

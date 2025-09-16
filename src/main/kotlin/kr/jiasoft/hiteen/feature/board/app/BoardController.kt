@@ -102,7 +102,7 @@ class BoardController(
     ): ResponseEntity<ApiResult<Map<String, Any>>> {
         val ip = request.remoteAddress?.address?.hostAddress
         val files: List<FilePart> = filesFlux?.collectList()?.awaitSingle().orEmpty()
-        val uid = service.create(req, user.id!!, files, ip)
+        val uid = service.create(req, user.id, files, ip)
         return ResponseEntity.ok(ApiResult.success(mapOf("uid" to uid)))
     }
 
@@ -117,7 +117,7 @@ class BoardController(
     ): ResponseEntity<ApiResult<Unit>> {
         val ip = request.remoteAddress?.address?.hostAddress
         val files: List<FilePart> = filesFlux?.collectList()?.awaitSingle().orEmpty()
-        service.update(req.uid, req, user.id!!, files, ip, req.replaceAssets, req.deleteAssetUids)
+        service.update(req.uid, req, user.id, files, ip, req.replaceAssets, req.deleteAssetUids)
         return ResponseEntity.ok(ApiResult.success(Unit))
     }
 
@@ -128,7 +128,7 @@ class BoardController(
         @PathVariable uid: UUID,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ): ResponseEntity<ApiResult<Unit>> {
-        service.softDelete(uid, currentUserId = user.id!!)
+        service.softDelete(uid, currentUserId = user.id)
         return ResponseEntity.ok(ApiResult.success(Unit))
     }
 
@@ -139,7 +139,7 @@ class BoardController(
         @PathVariable uid: UUID,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ): ResponseEntity<ApiResult<Unit>> {
-        service.like(uid, currentUserId = user.id!!)
+        service.like(uid, currentUserId = user.id)
         return ResponseEntity.ok(ApiResult.success(Unit))
     }
 
@@ -150,7 +150,7 @@ class BoardController(
         @PathVariable uid: UUID,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ): ResponseEntity<ApiResult<Unit>> {
-        service.unlike(uid, currentUserId = user.id!!)
+        service.unlike(uid, currentUserId = user.id)
         return ResponseEntity.ok(ApiResult.success(Unit))
     }
 
@@ -192,7 +192,7 @@ class BoardController(
         req: BoardCommentRegisterRequest,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ): ResponseEntity<ApiResult<Map<String, Any>>> {
-        val uid = service.createComment(req.boardUid, req, user.id!!)
+        val uid = service.createComment(req.boardUid, req, user.id)
         return ResponseEntity.ok(ApiResult.success(mapOf("uid" to uid)))
     }
 
@@ -203,7 +203,7 @@ class BoardController(
         req: BoardCommentRegisterRequest,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ): ResponseEntity<ApiResult<Map<String, Any>>> {
-        val uid = service.updateComment(req.boardUid, req.commentUid!!, req, user.id!!)
+        val uid = service.updateComment(req.boardUid, req.commentUid!!, req, user.id)
         return ResponseEntity.ok(ApiResult.success(mapOf("uid" to uid)))
     }
 
@@ -214,7 +214,7 @@ class BoardController(
         req: BoardCommentRegisterRequest,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ): ResponseEntity<ApiResult<Map<String, Any>>> {
-        val uid = service.deleteComment(req.boardUid, req.commentUid!!, user.id!!)
+        val uid = service.deleteComment(req.boardUid, req.commentUid!!, user.id)
         return ResponseEntity.ok(ApiResult.success(mapOf("uid" to uid)))
     }
 
@@ -225,7 +225,7 @@ class BoardController(
         req: BoardCommentRegisterRequest,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ): ResponseEntity<ApiResult<Unit>> {
-        service.likeComment(req.commentUid!!, user.id!!)
+        service.likeComment(req.commentUid!!, user.id)
         return ResponseEntity.ok(ApiResult.success(Unit))
     }
 
@@ -236,7 +236,7 @@ class BoardController(
         req: BoardCommentRegisterRequest,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ): ResponseEntity<ApiResult<Unit>> {
-        service.unlikeComment(req.commentUid!!, user.id!!)
+        service.unlikeComment(req.commentUid!!, user.id)
         return ResponseEntity.ok(ApiResult.success(Unit))
     }
 }

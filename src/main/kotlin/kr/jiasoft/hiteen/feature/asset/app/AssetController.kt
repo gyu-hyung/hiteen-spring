@@ -31,7 +31,7 @@ class AssetController(
         @RequestPart(name = "originFileName", required = false) originFileName: String?,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ): AssetResponse {
-        return assetService.upload(file, originFileName, currentUserId = user.id!!)
+        return assetService.upload(file, originFileName, currentUserId = user.id)
     }
 
     /** 여러 파일 업로드 */
@@ -47,7 +47,7 @@ class AssetController(
         val files: List<FilePart> = flux.collectList().awaitSingle()
         if (files.isEmpty()) throw ResponseStatusException(HttpStatus.BAD_REQUEST, "no files")
 
-        return assetService.uploadAll(files, currentUserId = user.id!!, originFileNames = originFileNames)
+        return assetService.uploadAll(files, currentUserId = user.id, originFileNames = originFileNames)
     }
 
 
@@ -105,7 +105,7 @@ class AssetController(
         @PathVariable uid: UUID,
         @AuthenticationPrincipal(expression = "user") user: UserEntity
     ): ResponseEntity<AssetResponse> {
-        val deleted = assetService.softDelete(uid, user.id!!) ?: return ResponseEntity.notFound().build()
+        val deleted = assetService.softDelete(uid, user.id) ?: return ResponseEntity.notFound().build()
         return ResponseEntity.ok(deleted.toResponse())
     }
 }
