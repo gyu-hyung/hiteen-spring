@@ -124,6 +124,9 @@ class AssetService(
     suspend fun increaseDownload(uid: UUID, userId: Long): AssetEntity? =
         assetRepository.increaseDownloadAndReturn(uid, userId)
 
+    suspend fun increase(uid: UUID): AssetEntity? =
+        assetRepository.increaseDownload(uid)
+
     suspend fun softDelete(uid: UUID, userId: Long): AssetEntity? =
         assetRepository.softDelete(uid, userId)
 
