@@ -70,7 +70,7 @@ class InterestUserService(
         // 1) 내 관심사 목록
         val myInterests = interestUserRepository.findByUserId(user.id).toList().map { it.interestId }.toSet()
         if (myInterests.isEmpty()) {
-            throw BusinessValidationException(mapOf("message" to "관심사가 없습니다."))
+            throw BusinessValidationException(mapOf("message" to "관심사가 존재하지 않습니다. 관심사를 추가해주세요~"))
         }
 
         // 2) 후보군 ID
