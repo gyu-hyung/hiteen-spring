@@ -9,8 +9,8 @@ import java.util.UUID
 @Table("user_photos")
 data class UserPhotosEntity (
     @Id
-    val id: Long? = null,
+    val id: Long = 0,
     @JsonIgnore
-    val userId: Long? = null,
-    val uid: UUID? = null,
+    val userId: Long,
+    val uid: UUID,
 )

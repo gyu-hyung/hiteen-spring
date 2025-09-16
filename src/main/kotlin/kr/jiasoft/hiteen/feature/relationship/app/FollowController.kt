@@ -37,50 +37,52 @@ class FollowController(
 
 
     /** 팔로우 요청 보내기: me -> {uid} */
-    @PostMapping("/request")
+    @PostMapping("/request/{userUid}")
     suspend fun request(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
-        @RequestParam uid: String
-    ) = ResponseEntity.ok(ApiResult(true, followService.request(user, uid)))
+        @PathVariable userUid: String
+    ) = ResponseEntity.ok(ApiResult(true, followService.request(user, userUid)))
 
 
-    /** 받은 팔로우 요청 승인 */
-    @PostMapping("/accept")
+    /** 받은 팔로우 요청 승인
+     * TODO : 맞팔로우 플래그
+     * */
+    @PostMapping("/accept/{userUid}")
     suspend fun accept(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
-        @RequestParam uid: String
-    ) = ResponseEntity.ok(ApiResult(true, followService.accept(user, uid)))
+        @PathVariable userUid: String
+    ) = ResponseEntity.ok(ApiResult(true, followService.accept(user, userUid)))
 
 
     /** 받은 팔로우 요청 거절 */
-    @PostMapping("/reject")
+    @PostMapping("/reject/{userUid}")
     suspend fun reject(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
-        @RequestParam uid: String
-    ) = ResponseEntity.ok(ApiResult(true, followService.reject(user, uid)))
+        @PathVariable userUid: String
+    ) = ResponseEntity.ok(ApiResult(true, followService.reject(user, userUid)))
 
 
     /** 내가 보낸 팔로우 요청 취소 */
-    @PostMapping("/cancel")
+    @PostMapping("/cancel/{userUid}")
     suspend fun cancel(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
-        @RequestParam uid: String
-    ) = ResponseEntity.ok(ApiResult(true, followService.cancel(user, uid)))
+        @PathVariable userUid: String
+    ) = ResponseEntity.ok(ApiResult(true, followService.cancel(user, userUid)))
 
 
     /** 언팔로우 (이미 팔로우 상태 끊기) */
-    @PostMapping("/unfollow")
+    @PostMapping("/unfollow/{userUid}")
     suspend fun unfollow(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
-        @RequestParam uid: String
-    ) = ResponseEntity.ok(ApiResult(true, followService.unfollow(user, uid)))
+        @PathVariable userUid: String
+    ) = ResponseEntity.ok(ApiResult(true, followService.unfollow(user, userUid)))
 
 
     /** 나를 팔로우하는 사람 강제 제거 */
-    @PostMapping("/remove-follower")
+    @PostMapping("/remove-follower/{userUid}")
     suspend fun removeFollower(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
-        @RequestParam uid: String
-    ) = ResponseEntity.ok(ApiResult(true, followService.removeFollower(user, uid)))
+        @PathVariable userUid: String
+    ) = ResponseEntity.ok(ApiResult(true, followService.removeFollower(user, userUid)))
 
 }

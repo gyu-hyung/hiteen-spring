@@ -92,43 +92,43 @@ class FriendController(
 
 
     /** 친구 요청 보내기: me -> {uid} */
-    @PostMapping("/request")
+    @PostMapping("/request/{userUid}")
     suspend fun request(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
-        @RequestParam uid: String
-    ) = ResponseEntity.ok(ApiResult(true,friendService.request(user, uid)))
+        @PathVariable userUid: String
+    ) = ResponseEntity.ok(ApiResult(true,friendService.request(user, userUid)))
 
 
     /** 받은 요청 수락: {uid} -> me */
-    @PostMapping("/accept")
+    @PostMapping("/accept/{userUid}")
     suspend fun accept(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
-        @RequestParam uid: String
-    ) = ResponseEntity.ok(ApiResult(true,friendService.accept(user, uid)))
+        @PathVariable userUid: String
+    ) = ResponseEntity.ok(ApiResult(true,friendService.accept(user, userUid)))
 
 
     /** 받은 요청 거절 */
-    @PostMapping("/reject")
+    @PostMapping("/reject/{userUid}")
     suspend fun reject(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
-        @RequestParam uid: String
-    ) = ResponseEntity.ok(ApiResult(true,friendService.reject(user, uid)))
+        @PathVariable userUid: String
+    ) = ResponseEntity.ok(ApiResult(true,friendService.reject(user, userUid)))
 
 
     /** 내가 보낸 요청 취소 */
-    @PostMapping("/cancel")
+    @PostMapping("/cancel/{userUid}")
     suspend fun cancel(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
-        @RequestParam uid: String
-    ) = ResponseEntity.ok(ApiResult(true,friendService.cancel(user, uid)))
+        @PathVariable userUid: String
+    ) = ResponseEntity.ok(ApiResult(true,friendService.cancel(user, userUid)))
 
 
     /** 친구 끊기 */
-    @PostMapping("/unfriend")
+    @PostMapping("/unfriend/{userUid}")
     suspend fun unfriend(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
-        @RequestParam uid: String
-    ) = ResponseEntity.ok(ApiResult(true, friendService.unfriend(user, uid)))
+        @PathVariable userUid: String
+    ) = ResponseEntity.ok(ApiResult(true, friendService.unfriend(user, userUid)))
 
 
 }

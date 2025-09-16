@@ -21,6 +21,7 @@ import kr.jiasoft.hiteen.feature.board.infra.BoardCommentLikeRepository
 import kr.jiasoft.hiteen.feature.board.infra.BoardCommentRepository
 import kr.jiasoft.hiteen.feature.board.infra.BoardLikeRepository
 import kr.jiasoft.hiteen.feature.board.infra.BoardRepository
+import kr.jiasoft.hiteen.feature.user.app.UserService
 import org.springframework.dao.DuplicateKeyException
 import org.springframework.http.HttpStatus
 import org.springframework.http.codec.multipart.FilePart
@@ -38,6 +39,7 @@ class BoardService(
     private val commentLikes: BoardCommentLikeRepository,
     private val assetService: AssetService,
     private val eloquent: CoroutineEloquent,
+    private val userService: UserService,
 ) {
 
 //    suspend fun getUserBoards(userId: Long?): CursorResult<BoardResponse, Long> {
@@ -48,86 +50,96 @@ class BoardService(
 ////            ?.boards.orEmpty()
 //    }
 
-        suspend fun getUserBoards(userId: Long?): BoardResponse? {
-            return eloquent.forEntity(BoardResponse::class.java)
-                .where("created_id", "=", userId!!)
-                .with("user")
-                .first()
-        }
+    suspend fun getUserBoards(userId: Long?): BoardResponse? {
+        return eloquent.forEntity(BoardResponse::class.java)
+            .where("created_id", "=", userId!!)
+            .with("user")
+            .first()
+    }
 
 
     suspend fun getBoard(uid: UUID, currentUserId: Long?): BoardResponse {
-        val b = boards.findByUid(uid) ?: throw IllegalArgumentException("board not found")
-        val boardId = b.id!!
-        val likeCount = likes.countByBoardId(boardId)
-        val commentCount = comments.countActiveByBoardId(boardId)
-        val likedByMe = currentUserId?.let { likes.findByBoardIdAndUserId(boardId, it) != null } ?: false
-        val attachments = boardAssetRepository.findAllByBoardId(boardId).map { it.uid }.toList()
-        boards.increaseHits(boardId)
+        val userId = currentUserId ?: -1L
+        val b = boards.findDetailByUid(uid, userId) ?: throw IllegalArgumentException("board not found")
+        val userSummary = userService.findSummary(b.createdId)
 
-        val perPage = 15// 기본 댓글 조회 개수
-        val commentList = comments.findComments(b.uid, null, currentUserId ?: -1L, null, perPage + 1).toList()
+        val perPage = 15
+        val commentList = comments.findComments(b.uid, null, userId, null, perPage + 1)
+                .map { comments ->
+                    comments.copy(
+                        user = userService.findSummary(comments.createdId)
+                    )
+                }.toList()
 
         val hasMore = commentList.size > perPage
         val items = if (hasMore) commentList.dropLast(1) else commentList
         val nextCursor = if (hasMore) commentList.lastOrNull()?.uid?.toString() else null
 
-        val commentPage = ApiPageCursor(
-            nextCursor = nextCursor,
-            items = items,
-            perPage = perPage
-        )
+        // 조회수 증가
+        b.id.let { boards.increaseHits(it) }
 
-        return BoardResponse(
-            uid = b.uid,
-            category = b.category,
-            subject = b.subject ?: "",
-            content = b.content ?: "",
-            link = b.link,
-            hits = (b.hits + 1),
-            assetUid = b.assetUid,
-            attachments = attachments,
-            startDate = b.startDate,
-            endDate = b.endDate,
-            status = b.status,
-            address = b.address,
-            detailAddress = b.detailAddress,
-            createdAt = b.createdAt,
-            createdId = b.createdId,
-            updatedAt = b.updatedAt,
-            likeCount = likeCount,
-            commentCount = commentCount,
-            likedByMe = likedByMe,
-            comments = commentPage,
+        return b.copy(
+            content = b.content,
+            hits = (b.hits) + 1,
+            user = userSummary,
+            comments = ApiPageCursor(
+                nextCursor = nextCursor,
+                items = items,
+                perPage = perPage
+            )
         )
     }
 
 
-    suspend fun listBoards(
-        category: String?, q: String?, page: Int, size: Int, currentUserId: Long?
+    suspend fun listBoardsByPage(
+        category: String?, q: String?, page: Int, size: Int, currentUserId: Long?,
+        followOnly: Boolean, friendOnly: Boolean, sameSchoolOnly: Boolean
     ): List<BoardResponse> {
         val p = page.coerceAtLeast(0)
         val s = size.coerceIn(1, 100)
         val offset = p * s
         val uid = currentUserId ?: -1L
-        return boards.searchSummaries(category, q, s, offset, uid)
+
+        return boards.searchSummariesByPage(category, q, s, offset, uid, followOnly, friendOnly, sameSchoolOnly)
             .map { row ->
-                BoardResponse(
-                    uid = row.uid,
-                    category = row.category,
-                    subject = row.subject ?: "",
-                    content = (row.content ?: "").take(160),
-                    link = row.link,
-                    hits = row.hits ?: 0,
-                    assetUid = row.assetUid,
-                    createdAt = row.createdAt,
-                    createdId = row.createdId,
-                    likeCount = row.likeCount,
-                    commentCount = row.commentCount,
-                    likedByMe = row.likedByMe,
+                row.copy(
+                    subject = row.subject,
+                    content = (row.content).take(160),
+                    user = userService.findSummary(row.createdId)
                 )
             }.toList()
     }
+
+
+    suspend fun listBoardsByCursor(
+        category: String?, q: String?, size: Int, currentUserId: Long?,
+        followOnly: Boolean, friendOnly: Boolean, sameSchoolOnly: Boolean,
+        cursorUid: UUID?
+    ): ApiPageCursor<BoardResponse> {
+        val s = size.coerceIn(1, 100)
+        val uid = currentUserId ?: -1L
+
+        val rows = boards.searchSummariesByCursor(
+            category, q, s + 1, uid, followOnly, friendOnly, sameSchoolOnly, cursorUid
+        ).toList()
+
+        val hasMore = rows.size > s
+        val items = if (hasMore) rows.take(s) else rows
+        val nextCursor = if (hasMore) rows[s].uid.toString() else null
+
+        return ApiPageCursor(
+            nextCursor = nextCursor,
+            items = items.map { row ->
+                row.copy(
+                    subject = row.subject,
+                    content = (row.content).take(160),
+                    user = userService.findSummary(row.createdId)
+                )
+            },
+            perPage = s
+        )
+    }
+
 
     suspend fun create(
         req: BoardCreateRequest,
@@ -155,6 +167,7 @@ class BoardService(
                 detailAddress = req.detailAddress,
                 assetUid = representativeUid,
                 createdId = currentUserId,
+                createdAt = OffsetDateTime.now(),
             )
         )
 
@@ -163,7 +176,7 @@ class BoardService(
             uploaded.forEach { a ->
                 boardAssetRepository.save(
                     BoardAssetEntity(
-                        boardId = saved.id!!,
+                        boardId = saved.id,
                         uid = a.uid
                     )
                 )
@@ -186,7 +199,7 @@ class BoardService(
      *      남아있는 자산 중 하나(가장 최근/가장 오래된 등 정책)에 맞춰 대표를 재지정
      */
     suspend fun update(
-        uid: UUID,
+        uid: UUID?,
         req: BoardUpdateRequest,
         currentUserId: Long,
         files: List<FilePart> = emptyList(),
@@ -194,8 +207,8 @@ class BoardService(
         replaceAssets: Boolean? = false,
         deleteAssetUids: List<UUID>?
     ) {
-        val b = boards.findByUid(uid) ?: throw notFound("board")
-        val boardId = b.id ?: error("Board id not generated")
+        val b = boards.findByUid(uid!!) ?: throw notFound("board")
+        val boardId = b.id
 
         // 1) 에셋 매핑 삭제
         val toDelete = deleteAssetUids?.distinct().orEmpty()
@@ -248,7 +261,7 @@ class BoardService(
     suspend fun like(uid: UUID, currentUserId: Long) {
         val b = boards.findByUid(uid) ?: throw notFound("board")
         try {
-            likes.save(BoardLikeEntity(boardId = b.id!!, userId = currentUserId))
+            likes.save(BoardLikeEntity(boardId = b.id, userId = currentUserId, createdAt = OffsetDateTime.now()))
         } catch (_: DuplicateKeyException) {
         }
     }
@@ -257,7 +270,7 @@ class BoardService(
     suspend fun unlike(uid: UUID, currentUserId: Long) {
         val b = boards.findByUid(uid) ?: throw notFound("board")
         try {
-            likes.deleteByBoardIdAndUserId(b.id!!, currentUserId)
+            likes.deleteByBoardIdAndUserId(b.id, currentUserId)
         } catch (_: DuplicateKeyException) {
         }
     }
@@ -270,7 +283,12 @@ class BoardService(
         cursor: UUID?,
         perPage: Int
     ): List<BoardCommentResponse>
-            = comments.findComments(boardUid, parentUid, currentUserId ?: -1L, cursor, perPage).toList()
+            = comments.findComments(boardUid, parentUid, currentUserId ?: -1L, cursor, perPage)
+                .map { comments ->
+                    comments.copy(
+                        user = userService.findSummary(comments.createdId)
+                    )
+                }.toList()
 
 
     suspend fun createComment(boardUid: UUID, req: BoardCommentRegisterRequest, currentUserId: Long): UUID {
@@ -278,13 +296,14 @@ class BoardService(
         val parent: BoardCommentEntity? = req.parentUid?.let { comments.findByUid(it) }
         val saved = comments.save(
             BoardCommentEntity(
-                boardId = b.id!!,
+                boardId = b.id,
                 parentId = parent?.id,
                 content = req.content,
                 createdId = currentUserId,
+                createdAt = OffsetDateTime.now(),
             )
         )
-        if (parent != null) comments.increaseReplyCount(parent.id!!)
+        if (parent != null) comments.increaseReplyCount(parent.id)
         return saved.uid
     }
 
@@ -305,8 +324,8 @@ class BoardService(
         // 권한: 작성자만 수정 (관리자 허용하고 싶으면 role 체크 추가)
         if (comment.createdId != currentUserId) throw forbidden("you are not the author")
 
-        val trimmed = req.content?.trim()
-        trimmed?.let { if (it.isEmpty()) throw badRequest("content must not be blank") }
+        val trimmed = req.content.trim()
+        trimmed.let { if (it.isEmpty()) throw badRequest("content must not be blank") }
 
         val merged = comment.copy(
             content = trimmed,
@@ -347,7 +366,7 @@ class BoardService(
     suspend fun likeComment(commentUid: UUID, currentUserId: Long) {
         val c = comments.findByUid(commentUid) ?: throw notFound("comment")
         try {
-            commentLikes.save(BoardCommentLikeEntity(commentId = c.id!!, userId = currentUserId))
+            commentLikes.save(BoardCommentLikeEntity(commentId = c.id, userId = currentUserId, createdAt = OffsetDateTime.now()))
         } catch (_: DuplicateKeyException) {
         }
     }
@@ -355,7 +374,7 @@ class BoardService(
 
     suspend fun unlikeComment(commentUid: UUID, currentUserId: Long) {
         val c = comments.findByUid(commentUid) ?: throw notFound("comment")
-        commentLikes.deleteByCommentIdAndUserId(c.id!!, currentUserId)
+        commentLikes.deleteByCommentIdAndUserId(c.id, currentUserId)
     }
 
 

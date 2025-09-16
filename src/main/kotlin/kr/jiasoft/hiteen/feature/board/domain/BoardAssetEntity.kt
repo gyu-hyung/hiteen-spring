@@ -7,7 +7,7 @@ import java.util.UUID
 @Table("board_assets")
 data class BoardAssetEntity (
     @Id
-    val id: Long? = null,
+    val id: Long = 0,
     val boardId: Long,
     val uid: UUID,
 )

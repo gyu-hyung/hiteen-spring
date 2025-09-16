@@ -24,11 +24,13 @@ interface PollRepository : CoroutineCrudRepository<PollEntity, Long> {
             p.color_end,
             p.vote_count,
             p.comment_count,
-            u.id   AS user_id,
 --          u.username,
 --          u.nickname,
 --          u.asset_uid AS profile_image,
-            EXISTS (SELECT 1 FROM poll_users pu WHERE pu.poll_id = p.id AND pu.user_id = :currentUserId) AS voted_by_me
+            p.created_id,
+            p.created_at,
+            EXISTS (SELECT seq FROM poll_users pu WHERE pu.poll_id = p.id AND pu.user_id = :currentUserId) AS voted_by_me,
+            (SELECT seq FROM poll_users pu WHERE pu.poll_id = p.id AND pu.user_id = :currentUserId) AS voted_seq
         FROM polls p
         JOIN users u ON u.id = p.created_id
         WHERE p.deleted_at IS NULL

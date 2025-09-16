@@ -11,6 +11,7 @@ import kr.jiasoft.hiteen.feature.user.domain.UserPhotosEntity
 import kr.jiasoft.hiteen.feature.user.dto.CustomUserDetails
 import kr.jiasoft.hiteen.feature.user.dto.UserRegisterForm
 import kr.jiasoft.hiteen.feature.user.dto.UserResponse
+import kr.jiasoft.hiteen.feature.user.dto.UserSummary
 import kr.jiasoft.hiteen.feature.user.dto.UserUpdateForm
 import kr.jiasoft.hiteen.feature.user.infra.UserPhotosRepository
 import kr.jiasoft.hiteen.feature.user.infra.UserRepository
@@ -60,7 +61,7 @@ class UserService (
             val asset = assetService.uploadImage(
                 file = file,
                 originFileName = null,
-                currentUserId = saved.id!!
+                currentUserId = saved.id
             )
             userRepository.save(saved.copy(assetUid = asset.uid))
         } else {
@@ -81,10 +82,15 @@ class UserService (
     }
 
 
+    suspend fun findSummary(userId: Long): UserSummary {
+        return userRepository.findSummaryInfoById(userId)
+    }
+
+
     // TODO 회원 정보 변경 시 로그아웃(토큰 무효화) 기준 정리 필요: 비밀번호/권한/중요 개인정보 변경 시 재로그인 유도 등
     suspend fun updateUser(current: UserEntity, param: UserUpdateForm, part: FilePart?): UserResponse {
 
-        val existing = userRepository.findById(current.id!!)
+        val existing = userRepository.findById(current.id)
             ?: throw UsernameNotFoundException("User not found: ${current.username}")
 
         // 1) 파일 업로드 처리
@@ -117,12 +123,12 @@ class UserService (
 
         // 중복 검사
         if (newEmail != null && !newEmail.equals(existing.email, ignoreCase = true)) {
-            if (userRepository.existsByEmailIgnoreCaseAndActiveAndIdNot(newEmail, existing.id!!)) {
+            if (userRepository.existsByEmailIgnoreCaseAndActiveAndIdNot(newEmail, existing.id)) {
                 throw BusinessValidationException(mapOf("email" to "이미 사용 중인 이메일입니다."))
             }
         }
         if (!newUsername.equals(existing.username, ignoreCase = true)) {
-            if (userRepository.existsByUsernameIgnoreCaseAndActiveAndIdNot(newUsername, existing.id!!)) {
+            if (userRepository.existsByUsernameIgnoreCaseAndActiveAndIdNot(newUsername, existing.id)) {
                 throw BusinessValidationException(mapOf("username" to "이미 사용 중인 사용자명입니다."))
             }
         }
@@ -169,12 +175,11 @@ class UserService (
             val asset = assetService.uploadImage(
                 file = file,
                 originFileName = null,
-                currentUserId = user.id!!
+                currentUserId = user.id
             )
 
             // 2) user_photos row 생성
             val photoEntity = UserPhotosEntity(
-                id = null,
                 userId = user.id,
                 uid = asset.uid
             )
@@ -185,23 +190,23 @@ class UserService (
 
 
     suspend fun deletePhoto(user: UserEntity, photoId: Long) {
-        val exist = userPhotosRepository.findByIdAndUserId(photoId, user.id!!)
+        val exist = userPhotosRepository.findByIdAndUserId(photoId, user.id)
             ?: throw BusinessValidationException(mapOf("photo" to "존재하지 않거나 본인 소유가 아닌 사진입니다."))
 
         // asset 파일도 소프트 삭제
         try {
-            assetService.softDelete(exist.uid!!, user.id)
+            assetService.softDelete(exist.uid, user.id)
         } catch (_: Throwable) {}
 
         // user_photos row 삭제
-        userPhotosRepository.deleteById(exist.id!!)
+        userPhotosRepository.deleteById(exist.id)
     }
 
     suspend fun getPhotos(userUid: String): List<UserPhotosEntity> {
         val userEntity = userRepository.findByUid(userUid)
             ?: throw BusinessValidationException(mapOf("user" to "존재하지 않는 사용자입니다."))
 
-        return userPhotosRepository.findByUserId(userEntity.id!!).toList()
+        return userPhotosRepository.findByUserId(userEntity.id).toList()
     }
 
 

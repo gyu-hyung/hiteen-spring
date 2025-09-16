@@ -22,13 +22,14 @@ interface PollCommentRepository : CoroutineCrudRepository<PollCommentEntity, Lon
 
     @Query("""
         SELECT
+            c.id,
             c.uid,
             c.content,
             c.created_at  AS created_at,
             c.created_id  AS created_id,
             c.reply_count AS reply_count,
-            (SELECT COUNT(*)::bigint FROM poll_comment_likes l WHERE l.poll_comment_id = c.id) AS like_count,
-            EXISTS (SELECT 1 FROM poll_comment_likes l2 WHERE l2.poll_comment_id = c.id AND l2.user_id = :userId) AS liked_by_me,
+            (SELECT COUNT(*)::bigint FROM poll_comment_likes l WHERE l.comment_id = c.id) AS like_count,
+            EXISTS (SELECT 1 FROM poll_comment_likes l2 WHERE l2.comment_id = c.id AND l2.user_id = :userId) AS liked_by_me,
             p.uid AS parent_uid
         FROM poll_comments c
         LEFT JOIN poll_comments p ON c.parent_id = p.id

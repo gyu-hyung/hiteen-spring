@@ -79,13 +79,13 @@ class AssetController(
         val updated = assetService.increaseDownload(uid, 13)
             ?: return ResponseEntity.notFound().build()
 
-        val filePath = updated.filePath ?: return ResponseEntity.notFound().build()
+        val filePath = updated.filePath
         val path = assetService.resolveFilePath(filePath)
         if (!assetService.existsFile(path)) return ResponseEntity.notFound().build()
 
         val resource = FileSystemResource(path)
         val mime = updated.type ?: MediaType.APPLICATION_OCTET_STREAM_VALUE
-        val fileName = (updated.originFileName ?: updated.storeFileName ?: "download")
+        val fileName = updated.originFileName
         val encoded = URLEncoder.encode(fileName, StandardCharsets.UTF_8).replace("+", "%20")
 
         val headers = HttpHeaders().apply {

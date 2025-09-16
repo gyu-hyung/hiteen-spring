@@ -7,7 +7,7 @@ import java.time.OffsetDateTime
 @Table("interest_match_history")
 data class InterestMatchHistoryEntity (
     @Id
-    val id: Long?,
+    val id: Long = 0,
     val userId: Long,
     val targetId: Long,
     val status: String,

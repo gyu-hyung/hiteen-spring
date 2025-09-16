@@ -7,8 +7,8 @@ import java.time.OffsetDateTime
 @Table("poll_likes")
 data class PollLikeEntity (
     @Id
-    val id: Long? = null,
+    val id: Long = 0,
     val pollId: Long,
     val userId: Long,
-    val createdAt: OffsetDateTime? = null,
+    val createdAt: OffsetDateTime,
 )

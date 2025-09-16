@@ -10,7 +10,7 @@ import java.util.UUID
 data class ChatMessageEntity(
 
     @Id
-    val id: Long? = null,
+    val id: Long = 0,
 
     @Column("chat_room_id")
     val chatRoomId: Long,
@@ -26,7 +26,7 @@ data class ChatMessageEntity(
 //    val readCount: Int? = 0,
 
     @Column("created_at")
-    val createdAt: OffsetDateTime? = null,
+    val createdAt: OffsetDateTime,
 
     @Column("updated_at")
     val updatedAt: OffsetDateTime? = null,

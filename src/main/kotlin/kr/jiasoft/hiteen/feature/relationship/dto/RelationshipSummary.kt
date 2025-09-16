@@ -10,5 +10,4 @@ data class RelationshipSummary(
     val lat: Double? = null,
     val lng: Double? = null,
     val lastSeenAt: Long? = null,
-
 )

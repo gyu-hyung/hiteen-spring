@@ -78,10 +78,11 @@ class SmsService(
         if (authCode != null) {
             smsAuthRepository.save(
                 SmsAuthEntity(
-                    smsId = sms.id!!,
+                    smsId = sms.id,
                     phone = phone,
                     code = authCode,
-                    status = Status.WAITING.name
+                    status = Status.WAITING.name,
+                    createdAt = OffsetDateTime.now()
                 )
             )
         }

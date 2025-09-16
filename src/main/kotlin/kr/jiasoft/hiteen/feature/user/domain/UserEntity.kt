@@ -12,7 +12,7 @@ data class UserEntity(
     /* 고유번호 */
     @Id
     @JsonIgnore
-    val id: Long? = null,
+    val id: Long = 0,
 
     /* UUID, 외부 노출용 고유 식별자 */
     val uid: UUID = UUID.randomUUID(),

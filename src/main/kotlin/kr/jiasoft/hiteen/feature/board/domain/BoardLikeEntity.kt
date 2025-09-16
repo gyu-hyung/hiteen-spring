@@ -8,10 +8,10 @@ import java.time.OffsetDateTime
 @Table("board_likes")
 data class BoardLikeEntity (
     @Id
-    val id: Long? = null,
+    val id: Long = 0,
     val boardId: Long,
     val userId: Long,
-    val createdAt: OffsetDateTime? = null,
+    val createdAt: OffsetDateTime,
 //    val updatedAt: OffsetDateTime? = null,
 //    val deletedAt: OffsetDateTime? = null,
 )

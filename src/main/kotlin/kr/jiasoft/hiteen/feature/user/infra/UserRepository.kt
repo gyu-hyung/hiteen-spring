@@ -23,14 +23,14 @@ interface UserRepository : CoroutineCrudRepository<UserEntity, Long> {
            OR  LOWER(COALESCE(email,'')) LIKE LOWER(CONCAT('%', :q, '%')))
         LIMIT :limit
     """)
-    suspend fun searchPublic(q: String, limit: Int = 30): Flow<UserSummary>
+    suspend fun searchSummary(q: String, limit: Int = 30): Flow<UserSummary>
 
     /* 친구/팔로우 사용자 정보회 */
     @Query("""
         SELECT uid, username, nickname, phone, address, detail_address, mood, tier, asset_uid 
         FROM users WHERE id = :id
     """)
-    suspend fun findSummaryInfoById(id: Long): UserSummary?
+    suspend fun findSummaryInfoById(id: Long): UserSummary
 
     @Query("""
         SELECT EXISTS (

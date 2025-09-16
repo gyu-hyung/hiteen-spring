@@ -66,14 +66,13 @@ class PollController(
 
 
     /** 투표 수정 */
-    @PutMapping("/{id}")
+    @PostMapping("/{id}")
     suspend fun update(
-        @PathVariable id: Long,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
         @ModelAttribute req: PollUpdateRequest,
         @RequestPart(required = false) file: FilePart?,
     ): ResponseEntity<ApiResult<Long>> {
-        val updatedId = service.update(id, req, user.id!!, file)
+        val updatedId = service.update(req.id, req, user.id, file)
         return ResponseEntity.ok(ApiResult.success(updatedId))
     }
 
@@ -84,7 +83,7 @@ class PollController(
         @PathVariable id: Long,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ): ResponseEntity<ApiResult<Unit>> {
-        service.softDelete(id, currentUserId = user.id!!)
+        service.softDelete(id, currentUserId = user.id)
         return ResponseEntity.ok(ApiResult.success(Unit))
     }
 
@@ -92,11 +91,10 @@ class PollController(
     /** 투표 참여 */
     @PostMapping("/{id}/vote")
     suspend fun vote(
-        @PathVariable id: Long,
         req: PollVoteRequest,
         @AuthenticationPrincipal(expression = "user") user: UserEntity
     ): ResponseEntity<ApiResult<Unit>> {
-        service.vote(id, req.seq, user.id!!)
+        service.vote(req.pollId, req.seq, user.id)
         return ResponseEntity.ok(ApiResult.success(Unit))
     }
 
@@ -107,7 +105,7 @@ class PollController(
         @PathVariable id: Long,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ): ResponseEntity<ApiResult<Unit>> {
-        service.like(id, currentUserId = user.id!!)
+        service.like(id, currentUserId = user.id)
         return ResponseEntity.ok(ApiResult.success(Unit))
     }
 
@@ -118,7 +116,7 @@ class PollController(
         @PathVariable id: Long,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ): ResponseEntity<ApiResult<Unit>> {
-        service.unlike(id, currentUserId = user.id!!)
+        service.unlike(id, currentUserId = user.id)
         return ResponseEntity.ok(ApiResult.success(Unit))
     }
 
@@ -132,7 +130,9 @@ class PollController(
         @RequestParam(defaultValue = "20") perPage: Int,
         @AuthenticationPrincipal(expression = "user") user: UserEntity?
     ): ResponseEntity<ApiResult<ApiPageCursor<PollCommentResponse>>> {
-        val list = service.listComments(pollId, parentUid, user?.id, cursor, perPage)
+
+        // +1 가져와서 nextCursor 여부 판단
+        val list = service.listComments(pollId, parentUid, user?.id, cursor, perPage + 1)
 
         val hasMore = list.size > perPage
         val items = if (hasMore) list.dropLast(1) else list
@@ -154,7 +154,7 @@ class PollController(
         req: PollCommentRegisterRequest,
         @AuthenticationPrincipal(expression = "user") user: UserEntity
     ): ResponseEntity<ApiResult<Long>> {
-        val commentId = service.createComment(req, user.id!!)
+        val commentId = service.createComment(req, user.id)
         return ResponseEntity.ok(ApiResult.success(commentId))
     }
 
@@ -165,7 +165,7 @@ class PollController(
         req: PollCommentRegisterRequest,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ): ResponseEntity<ApiResult<Map<String, Any>>> {
-        val uid = service.updateComment(req.pollId!!, req.commentUid!!, req, user.id!!)
+        val uid = service.updateComment(req.pollId!!, req.commentUid!!, req, user.id)
         return ResponseEntity.ok(ApiResult.success(mapOf("uid" to uid)))
     }
 
@@ -176,7 +176,7 @@ class PollController(
         req: PollCommentRegisterRequest,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ): ResponseEntity<ApiResult<Map<String, Any>>> {
-        val uid = service.deleteComment(req.pollId!!, req.commentUid!!, user.id!!)
+        val uid = service.deleteComment(req.pollId!!, req.commentUid!!, user.id)
         return ResponseEntity.ok(ApiResult.success(mapOf("uid" to uid)))
     }
 
@@ -187,7 +187,7 @@ class PollController(
         req: PollCommentRegisterRequest,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ): ResponseEntity<ApiResult<Unit>> {
-        service.likeComment(req.commentUid!!, user.id!!)
+        service.likeComment(req.commentUid!!, user.id)
         return ResponseEntity.ok(ApiResult.success(Unit))
     }
 
@@ -198,7 +198,7 @@ class PollController(
         req: PollCommentRegisterRequest,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ): ResponseEntity<ApiResult<Unit>> {
-        service.unlikeComment(req.commentUid!!, user.id!!)
+        service.unlikeComment(req.commentUid!!, user.id)
         return ResponseEntity.ok(ApiResult.success(Unit))
     }
 

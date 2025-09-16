@@ -35,21 +35,48 @@ class BoardController(
     }
 
 
-    /** 게시글 목록
-     * TODO : 팔로우된 사용자 게시글만 조회
-     * TODO : 친구 상태인 사용자 게시글만 조회
-     * TODO : 같은 학교 사용자 게시글만 조회
-     * TODO : 첨부파일 목록조회
-     * */
+    /** 게시글 목록 Page */
+//    @GetMapping
+//    suspend fun list(
+//        @RequestParam(required = false) category: String?,
+//        @RequestParam(required = false) q: String?,
+//        @RequestParam(defaultValue = "0") page: Int,
+//        @RequestParam(defaultValue = "20") size: Int,
+//        @RequestParam(defaultValue = "false") followOnly: Boolean,
+//        @RequestParam(defaultValue = "false") friendOnly: Boolean,
+//        @RequestParam(defaultValue = "false") sameSchoolOnly: Boolean,
+//        @AuthenticationPrincipal(expression = "user") user: UserEntity?
+//    ): ResponseEntity<ApiResult<List<BoardResponse>>> {
+//        val boards = service.listBoardsByPage(
+//            category,
+//            q,
+//            page,
+//            size,
+//            user?.id,
+//            followOnly,
+//            friendOnly,
+//            sameSchoolOnly
+//        )
+//        return ResponseEntity.ok(ApiResult.success(boards))
+//    }
+
+
+    /** 게시글 목록 Page */
     @GetMapping
     suspend fun list(
         @RequestParam(required = false) category: String?,
         @RequestParam(required = false) q: String?,
-        @RequestParam(defaultValue = "0") page: Int,
         @RequestParam(defaultValue = "20") size: Int,
+        @RequestParam(required = false) cursor: UUID?,
+        @RequestParam(defaultValue = "false") followOnly: Boolean,
+        @RequestParam(defaultValue = "false") friendOnly: Boolean,
+        @RequestParam(defaultValue = "false") sameSchoolOnly: Boolean,
         @AuthenticationPrincipal(expression = "user") user: UserEntity?
-    ): ResponseEntity<ApiResult<List<BoardResponse>>> {
-        val boards = service.listBoards(category, q, page, size, user?.id)
+    ): ResponseEntity<ApiResult<ApiPageCursor<BoardResponse>>> {
+        val boards = service.listBoardsByCursor(
+            category, q, size, user?.id,
+            followOnly, friendOnly, sameSchoolOnly, cursor
+        )
         return ResponseEntity.ok(ApiResult.success(boards))
     }
 
@@ -83,7 +110,6 @@ class BoardController(
     /** 게시글 수정 */
     @PostMapping("/{uid}", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     suspend fun update(
-        @PathVariable uid: UUID,
         req: BoardUpdateRequest,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
         @RequestPart(name = "files", required = false) filesFlux: Flux<FilePart>?,
@@ -91,7 +117,7 @@ class BoardController(
     ): ResponseEntity<ApiResult<Unit>> {
         val ip = request.remoteAddress?.address?.hostAddress
         val files: List<FilePart> = filesFlux?.collectList()?.awaitSingle().orEmpty()
-        service.update(uid, req, user.id!!, files, ip, req.replaceAssets, req.deleteAssetUids)
+        service.update(req.uid, req, user.id!!, files, ip, req.replaceAssets, req.deleteAssetUids)
         return ResponseEntity.ok(ApiResult.success(Unit))
     }
 
@@ -119,7 +145,7 @@ class BoardController(
 
 
     /** 게시글 좋아요 취소 */
-    @DeleteMapping("/like/{uid}")
+    @DeleteMapping("/{uid}/like")
     suspend fun unlike(
         @PathVariable uid: UUID,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
@@ -166,7 +192,7 @@ class BoardController(
         req: BoardCommentRegisterRequest,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ): ResponseEntity<ApiResult<Map<String, Any>>> {
-        val uid = service.createComment(req.boardUid!!, req, user.id!!)
+        val uid = service.createComment(req.boardUid, req, user.id!!)
         return ResponseEntity.ok(ApiResult.success(mapOf("uid" to uid)))
     }
 
@@ -177,7 +203,7 @@ class BoardController(
         req: BoardCommentRegisterRequest,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ): ResponseEntity<ApiResult<Map<String, Any>>> {
-        val uid = service.updateComment(req.boardUid!!, req.commentUid!!, req, user.id!!)
+        val uid = service.updateComment(req.boardUid, req.commentUid!!, req, user.id!!)
         return ResponseEntity.ok(ApiResult.success(mapOf("uid" to uid)))
     }
 
@@ -188,7 +214,7 @@ class BoardController(
         req: BoardCommentRegisterRequest,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ): ResponseEntity<ApiResult<Map<String, Any>>> {
-        val uid = service.deleteComment(req.boardUid!!, req.commentUid!!, user.id!!)
+        val uid = service.deleteComment(req.boardUid, req.commentUid!!, user.id!!)
         return ResponseEntity.ok(ApiResult.success(mapOf("uid" to uid)))
     }
 

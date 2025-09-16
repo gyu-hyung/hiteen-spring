@@ -27,7 +27,7 @@ data class FriendEntity (
 
     /* 고유번호 */
     @Id
-    val id: Long? = null,
+    val id: Long = 0,
 
     /* 사용자 ID */
     val userId: Long,
@@ -39,10 +39,10 @@ data class FriendEntity (
     val status: String,
 
     /* 상태 변경일시 */
-    val statusAt: OffsetDateTime? = null,
+    val statusAt: OffsetDateTime,
 
     /* 생성일시 */
-    val createdAt: OffsetDateTime? = null,
+    val createdAt: OffsetDateTime,
 
     /* 수정일시 */
     val updatedAt: OffsetDateTime? = null,
