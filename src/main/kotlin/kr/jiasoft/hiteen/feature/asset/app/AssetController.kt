@@ -76,8 +76,8 @@ class AssetController(
         @AuthenticationPrincipal(expression = "user") user: UserEntity
     ): ResponseEntity<FileSystemResource> {
 //        val updated = assetService.increaseDownload(uid, user.id!!)
-        val updated = assetService.increaseDownload(uid, 13)
-            ?: return ResponseEntity.notFound().build()
+        val updated = assetService.increase(uid)
+            ?: return ResponseEntity.badRequest().build()
 
         val filePath = updated.filePath
         val path = assetService.resolveFilePath(filePath)

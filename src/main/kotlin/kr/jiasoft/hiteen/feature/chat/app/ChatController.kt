@@ -18,9 +18,7 @@ class ChatController(
     private val service: ChatService,
 ) {
 
-    /** 내가 속한 채팅방 목록 (최근순)
-     * TODO : 각 채팅방 썸네일
-     * */
+    /** 내가 속한 채팅방 목록 (최근순) */
     @GetMapping
     suspend fun listRooms(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,

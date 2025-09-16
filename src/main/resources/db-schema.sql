@@ -94,6 +94,18 @@ CREATE TABLE codes (
 
 
 -- ========================
+-- 코드 > 첨부파일
+-- ========================
+CREATE TABLE code_assets (
+    id bigserial PRIMARY KEY,
+    code_id bigint NOT NULL REFERENCES codes(id) ON DELETE CASCADE,
+    uid uuid NOT NULL REFERENCES assets(uid) ON DELETE CASCADE,
+    created_id bigint,
+    created_at timestamptz DEFAULT now()
+);
+
+
+-- ========================
 -- 관심사
 -- ========================
 CREATE TABLE interests (
@@ -782,6 +794,7 @@ CREATE TABLE user_photos (
 --  assets,
 --  interest_user,
 --  interests,
+--  code_assets,
 --  codes,
 --  user_details,
 --  users,
