@@ -29,6 +29,10 @@ class PinService(
     private val userRepository: UserRepository,
 ) {
 
+    enum class VISIBILITY {
+        PUBLIC, PRIVATE, FRIENDS
+    }
+
     /** 내가 등록한 핀 목록 */
     suspend fun listMyPins(user: UserEntity): List<PinResponse> {
         val myPins = pinRepository.findAllByUserId(user.id).toList()
@@ -38,19 +42,24 @@ class PinService(
             .toList()
             .groupBy({ it.pinId }, { it.userId })
 
-        // userId → UserEntity 매핑
         val friendIds = pinUsersMap.values.flatten().distinct()
         val friends = userRepository.findAllById(friendIds).toList()
         val friendMap = friends.associateBy({ it.id }, { it })
 
         return myPins.map { pin ->
-            val allowedFriends = pinUsersMap[pin.id]?.mapNotNull { fid ->
-                friendMap[fid]?.let { AllowedFriend(it.uid.toString(), it.nickname) }
-            } ?: emptyList()
+            val allowedFriends =
+                if (pin.visibility == VISIBILITY.FRIENDS.name) {
+                    pinUsersMap[pin.id]?.mapNotNull { fid ->
+                        friendMap[fid]?.let { AllowedFriend(it.uid.toString(), it.nickname) }
+                    } ?: emptyList()
+                } else {
+                    emptyList()
+                }
 
             PinResponse.from(pin, user, allowedFriends)
         }
     }
+
 
 
     /**
@@ -63,11 +72,11 @@ class PinService(
         val userId = user.id
 
         // 1. 전체 공개 핀 TODO 근처 핀만 조회로 변경해야함
-        val publicPins = pinRepository.findAllByVisibilityOrderByIdDesc("PUBLIC")
+        val publicPins = pinRepository.findAllByVisibilityOrderByIdDesc(VISIBILITY.PUBLIC.name)
 
         // 2. 내 PRIVATE 핀
         val myPrivatePins = pinRepository.findAllByUserId(userId)
-            .filter { it.visibility == "PRIVATE" }
+            .filter { it.visibility == VISIBILITY.PRIVATE.name }
 
         // 3. 나에게 공개된 FRIENDS 핀
         val friendPins = pinUsersRepository.findAllByUserId(userId)
@@ -148,31 +157,39 @@ class PinService(
 
         // 3. 값 수정
         val updated = pin.copy(
-            zipcode = dto.zipcode,
-            lat = dto.lat,
-            lng = dto.lng,
-            description = dto.description,
-            visibility = dto.visibility,
-            updatedId = user.id,
-            updatedAt = OffsetDateTime.now(),
+            zipcode     = dto.zipcode     ?: pin.zipcode,
+            lat         = dto.lat         ?: pin.lat,
+            lng         = dto.lng         ?: pin.lng,
+            description = dto.description ?: pin.description,
+            visibility  = dto.visibility  ?: pin.visibility,
+            updatedId   = user.id,
+            updatedAt   = OffsetDateTime.now(),
         )
         val saved = pinRepository.save(updated)
 
         // 4. 공개 친구 수정
-        if (dto.visibility == "FRIENDS") {
-            if (dto.friendUids != null) {
-                pinUsersRepository.deleteAllByPinId(pin.id)
-                if (dto.friendUids.isNotEmpty()) {
-                    val users = userRepository.findAllByUidIn(dto.friendUids)
-                    users.forEach { u ->
-                        pinUsersRepository.save(
-                            PinUsersEntity(pinId = pin.id, userId = u.id, createdAt = OffsetDateTime.now())
-                        )
+        when (updated.visibility) {
+            VISIBILITY.FRIENDS.name -> {
+                if (dto.friendUids != null) {
+                    pinUsersRepository.deleteAllByPinId(pin.id)
+                    if (dto.friendUids.isNotEmpty()) {
+                        val users = userRepository.findAllByUidIn(dto.friendUids)
+                        users.forEach { u ->
+                            pinUsersRepository.save(
+                                PinUsersEntity(
+                                    pinId = pin.id,
+                                    userId = u.id,
+                                    createdAt = OffsetDateTime.now()
+                                )
+                            )
+                        }
                     }
                 }
             }
+            VISIBILITY.PUBLIC.name, VISIBILITY.PRIVATE.name -> {
+                pinUsersRepository.deleteAllByPinId(pin.id)
+            }
         }
-
 
         return saved
     }

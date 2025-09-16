@@ -18,7 +18,7 @@ class UserServiceTest {
     private val encoder: PasswordEncoder = mock()
     private val schoolRepository: SchoolRepository = mock()
 
-    private val userService = UserService(assetService, userRepository, encoder, schoolRepository)
+//    private val userService = UserService(assetService, userRepository, encoder, schoolRepository)
 
 
     @Test

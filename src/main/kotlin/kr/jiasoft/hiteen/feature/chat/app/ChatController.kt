@@ -58,7 +58,8 @@ class ChatController(
     ) = ResponseEntity.ok(ApiResult.success(service.pageMessages(roomUid, cursor, size.coerceIn(1, 100))))
 
 
-    /** 메세지 전송 */
+    /** 메세지 전송
+     * TODO 전송한 메세지 반환 */
     @PostMapping("/{roomUid}/messages")
     suspend fun sendMessage(
         @PathVariable roomUid: UUID,

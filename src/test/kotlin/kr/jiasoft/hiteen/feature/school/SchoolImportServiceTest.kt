@@ -14,7 +14,7 @@ class SchoolImportServiceTest (
 
     @Test
     fun `NEIS API에서 학교 데이터 가져오기`() = runBlocking {
-        // when
+//        // when
 //        schoolImportService.fetchAndSaveSchools()
 //
 //        // then
