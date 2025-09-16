@@ -60,6 +60,8 @@ class UserService (
             throw BusinessValidationException(mapOf("nickname" to "이미 사용 중인 닉네임입니다."))
         }
 
+        val grade = param.grade
+        val school = param.schoolId?.let { id -> schoolRepository.findById(id) }
         val toEntity = param.toEntity(encoder.encode(param.password))
         val saved = userRepository.save(toEntity)
 
@@ -74,14 +76,15 @@ class UserService (
             saved
         }
 
-        val school = updated.schoolId?.let { id -> schoolRepository.findById(id) }
-        val interests = interestUserRepository.getInterestResponseById(null, updated.id).toList()
-        val relationshipCounts = followService.getRelationshipCounts(updated.id).copy(
-            postCount = boardRepository.countByCreatedId(updated.id)
-        )
-        val photos = getPhotosById(updated.id)
 
-        return UserResponse.from(updated, school, interests, relationshipCounts, photos)
+//        val interests = interestUserRepository.getInterestResponseById(null, updated.id).toList()
+//        val relationshipCounts = followService.getRelationshipCounts(updated.id).copy(
+//            postCount = boardRepository.countByCreatedId(updated.id)
+//        )
+//        val photos = getPhotosById(updated.id)
+
+//        return UserResponse.from(updated, school, interests, relationshipCounts, photos)
+        return UserResponse.from(updated, school)
     }
 
 

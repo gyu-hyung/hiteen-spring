@@ -47,9 +47,6 @@ class SecurityConfig(
                     "/broadcasting/auth",
                     "/api/user",
                     "/favicon.ico",
-                    "/swagger-ui/**",
-                    "/api-docs/**",
-                    "/v3/api-docs/**",
                 ).permitAll()
 
                 // 다운로드는 GET 허용
@@ -58,6 +55,9 @@ class SecurityConfig(
                     "/api/school",
                     "/api/assets/{uid}/download",
                     "/api/user/nickname/{nickname}",
+                    "/api-docs/**",
+                    "/v3/api-docs/**",
+                    "/swagger-ui/**",
                 ).permitAll()
 
                 it.pathMatchers("/ws/**").permitAll()
