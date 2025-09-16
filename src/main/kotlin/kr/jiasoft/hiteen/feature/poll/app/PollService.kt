@@ -42,7 +42,7 @@ class PollService(
     ): List<PollResponse> =
         polls.findSummariesByCursor(cursor, size, currentUserId)
             .map { row ->
-                val user = userService.findSummary(row.createdId)
+                val user = userService.findUserSummary(row.createdId)
 
                 PollResponse.from(row, user)
             }.toList()
@@ -51,7 +51,7 @@ class PollService(
     suspend fun getPoll(id: Long, currentUserId: Long?): PollResponse {
         val poll = polls.findById(id) ?: throw notFound("poll")
         val votedSeq = pollUsers.findByPollIdAndUserId(id, currentUserId!!)?.seq
-        val user = userService.findSummary(poll.createdId)
+        val user = userService.findUserSummary(poll.createdId)
         return PollResponse.of(poll, votedSeq, user)
     }
 
@@ -175,7 +175,7 @@ class PollService(
             = comments.findComments(pollId, parentUid, currentUserId ?: -1L, cursor, perPage + 1)
                 .map { comment ->
                         comment.copy(
-                            user = userService.findSummary(comment.createdId)
+                            user = userService.findUserSummary(comment.createdId)
                         )
                     }.toList()
 

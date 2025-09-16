@@ -26,7 +26,7 @@ class ChatController(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
         @RequestParam(defaultValue = "20") limit: Int,
         @RequestParam(defaultValue = "0") offset: Int,
-    ) = ResponseEntity.ok(ApiResult.success(service.listRoomsSnapshot(user.id!!, limit.coerceIn(1, 100), offset.coerceAtLeast(0))))
+    ) = ResponseEntity.ok(ApiResult.success(service.listRoomsSnapshot(user.id, limit.coerceIn(1, 100), offset.coerceAtLeast(0))))
 
 
     /** 1:1 방 만들기(이미 있으면 재사용) */
@@ -34,7 +34,7 @@ class ChatController(
     suspend fun createDirectRoom(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
         req: CreateDirectRoomRequest
-    ) = ResponseEntity.ok(ApiResult.success(service.createDirectRoom(user.id!!, req.peerUid)))
+    ) = ResponseEntity.ok(ApiResult.success(service.createDirectRoom(user.id, req.peerUid)))
 
 
     /** 단톡 생성 */
@@ -42,7 +42,7 @@ class ChatController(
     suspend fun createRoom(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
         req: CreateRoomRequest
-    ) = ResponseEntity.ok(ApiResult.success(service.createRoom(user.id!!, req.peerUids, req.reuseExactMembers)))
+    ) = ResponseEntity.ok(ApiResult.success(service.createRoom(user.id, req.peerUids, req.reuseExactMembers)))
 
 
     /** 방 상세 가져오기(필요시) */
@@ -84,7 +84,7 @@ class ChatController(
         @PathVariable roomUid: UUID,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
          req: TogglePushRequest
-    ) = ResponseEntity.ok(ApiResult.success(service.togglePush(roomUid, user.id!!, req.enabled)))
+    ) = ResponseEntity.ok(ApiResult.success(service.togglePush(roomUid, user.id, req.enabled)))
 
 
     /** 방 나가기 */
@@ -92,6 +92,6 @@ class ChatController(
     suspend fun leaveRoom(
         @PathVariable roomUid: UUID,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
-    ) = ResponseEntity.ok(ApiResult.success(service.leaveRoom(roomUid, user.id!!)))
+    ) = ResponseEntity.ok(ApiResult.success(service.leaveRoom(roomUid, user.id)))
 
 }

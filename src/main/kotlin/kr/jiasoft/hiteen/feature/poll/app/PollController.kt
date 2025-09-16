@@ -60,7 +60,7 @@ class PollController(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
         @RequestPart("file", required = false) file: FilePart?,
         ): ResponseEntity<ApiResult<Long>> {
-        val id = service.create(req, user.id!!, file)
+        val id = service.create(req, user.id, file)
         return ResponseEntity.ok(ApiResult.success(id))
     }
 

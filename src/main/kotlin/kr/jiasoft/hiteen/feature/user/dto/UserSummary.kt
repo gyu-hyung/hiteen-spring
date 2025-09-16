@@ -1,6 +1,7 @@
 package kr.jiasoft.hiteen.feature.user.dto
 
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
+import kotlin.String
 
 
 data class UserSummary(
@@ -11,6 +12,7 @@ data class UserSummary(
     val address: String?,
     val detailAddress: String?,
     val mood: String?,
+    val mbti: String?,
     val tier: String?,
     val assetUid: String?
 ) {
@@ -24,6 +26,7 @@ data class UserSummary(
                 address = user.address,
                 detailAddress = user.detailAddress,
                 mood = user.mood,
+                mbti = user.mbti,
                 tier = user.tier,
                 assetUid = user.assetUid?.toString()
             )
@@ -35,6 +38,7 @@ data class UserSummary(
             address = null,
             detailAddress = null,
             mood = null,
+            mbti = null,
             tier = null,
             assetUid = null
         )

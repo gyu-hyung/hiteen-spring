@@ -5,6 +5,9 @@ import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactor.mono
 import kr.jiasoft.hiteen.common.exception.BusinessValidationException
 import kr.jiasoft.hiteen.feature.asset.app.AssetService
+import kr.jiasoft.hiteen.feature.board.infra.BoardRepository
+import kr.jiasoft.hiteen.feature.interest.infra.InterestUserRepository
+import kr.jiasoft.hiteen.feature.relationship.app.FollowService
 import kr.jiasoft.hiteen.feature.school.infra.SchoolRepository
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import kr.jiasoft.hiteen.feature.user.domain.UserPhotosEntity
@@ -32,6 +35,9 @@ class UserService (
     private val userPhotosRepository: UserPhotosRepository,
     private val encoder: PasswordEncoder,
     private val schoolRepository: SchoolRepository,
+    private val interestUserRepository: InterestUserRepository,
+    private val followService: FollowService,
+    private val boardRepository: BoardRepository,
 ) : ReactiveUserDetailsService {
 
     override fun findByUsername(username: String): Mono<UserDetails> = mono {
@@ -49,7 +55,7 @@ class UserService (
 
 
     suspend fun register(param: UserRegisterForm, file: FilePart?): UserResponse {
-        val exists = nicknameDuplicationCheck(param.nickname!!)
+        val exists = nicknameDuplicationCheck(param.nickname)
         if (exists) {
             throw BusinessValidationException(mapOf("nickname" to "이미 사용 중인 닉네임입니다."))
         }
@@ -69,20 +75,30 @@ class UserService (
         }
 
         val school = updated.schoolId?.let { id -> schoolRepository.findById(id) }
-        return UserResponse.from(updated, school)
+        val interests = interestUserRepository.getInterestResponseById(null, updated.id).toList()
+        val relationshipCounts = followService.getRelationshipCounts(updated.id).copy(
+            postCount = boardRepository.countByCreatedId(updated.id)
+        )
+
+        return UserResponse.from(updated, school, interests, relationshipCounts)
     }
 
 
-    suspend fun findMe(userId: Long): UserResponse {
-        val user = userRepository.findById(userId)
+    suspend fun findUserResponse(userId: UUID): UserResponse {
+        val user = userRepository.findByUid(userId.toString())
             ?: throw UsernameNotFoundException("User not found: $userId")
 
         val school = user.schoolId?.let { id -> schoolRepository.findById(id) }
-        return UserResponse.from(user, school)
+        val interests = interestUserRepository.getInterestResponseById(null, user.id).toList()
+        val relationshipCounts = followService.getRelationshipCounts(user.id).copy(
+            postCount = boardRepository.countByCreatedId(user.id)
+        )
+
+        return UserResponse.from(user, school, interests, relationshipCounts)
     }
 
 
-    suspend fun findSummary(userId: Long): UserSummary {
+    suspend fun findUserSummary(userId: Long): UserSummary {
         return userRepository.findSummaryInfoById(userId)
     }
 
@@ -161,7 +177,10 @@ class UserService (
 
         // 5) schoolId 있으면 조회해서 DTO 변환
         val school = saved.schoolId?.let { id -> schoolRepository.findById(id) }
-        return UserResponse.from(saved, school)
+        val interests = interestUserRepository.getInterestResponseById(null, saved.id).toList()
+        val relationshipCounts = followService.getRelationshipCounts(saved.id)
+
+        return UserResponse.from(saved, school, interests, relationshipCounts)
     }
 
 

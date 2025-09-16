@@ -31,14 +31,14 @@ class InterestUserController(
     suspend fun delete(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
         @RequestParam interestId: Long
-    ) = ResponseEntity.ok(ApiResult.success(service.removeInterestFromUser(user.id!!, interestId)))
+    ) = ResponseEntity.ok(ApiResult.success(service.removeInterestFromUser(user.id, interestId)))
 
 
     /** 사용자 관심사 전체 삭제 */
     @PostMapping("/reset")
     suspend fun clear(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
-    ) = ResponseEntity.ok(ApiResult.success(service.clearUserInterests(user.id!!)))
+    ) = ResponseEntity.ok(ApiResult.success(service.clearUserInterests(user.id)))
 
 
     /** 친구 추천 받기 */

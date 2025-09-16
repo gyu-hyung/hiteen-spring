@@ -61,13 +61,13 @@ class BoardService(
     suspend fun getBoard(uid: UUID, currentUserId: Long?): BoardResponse {
         val userId = currentUserId ?: -1L
         val b = boards.findDetailByUid(uid, userId) ?: throw IllegalArgumentException("board not found")
-        val userSummary = userService.findSummary(b.createdId)
+        val userSummary = userService.findUserSummary(b.createdId)
 
         val perPage = 15
         val commentList = comments.findComments(b.uid, null, userId, null, perPage + 1)
                 .map { comments ->
                     comments.copy(
-                        user = userService.findSummary(comments.createdId)
+                        user = userService.findUserSummary(comments.createdId)
                     )
                 }.toList()
 
@@ -105,7 +105,7 @@ class BoardService(
                 row.copy(
                     subject = row.subject,
                     content = (row.content).take(160),
-                    user = userService.findSummary(row.createdId)
+                    user = userService.findUserSummary(row.createdId)
                 )
             }.toList()
     }
@@ -133,7 +133,7 @@ class BoardService(
                 row.copy(
                     subject = row.subject,
                     content = (row.content).take(160),
-                    user = userService.findSummary(row.createdId)
+                    user = userService.findUserSummary(row.createdId)
                 )
             },
             perPage = s
@@ -286,7 +286,7 @@ class BoardService(
             = comments.findComments(boardUid, parentUid, currentUserId ?: -1L, cursor, perPage)
                 .map { comments ->
                     comments.copy(
-                        user = userService.findSummary(comments.createdId)
+                        user = userService.findUserSummary(comments.createdId)
                     )
                 }.toList()
 
