@@ -58,6 +58,7 @@ class BoardController(
         @RequestParam(required = false) q: String?,
         @RequestParam(defaultValue = "20") size: Int,
         @RequestParam(required = false) cursor: UUID?,
+        @RequestParam(required = false) author: UUID?,
         @RequestParam(defaultValue = "false") followOnly: Boolean,
         @RequestParam(defaultValue = "false") friendOnly: Boolean,
         @RequestParam(defaultValue = "false") sameSchoolOnly: Boolean,
@@ -65,10 +66,11 @@ class BoardController(
     ): ResponseEntity<ApiResult<ApiPageCursor<BoardResponse>>> {
         val boards = service.listBoardsByCursor(
             category, q, size, user?.id,
-            followOnly, friendOnly, sameSchoolOnly, cursor
+            followOnly, friendOnly, sameSchoolOnly, cursor, author
         )
         return ResponseEntity.ok(ApiResult.success(boards))
     }
+
 
 
     /** 게시글 단건 조회 */

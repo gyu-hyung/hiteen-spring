@@ -79,7 +79,7 @@ class UserService (
         val relationshipCounts = followService.getRelationshipCounts(updated.id).copy(
             postCount = boardRepository.countByCreatedId(updated.id)
         )
-        val photos = getPhotos(updated.uid.toString())
+        val photos = getPhotosById(updated.id)
 
         return UserResponse.from(updated, school, interests, relationshipCounts, photos)
     }
@@ -94,7 +94,7 @@ class UserService (
         val relationshipCounts = followService.getRelationshipCounts(user.id).copy(
             postCount = boardRepository.countByCreatedId(user.id)
         )
-        val photos = getPhotos(user.uid.toString())
+        val photos = getPhotosById(user.id)
 
         return UserResponse.from(user, school, interests, relationshipCounts, photos)
     }
@@ -181,7 +181,7 @@ class UserService (
         val school = saved.schoolId?.let { id -> schoolRepository.findById(id) }
         val interests = interestUserRepository.getInterestResponseById(null, saved.id).toList()
         val relationshipCounts = followService.getRelationshipCounts(saved.id)
-        val photos = getPhotos(saved.uid.toString())
+        val photos = getPhotosById(saved.id)
 
         return UserResponse.from(saved, school, interests, relationshipCounts, photos)
     }
@@ -223,6 +223,13 @@ class UserService (
         // user_photos row 삭제
         userPhotosRepository.deleteById(exist.id)
     }
+
+
+    suspend fun getPhotosById(userId: Long): List<UserPhotosEntity> {
+        val flow = userPhotosRepository.findByUserId(userId)?.toList()
+        return flow?.toList() ?: emptyList()
+    }
+
 
     suspend fun getPhotos(userUid: String): List<UserPhotosEntity> {
         val userEntity = userRepository.findByUid(userUid)

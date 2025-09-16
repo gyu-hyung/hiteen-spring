@@ -124,10 +124,8 @@ interface BoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
                 SELECT u.id FROM users u 
                 WHERE u.school_id = (SELECT school_id FROM users WHERE id = :userId)
           ))
-          AND (
-              :lastUid IS NULL 
-              OR b.id <= (SELECT id FROM boards WHERE uid = :lastUid)
-          )
+          AND (:lastUid IS NULL OR b.id <= (SELECT id FROM boards WHERE uid = :lastUid))
+          AND (:authorUid IS NULL OR b.created_id = (SELECT id FROM users WHERE uid = :authorUid))
         ORDER BY b.id DESC
         LIMIT :limit
     """)
@@ -139,7 +137,8 @@ interface BoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
         followOnly: Boolean,
         friendOnly: Boolean,
         sameSchoolOnly: Boolean,
-        lastUid: UUID?
+        lastUid: UUID?,
+        authorUid: UUID?
     ): Flow<BoardResponse>
 
 
