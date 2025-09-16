@@ -17,7 +17,7 @@ class SchoolController(
 
     /**
      * 학교 정보 조회 (검색 + 커서 기반 페이지네이션)
-     *
+     * TODO : HITEEN 사용중 유저 COUNT
      * @param keyword 학교 이름 키워드 (없으면 전체 반환)
      * @param cursor  마지막으로 조회한 학교 ID (없으면 처음부터)
      * @param limit   페이지당 개수 (기본 30)

@@ -23,6 +23,7 @@ class AuthController(
     data class JwtResponse(val token: String)
 
 
+    //TODO 로그인 시 device 정보 user_details에 저장
     @PostMapping("/login")
     suspend fun login(form: LoginForm): JwtResponse =
         try { JwtResponse(authService.login(form.username, form.password)) }
