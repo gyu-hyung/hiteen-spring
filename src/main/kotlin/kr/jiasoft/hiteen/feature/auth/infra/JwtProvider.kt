@@ -41,7 +41,6 @@ class JwtProvider (
     }
 
 
-
     /** username으로 BearerToken(AccessToken) 발급 */
     fun generate(username: String): BearerToken {
         val now = Date()
@@ -54,58 +53,45 @@ class JwtProvider (
         return BearerToken(token)
     }
 
-    fun generateExpiredToken(): BearerToken {
-        val now = Date()
-        val token = Jwts.builder()
-            .subject("test")
-            .issuedAt(now)
-            .expiration(Date(now.time - accessExpiration))
-            .signWith(key)
-            .compact()
-        return BearerToken(token)
-    }
-
-    /** BearerToken에서 username(subject) 추출 */
-    fun getUsername(token: BearerToken): String {
-        return try {
-            Jwts.parser()
-                .verifyWith(key)
-                .build()
-                .parseSignedClaims(token.value)
-                .payload
-                .subject
-        } catch (e: Exception) {
-//            e.printStackTrace()
-            ""
-        }
-    }
-
 
     /** 토큰을 완전 검증(서명/exp/nbf)하고 Claims를 반환. 실패 시 JwtException 계열을 던짐 */
     fun parseAndValidateOrThrow(token: BearerToken): Jws<Claims> {
         return parser.parseSignedClaims(token.value)
     }
 
-    /** 로깅 전용: 안전하게 subject를 꺼내되 실패하면 null */
-    fun tryGetSubjectSafely(token: BearerToken): String? =
-        try { parser.parseSignedClaims(token.value).payload.subject }
-        catch (_: JwtException) { null }
-        catch (_: IllegalArgumentException) { null }
+    /** username으로 Access/Refresh 동시 발급 */
+    fun generateTokens(username: String): Pair<BearerToken, BearerToken> {
+        val now = Date()
+
+        val access = Jwts.builder()
+            .subject(username)
+            .issuedAt(now)
+            .expiration(Date(now.time + accessExpiration))
+            .signWith(key)
+            .compact()
+
+        val refresh = Jwts.builder()
+            .subject(username)
+            .issuedAt(now)
+            .expiration(Date(now.time + refreshExpiration))
+            .signWith(key)
+            .compact()
+
+        return BearerToken(access) to BearerToken(refresh)
+    }
 
 
-    /** BearerToken 유효성 검사 및 사용자 체크 */
-    fun isValid(token: BearerToken): Boolean {
-        return try {
-            Jwts.parser()
-                .verifyWith(key)
-                .build()
-                .parseSignedClaims(token.value)
-                .payload
-            true
-        } catch (e: Exception) {
-            e.printStackTrace()
-            false
+    fun refreshTokens(refreshToken: BearerToken): Pair<BearerToken, BearerToken> {
+        val claims = parser.parseSignedClaims(refreshToken.value).payload
+
+        if (claims.expiration.before(Date())) {
+            throw JwtException("Refresh expired")
         }
+
+        val username = claims.subject
+
+        // 새 Access & Refresh 발급 (자동 연장)
+        return generateTokens(username)
     }
 
 
