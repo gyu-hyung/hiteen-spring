@@ -4,6 +4,6 @@ import kr.jiasoft.hiteen.feature.user.dto.UserSummary
 
 data class ContactResponse(
     val registeredUsers: List<UserSummary>,
-//    val friends: List<ContactDto>,
+    val friends: List<UserSummary>,
     val notRegisteredUsers: List<String>
 )

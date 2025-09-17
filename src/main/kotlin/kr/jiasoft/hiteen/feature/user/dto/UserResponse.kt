@@ -33,6 +33,8 @@ data class UserResponse(
     val grade: String?,
     val gender: String?,
     val birthday: LocalDate?,
+    val isFollowed: Boolean = false,
+    val isFriend: Boolean = false,
     val createdAt: LocalDateTime,
     val updatedAt: LocalDateTime?,
     val deletedAt: LocalDateTime?,
@@ -40,9 +42,6 @@ data class UserResponse(
     val relationshipCounts: RelationshipCounts?,
     val interests: List<InterestUserResponse>?,
     val photos: List<UserPhotosEntity>?,
-
-    val isFollowed: Boolean = false,
-    val isFriend: Boolean = false,
 
 ) {
     companion object {
@@ -73,14 +72,14 @@ data class UserResponse(
                     grade = entity.grade,
                     gender = entity.gender,
                     birthday = entity.birthday,
+                    isFollowed = isFollowed,
+                    isFriend = isFriend,
                     createdAt = entity.createdAt.toLocalDateTime(),
                     updatedAt = entity.updatedAt?.toLocalDateTime(),
                     deletedAt = entity.deletedAt?.toLocalDateTime(),
                     relationshipCounts = relationshipCounts,
                     interests = interests,
                     photos = photos,
-                    isFollowed = isFollowed,
-                    isFriend = isFriend
                 )
     }
 }
