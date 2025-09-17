@@ -12,7 +12,7 @@ data class CodeEntity(
     val code: String,
     val codeGroupName: String,
     val codeGroup: String,
-    val status: String,
+    val status: CodeStatus? = CodeStatus.INACTIVE,
     val createdId: Long,
     val createdAt: OffsetDateTime,
     val updatedId: Long? = null,
