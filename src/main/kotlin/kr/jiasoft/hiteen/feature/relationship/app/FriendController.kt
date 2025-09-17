@@ -6,6 +6,7 @@ import kotlinx.coroutines.reactive.asFlow
 import kr.jiasoft.hiteen.common.dto.ApiResult
 import kr.jiasoft.hiteen.feature.relationship.dto.ContactResponse
 import kr.jiasoft.hiteen.feature.relationship.dto.RelationshipSearchItem
+import kr.jiasoft.hiteen.feature.relationship.dto.UpdateLocationModeRequest
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
@@ -130,5 +131,19 @@ class FriendController(
         @PathVariable userUid: String
     ) = ResponseEntity.ok(ApiResult(true, friendService.unfriend(user, userUid)))
 
+
+    /** 친구 위치 모드 변경 */
+    @PatchMapping("/location-mode")
+    suspend fun updateLocationMode(
+        @AuthenticationPrincipal(expression = "user") user: UserEntity,
+        @RequestBody req: UpdateLocationModeRequest
+    ): ResponseEntity<ApiResult<String>> {
+        val friend = friendService.findUserByUid(req.friendUid)
+            ?: throw IllegalArgumentException("해당 UID의 사용자를 찾을 수 없습니다.")
+
+        friendService.updateLocationMode(user.id, friend.id, req.mode)
+
+        return ResponseEntity.ok(ApiResult.success("위치 모드가 '${req.mode}' 로 변경되었습니다."))
+    }
 
 }

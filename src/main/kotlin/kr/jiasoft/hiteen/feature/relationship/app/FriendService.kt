@@ -9,6 +9,7 @@ import kr.jiasoft.hiteen.feature.relationship.domain.FollowEntity
 import kr.jiasoft.hiteen.feature.relationship.domain.FollowStatus
 import kr.jiasoft.hiteen.feature.relationship.domain.FriendEntity
 import kr.jiasoft.hiteen.feature.relationship.domain.FriendStatus
+import kr.jiasoft.hiteen.feature.relationship.domain.LocationMode
 import kr.jiasoft.hiteen.feature.relationship.dto.ContactResponse
 import kr.jiasoft.hiteen.feature.relationship.dto.RelationshipSummary
 import kr.jiasoft.hiteen.feature.relationship.dto.RelationshipSearchItem
@@ -37,20 +38,35 @@ class FriendService(
             ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "user not found: $uid")
     }
 
-    private fun toRelationshipSummary(e: FriendEntity, other: UserSummary?, latestLocation: LocationHistory?): RelationshipSummary {
+    private fun toRelationshipSummary(
+            e: FriendEntity,
+            myId: Long,
+            other: UserSummary?,
+            latestLocation: LocationHistory?
+    ): RelationshipSummary {
+        val myMode = if (e.userId == myId) e.userLocationMode else e.friendLocationMode
+        val theirMode = if (e.userId == myId) e.friendLocationMode else e.userLocationMode
+
         return RelationshipSummary(
             userSummary = other ?: UserSummary.empty(),
             status = e.status,
             statusAt = e.statusAt,
             lat = latestLocation?.lat,
             lng = latestLocation?.lng,
-            lastSeenAt = latestLocation?.timestamp
+            lastSeenAt = latestLocation?.timestamp,
+            myLocationMode = myMode,
+            theirLocationMode = theirMode
         )
     }
 
     suspend fun isFriend(userId: Long, targetId: Long): Boolean {
         return friendRepository.existsFriend(userId, targetId) > 0
     }
+
+    suspend fun findUserByUid(uid: String): UserEntity? {
+        return userRepository.findByUid(uid)
+    }
+
 
 
     suspend fun getContacts(user: UserEntity, rawContacts: String): ContactResponse {
@@ -98,7 +114,7 @@ class FriendService(
                     locationCacheRedisService.getLatest(uid)
                 }
 
-                toRelationshipSummary(e, other, latestLocation)
+                toRelationshipSummary(e, me.id, other, latestLocation)
             }.toList()
     }
 
@@ -107,7 +123,7 @@ class FriendService(
         return friendRepository.findAllOutgoingPending(me.id)
             .map { e ->
                 val other = userRepository.findSummaryInfoById(e.friendId)
-                toRelationshipSummary(e, other, null)
+                toRelationshipSummary(e, me.id, other, null)
             }.toList()
     }
 
@@ -116,7 +132,7 @@ class FriendService(
         return friendRepository.findAllIncomingPending(me.id)
             .map { e ->
                 val other = userRepository.findSummaryInfoById(e.userId)
-                toRelationshipSummary(e, other, null)
+                toRelationshipSummary(e, me.id, other, null)
             }.toList()
     }
 
@@ -291,5 +307,20 @@ class FriendService(
             )
         }
     }
+
+
+    suspend fun updateLocationMode(userId: Long, friendId: Long, mode: LocationMode) {
+        val friendship = friendRepository.findBetween(userId, friendId)
+            ?: throw IllegalArgumentException("친구 관계가 존재하지 않습니다.")
+
+        val updated = if (friendship.userId == userId) {
+            friendship.copy(userLocationMode = mode, updatedAt = OffsetDateTime.now())
+        } else {
+            friendship.copy(friendLocationMode = mode, updatedAt = OffsetDateTime.now())
+        }
+
+        friendRepository.save(updated)
+    }
+
 
 }

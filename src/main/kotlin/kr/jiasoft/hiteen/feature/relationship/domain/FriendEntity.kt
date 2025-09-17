@@ -41,6 +41,12 @@ data class FriendEntity (
     /* 상태 변경일시 */
     val statusAt: OffsetDateTime,
 
+    /* 사용자 위치 공개 모드 */
+    val userLocationMode: LocationMode = LocationMode.PUBLIC,
+
+    /* 친구 위치 공개 모드 */
+    val friendLocationMode: LocationMode = LocationMode.PUBLIC,
+
     /* 생성일시 */
     val createdAt: OffsetDateTime,
 

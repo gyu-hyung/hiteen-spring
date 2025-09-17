@@ -369,14 +369,16 @@ CREATE TABLE report (
 -- 친구
 -- ========================
 CREATE TABLE friends (
-  id         bigserial PRIMARY KEY,
-  user_id    bigint NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  friend_id  bigint NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  status     varchar(20),
-  status_at  timestamptz,
-  created_at timestamptz DEFAULT now(),
-  updated_at timestamptz,
-  deleted_at timestamptz,
+  id                    bigserial PRIMARY KEY,
+  user_id               bigint NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  friend_id             bigint NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  status                varchar(20),
+  status_at             timestamptz,
+  user_location_mode    varchar(20) DEFAULT 'PUBLIC',
+  friend_location_mode  varchar(20) DEFAULT 'PUBLIC'
+  created_at            timestamptz DEFAULT now(),
+  updated_at            timestamptz,
+  deleted_at            timestamptz,
   CONSTRAINT friends_not_self CHECK (user_id <> friend_id),
   UNIQUE (user_id, friend_id)
 );
