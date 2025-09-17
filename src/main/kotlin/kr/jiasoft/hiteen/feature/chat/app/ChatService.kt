@@ -307,11 +307,11 @@ class ChatService(
                 lastMessage = if (last != null) {
                     MessageSummary(
                         messageUid = last.uid,
-                        sender = sender,
                         content = last.content,
                         kind = last.kind,
                         emojiCode = last.emojiCode,
                         createdAt = last.createdAt,
+                        sender = sender,
                         assets = lastAssets
                     )
                 } else null,

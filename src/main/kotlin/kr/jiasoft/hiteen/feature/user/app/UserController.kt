@@ -60,9 +60,14 @@ class UserController(
     /** 회원 프로필 조회 */
     @GetMapping("/profile/{uid}")
     suspend fun profile(
-        @PathVariable uid: UUID
+        @PathVariable uid: UUID,
+        @AuthenticationPrincipal(expression = "user") currentUser: UserEntity?
     ): ResponseEntity<ApiResult<UserResponse>> {
-        return ResponseEntity.ok(ApiResult.success(userService.findUserResponse(uid)))
+        return ResponseEntity.ok(
+            ApiResult.success(
+                userService.findUserResponse(uid, currentUser?.id)
+            )
+        )
     }
 
 

@@ -40,39 +40,47 @@ data class UserResponse(
     val relationshipCounts: RelationshipCounts?,
     val interests: List<InterestUserResponse>?,
     val photos: List<UserPhotosEntity>?,
+
+    val isFollowed: Boolean = false,
+    val isFriend: Boolean = false,
+
 ) {
     companion object {
         fun from(
-            entity: UserEntity,
-            school: SchoolEntity? = null,
-            interests: List<InterestUserResponse>? = null,
-            relationshipCounts: RelationshipCounts? = null,
-            photos: List<UserPhotosEntity>? = null,
-        ): UserResponse =
-            UserResponse(
-                id = entity.id,
-                uid = entity.uid.toString(),
-                username = entity.username,
-                email = entity.email,
-                nickname = entity.nickname,
-                role = entity.role,
-                address = entity.address,
-                detailAddress = entity.detailAddress,
-                phone = entity.phone,
-                mood = entity.mood,
-                mbti = entity.mbti,
-                tier = entity.tier,
-                assetUid = entity.assetUid?.toString(),
-                school = school?.let { SchoolDto(it.id!!, it.name) },
-                grade = entity.grade,
-                gender = entity.gender,
-                birthday = entity.birthday,
-                createdAt = entity.createdAt.toLocalDateTime(),
-                updatedAt = entity.updatedAt?.toLocalDateTime(),
-                deletedAt = entity.deletedAt?.toLocalDateTime(),
-                relationshipCounts = relationshipCounts,
-                interests = interests,
-                photos = photos
-            )
+                entity: UserEntity,
+                school: SchoolEntity? = null,
+                interests: List<InterestUserResponse>? = null,
+                relationshipCounts: RelationshipCounts? = null,
+                photos: List<UserPhotosEntity>? = null,
+                isFollowed: Boolean = false,
+                isFriend: Boolean = false,
+            ): UserResponse =
+                UserResponse(
+                    id = entity.id,
+                    uid = entity.uid.toString(),
+                    username = entity.username,
+                    email = entity.email,
+                    nickname = entity.nickname,
+                    role = entity.role,
+                    address = entity.address,
+                    detailAddress = entity.detailAddress,
+                    phone = entity.phone,
+                    mood = entity.mood,
+                    mbti = entity.mbti,
+                    tier = entity.tier,
+                    assetUid = entity.assetUid?.toString(),
+                    school = school?.let { SchoolDto(it.id!!, it.name) },
+                    grade = entity.grade,
+                    gender = entity.gender,
+                    birthday = entity.birthday,
+                    createdAt = entity.createdAt.toLocalDateTime(),
+                    updatedAt = entity.updatedAt?.toLocalDateTime(),
+                    deletedAt = entity.deletedAt?.toLocalDateTime(),
+                    relationshipCounts = relationshipCounts,
+                    interests = interests,
+                    photos = photos,
+                    isFollowed = isFollowed,
+                    isFriend = isFriend
+                )
     }
 }

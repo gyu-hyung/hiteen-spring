@@ -8,6 +8,7 @@ import kr.jiasoft.hiteen.feature.asset.app.AssetService
 import kr.jiasoft.hiteen.feature.board.infra.BoardRepository
 import kr.jiasoft.hiteen.feature.interest.infra.InterestUserRepository
 import kr.jiasoft.hiteen.feature.relationship.app.FollowService
+import kr.jiasoft.hiteen.feature.relationship.app.FriendService
 import kr.jiasoft.hiteen.feature.school.infra.SchoolRepository
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import kr.jiasoft.hiteen.feature.user.domain.UserPhotosEntity
@@ -30,13 +31,15 @@ import java.util.UUID
 
 @Service
 class UserService (
+    private val encoder: PasswordEncoder,
     private val assetService: AssetService,
+    private val followService: FollowService,
+    private val friendService: FriendService,
+
     private val userRepository: UserRepository,
     private val userPhotosRepository: UserPhotosRepository,
-    private val encoder: PasswordEncoder,
     private val schoolRepository: SchoolRepository,
     private val interestUserRepository: InterestUserRepository,
-    private val followService: FollowService,
     private val boardRepository: BoardRepository,
 ) : ReactiveUserDetailsService {
 
@@ -47,17 +50,26 @@ class UserService (
         CustomUserDetails.from(user)
     }
 
-
     suspend fun nicknameDuplicationCheck(nickname: String): Boolean {
         val user = userRepository.findAllByNickname(nickname).firstOrNull()
         return user != null
     }
 
+    suspend fun phoneDuplicationCheck(phone: String): Boolean {
+        val user = userRepository.findAllByPhone(phone).firstOrNull()
+        return user != null
+    }
+
 
     suspend fun register(param: UserRegisterForm, file: FilePart?): UserResponse {
-        val exists = nicknameDuplicationCheck(param.nickname)
-        if (exists) {
+        val nicknameExists = nicknameDuplicationCheck(param.nickname)
+        if (nicknameExists) {
             throw BusinessValidationException(mapOf("nickname" to "이미 사용 중인 닉네임입니다."))
+        }
+
+        val phoneExists = phoneDuplicationCheck(param.phone)
+        if (phoneExists) {
+            throw BusinessValidationException(mapOf("phone" to "이미 사용 중인 휴대폰 번호입니다."))
         }
 
         val grade = param.grade
@@ -76,30 +88,25 @@ class UserService (
             saved
         }
 
-
-//        val interests = interestUserRepository.getInterestResponseById(null, updated.id).toList()
-//        val relationshipCounts = followService.getRelationshipCounts(updated.id).copy(
-//            postCount = boardRepository.countByCreatedId(updated.id)
-//        )
-//        val photos = getPhotosById(updated.id)
-
-//        return UserResponse.from(updated, school, interests, relationshipCounts, photos)
         return UserResponse.from(updated, school)
     }
 
 
-    suspend fun findUserResponse(userId: UUID): UserResponse {
-        val user = userRepository.findByUid(userId.toString())
-            ?: throw UsernameNotFoundException("User not found: $userId")
+    suspend fun findUserResponse(targetUid: UUID, currentUserId: Long? = null): UserResponse {
+        val targetUser = userRepository.findByUid(targetUid.toString())
+            ?: throw UsernameNotFoundException("User not found: $targetUid")
 
-        val school = user.schoolId?.let { id -> schoolRepository.findById(id) }
-        val interests = interestUserRepository.getInterestResponseById(null, user.id).toList()
-        val relationshipCounts = followService.getRelationshipCounts(user.id).copy(
-            postCount = boardRepository.countByCreatedId(user.id)
+        val school = targetUser.schoolId?.let { id -> schoolRepository.findById(id) }
+        val interests = interestUserRepository.getInterestResponseById(null, targetUser.id).toList()
+        val relationshipCounts = followService.getRelationshipCounts(targetUser.id).copy(
+            postCount = boardRepository.countByCreatedId(targetUser.id)
         )
-        val photos = getPhotosById(user.id)
+        val photos = getPhotosById(targetUser.id)
 
-        return UserResponse.from(user, school, interests, relationshipCounts, photos)
+        val isFollowed = currentUserId?.let { followService.isFollowing(it, targetUser.id) } ?: false
+        val isFriend = currentUserId?.let { friendService.isFriend(it, targetUser.id) } ?: false
+
+        return UserResponse.from(targetUser, school, interests, relationshipCounts, photos, isFollowed, isFriend)
     }
 
 

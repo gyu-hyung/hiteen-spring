@@ -16,4 +16,7 @@ interface FollowRepository : CoroutineCrudRepository<FollowEntity, Long> {
     suspend fun countByFollowIdAndStatus(id: Long, name: String): Int
     suspend fun countByUserIdAndStatus(id: Long, name: String): Int
 
+    @Query("SELECT COUNT(1) FROM follows WHERE user_id = :followerId AND follow_id = :targetId")
+    suspend fun existsFollow(followerId: Long, targetId: Long): Long
+
 }

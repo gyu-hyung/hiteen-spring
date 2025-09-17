@@ -15,6 +15,8 @@ class SchoolController(
     private val schoolRepository: SchoolRepository
 ) {
 
+    /** TODO : 없는 학교 문의하기 */
+
     /**
      * 학교 정보 조회 (검색 + 커서 기반 페이지네이션)
      * TODO : HITEEN 사용중 유저 COUNT

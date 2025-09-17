@@ -48,6 +48,10 @@ class FriendService(
         )
     }
 
+    suspend fun isFriend(userId: Long, targetId: Long): Boolean {
+        return friendRepository.existsFriend(userId, targetId) > 0
+    }
+
 
     suspend fun getContacts(user: UserEntity, rawContacts: String): ContactResponse {
         // 1. 연락처 문자열 -> 전화번호 리스트
