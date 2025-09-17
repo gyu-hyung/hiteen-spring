@@ -2,8 +2,10 @@
 -- hiteen DDL
 -- ========================
 
---CREATE EXTENSION IF NOT EXISTS pgcrypto; -- for gen_random_uuid()
---CREATE EXTENSION IF NOT EXISTS citext;   -- case-insensitive text
+CREATE EXTENSION IF NOT EXISTS pgcrypto; -- for gen_random_uuid()
+CREATE EXTENSION IF NOT EXISTS citext;   -- case-insensitive text
+CREATE EXTENSION IF NOT EXISTS cube;
+CREATE EXTENSION IF NOT EXISTS earthdistance;
 
 
 
