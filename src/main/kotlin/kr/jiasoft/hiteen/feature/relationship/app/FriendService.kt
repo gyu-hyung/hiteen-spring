@@ -64,21 +64,25 @@ class FriendService(
         val registeredUsers = userRepository.findAllByPhoneIn(phones).toList()
 
         // 3. 친구 관계 조회 (내가 user_id 또는 friend_id 인 경우)
-        val friends = friendRepository.findByUserIdOrFriendId(user.id, user.id).toList()
+        val friendRelations = friendRepository.findByUserIdOrFriendId(user.id, user.id).toList()
 
         // 3-1. 친구 userId 집합 만들기 (내 친구들의 userId)
-        val friendIds = friends.map {
+        val friendIds = friendRelations.map {
             if (it.userId == user.id) it.friendId else it.userId
         }.toSet()
 
         // 4. 그룹 분류
-//        val friendList = registeredUsers.filter { it.id in friendIds }
+        val friendList = registeredUsers.filter { it.id in friendIds }
         val registeredNotFriend = registeredUsers.filter { it.id !in friendIds && it.id != user.id }
         val notRegistered = phones.filter { phone -> registeredUsers.none { it.phone == phone } }
 
         return ContactResponse(
-            registeredUsers = registeredNotFriend.map { UserSummary.from(it) },
-//            friends = friendList.map { ContactDto.from(it, "friend") },
+            registeredUsers = registeredNotFriend.map { u ->
+                UserSummary.from(u, isFriend = u.id in friendIds)
+            },
+            friends = friendList.map { u ->
+                UserSummary.from(u, isFriend = true)
+            },
             notRegisteredUsers = notRegistered
         )
     }

@@ -14,10 +14,11 @@ data class UserSummary(
     val mood: String?,
     val mbti: String?,
     val tier: String?,
-    val assetUid: String?
+    val assetUid: String?,
+    val isFriend: Boolean? = false,
 ) {
     companion object {
-        fun from(user: UserEntity): UserSummary =
+        fun from(user: UserEntity, isFriend: Boolean? = false): UserSummary =
             UserSummary(
                 uid = user.uid.toString(),
                 username = user.username,
@@ -28,7 +29,8 @@ data class UserSummary(
                 mood = user.mood,
                 mbti = user.mbti,
                 tier = user.tier,
-                assetUid = user.assetUid?.toString()
+                assetUid = user.assetUid?.toString(),
+                isFriend = isFriend
             )
         fun empty() = UserSummary(
             uid = "",
@@ -40,7 +42,8 @@ data class UserSummary(
             mood = null,
             mbti = null,
             tier = null,
-            assetUid = null
+            assetUid = null,
+            isFriend = false
         )
     }
 
