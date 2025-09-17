@@ -13,13 +13,17 @@ class AuthService(
     private val jwtProvider: JwtProvider
 ) {
 
-    suspend fun login(username: String, rawPassword: String): String {
+    suspend fun login(username: String, rawPassword: String): Pair<String, String> {
         val userDetails = reactiveUserDetailsService.findByUsername(username).awaitFirstOrNull()
             ?: throw IllegalArgumentException("Invalid credentials")
         if (!encoder.matches(rawPassword, userDetails.password)) {
             throw IllegalArgumentException("Invalid credentials")
         }
-        return jwtProvider.generate(userDetails.username).value
+
+        val (access, refresh) = jwtProvider.generateTokens(userDetails.username)
+
+        return access.value to refresh.value
     }
+
 
 }
