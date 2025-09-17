@@ -2,12 +2,14 @@ package kr.jiasoft.hiteen.feature.code.app
 
 import kotlinx.coroutines.reactive.awaitSingle
 import kr.jiasoft.hiteen.common.dto.ApiResult
+import kr.jiasoft.hiteen.feature.code.dto.CodeRequest
 import kr.jiasoft.hiteen.feature.code.dto.CodeWithAssetResponse
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.security.core.annotation.AuthenticationPrincipal
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -22,8 +24,44 @@ import reactor.core.publisher.Flux
 class CodeController(
     private val codeService: CodeService
 ) {
+
+
+    /** 코드 단일 등록 */
+    @PostMapping
+    suspend fun createCode(
+        @AuthenticationPrincipal(expression = "user") user: UserEntity,
+        dto: CodeRequest
+    ): ResponseEntity<ApiResult<Map<String, Any>>> {
+        val saved = codeService.createCode(user.id, dto)
+        return ResponseEntity.ok(ApiResult.success(mapOf("id" to saved.id, "code" to saved.code)))
+    }
+
+
+    /** 코드 수정 */
+    @PostMapping("/{id}")
+    suspend fun updateCode(
+        @PathVariable id: Long,
+        @AuthenticationPrincipal(expression = "user") user: UserEntity,
+        dto: CodeRequest
+    ): ResponseEntity<ApiResult<Map<String, Any>>> {
+        val updated = codeService.updateCode(user.id, id, dto)
+        return ResponseEntity.ok(ApiResult.success(mapOf("id" to updated.id, "code" to updated.code)))
+    }
+
+
+    /** 코드 삭제 */
+    @DeleteMapping("/{id}")
+    suspend fun deleteCode(
+        @PathVariable id: Long,
+        @AuthenticationPrincipal(expression = "user") user: UserEntity,
+    ): ResponseEntity<ApiResult<Unit>> {
+        codeService.deleteCode(user.id, id)
+        return ResponseEntity.ok(ApiResult.success(Unit))
+    }
+
+
     /** 공통 코드 그룹 + 파일 첨부 생성 */
-    @PostMapping("/{group}", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+    @PostMapping("/group/{group}", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     suspend fun createCodes(
         @PathVariable group: String,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
@@ -37,6 +75,7 @@ class CodeController(
             )
         )
     }
+
 
     /** 공통 코드 그룹 조회 */
     @GetMapping("/{group}")

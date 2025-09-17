@@ -6,6 +6,7 @@ import kr.jiasoft.hiteen.feature.asset.infra.AssetRepository
 import kr.jiasoft.hiteen.feature.code.domain.CodeAssetEntity
 import kr.jiasoft.hiteen.feature.code.domain.CodeEntity
 import kr.jiasoft.hiteen.feature.code.domain.CodeStatus
+import kr.jiasoft.hiteen.feature.code.dto.CodeRequest
 import kr.jiasoft.hiteen.feature.code.dto.CodeWithAssetResponse
 import kr.jiasoft.hiteen.feature.code.infra.CodeAssetRepository
 import kr.jiasoft.hiteen.feature.code.infra.CodeRepository
@@ -82,6 +83,7 @@ class CodeService(
 
             results.add(
                 CodeWithAssetResponse(
+                    id = code.id,
                     code = code.code,
                     name = code.codeName,
                     status = code.status ?: CodeStatus.ACTIVE,
@@ -91,4 +93,53 @@ class CodeService(
         }
         return results
     }
+
+
+
+
+
+    /** 코드 단일 등록 */
+    suspend fun createCode(userId: Long, dto: CodeRequest): CodeEntity {
+        val entity = CodeEntity(
+            codeName = dto.codeName,
+            code = dto.code,
+            codeGroupName = dto.group,
+            codeGroup = dto.group.uppercase(),
+            status = dto.status,
+            createdId = userId,
+            createdAt = OffsetDateTime.now()
+        )
+        return codeRepository.save(entity)
+    }
+
+    /** 코드 수정 */
+    suspend fun updateCode(userId: Long, id: Long, dto: CodeRequest): CodeEntity {
+        val existing = codeRepository.findById(id)
+            ?: throw IllegalArgumentException("해당 코드가 존재하지 않습니다: id=$id")
+
+        val updated = existing.copy(
+            code = dto.code,
+            codeName = dto.codeName,
+            codeGroupName = dto.group,
+            codeGroup = dto.group.uppercase(),
+            status = dto.status,
+            updatedId = userId,
+            updatedAt = OffsetDateTime.now()
+        )
+        return codeRepository.save(updated)
+    }
+
+    /** 코드 삭제 (소프트 삭제 처리) */
+    suspend fun deleteCode(userId: Long, id: Long) {
+        val existing = codeRepository.findById(id)
+            ?: throw IllegalArgumentException("해당 코드가 존재하지 않습니다: id=$id")
+
+        val deleted = existing.copy(
+            deletedId = userId,
+            deletedAt = OffsetDateTime.now()
+        )
+        codeRepository.save(deleted)
+    }
+
+
 }
