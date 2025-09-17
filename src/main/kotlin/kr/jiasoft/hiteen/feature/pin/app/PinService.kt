@@ -64,15 +64,20 @@ class PinService(
 
     /**
      * 나에게 공개된 핀 목록
-     * - 전체공개 (PUBLIC) -> TODO 내주변 pin 목록
+     * - 전체공개 (PUBLIC) -> 내주변 pin 목록
      * - 나만보기 (PRIVATE) → 등록자가 본인일 때만
      * - 일부공개 (FRIENDS)
      */
-    suspend fun listVisiblePins(user: UserEntity): List<PinResponse> {
+    suspend fun listVisiblePins(user: UserEntity, lat: Double, lng: Double, radius: Double): List<PinResponse> {
         val userId = user.id
 
-        // 1. 전체 공개 핀 TODO 근처 핀만 조회로 변경해야함
-        val publicPins = pinRepository.findAllByVisibilityOrderByIdDesc(VISIBILITY.PUBLIC.name)
+        // 1. 내 주변 전체공개 핀 (반경 radius m)
+        val publicPins = pinRepository.findNearbyPublicPins(
+            VISIBILITY.PUBLIC.name,
+            lat,
+            lng,
+            radius
+        )
 
         // 2. 내 PRIVATE 핀
         val myPrivatePins = pinRepository.findAllByUserId(userId)
