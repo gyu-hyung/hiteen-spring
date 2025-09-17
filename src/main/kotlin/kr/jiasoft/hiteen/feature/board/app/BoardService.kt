@@ -126,7 +126,8 @@ class BoardService(
                 row.copy(
                     subject = row.subject,
                     content = row.content.take(160),
-                    user = userService.findUserSummary(row.createdId)
+                    user = userService.findUserSummary(row.createdId),
+                    attachments = boardAssetRepository.findAllByBoardId(row.id)?.map { it.uid }
                 )
             },
             perPage = s

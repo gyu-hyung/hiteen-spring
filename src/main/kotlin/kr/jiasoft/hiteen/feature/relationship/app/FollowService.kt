@@ -43,6 +43,10 @@ class FollowService(
             statusAt = e.statusAt
         )
 
+    suspend fun isFollowing(followerId: Long, targetId: Long): Boolean {
+        return followRepository.existsFollow(followerId, targetId) > 0
+    }
+
 
     /** 게시물, 팔로잉, 팔로워 COUNT */
     suspend fun getRelationshipCounts(id: Long): RelationshipCounts {

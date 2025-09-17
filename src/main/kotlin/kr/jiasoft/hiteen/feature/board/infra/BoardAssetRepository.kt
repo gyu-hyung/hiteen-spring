@@ -1,6 +1,5 @@
 package kr.jiasoft.hiteen.feature.board.infra
 
-import kotlinx.coroutines.flow.Flow
 import kr.jiasoft.hiteen.feature.board.domain.BoardAssetEntity
 import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
@@ -9,7 +8,7 @@ import java.util.UUID
 
 @Repository
 interface BoardAssetRepository : CoroutineCrudRepository<BoardAssetEntity, Long> {
-    suspend fun findAllByBoardId(boardId: Long): Flow<BoardAssetEntity>
+    suspend fun findAllByBoardId(boardId: Long): List<BoardAssetEntity>?
     suspend fun deleteByBoardId(boardId: Long)
     suspend fun deleteByBoardIdAndUidIn(boardId: Long, uids: Collection<UUID>): Int
     suspend fun deleteByBoardIdAndUid(boardId: Long, uid: UUID)

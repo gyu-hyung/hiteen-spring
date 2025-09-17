@@ -31,10 +31,10 @@ data class RoomSummaryResponse(
 data class MessageSummary(
     val messageUid: UUID,
     val content: String?,
-    val unreadCount: Int? = null,
-    val createdAt: OffsetDateTime?,
     val kind: Short = 0,
     val emojiCode: String? = null,
+    val unreadCount: Int? = null,
+    val createdAt: OffsetDateTime?,
     val sender: UserSummary?,
     val assets: List<MessageAssetSummary>?,
 ) {
@@ -43,10 +43,10 @@ data class MessageSummary(
             return MessageSummary(
                 messageUid = entity.uid,
                 content = entity.content,
-                unreadCount = unreadCount,
-                createdAt = entity.createdAt,
                 kind = entity.kind,
                 emojiCode = entity.emojiCode,
+                unreadCount = unreadCount,
+                createdAt = entity.createdAt,
                 sender = sender,
                 assets = assets,
             )

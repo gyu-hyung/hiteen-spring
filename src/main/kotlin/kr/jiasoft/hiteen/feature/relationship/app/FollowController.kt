@@ -12,15 +12,15 @@ class FollowController(
     private val followService: FollowService
 ) {
 
-    /** 내가 팔로우하고 있는 목록 */
+    /** 내가 팔로우하고 있는 목록 TODO UserSummary -> UserResponse */
     @GetMapping("/following")
     suspend fun listFollowing(@AuthenticationPrincipal(expression = "user") user: UserEntity) =
         ResponseEntity.ok(ApiResult(true, followService.listFollowing(user)))
 
 
-    /** 나를 팔로우하는 목록  */
+    /** 나를 팔로우하는 목록 TODO UserSummary -> UserResponse */
     @GetMapping("/followers")
-    suspend fun listFollowers(@AuthenticationPrincipal(expression = "user") user: UserEntity) =
+    suspend fun  listFollowers(@AuthenticationPrincipal(expression = "user") user: UserEntity) =
         ResponseEntity.ok(ApiResult(true, followService.listFollowers(user)))
 
 
