@@ -60,22 +60,22 @@ class PollController(
     @Operation(summary = "투표 생성", description = "새로운 투표를 생성합니다.")
     @PostMapping(consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     suspend fun create(
-        @Parameter(description = "투표 생성 요청 DTO") req: PollCreateRequest,
+        @Parameter(description = "투표 생성 요청 DTO") pollCreateRequest: PollCreateRequest,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
         @Parameter(description = "첨부 파일") @RequestPart("file", required = false) file: FilePart?,
     ): ResponseEntity<ApiResult<Long>> {
-        val id = service.create(req, user.id, file)
+        val id = service.create(pollCreateRequest, user.id, file)
         return ResponseEntity.ok(ApiResult.success(id))
     }
 
     @Operation(summary = "투표 수정", description = "기존 투표를 수정합니다.")
     @PostMapping("/{id}", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     suspend fun update(
+        @Parameter(description = "투표 수정 요청 DTO") @ModelAttribute pollUpdateRequest: PollUpdateRequest,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
-        @Parameter(description = "투표 수정 요청 DTO") @ModelAttribute req: PollUpdateRequest,
         @Parameter(description = "첨부 파일") @RequestPart(required = false) file: FilePart?,
     ): ResponseEntity<ApiResult<Long>> {
-        val updatedId = service.update(req.id, req, user.id, file)
+        val updatedId = service.update(pollUpdateRequest.id, pollUpdateRequest, user.id, file)
         return ResponseEntity.ok(ApiResult.success(updatedId))
     }
 
@@ -92,10 +92,10 @@ class PollController(
     @Operation(summary = "투표 참여", description = "투표 항목에 참여합니다.")
     @PostMapping("/vote/{id}")
     suspend fun vote(
-        @Parameter(description = "투표 요청 DTO") req: PollVoteRequest,
+        @Parameter(description = "투표 요청 DTO") pollVoteRequest: PollVoteRequest,
         @AuthenticationPrincipal(expression = "user") user: UserEntity
     ): ResponseEntity<ApiResult<Unit>> {
-        service.vote(req.pollId, req.seq, user.id)
+        service.vote(pollVoteRequest.pollId, pollVoteRequest.seq, user.id)
         return ResponseEntity.ok(ApiResult.success(Unit))
     }
 
@@ -146,51 +146,52 @@ class PollController(
     @Operation(summary = "댓글 작성", description = "투표에 댓글을 작성합니다.")
     @PostMapping("/comments/{pollId}")
     suspend fun createComment(
-        req: PollCommentRegisterRequest,
+        @Parameter(description = "댓글 등록/수정 요청 DTO") pollCommentRegisterRequest: PollCommentRegisterRequest,
         @AuthenticationPrincipal(expression = "user") user: UserEntity
     ): ResponseEntity<ApiResult<Long>> {
-        val commentId = service.createComment(req, user.id)
+        val commentId = service.createComment(pollCommentRegisterRequest, user.id)
         return ResponseEntity.ok(ApiResult.success(commentId))
     }
 
     //TODO : 반환 타입?
-    @Operation(summary = "댓글 수정", description = "기존 댓글을 수정합니다.")
+    @Operation(summary = "댓글 수정", description = "기존 댓글을 수정합니다. commentUid 필수")
     @PostMapping("/comments/{pollId}/{commentUid}")
     suspend fun updateComment(
-        req: PollCommentRegisterRequest,
+        @Parameter(description = "댓글 등록/수정 요청 DTO") pollCommentRegisterRequest: PollCommentRegisterRequest,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ): ResponseEntity<ApiResult<Map<String, Any>>> {
-        val uid = service.updateComment(req.pollId!!, req.commentUid!!, req, user.id)
+        val uid = service.updateComment(pollCommentRegisterRequest.pollId, pollCommentRegisterRequest.commentUid!!, pollCommentRegisterRequest, user.id)
         return ResponseEntity.ok(ApiResult.success(mapOf("uid" to uid)))
     }
 
     @Operation(summary = "댓글 삭제", description = "특정 댓글을 삭제합니다.")
     @DeleteMapping("/comments/{pollId}/{commentUid}")
     suspend fun deleteComment(
-        req: PollCommentRegisterRequest,
+        @Parameter(description = "투표 ID") pollId: Long,
+        @Parameter(description = "댓글 UUID") commentUid: UUID,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ): ResponseEntity<ApiResult<Map<String, Any>>> {
-        val uid = service.deleteComment(req.pollId!!, req.commentUid!!, user.id)
+        val uid = service.deleteComment(pollId, commentUid, user.id)
         return ResponseEntity.ok(ApiResult.success(mapOf("uid" to uid)))
     }
 
     @Operation(summary = "댓글 좋아요", description = "댓글에 좋아요를 추가합니다.")
     @PostMapping("/comments/like/{commentUid}")
     suspend fun likeComment(
-        req: PollCommentRegisterRequest,
+        @Parameter(description = "댓글 UUID") commentUid: UUID,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ): ResponseEntity<ApiResult<Unit>> {
-        service.likeComment(req.commentUid!!, user.id)
+        service.likeComment(commentUid, user.id)
         return ResponseEntity.ok(ApiResult.success(Unit))
     }
 
     @Operation(summary = "댓글 좋아요 취소", description = "댓글 좋아요를 취소합니다.")
     @DeleteMapping("/comments/like/{commentUid}")
     suspend fun unlikeComment(
-        req: PollCommentRegisterRequest,
+        @Parameter(description = "댓글 UUID") commentUid: UUID,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ): ResponseEntity<ApiResult<Unit>> {
-        service.unlikeComment(req.commentUid!!, user.id)
+        service.unlikeComment(commentUid, user.id)
         return ResponseEntity.ok(ApiResult.success(Unit))
     }
 }

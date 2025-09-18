@@ -44,7 +44,7 @@ class LocationAppService(
             )
 
             val payload = mapOf(
-                "userId" to event.userId,
+                "userId" to userUid,
                 "lat" to event.lat,
                 "lng" to event.lng,
                 "timestamp" to event.timestamp.toString(),
@@ -63,5 +63,5 @@ class LocationAppService(
     }
 
     suspend fun getMyLocations(user: UserEntity): List<LocationHistory> =
-        locationService.findAllByUserId(user.username)
+        locationService.findAllByUserId(user.uid.toString())
 }

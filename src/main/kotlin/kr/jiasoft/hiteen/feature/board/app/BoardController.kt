@@ -50,70 +50,70 @@ class BoardController(
     }
 
     @Operation(summary = "게시글 단건 조회", description = "특정 게시글을 UID로 조회합니다.")
-    @GetMapping("/{uid}")
+    @GetMapping("/{boardUid}")
     suspend fun get(
-        @Parameter(description = "게시글 UID") @PathVariable uid: UUID,
+        @Parameter(description = "게시글 UID") @PathVariable boardUid: UUID,
         @AuthenticationPrincipal(expression = "user") user: UserEntity?
     ): ResponseEntity<ApiResult<BoardResponse>> {
-        val board = service.getBoard(uid, user?.id)
+        val board = service.getBoard(boardUid, user?.id)
         return ResponseEntity.ok(ApiResult.success(board))
     }
 
     @Operation(summary = "게시글 작성", description = "게시글을 작성하고 파일(이미지 등)을 업로드할 수 있습니다.")
     @PostMapping(consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     suspend fun create(
-        @Parameter(description = "게시글 생성 요청 DTO") req: BoardCreateRequest,
+        @Parameter(description = "게시글 생성 요청 DTO") boardCreateRequest: BoardCreateRequest,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
         @Parameter(description = "첨부 파일들") @RequestPart(name = "files", required = false) filesFlux: Flux<FilePart>?,
         request: ServerHttpRequest
     ): ResponseEntity<ApiResult<Map<String, Any>>> {
         val ip = request.remoteAddress?.address?.hostAddress
         val files: List<FilePart> = filesFlux?.collectList()?.awaitSingle().orEmpty()
-        val uid = service.create(req, user.id, files, ip)
+        val uid = service.create(boardCreateRequest, user.id, files, ip)
         return ResponseEntity.ok(ApiResult.success(mapOf("uid" to uid)))
     }
 
     @Operation(summary = "게시글 수정", description = "기존 게시글 내용을 수정합니다.")
-    @PostMapping("/{uid}", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+    @PostMapping("/{boardUid}", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     suspend fun update(
-        @Parameter(description = "게시글 수정 요청 DTO") req: BoardUpdateRequest,
+        @Parameter(description = "게시글 수정 요청 DTO") boardUpdateRequest: BoardUpdateRequest,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
         @Parameter(description = "첨부 파일들") @RequestPart(name = "files", required = false) filesFlux: Flux<FilePart>?,
         request: ServerHttpRequest
     ): ResponseEntity<ApiResult<Unit>> {
         val ip = request.remoteAddress?.address?.hostAddress
         val files: List<FilePart> = filesFlux?.collectList()?.awaitSingle().orEmpty()
-        service.update(req.uid, req, user.id, files, ip, req.replaceAssets, req.deleteAssetUids)
+        service.update(boardUpdateRequest.boardUid, boardUpdateRequest, user.id, files, ip, boardUpdateRequest.replaceAssets, boardUpdateRequest.deleteAssetUids)
         return ResponseEntity.ok(ApiResult.success(Unit))
     }
 
     @Operation(summary = "게시글 삭제", description = "특정 게시글을 삭제합니다.")
-    @DeleteMapping("/{uid}")
+    @DeleteMapping("/{boardUid}")
     suspend fun delete(
-        @Parameter(description = "게시글 UID") @PathVariable uid: UUID,
+        @Parameter(description = "게시글 UID") @PathVariable boardUid: UUID,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ): ResponseEntity<ApiResult<Unit>> {
-        service.softDelete(uid, currentUserId = user.id)
+        service.softDelete(boardUid, currentUserId = user.id)
         return ResponseEntity.ok(ApiResult.success(Unit))
     }
 
     @Operation(summary = "게시글 좋아요", description = "게시글에 좋아요를 추가합니다.")
-    @PostMapping("/{uid}/like")
+    @PostMapping("/like/{boardUid}")
     suspend fun like(
-        @Parameter(description = "게시글 UID") @PathVariable uid: UUID,
+        @Parameter(description = "게시글 UID") @PathVariable boardUid: UUID,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ): ResponseEntity<ApiResult<Unit>> {
-        service.like(uid, currentUserId = user.id)
+        service.like(boardUid, currentUserId = user.id)
         return ResponseEntity.ok(ApiResult.success(Unit))
     }
 
     @Operation(summary = "게시글 좋아요 취소", description = "게시글 좋아요를 취소합니다.")
-    @DeleteMapping("/{uid}/like")
+    @DeleteMapping("/like/{boardUid}")
     suspend fun unlike(
-        @Parameter(description = "게시글 UID") @PathVariable uid: UUID,
+        @Parameter(description = "게시글 UID") @PathVariable boardUid: UUID,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ): ResponseEntity<ApiResult<Unit>> {
-        service.unlike(uid, currentUserId = user.id)
+        service.unlike(boardUid, currentUserId = user.id)
         return ResponseEntity.ok(ApiResult.success(Unit))
     }
 
@@ -146,50 +146,51 @@ class BoardController(
     @Operation(summary = "댓글 작성", description = "특정 게시글에 댓글을 작성합니다.")
     @PostMapping("/comments/{boardUid}")
     suspend fun createComment(
-        @Parameter(description = "댓글 등록 요청 DTO") req: BoardCommentRegisterRequest,
+        @Parameter(description = "댓글 등록/수정 요청 DTO") boardCommentRegisterRequest: BoardCommentRegisterRequest,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ): ResponseEntity<ApiResult<Map<String, Any>>> {
-        val uid = service.createComment(req.boardUid, req, user.id)
+        val uid = service.createComment(boardCommentRegisterRequest.boardUid, boardCommentRegisterRequest, user.id)
         return ResponseEntity.ok(ApiResult.success(mapOf("uid" to uid)))
     }
 
     @Operation(summary = "댓글 수정", description = "특정 댓글을 수정합니다.")
-    @PostMapping("/comments/{boardId}/{commentUid}")
+    @PostMapping("/comments/{boardUid}/{commentUid}")
     suspend fun updateComment(
-        @Parameter(description = "댓글 수정 요청 DTO") req: BoardCommentRegisterRequest,
+        @Parameter(description = "댓글 등록/수정 요청 DTO") boardCommentRegisterRequest: BoardCommentRegisterRequest,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ): ResponseEntity<ApiResult<Map<String, Any>>> {
-        val uid = service.updateComment(req.boardUid, req.commentUid!!, req, user.id)
+        val uid = service.updateComment(boardCommentRegisterRequest.boardUid, boardCommentRegisterRequest.commentUid!!, boardCommentRegisterRequest, user.id)
         return ResponseEntity.ok(ApiResult.success(mapOf("uid" to uid)))
     }
 
     @Operation(summary = "댓글 삭제", description = "특정 댓글을 삭제합니다.")
-    @DeleteMapping("/comments/{boardId}/{commentUid}")
+    @DeleteMapping("/comments/{boardUid}/{commentUid}")
     suspend fun deleteComment(
-        @Parameter(description = "댓글 삭제 요청 DTO") req: BoardCommentRegisterRequest,
+        @Parameter(description = "게시글 UUID") boardUid: UUID,
+        @Parameter(description = "댓글 UUID") commentUid: UUID,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ): ResponseEntity<ApiResult<Map<String, Any>>> {
-        val uid = service.deleteComment(req.boardUid, req.commentUid!!, user.id)
+        val uid = service.deleteComment(boardUid, commentUid, user.id)
         return ResponseEntity.ok(ApiResult.success(mapOf("uid" to uid)))
     }
 
     @Operation(summary = "댓글 좋아요", description = "특정 댓글에 좋아요를 추가합니다.")
     @PostMapping("/comments/like/{commentUid}")
     suspend fun likeComment(
-        @Parameter(description = "댓글 좋아요 요청 DTO") req: BoardCommentRegisterRequest,
+        @Parameter(description = "댓글 UUID") commentUid: UUID,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ): ResponseEntity<ApiResult<Unit>> {
-        service.likeComment(req.commentUid!!, user.id)
+        service.likeComment(commentUid, user.id)
         return ResponseEntity.ok(ApiResult.success(Unit))
     }
 
     @Operation(summary = "댓글 좋아요 취소", description = "특정 댓글 좋아요를 취소합니다.")
     @DeleteMapping("/comments/like/{commentUid}")
     suspend fun unlikeComment(
-        @Parameter(description = "댓글 좋아요 취소 요청 DTO") req: BoardCommentRegisterRequest,
+        @Parameter(description = "댓글 UUID") commentUid: UUID,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ): ResponseEntity<ApiResult<Unit>> {
-        service.unlikeComment(req.commentUid!!, user.id)
+        service.unlikeComment(commentUid, user.id)
         return ResponseEntity.ok(ApiResult.success(Unit))
     }
 }

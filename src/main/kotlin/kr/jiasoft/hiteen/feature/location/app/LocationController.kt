@@ -29,21 +29,21 @@ class LocationController(
     @PostMapping
     suspend fun saveLocation(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
-        @Parameter(description = "위치 저장 요청 DTO") @RequestBody request: LocationRequest
+        @Parameter(description = "위치 저장 요청 DTO") @RequestBody locationRequest: LocationRequest
     ): ResponseEntity<LocationHistory> {
-        val saved = locationAppService.saveLocation(user, request)
+        val saved = locationAppService.saveLocation(user, locationRequest)
         return ResponseEntity.status(HttpStatus.CREATED).body(saved)
     }
 
     @Operation(
         summary = "사용자의 최신 위치 조회",
-        description = "특정 사용자(userId)의 가장 최신 위치를 조회합니다."
+        description = "특정 사용자(userUid)의 가장 최신 위치를 조회합니다."
     )
-    @GetMapping("/latest")
+    @GetMapping("/latest/{userUid}")
     suspend fun getLatest(
-        @Parameter(description = "조회할 사용자 ID") @RequestParam userId: String
+        @Parameter(description = "조회할 사용자 ID") @PathVariable userUid: String
     ): LocationHistory? =
-        locationAppService.getLatest(userId)
+        locationAppService.getLatest(userUid)
 
     @Operation(
         summary = "내 위치 기록 조회",

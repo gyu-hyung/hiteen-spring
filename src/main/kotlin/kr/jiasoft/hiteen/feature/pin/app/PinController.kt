@@ -22,7 +22,7 @@ class PinController(
 ) {
 
     @Operation(
-        summary = "지도에서 볼 수 있는 핀 목록",
+        summary = "지도 핀 목록 조회",
         description = "현재 위치(lat, lng)와 반경(radius) 기준으로 지도에서 볼 수 있는 핀들을 조회합니다. 기본 반경은 5km입니다."
     )
     @GetMapping
@@ -47,16 +47,16 @@ class PinController(
     @PostMapping
     suspend fun register(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
-        @Parameter(description = "핀 등록 요청 DTO") dto: PinRegisterRequest
-    ) = ResponseEntity.ok(ApiResult.success(pinService.register(user, dto)))
+        @Parameter(description = "핀 등록 요청 DTO") pinRegisterRequest: PinRegisterRequest
+    ) = ResponseEntity.ok(ApiResult.success(pinService.register(user, pinRegisterRequest)))
 
 
     @Operation(summary = "핀 수정", description = "기존 핀 정보를 수정합니다.")
     @PostMapping("/{id}")
     suspend fun update(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
-        @Parameter(description = "핀 수정 요청 DTO") dto: PinUpdateRequest
-    ) = ResponseEntity.ok(ApiResult.success(pinService.update(user, dto)))
+        @Parameter(description = "핀 수정 요청 DTO") pinUpdateRequest: PinUpdateRequest
+    ) = ResponseEntity.ok(ApiResult.success(pinService.update(user, pinUpdateRequest)))
 
 
     @Operation(summary = "핀 삭제", description = "특정 핀을 삭제합니다.")

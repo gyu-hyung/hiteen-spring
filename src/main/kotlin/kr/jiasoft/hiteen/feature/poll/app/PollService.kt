@@ -181,7 +181,7 @@ class PollService(
 
 
     suspend fun createComment(req: PollCommentRegisterRequest, userId: Long): Long {
-        val p = polls.findById(req.pollId!!)!!
+        val p = polls.findById(req.pollId)!!
         val parent: PollCommentEntity? = req.parentId?.let { comments.findById(it) }
         val saved = comments.save(
             PollCommentEntity(

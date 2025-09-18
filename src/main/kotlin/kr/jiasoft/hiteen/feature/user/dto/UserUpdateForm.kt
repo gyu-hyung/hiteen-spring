@@ -1,5 +1,6 @@
 package kr.jiasoft.hiteen.feature.user.dto
 
+import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.Size
 import kr.jiasoft.hiteen.validation.ValidPassword
