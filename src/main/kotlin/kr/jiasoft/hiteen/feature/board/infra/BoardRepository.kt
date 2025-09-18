@@ -109,7 +109,7 @@ interface BoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
           )
           AND (:followOnly = false OR b.created_id IN (
                 SELECT f.follow_id FROM follows f WHERE f.user_id = :userId
-          ))
+          ) OR b.created_id = :userId)
           AND (:friendOnly = false OR b.created_id IN (
                 SELECT CASE 
                          WHEN f.user_id = :userId THEN f.friend_id 
@@ -117,11 +117,11 @@ interface BoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
                        END
                 FROM friends f
                 WHERE f.user_id = :userId OR f.friend_id = :userId
-          ))
+          ) OR b.created_id = :userId)
           AND (:sameSchoolOnly = false OR b.created_id IN (
                 SELECT u.id FROM users u 
                 WHERE u.school_id = (SELECT school_id FROM users WHERE id = :userId)
-          ))
+          ) OR b.created_id = :userId)
           AND (:lastUid IS NULL OR b.id <= (SELECT id FROM boards WHERE uid = :lastUid))
           AND (:authorUid IS NULL OR b.created_id = (SELECT id FROM users WHERE uid = :authorUid))
         ORDER BY b.id DESC
