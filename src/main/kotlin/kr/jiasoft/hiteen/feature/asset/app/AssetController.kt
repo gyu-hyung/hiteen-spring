@@ -1,12 +1,16 @@
 package kr.jiasoft.hiteen.feature.asset.app
 
-
-import kr.jiasoft.hiteen.feature.user.domain.UserEntity
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.Parameter
+import io.swagger.v3.oas.annotations.media.Content
+import io.swagger.v3.oas.annotations.security.SecurityRequirement
+import io.swagger.v3.oas.annotations.tags.Tag
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactor.awaitSingle
 import kr.jiasoft.hiteen.feature.asset.dto.AssetResponse
 import kr.jiasoft.hiteen.feature.asset.dto.toResponse
+import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import org.springframework.core.io.FileSystemResource
 import org.springframework.http.*
 import org.springframework.http.codec.multipart.FilePart
@@ -18,31 +22,48 @@ import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 import java.util.*
 
+@Tag(name = "Asset", description = "파일 업로드/다운로드/조회 API")
 @RestController
 @RequestMapping("/api/assets")
+@SecurityRequirement(name = "bearerAuth")   // 🔑 JWT 인증 필요
 class AssetController(
     private val assetService: AssetService
 ) {
 
-    /** 업로드 (multipart/form-data: file, originFileName[opt]) */
+    @Operation(
+        summary = "파일 업로드",
+        description = "단일 파일을 업로드합니다.",
+        requestBody = io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "multipart/form-data 형식의 파일 업로드",
+            required = true,
+            content = [Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE)]
+        )
+    )
     @PostMapping(consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     suspend fun upload(
-        @RequestPart("file") file: FilePart,
-        @RequestPart(name = "originFileName", required = false) originFileName: String?,
+        @Parameter(description = "업로드할 파일") @RequestPart("file") file: FilePart,
+        @Parameter(description = "원본 파일명 (선택)") @RequestPart(name = "originFileName", required = false) originFileName: String?,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ): AssetResponse {
         return assetService.upload(file, originFileName, currentUserId = user.id)
     }
 
-    /** 여러 파일 업로드 */
+    @Operation(
+        summary = "여러 파일 업로드",
+        description = "여러 개의 파일을 한 번에 업로드합니다.",
+        requestBody = io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "multipart/form-data 형식의 파일 업로드",
+            required = true,
+            content = [Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE)]
+        )
+    )
     @PostMapping("/batch", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     suspend fun uploadBatch(
-        @RequestPart(name = "files", required = false) filesFlux: Flux<FilePart>?,
-        @RequestPart(name = "originFileNames", required = false) originFileNames: List<String>?,
+        @Parameter(description = "업로드할 파일 목록") @RequestPart(name = "files", required = false) filesFlux: Flux<FilePart>?,
+        @Parameter(description = "원본 파일명 목록") @RequestPart(name = "originFileNames", required = false) originFileNames: List<String>?,
         @AuthenticationPrincipal(expression = "user") user: UserEntity
     ): List<AssetResponse> {
-        val flux = filesFlux ?: filesFlux
-        ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "files or file part is required")
+        val flux = filesFlux ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "files or file part is required")
 
         val files: List<FilePart> = flux.collectList().awaitSingle()
         if (files.isEmpty()) throw ResponseStatusException(HttpStatus.BAD_REQUEST, "no files")
@@ -50,37 +71,45 @@ class AssetController(
         return assetService.uploadAll(files, currentUserId = user.id, originFileNames = originFileNames)
     }
 
-
-    /** 단건 조회 (메타데이터) */
+    @Operation(summary = "단건 조회", description = "특정 파일 메타데이터를 조회합니다.")
     @GetMapping("/{uid}")
-    suspend fun getOne(@PathVariable uid: UUID): ResponseEntity<AssetResponse> {
+    suspend fun getOne(
+        @Parameter(description = "파일 UID") @PathVariable uid: UUID
+    ): ResponseEntity<AssetResponse> {
         val e = assetService.get(uid) ?: return ResponseEntity.notFound().build()
         return ResponseEntity.ok(e.toResponse())
     }
 
-    /** 목록 조회 (간단 페이징) */
+    @Operation(summary = "파일 목록 조회", description = "등록된 파일들을 간단 페이징으로 조회합니다.")
     @GetMapping
     suspend fun list(
-        @RequestParam(defaultValue = "20") limit: Int,
-        @RequestParam(defaultValue = "0") offset: Int
+        @Parameter(description = "조회 개수 (기본 20)") @RequestParam(defaultValue = "20") limit: Int,
+        @Parameter(description = "조회 시작 offset (기본 0)") @RequestParam(defaultValue = "0") offset: Int
     ): List<AssetResponse> {
         return assetService.list(limit.coerceIn(1, 100), offset.coerceAtLeast(0))
             .map { it.toResponse() }
             .toList()
     }
 
-    /** 다운로드 (Content-Disposition + download_count 증가) */
+    @Operation(
+        summary = "파일 다운로드",
+        description = "파일을 다운로드하며, 다운로드 횟수를 증가시킵니다.",
+        responses = [
+            io.swagger.v3.oas.annotations.responses.ApiResponse(
+                responseCode = "200",
+                description = "파일 다운로드 성공",
+                content = [Content(mediaType = MediaType.APPLICATION_OCTET_STREAM_VALUE)]
+            )
+        ]
+    )
     @GetMapping("/{uid}/download")
     suspend fun download(
-        @PathVariable uid: UUID,
+        @Parameter(description = "파일 UID") @PathVariable uid: UUID,
         @AuthenticationPrincipal(expression = "user") user: UserEntity
     ): ResponseEntity<FileSystemResource> {
-//        val updated = assetService.increaseDownload(uid, user.id!!)
-        val updated = assetService.increase(uid)
-            ?: return ResponseEntity.badRequest().build()
+        val updated = assetService.increase(uid) ?: return ResponseEntity.badRequest().build()
 
-        val filePath = updated.filePath
-        val path = assetService.resolveFilePath(filePath)
+        val path = assetService.resolveFilePath(updated.filePath)
         if (!assetService.existsFile(path)) return ResponseEntity.notFound().build()
 
         val resource = FileSystemResource(path)
@@ -92,17 +121,16 @@ class AssetController(
             contentType = MediaType.parseMediaType(mime)
             contentLength = resource.contentLength()
             add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename*=UTF-8''$encoded")
-            // 캐싱 정책 필요 시 여기에 추가
         }
         return ResponseEntity.ok()
             .headers(headers)
             .body(resource)
     }
 
-    /** 소프트 삭제 (메타데이터만 deleted_*) */
+    @Operation(summary = "파일 삭제", description = "특정 파일을 소프트 삭제(메타데이터만 변경)합니다.")
     @DeleteMapping("/{uid}")
     suspend fun delete(
-        @PathVariable uid: UUID,
+        @Parameter(description = "파일 UID") @PathVariable uid: UUID,
         @AuthenticationPrincipal(expression = "user") user: UserEntity
     ): ResponseEntity<AssetResponse> {
         val deleted = assetService.softDelete(uid, user.id) ?: return ResponseEntity.notFound().build()

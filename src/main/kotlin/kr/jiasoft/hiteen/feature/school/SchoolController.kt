@@ -1,34 +1,34 @@
 package kr.jiasoft.hiteen.feature.school
 
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.Parameter
+import io.swagger.v3.oas.annotations.tags.Tag
 import kotlinx.coroutines.flow.toList
 import kr.jiasoft.hiteen.common.dto.ApiPageCursor
 import kr.jiasoft.hiteen.feature.school.domain.SchoolEntity
 import kr.jiasoft.hiteen.feature.school.infra.SchoolRepository
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
+@Tag(name = "School", description = "학교 정보 조회 API")
 @RestController
 @RequestMapping("/api/school")
 class SchoolController(
     private val schoolRepository: SchoolRepository
 ) {
 
-    /** TODO : 없는 학교 문의하기 */
-
-    /**
-     * 학교 정보 조회 (검색 + 커서 기반 페이지네이션)
-     * TODO : HITEEN 사용중 유저 COUNT
-     * @param keyword 학교 이름 키워드 (없으면 전체 반환)
-     * @param cursor  마지막으로 조회한 학교 ID (없으면 처음부터)
-     * @param limit   페이지당 개수 (기본 30)
-     */
+    //TODO : 없는 학교 문의하기
+    //TODO : HITEEN 사용중 유저 COUNT
+    //TODO : 학교 주소 위경도 변환
+    //TODO : 학교 최신정보 갱신 JOB
+    @Operation(
+        summary = "학교 정보 조회",
+        description = "학교 이름 키워드 검색 및 커서 기반 페이지네이션으로 학교 목록을 조회합니다."
+    )
     @GetMapping
     suspend fun getSchools(
-        @RequestParam(required = false) keyword: String?,
-        @RequestParam(required = false) cursor: Long?,
-        @RequestParam(required = false, defaultValue = "30") limit: Int
+        @Parameter(description = "학교 이름 키워드 (없으면 전체)") @RequestParam(required = false) keyword: String?,
+        @Parameter(description = "마지막으로 조회한 학교 ID") @RequestParam(required = false) cursor: Long?,
+        @Parameter(description = "페이지당 개수 (기본 30)") @RequestParam(required = false, defaultValue = "30") limit: Int
     ): ApiPageCursor<SchoolEntity> {
         val items: List<SchoolEntity> = if (keyword.isNullOrBlank()) {
             if (cursor == null) {
