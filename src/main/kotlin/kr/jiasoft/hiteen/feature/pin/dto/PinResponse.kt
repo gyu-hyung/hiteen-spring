@@ -17,6 +17,12 @@ data class PinResponse(
     @param:Schema(description = "핀 소유자 닉네임", example = "홍길동")
     val nickname: String? = null,
 
+    @param:Schema(description = "핀 소유자 기분", example = "졸려~~")
+    val mood: String? = null,
+
+    @param:Schema(description = "핀 소유자 프로필", example = "홍길동")
+    val assetUid: String? = null,
+
     @param:Schema(description = "우편번호", example = "12345")
     val zipcode: String? = null,
 
@@ -48,6 +54,8 @@ data class PinResponse(
             id = entity.id,
             userUid = owner.uid.toString(),
             nickname = owner.nickname,
+            mood = owner.mood,
+            assetUid = owner.assetUid.toString(),
             zipcode = entity.zipcode,
             lat = entity.lat,
             lng = entity.lng,

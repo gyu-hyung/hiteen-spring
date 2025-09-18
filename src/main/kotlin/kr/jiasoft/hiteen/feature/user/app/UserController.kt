@@ -48,13 +48,15 @@ class UserController(
         @Parameter(description = "확인할 닉네임") @PathVariable nickname: String
     ): ResponseEntity<ApiResult<Boolean>> {
         val exists = userService.nicknameDuplicationCheck(nickname)
-        return ResponseEntity.ok(
-            ApiResult(
-                success = true,
-                data = exists,
-                message = if (exists) "이미 사용 중인 닉네임입니다." else "사용 가능한 닉네임입니다."
+        if(exists) {
+            return ResponseEntity.badRequest().body(
+                ApiResult.success(exists, "이미 사용 중인 닉네임입니다.")
             )
-        )
+        } else {
+            return ResponseEntity.ok(
+                ApiResult.success(exists, "")
+            )
+        }
     }
 
     //TODO : 학년 ex) 3 -> 고3
@@ -65,7 +67,7 @@ class UserController(
         @RequestPart("file", required = false) file: FilePart?
     ): ResponseEntity<ApiResult<UserResponse>> {
         val user = userService.register(userRegisterForm, file)
-        return ResponseEntity.ok(ApiResult(success = true, data = user, message = "회원가입 완료"))
+        return ResponseEntity.ok(ApiResult.success(user))
     }
 
     @Operation(summary = "내 정보 조회", description = "현재 로그인한 회원 정보를 조회합니다.")

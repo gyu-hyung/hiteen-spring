@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
+import kr.jiasoft.hiteen.common.exception.BusinessValidationException
 import kr.jiasoft.hiteen.feature.pin.domain.PinEntity
 import kr.jiasoft.hiteen.feature.pin.domain.PinUsersEntity
 import kr.jiasoft.hiteen.feature.pin.dto.AllowedFriend
@@ -79,21 +80,29 @@ class PinService(
             radius
         )
 
-        // 2. 내 PRIVATE 핀
-        val myPrivatePins = pinRepository.findAllByUserId(userId)
-            .filter { it.visibility == VISIBILITY.PRIVATE.name }
+        // 2. 내 PRIVATE 핀 + 내 24시간 안 지난 FRIENDS 핀
+        val myPins = pinRepository.findAllByUserId(userId)
+            .filter { pin ->
+                when (pin.visibility) {
+                    VISIBILITY.PRIVATE.name -> true // 항상 유지
+                    VISIBILITY.FRIENDS.name -> pin.createdAt.isAfter(OffsetDateTime.now().minusHours(24)) // 24시간 내만
+                    else -> false
+                }
+            }
 
-        // 3. 나에게 공개된 FRIENDS 핀
+        // 3. 나에게 공개된 FRIENDS 핀 (24시간 제한)
         val friendPins = pinUsersRepository.findAllByUserId(userId)
             .map { it.pinId }
             .toList()
             .let { ids: List<Long> ->
-                if (ids.isNotEmpty()) pinRepository.findAllById(ids)
-                else emptyFlow()
+                if (ids.isNotEmpty()) {
+                    pinRepository.findAllById(ids)
+                        .filter { it.visibility == VISIBILITY.FRIENDS.name && it.createdAt.isAfter(OffsetDateTime.now().minusHours(24)) }
+                } else emptyFlow()
             }
 
         // 4. merge 후 collect
-        val pins = merge(publicPins, myPrivatePins, friendPins).toList()
+        val pins = merge(publicPins, myPins, friendPins).toList()
 
         // 작성자/친구 userId 모으기
         val userIds = pins.map { it.userId }.distinct()
@@ -157,7 +166,7 @@ class PinService(
 
         // 2. 권한 체크 (작성자가 본인인지)
         if (pin.userId != user.id) {
-            throw IllegalAccessException("본인이 등록한 핀만 수정할 수 있습니다.")
+            throw BusinessValidationException(mapOf("message" to "본인이 등록한 핀만 수정할 수 있습니다."))
         }
 
         // 3. 값 수정
