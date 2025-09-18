@@ -36,8 +36,8 @@ class ChatController(
     @PostMapping
     suspend fun createDirectRoom(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
-        @Parameter(description = "1:1 채팅방 생성 요청 DTO") req: CreateDirectRoomRequest
-    ) = ResponseEntity.ok(ApiResult.success(service.createDirectRoom(user.id, req.peerUid)))
+        @Parameter(description = "1:1 채팅방 생성 요청 DTO") peerUid: UUID,
+    ) = ResponseEntity.ok(ApiResult.success(service.createDirectRoom(user.id, peerUid)))
 
 
     @Operation(summary = "그룹 채팅방 생성", description = "여러 명을 지정하여 단체 채팅방을 생성합니다.")
@@ -92,8 +92,8 @@ class ChatController(
     suspend fun togglePush(
         @Parameter(description = "채팅방 UID") @PathVariable roomUid: UUID,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
-        @Parameter(description = "알림 설정 요청 DTO") req: TogglePushRequest
-    ) = ResponseEntity.ok(ApiResult.success(service.togglePush(roomUid, user.id, req.enabled)))
+        @Parameter(description = "알림 활성화 여부") enabled: Boolean
+    ) = ResponseEntity.ok(ApiResult.success(service.togglePush(roomUid, user.id, enabled)))
 
 
     @Operation(summary = "채팅방 나가기", description = "특정 채팅방에서 나갑니다.")
