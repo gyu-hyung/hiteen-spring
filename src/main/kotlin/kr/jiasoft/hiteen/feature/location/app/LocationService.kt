@@ -6,6 +6,7 @@ import kr.jiasoft.hiteen.feature.integration.mqtt.dto.MqttResponse
 import kr.jiasoft.hiteen.feature.location.domain.LocationHistory
 import kr.jiasoft.hiteen.feature.location.infra.db.LocationHistoryMongoRepository
 import org.springframework.stereotype.Service
+import java.util.UUID
 
 @Service
 class LocationService(
@@ -26,6 +27,6 @@ class LocationService(
         locationHistoryMongoRepository.save(entity).awaitFirstOrNull()
     }
 
-    suspend fun findAllByUserId(userId: String): List<LocationHistory> =
-        locationHistoryMongoRepository.findAllByUserId(userId).collectList().awaitFirst()
+    suspend fun findAllByUserId(userUid: String): List<LocationHistory> =
+        locationHistoryMongoRepository.findAllByUserId(userUid).collectList().awaitFirst()
 }

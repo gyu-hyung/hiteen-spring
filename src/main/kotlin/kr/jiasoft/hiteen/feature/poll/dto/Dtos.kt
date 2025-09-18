@@ -3,22 +3,26 @@ package kr.jiasoft.hiteen.feature.poll.dto
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import io.swagger.v3.oas.annotations.media.Schema
+import jakarta.validation.constraints.NotBlank
 import kr.jiasoft.hiteen.feature.poll.domain.PollEntity
 import kr.jiasoft.hiteen.feature.user.dto.UserSummary
 import java.time.OffsetDateTime
 import java.util.UUID
 
+
 data class PollCreateRequest(
-    val question: String,
-    val answers: List<String>,      // ["치킨", "피자", "김밥"]
-    val colorStart: String?,
-    val colorEnd: String?,
-    val allowComment: Int = 1,      // 0=허용안함, 1=허용
-//    val onlyComment: Int = 0        // 1=댓글로 투표, 0=일반투표
+    @param:Schema(description = "질문") val question: String,
+    @param:Schema(description = "답변 목록") val answers: List<String>,
+    @param:Schema(description = "시작 색상") val colorStart: String? = null,
+    @param:Schema(description = "끝 색상") val colorEnd: String? = null,
+    @param:Schema(description = "댓글 허용 여부 (0=불가,1=가능)") val allowComment: Int
+    //    val onlyComment: Int = 0        // 1=댓글로 투표, 0=일반투표
 )
 
+
 data class PollUpdateRequest(
-    val id: Long?,
+    val id: Long,
     val question: String?,
     val answers: List<String>?, // 선택지 수정
     val colorStart: String?,
@@ -126,9 +130,9 @@ data class PollResponse(
 
 
 data class PollCommentRegisterRequest(
-    val pollId: Long? = null,
+    val pollId: Long,
     val commentUid: UUID? = null,
-//    @field:NotBlank
+    @field:NotBlank
     val content: String,
     val parentId: Long? = null
 )

@@ -24,9 +24,9 @@ class InterestController(
     @PostMapping
     suspend fun create(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
-        @Parameter(description = "관심사 등록 요청 DTO") request: InterestRegisterRequest
+        @Parameter(description = "관심사 등록 요청 DTO") interestRegisterRequest: InterestRegisterRequest
     ) : ResponseEntity<ApiResult<InterestEntity>> {
-        val saved = interestService.createInterest(user, request)
+        val saved = interestService.createInterest(user, interestRegisterRequest)
         return ResponseEntity.ok(ApiResult.success(saved))
     }
 
@@ -46,8 +46,8 @@ class InterestController(
     @PostMapping("/{id}")
     suspend fun update(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
-        @Parameter(description = "관심사 수정 요청 DTO") request: InterestRegisterRequest,
-    ) = ResponseEntity.ok(ApiResult.success(interestService.updateInterest(user, request)))
+        @Parameter(description = "관심사 수정 요청 DTO") interestRegisterRequest: InterestRegisterRequest,
+    ) = ResponseEntity.ok(ApiResult.success(interestService.updateInterest(user, interestRegisterRequest)))
 
     @Operation(summary = "관심사 삭제", description = "특정 관심사를 삭제합니다.")
     @DeleteMapping("/{id}")

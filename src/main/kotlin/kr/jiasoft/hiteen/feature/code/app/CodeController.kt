@@ -28,9 +28,9 @@ class CodeController(
     @PostMapping
     suspend fun createCode(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
-        @Parameter(description = "코드 등록 요청 DTO") dto: CodeRequest
+        @Parameter(description = "코드 등록 요청 DTO") codeRequest: CodeRequest
     ): ResponseEntity<ApiResult<Map<String, Any>>> {
-        val saved = codeService.createCode(user.id, dto)
+        val saved = codeService.createCode(user.id, codeRequest)
         return ResponseEntity.ok(ApiResult.success(mapOf("id" to saved.id, "code" to saved.code)))
     }
 
@@ -39,9 +39,9 @@ class CodeController(
     suspend fun updateCode(
         @Parameter(description = "수정할 코드 ID") @PathVariable id: Long,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
-        @Parameter(description = "코드 수정 요청 DTO") dto: CodeRequest
+        @Parameter(description = "코드 수정 요청 DTO") codeRequest: CodeRequest
     ): ResponseEntity<ApiResult<Map<String, Any>>> {
-        val updated = codeService.updateCode(user.id, id, dto)
+        val updated = codeService.updateCode(user.id, id, codeRequest)
         return ResponseEntity.ok(ApiResult.success(mapOf("id" to updated.id, "code" to updated.code)))
     }
 
