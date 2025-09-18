@@ -29,7 +29,6 @@ data class UserResponse(
     val mbti: String?,
     val tier: String?,
     val assetUid: String?,
-    val school: SchoolDto?,
     val grade: String?,
     val gender: String?,
     val birthday: LocalDate?,
@@ -38,11 +37,10 @@ data class UserResponse(
     val createdAt: LocalDateTime,
     val updatedAt: LocalDateTime?,
     val deletedAt: LocalDateTime?,
-
+    val school: SchoolDto?,
     val relationshipCounts: RelationshipCounts?,
     val interests: List<InterestUserResponse>?,
     val photos: List<UserPhotosEntity>?,
-
 ) {
     companion object {
         fun from(
@@ -68,7 +66,6 @@ data class UserResponse(
                     mbti = entity.mbti,
                     tier = entity.tier,
                     assetUid = entity.assetUid?.toString(),
-                    school = school?.let { SchoolDto(it.id!!, it.name) },
                     grade = entity.grade,
                     gender = entity.gender,
                     birthday = entity.birthday,
@@ -77,6 +74,7 @@ data class UserResponse(
                     createdAt = entity.createdAt.toLocalDateTime(),
                     updatedAt = entity.updatedAt?.toLocalDateTime(),
                     deletedAt = entity.deletedAt?.toLocalDateTime(),
+                    school = school?.let { SchoolDto(it.id!!, it.name) },
                     relationshipCounts = relationshipCounts,
                     interests = interests,
                     photos = photos,
