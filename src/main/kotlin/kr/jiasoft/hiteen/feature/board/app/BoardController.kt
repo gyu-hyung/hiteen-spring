@@ -177,7 +177,7 @@ class BoardController(
     @Operation(summary = "댓글 좋아요", description = "특정 댓글에 좋아요를 추가합니다.")
     @PostMapping("/comments/like/{commentUid}")
     suspend fun likeComment(
-        @Parameter(description = "댓글 UUID") commentUid: UUID,
+        @Parameter(description = "댓글 UUID") @PathVariable commentUid: UUID,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ): ResponseEntity<ApiResult<Unit>> {
         service.likeComment(commentUid, user.id)
@@ -187,7 +187,7 @@ class BoardController(
     @Operation(summary = "댓글 좋아요 취소", description = "특정 댓글 좋아요를 취소합니다.")
     @DeleteMapping("/comments/like/{commentUid}")
     suspend fun unlikeComment(
-        @Parameter(description = "댓글 UUID") commentUid: UUID,
+        @Parameter(description = "댓글 UUID") @PathVariable commentUid: UUID,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ): ResponseEntity<ApiResult<Unit>> {
         service.unlikeComment(commentUid, user.id)
