@@ -20,28 +20,29 @@ import org.springframework.web.bind.annotation.*
 class MqttCredentialController(
     private val service: MqttCredentialService
 ) {
+
     data class IssueReq(
+        @param:Schema(description = "디바이스 ID", example = "device-12345")
         @field:NotBlank
-        @Schema(description = "디바이스 ID", example = "device-12345")
         val deviceId: String
     )
 
     data class IssueRes(
-        @Schema(description = "MQTT 브로커 호스트", example = "mqtt.example.com")
+        @param:Schema(description = "MQTT 브로커 호스트", example = "mqtt.example.com")
         val host: String,
-        @Schema(description = "포트 번호", example = "1883")
+        @param:Schema(description = "포트 번호", example = "1883")
         val port: Int,
-        @Schema(description = "TLS 사용 여부", example = "true")
+        @param:Schema(description = "TLS 사용 여부", example = "true")
         val tls: Boolean,
-        @Schema(description = "클라이언트 ID", example = "client-xyz")
+        @param:Schema(description = "클라이언트 ID", example = "client-xyz")
         val clientId: String?,
-        @Schema(description = "MQTT 접속용 유저명", example = "user-abc")
+        @param:Schema(description = "MQTT 접속용 유저명", example = "user-abc")
         val username: String,
-        @Schema(description = "MQTT 접속용 비밀번호", example = "p@ssw0rd")
+        @param:Schema(description = "MQTT 접속용 비밀번호", example = "p@ssw0rd")
         val password: String,
-        @Schema(description = "퍼블리시 가능한 토픽", example = "devices/device-12345/pub")
+        @param:Schema(description = "퍼블리시 가능한 토픽", example = "devices/device-12345/pub")
         val pubTopic: String,
-        @Schema(description = "만료 시각 (ISO-8601)", example = "2025-09-17T12:00:00Z")
+        @param:Schema(description = "만료 시각 (ISO-8601)", example = "2025-09-17T12:00:00Z")
         val expiresAt: String
     )
 

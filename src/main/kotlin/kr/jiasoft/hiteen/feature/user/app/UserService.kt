@@ -72,7 +72,8 @@ class UserService (
             throw BusinessValidationException(mapOf("phone" to "이미 사용 중인 휴대폰 번호입니다."))
         }
 
-        val grade = param.grade
+        //TODO
+//        val grade = param.grade
         val school = param.schoolId?.let { id -> schoolRepository.findById(id) }
         val toEntity = param.toEntity(encoder.encode(param.password))
         val saved = userRepository.save(toEntity)

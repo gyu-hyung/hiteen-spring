@@ -35,10 +35,13 @@ class AuthController(
     private val smsAuthRepository: SmsAuthRepository,
     private val jwtProvider: JwtProvider,
 ) {
+
+    @Schema(description = "로그인 요청 DTO")
     data class LoginForm(
         @Schema(description = "아이디") val username: String,
         @Schema(description = "비밀번호") val password: String
     )
+
     data class JwtResponse(
         @Schema(description = "Access Token") val token: String
     )
