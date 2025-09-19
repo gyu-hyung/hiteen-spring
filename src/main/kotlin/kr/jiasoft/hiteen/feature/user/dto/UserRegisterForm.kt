@@ -69,6 +69,13 @@ data class UserRegisterForm(
 
     @param:Schema(description = "생일", example = "1999-12-01")
     val birthday: LocalDate? = null,
+
+    @param:Schema(description = "초대코드", example = "TMUZTTCH6L")
+    var inviteCode: String? = null,
+
+//    @param:Schema(description = "초대 후 가입자수", example = "10")
+//    val inviteJoins: Long = 0,
+
 ) {
     fun toEntity(encodedPassword: String): UserEntity = UserEntity(
         username = username ?: "",
@@ -87,5 +94,7 @@ data class UserRegisterForm(
         grade = grade,
         gender = gender,
         birthday = birthday,
+        inviteCode = inviteCode,
+//        inviteJoins = inviteJoins,
     )
 }

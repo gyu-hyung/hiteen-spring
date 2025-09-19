@@ -14,6 +14,9 @@ interface UserRepository : CoroutineCrudRepository<UserEntity, Long> {
     suspend fun findByUid(uid: String): UserEntity?
     suspend fun findAllByNickname(nickname: String): Flow<UserEntity>
     suspend fun findAllByPhone(phone: String): Flow<UserEntity>
+    suspend fun findByInviteCode(inviteCode: String): UserEntity?
+
+
 
     /* 간단 검색: username/nickname/email 에 like (필요시 정규화/풀텍스트로 교체) */
     @Query("""

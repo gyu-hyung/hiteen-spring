@@ -7,6 +7,7 @@ import kr.jiasoft.hiteen.common.exception.BusinessValidationException
 import kr.jiasoft.hiteen.feature.asset.app.AssetService
 import kr.jiasoft.hiteen.feature.board.infra.BoardRepository
 import kr.jiasoft.hiteen.feature.interest.infra.InterestUserRepository
+import kr.jiasoft.hiteen.feature.invite.app.InviteService
 import kr.jiasoft.hiteen.feature.relationship.app.FollowService
 import kr.jiasoft.hiteen.feature.relationship.app.FriendService
 import kr.jiasoft.hiteen.feature.school.infra.SchoolRepository
@@ -41,6 +42,7 @@ class UserService (
     private val schoolRepository: SchoolRepository,
     private val interestUserRepository: InterestUserRepository,
     private val boardRepository: BoardRepository,
+    private val inviteService: InviteService,
 ) : ReactiveUserDetailsService {
 
     override fun findByUsername(username: String): Mono<UserDetails> = mono {
@@ -62,6 +64,9 @@ class UserService (
 
 
     suspend fun register(param: UserRegisterForm, file: FilePart?): UserResponse {
+        val inviteCode = param.inviteCode
+        param.inviteCode = null
+
         val nicknameExists = nicknameDuplicationCheck(param.nickname)
         if (nicknameExists) {
             throw BusinessValidationException(mapOf("nickname" to "이미 사용 중인 닉네임입니다."))
@@ -72,8 +77,6 @@ class UserService (
             throw BusinessValidationException(mapOf("phone" to "이미 사용 중인 휴대폰 번호입니다."))
         }
 
-        //TODO
-//        val grade = param.grade
         val school = param.schoolId?.let { id -> schoolRepository.findById(id) }
         val toEntity = param.toEntity(encoder.encode(param.password))
         val saved = userRepository.save(toEntity)
@@ -87,6 +90,19 @@ class UserService (
             userRepository.save(saved.copy(assetUid = asset.uid))
         } else {
             saved
+        }
+
+        // 초대코드 생성
+        inviteService.registerInviteCode(updated)
+
+        //초대코드를 통해 회원가입 할 경우
+        if(!inviteCode.isNullOrBlank()) {
+            val success = inviteService.handleInviteJoin(updated, inviteCode)
+            if (!success) {
+                throw BusinessValidationException(
+                    mapOf("inviteCode" to "유효하지 않은 초대코드입니다.")
+                )
+            }
         }
 
         return UserResponse.from(updated, school)

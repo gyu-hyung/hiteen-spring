@@ -83,4 +83,11 @@ data class UserEntity(
 
     /* 삭제 일시 */
     val deletedAt: OffsetDateTime? = null,
+
+    /* 초대코드 */
+    val inviteCode: String? = null,
+
+    /* 초대 후 가입자수 */
+    val inviteJoins: Long = 0,
+
 )
