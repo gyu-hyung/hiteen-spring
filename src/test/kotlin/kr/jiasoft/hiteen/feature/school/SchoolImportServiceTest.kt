@@ -1,6 +1,7 @@
 package kr.jiasoft.hiteen.feature.school
 
 import kotlinx.coroutines.runBlocking
+import kr.jiasoft.hiteen.feature.school.app.SchoolImportService
 import kr.jiasoft.hiteen.feature.school.infra.SchoolRepository
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -14,12 +15,12 @@ class SchoolImportServiceTest (
 
     @Test
     fun `NEIS API에서 학교 데이터 가져오기`() = runBlocking {
-//        // when
-//        schoolImportService.fetchAndSaveSchools()
-//
-//        // then
-//        val count = schoolRepository.count()
-//        println("저장된 학교 개수: $count")
+        // when 10m 55s
+        schoolImportService.fetchAndSaveSchools()
+
+        // then
+        val count = schoolRepository.count()
+        println("저장된 학교 개수: $count")
     }
 
 
