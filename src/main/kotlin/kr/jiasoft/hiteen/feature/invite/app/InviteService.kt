@@ -63,7 +63,6 @@ class InviteService(
 
     //TODO 포인트 상수화
     private fun getInviteJoinPoint(): Int {
-        // 설정값에서 불러오거나 상수화 가능
         return 100
     }
 
