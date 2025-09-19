@@ -243,6 +243,20 @@ CREATE TABLE invites (
 
 
 -- ========================
+-- 출석체크
+-- ========================
+CREATE TABLE attends (
+    id         BIGSERIAL PRIMARY KEY,         -- 고유번호
+    user_id    BIGINT NOT NULL,               -- 회원번호
+    attend_date DATE NOT NULL,                -- 출석일
+    sum_day    SMALLINT NOT NULL DEFAULT 0,   -- 누적 출석일수
+    point      INT NOT NULL DEFAULT 0,        -- 총 지급 포인트
+    add_point  INT NOT NULL DEFAULT 0,        -- 추가 포인트
+    created_at TIMESTAMPTZ DEFAULT now()      -- 체크일시
+);
+
+
+-- ========================
 -- 학급
 -- ========================
 CREATE TABLE classes (
