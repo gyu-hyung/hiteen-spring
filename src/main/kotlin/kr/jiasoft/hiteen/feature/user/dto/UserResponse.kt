@@ -69,6 +69,12 @@ data class UserResponse(
     @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     val birthday: LocalDate?,
 
+    @param:Schema(description = "초대코드", example = "TMUZTTCH6L")
+    val inviteCode: String? = null,
+
+    @param:Schema(description = "초대 후 가입자수", example = "10")
+    val inviteJoins: Long? = null,
+
     @param:Schema(description = "팔로우 여부", example = "false")
     val isFollowed: Boolean = false,
 
@@ -126,6 +132,8 @@ data class UserResponse(
                     grade = entity.grade,
                     gender = entity.gender,
                     birthday = entity.birthday,
+                    inviteCode = entity.inviteCode,
+                    inviteJoins = entity.inviteJoins,
                     isFollowed = isFollowed,
                     isFriend = isFriend,
                     createdAt = entity.createdAt.toLocalDateTime(),

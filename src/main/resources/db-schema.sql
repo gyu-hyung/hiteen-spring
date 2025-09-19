@@ -31,6 +31,8 @@ CREATE TABLE users (
   grade         varchar(30),
   gender        varchar(30),
   birthday		date,
+  invite_code   varchar(30),
+  invite_joins  bigint,
   created_id    bigint,
   created_at    timestamptz not null DEFAULT now(),
   updated_id    bigint,
@@ -221,6 +223,24 @@ CREATE TABLE schools (
   deleted_id  bigint ,
   deleted_at  timestamptz
 );
+
+
+-- ========================
+-- 초대 내역
+-- ========================
+CREATE TABLE invites (
+    id          BIGSERIAL PRIMARY KEY,                -- 고유번호
+    type        VARCHAR(30)    NOT NULL DEFAULT 'Register', -- 초대구분 (Invite, Referral, Register)
+    user_id     BIGINT,                               -- 회원번호(초대한 회원)
+    phone       VARCHAR(200)  NOT NULL,               -- 초대한 연락처
+    code        VARCHAR(100),                         -- 초대코드
+    status      smallint       NOT NULL DEFAULT 0,     -- 상태 (가입, 탈퇴 등)
+    join_id     BIGINT,                               -- 가입 회원번호
+    join_point  INT           NOT NULL DEFAULT 0,     -- 초대가입 지급포인트
+    join_date   timestamptz,                            -- 가입일시
+    leave_date  timestamptz                             -- 탈퇴일시
+);
+
 
 -- ========================
 -- 학급
