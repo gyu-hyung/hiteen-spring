@@ -131,7 +131,7 @@ data class UserResponse(
                     createdAt = entity.createdAt.toLocalDateTime(),
                     updatedAt = entity.updatedAt?.toLocalDateTime(),
                     deletedAt = entity.deletedAt?.toLocalDateTime(),
-                    school = school?.let { SchoolDto(it.id!!, it.name) },
+                    school = school?.let { SchoolDto.from(it) },
                     relationshipCounts = relationshipCounts,
                     interests = interests,
                     photos = photos,
