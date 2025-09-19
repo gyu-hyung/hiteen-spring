@@ -15,7 +15,7 @@ data class SchoolEntity(
 
     @Id
     @param:Schema(description = "학교 PK", example = "1")
-    val id: Long? = null,
+    val id: Long = 0,
 
     @param:Schema(description = "시/도 코드", example = "11")
     val sido: String?,

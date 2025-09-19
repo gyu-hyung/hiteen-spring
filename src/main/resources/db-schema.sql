@@ -208,7 +208,7 @@ CREATE TABLE schools (
   sido_name   varchar(50),
   code        varchar(30),
   name        varchar(100),
-  type        varchar(20),
+  type        integer,
   type_name   varchar(30),
   zipcode     varchar(10),
   address     varchar(255),
@@ -226,33 +226,19 @@ CREATE TABLE schools (
 
 
 -- ========================
--- 초대 내역
+-- 학교 > 급식
 -- ========================
-CREATE TABLE invites (
-    id          BIGSERIAL PRIMARY KEY,                -- 고유번호
-    type        VARCHAR(30)    NOT NULL DEFAULT 'Register', -- 초대구분 (Invite, Referral, Register)
-    user_id     BIGINT,                               -- 회원번호(초대한 회원)
-    phone       VARCHAR(200)  NOT NULL,               -- 초대한 연락처
-    code        VARCHAR(100),                         -- 초대코드
-    status      smallint       NOT NULL DEFAULT 0,     -- 상태 (가입, 탈퇴 등)
-    join_id     BIGINT,                               -- 가입 회원번호
-    join_point  INT           NOT NULL DEFAULT 0,     -- 초대가입 지급포인트
-    join_date   timestamptz,                            -- 가입일시
-    leave_date  timestamptz                             -- 탈퇴일시
-);
-
-
--- ========================
--- 출석체크
--- ========================
-CREATE TABLE attends (
-    id         BIGSERIAL PRIMARY KEY,         -- 고유번호
-    user_id    BIGINT NOT NULL,               -- 회원번호
-    attend_date DATE NOT NULL,                -- 출석일
-    sum_day    SMALLINT NOT NULL DEFAULT 0,   -- 누적 출석일수
-    point      INT NOT NULL DEFAULT 0,        -- 총 지급 포인트
-    add_point  INT NOT NULL DEFAULT 0,        -- 추가 포인트
-    created_at TIMESTAMPTZ DEFAULT now()      -- 체크일시
+CREATE TABLE school_food (
+    id BIGSERIAL PRIMARY KEY,
+    school_id BIGINT NOT NULL,
+    meal_date DATE NOT NULL,
+    code VARCHAR(10) NOT NULL,
+    code_name VARCHAR(50),
+    meals TEXT,
+    calorie VARCHAR(50),
+    created_at TIMESTAMPTZ DEFAULT now(),
+    updated_at TIMESTAMPTZ DEFAULT now(),
+    UNIQUE (school_id, meal_date, code)
 );
 
 
@@ -301,6 +287,37 @@ CREATE TABLE user_classes (
   deleted_id   bigint ,
   deleted_at   timestamptz,
   UNIQUE (user_id, class_id)
+);
+
+
+-- ========================
+-- 초대 내역
+-- ========================
+CREATE TABLE invites (
+    id          BIGSERIAL PRIMARY KEY,                -- 고유번호
+    type        VARCHAR(30)    NOT NULL DEFAULT 'Register', -- 초대구분 (Invite, Referral, Register)
+    user_id     BIGINT,                               -- 회원번호(초대한 회원)
+    phone       VARCHAR(200)  NOT NULL,               -- 초대한 연락처
+    code        VARCHAR(100),                         -- 초대코드
+    status      smallint       NOT NULL DEFAULT 0,     -- 상태 (가입, 탈퇴 등)
+    join_id     BIGINT,                               -- 가입 회원번호
+    join_point  INT           NOT NULL DEFAULT 0,     -- 초대가입 지급포인트
+    join_date   timestamptz,                            -- 가입일시
+    leave_date  timestamptz                             -- 탈퇴일시
+);
+
+
+-- ========================
+-- 출석체크
+-- ========================
+CREATE TABLE attends (
+    id         BIGSERIAL PRIMARY KEY,         -- 고유번호
+    user_id    BIGINT NOT NULL,               -- 회원번호
+    attend_date DATE NOT NULL,                -- 출석일
+    sum_day    SMALLINT NOT NULL DEFAULT 0,   -- 누적 출석일수
+    point      INT NOT NULL DEFAULT 0,        -- 총 지급 포인트
+    add_point  INT NOT NULL DEFAULT 0,        -- 추가 포인트
+    created_at TIMESTAMPTZ DEFAULT now()      -- 체크일시
 );
 
 

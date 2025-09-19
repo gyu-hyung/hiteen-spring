@@ -18,9 +18,6 @@ class SchoolController(
     private val schoolRepository: SchoolRepository
 ) {
 
-    //TODO : 없는 학교 문의하기
-    //TODO : 학교 주소 위경도 변환
-    //TODO : 학교 최신정보 갱신 JOB
     @Operation(
         summary = "학교 정보 조회",
         description = "학교 이름 키워드 검색 및 커서 기반 페이지네이션으로 학교 목록을 조회합니다."

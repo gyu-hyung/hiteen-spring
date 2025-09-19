@@ -5,17 +5,16 @@ import org.springframework.data.relational.core.mapping.Table
 import java.time.LocalDateTime
 
 //TODO
-@Table("time_table")
-data class TimeTableEntity(
+@Table("time_user")
+data class TimeTableUserEntity(
     @Id
     val id: Long? = null,
     val classId: Long,
-    val year: Int,
-    val semester: Int,
-    val timeDate: LocalDateTime,
+    val userId: Long,
+    val week: Int,
     val period: Int,
-    val subject: String?,
-    val createdAt: LocalDateTime? = LocalDateTime.now(),
+    val subject: String,
+    val createdAt: LocalDateTime = LocalDateTime.now(),
     val updatedAt: LocalDateTime? = null,
     val deletedAt: LocalDateTime? = null
 )

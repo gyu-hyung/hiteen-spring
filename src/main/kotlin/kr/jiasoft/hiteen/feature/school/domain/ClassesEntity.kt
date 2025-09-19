@@ -1,0 +1,30 @@
+package kr.jiasoft.hiteen.feature.school.domain
+
+import org.springframework.data.annotation.Id
+import org.springframework.data.relational.core.mapping.Column
+import org.springframework.data.relational.core.mapping.Table
+import java.time.LocalDateTime
+
+@Table("classes")
+data class ClassesEntity(
+    @Id
+    val id: Long = 0,
+    val code: String,
+    val year: Int,
+    @Column("school_id")
+    val schoolId: Long,
+    @Column("school_name")
+    val schoolName: String,
+    @Column("school_type")
+    val schoolType: Int,
+    @Column("class_name")
+    val className: String,
+    val major: String?,
+    val grade: String?,
+    @Column("class")
+    val classNo: String?,    // 컬럼명 명시!
+    val createdAt: LocalDateTime? = LocalDateTime.now(),
+    val updatedId: Long? = null,
+    val updatedAt: LocalDateTime? = null,
+    val deletedAt: LocalDateTime? = null
+)
