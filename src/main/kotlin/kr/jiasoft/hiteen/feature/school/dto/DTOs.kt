@@ -1,14 +1,7 @@
-package kr.jiasoft.hiteen.feature.school.domain
+package kr.jiasoft.hiteen.feature.school.dto
 
 
-data class SchoolInfoResponse(
-    val schoolInfo: List<SchoolInfoItem>
-)
 
-data class SchoolInfoItem(
-    val head: List<Map<String, Any>>? = null,
-    val row: List<SchoolRow>? = null
-)
 
 //@JsonIgnoreProperties(ignoreUnknown = true) // 혹시 빠진 게 있어도 무시
 data class SchoolRow(
