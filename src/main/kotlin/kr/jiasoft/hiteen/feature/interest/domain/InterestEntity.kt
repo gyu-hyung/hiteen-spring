@@ -22,9 +22,9 @@ data class InterestEntity (
     val category: String,
 
     @param:Schema(
-        description = "상태",
-        example = "ACTIVE",
-        allowableValues = ["ACTIVE", "INACTIVE"]
+        description = "내 관심사로 등록 여부 (Y=등록됨, N=미등록)",
+        example = "Y",
+        allowableValues = ["Y", "N"]
     )
     val status: String,
 

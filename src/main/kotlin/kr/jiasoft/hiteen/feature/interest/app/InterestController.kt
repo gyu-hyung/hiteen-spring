@@ -30,6 +30,7 @@ class InterestController(
         return ResponseEntity.ok(ApiResult.success(saved))
     }
 
+
     @Operation(summary = "관심사 상세 조회", description = "관심사 ID로 특정 관심사를 조회합니다.")
     @GetMapping("/{id}")
     suspend fun get(
@@ -37,10 +38,13 @@ class InterestController(
     ): ResponseEntity<ApiResult<InterestEntity>> =
         ResponseEntity.ok(ApiResult.success(interestService.getInterest(id)))
 
-    @Operation(summary = "관심사 전체 조회", description = "등록된 모든 관심사를 조회합니다.")
+
+    @Operation(summary = "관심사 전체 조회", description = "유저별 등록 여부 포함, 모든 관심사를 카테고리별로 조회합니다.")
     @GetMapping
-    suspend fun list() =
-        ResponseEntity.ok(ApiResult.success(interestService.getAllInterests()))
+    suspend fun list(
+        @AuthenticationPrincipal(expression = "user") user: UserEntity) =
+        ResponseEntity.ok(ApiResult.success(interestService.getAllInterestsByUser(user.id)))
+
 
     @Operation(summary = "관심사 수정", description = "특정 관심사를 수정합니다.")
     @PostMapping("/{id}")
@@ -48,6 +52,7 @@ class InterestController(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
         @Parameter(description = "관심사 수정 요청 DTO") interestRegisterRequest: InterestRegisterRequest,
     ) = ResponseEntity.ok(ApiResult.success(interestService.updateInterest(user, interestRegisterRequest)))
+
 
     @Operation(summary = "관심사 삭제", description = "특정 관심사를 삭제합니다.")
     @DeleteMapping("/{id}")

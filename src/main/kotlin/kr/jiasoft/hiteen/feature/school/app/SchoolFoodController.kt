@@ -41,7 +41,6 @@ class SchoolFoodController(
     @PostMapping("/meal/save")
     suspend fun saveMeal(
         @Parameter(description = "급식 등록 요청 DTO") req: SchoolFoodSaveRequest,
-
     ): ResponseEntity<ApiResult<Boolean>> {
         schoolFoodService.saveMeal(req)
         return ResponseEntity.ok(ApiResult.success(true,"급식 등록 완료"))

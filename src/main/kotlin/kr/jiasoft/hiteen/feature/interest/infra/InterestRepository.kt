@@ -9,6 +9,29 @@ import org.springframework.stereotype.Repository
 @Repository
 interface InterestRepository : CoroutineCrudRepository<InterestEntity, Long> {
     suspend fun findByStatus(status: String): Flow<InterestEntity>
-    @Query("SELECT * FROM interests ORDER BY id")
-    fun findAllOrderById(): Flow<InterestEntity>
+
+    @Query("SELECT * FROM interests ORDER BY category, id")
+    fun findAllOrderByCategoryAndId(): Flow<InterestEntity>
+
+    @Query(
+        """
+        SELECT i.id,
+               i.topic,
+               i.category,
+               CASE WHEN iu.id IS NULL THEN 'N' ELSE 'Y' END AS status,
+               i.created_at,
+               i.updated_at,
+               i.deleted_at,
+               i.created_id,
+               i.updated_id,
+               i.deleted_id
+        FROM interests i
+        LEFT JOIN interest_user iu
+          ON i.id = iu.interest_id
+         AND iu.user_id = :userId
+        ORDER BY i.category, i.id
+        """
+    )
+    fun findAllWithUserStatus(userId: Long): Flow<InterestEntity>
+
 }
