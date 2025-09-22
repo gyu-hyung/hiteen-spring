@@ -3,6 +3,8 @@ package kr.jiasoft.hiteen.feature.interest.app
 import kotlinx.coroutines.flow.toList
 import kr.jiasoft.hiteen.feature.interest.domain.InterestEntity
 import kr.jiasoft.hiteen.feature.interest.dto.InterestRegisterRequest
+import kr.jiasoft.hiteen.feature.interest.dto.InterestResponse
+import kr.jiasoft.hiteen.feature.interest.dto.toResponse
 import kr.jiasoft.hiteen.feature.interest.infra.InterestRepository
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import org.springframework.stereotype.Service
@@ -31,9 +33,13 @@ class InterestService(
         return interestRepository.findById(id)
     }
 
-    suspend fun getAllInterests(): List<InterestEntity> {
-        return interestRepository.findAllOrderById().toList()
+
+    suspend fun getAllInterestsByUser(userId: Long): Map<String, List<InterestResponse>> {
+        val all = interestRepository.findAllWithUserStatus(userId).toList()
+        return all.groupBy { it.category }
+            .mapValues { (_, list) -> list.map { it.toResponse() }.sortedBy { e -> e.id } }
     }
+
 
     suspend fun updateInterest(
         user: UserEntity, updated: InterestRegisterRequest

@@ -124,7 +124,7 @@ class SchoolFoodService(
         return schoolFoodAssetRepository.findLatest(schoolId, year, month)
     }
 
-    /** 급식 사진 신고 */
+    /** 급식 사진 신고 TODO 신고++ */
     suspend fun reportImage(id: Long) {
         schoolFoodAssetRepository.incrementReport(id)
     }
