@@ -1,30 +1,31 @@
 package kr.jiasoft.hiteen.feature.school.app
 
-import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
-import kotlinx.coroutines.reactor.awaitSingle
+import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactor.awaitSingleOrNull
-import kr.jiasoft.hiteen.feature.school.domain.ClassesEntity
+import kr.jiasoft.hiteen.feature.school.domain.SchoolClassesEntity
 import kr.jiasoft.hiteen.feature.school.domain.SchoolEntity
-import kr.jiasoft.hiteen.feature.school.domain.SchoolInfoResponse
-import kr.jiasoft.hiteen.feature.school.domain.SchoolRow
-import kr.jiasoft.hiteen.feature.school.infra.ClassesRepository
+import kr.jiasoft.hiteen.feature.school.infra.SchoolClassesRepository
 import kr.jiasoft.hiteen.feature.school.infra.SchoolRepository
 import org.slf4j.LoggerFactory
+import org.springframework.http.client.reactive.ReactorClientHttpConnector
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.ExchangeStrategies
 import org.springframework.web.reactive.function.client.WebClient
+import reactor.netty.http.client.HttpClient
+import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.util.UUID
+import java.util.*
 
 @Component
 class SchoolImportService(
     private val schoolRepository: SchoolRepository,
-    private val classesRepository: ClassesRepository,
+    private val schoolClassesRepository: SchoolClassesRepository,
 ) {
     private val logger = LoggerFactory.getLogger(SchoolImportService::class.java)
 
@@ -36,8 +37,15 @@ class SchoolImportService(
         .baseUrl("https://open.neis.go.kr/hub")
         .exchangeStrategies(
             ExchangeStrategies.builder()
-                .codecs { it.defaultCodecs().maxInMemorySize(10 * 1024 * 1024) }
+                .codecs { it.defaultCodecs().maxInMemorySize(4 * 1024 * 1024) } // 줄임
                 .build()
+        )
+        .clientConnector(
+            ReactorClientHttpConnector(
+                HttpClient.create()
+                    .option(io.netty.channel.ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000)
+                    .responseTimeout(Duration.ofSeconds(15))
+            )
         )
         .build()
 
@@ -47,20 +55,23 @@ class SchoolImportService(
         .defaultHeader("Authorization", "KakaoAK $kakaoApiKey")
         .exchangeStrategies(
             ExchangeStrategies.builder()
-                .codecs
-
-                { it.defaultCodecs().maxInMemorySize(10 * 1024 * 1024) }
+                .codecs { it.defaultCodecs().maxInMemorySize(2 * 1024 * 1024) }
                 .build()
         )
         .build()
 
-    suspend fun fetchAndSaveSchools() {
+    /** ✅ Kakao 주소 변환 결과 캐시 (최대 5000개, 오래된 항목 삭제) */
+    private val geocodeCache = object : LinkedHashMap<String, Pair<Double?, Double?>>(5000, 0.75f, true) {
+        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, Pair<Double?, Double?>>?): Boolean {
+            return this.size > 5000
+        }
+    }
+
+    suspend fun import() {
         logger.info("학교 + 학급 정보 가져오기 시작")
 
-        // 1. 전체 updated_id 초기화 (-1)
         schoolRepository.markAllForDeletion()
-        classesRepository.markAllForDeletion()
-
+        schoolClassesRepository.markAllForDeletion()
 
         val totalCount = fetchTotalCount()
         if (totalCount <= 0) {
@@ -72,7 +83,7 @@ class SchoolImportService(
         val totalPages = (totalCount + pageSize - 1) / pageSize
 
         for (page in 1..totalPages) {
-            val response = neisClient.get()
+            neisClient.get()
                 .uri { builder ->
                     builder.path("/schoolInfo")
                         .queryParam("KEY", neisApiKey)
@@ -82,112 +93,76 @@ class SchoolImportService(
                         .build()
                 }
                 .retrieve()
-                .bodyToMono(String::class.java)
-                .awaitSingleOrNull() ?: continue
+                .bodyToFlux(JsonNode::class.java)
+                .flatMapIterable { json ->
+                    json["schoolInfo"]?.get(1)?.get("row") ?: emptyList()
+                }
+                .asFlow()   // 코루틴 Flow로 변환
+                .onEach { row ->
+                    try {
+                        saveSchoolRow(row)
+                    } catch (e: Exception) {
+                        logger.error("학교 데이터 처리 실패: ${e.message}", e)
+                    }
+                }
+                .collect()
 
-            val result: SchoolInfoResponse = try {
-                jacksonObjectMapper().readValue(response)
-            } catch (e: Exception) {
-                logger.error("JSON 파싱 실패 (page=$page): ${e.message}")
-                continue
-            }
-
-            val rows = result.schoolInfo.getOrNull(1)?.row ?: emptyList()
-            for (row in rows) {
-                saveSchool(row)
-            }
+            logger.info("Page $page/$totalPages 처리 완료")
         }
 
-        // 3. 아직 -1 로 남은 데이터 삭제
         schoolRepository.deleteMarkedForDeletion()
-        classesRepository.deleteMarkedForDeletion()
+        schoolClassesRepository.deleteMarkedForDeletion()
 
         logger.info("학교 + 학급 정보 가져오기 완료")
     }
 
-    private suspend fun saveSchool(row: SchoolRow) {
-        val address = row.ORG_RDNMA?.trim()
-        var latitude: Double? = null
-        var longitude: Double? = null
-
-        if (!address.isNullOrBlank()) {
-            try {
-                val response = kakaoClient.get()
-                    .uri { it.path("/search/address.json").queryParam("query", address).build() }
-                    .header("Authorization", "KakaoAK $kakaoApiKey") // 🔑 반드시 헤더 추가
-                    .retrieve()
-                    .bodyToMono(String::class.java)
-                    .awaitSingleOrNull()
-
-                if (response != null) {
-                    val json: JsonNode = jacksonObjectMapper().readTree(response)
-                    val documents = json["documents"]
-                    if (documents != null && documents.isArray && documents.size() > 0) {
-                        latitude = documents[0]["y"]?.asDouble()
-                        longitude = documents[0]["x"]?.asDouble()
-                    }
-                }
-            } catch (e: Exception) {
-                logger.warn("${row.SCHUL_NM} :: Kakao 주소 변환 실패 (${e.message})")
+    private suspend fun saveSchoolRow(row: JsonNode) {
+        val address = row["ORG_RDNMA"]?.asText()?.trim()
+        val (lat, lng) = if (!address.isNullOrBlank()) {
+            geocodeCache[address] ?: fetchLatLngFromKakao(address).also {
+                geocodeCache[address] = it
             }
-        }
+        } else null to null
 
         val entity = SchoolEntity(
-            sido = row.ATPT_OFCDC_SC_CODE,
-            sidoName = row.ATPT_OFCDC_SC_NM,
-            code = row.SD_SCHUL_CODE,
-            name = row.SCHUL_NM,
-            type = when {
-                row.SCHUL_KND_SC_NM?.contains("초등") == true -> 1
-                row.SCHUL_KND_SC_NM?.contains("중") == true -> 2
-                row.SCHUL_KND_SC_NM?.contains("고") == true -> 3
-                else -> 9
-            },
-            typeName = row.SCHUL_KND_SC_NM,
-            zipcode = row.ORG_RDNZC?.trim(),
+            sido = row["ATPT_OFCDC_SC_CODE"]?.asText(),
+            sidoName = row["ATPT_OFCDC_SC_NM"]?.asText(),
+            code = row["SD_SCHUL_CODE"]?.asText() ?: UUID.randomUUID().toString(),
+            name = row["SCHUL_NM"]?.asText() ?: "",
+            type = resolveSchoolType(row["SCHUL_KND_SC_NM"]?.asText(), row["SCHUL_NM"]?.asText()),
+            typeName = row["SCHUL_KND_SC_NM"]?.asText(),
+            zipcode = row["ORG_RDNZC"]?.asText(),
             address = address,
-            latitude = latitude,
-            longitude = longitude,
-            foundDate = parseDate(row.FOND_YMD),
+            latitude = lat,
+            longitude = lng,
+            foundDate = parseDate(row["FOND_YMD"]?.asText()),
         )
 
-        val existing = schoolRepository.findByCode(entity.code)
-        val saved = if (existing != null) {
-            // 변경된 값만 갱신
-            val updated = existing.copy(
-                sido = entity.sido ?: existing.sido,
-                sidoName = entity.sidoName ?: existing.sidoName,
-                name = entity.name.ifBlank { existing.name },
-                type = entity.type,
-                typeName = entity.typeName ?: existing.typeName,
-                zipcode = entity.zipcode ?: existing.zipcode,
-                address = entity.address ?: existing.address,
-                latitude = entity.latitude ?: existing.latitude,
-                longitude = entity.longitude ?: existing.longitude,
-                foundDate = entity.foundDate ?: existing.foundDate,
-                updatedId = 0,
-                updatedAt = LocalDateTime.now()
-            )
-            schoolRepository.save(updated)
-        } else {
-            // 신규 insert
-            schoolRepository.save(entity.copy(updatedId = 0))
-        }
+//        val saved = schoolRepository.findByCode(entity.code)?.copy(
+        schoolRepository.findByCode(entity.code)?.copy(
+            sido = entity.sido ?: "",
+            sidoName = entity.sidoName ?: "",
+            name = entity.name.ifBlank { entity.name },
+            type = entity.type,
+            typeName = entity.typeName ?: "",
+            zipcode = entity.zipcode,
+            address = entity.address,
+            latitude = entity.latitude,
+            longitude = entity.longitude,
+            foundDate = entity.foundDate,
+            updatedId = 0,
+            updatedAt = LocalDateTime.now()
+        )?.let { schoolRepository.save(it) }
+            ?: schoolRepository.save(entity.copy(updatedId = 0))
 
-
-        logger.info("저장 완료: ${saved.id} - ${saved.name}")
-
-        // 학급 정보까지 저장
-        val classes = fetchClasses(row.ATPT_OFCDC_SC_CODE, row.SD_SCHUL_CODE, row.SCHUL_NM)
-        if (classes.isNotEmpty()) {
-            saveClassesForSchool(saved, classes)
-        }
-
+//        val classes = fetchClasses(entity.sido ?: "", entity.code, entity.name)
+//        if (classes.isNotEmpty()) {
+//            saveClassesForSchool(saved, classes)
+//        }
     }
 
-
     private suspend fun fetchClasses(sido: String, schoolCode: String, schoolName: String): List<Map<String, String>> {
-        val response = neisClient.get()
+        val json = neisClient.get()
             .uri { builder ->
                 builder.path("/classInfo")
                     .queryParam("KEY", neisApiKey)
@@ -200,63 +175,43 @@ class SchoolImportService(
                     .build()
             }
             .retrieve()
-            .bodyToMono(String::class.java)
-            .awaitSingleOrNull()
+            .bodyToMono(JsonNode::class.java)
+            .awaitSingleOrNull() ?: return emptyList()
 
-        if (response.isNullOrBlank()) {
-            logger.warn("$schoolCode :: $schoolName :: 학급 데이터 추출 실패 (응답 없음)")
+        val rows = json["classInfo"]?.get(1)?.get("row")
+        if (rows == null || !rows.isArray) {
+            logger.debug("$schoolCode :: $schoolName :: 학급 데이터 없음")
             return emptyList()
         }
 
-        return try {
-            val json = jacksonObjectMapper().readTree(response)
-            val rows = json["classInfo"]?.get(1)?.get("row")
-            if (rows != null && rows.isArray) {
-                jacksonObjectMapper().convertValue(rows, object : TypeReference<List<Map<String, String>>>() {})
-            } else {
-                logger.info("$schoolCode :: $schoolName :: 학급 데이터 없음")
-                emptyList()
-            }
-        } catch (e: Exception) {
-            logger.error("$schoolCode :: $schoolName :: 학급 데이터 파싱 실패", e)
-            emptyList()
+        return rows.map { row ->
+            mapOf(
+                "AY" to row["AY"]?.asText().orEmpty(),
+                "GRADE" to row["GRADE"]?.asText().orEmpty(),
+                "CLASS_NM" to row["CLASS_NM"]?.asText().orEmpty(),
+                "DDDEP_NM" to row["DDDEP_NM"]?.asText().orEmpty(),
+                "SCHUL_CRSE_SC_NM" to row["SCHUL_CRSE_SC_NM"]?.asText().orEmpty()
+            )
         }
-
     }
 
-
     suspend fun saveClassesForSchool(school: SchoolEntity, classRows: List<Map<String, String>>) {
-        var count = 0
-
-        for (row in classRows) {
-            val year = row["AY"] ?: continue
-            val grade = row["GRADE"] ?: continue
-            val classNum = row["CLASS_NM"] ?: continue
+        val entities = classRows.mapNotNull { row ->
+            val year = row["AY"] ?: return@mapNotNull null
+            val grade = row["GRADE"] ?: return@mapNotNull null
+            val classNum = row["CLASS_NM"] ?: return@mapNotNull null
             val major = row["DDDEP_NM"] ?: ""
             val schoolTypeName = row["SCHUL_CRSE_SC_NM"] ?: ""
 
-            // 학급명 구성
             val className = when {
                 school.typeName == "특수학교" ->
                     "$schoolTypeName ${if (schoolTypeName == "전공과") "" else grade + "학년 "}$classNum 반"
                 major.isNotBlank() && major != "일반과" && major != "일반학과" ->
                     "$major $grade 학년 $classNum 반"
-                else ->
-                    "$grade 학년 $classNum 반"
+                else -> "$grade 학년 $classNum 반"
             }
 
-
-
-            val existing = classesRepository.findBySchoolIdAndYearAndGradeAndClassNo(
-                school.id, year.toInt(), grade, classNum
-            ).awaitSingleOrNull()
-
-            val entity = existing?.copy(
-                className = className,
-                major = if (major == "일반과" || major == "일반학과") "" else major,
-                updatedId = 0,
-                updatedAt = LocalDateTime.now()
-            ) ?: ClassesEntity(
+            SchoolClassesEntity(
                 code = UUID.randomUUID().toString(),
                 year = year.toInt(),
                 schoolId = school.id,
@@ -269,21 +224,19 @@ class SchoolImportService(
                 createdAt = LocalDateTime.now(),
                 updatedId = 0,
             )
-
-            classesRepository.save(entity).awaitSingle()
-
-
-            logger.info("학급 저장 완료: ${entity.id} - ${entity.className}")
-            count++
-
         }
 
-        logger.info("${school.code} :: ${school.name} :: ${count} 학급 성공")
+        // 100개 단위로 잘라서 저장
+        entities.chunked(100).forEach { chunk ->
+            schoolClassesRepository.saveAll(chunk.asFlow()).collect()
+        }
+
+        logger.debug("${school.code} :: ${school.name} :: ${entities.size} 학급 저장")
     }
 
 
     private suspend fun fetchTotalCount(): Int {
-        val response = neisClient.get()
+        val json = neisClient.get()
             .uri { builder ->
                 builder.path("/schoolInfo")
                     .queryParam("KEY", neisApiKey)
@@ -293,24 +246,46 @@ class SchoolImportService(
                     .build()
             }
             .retrieve()
-            .bodyToMono(String::class.java)
+            .bodyToMono(JsonNode::class.java)
             .awaitSingleOrNull() ?: return 0
 
-        return try {
-            val json = jacksonObjectMapper().readTree(response)
-            json["schoolInfo"]?.get(0)?.get("head")?.get(0)?.get("list_total_count")?.asInt() ?: 0
-        } catch (e: Exception) {
-            logger.error("총 건수 파싱 실패: ${e.message}")
-            0
-        }
+        return json["schoolInfo"]?.get(0)?.get("head")?.get(0)?.get("list_total_count")?.asInt() ?: 0
     }
 
     private fun parseDate(date: String?): LocalDate? {
         return try {
             if (date.isNullOrBlank()) null
             else LocalDate.parse(date, DateTimeFormatter.ofPattern("yyyyMMdd"))
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             null
+        }
+    }
+
+    private fun resolveSchoolType(typeName: String?, fallback: String?): Int {
+        val target = typeName ?: fallback ?: ""
+        return when {
+            target.contains("초등학교") -> 1
+            target.contains("중학교") -> 2
+            target.contains("고등학교") -> 3
+            else -> 9
+        }
+    }
+
+    private suspend fun fetchLatLngFromKakao(address: String): Pair<Double?, Double?> {
+        return try {
+            val json = kakaoClient.get()
+                .uri { it.path("/search/address.json").queryParam("query", address).build() }
+                .retrieve()
+                .bodyToMono(JsonNode::class.java)
+                .awaitSingleOrNull()
+
+            val doc = json?.get("documents")?.firstOrNull()
+            val lat = doc?.get("y")?.asDouble()
+            val lng = doc?.get("x")?.asDouble()
+            lat to lng
+        } catch (e: Exception) {
+            logger.warn("주소 변환 실패 ($address): ${e.message}")
+            null to null
         }
     }
 }

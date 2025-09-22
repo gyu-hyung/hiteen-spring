@@ -238,14 +238,34 @@ CREATE TABLE school_food (
     calorie VARCHAR(50),
     created_at TIMESTAMPTZ DEFAULT now(),
     updated_at TIMESTAMPTZ DEFAULT now(),
+    deleted_at TIMESTAMPTZ DEFAULT now(),
     UNIQUE (school_id, meal_date, code)
 );
 
 
 -- ========================
+-- 학교 > 급식 > 이미지
+-- ========================
+CREATE TABLE school_food_image (
+    id BIGSERIAL PRIMARY KEY,
+    school_id BIGINT NOT NULL,
+    year SMALLINT NOT NULL DEFAULT 0,
+    month SMALLINT NOT NULL DEFAULT 0,
+    user_id BIGINT,
+    image VARCHAR(100),              -- 파일 UID
+    report_count INT NOT NULL DEFAULT 0,
+    status SMALLINT NOT NULL DEFAULT 1, -- 1: 노출, 0: 미노출
+    created_at TIMESTAMPTZ DEFAULT now(),
+    updated_at TIMESTAMPTZ,
+    deleted_at TIMESTAMPTZ
+);
+
+
+
+-- ========================
 -- 학급
 -- ========================
-CREATE TABLE classes (
+CREATE TABLE school_classes (
   id           bigserial PRIMARY KEY,
   code         varchar(50),
   year         smallint,
@@ -255,7 +275,7 @@ CREATE TABLE classes (
   class_name   varchar(50),
   major        varchar(50),
   grade        varchar(10),
-  class        varchar(10),
+  classNo      varchar(100),
   created_id   bigint ,
   created_at   timestamptz DEFAULT now(),
   updated_id   bigint ,
@@ -287,6 +307,61 @@ CREATE TABLE user_classes (
   deleted_id   bigint ,
   deleted_at   timestamptz,
   UNIQUE (user_id, class_id)
+);
+
+
+-- ========================
+-- 학급 시간표
+-- ========================
+CREATE TABLE time_table (
+    id BIGSERIAL PRIMARY KEY,
+    class_id BIGINT NOT NULL,
+    year SMALLINT NOT NULL DEFAULT 0,
+    semester SMALLINT NOT NULL DEFAULT 0,
+    time_date DATE NOT NULL,
+    period SMALLINT NOT NULL DEFAULT 0,
+    subject VARCHAR(255),
+    created_at TIMESTAMP DEFAULT now(),
+    updated_at TIMESTAMP,
+    deleted_at TIMESTAMP,
+    CONSTRAINT uq_time_table_class_date_period UNIQUE (class_id, time_date, period)
+);
+
+CREATE INDEX idx_time_table_class_date
+    ON time_table (class_id, time_date);
+
+
+
+-- ========================
+-- 사용자 등록 시간표
+-- ========================
+CREATE TABLE time_user (
+    id BIGSERIAL PRIMARY KEY,
+    class_id BIGINT NOT NULL,
+    user_id BIGINT,
+    week SMALLINT NOT NULL DEFAULT 0,
+    period SMALLINT NOT NULL DEFAULT 0,
+    subject VARCHAR(255),
+    created_at TIMESTAMP DEFAULT now(),
+    updated_at TIMESTAMP,
+    deleted_at TIMESTAMP
+);
+
+
+-- ========================
+-- 시간표 이미지
+-- ========================
+CREATE TABLE time_image (
+    id BIGSERIAL PRIMARY KEY,
+    class_id BIGINT NOT NULL,
+    semester SMALLINT NOT NULL DEFAULT 1,
+    user_id BIGINT,
+    image VARCHAR(100),
+    report_count INT NOT NULL DEFAULT 0,
+    status SMALLINT NOT NULL DEFAULT 1,
+    created_at TIMESTAMP DEFAULT now(),
+    updated_at TIMESTAMP,
+    deleted_at TIMESTAMP
 );
 
 
@@ -843,7 +918,7 @@ CREATE TABLE user_photos (
 --  pin_users,
 --  pin,
 --  user_classes,
---  classes,
+--  school_classes,
 --  schools,
 --  tiers,
 --  assets,

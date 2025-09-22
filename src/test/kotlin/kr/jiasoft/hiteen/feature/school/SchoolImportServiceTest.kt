@@ -16,7 +16,7 @@ class SchoolImportServiceTest (
     @Test
     fun `NEIS API에서 학교 데이터 가져오기`() = runBlocking {
         // when 10m 55s
-        schoolImportService.fetchAndSaveSchools()
+        schoolImportService.import()
 
         // then
         val count = schoolRepository.count()
