@@ -48,6 +48,13 @@ data class UserSummary(
     )
     val mood: String?,
 
+
+    @param:Schema(
+        description = "현재 기분/상태 이모지",
+        example = "E_001"
+    )
+    val moodEmoji: String?,
+
     @param:Schema(
         description = "MBTI",
         example = "ENTP"
@@ -82,6 +89,7 @@ data class UserSummary(
                 address = user.address,
                 detailAddress = user.detailAddress,
                 mood = user.mood,
+                moodEmoji = user.moodEmoji,
                 mbti = user.mbti,
                 tier = user.tier,
                 assetUid = user.assetUid?.toString(),
@@ -95,6 +103,7 @@ data class UserSummary(
             address = null,
             detailAddress = null,
             mood = null,
+            moodEmoji = null,
             mbti = null,
             tier = null,
             assetUid = null,

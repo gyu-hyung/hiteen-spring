@@ -160,6 +160,7 @@ class UserService (
         val newAddress     = param.address ?: existing.address
         val newDetailAddr  = param.detailAddress ?: existing.detailAddress
         val newMood        = param.mood ?: existing.mood
+        val newMoodEmoji   = param.moodEmoji ?: existing.moodEmoji
         val newTier        = param.tier ?: existing.tier
         val newSchoolId    = param.schoolId ?: existing.schoolId
         val newGrade       = param.grade ?: existing.grade
@@ -187,6 +188,7 @@ class UserService (
             address       = newAddress,
             detailAddress = newDetailAddr,
             mood          = newMood,
+            moodEmoji     = newMoodEmoji,
             tier          = newTier,
             assetUid      = newAssetUid,
             schoolId      = newSchoolId,

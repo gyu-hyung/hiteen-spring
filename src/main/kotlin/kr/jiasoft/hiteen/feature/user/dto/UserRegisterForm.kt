@@ -49,6 +49,9 @@ data class UserRegisterForm(
     @param:Schema(description = "현재 기분", example = "기분좋음")
     val mood: String? = null,
 
+    @param:Schema(description = "현재 기분 이모지", example = "E_001")
+    val moodEmoji: String? = null,
+
     @param:Schema(description = "MBTI", example = "INTJ")
     val mbti: String? = null,
 
@@ -87,6 +90,7 @@ data class UserRegisterForm(
         detailAddress = detailAddress,
         phone = phone,
         mood = mood,
+        moodEmoji = moodEmoji,
         mbti = mbti,
         tier = tier,
         assetUid = assetUid,

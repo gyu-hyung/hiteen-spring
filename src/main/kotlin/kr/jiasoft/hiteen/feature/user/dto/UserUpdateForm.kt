@@ -37,6 +37,9 @@ data class UserUpdateForm(
     @param:Schema(description = "기분 상태", example = "기분좋음", maxLength = 30)
     val mood: String? = null,
 
+    @param:Schema(description = "기분 상태 이모지", example = "E_001", maxLength = 30)
+    val moodEmoji: String? = null,
+
     @param:Schema(description = "MBTI", example = "INTJ", maxLength = 30)
     val mbti: String? = null,
 

@@ -20,7 +20,7 @@ interface UserRepository : CoroutineCrudRepository<UserEntity, Long> {
 
     /* 간단 검색: username/nickname/email 에 like (필요시 정규화/풀텍스트로 교체) */
     @Query("""
-        SELECT uid, username, nickname, phone, address, detail_address, mood, tier, asset_uid
+        SELECT *
         FROM users
         WHERE (LOWER(username) LIKE LOWER(CONCAT('%', :q, '%'))
            OR  LOWER(COALESCE(nickname,'')) LIKE LOWER(CONCAT('%', :q, '%'))
@@ -30,10 +30,7 @@ interface UserRepository : CoroutineCrudRepository<UserEntity, Long> {
     suspend fun searchSummary(q: String, limit: Int = 30): Flow<UserSummary>
 
     /* 친구/팔로우 사용자 정보회 */
-    @Query("""
-        SELECT uid, username, nickname, phone, address, detail_address, mood, tier, asset_uid, mbti
-        FROM users WHERE id = :id
-    """)
+    @Query("SELECT * FROM users WHERE id = :id")
     suspend fun findSummaryInfoById(id: Long): UserSummary
 
     @Query("""

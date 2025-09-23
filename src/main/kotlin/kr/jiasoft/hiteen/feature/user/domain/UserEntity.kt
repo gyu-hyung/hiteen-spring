@@ -45,6 +45,9 @@ data class UserEntity(
     /* 사용자 상태/기분 코드 */
     val mood: String? = null,
 
+    /* 사용자 상태/기분 이모지 코드 */
+    val moodEmoji: String? = null,
+
     /* 사용자 MBTI */
     val mbti: String? = null,
 
