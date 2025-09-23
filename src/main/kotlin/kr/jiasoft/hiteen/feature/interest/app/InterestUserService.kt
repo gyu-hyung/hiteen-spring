@@ -60,7 +60,7 @@ class InterestUserService(
     }
 
 
-    /** 오늘의 추천 친구 1명 뽑기 */
+    /** 오늘의 추천 친구 1명 뽑기 TODO 거리, 추천옵션, 추천제외*/
     suspend fun recommendFriend(user: UserEntity, dailyLimit: Int = 1): FriendRecommendationResponse? {
         val todayCount = interestMatchHistoryRepository.countTodayRecommendations(user.id)
         if (todayCount >= dailyLimit) {

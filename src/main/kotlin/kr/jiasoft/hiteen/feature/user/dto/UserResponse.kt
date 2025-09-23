@@ -50,6 +50,9 @@ data class UserResponse(
     @param:Schema(description = "현재 기분", example = "기분좋음")
     val mood: String?,
 
+    @param:Schema(description = "현재 기분 이모지", example = "E_001")
+    val moodEmoji: String?,
+
     @param:Schema(description = "MBTI", example = "INTJ")
     val mbti: String?,
 
@@ -126,6 +129,7 @@ data class UserResponse(
                     detailAddress = entity.detailAddress,
                     phone = entity.phone,
                     mood = entity.mood,
+                    moodEmoji = entity.moodEmoji,
                     mbti = entity.mbti,
                     tier = entity.tier,
                     assetUid = entity.assetUid?.toString(),

@@ -24,6 +24,7 @@ CREATE TABLE users (
   detail_address varchar(255),
   phone         varchar(30),
   mood          varchar(30),
+  mood_emoji    varchar(30),
   mbti          varchar(30),
   tier          varchar(30),
   asset_uid     uuid, -- REFERENCES assets(uid),

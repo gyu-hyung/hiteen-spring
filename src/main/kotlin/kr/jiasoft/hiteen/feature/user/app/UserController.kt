@@ -59,7 +59,6 @@ class UserController(
         }
     }
 
-    //TODO : 학년 ex) 3 -> 고3
     @Operation(summary = "회원가입", description = "신규 회원을 등록합니다.")
     @PostMapping(consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     suspend fun register(
