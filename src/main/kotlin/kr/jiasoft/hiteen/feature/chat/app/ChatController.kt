@@ -33,7 +33,7 @@ class ChatController(
 
 
     @Operation(summary = "1:1 채팅방 생성", description = "상대방 UID를 지정하여 1:1 채팅방을 생성합니다. 이미 존재하면 기존 방을 반환합니다.")
-    @PostMapping
+    @PostMapping("/direct")
     suspend fun createDirectRoom(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
         @Parameter(description = "1:1 채팅방 생성 요청 DTO") peerUid: UUID,

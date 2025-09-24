@@ -3,6 +3,7 @@ package kr.jiasoft.hiteen.feature.user.infra
 import kotlinx.coroutines.flow.Flow
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import kr.jiasoft.hiteen.feature.user.dto.UserSummary
+import org.springframework.data.r2dbc.repository.Modifying
 import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 import java.util.UUID
@@ -20,8 +21,9 @@ interface UserRepository : CoroutineCrudRepository<UserEntity, Long> {
 
     /* 간단 검색: username/nickname/email 에 like (필요시 정규화/풀텍스트로 교체) */
     @Query("""
-        SELECT *
-        FROM users
+        SELECT a.*
+        , (select tier_name_kr from tiers where id = tier_id) tier_name
+        FROM users a
         WHERE (LOWER(username) LIKE LOWER(CONCAT('%', :q, '%'))
            OR  LOWER(COALESCE(nickname,'')) LIKE LOWER(CONCAT('%', :q, '%'))
            OR  LOWER(COALESCE(email,'')) LIKE LOWER(CONCAT('%', :q, '%')))
@@ -30,8 +32,20 @@ interface UserRepository : CoroutineCrudRepository<UserEntity, Long> {
     suspend fun searchSummary(q: String, limit: Int = 30): Flow<UserSummary>
 
     /* 친구/팔로우 사용자 정보회 */
-    @Query("SELECT * FROM users WHERE id = :id")
+    @Query("""
+        SELECT a.*
+        , (select tier_name_kr from tiers where id = tier_id) tier_name
+        FROM users a WHERE id = :id
+    """)
     suspend fun findSummaryInfoById(id: Long): UserSummary
+
+    @Modifying
+    @Query("""
+        UPDATE users 
+        SET exp_points = :exp, tier_id = :tierId 
+        WHERE id = :userId
+    """)
+    suspend fun updateExpAndTier(userId: Long, exp: Long, tierId: Long?)
 
     @Query("""
         SELECT EXISTS (

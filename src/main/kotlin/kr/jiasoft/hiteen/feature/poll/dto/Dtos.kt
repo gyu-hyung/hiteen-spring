@@ -88,11 +88,13 @@ data class PollSummaryRow(
     val id: Long,
     val question: String,
     val photo: String?,
-    val selects: String?, // jsonb를 String으로 받음
+    val selects: String?, // jsonb -> String
     val colorStart: String?,
     val colorEnd: String?,
     val voteCount: Int = 0,
     val commentCount: Int = 0,
+    val likeCount: Int = 0,
+    val likedByMe: Boolean = false,
     val votedByMe: Boolean = false,
     val votedSeq: Int? = null,
     val createdId: Long,
@@ -124,10 +126,14 @@ data class PollResponse(
     @param:Schema(description = "총 투표 수", example = "120")
     val voteCount: Int = 0,
 
-    //    val likeCount: Int?,// TODO
-
     @param:Schema(description = "댓글 수", example = "15")
     val commentCount: Int = 0,
+
+    @param:Schema(description = "좋아요 수", example = "20")
+    val likeCount: Int = 0,
+
+    @param:Schema(description = "내가 좋아요했는지 여부", example = "true")
+    val likedByMe: Boolean = false,
 
     @param:Schema(description = "내가 투표했는지 여부", example = "true")
     val votedByMe: Boolean = false,
@@ -138,8 +144,10 @@ data class PollResponse(
     @param:Schema(description = "생성 일시", example = "2025.09.18 10:15")
     @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm")
     val createdAt: OffsetDateTime,
-//    val likedByMe: Boolean?,// TODO
+
     val user: UserSummary?,
+
+//    val likedByMe: Boolean?,// TODO
 //    val comments: ApiPageCursor<PollCommentResponse>?,// TODO
 ) {
     companion object {
@@ -183,6 +191,8 @@ data class PollResponse(
                 colorEnd = res.colorEnd,
                 voteCount = res.voteCount,
                 commentCount = res.commentCount,
+                likeCount = res.likeCount,
+                likedByMe = res.likedByMe,
                 votedByMe = res.votedByMe,
                 votedSeq = res.votedSeq,
                 createdAt = res.createdAt,

@@ -30,7 +30,7 @@ class InterestUserController(
     @PostMapping
     suspend fun addInterest(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
-        @Parameter(description = "등록할 관심사 ID") interestId: Long
+        @Parameter(description = "등록할 관심사 ID") @RequestParam interestId: Long
     ) = ResponseEntity.ok(service.addInterestToUser(user, interestId))
 
 

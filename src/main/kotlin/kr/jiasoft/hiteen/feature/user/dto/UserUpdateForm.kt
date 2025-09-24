@@ -43,8 +43,8 @@ data class UserUpdateForm(
     @param:Schema(description = "MBTI", example = "INTJ", maxLength = 30)
     val mbti: String? = null,
 
-    @param:Schema(description = "티어", example = "브론즈 1", maxLength = 30)
-    val tier: String? = null,
+//    @param:Schema(description = "티어", example = "브론즈 1", maxLength = 30)
+//    val tier: String? = null,
 
     val assetUid: UUID? = null,
 

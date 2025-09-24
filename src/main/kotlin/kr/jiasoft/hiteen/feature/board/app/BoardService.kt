@@ -3,7 +3,6 @@ package kr.jiasoft.hiteen.feature.board.app
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kr.jiasoft.hiteen.common.dto.ApiPageCursor
-import kr.jiasoft.hiteen.eloquent.CoroutineEloquent
 import kr.jiasoft.hiteen.feature.asset.app.AssetService
 import kr.jiasoft.hiteen.feature.asset.dto.AssetResponse
 import kr.jiasoft.hiteen.feature.board.domain.BoardAssetEntity
@@ -21,6 +20,7 @@ import kr.jiasoft.hiteen.feature.board.infra.BoardCommentLikeRepository
 import kr.jiasoft.hiteen.feature.board.infra.BoardCommentRepository
 import kr.jiasoft.hiteen.feature.board.infra.BoardLikeRepository
 import kr.jiasoft.hiteen.feature.board.infra.BoardRepository
+import kr.jiasoft.hiteen.feature.level.app.ExpService
 import kr.jiasoft.hiteen.feature.user.app.UserService
 import org.springframework.dao.DuplicateKeyException
 import org.springframework.http.HttpStatus
@@ -40,6 +40,7 @@ class BoardService(
     private val assetService: AssetService,
     private val userService: UserService,
 //    private val eloquent: CoroutineEloquent,
+    private val expService: ExpService,
 ) {
 
 //    suspend fun getUserBoards(userId: Long?): CursorResult<BoardResponse, Long> {
@@ -105,21 +106,26 @@ class BoardService(
 
 
     suspend fun listBoardsByCursor(
-        category: String?, q: String?, size: Int, currentUserId: Long?,
+        category: String?, q: String?, size: Int, userId: Long,
         followOnly: Boolean, friendOnly: Boolean, sameSchoolOnly: Boolean,
         cursorUid: UUID?, authorUid: UUID?
     ): ApiPageCursor<BoardResponse> {
         val s = size.coerceIn(1, 100)
-        val uid = currentUserId ?: -1L
 
         val rows = boards.searchSummariesByCursor(
-            category, q, s + 1, uid, followOnly, friendOnly, sameSchoolOnly, cursorUid, authorUid
+            category, q, s + 1, userId, followOnly, friendOnly, sameSchoolOnly, cursorUid, authorUid
         ).toList()
 
         val hasMore = rows.size > s
         val items = if (hasMore) rows.take(s) else rows
         val nextCursor = if (hasMore) rows[s].uid.toString() else null
 
+        // 특정 회원의 게시글 조회 시 경험치++(프로필 조회 화면)
+        authorUid?.let {
+            userService.findByUid(it.toString())?.let { user ->
+                expService.grantExp(userId, "FRIEND_PROFILE_VISIT", user.id)
+            }
+        }
         return ApiPageCursor(
             nextCursor = nextCursor,
             items = items.map { row ->
@@ -177,6 +183,8 @@ class BoardService(
                 )
             }
         }
+
+        expService.grantExp(currentUserId, "CREATE_BOARD", saved.id)
 
         return saved.uid
     }
@@ -257,6 +265,7 @@ class BoardService(
         val b = boards.findByUid(uid) ?: throw notFound("board")
         try {
             likes.save(BoardLikeEntity(boardId = b.id, userId = currentUserId, createdAt = OffsetDateTime.now()))
+            expService.grantExp(currentUserId, "LIKE_BOARD", b.id)
         } catch (_: DuplicateKeyException) {
         }
     }
@@ -299,6 +308,8 @@ class BoardService(
             )
         )
         if (parent != null) comments.increaseReplyCount(parent.id)
+
+        expService.grantExp(currentUserId, "CREATE_BOARD_COMMENT", saved.id)
         return saved.uid
     }
 
@@ -362,6 +373,7 @@ class BoardService(
         val c = comments.findByUid(commentUid) ?: throw notFound("comment")
         try {
             commentLikes.save(BoardCommentLikeEntity(commentId = c.id, userId = currentUserId, createdAt = OffsetDateTime.now()))
+            expService.grantExp(currentUserId, "LIKE_BOARD_COMMENT", c.id)
         } catch (_: DuplicateKeyException) {
         }
     }

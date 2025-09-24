@@ -1,5 +1,6 @@
 package kr.jiasoft.hiteen.feature.interest.app
 
+import kotlinx.coroutines.flow.count
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.toList
 import kr.jiasoft.hiteen.common.exception.BusinessValidationException
@@ -9,6 +10,7 @@ import kr.jiasoft.hiteen.feature.interest.dto.FriendRecommendationResponse
 import kr.jiasoft.hiteen.feature.interest.dto.InterestUserResponse
 import kr.jiasoft.hiteen.feature.interest.infra.InterestMatchHistoryRepository
 import kr.jiasoft.hiteen.feature.interest.infra.InterestUserRepository
+import kr.jiasoft.hiteen.feature.level.app.ExpService
 import kr.jiasoft.hiteen.feature.school.infra.SchoolRepository
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import kr.jiasoft.hiteen.feature.user.dto.UserResponse
@@ -23,7 +25,8 @@ class InterestUserService(
     private val interestMatchHistoryRepository: InterestMatchHistoryRepository,
     private val userPhotosRepository: UserPhotosRepository,
     private val userRepository: UserRepository,
-    private val schoolRepository: SchoolRepository
+    private val schoolRepository: SchoolRepository,
+    private val expService: ExpService
 ) {
 
     /** 특정 사용자 관심사 등록 */
@@ -33,12 +36,18 @@ class InterestUserService(
             return interestUserRepository.getInterestResponseById(exist.id, null).firstOrNull()
         }
 
+        // 관심사 5개 이상 등록 불가
+        interestUserRepository.findByUserId(user.id).count()
+            .takeIf { it >= 5 }
+            ?.let { throw BusinessValidationException(mapOf("message" to "관심사가 5개를 초과했습니다.")) }
+
         val entity = InterestUserEntity(
             interestId = interestId,
             userId = user.id,
             createdAt = OffsetDateTime.now()
         )
         val saved = interestUserRepository.save(entity)
+        expService.grantExp(user.id, "INTEREST_TAG_REGISTER", interestId)
         return interestUserRepository.getInterestResponseById(saved.id, null).firstOrNull()
     }
 
@@ -64,7 +73,7 @@ class InterestUserService(
     suspend fun recommendFriend(user: UserEntity, dailyLimit: Int = 1): FriendRecommendationResponse? {
         val todayCount = interestMatchHistoryRepository.countTodayRecommendations(user.id)
         if (todayCount >= dailyLimit) {
-            return null
+            throw BusinessValidationException(mapOf("message" to "오늘은 추천 친구를 더 뽑을 수 없습니다."))
         }
 
         // 1) 내 관심사 목록
@@ -87,7 +96,7 @@ class InterestUserService(
         val targetUserResponse = UserResponse.from(targetUser, school)
 
         // 4) 추천 대상자의 관심사 목록
-        val interests = interestUserRepository.getInterestResponseById(null, targetUserId).toList()
+           val interests = interestUserRepository.getInterestResponseById(null, targetUserId).toList()
 
         // 5) 추천 대상자의 사진 목록
         val photos = userPhotosRepository.findByUserId(targetUserId)?.toList() ?: emptyList()
@@ -102,6 +111,7 @@ class InterestUserService(
             )
         )
 
+        expService.grantExp(user.id, "TODAY_FRIEND_CHECK", targetUserId)
         return FriendRecommendationResponse(
             user = targetUserResponse,
             interests = interests,

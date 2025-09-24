@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonIgnore
 import io.swagger.v3.oas.annotations.media.Schema
 import kr.jiasoft.hiteen.feature.interest.dto.InterestUserResponse
+import kr.jiasoft.hiteen.feature.level.domain.TierEntity
 import kr.jiasoft.hiteen.feature.relationship.dto.RelationshipCounts
 import kr.jiasoft.hiteen.feature.school.domain.SchoolEntity
 import kr.jiasoft.hiteen.feature.school.dto.SchoolDto
@@ -56,8 +57,11 @@ data class UserResponse(
     @param:Schema(description = "MBTI", example = "INTJ")
     val mbti: String?,
 
-    @param:Schema(description = "등급/티어", example = "브론즈 1")
-    val tier: String?,
+    @param:Schema(
+        description = "현재 누적 경험치",
+        example = "9999"
+    )
+    val expPoint: Long,
 
     @param:Schema(description = "프로필 이미지 UID", example = "a0e9f441-3669-4cfb-aac5-1c38533d87c1")
     val assetUid: String?,
@@ -99,6 +103,9 @@ data class UserResponse(
     @param:Schema(description = "학교 정보")
     val school: SchoolDto?,
 
+    @param:Schema(description = "티어 정보")
+    val tier: TierEntity?,
+
     @param:Schema(description = "관계 카운트 정보 (친구/팔로워 등)")
     val relationshipCounts: RelationshipCounts?,
 
@@ -112,6 +119,7 @@ data class UserResponse(
         fun from(
                 entity: UserEntity,
                 school: SchoolEntity? = null,
+                tier: TierEntity? = null,
                 interests: List<InterestUserResponse>? = null,
                 relationshipCounts: RelationshipCounts? = null,
                 photos: List<UserPhotosEntity>? = null,
@@ -131,7 +139,7 @@ data class UserResponse(
                     mood = entity.mood,
                     moodEmoji = entity.moodEmoji,
                     mbti = entity.mbti,
-                    tier = entity.tier,
+                    expPoint = entity.expPoints,
                     assetUid = entity.assetUid?.toString(),
                     grade = entity.grade,
                     gender = entity.gender,
@@ -144,6 +152,7 @@ data class UserResponse(
                     updatedAt = entity.updatedAt?.toLocalDateTime(),
                     deletedAt = entity.deletedAt?.toLocalDateTime(),
                     school = school?.let { SchoolDto.from(it) },
+                    tier = tier,
                     relationshipCounts = relationshipCounts,
                     interests = interests,
                     photos = photos,

@@ -3,6 +3,7 @@ package kr.jiasoft.hiteen.feature.attend.app
 import kotlinx.coroutines.flow.toList
 import kr.jiasoft.hiteen.feature.attend.domain.AttendEntity
 import kr.jiasoft.hiteen.feature.attend.infra.AttendRepository
+import kr.jiasoft.hiteen.feature.level.app.ExpService
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -10,7 +11,8 @@ import java.time.OffsetDateTime
 
 @Service
 class AttendService(
-    private val attendRepository: AttendRepository
+    private val attendRepository: AttendRepository,
+    private val expService: ExpService
 ) {
 
     /** 출석 현황 조회 */
@@ -49,6 +51,9 @@ class AttendService(
         )
 
         val saved = attendRepository.save(attend)
+
+
+        expService.grantExp(user.id, "ATTENDANCE", saved.id)
 
         return Result.success(saved)
     }
