@@ -4,6 +4,7 @@ plugins {
 	id("org.springframework.boot") version "3.5.4"
 	id("io.spring.dependency-management") version "1.1.7"
 //	kotlin("plugin.jpa") version "1.9.25"
+    kotlin("kapt") version "1.9.0"
 }
 
 group = "kr.jiasoft"
@@ -88,6 +89,10 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-aop")
 
     implementation(project(":coroutine-eloquent"))
+
+    implementation("org.mapstruct:mapstruct:1.5.5.Final")
+    kapt("org.mapstruct:mapstruct-processor:1.5.5.Final")
+
 }
 
 

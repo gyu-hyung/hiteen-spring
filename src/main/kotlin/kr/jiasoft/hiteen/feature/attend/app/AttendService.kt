@@ -1,10 +1,13 @@
 package kr.jiasoft.hiteen.feature.attend.app
 
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kr.jiasoft.hiteen.feature.attend.domain.AttendEntity
 import kr.jiasoft.hiteen.feature.attend.infra.AttendRepository
 import kr.jiasoft.hiteen.feature.level.app.ExpService
+import kr.jiasoft.hiteen.feature.user.app.UserService
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
+import kr.jiasoft.hiteen.feature.user.dto.UserSummary
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.OffsetDateTime
@@ -12,7 +15,8 @@ import java.time.OffsetDateTime
 @Service
 class AttendService(
     private val attendRepository: AttendRepository,
-    private val expService: ExpService
+    private val expService: ExpService,
+    private val userService: UserService
 ) {
 
     /** 출석 현황 조회 */
@@ -57,4 +61,14 @@ class AttendService(
 
         return Result.success(saved)
     }
+
+
+    /** 나를 추천인으로 등록한 친구 */
+    suspend fun myReferralList (userId: Long) : List<UserSummary> {
+        val attends = attendRepository.findAllByUserId(userId).map { it.id }.toList()
+        return userService.findUserSummaryList(attends)
+    }
+
+
+
 }

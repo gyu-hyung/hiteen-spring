@@ -142,6 +142,11 @@ class UserService (
     }
 
 
+    suspend fun findUserSummaryList(userIds: List<Long>) 
+        = userRepository.findSummaryByIds(userIds)
+
+
+
     // TODO 회원 정보 변경 시 로그아웃(토큰 무효화) 기준 정리 필요: 비밀번호/권한/중요 개인정보 변경 시 재로그인 유도 등
     suspend fun updateUser(current: UserEntity, param: UserUpdateForm, part: FilePart?): UserResponse {
 
