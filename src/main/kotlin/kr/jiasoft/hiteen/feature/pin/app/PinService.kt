@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 import kr.jiasoft.hiteen.common.exception.BusinessValidationException
+import kr.jiasoft.hiteen.feature.level.app.ExpService
 import kr.jiasoft.hiteen.feature.pin.domain.PinEntity
 import kr.jiasoft.hiteen.feature.pin.domain.PinUsersEntity
 import kr.jiasoft.hiteen.feature.pin.dto.AllowedFriend
@@ -28,6 +29,7 @@ class PinService(
     private val pinRepository: PinRepository,
     private val pinUsersRepository: PinUsersRepository,
     private val userRepository: UserRepository,
+    private val expService: ExpService,
 ) {
 
     enum class VISIBILITY {
@@ -154,6 +156,10 @@ class PinService(
                 }
             }
         }
+
+
+        // 경험치 지급
+        expService.grantExp(user.id,"PIN_REGISTER",pin.id)
 
         return pin
     }

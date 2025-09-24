@@ -48,7 +48,6 @@ data class UserSummary(
     )
     val mood: String?,
 
-
     @param:Schema(
         description = "현재 기분/상태 이모지",
         example = "E_001"
@@ -62,10 +61,16 @@ data class UserSummary(
     val mbti: String?,
 
     @param:Schema(
-        description = "티어(등급)",
-        example = "브론즈 1"
+        description = "현재 누적 경험치",
+        example = "9999"
     )
-    val tier: String?,
+    val expPoints: Long,
+
+    @param:Schema(
+        description = "티어명",
+        example = "별빛 그랜드마스터"
+    )
+    val tierName: String? = null,
 
     @param:Schema(
         description = "프로필 이미지 UID",
@@ -80,7 +85,7 @@ data class UserSummary(
     val isFriend: Boolean? = false,
 ) {
     companion object {
-        fun from(user: UserEntity, isFriend: Boolean? = false): UserSummary =
+        fun from(user: UserEntity, isFriend: Boolean? = false, tierName: String? = null): UserSummary =
             UserSummary(
                 uid = user.uid.toString(),
                 username = user.username,
@@ -91,7 +96,8 @@ data class UserSummary(
                 mood = user.mood,
                 moodEmoji = user.moodEmoji,
                 mbti = user.mbti,
-                tier = user.tier,
+                expPoints = user.expPoints,
+                tierName = tierName,
                 assetUid = user.assetUid?.toString(),
                 isFriend = isFriend
             )
@@ -105,7 +111,8 @@ data class UserSummary(
             mood = null,
             moodEmoji = null,
             mbti = null,
-            tier = null,
+            expPoints = 0,
+            tierName = "",
             assetUid = null,
             isFriend = false
         )

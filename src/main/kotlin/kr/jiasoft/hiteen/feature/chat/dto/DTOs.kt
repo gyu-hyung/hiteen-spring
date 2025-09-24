@@ -28,12 +28,17 @@ data class SendMessageRequest(
     @param:Schema(description = "첨부 파일 UIDs", example = "[a1a8990f-2443-4492-baad-699d59b272fa,a1a8990f-2443-4492-baad-699d59b272fa]")
     val assetUids: List<UUID>? = null,
 
-    @param:Schema(description = "메시지 종류", example = "0")
-    val kind: Short = 0,
+//    @param:Schema(description = "메시지 종류", example = "0")
+//    val kind: Int = 0,
 
     @param:Schema(description = "이모지 코드", example = "E_001")
     val emojiCode: String? = null,
-)
+) {
+    @get:Schema(description = "메시지 종류 (자동 결정: 0=텍스트, 1=이모지)")
+    val kind: Int
+        get() = if (emojiCode != null) 1 else 0
+}
+
 
 @Schema(description = "채팅방 요약 응답 DTO")
 data class RoomSummaryResponse(
@@ -65,7 +70,7 @@ data class MessageSummary(
     val content: String?,
 
     @param:Schema(description = "메시지 종류 (0=일반, 1=이미지, 2=이모지 등)", example = "0")
-    val kind: Short = 0,
+    val kind: Int = 0,
 
     @param:Schema(description = "이모지 코드", example = "👍")
     val emojiCode: String? = null,

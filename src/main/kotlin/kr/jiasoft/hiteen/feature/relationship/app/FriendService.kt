@@ -3,6 +3,7 @@ package kr.jiasoft.hiteen.feature.relationship.app
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
+import kr.jiasoft.hiteen.feature.level.app.ExpService
 import kr.jiasoft.hiteen.feature.location.domain.LocationHistory
 import kr.jiasoft.hiteen.feature.location.infra.cache.LocationCacheRedisService
 import kr.jiasoft.hiteen.feature.relationship.domain.FollowEntity
@@ -29,7 +30,8 @@ class FriendService(
     private val friendRepository: FriendRepository,
     private val followRepository: FollowRepository,
     private val userRepository: UserRepository,
-    private val locationCacheRedisService: LocationCacheRedisService
+    private val locationCacheRedisService: LocationCacheRedisService,
+    private val expService: ExpService
 ) {
     private val now: OffsetDateTime get() = OffsetDateTime.now(ZoneOffset.UTC)
 
@@ -181,6 +183,8 @@ class FriendService(
                             statusAt = now, createdAt = now
                         )
                     )
+                    expService.grantExp(meId, "FRIEND_ADD", targetId)
+                    expService.grantExp(targetId, "FRIEND_ADD", meId)
                 } else {
                     // 내가 이미 보낸 상태면 중복요청
                     throw ResponseStatusException(HttpStatus.CONFLICT, "already requested")
@@ -226,6 +230,9 @@ class FriendService(
                 status = FollowStatus.ACCEPTED.name,
                 statusAt = now, createdAt = now)
         )
+
+        expService.grantExp(meId, "FRIEND_ADD", requesterId)
+        expService.grantExp(requesterId, "FRIEND_ADD", meId)
     }
 
     /**

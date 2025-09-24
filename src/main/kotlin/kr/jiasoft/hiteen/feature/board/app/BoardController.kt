@@ -40,10 +40,10 @@ class BoardController(
         @Parameter(description = "팔로우한 사용자만") @RequestParam(defaultValue = "false") followOnly: Boolean,
         @Parameter(description = "친구만") @RequestParam(defaultValue = "false") friendOnly: Boolean,
         @Parameter(description = "같은 학교만") @RequestParam(defaultValue = "false") sameSchoolOnly: Boolean,
-        @AuthenticationPrincipal(expression = "user") user: UserEntity?
+        @AuthenticationPrincipal(expression = "user") user: UserEntity
     ): ResponseEntity<ApiResult<ApiPageCursor<BoardResponse>>> {
         val boards = service.listBoardsByCursor(
-            category, q, size, user?.id,
+            category, q, size, user.id,
             followOnly, friendOnly, sameSchoolOnly, cursor, author
         )
         return ResponseEntity.ok(ApiResult.success(boards))

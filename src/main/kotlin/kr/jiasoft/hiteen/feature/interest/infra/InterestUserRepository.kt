@@ -40,6 +40,12 @@ interface InterestUserRepository : CoroutineCrudRepository<InterestUserEntity, L
             GROUP BY user_id
             HAVING COUNT(*) >= 3
         )
+        AND user_id NOT IN (
+            SELECT follow_id FROM follows WHERE status = 'ACCEPTED' AND user_id = :currentUserId
+        )
+        AND user_id NOT IN (
+            SELECT CASE WHEN :currentUserId = user_id THEN friend_id ELSE user_id END FROM friends WHERE (user_id = :currentUserId OR friend_id = :currentUserId)
+        )
     """)
     fun findUsersByInterestIds(interestIds: Set<Long>, currentUserId: Long): Flow<Long>
 

@@ -13,33 +13,34 @@ CREATE EXTENSION IF NOT EXISTS earthdistance;
 -- 사용자
 -- ========================
 CREATE TABLE users (
-  id            bigserial PRIMARY KEY,
-  uid           uuid        NOT NULL DEFAULT gen_random_uuid(),
-  username      varchar(50),
-  email         varchar(255),
-  nickname      varchar(50),
-  password      varchar(255),
-  role          varchar(30),
-  address       varchar(255),
-  detail_address varchar(255),
-  phone         varchar(30),
-  mood          varchar(30),
-  mood_emoji    varchar(30),
-  mbti          varchar(30),
-  tier          varchar(30),
-  asset_uid     uuid, -- REFERENCES assets(uid),
-  school_id     bigint,
-  grade         varchar(30),
-  gender        varchar(30),
-  birthday		date,
-  invite_code   varchar(30),
-  invite_joins  bigint,
-  created_id    bigint,
-  created_at    timestamptz not null DEFAULT now(),
-  updated_id    bigint,
-  updated_at    timestamptz,
-  deleted_id    bigint,
-  deleted_at    timestamptz
+  id                bigserial PRIMARY KEY,
+  uid               uuid NOT NULL DEFAULT gen_random_uuid(),
+  username          varchar(50),
+  email             varchar(255),
+  nickname          varchar(50),
+  password          varchar(255),
+  role              varchar(30),
+  address           varchar(255),
+  detail_address    varchar(255),
+  phone             varchar(30),
+  mood              varchar(30),
+  mood_emoji        varchar(30),
+  mbti              varchar(30),
+  exp_points        integer DEFAULT 0,
+  tier_id bigint    REFERENCES tiers(id);
+  asset_uid         uuid, -- REFERENCES assets(uid),
+  school_id         bigint,
+  grade             varchar(30),
+  gender            varchar(30),
+  birthday		    date,
+  invite_code       varchar(30),
+  invite_joins      bigint,
+  created_id        bigint,
+  created_at        timestamptz not null DEFAULT now(),
+  updated_id        bigint,
+  updated_at        timestamptz,
+  deleted_id        bigint,
+  deleted_at        timestamptz
 );
 
 
@@ -75,7 +76,20 @@ CREATE TABLE user_details (
   push_service  VARCHAR(100),
   push_marketing VARCHAR(100),
   memo          text
-)
+);
+
+
+-- ========================
+-- 사용 사진
+-- ========================
+CREATE TABLE user_photos (
+  id      bigserial PRIMARY KEY,
+  user_id bigint NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  uid     uuid NOT NULL,
+--  uid     uuid   NOT NULL DEFAULT gen_random_uuid(),
+  UNIQUE (uid),
+  UNIQUE (user_id, uid)
+);
 
 
 -- ========================
@@ -182,21 +196,65 @@ CREATE TABLE assets (
 -- 티어
 -- ========================
 CREATE TABLE tiers (
+  id           bigserial PRIMARY KEY,
+  tier_code    varchar(30) NOT NULL, -- "BRONZE", "SILVER", "GOLD"
+  division_no  smallint,             -- 1,2,3 단계 (예: 브론즈 1,2,3)
+  rank_order   integer,              -- 전체 순서 (1=브론즈1, 2=브론즈2…)
+  status       varchar(20) DEFAULT 'ACTIVE',
+  min_points   integer NOT NULL,     -- 해당 티어 최소 포인트
+  max_points   integer NOT NULL,     -- 해당 티어 최대 포인트
+  uid          uuid DEFAULT gen_random_uuid(),
+  created_at   timestamptz DEFAULT now(),
+  updated_at   timestamptz,
+  deleted_at   timestamptz,
+  UNIQUE (tier_code, division_no)
+);
+
+
+
+-- ========================
+-- 획득 경험치 이력
+-- ========================
+CREATE TABLE user_exp_history (
   id          bigserial PRIMARY KEY,
-  tier_code   varchar(30) NOT NULL,
-  division_no smallint,
-  rank_order  integer,
-  status      varchar(20),
-  max_points  integer,
-  min_points  integer,
-  uid         uuid DEFAULT gen_random_uuid(),
-  created_id  bigint,
-  created_at  timestamptz DEFAULT now(),
-  updated_id  bigint ,
-  updated_at  timestamptz,
-  deleted_id  bigint ,
-  deleted_at  timestamptz,
-  UNIQUE (tier_code)
+  user_id     bigint NOT NULL REFERENCES users(id),
+  target_id   bigint,
+  action_code varchar(50) NOT NULL,   -- 활동 코드 (POST, COMMENT, LOGIN, FRIEND_ADD 등)
+  points      integer NOT NULL,       -- 획득/차감된 점수 (+10, -5 등)
+  reason      varchar(255),           -- 상세 설명 (ex: "게시글 작성 보상")
+  created_at  timestamptz DEFAULT now()
+);
+
+
+
+-- ========================
+-- 포인트
+-- ========================
+CREATE TABLE point_rules (
+  id           bigserial PRIMARY KEY,
+  action_code  varchar(50)  NOT NULL,
+  point        integer NOT NULL,
+  daily_cap    integer,
+  cooldown_sec integer,
+  created_id   bigint ,
+  created_at   timestamptz DEFAULT now(),
+  updated_id   bigint ,
+  updated_at   timestamptz,
+  deleted_id   bigint ,
+  deleted_at   timestamptz,
+  UNIQUE (action_code)
+);
+
+
+-- ========================
+-- 획득점수 이력
+-- ========================
+CREATE TABLE point_histories (
+  id         bigserial PRIMARY KEY,
+  user_id    bigint   NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  point      integer  NOT NULL,
+  meta_json  jsonb,
+  created_at timestamptz DEFAULT now()
 );
 
 
@@ -322,15 +380,14 @@ CREATE TABLE time_table (
     time_date DATE NOT NULL,
     period SMALLINT NOT NULL DEFAULT 0,
     subject VARCHAR(255),
-    created_at TIMESTAMP DEFAULT now(),
-    updated_at TIMESTAMP,
-    deleted_at TIMESTAMP,
+    created_at TIMESTAMPTZ DEFAULT now(),
+    updated_at TIMESTAMPTZ,
+    deleted_at TIMESTAMPTZ,
     CONSTRAINT uq_time_table_class_date_period UNIQUE (class_id, time_date, period)
 );
 
 CREATE INDEX idx_time_table_class_date
     ON time_table (class_id, time_date);
-
 
 
 -- ========================
@@ -343,9 +400,9 @@ CREATE TABLE time_user (
     week SMALLINT NOT NULL DEFAULT 0,
     period SMALLINT NOT NULL DEFAULT 0,
     subject VARCHAR(255),
-    created_at TIMESTAMP DEFAULT now(),
-    updated_at TIMESTAMP,
-    deleted_at TIMESTAMP
+    created_at TIMESTAMPTZ DEFAULT now(),
+    updated_at TIMESTAMPTZ,
+    deleted_at TIMESTAMPTZ
 );
 
 
@@ -360,9 +417,9 @@ CREATE TABLE time_image (
     image VARCHAR(100),
     report_count INT NOT NULL DEFAULT 0,
     status SMALLINT NOT NULL DEFAULT 1,
-    created_at TIMESTAMP DEFAULT now(),
-    updated_at TIMESTAMP,
-    deleted_at TIMESTAMP
+    created_at TIMESTAMPTZ DEFAULT now(),
+    updated_at TIMESTAMPTZ,
+    deleted_at TIMESTAMPTZ
 );
 
 
@@ -817,52 +874,6 @@ CREATE TABLE chat_messages_assets (
 CREATE INDEX IF NOT EXISTS idx_chat_users_room_user_active ON chat_users (chat_room_id, user_id) WHERE deleted_at IS NULL;
 
 
-
--- ========================
--- 포인트
--- ========================
-CREATE TABLE point_rules (
-  id           bigserial PRIMARY KEY,
-  action_code  varchar(50)  NOT NULL,
-  point  integer      NOT NULL,
-  daily_cap    integer,
-  cooldown_sec integer,
-  created_id   bigint ,
-  created_at   timestamptz DEFAULT now(),
-  updated_id   bigint ,
-  updated_at   timestamptz,
-  deleted_id   bigint ,
-  deleted_at   timestamptz,
-  UNIQUE (action_code)
-);
-
-
--- ========================
--- 획득점수 이력
--- ========================
-CREATE TABLE point_histories (
-  id         bigserial PRIMARY KEY,
-  user_id    bigint   NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  point      integer  NOT NULL,
-  meta_json  jsonb,
-  created_at timestamptz DEFAULT now()
-);
-
-
--- ========================
--- 유저 사진
--- ========================
-CREATE TABLE user_photos (
-  id      bigserial PRIMARY KEY,
-  user_id bigint NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  uid     uuid NOT NULL,
---  uid     uuid   NOT NULL DEFAULT gen_random_uuid(),
-  UNIQUE (uid),
-  UNIQUE (user_id, uid)
-);
-
-
-
 -- ========================
 -- MQTT 인증정보
 -- ========================
@@ -935,9 +946,67 @@ CREATE TABLE user_photos (
 --CASCADE;
 
 
+
 INSERT INTO users (uid,username,email,nickname,"password","role",address,detail_address,phone,mood,tier,asset_uid,school_id,grade,gender,birthday,created_id,created_at,updated_id,updated_at,deleted_id,deleted_at) VALUES
-	 ('c264013d-bb1d-4d66-8d34-10962c022056'::uuid,'chat5','qwe@chat','닉넴5','$2a$10$WZ67oFFBEFypJ28HGxudzuhFu3tS6N8P4.HKKLPYdiaCh7tsZvDva','USER','광주광역시 북구 시청로 1','2층','01055555555','기분좋음','브론즈 1','f580e8e8-adee-4285-b181-3fed545e7be0'::uuid,1,'1','M','1999-12-01',NULL,'2025-09-09 14:29:06.591',NULL,NULL,NULL,NULL),
 	 ('6f9b90d6-96ca-49de-b9c2-b123e51ca7db'::uuid,'chat1','qwe@chat','닉넴1','$2a$10$X2FQYkcsynbJJwExkHDiMenGylpHGW9cFWEgugqeQYW4ZniYoPolG','USER','광주광역시 북구 시청로 1','2층','01095393637','기분좋음','브론즈 1','a0e9f441-3669-4cfb-aac5-1c38533d87c1'::uuid,1,'1','M','1999-12-01',NULL,'2025-09-09 14:26:44.586',NULL,NULL,NULL,NULL),
 	 ('f55db2b7-c8f3-4ebf-94c7-577bc4a3939b'::uuid,'chat2','qwe@chat','닉넴2','$2a$10$J1ZORvmaZji6btaLrdxv0ewHHjO2i8ZsmOtR3MPz1VGrS/8RNkgyG','USER','광주광역시 북구 시청로 1','2층','01022222222','기분좋음','브론즈 1','9524f629-4885-4dcf-bc5c-1f02391a1f8b'::uuid,1,'1','M','1999-12-01',NULL,'2025-09-09 14:27:20.574',NULL,NULL,NULL,NULL),
 	 ('c2605174-08b8-4879-acab-3f7f122bb2ed'::uuid,'chat3','qwe@chat','닉넴3','$2a$10$iVcqM0RGK4uGwkDfHUr8NOaSwbwrXRPpowXpe4BL6XTFcPfL2bc/6','USER','광주광역시 북구 시청로 1','2층','01033333333','기분좋음','브론즈 1','f26d080f-6f9c-485a-a8fd-f1850d217a2f'::uuid,1,'1','M','1999-12-01',NULL,'2025-09-09 14:28:41.477',NULL,NULL,NULL,NULL),
-	 ('6fae6813-73bb-47c0-a775-af1c6ca9a79b'::uuid,'chat4','qwe@chat','닉넴4','$2a$10$CUooWUv/UP4HlgMYzW4IMujmSmUkEn4lMoP7GTqT4YEy0hfaQaW0.','USER','광주광역시 북구 시청로 1','2층','01044444444','기분좋음','브론즈 1','f0bceba2-e02b-4706-9f0f-743616d9d911'::uuid,1,'1','M','1999-12-01',NULL,'2025-09-09 14:28:54.742',NULL,NULL,NULL,NULL);
+	 ('6fae6813-73bb-47c0-a775-af1c6ca9a79b'::uuid,'chat4','qwe@chat','닉넴4','$2a$10$CUooWUv/UP4HlgMYzW4IMujmSmUkEn4lMoP7GTqT4YEy0hfaQaW0.','USER','광주광역시 북구 시청로 1','2층','01044444444','기분좋음','브론즈 1','f0bceba2-e02b-4706-9f0f-743616d9d911'::uuid,1,'1','M','1999-12-01',NULL,'2025-09-09 14:28:54.742',NULL,NULL,NULL,NULL),
+	 ('c264013d-bb1d-4d66-8d34-10962c022056'::uuid,'chat5','qwe@chat','닉넴5','$2a$10$WZ67oFFBEFypJ28HGxudzuhFu3tS6N8P4.HKKLPYdiaCh7tsZvDva','USER','광주광역시 북구 시청로 1','2층','01055555555','기분좋음','브론즈 1','f580e8e8-adee-4285-b181-3fed545e7be0'::uuid,1,'1','M','1999-12-01',NULL,'2025-09-09 14:29:06.591',NULL,NULL,NULL,NULL);
+
+
+
+-- Lv1 브론즈 (0~199)
+INSERT INTO tiers (tier_code, division_no, rank_order, min_points, max_points)
+VALUES
+('BRONZE_STAR', 1, 1, 0, 49),         -- 별빛 브론즈
+('BRONZE_MOON', 2, 2, 50, 99),        -- 달빛 브론즈
+('BRONZE_SUN', 3, 3, 100, 199);       -- 태양 브론즈
+
+-- Lv2 실버 (200~499)
+INSERT INTO tiers (tier_code, division_no, rank_order, min_points, max_points)
+VALUES
+('SILVER_STAR', 1, 4, 200, 299),      -- 별빛 실버
+('SILVER_MOON', 2, 5, 300, 399),      -- 달빛 실버
+('SILVER_SUN', 3, 6, 400, 499);       -- 태양 실버
+
+-- Lv3 골드 (500~999)
+INSERT INTO tiers (tier_code, division_no, rank_order, min_points, max_points)
+VALUES
+('GOLD_STAR', 1, 7, 500, 649),        -- 별빛 골드
+('GOLD_MOON', 2, 8, 650, 849),        -- 달빛 골드
+('GOLD_SUN', 3, 9, 850, 999);         -- 태양 골드
+
+-- Lv4 플래티넘 (1000~2999)
+INSERT INTO tiers (tier_code, division_no, rank_order, min_points, max_points)
+VALUES
+('PLATINUM_STAR', 1, 10, 1000, 1499),   -- 별빛 플래티넘
+('PLATINUM_MOON', 2, 11, 1500, 2499),   -- 달빛 플래티넘
+('PLATINUM_SUN', 3, 12, 2500, 2999);    -- 태양 플래티넘
+
+-- Lv5 다이아몬드 (3000~4999)
+INSERT INTO tiers (tier_code, division_no, rank_order, min_points, max_points)
+VALUES
+('DIAMOND_STAR', 1, 13, 3000, 3499),   -- 별빛 다이아몬드
+('DIAMOND_MOON', 2, 14, 3500, 4499),   -- 달빛 다이아몬드
+('DIAMOND_SUN', 3, 15, 4500, 4999);    -- 태양 다이아몬드
+
+-- Lv6 마스터 (5000~7999)
+INSERT INTO tiers (tier_code, division_no, rank_order, min_points, max_points)
+VALUES
+('MASTER_STAR', 1, 16, 5000, 5999),    -- 별빛 마스터
+('MASTER_MOON', 2, 17, 6000, 6999),    -- 달빛 마스터
+('MASTER_SUN', 3, 18, 7000, 7999);     -- 태양 마스터
+
+-- Lv7 그랜드마스터 (8000~9999)
+INSERT INTO tiers (tier_code, division_no, rank_order, min_points, max_points)
+VALUES
+('GRANDMASTER_STAR', 1, 19, 8000, 8499),  -- 별빛 그랜드마스터
+('GRANDMASTER_MOON', 2, 20, 8500, 9499),  -- 달빛 그랜드마스터
+('GRANDMASTER_SUN', 3, 21, 9500, 9999);   -- 태양 그랜드마스터
+
+-- Lv8 챌린저 (10000 이상)
+INSERT INTO tiers (tier_code, division_no, rank_order, min_points, max_points)
+VALUES
+('CHALLENGER', 1, 22, 10000, 2147483647); -- 챌린저
+

@@ -34,7 +34,7 @@ data class ChatMessageEntity(
     @Column("deleted_at")
     val deletedAt: OffsetDateTime? = null,
 
-    val kind: Short = 0,
+    val kind: Int = 0,// 0: 텍스트, 1: 이모지
 
     @Column("emoji_code")
     val emojiCode: String? = null,

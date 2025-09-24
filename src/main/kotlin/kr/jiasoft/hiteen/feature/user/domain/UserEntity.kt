@@ -51,8 +51,11 @@ data class UserEntity(
     /* 사용자 MBTI */
     val mbti: String? = null,
 
-    /* 티어 코드 문자열 */
-    val tier: String? = null,
+    /* 누적 경험치 */
+    val expPoints: Long = 0,
+
+    /* 티어 id */
+    val tierId: Long,
 
     /* 프로필 썸네일 Asset UID(assets.uid) */
     val assetUid: UUID? = null,

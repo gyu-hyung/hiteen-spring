@@ -8,6 +8,9 @@ import kr.jiasoft.hiteen.feature.asset.app.AssetService
 import kr.jiasoft.hiteen.feature.board.infra.BoardRepository
 import kr.jiasoft.hiteen.feature.interest.infra.InterestUserRepository
 import kr.jiasoft.hiteen.feature.invite.app.InviteService
+import kr.jiasoft.hiteen.feature.level.app.ExpService
+import kr.jiasoft.hiteen.feature.level.domain.TierCode
+import kr.jiasoft.hiteen.feature.level.infra.TierRepository
 import kr.jiasoft.hiteen.feature.relationship.app.FollowService
 import kr.jiasoft.hiteen.feature.relationship.app.FriendService
 import kr.jiasoft.hiteen.feature.school.infra.SchoolRepository
@@ -43,6 +46,7 @@ class UserService (
     private val interestUserRepository: InterestUserRepository,
     private val boardRepository: BoardRepository,
     private val inviteService: InviteService,
+    private val tierRepository: TierRepository,
 ) : ReactiveUserDetailsService {
 
     override fun findByUsername(username: String): Mono<UserDetails> = mono {
@@ -50,6 +54,10 @@ class UserService (
             ?: throw UsernameNotFoundException("User not found: $username")
 
         CustomUserDetails.from(user)
+    }
+
+    suspend fun findByUid(uid: String): UserEntity? {
+        return userRepository.findByUid(uid)
     }
 
     suspend fun nicknameDuplicationCheck(nickname: String): Boolean {
@@ -78,7 +86,8 @@ class UserService (
         }
 
         val school = param.schoolId?.let { id -> schoolRepository.findById(id) }
-        val toEntity = param.toEntity(encoder.encode(param.password))
+        val tier = tierRepository.findByTierCode(TierCode.BRONZE_STAR)
+        val toEntity = param.toEntity(encoder.encode(param.password), tier.id)
         val saved = userRepository.save(toEntity)
 
         val updated: UserEntity = if (file != null) {
@@ -114,6 +123,7 @@ class UserService (
             ?: throw UsernameNotFoundException("User not found: $targetUid")
 
         val school = targetUser.schoolId?.let { id -> schoolRepository.findById(id) }
+        val tier = tierRepository.findById(targetUser.tierId)
         val interests = interestUserRepository.getInterestResponseById(null, targetUser.id).toList()
         val relationshipCounts = followService.getRelationshipCounts(targetUser.id).copy(
             postCount = boardRepository.countByCreatedId(targetUser.id)
@@ -123,7 +133,7 @@ class UserService (
         val isFollowed = currentUserId?.let { followService.isFollowing(it, targetUser.id) } ?: false
         val isFriend = currentUserId?.let { friendService.isFriend(it, targetUser.id) } ?: false
 
-        return UserResponse.from(targetUser, school, interests, relationshipCounts, photos, isFollowed, isFriend)
+        return UserResponse.from(targetUser, school, tier, interests, relationshipCounts, photos, isFollowed, isFriend)
     }
 
 
@@ -161,7 +171,6 @@ class UserService (
         val newDetailAddr  = param.detailAddress ?: existing.detailAddress
         val newMood        = param.mood ?: existing.mood
         val newMoodEmoji   = param.moodEmoji ?: existing.moodEmoji
-        val newTier        = param.tier ?: existing.tier
         val newSchoolId    = param.schoolId ?: existing.schoolId
         val newGrade       = param.grade ?: existing.grade
         val newGender      = param.gender ?: existing.gender
@@ -189,7 +198,6 @@ class UserService (
             detailAddress = newDetailAddr,
             mood          = newMood,
             moodEmoji     = newMoodEmoji,
-            tier          = newTier,
             assetUid      = newAssetUid,
             schoolId      = newSchoolId,
             grade         = newGrade,
@@ -208,11 +216,12 @@ class UserService (
 
         // 5) schoolId 있으면 조회해서 DTO 변환
         val school = saved.schoolId?.let { id -> schoolRepository.findById(id) }
+        val tier = tierRepository.findById(current.tierId)
         val interests = interestUserRepository.getInterestResponseById(null, saved.id).toList()
         val relationshipCounts = followService.getRelationshipCounts(saved.id)
         val photos = getPhotosById(saved.id)
 
-        return UserResponse.from(saved, school, interests, relationshipCounts, photos)
+        return UserResponse.from(saved, school, tier, interests, relationshipCounts, photos)
     }
 
 

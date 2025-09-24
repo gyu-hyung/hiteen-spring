@@ -5,6 +5,7 @@ import io.r2dbc.postgresql.codec.Json
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kr.jiasoft.hiteen.feature.asset.app.AssetService
+import kr.jiasoft.hiteen.feature.level.app.ExpService
 import kr.jiasoft.hiteen.feature.poll.domain.*
 import kr.jiasoft.hiteen.feature.poll.dto.*
 import kr.jiasoft.hiteen.feature.poll.infra.*
@@ -26,7 +27,8 @@ class PollService(
     private val assetService: AssetService,
     private val objectMapper: ObjectMapper,
     private val pollLikes: PollLikeRepository,
-    private val userService: UserService
+    private val userService: UserService,
+    private val expService: ExpService,
 ) {
 
     private enum class PollStatus {
@@ -86,6 +88,8 @@ class PollService(
                 createdAt = OffsetDateTime.now()
             )
         )
+
+        expService.grantExp(userId, "CREATE_VOTE", saved.id)
         return saved.id
     }
 
@@ -140,6 +144,7 @@ class PollService(
         try {
             pollUsers.save(PollUserEntity(pollId = pollId!!, userId = userId, seq = seq, votedAt = OffsetDateTime.now()))
             polls.increaseVoteCount(pollId)
+            expService.grantExp(userId, "VOTE_PARTICIPATE", pollId)
         } catch (_: DuplicateKeyException) {
             throw badRequest("already voted")
         }
@@ -151,6 +156,7 @@ class PollService(
         val p = polls.findById(id) ?: throw notFound("board")
         try {
             pollLikes.save(PollLikeEntity(pollId = p.id, userId = currentUserId, createdAt = OffsetDateTime.now()))
+            expService.grantExp(currentUserId, "LIKE_VOTE", p.id)
         } catch (_: DuplicateKeyException) {
         }
     }
@@ -163,6 +169,7 @@ class PollService(
         } catch (_: DuplicateKeyException) {
         }
     }
+
 
     // ---------------------- Comments ----------------------
     suspend fun listComments(
@@ -193,6 +200,8 @@ class PollService(
             )
         )
         if (parent != null) comments.increaseReplyCount(parent.id)
+
+        expService.grantExp(userId, "CREATE_VOTE_COMMENT", saved.id)
         return saved.id
     }
 
@@ -254,9 +263,11 @@ class PollService(
         val c = comments.findByUid(commentUid) ?: throw notFound("comment")
         try {
             commentLikes.save(PollCommentLikeEntity(commentId = c.id, userId = currentUserId, createdAt = OffsetDateTime.now()))
+            expService.grantExp(currentUserId, "LIKE_VOTE_COMMENT", c.id)
         } catch (_: DuplicateKeyException) {
         }
     }
+
 
     suspend fun unlikeComment(commentUid: UUID, currentUserId: Long) {
         val c = comments.findByUid(commentUid) ?: throw notFound("comment")

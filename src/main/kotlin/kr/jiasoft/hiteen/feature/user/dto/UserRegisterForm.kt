@@ -80,7 +80,7 @@ data class UserRegisterForm(
 //    val inviteJoins: Long = 0,
 
 ) {
-    fun toEntity(encodedPassword: String): UserEntity = UserEntity(
+    fun toEntity(encodedPassword: String, tierId: Long): UserEntity = UserEntity(
         username = username ?: "",
         email = email,
         nickname = nickname,
@@ -92,7 +92,7 @@ data class UserRegisterForm(
         mood = mood,
         moodEmoji = moodEmoji,
         mbti = mbti,
-        tier = tier,
+        tierId = tierId,
         assetUid = assetUid,
         schoolId = schoolId,
         grade = grade,
