@@ -31,7 +31,7 @@ class SchoolController(
         val pageSize = limit ?: 20
         val entities = schoolRepository.findSchools(keyword, cursor, pageSize).toList()
         val items: List<SchoolDto> = entities.map {
-            SchoolDto.from(it, schoolRepository.countMembersBySchoolId(it.id!!))
+            SchoolDto.from(it, schoolRepository.countMembersBySchoolId(it.id))
         }
         val nextCursor = entities.lastOrNull()?.id?.toString()
 

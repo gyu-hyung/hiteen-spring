@@ -39,6 +39,15 @@ interface UserRepository : CoroutineCrudRepository<UserEntity, Long> {
     """)
     suspend fun findSummaryInfoById(id: Long): UserSummary
 
+    
+    @Query("""
+        SELECT a.*
+        , (select tier_name_kr from tiers where id = tier_id) tier_name
+        FROM users a WHERE id IN (:ids)
+    """)
+    suspend fun findSummaryByIds(ids: List<Long>): List<UserSummary>
+
+
     @Modifying
     @Query("""
         UPDATE users 
