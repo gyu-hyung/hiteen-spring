@@ -84,6 +84,12 @@ data class PollSelectResponse(
 )
 
 
+data class VoteCountRow(
+    val seq: Int,
+    val votes: Long
+)
+
+
 data class PollSummaryRow(
     val id: Long,
     val question: String,
@@ -146,56 +152,53 @@ data class PollResponse(
     val createdAt: OffsetDateTime,
 
     val user: UserSummary?,
-
-//    val likedByMe: Boolean?,// TODO
-//    val comments: ApiPageCursor<PollCommentResponse>?,// TODO
 ) {
     companion object {
-        fun of(entity: PollEntity, votedSeq: Int?, user: UserSummary): PollResponse {
-            val selects: List<PollSelectResponse> =
-                try {
-                    val raw = entity.selects.asString()
-                    jacksonObjectMapper().readValue(raw, object : TypeReference<List<PollSelectResponse>>() {})
-                } catch (_: Exception) {
-                    emptyList()
-                }
-            return PollResponse(
-                id = entity.id,
-                question = entity.question,
-                photo = entity.photo,
-                selects = selects,
-                colorStart = entity.colorStart,
-                colorEnd = entity.colorEnd,
-                voteCount = entity.voteCount,
-                commentCount = entity.commentCount,
-                votedByMe = votedSeq != null,
-                votedSeq = votedSeq,
-                createdAt = entity.createdAt,
-                user = user
-            )
-        }
+        fun build(
+            id: Long,
+            question: String,
+            photo: String?,
+            selectsJson: String?,
+            colorStart: String?,
+            colorEnd: String?,
+            commentCount: Int,
+            createdAt: OffsetDateTime,
+            user: UserSummary,
+            votedSeq: Int?,
+            likeCount: Int = 0,
+            likedByMe: Boolean = false,
+            votedByMe: Boolean = votedSeq != null,
+            voteCounts: Map<Int, Int> = emptyMap()
+        ): PollResponse {
 
-        fun from(res: PollSummaryRow, user: UserSummary): PollResponse {
             val selects: List<PollSelectResponse> =
                 try {
-                    jacksonObjectMapper().readValue(res.selects, object : TypeReference<List<PollSelectResponse>>() {})
+                    jacksonObjectMapper().readValue(
+                        selectsJson ?: "[]",
+                        object : TypeReference<List<PollSelectResponse>>() {}
+                    ).map { sel ->
+                        if (voteCounts.isNotEmpty())
+                            sel.copy(votes = voteCounts[sel.seq] ?: 0)
+                        else sel
+                    }
                 } catch (_: Exception) {
                     emptyList()
                 }
+
             return PollResponse(
-                id = res.id,
-                question = res.question,
-                photo = res.photo,
+                id = id,
+                question = question,
+                photo = photo,
                 selects = selects,
-                colorStart = res.colorStart,
-                colorEnd = res.colorEnd,
-                voteCount = res.voteCount,
-                commentCount = res.commentCount,
-                likeCount = res.likeCount,
-                likedByMe = res.likedByMe,
-                votedByMe = res.votedByMe,
-                votedSeq = res.votedSeq,
-                createdAt = res.createdAt,
+                colorStart = colorStart,
+                colorEnd = colorEnd,
+                voteCount = if (voteCounts.isNotEmpty()) voteCounts.values.sum() else selects.sumOf { it.votes },
+                commentCount = commentCount,
+                likeCount = likeCount,
+                likedByMe = likedByMe,
+                votedByMe = votedByMe,
+                votedSeq = votedSeq,
+                createdAt = createdAt,
                 user = user
             )
         }

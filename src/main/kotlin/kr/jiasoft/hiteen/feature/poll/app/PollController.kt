@@ -51,9 +51,9 @@ class PollController(
     @GetMapping("/{id}")
     suspend fun get(
         @Parameter(description = "투표 ID") @PathVariable id: Long,
-        @AuthenticationPrincipal(expression = "user") user: UserEntity?
+        @AuthenticationPrincipal(expression = "user") user: UserEntity
     ): ResponseEntity<ApiResult<PollResponse>> {
-        val poll = service.getPoll(id, user?.id)
+        val poll = service.getPoll(id, user.id)
         return ResponseEntity.ok(ApiResult.success(poll))
     }
 
