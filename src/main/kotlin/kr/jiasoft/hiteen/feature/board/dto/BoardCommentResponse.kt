@@ -24,8 +24,14 @@ data class BoardCommentResponse(
     @param:Schema(description = "댓글 내용", example = "좋은 글이네요! 감사합니다.")
     val content: String,
 
+    @param:Schema(description = "게시글 내용", example = "맛집정보 공유합니다.맛집정보 공유합니다.맛집정보 공유합니다.맛집정보 공유합니다.맛집정보 공유합니다.")
+    val boardContent: String? = null,
+
     @param:Schema(description = "대댓글 개수", example = "2")
     val replyCount: Int = 0,
+
+    @param:Schema(description = "게시글에 달린 댓글 개수")
+    val boardCommentCount: Int = 0,
 
     @param:Schema(description = "좋아요 개수", example = "15")
     val likeCount: Long = 0,

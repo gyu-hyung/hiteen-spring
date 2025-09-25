@@ -28,13 +28,13 @@ interface BoardCommentRepository : CoroutineCrudRepository<BoardCommentEntity, L
             c.id,
             c.uid,
             c.content,
+            b.content AS board_content,
             c.created_at  AS created_at,
             c.created_id  AS created_id,
             c.reply_count AS reply_count,
-            (SELECT COUNT(*)::bigint FROM board_comment_likes l 
-              WHERE l.comment_id = c.id) AS like_count,
-            EXISTS (SELECT 1 FROM board_comment_likes l2 
-                      WHERE l2.comment_id = c.id AND l2.user_id = :userId) AS liked_by_me,
+            (select COUNT(*) from board_comments where board_id = b.id) board_comment_count,
+            (SELECT COUNT(*)::bigint FROM board_comment_likes l WHERE l.comment_id = c.id) AS like_count,
+            EXISTS (SELECT 1 FROM board_comment_likes l2 WHERE l2.comment_id = c.id AND l2.user_id = :userId) AS liked_by_me,
             p.uid AS parent_uid
         FROM board_comments c
         LEFT JOIN board_comments p ON c.parent_id = p.id

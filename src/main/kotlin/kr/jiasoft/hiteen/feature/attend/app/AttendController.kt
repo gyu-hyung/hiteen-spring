@@ -5,7 +5,6 @@ import kr.jiasoft.hiteen.common.dto.ApiResult
 import kr.jiasoft.hiteen.common.exception.BusinessValidationException
 import kr.jiasoft.hiteen.feature.attend.domain.AttendEntity
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
-import kr.jiasoft.hiteen.feature.user.dto.UserSummary
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.GetMapping
@@ -52,11 +51,6 @@ class AttendController(
     }
 
 
-    @Operation(summary = "나를 추천인으로 등록한 친구 조회")
-    @GetMapping("/referral")
-    suspend fun referral(@AuthenticationPrincipal(expression = "user") user: UserEntity)
-    : ResponseEntity<ApiResult<List<UserSummary>>>
-        = ResponseEntity.ok(ApiResult.success(attendService.myReferralList(user.id)))
 
 
 

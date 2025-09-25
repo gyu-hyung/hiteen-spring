@@ -8,7 +8,6 @@ import kr.jiasoft.hiteen.feature.asset.app.AssetService
 import kr.jiasoft.hiteen.feature.board.infra.BoardRepository
 import kr.jiasoft.hiteen.feature.interest.infra.InterestUserRepository
 import kr.jiasoft.hiteen.feature.invite.app.InviteService
-import kr.jiasoft.hiteen.feature.level.app.ExpService
 import kr.jiasoft.hiteen.feature.level.domain.TierCode
 import kr.jiasoft.hiteen.feature.level.infra.TierRepository
 import kr.jiasoft.hiteen.feature.relationship.app.FollowService
@@ -142,7 +141,7 @@ class UserService (
     }
 
 
-    suspend fun findUserSummaryList(userIds: List<Long>) 
+    suspend fun findUserSummaryList(userIds: List<Long>)
         = userRepository.findSummaryByIds(userIds)
 
 
@@ -281,7 +280,10 @@ class UserService (
         return userPhotosRepository.findByUserId(userEntity.id)?.toList() ?: emptyList()
     }
 
-
+    suspend fun myReferralList(userId: Long): List<UserSummary> {
+        val ids = inviteService.findMyReferralList(userId).ifEmpty { return emptyList() }
+        return findUserSummaryList(ids)
+    }
 
 
 }
