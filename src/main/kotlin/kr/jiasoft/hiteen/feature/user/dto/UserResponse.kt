@@ -57,10 +57,7 @@ data class UserResponse(
     @param:Schema(description = "MBTI", example = "INTJ")
     val mbti: String?,
 
-    @param:Schema(
-        description = "현재 누적 경험치",
-        example = "9999"
-    )
+    @param:Schema(description = "현재 누적 경험치",example = "9999")
     val expPoint: Long,
 
     @param:Schema(description = "프로필 이미지 UID", example = "a0e9f441-3669-4cfb-aac5-1c38533d87c1")
@@ -75,6 +72,9 @@ data class UserResponse(
     @param:Schema(description = "생일", example = "1999-12-01")
     @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     val birthday: LocalDate?,
+
+    @param:Schema(description = "프로필 데코레이션 코드", example = "P_001")
+    val profileDecorationCode: String? = null,
 
     @param:Schema(description = "초대코드", example = "TMUZTTCH6L")
     val inviteCode: String? = null,
@@ -144,6 +144,7 @@ data class UserResponse(
                     grade = entity.grade,
                     gender = entity.gender,
                     birthday = entity.birthday,
+                    profileDecorationCode = entity.profileDecorationCode,
                     inviteCode = entity.inviteCode,
                     inviteJoins = entity.inviteJoins,
                     isFollowed = isFollowed,

@@ -60,4 +60,7 @@ data class UserUpdateForm(
     @param:Schema(description = "생년월일", example = "1999-12-01")
     @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     val birthday: LocalDate? = null,
+
+    @param:Schema(description = "프로필 데코레이션 코드", example = "P_001")
+    val profileDecorationCode: String? = null,
 )

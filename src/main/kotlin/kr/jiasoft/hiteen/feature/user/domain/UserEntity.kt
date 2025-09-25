@@ -72,6 +72,15 @@ data class UserEntity(
     /* 생년월일 */
     val birthday: LocalDate? = null,
 
+    /* 프로필 데코레이션 코드 */
+    val profileDecorationCode: String? = null,
+
+    /* 초대코드 */
+    val inviteCode: String? = null,
+
+    /* 초대 후 가입자수 */
+    val inviteJoins: Long = 0,
+
     /* 생성자 사용자 ID(감사용) */
     val createdId: Long? = null,
 
@@ -90,10 +99,6 @@ data class UserEntity(
     /* 삭제 일시 */
     val deletedAt: OffsetDateTime? = null,
 
-    /* 초대코드 */
-    val inviteCode: String? = null,
 
-    /* 초대 후 가입자수 */
-    val inviteJoins: Long = 0,
 
 )

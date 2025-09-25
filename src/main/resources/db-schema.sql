@@ -27,12 +27,13 @@ CREATE TABLE users (
   mood_emoji        varchar(30),
   mbti              varchar(30),
   exp_points        integer DEFAULT 0,
-  tier_id bigint    REFERENCES tiers(id);
+  tier_id           bigint REFERENCES tiers(id);
   asset_uid         uuid, -- REFERENCES assets(uid),
   school_id         bigint,
   grade             varchar(30),
   gender            varchar(30),
   birthday		    date,
+  profile_decoration_code VARCHAR(50)
   invite_code       varchar(30),
   invite_joins      bigint,
   created_id        bigint,

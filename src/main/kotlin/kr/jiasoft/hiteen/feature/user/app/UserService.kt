@@ -179,6 +179,7 @@ class UserService (
         val newGrade       = param.grade ?: existing.grade
         val newGender      = param.gender ?: existing.gender
         val newBirthday    = param.birthday ?: existing.birthday
+        val newProfileDecorationCode = param.profileDecorationCode ?: existing.profileDecorationCode
 
         // 중복 검사
         if (newEmail != null && !newEmail.equals(existing.email, ignoreCase = true)) {
@@ -207,6 +208,7 @@ class UserService (
             grade         = newGrade,
             gender        = newGender,
             birthday      = newBirthday,
+            profileDecorationCode = newProfileDecorationCode,
             updatedId     = current.id,
             updatedAt     = OffsetDateTime.now(),
         )
