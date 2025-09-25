@@ -14,6 +14,14 @@ interface PollRepository : CoroutineCrudRepository<PollEntity, Long> {
     suspend fun increaseVoteCount(id: Long): Int
 
 
+    @Query("UPDATE polls SET comment_count = comment_count + 1 WHERE id = :id")
+    suspend fun increaseCommentCount(id: Long): Int
+
+
+    @Query("UPDATE polls SET comment_count = GREATEST(comment_count - 1, 0) WHERE id = :id")
+    suspend fun decreaseCommentCount(id: Long): Int
+
+
     @Query("""
         SELECT 
             p.id,
@@ -68,7 +76,7 @@ interface PollRepository : CoroutineCrudRepository<PollEntity, Long> {
     """)
     suspend fun findSummaryById(
         pollId: Long,
-        currentUserId: Long?
+        currentUserId: Long
     ): PollSummaryRow?
 
 

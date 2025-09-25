@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import io.r2dbc.postgresql.codec.Json
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
+import kr.jiasoft.hiteen.common.exception.BusinessValidationException
 import kr.jiasoft.hiteen.feature.asset.app.AssetService
 import kr.jiasoft.hiteen.feature.level.app.ExpService
 import kr.jiasoft.hiteen.feature.poll.domain.*
@@ -45,17 +46,55 @@ class PollService(
         polls.findSummariesByCursor(cursor, size, currentUserId)
             .map { row ->
                 val user = userService.findUserSummary(row.createdId)
+                val voteCounts = pollUsers.countVotesByPollId(row.id).toList()
+                    .associateBy({ it.seq }, { it.votes.toInt() })
 
-                PollResponse.from(row, user)
+                PollResponse.build(
+                    id = row.id,
+                    question = row.question,
+                    photo = row.photo,
+                    selectsJson = row.selects,
+                    colorStart = row.colorStart,
+                    colorEnd = row.colorEnd,
+                    commentCount = row.commentCount,
+                    createdAt = row.createdAt,
+                    user = user,
+                    votedSeq = row.votedSeq,
+                    likeCount = row.likeCount,
+                    likedByMe = row.likedByMe,
+                    votedByMe = row.votedByMe,
+                    voteCounts = voteCounts
+                )
             }.toList()
 
 
-    suspend fun getPoll(id: Long, currentUserId: Long?): PollResponse {
-        val poll = polls.findById(id) ?: throw notFound("poll")
-        val votedSeq = pollUsers.findByPollIdAndUserId(id, currentUserId!!)?.seq
+    suspend fun getPoll(id: Long, currentUserId: Long): PollResponse {
+        val poll = polls.findSummaryById(id, currentUserId) ?: throw notFound("poll")
+
         val user = userService.findUserSummary(poll.createdId)
-        return PollResponse.of(poll, votedSeq, user)
+
+        val voteCounts = pollUsers.countVotesByPollId(id).toList()
+            .associateBy({ it.seq }, { it.votes.toInt() })
+
+        return PollResponse.build(
+            id = poll.id,
+            question = poll.question,
+            photo = poll.photo,
+            selectsJson = poll.selects,
+            colorStart = poll.colorStart,
+            colorEnd = poll.colorEnd,
+            commentCount = poll.commentCount,
+            createdAt = poll.createdAt,
+            user = user,
+            votedSeq = poll.votedSeq,
+            likeCount = poll.likeCount,
+            likedByMe = poll.likedByMe,
+            voteCounts = voteCounts
+        )
     }
+
+
+
 
 
     suspend fun create(req: PollCreateRequest, userId: Long, file: FilePart?): Long {
@@ -146,7 +185,7 @@ class PollService(
             polls.increaseVoteCount(pollId)
             expService.grantExp(userId, "VOTE_PARTICIPATE", pollId)
         } catch (_: DuplicateKeyException) {
-            throw badRequest("already voted")
+            throw BusinessValidationException(mapOf("error" to "already voted"))
         }
     }
 
@@ -199,6 +238,7 @@ class PollService(
                 createdAt = OffsetDateTime.now(),
             )
         )
+        polls.increaseCommentCount(req.pollId)
         if (parent != null) comments.increaseReplyCount(parent.id)
 
         expService.grantExp(userId, "CREATE_VOTE_COMMENT", saved.id)
@@ -251,6 +291,7 @@ class PollService(
             deletedAt = OffsetDateTime.now()
         )
         comments.save(deleted)
+        polls.decreaseCommentCount(pollId)
         comment.parentId?.let { pid ->
             comments.decreaseReplyCount(pid)
         }
