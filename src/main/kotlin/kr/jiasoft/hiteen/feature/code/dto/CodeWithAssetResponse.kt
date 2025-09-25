@@ -1,7 +1,9 @@
 package kr.jiasoft.hiteen.feature.code.dto
 
 import io.swagger.v3.oas.annotations.media.Schema
+import kr.jiasoft.hiteen.feature.code.domain.CodeEntity
 import kr.jiasoft.hiteen.feature.code.domain.CodeStatus
+import java.util.UUID
 
 @Schema(description = "코드 응답 DTO")
 data class CodeWithAssetResponse(
@@ -13,11 +15,32 @@ data class CodeWithAssetResponse(
     val code: String,        // "E_001"
 
     @param:Schema(description = "코드 이름", example = "웃는 얼굴")
-    val name: String,        // "웃는 얼굴" (codeName)
+    val codeName: String,        // "웃는 얼굴" (codeName)
+
+    @param:Schema(description = "코드 그룹", example = "EMOJI")
+    val codeGroup: String,
+
+    @param:Schema(description = "코드 그룹명", example = "이모지")
+    val codeGroupName: String,
 
     @param:Schema(description = "코드 상태", example = "ACTIVE")
     val status: CodeStatus,      // "ACTIVE"
 
     @param:Schema(description = "첨부파일 UUID", example = "a1a8990f-2443-4492-baad-699d59b272fa")
-    val url: String?         // 첨부파일이 있을 경우
-)
+    val imageUid: UUID?         // 첨부파일이 있을 경우
+) {
+    companion object {
+        fun from(entity: CodeEntity): CodeWithAssetResponse {
+            return CodeWithAssetResponse(
+                id = entity.id,
+                code = entity.code,
+                codeName = entity.codeName,
+                codeGroup = entity.codeGroup,
+                codeGroupName = entity.codeGroupName,
+                status = entity.status,
+                imageUid = entity.imageUid,
+            )
+        }
+    }
+}
+

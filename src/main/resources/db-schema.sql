@@ -98,10 +98,10 @@ CREATE TABLE user_photos (
 -- ========================
 CREATE TABLE codes (
   id              bigserial PRIMARY KEY,
-  code_name       varchar(100) NOT NULL,
   code            varchar(50)  NOT NULL,
-  code_group_name varchar(100), -- 관심사 등
+  code_name       varchar(100) NOT NULL,
   code_group      varchar(50),
+  code_group_name varchar(100), -- 관심사 등
   status          varchar(20),
   created_id      bigint,
   created_at      timestamptz DEFAULT now(),
@@ -110,18 +110,6 @@ CREATE TABLE codes (
   deleted_id      bigint,
   deleted_at      timestamptz,
   UNIQUE (code_group, code)
-);
-
-
--- ========================
--- 코드 > 첨부파일
--- ========================
-CREATE TABLE code_assets (
-    id bigserial PRIMARY KEY,
-    code_id bigint NOT NULL REFERENCES codes(id) ON DELETE CASCADE,
-    uid uuid NOT NULL REFERENCES assets(uid) ON DELETE CASCADE,
-    created_id bigint,
-    created_at timestamptz DEFAULT now()
 );
 
 

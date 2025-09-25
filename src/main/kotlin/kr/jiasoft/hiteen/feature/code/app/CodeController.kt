@@ -19,31 +19,35 @@ import reactor.core.publisher.Flux
 @Tag(name = "Code", description = "공통 코드 관리 API")
 @RestController
 @RequestMapping("/api/codes")
-@SecurityRequirement(name = "bearerAuth")   // 🔑 JWT 인증 필요
+@SecurityRequirement(name = "bearerAuth")
 class CodeController(
     private val codeService: CodeService
 ) {
 
-    @Operation(summary = "코드 단일 등록", description = "단일 코드 항목을 등록합니다.")
-    @PostMapping
+    @Operation(summary = "코드 단일 등록", description = "단일 코드 항목을 등록합니다. (파일 첨부 가능)")
+    @PostMapping(consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     suspend fun createCode(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
-        @Parameter(description = "코드 등록 요청 DTO") codeRequest: CodeRequest
-    ): ResponseEntity<ApiResult<Map<String, Any>>> {
-        val saved = codeService.createCode(user.id, codeRequest)
-        return ResponseEntity.ok(ApiResult.success(mapOf("id" to saved.id, "code" to saved.code)))
+        @Parameter(description = "코드 등록 요청 DTO") codeRequest: CodeRequest,
+        @Parameter(description = "첨부할 파일") @RequestPart(name = "file", required = false) file: FilePart?
+    ): ResponseEntity<ApiResult<CodeWithAssetResponse>> {
+        val saved = codeService.createCode(user.id, codeRequest, file)
+        return ResponseEntity.ok(ApiResult.success(saved))
     }
 
-    @Operation(summary = "코드 수정", description = "특정 코드를 수정합니다.")
-    @PostMapping("/{id}")
+
+    @Operation(summary = "코드 수정", description = "특정 코드를 수정합니다. (파일 첨부 가능)")
+    @PostMapping("/{id}", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     suspend fun updateCode(
         @Parameter(description = "수정할 코드 ID") @PathVariable id: Long,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
-        @Parameter(description = "코드 수정 요청 DTO") codeRequest: CodeRequest
-    ): ResponseEntity<ApiResult<Map<String, Any>>> {
-        val updated = codeService.updateCode(user.id, id, codeRequest)
-        return ResponseEntity.ok(ApiResult.success(mapOf("id" to updated.id, "code" to updated.code)))
+        @Parameter(description = "코드 수정 요청 DTO") codeRequest: CodeRequest,
+        @Parameter(description = "첨부할 파일") @RequestPart(name = "file", required = false) file: FilePart?
+    ): ResponseEntity<ApiResult<CodeWithAssetResponse>> {
+        val updated = codeService.updateCode(user.id, id, codeRequest, file)
+        return ResponseEntity.ok(ApiResult.success(updated))
     }
+
 
     @Operation(summary = "코드 삭제", description = "특정 코드를 삭제합니다.")
     @DeleteMapping("/{id}")
@@ -55,10 +59,8 @@ class CodeController(
         return ResponseEntity.ok(ApiResult.success(Unit))
     }
 
-    @Operation(
-        summary = "코드 그룹 생성 (파일 첨부 가능)",
-        description = "파일 첨부를 통해 특정 그룹의 여러 개의 코드 항목을 생성합니다."
-    )
+
+    @Operation(summary = "코드 그룹 생성 (파일 첨부 가능)",description = "파일 첨부를 통해 특정 그룹의 여러 개의 코드 항목을 생성합니다.")
     @PostMapping("/group/{group}", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     suspend fun createCodes(
         @Parameter(description = "코드 그룹명") @PathVariable group: String,
@@ -73,6 +75,7 @@ class CodeController(
             )
         )
     }
+
 
     @Operation(summary = "코드 그룹 조회", description = "특정 그룹에 속한 코드 목록을 조회합니다.")
     @GetMapping("/{group}")
