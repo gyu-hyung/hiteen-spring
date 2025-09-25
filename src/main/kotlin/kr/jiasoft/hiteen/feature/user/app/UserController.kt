@@ -13,6 +13,7 @@ import kr.jiasoft.hiteen.common.dto.ApiResult
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import kr.jiasoft.hiteen.feature.user.dto.UserRegisterForm
 import kr.jiasoft.hiteen.feature.user.dto.UserResponse
+import kr.jiasoft.hiteen.feature.user.dto.UserSummary
 import kr.jiasoft.hiteen.feature.user.dto.UserUpdateForm
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -125,4 +126,13 @@ class UserController(
     suspend fun list(
         @Parameter(description = "조회할 사용자 UID") @RequestParam(required = true) userUid: String
     ) = ResponseEntity.ok(ApiResult.success(userService.getPhotos(userUid)))
+
+
+    @Operation(summary = "나를 추천인으로 등록한 친구 조회")
+    @GetMapping("/referral")
+    suspend fun referral(@AuthenticationPrincipal(expression = "user") user: UserEntity)
+            : ResponseEntity<ApiResult<List<UserSummary>>>
+            = ResponseEntity.ok(ApiResult.success(userService.myReferralList(user.id)))
+
+
 }

@@ -1,5 +1,7 @@
 package kr.jiasoft.hiteen.feature.invite.app
 
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.toList
 import kr.jiasoft.hiteen.feature.invite.domain.InviteEntity
 import kr.jiasoft.hiteen.feature.invite.infra.InviteRepository
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
@@ -11,9 +13,14 @@ import kotlin.random.Random
 @Service
 class InviteService(
     private val inviteRepository: InviteRepository,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
 ) {
 
+
+    /** 내 초대코드로 등록한 친구 목록 */
+    suspend fun findMyReferralList (userId: Long) : List<Long> {
+        return inviteRepository.findAllByUserId(userId).map { it.id }.toList()
+    }
 
     /**
      * 초대코드로 회원가입한 경우 처리

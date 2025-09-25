@@ -1,5 +1,6 @@
 package kr.jiasoft.hiteen.feature.invite.infra
 
+import kotlinx.coroutines.flow.Flow
 import kr.jiasoft.hiteen.feature.invite.domain.InviteEntity
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 import org.springframework.stereotype.Repository
@@ -7,4 +8,7 @@ import org.springframework.stereotype.Repository
 @Repository
 interface InviteRepository : CoroutineCrudRepository<InviteEntity, Long> {
     suspend fun countByPhone(phone: String): Long
+
+    suspend fun findAllByUserId(userId: Long): Flow<InviteEntity>
+
 }

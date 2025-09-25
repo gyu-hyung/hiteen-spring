@@ -1,5 +1,7 @@
 package kr.jiasoft.hiteen.feature.level.app
 
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.media.Schema
 import kotlinx.coroutines.flow.toList
 import kr.jiasoft.hiteen.common.dto.ApiResult
 import kr.jiasoft.hiteen.feature.level.domain.TierCode
@@ -16,15 +18,25 @@ class TierController(
     private val tierRepository: TierRepository
 ) {
 
+    @Schema(description = "티어 응답")
     data class TierResponse(
+        @field:Schema(description = "티어 ID")
         val id: Long,
+        @field:Schema(description = "티어 코드")
         val tierCode: String,
+        @field:Schema(description = "티어 이름")
         val tierNameKr: String,
+        @field:Schema(description = "티어 세부 순서")
         val divisionNo: Int,
+        @field:Schema(description = "티어 순서")
         val rankOrder: Int,
+        @field:Schema(description = "티어 상태")
         val status: String,
+        @field:Schema(description = "티어 최소 포인트")
         val minPoints: Int,
+        @field:Schema(description = "티어 최대 포인트")
         val maxPoints: Int,
+        @field:Schema(description = "티어 레벨")
         val level: Int
     ) {
         companion object {
@@ -44,6 +56,7 @@ class TierController(
     }
 
 
+    @Operation(summary = "티어 목록 조회", description = "티어 목록을 조회합니다.")
     @GetMapping
     suspend fun getTiers(): ResponseEntity<ApiResult<List<TierResponse>>> {
         val tiers = tierRepository.findAllOrdered()
