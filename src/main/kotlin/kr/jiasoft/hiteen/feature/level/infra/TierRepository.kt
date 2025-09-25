@@ -1,5 +1,6 @@
 package kr.jiasoft.hiteen.feature.level.infra
 
+import kotlinx.coroutines.flow.Flow
 import kr.jiasoft.hiteen.feature.level.domain.TierCode
 import kr.jiasoft.hiteen.feature.level.domain.TierEntity
 import org.springframework.data.r2dbc.repository.Query
@@ -18,5 +19,9 @@ interface TierRepository : CoroutineCrudRepository<TierEntity, Long> {
         LIMIT 1
     """)
     suspend fun findByPoints(exp: Long): TierEntity?
+
+    @Query("SELECT * FROM tiers ORDER BY rank_order ASC")
+    fun findAllOrdered(): Flow<TierEntity>
+
 
 }

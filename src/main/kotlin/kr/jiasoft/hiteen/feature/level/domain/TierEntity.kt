@@ -46,16 +46,16 @@ data class TierEntity(
     val status: String = "ACTIVE",
 
     @field:Schema(
-        description = "해당 티어 최대 포인트",
-        example = "199"
-    )
-    val maxPoints: Int,
-
-    @field:Schema(
         description = "해당 티어 최소 포인트",
         example = "0"
     )
     val minPoints: Int,
+
+    @field:Schema(
+        description = "해당 티어 최대 포인트",
+        example = "199"
+    )
+    val maxPoints: Int,
 
     @field:Schema(
         description = "티어 UUID (고유 식별자)",
