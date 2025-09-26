@@ -143,6 +143,31 @@ class BoardController(
         return ResponseEntity.ok(ApiResult.success(result))
     }
 
+    @Operation(
+        summary = "내 댓글 목록 조회",
+        description = "로그인한 사용자가 작성한 댓글 목록을 커서 기반 페이지네이션으로 조회합니다."
+    )
+    @GetMapping("/comments/me")
+    suspend fun myComments(
+        @AuthenticationPrincipal(expression = "user") user: UserEntity,
+        @Parameter(description = "커서 UUID") @RequestParam(required = false) cursor: UUID?,
+        @Parameter(description = "페이지당 댓글 개수 (기본 20)") @RequestParam(defaultValue = "20") perPage: Int,
+    ): ResponseEntity<ApiResult<ApiPageCursor<BoardCommentResponse>>> {
+        val list = service.listMyComments(user.id, cursor, perPage + 1)
+
+        val hasMore = list.size > perPage
+        val items = if (hasMore) list.dropLast(1) else list
+        val nextCursor = if (hasMore) list.lastOrNull()?.uid?.toString() else null
+
+        val result = ApiPageCursor(
+            nextCursor = nextCursor,
+            items = items,
+            perPage = perPage
+        )
+        return ResponseEntity.ok(ApiResult.success(result))
+    }
+
+
     @Operation(summary = "댓글 작성", description = "특정 게시글에 댓글을 작성합니다.")
     @PostMapping("/comments/{boardUid}")
     suspend fun createComment(

@@ -295,6 +295,19 @@ class BoardService(
                 }.toList()
 
 
+    suspend fun listMyComments(
+        userId: Long,
+        cursor: UUID?,
+        perPage: Int
+    ): List<BoardCommentResponse> =
+        comments.findMyComments(userId, cursor, perPage)
+            .map { comment ->
+                comment.copy(
+                    user = userService.findUserSummary(comment.createdId)
+                )
+            }.toList()
+
+
     suspend fun createComment(boardUid: UUID, req: BoardCommentRegisterRequest, currentUserId: Long): UUID {
         val b = boards.findByUid(boardUid) ?: throw notFound("board")
         val parent: BoardCommentEntity? = req.parentUid?.let { comments.findByUid(it) }
