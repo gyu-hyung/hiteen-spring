@@ -60,5 +60,23 @@ interface ChatUserRepository : CoroutineCrudRepository<ChatUserEntity, Long> {
     ): Int
 
 
+    @Query("""
+        SELECT EXISTS(
+            SELECT 1 
+            FROM chat_users cu
+            JOIN chat_rooms r ON r.id = cu.chat_room_id
+            WHERE r.uid = :roomUid
+              AND cu.user_id = :userId
+              AND cu.deleted_at IS NULL
+              AND r.deleted_at IS NULL
+        )
+    """)
+    suspend fun existsByRoomUidAndUserId(
+        roomUid: UUID,
+        userId: Long
+    ): Boolean
+
+
+
 
 }

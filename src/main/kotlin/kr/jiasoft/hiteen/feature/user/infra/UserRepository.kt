@@ -107,6 +107,15 @@ interface UserRepository : CoroutineCrudRepository<UserEntity, Long> {
         """)
     suspend fun findUidById(id: Long): UUID?
 
+    @Query("""
+        SELECT id
+        FROM users
+        WHERE deleted_at IS NULL
+          AND uid = :uid
+        LIMIT 1
+        """)
+    suspend fun findIdByUid(uid: UUID): Long?
+
 
     suspend fun findAllByPhoneIn(phones: Set<String>): Flow<UserEntity>
 

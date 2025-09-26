@@ -20,6 +20,7 @@ import javax.crypto.spec.SecretKeySpec
 @RequestMapping("/broadcasting")
 class SoketiAuthController(
     private val jwtProvider: JwtProvider,
+    private val channelAuthService: ChannelAuthorizationService,
     @Value("\${soketi.app-key}") private val appKey: String,
     @Value("\${soketi.app-secret}") private val appSecret: String,
 ) {
@@ -49,7 +50,7 @@ class SoketiAuthController(
         security = [SecurityRequirement(name = "bearerAuth")]
     )
     @PostMapping("/auth")
-    fun authorize(
+    suspend fun authorize(
         @Parameter(hidden = true) @ModelAttribute formReq: AuthRequest2?,
         @RequestHeader("Authorization", required = false) authHeader: String?
     ): Mono<ResponseEntity<Map<String, String>>> {
@@ -61,6 +62,7 @@ class SoketiAuthController(
 
         var username = "anonymous"
         var role = "guest"
+        var userIdFromJwt: Long? = null
 
         // JWT 인증
         if (!authHeader.isNullOrBlank() && authHeader.startsWith("Bearer ")) {
@@ -69,9 +71,14 @@ class SoketiAuthController(
                 val claims = jwtProvider.parseAndValidateOrThrow(bearer).payload
                 username = claims.subject ?: "anonymous"
                 role = claims["role"] as? String ?: "user"
+                userIdFromJwt = claims["userId"] as? Long
             } catch (e: Exception) {
                 return Mono.just(ResponseEntity.status(403).body(mapOf("error" to "Unauthorized")))
             }
+        }
+
+        if (!channelAuthService.canSubscribe(userIdFromJwt, channelName)) {
+            return Mono.just(ResponseEntity.status(403).body(mapOf("error" to "Forbidden channel access")))
         }
 
         var stringToSign = "$socketId:$channelName"
@@ -95,39 +102,39 @@ class SoketiAuthController(
         return Mono.just(ResponseEntity.ok(result))
     }
 
-    @Operation(
-        summary = "소켓 인증 (단순 버전)",
-        description = "폼데이터/JSON 모두 허용하는 간단 인증 엔드포인트입니다."
-    )
-    @PostMapping("/auth2")
-    fun authorize2(
-        @Parameter(hidden = true) @ModelAttribute formReq: AuthRequest,
-        @Parameter(hidden = true) @RequestBody(required = false) jsonReq: AuthRequest?
-    ): Mono<ResponseEntity<Map<String, String>>> {
-        val channelName = formReq.channelName ?: jsonReq?.channelName
-        val socketId = formReq.socketId ?: jsonReq?.socketId
-        var channelData = formReq.channelData ?: jsonReq?.channelData
-
-        if (channelName.isNullOrBlank() || socketId.isNullOrBlank()) {
-            return Mono.just(ResponseEntity.badRequest().body(mapOf("error" to "Missing channel_name or socket_id")))
-        }
-
-        if (channelName.startsWith("presence-") && channelData.isNullOrBlank()) {
-            channelData = """{"user_id":1,"user_info":{"name":"Test User","role":"tester"}}"""
-        }
-
-        val stringToSign = "$socketId:$channelName" + if (!channelData.isNullOrBlank()) ":$channelData" else ""
-
-        val mac = Mac.getInstance("HmacSHA256")
-        mac.init(SecretKeySpec(appSecret.toByteArray(), "HmacSHA256"))
-        val signature = mac.doFinal(stringToSign.toByteArray()).joinToString("") { "%02x".format(it) }
-
-        val result = if (!channelData.isNullOrBlank()) {
-            mapOf("auth" to "$appKey:$signature", "channel_data" to channelData)
-        } else {
-            mapOf("auth" to "$appKey:$signature")
-        }
-
-        return Mono.just(ResponseEntity.ok(result))
-    }
+//    @Operation(
+//        summary = "소켓 인증 (단순 버전)",
+//        description = "폼데이터/JSON 모두 허용하는 간단 인증 엔드포인트입니다."
+//    )
+//    @PostMapping("/auth2")
+//    fun authorize2(
+//        @Parameter(hidden = true) @ModelAttribute formReq: AuthRequest,
+//        @Parameter(hidden = true) @RequestBody(required = false) jsonReq: AuthRequest?
+//    ): Mono<ResponseEntity<Map<String, String>>> {
+//        val channelName = formReq.channelName ?: jsonReq?.channelName
+//        val socketId = formReq.socketId ?: jsonReq?.socketId
+//        var channelData = formReq.channelData ?: jsonReq?.channelData
+//
+//        if (channelName.isNullOrBlank() || socketId.isNullOrBlank()) {
+//            return Mono.just(ResponseEntity.badRequest().body(mapOf("error" to "Missing channel_name or socket_id")))
+//        }
+//
+//        if (channelName.startsWith("presence-") && channelData.isNullOrBlank()) {
+//            channelData = """{"user_id":1,"user_info":{"name":"Test User","role":"tester"}}"""
+//        }
+//
+//        val stringToSign = "$socketId:$channelName" + if (!channelData.isNullOrBlank()) ":$channelData" else ""
+//
+//        val mac = Mac.getInstance("HmacSHA256")
+//        mac.init(SecretKeySpec(appSecret.toByteArray(), "HmacSHA256"))
+//        val signature = mac.doFinal(stringToSign.toByteArray()).joinToString("") { "%02x".format(it) }
+//
+//        val result = if (!channelData.isNullOrBlank()) {
+//            mapOf("auth" to "$appKey:$signature", "channel_data" to channelData)
+//        } else {
+//            mapOf("auth" to "$appKey:$signature")
+//        }
+//
+//        return Mono.just(ResponseEntity.ok(result))
+//    }
 }

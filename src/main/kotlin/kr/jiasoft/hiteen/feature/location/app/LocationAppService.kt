@@ -52,7 +52,7 @@ class LocationAppService(
             )
 
             soketiBroadcaster.broadcast(
-                SoketiChannelPattern.PRIVATE_USER.format(userUid),
+                SoketiChannelPattern.PRIVATE_USER_LOCATION.format(userUid),
                 SoketiEventType.LOCATION,
                 payload
             )
