@@ -75,6 +75,7 @@ class ExpService(
             "LIKE_VOTE" -> existTargetId(userId, actionCode, targetId!!, dailyLimit)
             "LIKE_BOARD_COMMENT" -> existTargetId(userId, actionCode, targetId!!, dailyLimit)
             "LIKE_VOTE_COMMENT" -> existTargetId(userId, actionCode, targetId!!, dailyLimit)
+            "FRIEND_INVITE" -> existTargetId(userId, actionCode, targetId!!, dailyLimit)
             else -> validateCommon(userId, actionCode, dailyLimit)
         }
     }
