@@ -524,17 +524,22 @@ CREATE TABLE pin_users (
 -- ========================
 -- 신고
 -- ========================
-CREATE TABLE report (
-  id         bigserial PRIMARY KEY,
-  code       varchar(50),
-  content    text,
-  status     varchar(20),
-  created_id bigint ,
-  created_at timestamptz DEFAULT now(),
-  updated_id bigint ,
-  updated_at timestamptz,
-  deleted_id bigint ,
-  deleted_at timestamptz
+CREATE TABLE reports (
+    id              BIGSERIAL PRIMARY KEY, -- AUTO_INCREMENT 대신 BIGSERIAL
+    user_id         BIGINT       NOT NULL, -- 신고자 회원번호
+    target_id       BIGINT       NULL,     -- 신고대상 회원번호
+    type            VARCHAR(30)  NOT NULL, -- 신고 구분
+    reportable_type VARCHAR(100) NULL,     -- 컨텐츠 모델
+    reportable_id   BIGINT       NULL,     -- 컨텐츠 번호
+    reason          VARCHAR(255) NULL,     -- 신고사유
+    photo_uid       VARCHAR(100) NULL,     -- 신고사진 UID
+    status          SMALLINT     NOT NULL DEFAULT 0, -- 대기(0), 완료(1)
+    answer          TEXT         NULL,     -- 답변내용
+    answer_at       TIMESTAMPTZ  NULL,     -- 답변일시
+    memo            TEXT         NULL,     -- 조치내용
+    created_at      TIMESTAMPTZ  NOT NULL DEFAULT NOW(), -- 신고일시
+    updated_at      TIMESTAMPTZ  NULL,     -- 변경일시
+    deleted_at      TIMESTAMPTZ  NULL      -- 삭제일시
 );
 
 
