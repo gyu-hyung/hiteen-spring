@@ -4,41 +4,45 @@ import kr.jiasoft.hiteen.feature.user.domain.UserDetailEntity
 import kr.jiasoft.hiteen.feature.user.dto.UserDetailRequest
 import kr.jiasoft.hiteen.feature.user.dto.UserDetailResponse
 import kr.jiasoft.hiteen.feature.user.infra.UserDetailRepository
+import kr.jiasoft.hiteen.feature.user.infra.UserRepository
 import org.springframework.stereotype.Service
+import java.util.UUID
 
 @Service
 class UserDetailService(
-    private val userDetails: UserDetailRepository
+    private val userDetails: UserDetailRepository,
+    private val userRepository: UserRepository
 ) {
 
-    suspend fun getUserDetail(userId: Long): UserDetailResponse? {
-        val entity = userDetails.findByUserId(userId) ?: return null
+    suspend fun getUserDetail(userUid: UUID): UserDetailResponse? {
+        val entity = userDetails.findByUid(userUid) ?: return null
         return entity.toResponse()
     }
 
-    suspend fun upsertUserDetail(userId: Long, req: UserDetailRequest): UserDetailResponse {
-        val existing = userDetails.findByUserId(userId)
-        val saved = if (existing != null) {
-            existing.copy(
-                deviceId = req.deviceId ?: existing.deviceId,
-                deviceOs = req.deviceOs ?: existing.deviceOs,
-                deviceVersion = req.deviceVersion ?: existing.deviceVersion,
-                deviceDetail = req.deviceDetail ?: existing.deviceDetail,
-                deviceToken = req.deviceToken ?: existing.deviceToken,
-                locationToken = req.locationToken ?: existing.locationToken,
-                aqnsToken = req.aqnsToken ?: existing.aqnsToken,
-                apiToken = req.apiToken ?: existing.apiToken,
-                agreeService = req.agreeService ?: existing.agreeService,
-                agreePrivacy = req.agreePrivacy ?: existing.agreePrivacy,
-                agreeFinance = req.agreeFinance ?: existing.agreeFinance,
-                agreeMarketing = req.agreeMarketing ?: existing.agreeMarketing,
-                pushService = req.pushService ?: existing.pushService,
-                pushMarketing = req.pushMarketing ?: existing.pushMarketing,
-                memo = req.memo ?: existing.memo,
-            )
-        } else {
-            UserDetailEntity(
-                userId = userId,
+    suspend fun upsertUserDetail(userUid: UUID, req: UserDetailRequest): UserDetailResponse {
+        userRepository.findIdByUid(userUid)?.let {
+            req.userId = it
+        }
+        val existing = userDetails.findByUid(userUid)
+        val saved = existing?.copy(
+            deviceId = req.deviceId ?: existing.deviceId,
+            deviceOs = req.deviceOs ?: existing.deviceOs,
+            deviceVersion = req.deviceVersion ?: existing.deviceVersion,
+            deviceDetail = req.deviceDetail ?: existing.deviceDetail,
+            deviceToken = req.deviceToken ?: existing.deviceToken,
+            locationToken = req.locationToken ?: existing.locationToken,
+            aqnsToken = req.aqnsToken ?: existing.aqnsToken,
+            apiToken = req.apiToken ?: existing.apiToken,
+            agreeService = req.agreeService ?: existing.agreeService,
+            agreePrivacy = req.agreePrivacy ?: existing.agreePrivacy,
+            agreeFinance = req.agreeFinance ?: existing.agreeFinance,
+            agreeMarketing = req.agreeMarketing ?: existing.agreeMarketing,
+            pushService = req.pushService ?: existing.pushService,
+            pushMarketing = req.pushMarketing ?: existing.pushMarketing,
+            memo = req.memo ?: existing.memo,
+        )
+            ?: UserDetailEntity(
+                userId = req.userId!!,
                 deviceId = req.deviceId,
                 deviceOs = req.deviceOs,
                 deviceVersion = req.deviceVersion,
@@ -55,12 +59,11 @@ class UserDetailService(
                 pushMarketing = req.pushMarketing,
                 memo = req.memo,
             )
-        }
         return userDetails.save(saved).toResponse()
     }
 
-    suspend fun deleteUserDetail(userId: Long) {
-        userDetails.deleteByUserId(userId)
+    suspend fun deleteUserDetail(userUid: UUID) {
+        userDetails.deleteByUid(userUid)
     }
 
     private fun UserDetailEntity.toResponse() = UserDetailResponse(

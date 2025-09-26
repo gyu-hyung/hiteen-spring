@@ -1,11 +1,13 @@
 package kr.jiasoft.hiteen.feature.user.domain
 
+import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Table
 
 @Table("user_details")
 data class UserDetailEntity (
+    @Id
     val id: Long = 0,
-    val userId: Long,
+    var userId: Long,
     val deviceId: String? = null,
     val deviceOs: String? = null,
     val deviceVersion: String? = null,
