@@ -770,7 +770,7 @@ CREATE TABLE poll_comment_likes (
 CREATE TABLE poll_templates (
   id            bigserial PRIMARY KEY,
   question      text,
-  answers       text,
+  answers       jsonb,
   state         smallint,
   created_at    timestamptz DEFAULT now(),
   updated_at    timestamptz,

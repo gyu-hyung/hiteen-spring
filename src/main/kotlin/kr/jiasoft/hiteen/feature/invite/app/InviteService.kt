@@ -4,22 +4,32 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kr.jiasoft.hiteen.feature.invite.domain.InviteEntity
 import kr.jiasoft.hiteen.feature.invite.infra.InviteRepository
+import kr.jiasoft.hiteen.feature.level.app.ExpService
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import kr.jiasoft.hiteen.feature.user.infra.UserRepository
 import org.springframework.stereotype.Service
 import java.time.OffsetDateTime
+import java.util.UUID
 import kotlin.random.Random
 
 @Service
 class InviteService(
     private val inviteRepository: InviteRepository,
     private val userRepository: UserRepository,
+    private val expService: ExpService
 ) {
 
 
     /** 내 초대코드로 등록한 친구 목록 */
     suspend fun findMyReferralList (userId: Long) : List<Long> {
         return inviteRepository.findAllByUserId(userId).map { it.id }.toList()
+    }
+
+    /** 초대 완료 시 경험치 부여 TODO 보안 */
+    suspend fun giveInviteExp(userId: Long, targetUid: UUID) {
+        userRepository.findByUid(targetUid.toString())?.let { user ->
+            expService.grantExp(userId, "FRIEND_INVITE", user.id)
+        }
     }
 
     /**
