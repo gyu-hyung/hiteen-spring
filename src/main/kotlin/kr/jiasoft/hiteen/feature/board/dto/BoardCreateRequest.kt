@@ -30,7 +30,7 @@ data class BoardCreateRequest(
     @field:Size(max = 50)
     @param:Schema(
         description = "게시글 카테고리",
-        example = "운동",
+        example = "공지사항",
         maxLength = 50
     )
     val category: String,
