@@ -46,6 +46,9 @@ data class RoomSummaryResponse(
     @param:Schema(description = "채팅방 UID", example = "550e8400-e29b-41d4-a716-446655440000")
     val roomUid: UUID,
 
+    @param:Schema(description = "채팅방 제목", example = "홍길동")
+    val roomTitle: String,
+
     @param:Schema(description = "방에 참여한 멤버 수", example = "5")
     val memberCount: Int,
 
@@ -138,3 +141,45 @@ data class RoomsSnapshotResponse(
     @param:Schema(description = "채팅방 목록 정보")
     val rooms: List<RoomSummaryResponse>
 )
+
+
+@Schema(description = "채팅방 정보 DTO")
+data class ChatRoomResponse(
+
+    @param:Schema(description = "채팅방 PK", example = "1")
+    val id: Long = 0,
+
+    @param:Schema(description = "채팅방 UID", example = "550e8400-e29b-41d4-a716-446655440000")
+    val uid: UUID = UUID.randomUUID(),
+
+    @param:Schema(description = "마지막 메시지를 작성한 사용자 ID", example = "1001")
+    val lastUserId: Long? = null,
+
+    @param:Schema(description = "마지막 메시지 ID", example = "5001")
+    val lastMessageId: Long? = null,
+
+    @param:Schema(description = "생성자 ID", example = "1001")
+    val createdId: Long,
+
+    @param:Schema(description = "채팅방 생성 일시", example = "2025.09.18 10:15")
+    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm")
+    val createdAt: OffsetDateTime,
+
+    @param:Schema(description = "수정자 ID", example = "1002")
+    val updatedId: Long? = null,
+
+
+    @param:Schema(description = "채팅방 수정 일시", example = "2025.09.18 10:15")
+    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm")
+    val updatedAt: OffsetDateTime? = null,
+
+    @param:Schema(description = "삭제자 ID", example = "1003")
+    val deletedId: Long? = null,
+
+    @param:Schema(description = "채팅방 삭제 일시", example = "2025.09.18 10:15")
+    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm")
+    val deletedAt: OffsetDateTime? = null,
+
+    val roomTitle: String,
+)
+

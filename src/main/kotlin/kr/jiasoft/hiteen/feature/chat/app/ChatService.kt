@@ -308,6 +308,7 @@ class ChatService(
 
             RoomSummaryResponse(
                 roomUid = r.uid,
+                roomTitle = r.roomTitle,
                 memberCount = memberCount.toInt(),
                 unreadCount = unreadCount,
                 updatedAt = r.updatedAt ?: r.createdAt,

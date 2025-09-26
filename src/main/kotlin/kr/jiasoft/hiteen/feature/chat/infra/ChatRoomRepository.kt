@@ -2,6 +2,7 @@ package kr.jiasoft.hiteen.feature.chat.infra
 
 import kotlinx.coroutines.flow.Flow
 import kr.jiasoft.hiteen.feature.chat.domain.ChatRoomEntity
+import kr.jiasoft.hiteen.feature.chat.dto.ChatRoomResponse
 import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 import java.util.UUID
@@ -23,7 +24,10 @@ interface ChatRoomRepository : CoroutineCrudRepository<ChatRoomEntity, Long> {
 
     /** 내가 속한 방 목록 (최근 메시지 시간순) */
     @Query("""
-        SELECT r.* FROM chat_rooms r
+        SELECT 
+            (select string_agg((select nickname from users where id = user_id), ',') from chat_users where chat_room_id = r.id and user_id != :userId) room_title,
+			r.* 
+        FROM chat_rooms r
         JOIN chat_users cu ON cu.chat_room_id = r.id
         WHERE cu.user_id = :userId
         AND r.last_message_id IS NOT NULL
@@ -32,7 +36,7 @@ interface ChatRoomRepository : CoroutineCrudRepository<ChatRoomEntity, Long> {
         ORDER BY COALESCE(r.updated_at, r.created_at) DESC NULLS LAST
         LIMIT :limit OFFSET :offset
     """)
-    fun listRooms(userId: Long, limit: Int, offset: Int): Flow<ChatRoomEntity>
+    fun listRooms(userId: Long, limit: Int, offset: Int): Flow<ChatRoomResponse>
 
 
     /** 동일 멤버셋(정확히 일치)인 방 한 개 찾기 (활성 멤버 기준) */
