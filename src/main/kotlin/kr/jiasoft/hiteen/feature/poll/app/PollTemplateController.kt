@@ -3,12 +3,12 @@ package kr.jiasoft.hiteen.feature.poll.app
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import kr.jiasoft.hiteen.common.dto.ApiResult
-import kr.jiasoft.hiteen.feature.poll.app.PollTemplateService
-import kr.jiasoft.hiteen.feature.poll.domain.PollTemplateEntity
 import kr.jiasoft.hiteen.feature.poll.dto.PollTemplateRequest
 import kr.jiasoft.hiteen.feature.poll.dto.PollTemplateResponse
+import kr.jiasoft.hiteen.feature.user.dto.CustomUserDetails
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -35,12 +35,14 @@ class PollTemplateController(
 
     // ---------------- 관리자 ----------------
     @Operation(summary = "투표 템플릿 생성 (ADMIN 전용)")
-    @PreAuthorize("hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
-    suspend fun createTemplate(@Parameter(description = "등록 투표 템플릿") req: PollTemplateRequest): ResponseEntity<Long> {
+    suspend fun createTemplate(@AuthenticationPrincipal user: CustomUserDetails, @Parameter(description = "등록 투표 템플릿") req: PollTemplateRequest): ResponseEntity<Long> {
+        println("user.id = ${user.user.id}")
         val id = pollTemplateService.createTemplate(req)
         return ResponseEntity.ok(id)
     }
+
 
     @Operation(summary = "투표 템플릿 수정 (ADMIN 전용)")
     @PreAuthorize("hasRole('ADMIN')")
