@@ -14,6 +14,10 @@ interface BoardCommentRepository : CoroutineCrudRepository<BoardCommentEntity, L
     fun findAllByBoardIdAndParentIdIsNullOrderByIdAsc(boardId: Long): Flow<BoardCommentEntity>
     fun findAllByParentIdOrderByIdAsc(parentId: Long): Flow<BoardCommentEntity>
 
+    @Query("SELECT id FROM board_comments WHERE uid = :uid")
+    suspend fun findIdByUid(uid: UUID): Long?
+
+
     @Query("SELECT COUNT(*) FROM board_comments WHERE board_id = :boardId AND deleted_at IS NULL")
     suspend fun countActiveByBoardId(boardId: Long): Long
 

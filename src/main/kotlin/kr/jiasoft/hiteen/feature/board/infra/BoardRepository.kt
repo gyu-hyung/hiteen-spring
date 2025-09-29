@@ -13,6 +13,9 @@ interface BoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
     suspend fun findByUid(uid: UUID): BoardEntity?
     fun findAllByCategoryAndDeletedAtIsNullOrderByIdDesc(category: String): Flow<BoardEntity>
 
+    @Query("SELECT id FROM boards WHERE uid = :uid")
+    suspend fun findIdByUid(uid: UUID): Long?
+
     @Query("UPDATE boards SET hits = hits + 1 WHERE id = :id")
     suspend fun increaseHits(id: Long)
 
