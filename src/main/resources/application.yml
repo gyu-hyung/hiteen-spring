@@ -1,4 +1,6 @@
 spring:
+  config:
+    import: "classpath:mbti.yml"
   application:
     name: hiteen
   r2dbc:

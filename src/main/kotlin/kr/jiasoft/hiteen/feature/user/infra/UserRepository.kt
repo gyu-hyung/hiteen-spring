@@ -17,7 +17,11 @@ interface UserRepository : CoroutineCrudRepository<UserEntity, Long> {
     suspend fun findAllByPhone(phone: String): Flow<UserEntity>
     suspend fun findByInviteCode(inviteCode: String): UserEntity?
 
-
+    @Query("""
+        UPDATE users SET mbti = :mbti WHERE id = :userId
+    """)
+    @Modifying
+    suspend fun updateMbti(userId: Long, mbti: String)
 
     /* 간단 검색: username/nickname/email 에 like (필요시 정규화/풀텍스트로 교체) */
     @Query("""
