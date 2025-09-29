@@ -868,6 +868,54 @@ CREATE TABLE chat_messages_assets (
 CREATE INDEX IF NOT EXISTS idx_chat_users_room_user_active ON chat_users (chat_room_id, user_id) WHERE deleted_at IS NULL;
 
 
+
+-- ========================
+-- 푸시 전송내역
+-- ========================
+CREATE TABLE push (
+    id BIGSERIAL PRIMARY KEY,                  -- 전송번호
+    type VARCHAR(50),                          -- 전송구분 (toast, dialog, notification)
+    code VARCHAR(50),                          -- 구분코드
+    title VARCHAR(255),                        -- 제목
+    message TEXT,                              -- 내용
+    total BIGINT NOT NULL DEFAULT 0,           -- 전송건수
+    success BIGINT NOT NULL DEFAULT 0,         -- 성공건수
+    failure BIGINT NOT NULL DEFAULT 0,         -- 실패건수
+    multicast_id VARCHAR(255),                 -- 다중ID
+    canonical_ids VARCHAR(255),                -- 발송ID
+    created_id BIGINT,                         -- 전송 회원번호
+    created_at TIMESTAMP,                      -- 전송일시
+    updated_at TIMESTAMP,                      -- 수정일시
+    deleted_at TIMESTAMP                       -- 삭제일시
+);
+
+
+
+-- ========================
+-- 푸시 전송상세
+-- ========================
+CREATE TABLE push_detail (
+    id BIGSERIAL PRIMARY KEY,                  -- 상세번호
+    push_id BIGINT NOT NULL REFERENCES tb_push(id), -- 전송번호 (FK)
+    user_id BIGINT,                            -- 수신자 회원번호
+    device_os VARCHAR(50),                     -- 디바이스 OS
+    device_token VARCHAR(300),                 -- 디바이스 토큰
+    phone VARCHAR(20),                         -- 전화번호
+    multicast_id VARCHAR(300),                 -- 다중ID
+    message_id VARCHAR(300),                   -- 메시지ID
+    registration_id VARCHAR(300),              -- 인증ID
+    error TEXT,                                -- 에러내용
+    success SMALLINT NOT NULL DEFAULT 0,       -- 성공여부 (0/1)
+    created_at TIMESTAMP,                      -- 전송일시
+    updated_at TIMESTAMP,                      -- 수정일시
+    deleted_at TIMESTAMP                       -- 삭제일시
+);
+
+
+
+
+
+
 -- ========================
 -- MQTT 인증정보
 -- ========================

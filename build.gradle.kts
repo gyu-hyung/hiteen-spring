@@ -93,6 +93,9 @@ dependencies {
     implementation("org.mapstruct:mapstruct:1.5.5.Final")
     kapt("org.mapstruct:mapstruct-processor:1.5.5.Final")
 
+    //firebase
+    implementation("com.google.firebase:firebase-admin:9.2.0")
+
 }
 
 

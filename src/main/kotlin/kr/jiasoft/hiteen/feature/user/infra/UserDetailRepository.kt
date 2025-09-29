@@ -1,6 +1,7 @@
 package kr.jiasoft.hiteen.feature.user.infra
 
 import kr.jiasoft.hiteen.feature.user.domain.UserDetailEntity
+import kr.jiasoft.hiteen.feature.user.dto.UserWithDetailDto
 import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 import org.springframework.stereotype.Repository
@@ -21,4 +22,12 @@ interface UserDetailRepository : CoroutineCrudRepository<UserDetailEntity, Long>
 
     @Query("DELETE FROM user_details WHERE user_id = :userId")
     suspend fun deleteByUserId(userId: Long): Int
+
+    @Query("""
+        SELECT u.id as userId, u.phone, d.device_os as deviceOs, d.device_token as deviceToken
+        FROM user u
+        JOIN user_detail d ON u.id = d.user_id
+        WHERE u.id IN (:userIds)
+    """)
+    suspend fun findUsersWithDetail(userIds: List<Long>): List<UserWithDetailDto>
 }
