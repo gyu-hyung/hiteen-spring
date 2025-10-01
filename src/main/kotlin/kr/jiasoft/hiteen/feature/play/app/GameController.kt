@@ -1,0 +1,95 @@
+package kr.jiasoft.hiteen.feature.play.app
+
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.Parameter
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.toList
+import kr.jiasoft.hiteen.common.dto.ApiResult
+import kr.jiasoft.hiteen.feature.play.domain.GameEntity
+import kr.jiasoft.hiteen.feature.play.domain.GameScoreEntity
+import kr.jiasoft.hiteen.feature.play.dto.ScoreRequest
+import kr.jiasoft.hiteen.feature.play.dto.SeasonRankingResponse
+import kr.jiasoft.hiteen.feature.play.dto.SeasonRoundResponse
+import kr.jiasoft.hiteen.feature.relationship.infra.FriendRepository
+import kr.jiasoft.hiteen.feature.user.domain.UserEntity
+import org.springframework.http.ResponseEntity
+import org.springframework.security.core.annotation.AuthenticationPrincipal
+import org.springframework.web.bind.annotation.*
+
+@RestController
+@RequestMapping("/api/games")
+class GameController(
+    private val gameService: GameService,
+    private val friendRepository: FriendRepository
+) {
+
+    @Operation(summary = "게임 목록 조회")
+    @GetMapping
+    suspend fun getAllGames(): List<GameEntity> {
+        return gameService.getAllGames()
+    }
+
+
+    @Operation(summary = "시즌 회차 목록 조회 (연도 + 리그 + 상태)")
+    @GetMapping("/seasons/{year}/{league}")
+    suspend fun getSeasonsByYearAndLeague(
+        @Parameter(description = "연도") @PathVariable year: Int,
+        @Parameter(description = "티어", example = "BRONZE") @PathVariable league: String,
+        @Parameter(description = "ACTIVE / CLOSED / PLANNED (없으면 전체)") @RequestParam(required = false) status: String?
+    ): ResponseEntity<ApiResult<List<SeasonRoundResponse>>>
+        = ResponseEntity.ok(ApiResult.success(gameService.getSeasonRounds(year, league, status)))
+
+
+    @Operation(summary = "점수 등록")
+    @PostMapping("/scores")
+    suspend fun recordScore(
+        @Parameter(description = "점수 등록 요청 DTO") req: ScoreRequest,
+        @AuthenticationPrincipal(expression = "user") user: UserEntity
+    ): ResponseEntity<ApiResult<GameScoreEntity>> =
+        ResponseEntity.ok(ApiResult.success(gameService.recordScore(
+            gameId = req.gameId,
+            score = req.score,
+            userId = user.id,
+            tierId = user.tierId
+        )))
+
+
+    @Operation(summary = "실시간 랭킹 조회 (game_scores + league 기준)")
+    @GetMapping("/realtime/{gameId}/{seasonId}")
+    suspend fun getRealtimeRanking(
+        @Parameter(description = "시즌 ID") @PathVariable seasonId: Long,
+        @Parameter(description = "게임 ID") @PathVariable gameId: Long,
+        @Parameter(description = "친구만 여부") @RequestParam(required = false) friendOnly: Boolean? = false,
+        @AuthenticationPrincipal(expression = "user") user: UserEntity
+    ): SeasonRankingResponse
+        = gameService.getRealtimeRanking(seasonId, gameId, user.id, friendOnly == true)
+
+
+    @Operation(summary = "시즌 랭킹 조회 (리그 기준)")
+    @GetMapping("/history/{seasonId}/{gameId}")
+    suspend fun getSeasonRanking(
+        @Parameter(description = "시즌 ID") @PathVariable seasonId: Long,
+        @Parameter(description = "게임 ID") @PathVariable gameId: Long,
+        @AuthenticationPrincipal(expression = "user") user: UserEntity
+    ): SeasonRankingResponse {
+        return gameService.getSeasonRanking(seasonId, gameId, user.id)
+    }
+
+
+    @Operation(summary = "친구 랭킹 조회 (리그 기준)")
+    @GetMapping("/history/{seasonId}/{gameId}/friends")
+    suspend fun getFriendRanking(
+        @Parameter(description = "시즌 ID") @PathVariable seasonId: Long,
+        @Parameter(description = "게임 ID") @PathVariable gameId: Long,
+//        @Parameter(description = "리그 (예: BRONZE, SILVER, GOLD...)") @PathVariable league: String,
+        @AuthenticationPrincipal(expression = "user") user: UserEntity
+    ): SeasonRankingResponse {
+        val friendIds = friendRepository.findAllAccepted(user.id).map {
+            if (it.userId == user.id) it.friendId else it.userId
+        }.toList()
+
+        return gameService.getSeasonRankingFiltered(seasonId, gameId, user.id, friendIds)
+    }
+
+
+}

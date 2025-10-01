@@ -784,6 +784,100 @@ CREATE TABLE poll_templates (
 
 
 -- ========================
+-- 게임 종류
+-- ========================
+CREATE TABLE games (
+  id          bigserial PRIMARY KEY,
+  code        varchar(50) NOT NULL UNIQUE, -- ex) NUMBER_SPEED, MEMORY, ENGLISH, BINGO
+  name        varchar(100) NOT NULL,       -- 노출 이름
+  description text,
+  status      varchar(20) DEFAULT 'ACTIVE',
+  created_at  timestamptz DEFAULT now(),
+  updated_at  timestamptz,
+  deleted_at  timestamptz
+);
+
+
+-- ========================
+-- 게임 점수 이력
+-- ========================
+CREATE TABLE game_scores (
+  id            bigserial PRIMARY KEY,
+  season_id 	bigint NOT NULL REFERENCES seasons(id) ON DELETE CASCADE,
+  participant_id bigint NOT NULL REFERENCES season_participants(id) ON DELETE CASCADE,
+  game_id       bigint NOT NULL REFERENCES games(id),
+  score         bigint NOT NULL,
+  try_count     integer DEFAULT 1,
+  created_at    timestamptz DEFAULT now(),
+  updated_at    timestamptz,
+  deleted_at    timestamptz,
+  UNIQUE (participant_id, game_id) -- 시즌/유저 단위 고유성 보장
+);
+
+
+-- ========================
+-- 게임 랭킹
+-- ========================
+CREATE TABLE game_rankings (
+  id             BIGSERIAL PRIMARY KEY,
+  season_id      BIGINT NOT NULL REFERENCES seasons(id) ON DELETE CASCADE,
+  participant_id BIGINT NOT NULL REFERENCES season_participants(id) ON DELETE CASCADE,
+  game_id        BIGINT NOT NULL REFERENCES games(id) ON DELETE CASCADE,
+  user_id        BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  rank           INTEGER NOT NULL,
+  score          INTEGER NOT NULL,
+  nickname       VARCHAR(50) NOT NULL,
+  profile_image  VARCHAR(255),
+  created_at     TIMESTAMPTZ DEFAULT now()
+);
+
+
+-- ========================
+-- 게임 회차
+-- ========================
+CREATE TABLE seasons (
+  id          bigserial PRIMARY KEY,
+  season_no   integer NOT NULL, -- 1,2,3... (자동 계산용)
+  start_date  date NOT NULL,
+  end_date    date NOT NULL,
+  status      varchar(20) DEFAULT 'ACTIVE', -- ACTIVE, CLOSED
+  league 	  varchar(20) NOT NULL,
+  created_at  timestamptz DEFAULT now(),
+  updated_at  timestamptz
+);
+
+
+-- ========================
+-- 게임 회차 > 참가자
+-- ========================
+CREATE TABLE season_participants (
+  id bigserial PRIMARY KEY,
+  season_id bigint NOT NULL REFERENCES seasons(id),
+  user_id bigint NOT NULL REFERENCES users(id),
+  tier_id bigint NOT NULL,  -- 시즌 시작 시점의 고정 티어
+  joined_at timestamptz DEFAULT now(),
+  joined_type varchar(20) DEFAULT 'INITIAL',-- INITIAL(시즌시작), BRONZE_JOIN(중간참여)
+  UNIQUE(season_id, user_id)
+);
+
+
+-- ========================
+-- 상품 지급 내역
+-- ========================
+CREATE TABLE rewards (
+  id          bigserial PRIMARY KEY,
+  season_id   bigint NOT NULL REFERENCES seasons(id),
+  user_id     bigint NOT NULL REFERENCES users(id),
+  league_code varchar(30) NOT NULL, -- BRONZE / PLATINUM / CHALLENGER
+  reward_type varchar(50),          -- GIFT_CARD, COUPON...
+  reward_value varchar(100),        -- "올영상품권 10,000원"
+  status      varchar(20) DEFAULT 'PENDING', -- PENDING / SENT / CANCELLED
+  created_at  timestamptz DEFAULT now(),
+  updated_at  timestamptz
+);
+
+
+-- ========================
 -- 채팅방
 -- ========================
 CREATE TABLE chat_rooms (
@@ -1051,4 +1145,12 @@ VALUES
 INSERT INTO tiers (tier_code, division_no, rank_order, min_points, max_points)
 VALUES
 ('CHALLENGER', 1, 22, 10000, 2147483647); -- 챌린저
+
+
+INSERT INTO games (code, name, description, status, created_at)
+VALUES
+  ('NUMBER_SPEED', '숫자 스피드 게임', '숫자를 빠르게 선택하는 게임', 'ACTIVE', now()),
+  ('MEMORY_TEST', '기억력 테스트', '순서를 기억하고 맞추는 게임', 'ACTIVE', now()),
+  ('WORD_CHALLENGE', '영단어 챌린지', '영단어 맞추기 게임', 'ACTIVE', now()),
+  ('BINGO', '빙고 게임', '빙고판에서 숫자를 맞추는 게임', 'ACTIVE', now());
 

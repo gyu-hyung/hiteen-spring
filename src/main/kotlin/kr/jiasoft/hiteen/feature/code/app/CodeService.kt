@@ -34,7 +34,7 @@ class CodeService(
         val uploaded = assetService.uploadImages(files, createdUserId)
         val results = mutableListOf<CodeEntity>()
 
-        uploaded.forEachIndexed { idx, asset ->
+        uploaded.forEach { asset ->
             lastIndex += 1
             val newCode = "${group.uppercase().take(1)}_%03d".format(lastIndex) // 예: E_001, C_001
 

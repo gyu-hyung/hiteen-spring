@@ -19,9 +19,7 @@ class FirebaseConfig {
             .build()
 
         return if (FirebaseApp.getApps().isEmpty()) {
-            val app = FirebaseApp.initializeApp(options)
-            println("Firebase ProjectId = ${options.projectId}")
-            return app
+            FirebaseApp.initializeApp(options)
         } else {
             FirebaseApp.getInstance()
         }

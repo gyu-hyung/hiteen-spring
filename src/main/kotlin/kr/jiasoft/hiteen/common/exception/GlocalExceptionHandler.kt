@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.bind.support.WebExchangeBindException
+import org.springframework.web.client.HttpClientErrorException
 
 
 @RestControllerAdvice
@@ -47,4 +48,45 @@ class GlobalExceptionHandler {
             .status(409) // 혹은 400 Bad Request로 맞춰도 됨
             .body(ApiResult(success = false, errors = errors))
     }
+
+
+    // 잘못된 상태 예외
+    @ExceptionHandler(IllegalStateException::class)
+    fun handleIllegalState(e: IllegalStateException): ResponseEntity<ApiResult<Nothing>> {
+        val errors = mapOf("state" to listOf(e.message ?: "잘못된 상태입니다."))
+        return ResponseEntity
+            .badRequest()
+            .body(ApiResult(success = false, errors = errors))
+    }
+
+    // 404 Not Found 전용
+    @ExceptionHandler(org.springframework.web.server.ResponseStatusException::class)
+    fun handleResponseStatusException(e: org.springframework.web.server.ResponseStatusException): ResponseEntity<ApiResult<Nothing>> {
+        return when (e.statusCode.value()) {
+            404 -> {
+                val errors = mapOf("not_found" to listOf(e.reason ?: "요청하신 API 또는 리소스를 찾을 수 없습니다."))
+                ResponseEntity
+                    .status(404)
+                    .body(ApiResult(success = false, errors = errors))
+            }
+            else -> {
+                val errors = mapOf("error" to listOf(e.reason ?: "요청 처리 중 오류가 발생했습니다."))
+                ResponseEntity
+                    .status(e.statusCode)
+                    .body(ApiResult(success = false, errors = errors))
+            }
+        }
+    }
+
+    // 최상위 에러 (404 등 잡히지 않은 나머지 모든 예외 처리)
+    @ExceptionHandler(Exception::class)
+    fun handleException(e: Exception): ResponseEntity<ApiResult<Nothing>> {
+        val errors = mapOf("error" to listOf("서버 내부 오류가 발생했습니다. 관리자에게 문의하세요."))
+        e.printStackTrace()
+        return ResponseEntity
+            .internalServerError()
+            .body(ApiResult(success = false, errors = errors))
+    }
+
+
 }
