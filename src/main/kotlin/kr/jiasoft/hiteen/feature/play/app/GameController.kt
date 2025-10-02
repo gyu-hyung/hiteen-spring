@@ -2,6 +2,7 @@ package kr.jiasoft.hiteen.feature.play.app
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
+import io.swagger.v3.oas.annotations.tags.Tag
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kr.jiasoft.hiteen.common.dto.ApiResult
@@ -16,6 +17,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
 
+@Tag(name = "Game", description = "게임 관련 API")
 @RestController
 @RequestMapping("/api/games")
 class GameController(
@@ -67,7 +69,7 @@ class GameController(
         = gameService.getRealtimeRanking(seasonId, gameId, user.id, friendOnly == true)
 
 
-    @Operation(summary = "시즌 랭킹 조회 (리그 기준)")
+    @Operation(summary = "시즌 랭킹 조회 (이력)")
     @GetMapping("/history/{seasonId}/{gameId}")
     suspend fun getSeasonRanking(
         @Parameter(description = "시즌 ID") @PathVariable seasonId: Long,
@@ -78,7 +80,7 @@ class GameController(
     }
 
 
-    @Operation(summary = "친구 랭킹 조회 (리그 기준)")
+    @Operation(summary = "친구 랭킹 조회 (이력)")
     @GetMapping("/history/{seasonId}/{gameId}/friends")
     suspend fun getFriendRanking(
         @Parameter(description = "시즌 ID") @PathVariable seasonId: Long,
@@ -92,6 +94,19 @@ class GameController(
 
         return gameService.getSeasonRankingFiltered(seasonId, gameId, user.id, friendIds)
     }
+
+
+    //TODO 경험치 5 하루 최대 3
+//    @Operation(summary = "공유하기")
+
+//    @Operation(summary = "영어 단어 학습목록")
+
+    //TODO 경험치 10
+//    @Operation(summary = "영어 단어 학습하기")
+
+
+
+
 
 
 }

@@ -5,6 +5,8 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import kr.jiasoft.hiteen.common.dto.ApiResult
 import kr.jiasoft.hiteen.feature.mbti.domain.MbtiAnswerRequest
 import kr.jiasoft.hiteen.feature.mbti.domain.MbtiQuestion
+import kr.jiasoft.hiteen.feature.point.app.PointService
+import kr.jiasoft.hiteen.feature.point.domain.PointPolicy
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import kr.jiasoft.hiteen.feature.user.infra.UserRepository
 import org.springframework.http.ResponseEntity
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.*
 class MbtiController(
     private val mbtiService: MbtiService,
     private val userRepository: UserRepository,
+    private val pointService: PointService,
 ) {
 
     @Operation(summary = "질문 목록 조회")
@@ -35,7 +38,9 @@ class MbtiController(
         val result = mbtiService.calculateResult(req.answers)
         userRepository.updateMbti(user.id, result["result"] as String)
 
-        // TODO: 포인트 사용 처리 (예: MBTI 검사 결과를 볼 때 포인트 차감)
+        if(!user.mbti.isNullOrBlank()) {
+            pointService.applyPolicy(user.id, PointPolicy.MBTI_TEST)
+        }
 
         return ResponseEntity.ok(ApiResult.success(result))
     }

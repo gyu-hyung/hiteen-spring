@@ -11,6 +11,8 @@ import kr.jiasoft.hiteen.feature.interest.dto.InterestUserResponse
 import kr.jiasoft.hiteen.feature.interest.infra.InterestMatchHistoryRepository
 import kr.jiasoft.hiteen.feature.interest.infra.InterestUserRepository
 import kr.jiasoft.hiteen.feature.level.app.ExpService
+import kr.jiasoft.hiteen.feature.point.app.PointService
+import kr.jiasoft.hiteen.feature.point.domain.PointPolicy
 import kr.jiasoft.hiteen.feature.school.infra.SchoolRepository
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import kr.jiasoft.hiteen.feature.user.dto.UserResponse
@@ -26,7 +28,8 @@ class InterestUserService(
     private val userPhotosRepository: UserPhotosRepository,
     private val userRepository: UserRepository,
     private val schoolRepository: SchoolRepository,
-    private val expService: ExpService
+    private val expService: ExpService,
+    private val pointService: PointService,
 ) {
 
     /** 특정 사용자 관심사 등록 */
@@ -112,6 +115,8 @@ class InterestUserService(
         )
 
         expService.grantExp(user.id, "TODAY_FRIEND_CHECK", targetUserId)
+        pointService.applyPolicy(user.id, PointPolicy.FRIEND_RECOMMEND)
+
         return FriendRecommendationResponse(
             user = targetUserResponse,
             interests = interests,

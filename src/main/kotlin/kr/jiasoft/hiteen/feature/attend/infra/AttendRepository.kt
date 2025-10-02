@@ -15,4 +15,18 @@ interface AttendRepository : CoroutineCrudRepository<AttendEntity, Long> {
 
     @Query("SELECT * FROM attends WHERE user_id = :userId AND attend_date = :date LIMIT 1")
     suspend fun findByUserIdAndAttendDate(userId: Long, date: LocalDate): AttendEntity?
+
+    @Query("""
+        WITH consecutive AS (
+            SELECT attend_date,
+                   ROW_NUMBER() OVER (ORDER BY attend_date DESC) AS rn
+            FROM attends
+            WHERE user_id = :userId
+        )
+        SELECT COUNT(*) 
+        FROM consecutive
+        WHERE attend_date = CURRENT_DATE - (rn - 1)
+    """)
+    suspend fun countConsecutiveAttendDays(userId: Long): Int
+
 }

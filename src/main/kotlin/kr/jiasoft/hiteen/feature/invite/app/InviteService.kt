@@ -5,6 +5,8 @@ import kotlinx.coroutines.flow.toList
 import kr.jiasoft.hiteen.feature.invite.domain.InviteEntity
 import kr.jiasoft.hiteen.feature.invite.infra.InviteRepository
 import kr.jiasoft.hiteen.feature.level.app.ExpService
+import kr.jiasoft.hiteen.feature.point.app.PointService
+import kr.jiasoft.hiteen.feature.point.domain.PointPolicy
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import kr.jiasoft.hiteen.feature.user.infra.UserRepository
 import org.springframework.stereotype.Service
@@ -16,7 +18,8 @@ import kotlin.random.Random
 class InviteService(
     private val inviteRepository: InviteRepository,
     private val userRepository: UserRepository,
-    private val expService: ExpService
+    private val expService: ExpService,
+    private val pointService: PointService,
 ) {
 
 
@@ -29,6 +32,7 @@ class InviteService(
     suspend fun giveInviteExp(userId: Long, targetUid: UUID) {
         userRepository.findByUid(targetUid.toString())?.let { user ->
             expService.grantExp(userId, "FRIEND_INVITE", user.id)
+            pointService.applyPolicy(userId, PointPolicy.FRIEND_INVITE, user.id)
         }
     }
 

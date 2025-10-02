@@ -2,6 +2,8 @@ package kr.jiasoft.hiteen.feature.report.app
 
 import kr.jiasoft.hiteen.feature.board.infra.BoardCommentRepository
 import kr.jiasoft.hiteen.feature.board.infra.BoardRepository
+import kr.jiasoft.hiteen.feature.level.app.ExpService
+import kr.jiasoft.hiteen.feature.point.app.PointService
 import kr.jiasoft.hiteen.feature.poll.infra.PollCommentRepository
 import kr.jiasoft.hiteen.feature.report.domain.ReportEntity
 import kr.jiasoft.hiteen.feature.report.infra.ReportRepository
@@ -13,50 +15,6 @@ import kr.jiasoft.hiteen.feature.user.infra.UserRepository
 import org.springframework.stereotype.Service
 import java.util.UUID
 
-//@Service
-//class ReportService(
-//    private val reportRepository: ReportRepository,
-//    private val userRepository: UserRepository,
-//    private val userService: UserService
-//) {
-//
-//    suspend fun createReport(userId: Long, userUid: UUID, req: ReportRequest): ReportResponse {
-//        val targetId = userRepository.findIdByUid(req.targetUid)
-//        val entity = ReportEntity(
-//            userId = userId,
-//            targetId = targetId,
-//            type = req.type,
-//            reportableType = req.reportableType,
-//            reportableId = req.reportableId,
-//            reason = req.reason,
-//            photoUid = req.photoUid
-//        )
-//        val saved = reportRepository.save(entity)
-//
-//
-//        // uid & summary 변환
-//        val targetUid = saved.targetId?.let { userRepository.findUidById(it) }
-//        val userSummary = saved.userId.let { userService.findUserSummary(it) }
-//        val targetSummary = saved.targetId?.let { userService.findUserSummary(it) }
-//
-//        return saved.toResponse(userUid, targetUid, userSummary, targetSummary)
-//    }
-//
-//    suspend fun getReportsByUser(userId: Long): List<ReportResponse> {
-//        val userUid = userRepository.findUidById(userId)
-//        val reports = reportRepository.findAllByUserId(userId)
-//
-//        return reports.map { report ->
-//            val targetUid = report.targetId?.let { userRepository.findUidById(it) }
-//            val userSummary = report.userId.let { userService.findUserSummary(it) }
-//            val targetSummary = report.targetId?.let { userService.findUserSummary(it) }
-//
-//            report.toResponse(userUid!!, targetUid, userSummary, targetSummary)
-//        }
-//    }
-//
-//}
-
 
 @Service
 class ReportService(
@@ -65,7 +23,9 @@ class ReportService(
     private val boardRepository: BoardRepository,
     private val boardCommentRepository: BoardCommentRepository,
     private val pollCommentRepository: PollCommentRepository,
-    private val userService: UserService
+    private val userService: UserService,
+    private val expService: ExpService,
+    private val pointService: PointService,
 ) {
 
     suspend fun createReport(userId: Long, userUid: UUID, req: ReportRequest): ReportResponse {
@@ -111,6 +71,9 @@ class ReportService(
         val targetUid = saved.targetId?.let { userRepository.findUidById(it) }
         val userSummary = userService.findUserSummary(saved.userId)
         val targetSummary = saved.targetId?.let { userService.findUserSummary(it) }
+
+        // 경험치 지급
+        expService.grantExp(saved.userId, "REPORT", saved.id)
 
         return saved.toResponse(userUid, targetUid, userSummary, targetSummary)
     }
