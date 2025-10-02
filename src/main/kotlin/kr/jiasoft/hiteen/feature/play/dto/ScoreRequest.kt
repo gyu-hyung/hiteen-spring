@@ -8,4 +8,9 @@ data class ScoreRequest(
     val gameId: Long,
     @param:Schema(description = "점수", example = "1")
     val score: Long,
+
+    @param:Schema(description = "광고 리워드 트랜잭션 ID", example = "1")
+    val transactionId: String? = null,
+    @param:Schema(description = "재도전 타입", example = "POINT / AD")
+    val retryType: String? = null
 )

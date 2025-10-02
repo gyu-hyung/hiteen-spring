@@ -1006,6 +1006,37 @@ CREATE TABLE push_detail (
 );
 
 
+-- ========================
+-- 포인트 적립/사용 내역
+-- ========================
+CREATE TABLE points (
+  id             BIGSERIAL PRIMARY KEY,
+  user_id        BIGINT NOT NULL REFERENCES users(id),
+  pointable_type VARCHAR(100),   -- 어떤 이벤트인지 (AD, GAME, PAYMENT 등)
+  pointable_id   BIGINT,         -- 연관 데이터 (게임ID, 광고 트랜잭션ID 등)
+  type           VARCHAR(50) NOT NULL, -- 'CREDIT' or 'DEBIT'
+  point          INT NOT NULL,
+  memo           VARCHAR(300),
+  created_at     TIMESTAMPTZ DEFAULT now(),
+  deleted_at     TIMESTAMPTZ
+);
+
+-- 조회 자주할 필드 인덱스
+CREATE INDEX idx_points_user_id ON points(user_id);
+CREATE INDEX idx_points_pointable ON points(pointable_type, pointable_id);
+
+
+-- ========================
+-- 광고 리워드 검증용 로그
+-- ========================
+CREATE TABLE admob_rewards (
+  id             BIGSERIAL PRIMARY KEY,
+  transaction_id VARCHAR(100) UNIQUE NOT NULL,
+  user_id        BIGINT NOT NULL REFERENCES users(id),
+  reward         INT NOT NULL,
+  raw_data       JSONB, -- webhook 전체 데이터 저장
+  created_at     TIMESTAMPTZ DEFAULT now()
+);
 
 
 
