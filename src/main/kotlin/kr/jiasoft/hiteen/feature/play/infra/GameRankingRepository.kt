@@ -8,8 +8,8 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface GameRankingRepository : CoroutineCrudRepository<GameRankingEntity, Long> {
-    fun findAllByGameId(gameId: Long): kotlinx.coroutines.flow.Flow<GameRankingEntity>
-    fun findAllByParticipantId(participantId: Long): kotlinx.coroutines.flow.Flow<GameRankingEntity>
+    fun findAllByGameId(gameId: Long): Flow<GameRankingEntity>
+    fun findAllByParticipantId(participantId: Long): Flow<GameRankingEntity>
 
     @Query("""
         SELECT * 

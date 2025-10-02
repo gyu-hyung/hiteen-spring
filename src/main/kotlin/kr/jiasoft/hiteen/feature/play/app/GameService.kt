@@ -2,6 +2,7 @@ package kr.jiasoft.hiteen.feature.play.app
 
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
+import kr.jiasoft.hiteen.feature.ad.app.AdService
 import kr.jiasoft.hiteen.feature.level.infra.TierRepository
 import kr.jiasoft.hiteen.feature.play.domain.*
 import kr.jiasoft.hiteen.feature.play.dto.RankingResponse
@@ -12,6 +13,7 @@ import kr.jiasoft.hiteen.feature.play.infra.GameRepository
 import kr.jiasoft.hiteen.feature.play.infra.GameScoreRepository
 import kr.jiasoft.hiteen.feature.play.infra.SeasonParticipantRepository
 import kr.jiasoft.hiteen.feature.play.infra.SeasonRepository
+import kr.jiasoft.hiteen.feature.point.app.PointService
 import kr.jiasoft.hiteen.feature.relationship.infra.FriendRepository
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -27,7 +29,10 @@ class GameService(
     private val tierRepository: TierRepository,
 
     private val rankingViewRepository: GameScoreRepository,
-    private val friendRepository: FriendRepository
+    private val friendRepository: FriendRepository,
+
+    private val pointService: PointService,
+    private val adService: AdService,
 ) {
 
 
@@ -54,8 +59,10 @@ class GameService(
         score: Long,
         userId: Long,
         tierId: Long,
-        tryCount: Int = 1
+        retryType: String? = null,
+        transactionId: String? = null,
     ): GameScoreEntity {
+        val today = LocalDate.now()
 
         // 0. gameId 유효성 체크
         val isValidGame = gameRepository.existsByIdAndDeletedAtIsNull(gameId)
@@ -65,7 +72,6 @@ class GameService(
 
         // 1. 이번 회차에 내가 속한 참가자 정보 찾기
         var participant = seasonParticipantRepository.findActiveParticipant(userId)
-
         if (participant == null) {
             // 참가자 없으면 → 현재 티어 기반으로 시즌 참가 자동 등록
             val tier = tierRepository.findById(tierId)
@@ -99,19 +105,51 @@ class GameService(
         val existing = gameScoreRepository.findBySeasonIdAndParticipantIdAndGameId(season.id, participant.id, gameId)
 
         return if (existing != null) {
-            val updated = existing.copy(
-                score = score,
-                tryCount = existing.tryCount + 1,
-                updatedAt = OffsetDateTime.now()
-            )
-            gameScoreRepository.save(updated)
+            val lastPlayedDate = existing.updatedAt?.toLocalDate() ?: existing.createdAt.toLocalDate()
+
+            if (lastPlayedDate.isEqual(today)) {
+                // 오늘 이미 플레이함 → 재도전 체크
+                if (existing.tryCount >= 1) {
+                    when (retryType) {
+                        "POINT" -> {
+                            try {
+                                pointService.usePoints(userId, 100, "GAME_RETRY", gameId, "게임 재도전")
+                            } catch (e: IllegalStateException) {
+                                throw IllegalStateException("포인트가 부족하여 재도전할 수 없습니다.")
+                            }
+                        }
+                        "AD" -> {
+                            if (transactionId == null) throw IllegalArgumentException("광고 재도전은 transactionId 가 필요합니다.")
+                            adService.verifyAdRewardAndUseForRetry(transactionId, userId, 100, 100, gameId = gameId)
+                        }
+
+                        else -> throw IllegalStateException("오늘 무료 도전 기회를 모두 사용했습니다.")
+                    }
+
+                }
+                val updated = existing.copy(
+                    score = score,
+                    tryCount = existing.tryCount + 1,
+                    updatedAt = OffsetDateTime.now()
+                )
+                gameScoreRepository.save(updated)
+            } else {
+                // 새로운 날짜 → tryCount 초기화
+                val updated = existing.copy(
+                    score = score,
+                    tryCount = 1,
+                    updatedAt = OffsetDateTime.now()
+                )
+                gameScoreRepository.save(updated)
+            }
+
         } else {
             val newScore = GameScoreEntity(
                 seasonId = season.id,
                 participantId = participant.id,
                 gameId = gameId,
                 score = score,
-                tryCount = tryCount
+                tryCount = 1
             )
             gameScoreRepository.save(newScore)
         }
@@ -141,6 +179,7 @@ class GameService(
                 profileImageUrl = it.assetUid,
                 score = it.score,
                 displayTime = formatScoreRaw(it.score),
+                tryCount = it.tryCount,
                 isMe = (it.userId == currentUserId)
             )
         }
@@ -196,6 +235,7 @@ class GameService(
                 profileImageUrl = it.profileImage,
                 score = it.score,
                 displayTime = formatScoreRaw(it.score),
+                tryCount = 0L,//TODO
                 isMe = (it.userId == currentUserId)
             )
         }

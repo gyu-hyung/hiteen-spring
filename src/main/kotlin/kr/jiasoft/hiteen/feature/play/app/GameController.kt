@@ -50,7 +50,9 @@ class GameController(
             gameId = req.gameId,
             score = req.score,
             userId = user.id,
-            tierId = user.tierId
+            tierId = user.tierId,
+            retryType = req.retryType,
+            transactionId = req.transactionId
         )))
 
 

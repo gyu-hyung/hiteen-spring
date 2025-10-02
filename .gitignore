@@ -39,5 +39,9 @@ out/
 ### Kotlin ###
 .kotlin
 
+### mac ###
+.DS_Store
+
+
 # Firebase service account credentials
 src/main/resources/firebase/*.json

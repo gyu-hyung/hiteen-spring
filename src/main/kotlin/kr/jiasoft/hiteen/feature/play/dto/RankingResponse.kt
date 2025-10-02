@@ -18,6 +18,8 @@ data class RankingResponse(
     val score: Long,
     @field:Schema(description = "표출 시간", example = "00:10:13")
     val displayTime: String,
+    @field:Schema(description = "시도 횟수", example = "1")
+    val tryCount: Long,
     @field:Schema(description = "나의 랭킹인지 여부", example = "true")
     val isMe: Boolean = false
 )
