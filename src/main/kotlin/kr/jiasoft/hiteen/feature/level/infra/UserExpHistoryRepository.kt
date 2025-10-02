@@ -72,4 +72,17 @@ interface UserExpHistoryRepository : CoroutineCrudRepository<UserExpHistoryEntit
     suspend fun existsTargetId(userId: Long, actionCode: String, targetId: Long): Boolean
 
 
+    @Query("""
+    SELECT COALESCE(SUM(points), 0)
+    FROM user_exp_history
+    WHERE user_id = :userId
+      AND action_code = :actionCode
+      AND DATE(created_at) = :date
+""")
+    suspend fun sumToday(
+        userId: Long,
+        actionCode: String,
+        date: LocalDate
+    ): Int?
+
 }

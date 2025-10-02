@@ -63,6 +63,50 @@ class ExpService(
 
 
     /**
+     * ✅ 세션 기반 경험치 부여
+     * - 여러 번 호출 가능
+     * - 하루 누적 30점까지만 적립
+     */
+    suspend fun grantSessionExp(
+        userId: Long,
+        sessionId: Long,
+        durationMinutes: Int
+    ) {
+        val today = LocalDate.now()
+
+        // 오늘 SESSION_REWARD 누적 점수
+        val todaySum = userExpHistoryRepository.sumToday(userId, "SESSION_REWARD", today) ?: 0
+        if (todaySum >= 30) return
+
+        // 접속 시간 → 점수 변환
+        val points = calculateSessionPoints(durationMinutes)
+        if (points <= 0) return
+
+        // 오늘 남은 적립 한도
+        val available = 30 - todaySum
+        val finalPoints = minOf(points, available)
+
+        // ✅ 내부적으로 기존 grantExp 재사용
+        grantExp(
+            userId = userId,
+            actionCode = "SESSION_REWARD",
+            targetId = sessionId,
+            dynamicPoints = finalPoints
+        )
+    }
+
+    private fun calculateSessionPoints(minutes: Int): Int =
+        when {
+            minutes <= 5 -> 5
+            minutes <= 15 -> 10
+            minutes <= 30 -> 20
+            else -> 30
+        }
+
+
+
+
+    /**
      * 액션별 검증 로직
      */
     private suspend fun validateAction(

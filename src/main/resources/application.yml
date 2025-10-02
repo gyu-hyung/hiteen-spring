@@ -236,11 +236,11 @@ exp:
       description: "연속 출석"
       points: 20
 
-#TODO
-    SESSION_TIME:
-      description: "접속 시간"
+    SESSION_REWARD:
       points: 0
-      dailyLimit: 30
+      description: "일일 접속 시간 보상"
+
+
 
     REPORT_CONTENT:
       description: "부적절 컨텐츠 신고받음"

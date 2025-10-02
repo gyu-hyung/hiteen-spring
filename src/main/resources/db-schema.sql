@@ -1039,6 +1039,18 @@ CREATE TABLE admob_rewards (
 );
 
 
+-- ========================
+-- 스크린타임
+-- ========================
+CREATE TABLE user_session (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    start_time TIMESTAMP NOT NULL,
+    end_time TIMESTAMP,
+    duration_minutes INT,
+    status VARCHAR(20) NOT NULL
+);
+
 
 
 -- ========================
