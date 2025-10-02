@@ -21,6 +21,8 @@ import kr.jiasoft.hiteen.feature.board.infra.BoardCommentRepository
 import kr.jiasoft.hiteen.feature.board.infra.BoardLikeRepository
 import kr.jiasoft.hiteen.feature.board.infra.BoardRepository
 import kr.jiasoft.hiteen.feature.level.app.ExpService
+import kr.jiasoft.hiteen.feature.point.app.PointService
+import kr.jiasoft.hiteen.feature.point.domain.PointPolicy
 import kr.jiasoft.hiteen.feature.user.app.UserService
 import org.springframework.dao.DuplicateKeyException
 import org.springframework.http.HttpStatus
@@ -41,6 +43,7 @@ class BoardService(
     private val userService: UserService,
 //    private val eloquent: CoroutineEloquent,
     private val expService: ExpService,
+    private val pointService: PointService,
 ) {
 
 //    suspend fun getUserBoards(userId: Long?): CursorResult<BoardResponse, Long> {
@@ -71,6 +74,12 @@ class BoardService(
 
         // 조회수 증가
         b.id.let { boards.increaseHits(it) }
+
+
+        // 공지사항/이벤트 확인 시 경험치 부여
+        if(b.category == "NOTICE" || b.category == "EVENT") {
+            expService.grantExp(userId, "NOTICE_READ", b.id)
+        }
 
         return b.copy(
             content = b.content,
@@ -184,7 +193,11 @@ class BoardService(
             }
         }
 
+        //경험치
         expService.grantExp(currentUserId, "CREATE_BOARD", saved.id)
+        //포인트
+        pointService.applyPolicy(currentUserId, PointPolicy.STORY_POST, saved.id)
+
 
         return saved.uid
     }
@@ -323,6 +336,7 @@ class BoardService(
         if (parent != null) comments.increaseReplyCount(parent.id)
 
         expService.grantExp(currentUserId, "CREATE_BOARD_COMMENT", saved.id)
+        pointService.applyPolicy(currentUserId, PointPolicy.STORY_COMMENT, saved.id)
         return saved.uid
     }
 

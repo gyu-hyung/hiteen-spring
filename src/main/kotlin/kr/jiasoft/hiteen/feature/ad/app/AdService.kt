@@ -2,34 +2,41 @@ package kr.jiasoft.hiteen.feature.ad.app
 
 import kr.jiasoft.hiteen.feature.ad.domain.AdmobRewardEntity
 import kr.jiasoft.hiteen.feature.ad.infra.AdmobRewardRepository
+import kr.jiasoft.hiteen.feature.level.app.ExpService
 import kr.jiasoft.hiteen.feature.point.app.PointService
+import kr.jiasoft.hiteen.feature.point.domain.PointPolicy
 import org.springframework.stereotype.Service
+
 
 @Service
 class AdService(
     private val admobRewardRepository: AdmobRewardRepository,
-    private val pointService: PointService
+    private val pointService: PointService,
+    private val expService: ExpService
 ) {
 
+    private val DAILY_AD_LIMIT = 5
+
     /**
-     * 광고 리워드 검증 및 포인트 지급
-     * - transactionId : 광고 SDK가 발급한 고유 트랜잭션
-     * - userId        : 광고를 본 사용자
-     * - rewardAmount  : 지급할 포인트
-     * - rawData       : 원본 JSON (옵션, 추후 디버깅/검증용)
+     * 광고 리워드 저장 + 포인트 지급 공통 처리
      */
-    suspend fun verifyAdRewardAndUseForRetry(
+    private suspend fun saveRewardAndGrantPoint(
         transactionId: String,
         userId: Long,
         rewardAmount: Int,
-        retryCost: Int, // 재도전 기본 비용
-        rawData: String? = null,
-        gameId: Long? = null
-    ) {
-        // 1. 중복 체크 (이미 지급된 트랜잭션이면 무시)
-        if (admobRewardRepository.existsByTransactionId(transactionId)) return
+        rawData: String? = null
+    ): AdmobRewardEntity? {
 
-        // TODO: 실제 Google AdMob 서버 검증 (SSV) API 호출
+        // 0. 이미 같은 트랜잭션이 처리됐으면 무시
+        if (admobRewardRepository.existsByTransactionId(transactionId)) return null
+
+        // 1. 오늘 지급된 광고 보상 횟수 체크
+        val todayCount = admobRewardRepository.countTodayByUserId(userId)
+        if (todayCount >= DAILY_AD_LIMIT) {
+            throw IllegalStateException("오늘은 광고 보상 횟수(최대 $DAILY_AD_LIMIT 회)를 모두 사용했습니다.")
+        }
+
+        // TODO: 2.실제 Google AdMob 서버 검증 (SSV) API 호출
         // try {
         //     val response = httpClient.post("https://www.google.com/admob/ssv/verify") {
         //         parameter("transaction_id", transactionId)
@@ -43,7 +50,7 @@ class AdService(
         //     throw IllegalStateException("광고 검증 중 오류 발생", ex)
         // }
 
-        // 광고 리워드 기록 (PK id 사용 예정)
+        // 3. 광고 리워드 기록
         val reward = admobRewardRepository.save(
             AdmobRewardEntity(
                 transactionId = transactionId,
@@ -53,25 +60,40 @@ class AdService(
             )
         )
 
+        // 4. 광고 포인트/경험치 지급
+        pointService.applyPolicy(userId, PointPolicy.AD_REWARD, reward.id)
+        expService.grantExp(userId, "WATCH_AD", reward.id)
 
-        // 3. 포인트 적립
-        pointService.addPoints(
-            userId = userId,
-            amount = rewardAmount,
-            type = "AD",
-            refType = "AD_REWARD",
-            refId = reward.id, // 트랜잭션ID를 참조ID로 저장 가능
-            memo = "[광고보기] ${rewardAmount}P 지급"
-        )
+        return reward
+    }
 
-        // 4. 재도전 차감
-        pointService.usePoints(
-            userId = userId,
-            amount = retryCost,
-            refType = "GAME_RETRY",
-            refId = gameId,
-            memo = "광고 재도전 (비용 ${retryCost}P 차감)"
-        )
+    /**
+     * 광고 리워드 검증 및 포인트 지급 (차감 없음)
+     */
+    suspend fun verifyAdReward(
+        transactionId: String,
+        userId: Long,
+        rewardAmount: Int,
+        rawData: String? = null
+    ) {
+        saveRewardAndGrantPoint(transactionId, userId, rewardAmount, rawData)
+    }
 
+    /**
+     * 광고 리워드 검증 + 게임 재도전 비용 차감
+     */
+    suspend fun verifyAdRewardAndUseForRetry(
+        transactionId: String,
+        userId: Long,
+        rewardAmount: Int,
+        rawData: String? = null,
+        gameId: Long? = null
+    ) {
+        saveRewardAndGrantPoint(transactionId, userId, rewardAmount, rawData)
+            ?: return // 이미 지급된 트랜잭션이면 차감도 안 함
+
+        // 4. 게임 재도전 비용 차감
+        pointService.applyPolicy(userId, PointPolicy.GAME_PLAY, gameId)
     }
 }
+

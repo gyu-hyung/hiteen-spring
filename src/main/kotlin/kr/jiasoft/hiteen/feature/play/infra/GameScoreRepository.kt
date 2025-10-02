@@ -23,13 +23,17 @@ interface GameScoreRepository : CoroutineCrudRepository<GameScoreEntity, Long> {
                ranked.nickname,
                ranked.asset_uid,
                ranked.score,
-               ranked.try_count
+               ranked.try_count,
+               ranked.created_at,
+               ranked.updated_at          
         FROM (
             SELECT u.id AS user_id,
                    u.nickname,
                    u.asset_uid,
                    gs.score,
                    gs.try_count,
+                   gs.created_at,
+                   gs.updated_at,
                    ROW_NUMBER() OVER (ORDER BY gs.score ASC, gs.created_at ASC) AS rank
             FROM game_scores gs
             JOIN season_participants sp ON gs.participant_id = sp.id

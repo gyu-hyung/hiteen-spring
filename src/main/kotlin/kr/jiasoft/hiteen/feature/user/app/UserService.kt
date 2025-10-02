@@ -10,6 +10,8 @@ import kr.jiasoft.hiteen.feature.interest.infra.InterestUserRepository
 import kr.jiasoft.hiteen.feature.invite.app.InviteService
 import kr.jiasoft.hiteen.feature.level.domain.TierCode
 import kr.jiasoft.hiteen.feature.level.infra.TierRepository
+import kr.jiasoft.hiteen.feature.point.app.PointService
+import kr.jiasoft.hiteen.feature.point.domain.PointPolicy
 import kr.jiasoft.hiteen.feature.relationship.app.FollowService
 import kr.jiasoft.hiteen.feature.relationship.app.FriendService
 import kr.jiasoft.hiteen.feature.school.infra.SchoolRepository
@@ -46,6 +48,7 @@ class UserService (
     private val boardRepository: BoardRepository,
     private val inviteService: InviteService,
     private val tierRepository: TierRepository,
+    private val pointService: PointService,
 ) : ReactiveUserDetailsService {
 
     override fun findByUsername(username: String): Mono<UserDetails> = mono {
@@ -112,6 +115,9 @@ class UserService (
                 )
             }
         }
+
+        //포인트 지급
+        pointService.applyPolicy(updated.id, PointPolicy.SIGNUP)
 
         return UserResponse.from(updated, school)
     }

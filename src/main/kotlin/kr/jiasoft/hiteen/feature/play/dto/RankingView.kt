@@ -1,6 +1,8 @@
 package kr.jiasoft.hiteen.feature.play.dto
 
+import com.fasterxml.jackson.annotation.JsonFormat
 import io.swagger.v3.oas.annotations.media.Schema
+import java.time.OffsetDateTime
 
 @Schema(description = "랭킹 정보 view DTO")
 data class RankingView(
@@ -20,5 +22,13 @@ data class RankingView(
     val score: Long,
 
     @field:Schema(description = "시도 횟수", example = "2")
-    val tryCount: Long
+    val tryCount: Long,
+
+    @param:Schema(description = "랭킹 생성 시간", example = "2025.09.18 10:15")
+    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm")
+    val createdAt: OffsetDateTime? = null,
+
+    @param:Schema(description = "랭킹 생성 시간", example = "2025.09.18 10:15")
+    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm")
+    val updatedAt: OffsetDateTime? = null,
 )

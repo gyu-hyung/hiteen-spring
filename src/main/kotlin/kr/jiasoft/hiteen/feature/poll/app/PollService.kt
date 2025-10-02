@@ -7,6 +7,8 @@ import kotlinx.coroutines.flow.toList
 import kr.jiasoft.hiteen.common.exception.BusinessValidationException
 import kr.jiasoft.hiteen.feature.asset.app.AssetService
 import kr.jiasoft.hiteen.feature.level.app.ExpService
+import kr.jiasoft.hiteen.feature.point.app.PointService
+import kr.jiasoft.hiteen.feature.point.domain.PointPolicy
 import kr.jiasoft.hiteen.feature.poll.domain.*
 import kr.jiasoft.hiteen.feature.poll.dto.*
 import kr.jiasoft.hiteen.feature.poll.infra.*
@@ -29,7 +31,9 @@ class PollService(
     private val objectMapper: ObjectMapper,
     private val pollLikes: PollLikeRepository,
     private val userService: UserService,
+
     private val expService: ExpService,
+    private val pointService: PointService,
 ) {
 
     private enum class PollStatus {
@@ -129,6 +133,7 @@ class PollService(
         )
 
         expService.grantExp(userId, "CREATE_VOTE", saved.id)
+        pointService.applyPolicy(userId, PointPolicy.VOTE_QUESTION, saved.id)
         return saved.id
     }
 
@@ -242,6 +247,7 @@ class PollService(
         if (parent != null) comments.increaseReplyCount(parent.id)
 
         expService.grantExp(userId, "CREATE_VOTE_COMMENT", saved.id)
+        pointService.applyPolicy(userId, PointPolicy.VOTE_COMMENT, saved.id)
         return saved.id
     }
 

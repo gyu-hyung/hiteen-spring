@@ -28,31 +28,39 @@ class ExpService(
         val points = dynamicPoints ?: action.points
         if (points == 0) return
 
-        // 액션별 검증
+        // 액션별 검증 (일일 제한 등)
         if (!validateAction(userId, actionCode, targetId, action.dailyLimit)) return
 
         // 유저 조회
         val user = userRepository.findById(userId) ?: return
-        var newExp = (user.expPoints) + points
+        var newExp = (user.expPoints) + points   // points 가 음수면 감점
 
-        // 티어 갱신
+        // EXP 최소 0 이하로 떨어지지 않게 보정
+        if (newExp < 0) newExp = 0
+
+        // 티어 갱신 (감점일 경우도 고려)
         val newTier = tierRepository.findByPoints(newExp)
-        //레벨업 5점 추가
-        if(newTier?.id != user.tierId) newExp += 5
 
+        // ✅ 가산점일 때만 레벨업 보너스 15점 추가
+        if (points > 0 && newTier?.id != user.tierId) {
+            newExp += 15
+        }
+
+        // DB 업데이트
         userRepository.updateExpAndTier(userId, newExp, newTier?.id)
 
-        // 이력 기록
+        // 이력 기록 (가산/감점 모두 기록)
         userExpHistoryRepository.save(
             UserExpHistoryEntity(
                 userId = userId,
                 actionCode = actionCode,
                 targetId = targetId,
-                points = points,
-                reason = action.description
+                points = points, // 음수 가능
+                reason = if (points > 0) action.description else "[감점] ${action.description}"
             )
         )
     }
+
 
     /**
      * 액션별 검증 로직
@@ -76,6 +84,7 @@ class ExpService(
             "LIKE_BOARD_COMMENT" -> existTargetId(userId, actionCode, targetId!!, dailyLimit)
             "LIKE_VOTE_COMMENT" -> existTargetId(userId, actionCode, targetId!!, dailyLimit)
             "FRIEND_INVITE" -> existTargetId(userId, actionCode, targetId!!, dailyLimit)
+            "NOTICE_READ" -> existTargetId(userId, actionCode, targetId!!, dailyLimit)
             else -> validateCommon(userId, actionCode, dailyLimit)
         }
     }
