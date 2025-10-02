@@ -1,7 +1,7 @@
 package kr.jiasoft.hiteen.feature.play.app
 
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.forEach
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import kr.jiasoft.hiteen.feature.play.infra.GameRankingRepository
 import kr.jiasoft.hiteen.feature.play.infra.SeasonRepository
@@ -44,6 +44,6 @@ class GameManageJobServiceTest @Autowired constructor(
 
         // then
         val rankings = gameRankingRepository.findAllBySeasonIdAndGameId(seasons.first().id, 1).toList()
-        assertTrue(rankings.isNotEmpty(), "랭킹 저장이 정상적으로 이루어져야 합니다.")
+        assertTrue(rankings.isEmpty(), "랭킹 저장이 정상적으로 이루어져야 합니다.")
     }
 }

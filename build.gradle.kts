@@ -33,6 +33,8 @@ dependencies {
 	testImplementation("io.projectreactor:reactor-test")
 	testImplementation("org.jetbrains.kotlin:kotlin-test")
 
+    testImplementation("io.mockk:mockk:1.13.12")
+
 	// Spring Security
 	implementation("org.springframework.boot:spring-boot-starter-security")
 
