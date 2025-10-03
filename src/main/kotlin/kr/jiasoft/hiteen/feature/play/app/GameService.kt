@@ -69,48 +69,45 @@ class GameService(
         val today = LocalDate.now()
         val wordChallengeGameId = gameRepository.findByCode("WORD_CHALLENGE")?.id
 
-        // 0. 게임 유효성 체크
         if (!gameRepository.existsByIdAndDeletedAtIsNull(gameId)) {
             throw IllegalArgumentException("유효하지 않은 게임 ID 입니다. (gameId=$gameId)")
         }
 
-        // 1. 시즌 참가자 확보
         val participant = getOrCreateParticipant(userId, tierId)
-
-        // 2. 시즌 유효성 검증
         val season = validateSeason(participant.seasonId)
 
-        // 3. 기존 점수 여부 확인
         val existing = gameScoreRepository.findBySeasonIdAndParticipantIdAndGameId(season.id, participant.id, gameId)
 
-        // 4. 경험치 지급
+        return if (existing != null) {
+            val lastPlayedDate = existing.updatedAt?.toLocalDate() ?: existing.createdAt.toLocalDate()
+
+            if (lastPlayedDate.isEqual(today)) {
+
+                handleRetry(retryType, transactionId, userId, gameId)
+                grantExp(userId, gameId, wordChallengeGameId)
+                saveOrUpdateScore(existing, score, existing.tryCount + 1)
+            } else {
+
+                pointService.applyPolicy(userId, PointPolicy.GAME_PLAY, gameId)
+                grantExp(userId, gameId, wordChallengeGameId)
+                saveOrUpdateScore(existing, score, 1)
+            }
+        } else {
+
+            pointService.applyPolicy(userId, PointPolicy.GAME_PLAY, gameId)
+            grantExp(userId, gameId, wordChallengeGameId)
+            createNewScore(season.id, participant.id, gameId, score)
+        }
+    }
+
+    private suspend fun grantExp(userId: Long, gameId: Long, wordChallengeGameId: Long?) {
         if (gameId == wordChallengeGameId) {
             expService.grantExp(userId, "GAME_PLAY", gameId, 15)
         } else {
             expService.grantExp(userId, "GAME_PLAY", gameId)
         }
-
-        // 5. 점수 처리
-        return if (existing != null) {
-            val lastPlayedDate = existing.updatedAt?.toLocalDate() ?: existing.createdAt.toLocalDate()
-
-            // 오늘 이미 플레이함 → 재도전 처리
-            if (lastPlayedDate.isEqual(today)) {
-
-                handleRetry(existing, retryType, transactionId, userId, gameId)
-                saveOrUpdateScore(existing, score, existing.tryCount + 1)
-
-            } else {
-                // 오늘 첫 게임 → 무료지만 기본 차감
-                pointService.applyPolicy(userId, PointPolicy.GAME_PLAY, gameId)
-                saveOrUpdateScore(existing, score, 1)
-            }
-        } else {
-            // 시즌 첫 게임
-            pointService.applyPolicy(userId, PointPolicy.GAME_PLAY, gameId)
-            createNewScore(season.id, participant.id, gameId, score)
-        }
     }
+
 
     // =============== 헬퍼 메서드 ===============
 
@@ -142,20 +139,19 @@ class GameService(
     }
 
     private suspend fun handleRetry(
-        existing: GameScoreEntity,
         retryType: String?,
         transactionId: String?,
         userId: Long,
         gameId: Long
     ) {
-        if (existing.tryCount < 1) return // 무료 첫판은 허용
         when (retryType) {
             "POINT" -> pointService.applyPolicy(userId, PointPolicy.GAME_PLAY, gameId)
             "AD" -> {
                 if (transactionId == null) throw IllegalArgumentException("광고 재도전은 transactionId 가 필요합니다.")
-                adService.verifyAdRewardAndUseForRetry(transactionId, userId, 100, gameId = gameId)
+                // 광고 시청 인증, 재도전(최대 5회) 보상 횟수 체크 포함
+                adService.verifyAdRewardAndUseForRetry(transactionId, userId, gameId)
             }
-            else -> throw IllegalStateException("오늘 무료 도전 기회를 모두 사용했습니다.")
+            else -> throw IllegalStateException("오늘 이미 게임을 진행했어~")
         }
     }
 

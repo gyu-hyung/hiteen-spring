@@ -50,6 +50,15 @@ class GlobalExceptionHandler {
     }
 
 
+    // 잘못된 값
+    @ExceptionHandler(IllegalArgumentException::class)
+    fun handleIllegalArgument(ex: IllegalArgumentException): ResponseEntity<ApiResult<Nothing>> {
+        val errors = mapOf("state" to listOf(ex.message ?: "잘못된 요청입니다."))
+        return ResponseEntity
+            .badRequest()
+            .body(ApiResult(success = true, errors = errors))
+    }
+
     // 잘못된 상태 예외
     @ExceptionHandler(IllegalStateException::class)
     fun handleIllegalState(e: IllegalStateException): ResponseEntity<ApiResult<Nothing>> {

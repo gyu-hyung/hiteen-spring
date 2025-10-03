@@ -28,7 +28,6 @@ class AdController(
         adService.verifyAdReward(
             transactionId = req.transactionId,
             userId = user.id,
-            rewardAmount = req.rewardAmount,
             rawData = req.rawData
         )
         return ResponseEntity.ok(ApiResult.success())

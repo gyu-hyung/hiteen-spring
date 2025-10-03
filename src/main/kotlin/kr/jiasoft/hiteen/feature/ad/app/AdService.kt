@@ -18,17 +18,16 @@ class AdService(
     private val DAILY_AD_LIMIT = 5
 
     /**
-     * 광고 리워드 저장 + 포인트 지급 공통 처리
+     * 광고 리워드 저장 + 포인트 지급 공통 처리, 보상 횟수 체크 포함
      */
     private suspend fun saveRewardAndGrantPoint(
         transactionId: String,
         userId: Long,
-        rewardAmount: Int,
         rawData: String? = null
-    ): AdmobRewardEntity? {
+    ): AdmobRewardEntity {
 
-        // 0. 이미 같은 트랜잭션이 처리됐으면 무시
-        if (admobRewardRepository.existsByTransactionId(transactionId)) return null
+        // 0. 트랜잭션 ID 유효성
+        if (admobRewardRepository.existsByTransactionId(transactionId)) throw IllegalArgumentException("이미 처리된 트랜잭션 ID입니다.")
 
         // 1. 오늘 지급된 광고 보상 횟수 체크
         val todayCount = admobRewardRepository.countTodayByUserId(userId)
@@ -55,7 +54,7 @@ class AdService(
             AdmobRewardEntity(
                 transactionId = transactionId,
                 userId = userId,
-                reward = rewardAmount,
+                reward = PointPolicy.AD_REWARD.amount,
                 rawData = rawData
             )
         )
@@ -73,10 +72,9 @@ class AdService(
     suspend fun verifyAdReward(
         transactionId: String,
         userId: Long,
-        rewardAmount: Int,
         rawData: String? = null
     ) {
-        saveRewardAndGrantPoint(transactionId, userId, rewardAmount, rawData)
+        saveRewardAndGrantPoint(transactionId, userId, rawData)
     }
 
     /**
@@ -85,12 +83,10 @@ class AdService(
     suspend fun verifyAdRewardAndUseForRetry(
         transactionId: String,
         userId: Long,
-        rewardAmount: Int,
+        gameId: Long? = null,
         rawData: String? = null,
-        gameId: Long? = null
     ) {
-        saveRewardAndGrantPoint(transactionId, userId, rewardAmount, rawData)
-            ?: return // 이미 지급된 트랜잭션이면 차감도 안 함
+        saveRewardAndGrantPoint(transactionId, userId, rawData)
 
         // 4. 게임 재도전 비용 차감
         pointService.applyPolicy(userId, PointPolicy.GAME_PLAY, gameId)
