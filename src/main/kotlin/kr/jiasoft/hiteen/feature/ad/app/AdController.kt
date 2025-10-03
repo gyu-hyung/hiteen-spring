@@ -8,6 +8,7 @@ import kr.jiasoft.hiteen.feature.ad.dto.AdRewardRequest
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -18,6 +19,14 @@ import org.springframework.web.bind.annotation.RestController
 class AdController(
     private val adService: AdService
 ) {
+
+    @Operation(summary = "남은 광고 보기 수 ")
+    @GetMapping("/remaining")
+    suspend fun getRemainingCount(
+        @AuthenticationPrincipal(expression = "user") user: UserEntity,
+    ): ResponseEntity<ApiResult<Int>> {
+        return ResponseEntity.ok(ApiResult.success(adService.getRemainingCount(user.id)))
+    }
 
     @Operation(summary = "광고 보기 보상")
     @PostMapping("/reward")
