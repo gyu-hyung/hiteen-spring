@@ -82,6 +82,14 @@ class AdService(
     }
 
     /**
+     * 남은 광고 보기 수
+     * */
+    suspend fun getRemainingCount(userId: Long) : Int {
+        val todayCount = admobRewardRepository.countTodayByUserId(userId) // 저장 이후 카운트
+        return  DAILY_AD_LIMIT - todayCount
+    }
+
+    /**
      * 광고 리워드 검증 + 게임 재도전 비용 차감
      */
     suspend fun verifyAdRewardAndUseForRetry(
