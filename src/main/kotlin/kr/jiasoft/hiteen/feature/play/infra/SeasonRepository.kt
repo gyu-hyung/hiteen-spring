@@ -51,7 +51,7 @@ interface SeasonRepository : CoroutineCrudRepository<SeasonEntity, Long> {
         WHERE EXTRACT(YEAR FROM s.start_date) = :year
           AND s.league = :league
           AND (:status IS NULL OR s.status = :status)
-        ORDER BY year DESC, month, round_no
+        ORDER BY year DESC, month, season_no desc
         """
     )
     fun findSeasonsByYearAndLeagueAndStatus(

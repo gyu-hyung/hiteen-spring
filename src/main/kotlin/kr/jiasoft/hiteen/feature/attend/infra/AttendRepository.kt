@@ -2,6 +2,7 @@ package kr.jiasoft.hiteen.feature.attend.infra
 
 import kotlinx.coroutines.flow.Flow
 import kr.jiasoft.hiteen.feature.attend.domain.AttendEntity
+import kr.jiasoft.hiteen.feature.session.dto.ConsecutiveAttendDay
 import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 import org.springframework.stereotype.Repository
@@ -23,10 +24,27 @@ interface AttendRepository : CoroutineCrudRepository<AttendEntity, Long> {
             FROM attends
             WHERE user_id = :userId
         )
-        SELECT COUNT(*) 
+        SELECT COUNT(*)
         FROM consecutive
-        WHERE attend_date = CURRENT_DATE - (rn - 1)
+        WHERE attend_date = CURRENT_DATE - ((rn - 1) * INTERVAL '1 day')
     """)
     suspend fun countConsecutiveAttendDays(userId: Long): Int
+
+
+    @Query("""
+    WITH consecutive AS (
+        SELECT attend_date,
+               ROW_NUMBER() OVER (ORDER BY attend_date DESC) AS rn
+        FROM attends
+        WHERE user_id = :userId
+    )
+    SELECT attend_date,
+           rn
+    FROM consecutive
+    WHERE attend_date = CURRENT_DATE - ((rn - 1) * INTERVAL '1 day')
+    ORDER BY attend_date ASC
+""")
+    fun findConsecutiveAttendDays(userId: Long): Flow<ConsecutiveAttendDay>
+
 
 }

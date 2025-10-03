@@ -10,7 +10,7 @@ interface PointRepository : CoroutineCrudRepository<PointEntity, Long> {
 
     @Query("""
         SELECT COUNT(*) 
-        FROM tb_point 
+        FROM points 
         WHERE user_id = :userId 
           AND pointable_type = :policyCode 
           AND DATE(created_at) = :today

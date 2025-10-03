@@ -6,6 +6,7 @@ import kr.jiasoft.hiteen.feature.attend.infra.AttendRepository
 import kr.jiasoft.hiteen.feature.level.app.ExpService
 import kr.jiasoft.hiteen.feature.point.app.PointService
 import kr.jiasoft.hiteen.feature.point.domain.PointPolicy
+import kr.jiasoft.hiteen.feature.session.dto.ConsecutiveAttendDay
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -22,6 +23,13 @@ class AttendService(
     suspend fun view(user: UserEntity): List<AttendEntity> {
         return attendRepository.findAllByUserId(user.id).toList()
     }
+
+    /** 연속 출석일수 조회 */
+    suspend fun consecutiveAttendDays(user: UserEntity): List<ConsecutiveAttendDay> {
+        return attendRepository.findConsecutiveAttendDays(user.id).toList()
+    }
+
+
 
     /**
      * 출석하기

@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation
 import kr.jiasoft.hiteen.common.dto.ApiResult
 import kr.jiasoft.hiteen.common.exception.BusinessValidationException
 import kr.jiasoft.hiteen.feature.attend.domain.AttendEntity
+import kr.jiasoft.hiteen.feature.session.dto.ConsecutiveAttendDay
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
@@ -18,14 +19,25 @@ class AttendController(
     private val attendService: AttendService
 ) {
 
-    @Operation(summary = "출석 현황")
+//    @Operation(summary = "출석 현황 - unused")
+//    @GetMapping
+//    suspend fun view(
+//        @AuthenticationPrincipal(expression = "user") user: UserEntity
+//    ): ResponseEntity<ApiResult<List<AttendEntity>>> {
+//        val data = attendService.view(user)
+//        return ResponseEntity.ok(ApiResult.success(data))
+//    }
+
+
+    @Operation(summary = "연속 출석 현황")
     @GetMapping
-    suspend fun view(
+    suspend fun consecutiveAttendDays(
         @AuthenticationPrincipal(expression = "user") user: UserEntity
-    ): ResponseEntity<ApiResult<List<AttendEntity>>> {
-        val data = attendService.view(user)
+    ): ResponseEntity<ApiResult<List<ConsecutiveAttendDay>>> {
+        val data = attendService.consecutiveAttendDays(user)
         return ResponseEntity.ok(ApiResult.success(data))
     }
+
 
     @Operation(summary = "출석하기")
     @PostMapping
