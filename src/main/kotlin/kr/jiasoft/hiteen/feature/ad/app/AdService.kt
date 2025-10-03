@@ -1,6 +1,7 @@
 package kr.jiasoft.hiteen.feature.ad.app
 
 import kr.jiasoft.hiteen.feature.ad.domain.AdmobRewardEntity
+import kr.jiasoft.hiteen.feature.ad.dto.AdRewardResult
 import kr.jiasoft.hiteen.feature.ad.infra.AdmobRewardRepository
 import kr.jiasoft.hiteen.feature.level.app.ExpService
 import kr.jiasoft.hiteen.feature.point.app.PointService
@@ -67,14 +68,17 @@ class AdService(
     }
 
     /**
-     * 광고 리워드 검증 및 포인트 지급 (차감 없음)
+     * 광고 리워드 검증 및 포인트 지급 (차감 없음) + 남은 횟수 반환
      */
     suspend fun verifyAdReward(
         transactionId: String,
         userId: Long,
         rawData: String? = null
-    ) {
-        saveRewardAndGrantPoint(transactionId, userId, rawData)
+    ): AdRewardResult {
+        val reward = saveRewardAndGrantPoint(transactionId, userId, rawData)
+        val todayCount = admobRewardRepository.countTodayByUserId(userId) // 저장 이후 카운트
+        val remaining = DAILY_AD_LIMIT - todayCount
+        return AdRewardResult(reward, remaining)
     }
 
     /**
