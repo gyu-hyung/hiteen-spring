@@ -90,8 +90,6 @@ dependencies {
     // Aop
     implementation("org.springframework.boot:spring-boot-starter-aop")
 
-    implementation(project(":coroutine-eloquent"))
-
     implementation("org.mapstruct:mapstruct:1.5.5.Final")
     kapt("org.mapstruct:mapstruct-processor:1.5.5.Final")
 

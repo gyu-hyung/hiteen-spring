@@ -4,8 +4,6 @@ import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonIgnore
 import io.swagger.v3.oas.annotations.media.Schema
 import kr.jiasoft.hiteen.common.dto.ApiPageCursor
-import kr.jiasoft.hiteen.eloquent.annotation.BelongsTo
-import kr.jiasoft.hiteen.eloquent.annotation.HasMany
 import kr.jiasoft.hiteen.feature.user.dto.UserSummary
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Table
@@ -81,11 +79,9 @@ data class BoardResponse(
     @param:Schema(description = "내가 좋아요 눌렀는지 여부", example = "true")
     val likedByMe: Boolean? = false,
 
-    @BelongsTo(target = UserSummary::class, foreignKey = "createdId")
     @param:Schema(description = "작성자 요약 정보")
     val user: UserSummary? = null,
 
-    @HasMany(target = BoardCommentResponse::class, foreignKey = "boardId")
     @param:Schema(description = "댓글 목록 (커서 기반 페이지네이션)")
     val comments: ApiPageCursor<BoardCommentResponse>? = null,
 )
