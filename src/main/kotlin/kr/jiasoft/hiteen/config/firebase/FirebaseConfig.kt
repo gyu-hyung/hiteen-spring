@@ -12,10 +12,10 @@ import org.springframework.core.io.ClassPathResource
 class FirebaseConfig {
     @Bean
     fun firebaseApp(): FirebaseApp {
-        val resource = ClassPathResource("firebase/back-end-template01-firebase-adminsdk-fbsvc-e777ccc663.json")
+        val resource = ClassPathResource("firebase/gyuhyungfcm-firebase-adminsdk-fbsvc-783efd0df8.json")
         val options = FirebaseOptions.builder()
             .setCredentials(GoogleCredentials.fromStream(resource.inputStream))
-            .setProjectId("back-end-template01")
+//            .setProjectId("back-end-template01")
             .build()
 
         return if (FirebaseApp.getApps().isEmpty()) {

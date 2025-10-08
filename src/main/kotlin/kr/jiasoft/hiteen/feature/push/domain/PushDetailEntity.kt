@@ -9,7 +9,7 @@ data class PushDetailEntity(
     @Id
     val id: Long = 0L,
 
-    val pushId: Long,               // FK to tb_push
+    val pushId: Long?,               // FK to tb_push
     val userId: Long? = null,
     val deviceOs: String? = null,
     val deviceToken: String? = null,
@@ -20,7 +20,7 @@ data class PushDetailEntity(
     val registrationId: String? = null,
 
     val error: String? = null,
-    val success: Boolean = false,   // tinyint → Boolean
+    val success: Int = 0,
 
     val createdAt: OffsetDateTime? = null,
     val updatedAt: OffsetDateTime? = null,
