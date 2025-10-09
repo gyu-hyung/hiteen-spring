@@ -157,6 +157,40 @@ data class UserResponse(
                     relationshipCounts = relationshipCounts,
                     interests = interests,
                     photos = photos,
-                )
+        )
+
+        fun empty() = UserResponse(
+            id = 0L,
+            uid = "",
+            username = "",
+            email = null,
+            nickname = "",
+            role = "USER",
+            address = null,
+            detailAddress = null,
+            phone = "",
+            mood = null,
+            moodEmoji = null,
+            mbti = null,
+            expPoint = 0L,
+            assetUid = null,
+            grade = null,
+            gender = null,
+            birthday = null,
+            profileDecorationCode = null,
+            inviteCode = null,
+            inviteJoins = 0L,
+            isFollowed = false,
+            isFriend = false,
+            createdAt = LocalDateTime.now(),
+            updatedAt = null,
+            deletedAt = null,
+            school = null,
+            tier = null,
+            relationshipCounts = null,
+            interests = emptyList(),
+            photos = emptyList()
+        )
+
     }
 }
