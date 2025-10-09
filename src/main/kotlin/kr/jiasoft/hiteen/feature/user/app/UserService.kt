@@ -14,6 +14,10 @@ import kr.jiasoft.hiteen.feature.point.app.PointService
 import kr.jiasoft.hiteen.feature.point.domain.PointPolicy
 import kr.jiasoft.hiteen.feature.relationship.app.FollowService
 import kr.jiasoft.hiteen.feature.relationship.app.FriendService
+import kr.jiasoft.hiteen.feature.relationship.domain.FollowStatus
+import kr.jiasoft.hiteen.feature.relationship.dto.RelationshipCounts
+import kr.jiasoft.hiteen.feature.relationship.infra.FollowRepository
+import kr.jiasoft.hiteen.feature.relationship.infra.FriendRepository
 import kr.jiasoft.hiteen.feature.school.infra.SchoolRepository
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import kr.jiasoft.hiteen.feature.user.domain.UserPhotosEntity
@@ -38,8 +42,8 @@ import java.util.UUID
 class UserService (
     private val encoder: PasswordEncoder,
     private val assetService: AssetService,
-    private val followService: FollowService,
-    private val friendService: FriendService,
+    private val followRepository: FollowRepository,
+    private val friendRepository: FriendRepository,
 
     private val userRepository: UserRepository,
     private val userPhotosRepository: UserPhotosRepository,
@@ -130,16 +134,39 @@ class UserService (
         val school = targetUser.schoolId?.let { id -> schoolRepository.findById(id) }
         val tier = tierRepository.findById(targetUser.tierId)
         val interests = interestUserRepository.getInterestResponseById(null, targetUser.id).toList()
-        val relationshipCounts = followService.getRelationshipCounts(targetUser.id).copy(
-            postCount = boardRepository.countByCreatedId(targetUser.id)
+        val relationshipCounts = RelationshipCounts(
+            postCount = boardRepository.countByCreatedId(targetUser.id),
+            followerCount = followRepository.countByFollowIdAndStatus(targetUser.id, FollowStatus.ACCEPTED.name),
+            followingCount = followRepository.countByUserIdAndStatus(targetUser.id, FollowStatus.ACCEPTED.name),
         )
         val photos = getPhotosById(targetUser.id)
 
-        val isFollowed = currentUserId?.let { followService.isFollowing(it, targetUser.id) } ?: false
-        val isFriend = currentUserId?.let { friendService.isFriend(it, targetUser.id) } ?: false
+        val isFollowed = currentUserId?.let { followRepository.existsFollow(it, targetUser.id) > 0 } ?: false
+        val isFriend = currentUserId?.let { friendRepository.existsFriend(it, targetUser.id) > 0 } ?: false
 
         return UserResponse.from(targetUser, school, tier, interests, relationshipCounts, photos, isFollowed, isFriend)
     }
+
+    suspend fun findUserResponse(targetId: Long, currentUserId: Long? = null): UserResponse {
+        val targetUser = userRepository.findById(targetId)
+            ?: throw UsernameNotFoundException("User not found: $targetId")
+
+        val school = targetUser.schoolId?.let { id -> schoolRepository.findById(id) }
+        val tier = tierRepository.findById(targetUser.tierId)
+        val interests = interestUserRepository.getInterestResponseById(null, targetUser.id).toList()
+        val relationshipCounts = RelationshipCounts(
+            postCount = boardRepository.countByCreatedId(targetUser.id),
+            followerCount = followRepository.countByFollowIdAndStatus(targetUser.id, FollowStatus.ACCEPTED.name),
+            followingCount = followRepository.countByUserIdAndStatus(targetUser.id, FollowStatus.ACCEPTED.name),
+        )
+        val photos = getPhotosById(targetUser.id)
+
+        val isFollowed = currentUserId?.let { followRepository.existsFollow(it, targetUser.id) > 0 } ?: false
+        val isFriend = currentUserId?.let { friendRepository.existsFriend(it, targetId) > 0 } ?: false
+
+        return UserResponse.from(targetUser, school, tier, interests, relationshipCounts, photos, isFollowed, isFriend)
+    }
+
 
 
     suspend fun findUserSummary(userId: Long): UserSummary {
@@ -148,7 +175,7 @@ class UserService (
 
 
     suspend fun findUserSummaryList(userIds: List<Long>)
-        = userRepository.findSummaryByIds(userIds)
+            = userRepository.findSummaryByIds(userIds)
 
 
 
@@ -237,7 +264,12 @@ class UserService (
         val school = saved.schoolId?.let { id -> schoolRepository.findById(id) }
         val tier = tierRepository.findById(current.tierId)
         val interests = interestUserRepository.getInterestResponseById(null, saved.id).toList()
-        val relationshipCounts = followService.getRelationshipCounts(saved.id)
+//        val relationshipCounts = followService.getRelationshipCounts(saved.id)
+        val relationshipCounts = RelationshipCounts(
+            postCount = boardRepository.countByCreatedId(saved.id),
+            followerCount = followRepository.countByFollowIdAndStatus(saved.id, FollowStatus.ACCEPTED.name),
+            followingCount = followRepository.countByUserIdAndStatus(saved.id, FollowStatus.ACCEPTED.name),
+        )
         val photos = getPhotosById(saved.id)
 
         return UserResponse.from(saved, school, tier, interests, relationshipCounts, photos)

@@ -3,14 +3,14 @@ package kr.jiasoft.hiteen.feature.relationship.dto
 import com.fasterxml.jackson.annotation.JsonFormat
 import io.swagger.v3.oas.annotations.media.Schema
 import kr.jiasoft.hiteen.feature.relationship.domain.LocationMode
-import kr.jiasoft.hiteen.feature.user.dto.UserSummary
+import kr.jiasoft.hiteen.feature.user.dto.UserResponse
 import java.time.OffsetDateTime
 
 @Schema(description = "관계 요약 정보")
 data class RelationshipSummary(
 
     @param:Schema(description = "유저 요약 정보")
-    val userSummary: UserSummary,
+    val userResponse: UserResponse,
 
     @param:Schema(description = "상태", example = "PENDING")
     val status: String,          // PENDING / ACCEPTED / ...

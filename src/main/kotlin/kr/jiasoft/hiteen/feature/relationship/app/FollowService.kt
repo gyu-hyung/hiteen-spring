@@ -5,11 +5,11 @@ import kotlinx.coroutines.flow.toList
 import kr.jiasoft.hiteen.feature.level.app.ExpService
 import kr.jiasoft.hiteen.feature.relationship.domain.FollowEntity
 import kr.jiasoft.hiteen.feature.relationship.domain.FollowStatus
-import kr.jiasoft.hiteen.feature.relationship.dto.RelationshipCounts
 import kr.jiasoft.hiteen.feature.relationship.dto.RelationshipSummary
 import kr.jiasoft.hiteen.feature.relationship.infra.FollowRepository
+import kr.jiasoft.hiteen.feature.user.app.UserService
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
-import kr.jiasoft.hiteen.feature.user.dto.UserSummary
+import kr.jiasoft.hiteen.feature.user.dto.UserResponse
 import kr.jiasoft.hiteen.feature.user.infra.UserRepository
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -21,6 +21,7 @@ import java.time.ZoneOffset
 class FollowService(
     private val followRepository: FollowRepository,
     private val userRepository: UserRepository,
+    private val userService: UserService,
     private val expService: ExpService
 ) {
     private val now: OffsetDateTime get() = OffsetDateTime.now(ZoneOffset.UTC)
@@ -38,31 +39,19 @@ class FollowService(
             ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "no follow request in $direction direction")
     }
 
-    private fun toFollowSummary(e: FollowEntity, other: UserSummary?): RelationshipSummary =
+    private fun toFollowSummary(e: FollowEntity, other: UserResponse?): RelationshipSummary =
         RelationshipSummary(
-            userSummary = other ?: UserSummary.empty(),
+            userResponse = other ?: UserResponse.empty(),
             status = e.status,
             statusAt = e.statusAt
         )
 
-    suspend fun isFollowing(followerId: Long, targetId: Long): Boolean {
-        return followRepository.existsFollow(followerId, targetId) > 0
-    }
-
-
-    /** 게시물, 팔로잉, 팔로워 COUNT */
-    suspend fun getRelationshipCounts(id: Long): RelationshipCounts {
-        return RelationshipCounts(
-            followerCount = followRepository.countByFollowIdAndStatus(id, FollowStatus.ACCEPTED.name),
-            followingCount = followRepository.countByUserIdAndStatus(id, FollowStatus.ACCEPTED.name),
-        )
-    }
 
     /** 내가 팔로우하고 있는 목록 (Following) */
     suspend fun listFollowing(me: UserEntity): List<RelationshipSummary> {
         return followRepository.findAllByUserIdAndStatus(me.id, FollowStatus.ACCEPTED.name)
             .map { e ->
-                val other = userRepository.findSummaryInfoById(e.followId)
+                val other = userService.findUserResponse(e.followId, me.id)
                 toFollowSummary(e, other)
             }.toList()
     }
@@ -71,7 +60,7 @@ class FollowService(
     suspend fun listFollowers(me: UserEntity): List<RelationshipSummary> {
         return followRepository.findAllByFollowIdAndStatus(me.id, FollowStatus.ACCEPTED.name)
             .map { e ->
-                val other = userRepository.findSummaryInfoById(e.userId)
+                val other = userService.findUserResponse(e.followId, me.id)
                 toFollowSummary(e, other)
             }.toList()
     }
@@ -80,7 +69,7 @@ class FollowService(
     suspend fun listOutgoing(me: UserEntity): List<RelationshipSummary> {
         return followRepository.findAllByUserIdAndStatus(me.id, FollowStatus.PENDING.name)
             .map { e ->
-                val other = userRepository.findSummaryInfoById(e.followId)
+                val other = userService.findUserResponse(e.followId, me.id)
                 toFollowSummary(e, other)
             }.toList()
     }
@@ -89,7 +78,7 @@ class FollowService(
     suspend fun listIncoming(me: UserEntity): List<RelationshipSummary> {
         return followRepository.findAllByFollowIdAndStatus(me.id, FollowStatus.PENDING.name)
             .map { e ->
-                val other = userRepository.findSummaryInfoById(e.userId)
+                val other = userService.findUserResponse(e.followId, me.id)
                 toFollowSummary(e, other)
             }.toList()
     }

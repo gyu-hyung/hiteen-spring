@@ -16,7 +16,9 @@ import kr.jiasoft.hiteen.feature.relationship.dto.RelationshipSummary
 import kr.jiasoft.hiteen.feature.relationship.dto.RelationshipSearchItem
 import kr.jiasoft.hiteen.feature.relationship.infra.FollowRepository
 import kr.jiasoft.hiteen.feature.relationship.infra.FriendRepository
+import kr.jiasoft.hiteen.feature.user.app.UserService
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
+import kr.jiasoft.hiteen.feature.user.dto.UserResponse
 import kr.jiasoft.hiteen.feature.user.dto.UserSummary
 import kr.jiasoft.hiteen.feature.user.infra.UserRepository
 import org.springframework.http.HttpStatus
@@ -31,7 +33,8 @@ class FriendService(
     private val followRepository: FollowRepository,
     private val userRepository: UserRepository,
     private val locationCacheRedisService: LocationCacheRedisService,
-    private val expService: ExpService
+    private val expService: ExpService,
+    private val userService: UserService,
 ) {
     private val now: OffsetDateTime get() = OffsetDateTime.now(ZoneOffset.UTC)
 
@@ -43,14 +46,14 @@ class FriendService(
     private fun toRelationshipSummary(
             e: FriendEntity,
             myId: Long,
-            other: UserSummary?,
+            other: UserResponse?,
             latestLocation: LocationHistory?
     ): RelationshipSummary {
         val myMode = if (e.userId == myId) e.userLocationMode else e.friendLocationMode
         val theirMode = if (e.userId == myId) e.friendLocationMode else e.userLocationMode
 
         return RelationshipSummary(
-            userSummary = other ?: UserSummary.empty(),
+            userResponse = other ?: UserResponse.empty(),
             status = e.status,
             statusAt = e.statusAt,
             lat = latestLocation?.lat,
@@ -61,14 +64,10 @@ class FriendService(
         )
     }
 
-    suspend fun isFriend(userId: Long, targetId: Long): Boolean {
-        return friendRepository.existsFriend(userId, targetId) > 0
-    }
 
     suspend fun findUserByUid(uid: String): UserEntity? {
         return userRepository.findByUid(uid)
     }
-
 
 
     suspend fun getContacts(user: UserEntity, rawContacts: String): ContactResponse {
@@ -109,7 +108,7 @@ class FriendService(
         return friendRepository.findAllAccepted(me.id)
             .map { e ->
                 val otherId = if (e.userId == me.id) e.friendId else e.userId
-                val other = userRepository.findSummaryInfoById(otherId)
+                val other = userService.findUserResponse(otherId, me.id)
 
                 // Redis/Mongo에서 최신 위치 조회 (uid기준)
                 val latestLocation = other.uid.let { uid ->
@@ -124,7 +123,8 @@ class FriendService(
     suspend fun listOutgoing(me: UserEntity): List<RelationshipSummary> {
         return friendRepository.findAllOutgoingPending(me.id)
             .map { e ->
-                val other = userRepository.findSummaryInfoById(e.friendId)
+                val otherId = if (e.userId == me.id) e.friendId else e.userId
+                val other = userService.findUserResponse(otherId, me.id)
                 toRelationshipSummary(e, me.id, other, null)
             }.toList()
     }
@@ -133,7 +133,8 @@ class FriendService(
     suspend fun listIncoming(me: UserEntity): List<RelationshipSummary> {
         return friendRepository.findAllIncomingPending(me.id)
             .map { e ->
-                val other = userRepository.findSummaryInfoById(e.userId)
+                val otherId = if (e.userId == me.id) e.friendId else e.userId
+                val other = userService.findUserResponse(otherId, me.id)
                 toRelationshipSummary(e, me.id, other, null)
             }.toList()
     }
