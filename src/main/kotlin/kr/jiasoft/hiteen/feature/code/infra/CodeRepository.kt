@@ -13,10 +13,10 @@ interface CodeRepository : CoroutineCrudRepository<CodeEntity, Long> {
         FROM codes c
         left join code_assets ca on c.id = ca.code_id 
         WHERE deleted_at IS null
-        AND c.code_group = :group
+        AND (:group IS NULL OR c.code_group = :group)
         ORDER BY code_group, code
     """)
-    fun findByGroup(group: String): Flow<CodeWithAssetResponse>
+    fun findByGroup(group: String?): Flow<CodeWithAssetResponse>
 
     @Query("SELECT code FROM codes WHERE code_group = :group ORDER BY code DESC LIMIT 1")
     suspend fun findLastCodeByGroup(group: String): String?

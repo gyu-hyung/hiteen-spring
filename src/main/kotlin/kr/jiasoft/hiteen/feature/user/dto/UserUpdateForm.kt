@@ -11,7 +11,7 @@ import java.util.UUID
 @Schema(description = "사용자 정보 수정 요청 DTO")
 data class UserUpdateForm(
 
-    val username: String? = null,
+//    val username: String? = null,
 
     @param:Schema(description = "이메일", example = "hong@test.com", maxLength = 255)
     @field:Email(message = "올바른 이메일 형식이어야 합니다.")
@@ -31,8 +31,8 @@ data class UserUpdateForm(
     @param:Schema(description = "상세 주소", example = "101동 202호", maxLength = 255)
     val detailAddress: String? = null,
 
-    @param:Schema(description = "휴대폰 번호", example = "01012345678", maxLength = 30)
-    val phone: String? = null,
+//    @param:Schema(description = "휴대폰 번호", example = "01012345678", maxLength = 30)
+//    val phone: String? = null,
 
     @param:Schema(description = "기분 상태", example = "기분좋음", maxLength = 30)
     val mood: String? = null,
