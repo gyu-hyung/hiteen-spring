@@ -6,7 +6,21 @@ import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 import java.time.LocalDate
 
 interface PointRepository : CoroutineCrudRepository<PointEntity, Long> {
+
     suspend fun findAllByUserId(userId: Long): List<PointEntity>
+
+    @Query("""
+        SELECT * 
+        FROM points 
+        WHERE user_id = :userId
+          AND DATE(created_at) BETWEEN :startDate AND :endDate
+        ORDER BY created_at DESC
+    """)
+    suspend fun findAllByUserIdAndDateRange(
+        userId: Long,
+        startDate: LocalDate,
+        endDate: LocalDate
+    ): List<PointEntity>
 
     @Query("""
         SELECT COUNT(*) 
@@ -20,5 +34,4 @@ interface PointRepository : CoroutineCrudRepository<PointEntity, Long> {
         policyCode: String,
         today: LocalDate
     ): Int
-
 }

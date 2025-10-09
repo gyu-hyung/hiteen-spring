@@ -26,6 +26,23 @@ class PointService(
 
 
     /**
+     * 내포인트 이력
+     * */
+    suspend fun getUserPointHistory(
+        userId: Long,
+        startDate: LocalDate? = null,
+        endDate: LocalDate? = null
+    ): List<PointEntity> {
+        return if (startDate != null && endDate != null) {
+            pointRepository.findAllByUserIdAndDateRange(userId, startDate, endDate)
+        } else {
+            pointRepository.findAllByUserId(userId)
+        }
+    }
+
+
+
+    /**
      * 정책 기반 포인트 지급/차감
      */
     suspend fun applyPolicy(

@@ -1,3 +1,7 @@
+import java.io.ByteArrayOutputStream
+import java.time.LocalDateTime
+
+
 plugins {
 	kotlin("jvm") version "1.9.25"
 	kotlin("plugin.spring") version "1.9.25"
@@ -5,6 +9,13 @@ plugins {
 	id("io.spring.dependency-management") version "1.1.7"
 //	kotlin("plugin.jpa") version "1.9.25"
     kotlin("kapt") version "1.9.0"
+    id("org.springdoc.openapi-gradle-plugin") version "1.8.0"
+}
+
+openApi {
+    apiDocsUrl.set("http://localhost:8080/api-docs")
+    outputDir.set(file("$buildDir/api-spec"))
+    outputFileName.set("openapi.json")
 }
 
 group = "kr.jiasoft"
@@ -108,4 +119,61 @@ kotlin {
 
 tasks.test {
 	useJUnitPlatform()
+}
+
+
+// Swagger spec 자동 복사
+tasks.register<Copy>("copyOpenApiSpec") {
+    dependsOn("generateOpenApiDocs")
+    from("$buildDir/api-spec/openapi.json")
+    into("docs/openapi")
+    rename("openapi.json", "openapi-new.json")
+    doLast {
+        println("✅ Swagger spec copied to docs/openapi/openapi-new.json")
+    }
+}
+
+// Swagger 변경 이력 자동 생성
+tasks.register("updateSwaggerChangeLog") {
+    group = "documentation"
+    description = "Generate OpenAPI docs and compare with previous version to update changelog"
+
+    dependsOn("copyOpenApiSpec")
+
+    doLast {
+        val openapiDir = file("docs/openapi")
+        openapiDir.mkdirs()
+
+        val newSpec = file("docs/openapi/openapi-new.json")
+        val oldSpec = file("docs/openapi/openapi-latest.json")
+        val changelog = file("docs/openapi/changelog.txt")
+
+        if (!oldSpec.exists()) {
+            println("⚠️ No previous spec found, creating initial snapshot...")
+            newSpec.copyTo(oldSpec, overwrite = true)
+            changelog.writeText("Initial API snapshot created.\n")
+            return@doLast
+        }
+
+        // openapi-diff 실행
+        println("🔍 Running openapi-diff...")
+        val output = ByteArrayOutputStream()
+        exec {
+            commandLine("npx", "openapi-diff", oldSpec.path, newSpec.path)
+            standardOutput = output
+            isIgnoreExitValue = true
+        }
+
+        val diffResult = output.toString().ifBlank { "✅ No API differences found." }
+        changelog.appendText(
+            "\n[${LocalDateTime.now()}]\n$diffResult\n-----------------------------------\n"
+        )
+
+
+        println("📜 Swagger changelog updated at docs/openapi/changelog.txt")
+
+        // 최신 스냅샷 갱신
+        newSpec.copyTo(oldSpec, overwrite = true)
+        println("✅ openapi-latest.json updated")
+    }
 }

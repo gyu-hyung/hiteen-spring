@@ -163,7 +163,7 @@ class PushService(
 
         return MulticastMessage.builder()
             .addAllTokens(tokens)
-            .setNotification(notification) // ✅ FCM이 직접 시스템 알림 표시 가능
+            .setNotification(notification)
             .putAllData(messageData)
             .setAndroidConfig(
                 AndroidConfig.builder()
