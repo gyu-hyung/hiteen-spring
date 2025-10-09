@@ -71,6 +71,18 @@ interface UserRepository : CoroutineCrudRepository<UserEntity, Long> {
     """)
     suspend fun existsByEmailIgnoreCaseAndActiveAndIdNot(email: String, excludeId: Long): Boolean
 
+
+    @Query("""
+        SELECT EXISTS (
+          SELECT 1
+          FROM users
+          WHERE deleted_at IS NULL
+            AND lower(phone) = lower(:phone)
+            AND id <> :excludeId
+        )
+    """)
+    suspend fun existsByPhoneAndActiveAndIdNot(phone: String, excludeId: Long): Boolean
+
     @Query("""
         SELECT EXISTS (
           SELECT 1

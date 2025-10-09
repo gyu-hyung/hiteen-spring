@@ -62,8 +62,8 @@ class CodeService(
     /**
      * 코드 그룹 단위 조회 (첨부파일 URL 포함)
      */
-    suspend fun listCodesByGroup(group: String): List<CodeWithAssetResponse> {
-        return codeRepository.findByGroup(group.uppercase()).toList()
+    suspend fun listCodesByGroup(group: String?): List<CodeWithAssetResponse> {
+        return codeRepository.findByGroup(group?.uppercase()).toList()
     }
 
 

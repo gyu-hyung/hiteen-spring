@@ -78,9 +78,9 @@ class CodeController(
 
 
     @Operation(summary = "코드 그룹 조회", description = "특정 그룹에 속한 코드 목록을 조회합니다.")
-    @GetMapping("/{group}")
+    @GetMapping
     suspend fun listCodes(
-        @Parameter(description = "조회할 코드 그룹명") @PathVariable group: String
+        @Parameter(description = "조회할 코드 그룹명") @RequestParam group: String?
     ): ResponseEntity<ApiResult<List<CodeWithAssetResponse>>> {
         return ResponseEntity.ok(ApiResult.success(codeService.listCodesByGroup(group)))
     }

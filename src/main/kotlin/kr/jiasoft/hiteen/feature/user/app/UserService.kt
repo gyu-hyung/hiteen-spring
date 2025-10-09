@@ -173,12 +173,13 @@ class UserService (
         }
 
         // 2) 변경값 준비 (null이면 기존값 유지)
-        val newUsername    = param.username?.trim()?.takeIf { it.isNotEmpty() } ?: existing.username
+//        val newUsername    = param.username?.trim()?.takeIf { it.isNotEmpty() } ?: existing.username
         val newEmail       = param.email?.trim()?.takeIf { it.isNotEmpty() } ?: existing.email
         val newNickname    = param.nickname ?: existing.nickname
         val newPassword    = param.password?.let { encoder.encode(it) } ?: existing.password
         val newAddress     = param.address ?: existing.address
         val newDetailAddr  = param.detailAddress ?: existing.detailAddress
+//        val newPhone       = param.phone ?: existing.phone
         val newMood        = param.mood ?: existing.mood
         val newMoodEmoji   = param.moodEmoji ?: existing.moodEmoji
         val newSchoolId    = param.schoolId ?: existing.schoolId
@@ -193,20 +194,26 @@ class UserService (
                 throw BusinessValidationException(mapOf("email" to "이미 사용 중인 이메일입니다."))
             }
         }
-        if (!newUsername.equals(existing.username, ignoreCase = true)) {
-            if (userRepository.existsByUsernameIgnoreCaseAndActiveAndIdNot(newUsername, existing.id)) {
-                throw BusinessValidationException(mapOf("username" to "이미 사용 중인 사용자명입니다."))
-            }
-        }
+//        if (newPhone != null && !newPhone.equals(existing.phone, ignoreCase = true)) {
+//            if (userRepository.existsByPhoneAndActiveAndIdNot(newPhone, existing.id)) {
+//                throw BusinessValidationException(mapOf("phone" to "이미 사용 중인 전화번호입니다."))
+//            }
+//        }
+//        if (!newUsername.equals(existing.username, ignoreCase = true)) {
+//            if (userRepository.existsByUsernameIgnoreCaseAndActiveAndIdNot(newUsername, existing.id)) {
+//                throw BusinessValidationException(mapOf("username" to "이미 사용 중인 사용자명입니다."))
+//            }
+//        }
 
         // 3) 엔티티 복사
         val updated = existing.copy(
-            username      = newUsername,
+//            username      = newUsername,
             email         = newEmail,
             nickname      = newNickname,
             password      = newPassword,
             address       = newAddress,
             detailAddress = newDetailAddr,
+//            phone         = newPhone,
             mood          = newMood,
             moodEmoji     = newMoodEmoji,
             assetUid      = newAssetUid,
