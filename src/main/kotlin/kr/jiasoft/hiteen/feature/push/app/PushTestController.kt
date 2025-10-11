@@ -12,14 +12,12 @@ class PushTestController(
 ) {
     @PostMapping("/test")
     suspend fun sendPushTest(
-        @RequestParam(required = false, defaultValue = "Android") deviceOs: String,
         @RequestParam(required = false, defaultValue = "테스트 제목") title: String,
         @RequestParam(required = false, defaultValue = "테스트 메시지입니다!") message: String,
         @AuthenticationPrincipal(expression = "user") user : UserEntity
     ): String {
         val data = mapOf("title" to title, "message" to message)
         pushService.sendAndSavePush(
-            deviceOs = deviceOs,
             userIds = listOf(user.id),
             data = data
         )

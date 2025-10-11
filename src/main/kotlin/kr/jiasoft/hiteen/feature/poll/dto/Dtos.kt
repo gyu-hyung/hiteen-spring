@@ -3,10 +3,9 @@ package kr.jiasoft.hiteen.feature.poll.dto
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.core.type.TypeReference
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.constraints.NotBlank
-import kr.jiasoft.hiteen.feature.poll.domain.PollEntity
 import kr.jiasoft.hiteen.feature.user.dto.UserSummary
 import java.time.OffsetDateTime
 import java.util.UUID
@@ -168,12 +167,13 @@ data class PollResponse(
             likeCount: Int = 0,
             likedByMe: Boolean = false,
             votedByMe: Boolean = votedSeq != null,
-            voteCounts: Map<Int, Int> = emptyMap()
+            voteCounts: Map<Int, Int> = emptyMap(),
+            objectMapper: ObjectMapper,
         ): PollResponse {
 
             val selects: List<PollSelectResponse> =
                 try {
-                    jacksonObjectMapper().readValue(
+                    objectMapper.readValue(
                         selectsJson ?: "[]",
                         object : TypeReference<List<PollSelectResponse>>() {}
                     ).map { sel ->

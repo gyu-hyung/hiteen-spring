@@ -1,6 +1,5 @@
 package kr.jiasoft.hiteen.feature.push.app
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.google.firebase.messaging.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -24,17 +23,15 @@ class PushService(
      * 전체 푸시 전송 + 요약 저장 + 상세 기록
      */
     suspend fun sendAndSavePush(
-        deviceOs: String,
         userIds: List<Long>,
-        data: Map<String, Any>,
-        isSilent: Boolean = false
+        data: Map<String, Any>
     ): SendResult {
         if (userIds.isEmpty()) return SendResult(0, 0, 0)
 
         // ① push 요약 저장
         val push = pushRepository.save(
             PushEntity(
-                type = if (isSilent) "silent" else "notification",
+                type = if (data["silent"] == true) "silent" else "notification",
                 code = data["code"]?.toString(),
                 title = data["title"]?.toString(),
                 message = data["message"]?.toString(),
@@ -43,46 +40,41 @@ class PushService(
         )
 
         // ② 실제 FCM 전송
-        val result = sendPush(push.id, deviceOs, userIds, data, isSilent)
+        val result = sendPush(push.id, userIds, data)
 
-        // ③ 요약 테이블에 성공/실패 반영
-        val updated = push.copy(
-            success = result.success.toLong(),
-            failure = result.failure.toLong(),
-            updatedAt = OffsetDateTime.now()
+        // ③ 요약 업데이트
+        pushRepository.save(
+            push.copy(
+                success = result.success.toLong(),
+                failure = result.failure.toLong(),
+                updatedAt = OffsetDateTime.now()
+            )
         )
-        pushRepository.save(updated)
 
-        println("✅ [PushService] pushId=${push.id}, sent all batches, success=${result.success}, failure=${result.failure}")
-        return SendResult(pushId = push.id, success = result.success, failure = result.failure)
+        println("✅ [PushService] pushId=${push.id}, success=${result.success}, failure=${result.failure}")
+        return result
     }
 
     /**
      * 실제 Firebase에 전송하고, push_detail 저장
      */
-    suspend fun sendPush(
-        pushId: Long?,
-        deviceOs: String,
+    private suspend fun sendPush(
+        pushId: Long,
         userIds: List<Long>,
-        data: Map<String, Any>,
-        isSilent: Boolean
+        data: Map<String, Any>
     ): SendResult {
-        if (userIds.isEmpty()) return SendResult(0, 0, 0)
-
-        // 사용자 상세 + 토큰 필터링
         val userDetails = userDetailRepository.findUsersWithDetail(userIds)
-            .filter { it.deviceToken != null && it.deviceOs == deviceOs }
+            .filter { !it.deviceToken.isNullOrBlank() }
 
         val tokens = userDetails.mapNotNull { it.deviceToken }.distinct()
-        if (tokens.isEmpty()) return SendResult(pushId ?: 0L, 0, 0)
+        if (tokens.isEmpty()) return SendResult(pushId, 0, 0)
 
         var totalSuccess = 0
         var totalFailure = 0
 
-        // chunk 단위로 묶음 전송
         val chunks = tokens.chunked(500)
         for (chunk in chunks) {
-            val message = buildMessage(deviceOs, data, chunk, isSilent)
+            val message = buildMessage(data, chunk)
 
             withContext(Dispatchers.IO) {
                 try {
@@ -90,95 +82,88 @@ class PushService(
                     totalSuccess += response.successCount
                     totalFailure += response.failureCount
 
-                    response.responses.forEachIndexed { idx, sendResponse ->
+                    response.responses.forEachIndexed { idx, res ->
                         val token = chunk[idx]
                         val userDetail = userDetails.firstOrNull { it.deviceToken == token }
 
-                        val detail = PushDetailEntity(
-                            pushId = pushId,
-                            userId = userDetail?.userId,
-                            deviceOs = userDetail?.deviceOs,
-                            deviceToken = token,
-                            phone = userDetail?.phone,
-                            multicastId = null,
-                            messageId = if (sendResponse.isSuccessful) sendResponse.messageId else null,
-                            error = sendResponse.exception?.message,
-                            success = if (sendResponse.isSuccessful) 1 else 0,
-                            createdAt = OffsetDateTime.now(),
-                            updatedAt = OffsetDateTime.now()
+                        pushDetailRepository.save(
+                            PushDetailEntity(
+                                pushId = pushId,
+                                userId = userDetail?.userId,
+                                deviceOs = userDetail?.deviceOs,
+                                deviceToken = token,
+                                phone = userDetail?.phone,
+                                messageId = if (res.isSuccessful) res.messageId else null,
+                                error = res.exception?.message,
+                                success = if (res.isSuccessful) 1 else 0,
+                                createdAt = OffsetDateTime.now(),
+                                updatedAt = OffsetDateTime.now()
+                            )
                         )
-                        pushDetailRepository.save(detail)
                     }
 
-                    println("🔥 Firebase sendEachForMulticast → success=${response.successCount}, failure=${response.failureCount}")
+                    println("🔥 Firebase sendEachForMulticast success=${response.successCount}, failure=${response.failureCount}")
                 } catch (ex: Exception) {
-                    // 전송 오류의 경우, chunk 전체에 대해 실패 처리
+                    // 전송 실패 시, chunk 전체 실패 처리
+                    totalFailure += chunk.size
                     chunk.forEach { token ->
                         val userDetail = userDetails.firstOrNull { it.deviceToken == token }
-                        val detail = PushDetailEntity(
-                            pushId = pushId,
-                            userId = userDetail?.userId,
-                            deviceOs = userDetail?.deviceOs,
-                            deviceToken = token,
-                            phone = userDetail?.phone,
-                            multicastId = null,
-                            messageId = null,
-                            error = ex.message,
-                            success = 0,
-                            createdAt = OffsetDateTime.now(),
-                            updatedAt = OffsetDateTime.now()
+                        pushDetailRepository.save(
+                            PushDetailEntity(
+                                pushId = pushId,
+                                userId = userDetail?.userId,
+                                deviceOs = userDetail?.deviceOs,
+                                deviceToken = token,
+                                phone = userDetail?.phone,
+                                messageId = null,
+                                error = ex.message,
+                                success = 0,
+                                createdAt = OffsetDateTime.now(),
+                                updatedAt = OffsetDateTime.now()
+                            )
                         )
-                        pushDetailRepository.save(detail)
                     }
                     println("‼️ Firebase sendEachForMulticast exception: ${ex.message}")
-                    // 실패 횟수엔 chunk 전체 수 반영
-                    totalFailure += chunk.size
                 }
             }
         }
 
-        return SendResult(pushId = pushId ?: 0L, success = totalSuccess, failure = totalFailure)
+        return SendResult(pushId, totalSuccess, totalFailure)
     }
 
     /**
      * 메시지 객체 구성
      * - notification + data 구조 분리
-     * - Android / iOS 옵션 강화
+     * - silent 여부 자동 판단
      */
-    private fun buildMessage(
-        deviceOs: String,
-        data: Map<String, Any>,
-        tokens: List<String>,
-        isSilent: Boolean
-    ): MulticastMessage {
+    private fun buildMessage(data: Map<String, Any>, tokens: List<String>): MulticastMessage {
         val messageData = data.mapValues { it.value.toString() }
+        val isSilent = messageData["silent"]?.toBoolean() == true
 
-        val title = messageData["title"] ?: "알림"
-        val body = messageData["message"] ?: "내용 없음"
+        val builder = MulticastMessage.builder().addAllTokens(tokens).putAllData(messageData)
 
-        val notification = Notification.builder()
-            .setTitle(title)
-            .setBody(body)
-            .build()
+        if (!isSilent) {
+            val notification = Notification.builder()
+                .setTitle(messageData["title"] ?: "알림")
+                .setBody(messageData["message"] ?: "")
+                .build()
 
-        return MulticastMessage.builder()
-            .addAllTokens(tokens)
-            .setNotification(notification)
-            .putAllData(messageData)
-            .setAndroidConfig(
-                AndroidConfig.builder()
-                    .setPriority(AndroidConfig.Priority.HIGH)
-                    .setNotification(
-                        AndroidNotification.builder()
-                            .setChannelId("default_channel")
-                            .setSound("default")
-                            .build()
-                    )
-                    .build()
-            )
-            .build()
+            builder.setNotification(notification)
+                .setAndroidConfig(
+                    AndroidConfig.builder()
+                        .setPriority(AndroidConfig.Priority.HIGH)
+                        .setNotification(
+                            AndroidNotification.builder()
+                                .setChannelId("default_channel")
+                                .setSound("default")
+                                .build()
+                        )
+                        .build()
+                )
+        }
+
+        return builder.build()
     }
-
 
     data class SendResult(
         val pushId: Long,
