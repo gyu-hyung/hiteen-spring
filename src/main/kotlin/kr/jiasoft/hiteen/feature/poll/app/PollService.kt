@@ -1,6 +1,7 @@
 package kr.jiasoft.hiteen.feature.poll.app
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.r2dbc.postgresql.codec.Json
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
@@ -67,7 +68,8 @@ class PollService(
                     likeCount = row.likeCount,
                     likedByMe = row.likedByMe,
                     votedByMe = row.votedByMe,
-                    voteCounts = voteCounts
+                    voteCounts = voteCounts,
+                    objectMapper = objectMapper
                 )
             }.toList()
 
@@ -93,7 +95,8 @@ class PollService(
             votedSeq = poll.votedSeq,
             likeCount = poll.likeCount,
             likedByMe = poll.likedByMe,
-            voteCounts = voteCounts
+            voteCounts = voteCounts,
+            objectMapper = objectMapper
         )
     }
 
@@ -185,8 +188,29 @@ class PollService(
 
 
     suspend fun vote(pollId: Long?, seq: Int, userId: Long) {
+        val poll = polls.findById(pollId!!)
+            ?: throw IllegalArgumentException( "poll not found")
+
+        // ✅ ① 선택지 검증 (poll.selects JSON 내부에서 seq 존재 여부 확인)
+        val mapper = objectMapper
+        val selects: List<Map<String, Any>> = mapper.readValue(poll.selects.asString())
+
+        val valid = selects.any { it["seq"]?.toString()?.toIntOrNull() == seq }
+        if (!valid) {
+            throw IllegalArgumentException("invalid choice")
+        }
+
+        // ✅ ② 중복 투표 예외 처리
         try {
-            pollUsers.save(PollUserEntity(pollId = pollId!!, userId = userId, seq = seq, votedAt = OffsetDateTime.now()))
+            pollUsers.save(
+                PollUserEntity(
+                    pollId = pollId,
+                    userId = userId,
+                    seq = seq,
+                    votedAt = OffsetDateTime.now()
+                )
+            )
+
             polls.increaseVoteCount(pollId)
             expService.grantExp(userId, "VOTE_PARTICIPATE", pollId)
         } catch (_: DuplicateKeyException) {

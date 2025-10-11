@@ -80,6 +80,7 @@ class UserService (
     suspend fun register(param: UserRegisterForm, file: FilePart?): UserResponse {
         val inviteCode = param.inviteCode
         param.inviteCode = null
+        param.username = param.phone
 
         val nicknameExists = nicknameDuplicationCheck(param.nickname)
         if (nicknameExists) {

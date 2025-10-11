@@ -99,7 +99,7 @@ class InterestUserService(
         val targetUserResponse = UserResponse.from(targetUser, school)
 
         // 4) 추천 대상자의 관심사 목록
-           val interests = interestUserRepository.getInterestResponseById(null, targetUserId).toList()
+        val interests = interestUserRepository.getInterestResponseById(null, targetUserId).toList()
 
         // 5) 추천 대상자의 사진 목록
         val photos = userPhotosRepository.findByUserId(targetUserId)?.toList() ?: emptyList()
