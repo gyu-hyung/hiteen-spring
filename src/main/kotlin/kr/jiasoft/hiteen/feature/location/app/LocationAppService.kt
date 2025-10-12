@@ -11,11 +11,11 @@ import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import org.springframework.stereotype.Service
 
 @Service
-class LocationAppService(
-    private val locationService: LocationService,
-    private val locationCacheRedisService: LocationCacheRedisService,
-    private val soketiBroadcaster: SoketiBroadcaster,
-) {
+    class LocationAppService(
+        private val locationService: LocationService,
+        private val locationCacheRedisService: LocationCacheRedisService,
+        private val soketiBroadcaster: SoketiBroadcaster,
+    ) {
 
     suspend fun getLatest(userId: String): LocationHistory? =
         locationCacheRedisService.getLatest(userId)

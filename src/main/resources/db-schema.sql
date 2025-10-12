@@ -94,6 +94,20 @@ CREATE TABLE user_photos (
 
 
 -- ========================
+-- 사용자 연락처
+-- ========================
+CREATE TABLE user_contacts (
+    id          bigserial PRIMARY KEY,
+    user_id     bigint NOT NULL,
+    phone       varchar(20) NOT NULL,
+    name        varchar(50),
+    created_at  timestamptz DEFAULT now(),
+    updated_at  timestamptz DEFAULT now(),
+    UNIQUE (user_id, phone)
+);
+
+
+-- ========================
 -- 코드
 -- ========================
 CREATE TABLE codes (

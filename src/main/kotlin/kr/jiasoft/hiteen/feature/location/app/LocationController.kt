@@ -41,7 +41,7 @@ class LocationController(
     )
     @GetMapping("/latest/{userUid}")
     suspend fun getLatest(
-        @Parameter(description = "조회할 사용자 ID") @PathVariable userUid: String
+        @Parameter(description = "조회할 사용자 UID") @PathVariable userUid: String
     ): LocationHistory? =
         locationAppService.getLatest(userUid)
 
