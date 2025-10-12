@@ -3,11 +3,13 @@ package kr.jiasoft.hiteen.feature.interest.dto
 import com.fasterxml.jackson.annotation.JsonFormat
 import io.swagger.v3.oas.annotations.media.Schema
 import kr.jiasoft.hiteen.feature.interest.domain.InterestEntity
+import org.springframework.data.annotation.Id
 import java.time.OffsetDateTime
 
 @Schema(description = "관심사 응답 DTO")
 data class InterestResponse(
 
+    @Id
     @field:Schema(description = "관심사 ID", example = "1")
     val id: Long,
 

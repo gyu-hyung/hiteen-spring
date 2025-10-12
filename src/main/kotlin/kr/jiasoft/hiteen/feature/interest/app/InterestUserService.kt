@@ -4,6 +4,7 @@ import kotlinx.coroutines.flow.count
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.toList
 import kr.jiasoft.hiteen.common.exception.BusinessValidationException
+import kr.jiasoft.hiteen.feature.contact.infra.UserContactRepository
 import kr.jiasoft.hiteen.feature.interest.domain.InterestMatchHistoryEntity
 import kr.jiasoft.hiteen.feature.interest.domain.InterestUserEntity
 import kr.jiasoft.hiteen.feature.interest.dto.FriendRecommendationResponse
@@ -11,6 +12,7 @@ import kr.jiasoft.hiteen.feature.interest.dto.InterestUserResponse
 import kr.jiasoft.hiteen.feature.interest.infra.InterestMatchHistoryRepository
 import kr.jiasoft.hiteen.feature.interest.infra.InterestUserRepository
 import kr.jiasoft.hiteen.feature.level.app.ExpService
+import kr.jiasoft.hiteen.feature.location.infra.cache.LocationCacheRedisService
 import kr.jiasoft.hiteen.feature.point.app.PointService
 import kr.jiasoft.hiteen.feature.point.domain.PointPolicy
 import kr.jiasoft.hiteen.feature.school.infra.SchoolRepository
@@ -28,8 +30,11 @@ class InterestUserService(
     private val userPhotosRepository: UserPhotosRepository,
     private val userRepository: UserRepository,
     private val schoolRepository: SchoolRepository,
+    private val userContactRepository: UserContactRepository,
+
     private val expService: ExpService,
     private val pointService: PointService,
+    private val locationCacheRedisService: LocationCacheRedisService,
 ) {
 
     /** 특정 사용자 관심사 등록 */
@@ -39,8 +44,8 @@ class InterestUserService(
             return interestUserRepository.getInterestResponseById(exist.id, null).firstOrNull()
         }
 
-        // 관심사 5개 이상 등록 불가
-        interestUserRepository.findByUserId(user.id).count()
+        // 관심사 5개 이상 등록 불가 ('추천방식', '추천옵션', '추천제외' 제외)
+        interestUserRepository.findByUserIdAndNotInSystemCategory(user.id).count()
             .takeIf { it >= 5 }
             ?.let { throw BusinessValidationException(mapOf("message" to "관심사가 5개를 초과했습니다.")) }
 
@@ -72,39 +77,92 @@ class InterestUserService(
     }
 
 
-    /** 오늘의 추천 친구 1명 뽑기 TODO 거리, 추천옵션, 추천제외*/
+    /** 오늘의 추천 친구 1명 뽑기 */
     suspend fun recommendFriend(user: UserEntity, dailyLimit: Int = 1): FriendRecommendationResponse? {
+
+        // 하루 추천 제한 확인
         val todayCount = interestMatchHistoryRepository.countTodayRecommendations(user.id)
         if (todayCount >= dailyLimit) {
             throw BusinessValidationException(mapOf("message" to "오늘은 추천 친구를 더 뽑을 수 없습니다."))
         }
 
-        // 1) 내 관심사 목록
-        val myInterests = interestUserRepository.findByUserId(user.id).toList().map { it.interestId }.toSet()
-        if (myInterests.isEmpty()) {
+        // 내 관심사 조회
+        val myInterestEntities = interestUserRepository.findByUserIdWithInterest(user.id).toList()
+        if (myInterestEntities.isEmpty()) {
             throw BusinessValidationException(mapOf("message" to "관심사가 존재하지 않습니다. 관심사를 추가해주세요~"))
         }
 
-        // 2) 후보군 ID
-        val candidateUserIds = interestUserRepository.findUsersByInterestIds(myInterests, user.id).toList()
-        val excludedUserIds = interestMatchHistoryRepository.findTargetIdsByUserId(user.id).toList()
-        val availableUserIds = candidateUserIds.filterNot { excludedUserIds.contains(it) }
+        // 분류별 분리
+        val interestIds = myInterestEntities.filter { it.category !in listOf("추천방식", "추천옵션", "추천제외") }
+            .map { it.id }
+            .toSet()
 
-        val targetUserId = availableUserIds.shuffled().firstOrNull() ?: return null
+        if (interestIds.isEmpty()) throw BusinessValidationException(mapOf("message" to "관심사가 존재하지 않습니다. 관심사를 추가해주세요~"))
 
-        // 3) 실제 UserEntity → UserResponse 변환
-        val targetUser = userRepository.findById(targetUserId)
-            ?: return null
-        val school = targetUser.schoolId?.let { schoolRepository.findById(it) }
-        val targetUserResponse = UserResponse.from(targetUser, school)
 
-        // 4) 추천 대상자의 관심사 목록
-        val interests = interestUserRepository.getInterestResponseById(null, targetUserId).toList()
+        // 추천방식 [거리]
+        val recommendMethods = myInterestEntities.filter { it.category == "추천방식" }.map { it.topic }
+        // 추천옵션 [관심사, 남자, 여자, 동급생, 선배, 후배]
+        val recommendOptions = myInterestEntities.filter { it.category == "추천옵션" }.map { it.topic }
+        // 추천제외 [같은학교, 연락처]
+        val recommendExcludes = myInterestEntities.filter { it.category == "추천제외" }.map { it.topic }
 
-        // 5) 추천 대상자의 사진 목록
-        val photos = userPhotosRepository.findByUserId(targetUserId)?.toList() ?: emptyList()
 
-        // 추천 이력 저장
+        // 후보 데이터 한번에 조회 (N+1 제거)
+        var candidateUsers = interestUserRepository.findAvailableUsersWithProfileByInterestIds(interestIds, user.id).toList()
+        if (candidateUsers.isEmpty()) return null
+
+        // 추천방식 처리
+        if (recommendMethods.contains("거리")) {
+            val nearbyUserIds = locationCacheRedisService.findNearbyUserIds(user.uid.toString(), 5.0)
+            if (nearbyUserIds.isNotEmpty()) {
+                // ✅ 반경 내 후보가 존재하면 우선 거리 기반 추천만 유지
+                candidateUsers = candidateUsers.filter { nearbyUserIds.contains(it.id) }
+                println("📍 거리 기반 후보 ${nearbyUserIds.size}명")
+            }
+        }
+
+        // 추천옵션 처리
+        val userGrade = user.grade?.toIntOrNull() ?: 0
+        candidateUsers = candidateUsers.filter { target ->
+            var match = true
+            if (recommendOptions.contains("남학생")) match = match && target.gender == "M"
+            if (recommendOptions.contains("여학생")) match = match && target.gender == "F"
+
+            val targetGrade = target.grade?.toIntOrNull() ?: 0
+            if (recommendOptions.contains("동급생")) match = match && targetGrade == userGrade
+            if (recommendOptions.contains("선배")) match = match && targetGrade > userGrade
+            if (recommendOptions.contains("후배")) match = match && targetGrade < userGrade
+
+            match
+        }
+
+        // 추천제외 처리
+        if (recommendExcludes.contains("같은 학교") && user.schoolId != null) {
+            candidateUsers = candidateUsers.filterNot { it.schoolId == user.schoolId }
+        }
+        if (recommendExcludes.contains("연락처")) {
+            // ① 내가 등록한 연락처 목록 가져오기
+            val myContactPhones = userContactRepository.findPhonesByUserId(user.id).toList().toSet()
+            if (myContactPhones.isNotEmpty()) {
+                // ② 연락처에 등록된 번호를 가진 사용자 조회
+                val contactUsers = userRepository.findAllByPhoneIn(myContactPhones).toList()
+                val contactUserIds = contactUsers.map { it.id }.toSet()
+
+                // ③ 후보 목록에서 제외
+                candidateUsers = candidateUsers.filterNot { contactUserIds.contains(it.id) }
+            }
+        }
+
+
+        val targetUser = candidateUsers.randomOrNull() ?: return null
+        val fullUser = userRepository.findById(targetUser.id) ?: return null
+        val school = fullUser.schoolId?.let { schoolRepository.findById(it) }
+        val targetUserResponse = UserResponse.from(fullUser, school)
+
+        val interests = interestUserRepository.getInterestResponseById(null, targetUser.id).toList()
+        val photos = userPhotosRepository.findByUserId(targetUser.id)?.toList() ?: emptyList()
+
         interestMatchHistoryRepository.save(
             InterestMatchHistoryEntity(
                 userId = user.id,
@@ -114,7 +172,7 @@ class InterestUserService(
             )
         )
 
-        expService.grantExp(user.id, "TODAY_FRIEND_CHECK", targetUserId)
+        expService.grantExp(user.id, "TODAY_FRIEND_CHECK", targetUser.id)
         pointService.applyPolicy(user.id, PointPolicy.FRIEND_RECOMMEND)
 
         return FriendRecommendationResponse(
@@ -123,7 +181,6 @@ class InterestUserService(
             photos = photos
         )
     }
-
 
 
 

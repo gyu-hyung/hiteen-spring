@@ -3,6 +3,8 @@ package kr.jiasoft.hiteen.feature.relationship.app
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
+import kr.jiasoft.hiteen.common.exception.BusinessValidationException
+import kr.jiasoft.hiteen.feature.contact.infra.UserContactRepository
 import kr.jiasoft.hiteen.feature.level.app.ExpService
 import kr.jiasoft.hiteen.feature.location.domain.LocationHistory
 import kr.jiasoft.hiteen.feature.location.infra.cache.LocationCacheRedisService
@@ -32,6 +34,8 @@ class FriendService(
     private val friendRepository: FriendRepository,
     private val followRepository: FollowRepository,
     private val userRepository: UserRepository,
+    private val userContactRepository: UserContactRepository,
+
     private val locationCacheRedisService: LocationCacheRedisService,
     private val expService: ExpService,
     private val userService: UserService,
@@ -77,25 +81,32 @@ class FriendService(
             .filter { it.isNotBlank() }
             .toSet()
 
-        // 2. 가입 사용자 조회 (연락처에 해당하는 users)
+        if (phones.isEmpty()) {
+            throw BusinessValidationException(mapOf("message" to "연락처 정보가 없습니다."))
+        }
+
+        // 2. DB에 연락처 저장 (중복은 upsert 처리)
+        phones.forEach { phone ->
+            userContactRepository.upsert(user.id, phone)
+        }
+
+        // 3. 가입 사용자 조회
         val registeredUsers = userRepository.findAllByPhoneIn(phones).toList()
 
-        // 3. 친구 관계 조회 (내가 user_id 또는 friend_id 인 경우)
+        // 4. 친구 관계 조회
         val friendRelations = friendRepository.findByUserIdOrFriendId(user.id, user.id).toList()
-
-        // 3-1. 친구 userId 집합 만들기 (내 친구들의 userId)
         val friendIds = friendRelations.map {
             if (it.userId == user.id) it.friendId else it.userId
         }.toSet()
 
-        // 4. 그룹 분류
+        // 5. 그룹 분류
         val friendList = registeredUsers.filter { it.id in friendIds }
         val registeredNotFriend = registeredUsers.filter { it.id !in friendIds && it.id != user.id }
         val notRegistered = phones.filter { phone -> registeredUsers.none { it.phone == phone } }
 
         return ContactResponse(
             registeredUsers = registeredNotFriend.map { u ->
-                UserSummary.from(u, isFriend = u.id in friendIds)
+                UserSummary.from(u, isFriend = false)
             },
             friends = friendList.map { u ->
                 UserSummary.from(u, isFriend = true)
@@ -103,6 +114,7 @@ class FriendService(
             notRegisteredUsers = notRegistered
         )
     }
+
 
     suspend fun listFriends(me: UserEntity): List<RelationshipSummary> {
         return friendRepository.findAllAccepted(me.id)
