@@ -59,40 +59,42 @@ class GameController(
 
 
     @Operation(summary = "실시간 랭킹 조회 (game_scores + league 기준)")
-    @GetMapping("/realtime/{gameId}/{seasonId}")
+    @GetMapping("/realtime/{gameId}/{seasonId}/{league}")
     suspend fun getRealtimeRanking(
         @Parameter(description = "시즌 ID") @PathVariable seasonId: Long,
         @Parameter(description = "게임 ID") @PathVariable gameId: Long,
+        @Parameter(description = "리그") @PathVariable league: String,
         @Parameter(description = "친구만 여부") @RequestParam(required = false) friendOnly: Boolean? = false,
         @AuthenticationPrincipal(expression = "user") user: UserEntity
     ): SeasonRankingResponse
-        = gameService.getRealtimeRanking(seasonId, gameId, user.id, friendOnly == true)
+        = gameService.getRealtimeRanking(seasonId, gameId, league, user.id, friendOnly == true)
 
 
-    @Operation(summary = "시즌 랭킹 조회 (이력)")
-    @GetMapping("/history/{seasonId}/{gameId}")
+    @Operation(summary = "이전 랭킹 조회 ")
+    @GetMapping("/history/{gameId}/{seasonId}/{league}")
     suspend fun getSeasonRanking(
         @Parameter(description = "시즌 ID") @PathVariable seasonId: Long,
         @Parameter(description = "게임 ID") @PathVariable gameId: Long,
+        @Parameter(description = "리그 (예: BRONZE, SILVER, GOLD...)") @PathVariable league: String,
         @AuthenticationPrincipal(expression = "user") user: UserEntity
     ): SeasonRankingResponse {
-        return gameService.getSeasonRanking(seasonId, gameId, user.id)
+        return gameService.getSeasonRanking(seasonId, gameId, league, user.id)
     }
 
 
     @Operation(summary = "친구 랭킹 조회 (이력)")
-    @GetMapping("/history/{seasonId}/{gameId}/friends")
+    @GetMapping("/history/{gameId}/{seasonId}/{league}/friends")
     suspend fun getFriendRanking(
         @Parameter(description = "시즌 ID") @PathVariable seasonId: Long,
         @Parameter(description = "게임 ID") @PathVariable gameId: Long,
-//        @Parameter(description = "리그 (예: BRONZE, SILVER, GOLD...)") @PathVariable league: String,
+        @Parameter(description = "리그 (예: BRONZE, SILVER, GOLD...)") @PathVariable league: String,
         @AuthenticationPrincipal(expression = "user") user: UserEntity
     ): SeasonRankingResponse {
         val friendIds = friendRepository.findAllAccepted(user.id).map {
             if (it.userId == user.id) it.friendId else it.userId
         }.toList()
 
-        return gameService.getSeasonRankingFiltered(seasonId, gameId, user.id, friendIds)
+        return gameService.getSeasonRankingFiltered(seasonId, gameId, league, user.id,  friendIds)
     }
 
 

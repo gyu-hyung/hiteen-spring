@@ -9,11 +9,10 @@ import java.time.OffsetDateTime
 data class SeasonEntity(
     @Id
     val id: Long = 0L,
-    val seasonNo: Int,
+    val seasonNo: String,
     val startDate: LocalDate,
     val endDate: LocalDate,
     val status: String = "ACTIVE",
-    val league: String,
     val createdAt: OffsetDateTime = OffsetDateTime.now(),
     val updatedAt: OffsetDateTime? = null
 )

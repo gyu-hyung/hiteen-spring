@@ -854,15 +854,17 @@ CREATE TABLE game_scores (
 CREATE TABLE game_rankings (
   id             BIGSERIAL PRIMARY KEY,
   season_id      BIGINT NOT NULL REFERENCES seasons(id) ON DELETE CASCADE,
-  participant_id BIGINT NOT NULL REFERENCES season_participants(id) ON DELETE CASCADE,
+  league 		 varchar(20),
   game_id        BIGINT NOT NULL REFERENCES games(id) ON DELETE CASCADE,
-  user_id        BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   rank           INTEGER NOT NULL,
   score          INTEGER NOT NULL,
+  participant_id BIGINT NOT NULL REFERENCES season_participants(id) ON DELETE CASCADE,
+  user_id        BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   nickname       VARCHAR(50) NOT NULL,
   profile_image  VARCHAR(255),
   created_at     TIMESTAMPTZ DEFAULT now()
 );
+
 
 
 -- ========================
@@ -874,7 +876,6 @@ CREATE TABLE seasons (
   start_date  date NOT NULL,
   end_date    date NOT NULL,
   status      varchar(20) DEFAULT 'ACTIVE', -- ACTIVE, CLOSED
-  league 	  varchar(20) NOT NULL,
   created_at  timestamptz DEFAULT now(),
   updated_at  timestamptz
 );
@@ -888,6 +889,7 @@ CREATE TABLE season_participants (
   season_id bigint NOT NULL REFERENCES seasons(id),
   user_id bigint NOT NULL REFERENCES users(id),
   tier_id bigint NOT NULL,  -- 시즌 시작 시점의 고정 티어
+  league varchar(20) NOT NULL,
   joined_at timestamptz DEFAULT now(),
   joined_type varchar(20) DEFAULT 'INITIAL',-- INITIAL(시즌시작), BRONZE_JOIN(중간참여)
   UNIQUE(season_id, user_id)
