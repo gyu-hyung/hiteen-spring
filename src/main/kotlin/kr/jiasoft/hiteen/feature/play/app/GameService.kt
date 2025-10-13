@@ -74,9 +74,8 @@ class GameService(
         }
 
         val participant = getOrCreateParticipant(userId, tierId)
-        val season = validateSeason(participant.seasonId)
 
-        val existing = gameScoreRepository.findBySeasonIdAndParticipantIdAndGameId(season.id, participant.id, gameId)
+        val existing = gameScoreRepository.findBySeasonIdAndParticipantIdAndGameId(participant.seasonId, participant.id, gameId)
 
         return if (existing != null) {
             val lastPlayedDate = existing.updatedAt?.toLocalDate() ?: existing.createdAt.toLocalDate()
@@ -96,7 +95,7 @@ class GameService(
 
             pointService.applyPolicy(userId, PointPolicy.GAME_PLAY, gameId)
             grantExp(userId, gameId, wordChallengeGameId)
-            createNewScore(season.id, participant.id, gameId, score)
+            createNewScore(participant.seasonId, participant.id, gameId, score)
         }
     }
 
@@ -115,28 +114,23 @@ class GameService(
         return seasonParticipantRepository.findActiveParticipant(userId) ?: run {
             val tier = tierRepository.findById(tierId)
                 ?: throw IllegalStateException("유저의 리그를 확인할 수 없습니다.")
-            val league = tier.tierCode.substringBefore("_")
-            val season = seasonRepository.findActiveSeason(league)
-                ?: throw IllegalStateException("현재 진행 중인 시즌이 없습니다. (league=$league)")
+            val season = seasonRepository.findActiveSeason()
+                ?: throw IllegalStateException("현재 진행 중인 시즌이 없습니다.")
+            if (season.status != "ACTIVE" || season.endDate.isBefore(LocalDate.now())) {
+                throw IllegalStateException("이미 종료된 시즌입니다. (seasonId=${season.id})")
+            }
             seasonParticipantRepository.save(
                 SeasonParticipantEntity(
                     seasonId = season.id,
                     userId = userId,
                     tierId = tierId,
+                    league = tier.tierCode.split("_")[0],
                     joinedType = "AUTO_JOIN"
                 )
             )
         }
     }
 
-    private suspend fun validateSeason(seasonId: Long): SeasonEntity {
-        val season = seasonRepository.findById(seasonId)
-            ?: throw IllegalStateException("해당 시즌 정보를 찾을 수 없습니다. (seasonId=$seasonId)")
-        if (season.status != "ACTIVE" || season.endDate.isBefore(LocalDate.now())) {
-            throw IllegalStateException("이미 종료된 시즌입니다. (seasonId=${season.id})")
-        }
-        return season
-    }
 
     private suspend fun handleRetry(
         retryType: String?,
@@ -184,12 +178,13 @@ class GameService(
     suspend fun getRealtimeRanking(
         seasonId: Long,
         gameId: Long,
+        league: String,
         currentUserId: Long,
         friendOnly: Boolean = false
     ): SeasonRankingResponse {
 
         // 전체 랭킹 조회
-        val all = rankingViewRepository.findSeasonRanking(seasonId, gameId).toList()
+        val all = rankingViewRepository.findSeasonRanking(seasonId, gameId, league).toList()
 
         // DTO 변환
         val dtoList = all.map {
@@ -241,13 +236,12 @@ class GameService(
     suspend fun getSeasonRanking(
         seasonId: Long,
         gameId: Long,
-//        league: String,
+        league: String,
         currentUserId: Long
     ): SeasonRankingResponse {
         // 랭킹 이력 직접 조회
         val rankings = gameRankingRepository
-//            .findAllBySeasonIdAndGameIdAndLeague(seasonId, gameId, league)
-            .findAllBySeasonIdAndGameId(seasonId, gameId)
+            .findAllBySeasonIdAndGameIdAndLeague(seasonId, gameId, league)
             .toList()
 
         val dtoList = rankings.map {
@@ -279,11 +273,11 @@ class GameService(
     suspend fun getSeasonRankingFiltered(
         seasonId: Long,
         gameId: Long,
-//        league: String,
+        league: String,
         currentUserId: Long,
         allowedUserIds: List<Long>
     ): SeasonRankingResponse {
-        val fullRanking = getSeasonRanking(seasonId, gameId, currentUserId)
+        val fullRanking = getSeasonRanking(seasonId, gameId, league, currentUserId)
 
         val filtered = fullRanking.rankings
             .filter { it.userId in allowedUserIds || it.isMe }

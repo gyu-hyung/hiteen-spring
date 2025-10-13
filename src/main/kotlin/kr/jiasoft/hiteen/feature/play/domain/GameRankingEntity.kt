@@ -11,12 +11,12 @@ data class GameRankingEntity(
 
     val seasonId: Long,
     val league: String,
-    val participantId: Long,
     val gameId: Long,
-    val userId: Long,
-
     val rank: Int,
     val score: Long,
+
+    val participantId: Long,
+    val userId: Long,
 
     val nickname: String,
     val profileImage: String? = null,

@@ -23,11 +23,8 @@ interface SeasonRepository : CoroutineCrudRepository<SeasonEntity, Long> {
     @Query("SELECT EXISTS(SELECT 1 FROM seasons WHERE start_date = :date)")
     suspend fun existsByStartDate(date: LocalDate): Boolean
 
-    @Query("SELECT * FROM seasons WHERE league = :league ORDER BY start_date desc, season_no DESC LIMIT 1")
-    suspend fun findLatestByLeague(league: String): SeasonEntity?
-
-    @Query("SELECT * FROM seasons WHERE status = 'ACTIVE' AND league = :league ORDER BY start_date DESC LIMIT 1")
-    suspend fun findActiveSeason(league: String): SeasonEntity?
+    @Query("SELECT * FROM seasons WHERE status = 'ACTIVE' ORDER BY start_date DESC LIMIT 1")
+    suspend fun findActiveSeason(): SeasonEntity?
 
     @Query("SELECT * FROM seasons WHERE status = 'ACTIVE'")
     fun findActiveSeasons(): Flow<SeasonEntity>
@@ -37,23 +34,22 @@ interface SeasonRepository : CoroutineCrudRepository<SeasonEntity, Long> {
 //    PARTITION BY EXTRACT(YEAR FROM s.start_date), EXTRACT(MONTH FROM s.start_date), s.league
 //    ORDER BY s.start_date
 //    ) AS round_no
-    @Query(
-        """
-        SELECT s.id,
-               s.season_no,
-               s.start_date,
-               s.end_date,
-               s.league,
-               s.status,
-               EXTRACT(YEAR FROM s.start_date)  AS year,
-               EXTRACT(MONTH FROM s.start_date) AS month
+    @Query("""
+        SELECT DISTINCT s.id,
+                        s.season_no,
+                        s.start_date,
+                        s.end_date,
+                        s.status,
+                        EXTRACT(YEAR FROM s.start_date)  AS year,
+                        EXTRACT(MONTH FROM s.start_date) AS month,
+                        sp.league
         FROM seasons s
+                 JOIN season_participants sp ON sp.season_id = s.id
         WHERE EXTRACT(YEAR FROM s.start_date) = :year
-          AND s.league = :league
+          AND sp.league = :league
           AND (:status IS NULL OR s.status = :status)
-        ORDER BY year DESC, month, season_no desc
-        """
-    )
+        ORDER BY year DESC, month, s.season_no DESC
+    """)
     fun findSeasonsByYearAndLeagueAndStatus(
         year: Int,
         league: String,

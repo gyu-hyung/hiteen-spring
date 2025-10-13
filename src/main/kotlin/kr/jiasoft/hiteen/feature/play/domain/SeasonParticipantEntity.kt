@@ -10,6 +10,7 @@ data class SeasonParticipantEntity(
     val id: Long = 0L,
     val seasonId: Long,
     val userId: Long,
+    val league: String,
     val tierId: Long,
     val joinedAt: OffsetDateTime = OffsetDateTime.now(),
     val joinedType: String = "INITIAL"

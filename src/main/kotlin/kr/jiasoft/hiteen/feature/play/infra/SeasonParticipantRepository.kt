@@ -10,8 +10,6 @@ import org.springframework.stereotype.Repository
 // ========================
 @Repository
 interface SeasonParticipantRepository : CoroutineCrudRepository<SeasonParticipantEntity, Long> {
-    suspend fun findBySeasonIdAndUserId(seasonId: Long, userId: Long): SeasonParticipantEntity?
-    fun findAllBySeasonId(seasonId: Long): kotlinx.coroutines.flow.Flow<SeasonParticipantEntity>
 
     @Query(
         """
