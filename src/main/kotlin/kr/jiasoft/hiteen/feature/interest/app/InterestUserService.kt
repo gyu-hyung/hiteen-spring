@@ -183,7 +183,6 @@ class InterestUserService(
             )
         )
 
-        pointService.applyPolicy(user.id, PointPolicy.FRIEND_RECOMMEND)
 
         return FriendRecommendationResponse(
             user = targetUserResponse,
