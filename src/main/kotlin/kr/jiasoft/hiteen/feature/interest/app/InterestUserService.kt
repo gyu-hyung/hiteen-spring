@@ -114,13 +114,24 @@ class InterestUserService(
 
         // 추천방식 처리
         if (recommendMethods.contains("거리")) {
-            val nearbyUserIds = locationCacheRedisService.findNearbyUserIds(user.uid.toString(), 5.0)
+            var nearbyUserIds = emptySet<Long>()
+            val radiusSteps = listOf(3.0, 10.0, 30.0) // km 단위 확장
+
+            for (r in radiusSteps) {
+                nearbyUserIds = locationCacheRedisService.findNearbyUserIds(user.uid.toString(), r)
+                if (nearbyUserIds.isNotEmpty()) {
+                    println("📍 반경 ${r}km 내 후보 발견: ${nearbyUserIds.size}명")
+                    break
+                }
+            }
+
             if (nearbyUserIds.isNotEmpty()) {
-                // ✅ 반경 내 후보가 존재하면 우선 거리 기반 추천만 유지
                 candidateUsers = candidateUsers.filter { nearbyUserIds.contains(it.id) }
-                println("📍 거리 기반 후보 ${nearbyUserIds.size}명")
+            } else {
+                println("⚠️ 반경 30km 내 후보 없음 → 거리 무시하고 전체 후보 유지")
             }
         }
+
 
         // 추천옵션 처리
         val userGrade = user.grade?.toIntOrNull() ?: 0
@@ -172,7 +183,6 @@ class InterestUserService(
             )
         )
 
-        expService.grantExp(user.id, "TODAY_FRIEND_CHECK", targetUser.id)
         pointService.applyPolicy(user.id, PointPolicy.FRIEND_RECOMMEND)
 
         return FriendRecommendationResponse(
