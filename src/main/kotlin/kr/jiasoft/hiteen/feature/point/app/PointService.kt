@@ -4,6 +4,7 @@ import kotlinx.coroutines.reactor.awaitSingle
 import kr.jiasoft.hiteen.feature.point.domain.PointEntity
 import kr.jiasoft.hiteen.feature.point.domain.PointPolicy
 import kr.jiasoft.hiteen.feature.point.infra.PointRepository
+import kr.jiasoft.hiteen.feature.point.infra.PointSummaryRepository
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToMono
@@ -14,15 +15,19 @@ import java.util.Base64
 class PointService(
     private val webClient: WebClient,
     private val pointRepository: PointRepository,
+    private val pointSummaryRepository: PointSummaryRepository
 ) {
 
     /**
      * 내 포인트 조회
      * */
     suspend fun getUserTotalPoints(userId: Long): Int {
-        val all = pointRepository.findAllByUserId(userId)
-        return all.sumOf { it.point }
+        // summary 테이블 우선 조회, 없으면 fallback
+        return pointSummaryRepository.findById(userId)?.totalPoint
+            ?: pointRepository.sumPointsByUserId(userId) ?: 0
     }
+
+
 
 
     /**
@@ -75,6 +80,7 @@ class PointService(
             pointableId = refId,
             memo = policy.memoTemplate
         )
+        pointSummaryRepository.upsertAddPoint(userId, policy.amount)
         return pointRepository.save(point)
     }
 

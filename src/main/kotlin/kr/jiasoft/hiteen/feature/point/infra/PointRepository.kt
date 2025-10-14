@@ -9,6 +9,10 @@ interface PointRepository : CoroutineCrudRepository<PointEntity, Long> {
 
     suspend fun findAllByUserId(userId: Long): List<PointEntity>
 
+    @Query("SELECT SUM(p.point) FROM points p WHERE p.user_id = :userId AND p.deleted_at IS NULL")
+    suspend fun sumPointsByUserId(userId: Long): Int?
+
+
     @Query("""
         SELECT * 
         FROM points 
