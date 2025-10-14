@@ -8,6 +8,9 @@ import kr.jiasoft.hiteen.feature.contact.infra.UserContactRepository
 import kr.jiasoft.hiteen.feature.level.app.ExpService
 import kr.jiasoft.hiteen.feature.location.domain.LocationHistory
 import kr.jiasoft.hiteen.feature.location.infra.cache.LocationCacheRedisService
+import kr.jiasoft.hiteen.feature.push.app.PushService
+import kr.jiasoft.hiteen.feature.push.domain.PushTemplate
+import kr.jiasoft.hiteen.feature.push.domain.buildPushData
 import kr.jiasoft.hiteen.feature.relationship.domain.FollowEntity
 import kr.jiasoft.hiteen.feature.relationship.domain.FollowStatus
 import kr.jiasoft.hiteen.feature.relationship.domain.FriendEntity
@@ -36,9 +39,10 @@ class FriendService(
     private val userRepository: UserRepository,
     private val userContactRepository: UserContactRepository,
 
+    private val userService: UserService,
     private val locationCacheRedisService: LocationCacheRedisService,
     private val expService: ExpService,
-    private val userService: UserService,
+    private val pushService: PushService,
 ) {
     private val now: OffsetDateTime get() = OffsetDateTime.now(ZoneOffset.UTC)
 
@@ -170,6 +174,10 @@ class FriendService(
                         statusAt = now, createdAt = now,
                     )
                 )
+                pushService.sendAndSavePush(
+                    listOf(targetId),
+                    PushTemplate.FRIEND_REQUEST.buildPushData("nickname" to me.nickname)
+                )
             }
             existing.status == FriendStatus.PENDING.name -> {
                 // 상대가 me 에게 이미 보낸 요청이라면, 이 요청은 '수락'으로 전환
@@ -198,6 +206,10 @@ class FriendService(
                     )
                     expService.grantExp(meId, "FRIEND_ADD", targetId)
                     expService.grantExp(targetId, "FRIEND_ADD", meId)
+                    pushService.sendAndSavePush(
+                        listOf(targetId),
+                        PushTemplate.FRIEND_ACCEPT.buildPushData("nickname" to me.nickname)
+                    )
                 } else {
                     // 내가 이미 보낸 상태면 중복요청
                     throw ResponseStatusException(HttpStatus.CONFLICT, "already requested")
@@ -246,6 +258,10 @@ class FriendService(
 
         expService.grantExp(meId, "FRIEND_ADD", requesterId)
         expService.grantExp(requesterId, "FRIEND_ADD", meId)
+        pushService.sendAndSavePush(
+            listOf(requesterId),
+            PushTemplate.FRIEND_ACCEPT.buildPushData("nickname" to me.nickname)
+        )
     }
 
     /**

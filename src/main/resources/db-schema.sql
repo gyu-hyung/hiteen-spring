@@ -76,6 +76,7 @@ CREATE TABLE user_details (
   agree_marketing VARCHAR(100),
   push_service  VARCHAR(100),
   push_marketing VARCHAR(100),
+  push_items    text,
   memo          text
 );
 

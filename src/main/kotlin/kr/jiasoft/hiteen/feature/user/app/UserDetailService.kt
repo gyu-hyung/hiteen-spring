@@ -1,5 +1,7 @@
 package kr.jiasoft.hiteen.feature.user.app
 
+import com.fasterxml.jackson.core.type.TypeReference
+import com.fasterxml.jackson.databind.ObjectMapper
 import kr.jiasoft.hiteen.feature.user.domain.UserDetailEntity
 import kr.jiasoft.hiteen.feature.user.dto.UserDetailRequest
 import kr.jiasoft.hiteen.feature.user.dto.UserDetailResponse
@@ -7,11 +9,13 @@ import kr.jiasoft.hiteen.feature.user.infra.UserDetailRepository
 import kr.jiasoft.hiteen.feature.user.infra.UserRepository
 import org.springframework.stereotype.Service
 import java.util.UUID
+import kotlin.collections.joinToString
 
 @Service
 class UserDetailService(
     private val userDetails: UserDetailRepository,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val objectMapper: ObjectMapper,
 ) {
 
     suspend fun getUserDetail(userUid: UUID): UserDetailResponse? {
@@ -23,6 +27,13 @@ class UserDetailService(
         userRepository.findIdByUid(userUid)?.let {
             req.userId = it
         }
+
+        val pushItems = req.pushItems.joinToString(
+            prefix = "[\"",
+            postfix = "\"]",
+            separator = "\",\""
+        )
+
         val existing = userDetails.findByUid(userUid)
         val saved = existing?.copy(
             deviceId = req.deviceId ?: existing.deviceId,
@@ -39,6 +50,7 @@ class UserDetailService(
             agreeMarketing = req.agreeMarketing ?: existing.agreeMarketing,
             pushService = req.pushService ?: existing.pushService,
             pushMarketing = req.pushMarketing ?: existing.pushMarketing,
+            pushItems = pushItems,
             memo = req.memo ?: existing.memo,
         )
             ?: UserDetailEntity(
@@ -57,6 +69,7 @@ class UserDetailService(
                 agreeMarketing = req.agreeMarketing,
                 pushService = req.pushService,
                 pushMarketing = req.pushMarketing,
+                pushItems = pushItems,
                 memo = req.memo,
             )
         return userDetails.save(saved).toResponse()
@@ -82,6 +95,24 @@ class UserDetailService(
         agreeMarketing = this.agreeMarketing,
         pushService = this.pushService,
         pushMarketing = this.pushMarketing,
+        pushItems = parsePushItems(this.pushItems),
         memo = this.memo,
     )
+
+    private fun parsePushItems(pushItems: String): List<String> {
+        val normalized = pushItems
+            .trim()
+            .removePrefix("\"")
+            .removeSuffix("\"")
+            .replace("\\\"", "\"")
+
+        return try {
+            objectMapper.readValue(normalized, object : TypeReference<List<String>>() {})
+        } catch (e: Exception) {
+            emptyList()
+        }
+
+    }
+
+
 }

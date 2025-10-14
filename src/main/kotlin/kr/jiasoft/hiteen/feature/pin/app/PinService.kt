@@ -17,6 +17,10 @@ import kr.jiasoft.hiteen.feature.pin.dto.PinRegisterRequest
 import kr.jiasoft.hiteen.feature.pin.dto.PinUpdateRequest
 import kr.jiasoft.hiteen.feature.pin.infra.PinRepository
 import kr.jiasoft.hiteen.feature.pin.infra.PinUsersRepository
+import kr.jiasoft.hiteen.feature.push.app.PushService
+import kr.jiasoft.hiteen.feature.push.domain.PushTemplate
+import kr.jiasoft.hiteen.feature.push.domain.buildPushData
+import kr.jiasoft.hiteen.feature.relationship.infra.FriendRepository
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import kr.jiasoft.hiteen.feature.user.infra.UserRepository
 import org.springframework.stereotype.Service
@@ -30,6 +34,8 @@ class PinService(
     private val pinUsersRepository: PinUsersRepository,
     private val userRepository: UserRepository,
     private val expService: ExpService,
+    private val pushService: PushService,
+    private val friendRepository: FriendRepository,
 ) {
 
     enum class VISIBILITY {
@@ -128,6 +134,7 @@ class PinService(
     }
 
     suspend fun register(user: UserEntity, dto: PinRegisterRequest): PinEntity {
+        // ① 핀 저장
         val pin = pinRepository.save(
             PinEntity(
                 userId = user.id,
@@ -141,25 +148,60 @@ class PinService(
             )
         )
 
+        // ② FRIENDS 공개 시 친구 uid → id 매핑 미리 조회
+        val selectedFriendIds: List<Long> = if (dto.visibility == "FRIENDS" && !dto.friendUids.isNullOrEmpty()) {
+            userRepository.findIdByUidIn(dto.friendUids)
+        } else {
+            emptyList()
+        }
 
-        //TODO 해당 uid 가 친구가 맞는지?
-        if (dto.visibility == "FRIENDS" && !dto.friendUids.isNullOrEmpty()) {
-            // uid -> id 매핑을 한번에 조회
-            val users = userRepository.findAllByUidIn(dto.friendUids)
+        // ③ FRIENDS 공개 시 pinUsers 저장
+        if (selectedFriendIds.isNotEmpty()) {
             coroutineScope {
-                users.forEach { u ->
+                selectedFriendIds.forEach { friendId ->
                     launch {
                         pinUsersRepository.save(
-                            PinUsersEntity(pinId = pin.id, userId = u.id, createdAt = OffsetDateTime.now())
+                            PinUsersEntity(
+                                pinId = pin.id,
+                                userId = friendId,
+                                createdAt = OffsetDateTime.now()
+                            )
                         )
                     }
                 }
             }
         }
 
+        // ④ 경험치 지급
+        expService.grantExp(user.id, "PIN_REGISTER", pin.id)
 
-        // 경험치 지급
-        expService.grantExp(user.id,"PIN_REGISTER",pin.id)
+        // ⑤ 푸시 알림 전송
+        coroutineScope {
+            launch {
+                try {
+                    // FRIENDS 공개일 때: 선택된 친구에게만 푸시
+                    // 그 외에는 전체 친구에게 푸시
+                    val friendIds =
+                        if (dto.visibility == "FRIENDS" && selectedFriendIds.isNotEmpty()) {
+                            selectedFriendIds
+                        } else {
+                            friendRepository.findAllFriendship(user.id).toList()
+                        }
+
+                    if (friendIds.isNotEmpty()) {
+                        val data = PushTemplate.PIN_REGISTER.buildPushData(
+                            "nickname" to user.nickname
+                        )
+                        pushService.sendAndSavePush(friendIds, data)
+                        println("📢 ${friendIds.size}명에게 PIN_ALERT 푸시 전송 완료")
+                    } else {
+                        println("⚠️ 푸시 전송 대상 없음 — visibility=${dto.visibility}")
+                    }
+                } catch (e: Exception) {
+                    println("‼️ PIN_ALERT 푸시 전송 중 오류: ${e.message}")
+                }
+            }
+        }
 
         return pin
     }

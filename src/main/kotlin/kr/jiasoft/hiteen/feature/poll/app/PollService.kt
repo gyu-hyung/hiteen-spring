@@ -13,7 +13,11 @@ import kr.jiasoft.hiteen.feature.point.domain.PointPolicy
 import kr.jiasoft.hiteen.feature.poll.domain.*
 import kr.jiasoft.hiteen.feature.poll.dto.*
 import kr.jiasoft.hiteen.feature.poll.infra.*
+import kr.jiasoft.hiteen.feature.push.app.PushService
+import kr.jiasoft.hiteen.feature.push.domain.PushTemplate
+import kr.jiasoft.hiteen.feature.push.domain.buildPushData
 import kr.jiasoft.hiteen.feature.user.app.UserService
+import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import org.springframework.dao.DuplicateKeyException
 import org.springframework.http.HttpStatus
 import org.springframework.http.codec.multipart.FilePart
@@ -35,6 +39,7 @@ class PollService(
 
     private val expService: ExpService,
     private val pointService: PointService,
+    private val pushService: PushService,
 ) {
 
     private enum class PollStatus {
@@ -255,7 +260,7 @@ class PollService(
                     }.toList()
 
 
-    suspend fun createComment(req: PollCommentRegisterRequest, userId: Long): Long {
+    suspend fun createComment(req: PollCommentRegisterRequest, user: UserEntity): Long {
         val p = polls.findById(req.pollId)!!
         val parent: PollCommentEntity? = req.parentId?.let { comments.findById(it) }
         val saved = comments.save(
@@ -263,15 +268,16 @@ class PollService(
                 pollId = p.id,
                 parentId = req.parentId,
                 content = req.content,
-                createdId = userId,
+                createdId = user.id,
                 createdAt = OffsetDateTime.now(),
             )
         )
         polls.increaseCommentCount(req.pollId)
         if (parent != null) comments.increaseReplyCount(parent.id)
 
-        expService.grantExp(userId, "CREATE_VOTE_COMMENT", saved.id)
-        pointService.applyPolicy(userId, PointPolicy.VOTE_COMMENT, saved.id)
+        expService.grantExp(user.id, "CREATE_VOTE_COMMENT", saved.id)
+        pointService.applyPolicy(user.id, PointPolicy.VOTE_COMMENT, saved.id)
+        pushService.sendAndSavePush(listOf(p.createdId), PushTemplate.VOTE_COMMENT.buildPushData("nickname" to user.nickname))
         return saved.id
     }
 

@@ -9,6 +9,15 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface FollowRepository : CoroutineCrudRepository<FollowEntity, Long> {
+
+    @Query("""
+        SELECT user_id
+        FROM follows
+        WHERE follow_id = :userId
+          AND status = 'ACCEPTED'
+    """)
+    suspend fun findAllFollowerIds(userId: Long): Flow<Long>
+
     @Query("SELECT * FROM follows WHERE user_id = :userId AND follow_id = :followId")
     suspend fun findBetween(userId: Long, followId: Long): FollowEntity?
     suspend fun findAllByUserIdAndStatus(userId: Long, status: String): Flow<FollowEntity>

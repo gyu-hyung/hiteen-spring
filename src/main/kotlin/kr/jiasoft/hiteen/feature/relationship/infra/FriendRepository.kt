@@ -10,6 +10,13 @@ import org.springframework.stereotype.Repository
 @Repository
 interface FriendRepository : CoroutineCrudRepository<FriendEntity, Long> {
 
+    @Query("""
+        SELECT CASE WHEN user_id = :userId THEN friend_id ELSE user_id END AS friend_id
+        FROM friends
+        WHERE (user_id = :userId OR friend_id = :userId)    
+          AND status = 'ACCEPTED'
+    """)
+    suspend fun findAllFriendship(userId: Long): Flow<Long>
 
     @Query("""
         SELECT COUNT(1) 

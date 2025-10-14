@@ -4,5 +4,6 @@ data class UserWithDetailDto(
     val userId: Long,
     val phone: String?,
     val deviceOs: String?,
-    val deviceToken: String?
+    val deviceToken: String?,
+    val pushItems: String?,
 )

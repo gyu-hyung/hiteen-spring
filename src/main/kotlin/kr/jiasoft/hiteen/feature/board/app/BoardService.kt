@@ -23,7 +23,12 @@ import kr.jiasoft.hiteen.feature.board.infra.BoardRepository
 import kr.jiasoft.hiteen.feature.level.app.ExpService
 import kr.jiasoft.hiteen.feature.point.app.PointService
 import kr.jiasoft.hiteen.feature.point.domain.PointPolicy
+import kr.jiasoft.hiteen.feature.push.app.PushService
+import kr.jiasoft.hiteen.feature.push.domain.PushTemplate
+import kr.jiasoft.hiteen.feature.push.domain.buildPushData
+import kr.jiasoft.hiteen.feature.relationship.infra.FollowRepository
 import kr.jiasoft.hiteen.feature.user.app.UserService
+import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import org.springframework.dao.DuplicateKeyException
 import org.springframework.http.HttpStatus
 import org.springframework.http.codec.multipart.FilePart
@@ -41,18 +46,12 @@ class BoardService(
     private val commentLikes: BoardCommentLikeRepository,
     private val assetService: AssetService,
     private val userService: UserService,
-//    private val eloquent: CoroutineEloquent,
     private val expService: ExpService,
     private val pointService: PointService,
-) {
+    private val pushService: PushService,
 
-//    suspend fun getUserBoards(userId: Long?): CursorResult<BoardResponse, Long> {
-//        return eloquent.forEntity(BoardResponse::class.java)
-//            .where("created_id", "=", userId!!)
-//            .with("user")
-//            .cursorPaginate(10,0)
-////            ?.boards.orEmpty()
-//    }
+    private val followRepository: FollowRepository,
+) {
 
 
     suspend fun getBoard(uid: UUID, currentUserId: Long?): BoardResponse {
@@ -153,13 +152,13 @@ class BoardService(
 
     suspend fun create(
         req: BoardCreateRequest,
-        currentUserId: Long,
+        user: UserEntity,
         files: List<FilePart>,
         ip: String?
     ): UUID {
         // 1) 파일이 있다면 먼저 업로드 → 첫 번째 파일을 대표이미지 후보로
         val uploaded: List<AssetResponse> =
-            if (files.isNotEmpty()) assetService.uploadImages(files, currentUserId) else emptyList()
+            if (files.isNotEmpty()) assetService.uploadImages(files, user.id) else emptyList()
         val representativeUid: UUID? = uploaded.firstOrNull()?.uid
 
         // 2) 대표이미지(assetUid)를 반영해 게시글 생성
@@ -176,7 +175,7 @@ class BoardService(
                 address = req.address,
                 detailAddress = req.detailAddress,
                 assetUid = representativeUid,
-                createdId = currentUserId,
+                createdId = user.id,
                 createdAt = OffsetDateTime.now(),
             )
         )
@@ -194,10 +193,12 @@ class BoardService(
         }
 
         //경험치
-        expService.grantExp(currentUserId, "CREATE_BOARD", saved.id)
+        expService.grantExp(user.id, "CREATE_BOARD", saved.id)
         //포인트
-        pointService.applyPolicy(currentUserId, PointPolicy.STORY_POST, saved.id)
-
+        pointService.applyPolicy(user.id, PointPolicy.STORY_POST, saved.id)
+        //포스팅 알림
+        val followerIds = followRepository.findAllFollowerIds(user.id).toList()
+        pushService.sendAndSavePush(followerIds, PushTemplate.NEW_POST.buildPushData("nickname" to user))
 
         return saved.uid
     }
@@ -321,7 +322,7 @@ class BoardService(
             }.toList()
 
 
-    suspend fun createComment(boardUid: UUID, req: BoardCommentRegisterRequest, currentUserId: Long): UUID {
+    suspend fun createComment(boardUid: UUID, req: BoardCommentRegisterRequest, user: UserEntity): UUID {
         val b = boards.findByUid(boardUid) ?: throw notFound("board")
         val parent: BoardCommentEntity? = req.parentUid?.let { comments.findByUid(it) }
         val saved = comments.save(
@@ -329,14 +330,15 @@ class BoardService(
                 boardId = b.id,
                 parentId = parent?.id,
                 content = req.content,
-                createdId = currentUserId,
+                createdId = user.id,
                 createdAt = OffsetDateTime.now(),
             )
         )
         if (parent != null) comments.increaseReplyCount(parent.id)
 
-        expService.grantExp(currentUserId, "CREATE_BOARD_COMMENT", saved.id)
-        pointService.applyPolicy(currentUserId, PointPolicy.STORY_COMMENT, saved.id)
+        expService.grantExp(user.id, "CREATE_BOARD_COMMENT", saved.id)
+        pointService.applyPolicy(user.id, PointPolicy.STORY_COMMENT, saved.id)
+        pushService.sendAndSavePush(listOf(b.createdId), PushTemplate.BOARD_COMMENT.buildPushData("nickname" to user.nickname))
         return saved.uid
     }
 
