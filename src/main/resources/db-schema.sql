@@ -839,7 +839,7 @@ CREATE TABLE game_scores (
   season_id 	bigint NOT NULL REFERENCES seasons(id) ON DELETE CASCADE,
   participant_id bigint NOT NULL REFERENCES season_participants(id) ON DELETE CASCADE,
   game_id       bigint NOT NULL REFERENCES games(id),
-  score         bigint NOT NULL,
+  score         DOUBLE PRECISION NOT NULL,
   try_count     integer DEFAULT 1,
   created_at    timestamptz DEFAULT now(),
   updated_at    timestamptz,
@@ -864,7 +864,6 @@ CREATE TABLE game_rankings (
   profile_image  VARCHAR(255),
   created_at     TIMESTAMPTZ DEFAULT now()
 );
-
 
 
 -- ========================
@@ -893,6 +892,27 @@ CREATE TABLE season_participants (
   joined_at timestamptz DEFAULT now(),
   joined_type varchar(20) DEFAULT 'INITIAL',-- INITIAL(시즌시작), BRONZE_JOIN(중간참여)
   UNIQUE(season_id, user_id)
+);
+
+
+-- ========================
+-- 영단어 학습
+-- ========================
+CREATE TABLE study (
+	id bigserial PRIMARY KEY,
+	uid varchar(100) NULL,
+	user_id bigint NOT NULL,
+	season_id bigint NOT NULL,
+	study_items text NULL,
+	give_point bigint NOT NULL,
+	status bigint NOT NULL,
+	complete_date timestamptz NULL,
+	prep bigint NOT NULL,
+	prep_point bigint NOT NULL,
+	prep_date timestamptz NULL,
+	created_at timestamptz NULL,
+	updated_at timestamptz NULL,
+	deleted_at timestamptz NULL
 );
 
 
@@ -1013,9 +1033,9 @@ CREATE TABLE push (
     multicast_id VARCHAR(255),                 -- 다중ID
     canonical_ids VARCHAR(255),                -- 발송ID
     created_id BIGINT,                         -- 전송 회원번호
-    created_at TIMESTAMP,                      -- 전송일시
-    updated_at TIMESTAMP,                      -- 수정일시
-    deleted_at TIMESTAMP                       -- 삭제일시
+    created_at timestamptz,                      -- 전송일시
+    updated_at timestamptz,                      -- 수정일시
+    deleted_at timestamptz                       -- 삭제일시
 );
 
 
@@ -1035,9 +1055,9 @@ CREATE TABLE push_detail (
     registration_id VARCHAR(300),              -- 인증ID
     error TEXT,                                -- 에러내용
     success SMALLINT NOT NULL DEFAULT 0,       -- 성공여부 (0/1)
-    created_at TIMESTAMP,                      -- 전송일시
-    updated_at TIMESTAMP,                      -- 수정일시
-    deleted_at TIMESTAMP                       -- 삭제일시
+    created_at timestamptz,                      -- 전송일시
+    updated_at timestamptz,                      -- 수정일시
+    deleted_at timestamptz                       -- 삭제일시
 );
 
 
@@ -1051,7 +1071,7 @@ CREATE TABLE admob_rewards (
   user_id        BIGINT NOT NULL REFERENCES users(id),
   reward         INT NOT NULL,
   raw_data       JSONB, -- webhook 전체 데이터 저장
-  created_at     TIMESTAMPTZ DEFAULT now()
+  created_at     timestamptz DEFAULT now()
 );
 
 
@@ -1061,8 +1081,8 @@ CREATE TABLE admob_rewards (
 CREATE TABLE user_session (
     id BIGSERIAL PRIMARY KEY,
     user_id BIGINT NOT NULL,
-    start_time TIMESTAMP NOT NULL,
-    end_time TIMESTAMP,
+    start_time timestamptz NOT NULL,
+    end_time timestamptz,
     duration_minutes INT,
     status VARCHAR(20) NOT NULL
 );

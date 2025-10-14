@@ -60,7 +60,7 @@ class GameService(
      * */
     suspend fun recordScore(
         gameId: Long,
-        score: Long,
+        score: Double,
         userId: Long,
         tierId: Long,
         retryType: String? = null,
@@ -81,11 +81,19 @@ class GameService(
             val lastPlayedDate = existing.updatedAt?.toLocalDate() ?: existing.createdAt.toLocalDate()
 
             if (lastPlayedDate.isEqual(today)) {
-
                 handleRetry(retryType, transactionId, userId, gameId)
                 grantExp(userId, gameId, wordChallengeGameId)
-                saveOrUpdateScore(existing, score, existing.tryCount + 1)
-            } else {
+
+                // 시도 횟수별 페널티 (0.08초 * n)
+                val nextTryCount = existing.tryCount + 1
+                val penalty = 0.08 * (nextTryCount - 1)
+
+                // 0.08초 단위는 Double 이므로 Long score 변환 시 ms 단위로 보정 필요할 수 있음
+                val adjustedScore = (score - penalty).coerceAtLeast(0.0)
+
+                saveOrUpdateScore(existing, adjustedScore, nextTryCount)
+            }
+            else {
 
                 pointService.applyPolicy(userId, PointPolicy.GAME_PLAY, gameId)
                 grantExp(userId, gameId, wordChallengeGameId)
@@ -149,7 +157,7 @@ class GameService(
         }
     }
 
-    private suspend fun saveOrUpdateScore(existing: GameScoreEntity, score: Long, tryCount: Int): GameScoreEntity {
+    private suspend fun saveOrUpdateScore(existing: GameScoreEntity, score: Double, tryCount: Int): GameScoreEntity {
         val updated = existing.copy(
             score = score,
             tryCount = tryCount,
@@ -158,7 +166,7 @@ class GameService(
         return gameScoreRepository.save(updated)
     }
 
-    private suspend fun createNewScore(seasonId: Long, participantId: Long, gameId: Long, score: Long): GameScoreEntity {
+    private suspend fun createNewScore(seasonId: Long, participantId: Long, gameId: Long, score: Double): GameScoreEntity {
         val newScore = GameScoreEntity(
             seasonId = seasonId,
             participantId = participantId,
@@ -186,7 +194,7 @@ class GameService(
         // 전체 랭킹 조회
         val all = rankingViewRepository.findSeasonRanking(seasonId, gameId, league).toList()
 
-        // DTO 변환
+        // DTO 변환 (displayTime은 DTO 내부에서 자동 계산됨)
         val dtoList = all.map {
             RankingResponse(
                 rank = it.rank,
@@ -194,7 +202,6 @@ class GameService(
                 nickname = it.nickname,
                 profileImageUrl = it.assetUid,
                 score = it.score,
-                displayTime = formatScoreRaw(it.score),
                 tryCount = it.tryCount,
                 createdAt = it.createdAt,
                 updatedAt = it.updatedAt,
@@ -204,14 +211,13 @@ class GameService(
 
         // 내 친구 ID 조회
         val friendIds = if (friendOnly) {
-            friendRepository.findAllAccepted(currentUserId).map {
-                if (it.userId == currentUserId) it.friendId else it.userId
-            }.toList()
+            friendRepository.findAllAccepted(currentUserId)
+                .map { if (it.userId == currentUserId) it.friendId else it.userId }
+                .toList()
         } else emptyList()
 
         // 조건에 따라 전체 or 친구 랭킹 필터링
         val filtered = if (friendOnly) {
-            // 친구 + 나만 필터링
             val onlyFriends = dtoList.filter { it.userId in friendIds || it.isMe }
             // 순위를 1부터 다시 매기기
             onlyFriends.mapIndexed { index, r ->
@@ -251,8 +257,9 @@ class GameService(
                 nickname = it.nickname,
                 profileImageUrl = it.profileImage,
                 score = it.score,
-                displayTime = formatScoreRaw(it.score),
-                tryCount = 0L,//TODO
+                tryCount = 0,  // TODO: 시즌 기록에는 시도 횟수 없음
+                createdAt = it.createdAt,
+                updatedAt = it.createdAt,
                 isMe = (it.userId == currentUserId)
             )
         }
@@ -264,6 +271,7 @@ class GameService(
             myRanking = myRanking
         )
     }
+
 
 
 
@@ -291,14 +299,6 @@ class GameService(
     }
 
 
-
-
-    private fun formatScoreRaw(score: Long): String {
-        val minutes = (score / 10000).toInt()        // 앞 2자리 = 분
-        val seconds = ((score / 100) % 100).toInt()  // 중간 2자리 = 초
-        val millis = (score % 100).toInt()           // 마지막 2자리 = 밀리초
-        return String.format("%02d:%02d:%02d", minutes, seconds, millis)
-    }
 
 
 }
