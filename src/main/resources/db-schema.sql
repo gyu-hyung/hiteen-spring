@@ -898,22 +898,54 @@ CREATE TABLE season_participants (
 -- ========================
 -- 영단어 학습
 -- ========================
-CREATE TABLE study (
+CREATE TABLE question (
 	id bigserial PRIMARY KEY,
-	uid varchar(100) NULL,
-	user_id bigint NOT NULL,
-	season_id bigint NOT NULL,
-	study_items text NULL,
-	give_point bigint NOT NULL,
+	"type" bigint NOT NULL,
+	category varchar(255) NULL,
+	question varchar(255) NULL,
+	symbol varchar(255) NULL,
+	sound varchar(255) NULL,
+	answer varchar(255) NULL,
+	"content" text NULL,
 	status bigint NOT NULL,
-	complete_date timestamptz NULL,
-	prep bigint NOT NULL,
-	prep_point bigint NOT NULL,
-	prep_date timestamptz NULL,
 	created_at timestamptz NULL,
 	updated_at timestamptz NULL,
 	deleted_at timestamptz NULL
 );
+
+
+-- ========================
+-- 영단어 학습
+-- ========================
+CREATE TABLE question_items (
+	id bigserial PRIMARY KEY,
+	season_id bigint NOT NULL,
+	"type" bigint NULL,
+	question_id bigint NULL,
+	answers text NULL,
+	CONSTRAINT question_items_pkey PRIMARY KEY (id)
+);
+
+
+---- ========================
+---- 영단어 학습
+---- ========================
+--CREATE TABLE study (
+--	id bigserial PRIMARY KEY,
+--	uid varchar(100) NULL,
+--	user_id bigint NOT NULL,
+--	season_id bigint NOT NULL,
+--	study_items text NULL,
+--	give_point bigint NOT NULL,
+--	status bigint NOT NULL,
+--	complete_date timestamptz NULL,
+--	prep bigint NOT NULL,
+--	prep_point bigint NOT NULL,
+--	prep_date timestamptz NULL,
+--	created_at timestamptz NULL,
+--	updated_at timestamptz NULL,
+--	deleted_at timestamptz NULL
+--);
 
 
 -- ========================

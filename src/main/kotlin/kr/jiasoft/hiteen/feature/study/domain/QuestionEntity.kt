@@ -1,4 +1,4 @@
-package kr.jiasoft.hiteen.feature.play.domain
+package kr.jiasoft.hiteen.feature.study.domain
 
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Table
