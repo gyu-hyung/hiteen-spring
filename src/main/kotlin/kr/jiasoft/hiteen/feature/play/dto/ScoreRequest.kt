@@ -7,7 +7,7 @@ data class ScoreRequest(
     @param:Schema(description = "게임 ID", example = "1")
     val gameId: Long,
     @param:Schema(description = "점수", example = "1")
-    val score: Long,
+    val score: Double,
 
     @param:Schema(description = "광고 리워드 트랜잭션 ID", example = "1")
     val transactionId: String? = null,

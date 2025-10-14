@@ -19,7 +19,7 @@ data class RankingView(
     val assetUid: String?,
 
     @field:Schema(description = "점수", example = "100")
-    val score: Long,
+    val score: Double,
 
     @field:Schema(description = "시도 횟수", example = "2")
     val tryCount: Long,

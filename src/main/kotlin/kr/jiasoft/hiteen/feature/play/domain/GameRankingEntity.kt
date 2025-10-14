@@ -13,7 +13,7 @@ data class GameRankingEntity(
     val league: String,
     val gameId: Long,
     val rank: Int,
-    val score: Long,
+    val score: Double,
 
     val participantId: Long,
     val userId: Long,
