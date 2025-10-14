@@ -1,7 +1,7 @@
-package kr.jiasoft.hiteen.feature.play.infra
+package kr.jiasoft.hiteen.feature.study.infra
 
 import kotlinx.coroutines.flow.Flow
-import kr.jiasoft.hiteen.feature.play.domain.QuestionEntity
+import kr.jiasoft.hiteen.feature.study.domain.QuestionEntity
 import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 

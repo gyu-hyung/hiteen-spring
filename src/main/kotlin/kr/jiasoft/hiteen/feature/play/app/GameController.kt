@@ -101,7 +101,8 @@ class GameController(
     //TODO 경험치 5 하루 최대 3
 //    @Operation(summary = "공유하기")
 
-//    @Operation(summary = "영어 단어 학습목록")
+
+//    @Operation(summary = "영어 단어 학습시작")
 
     //TODO 경험치 10
 //    @Operation(summary = "영어 단어 학습하기")

@@ -6,9 +6,11 @@ import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.flow.toSet
 import kr.jiasoft.hiteen.feature.play.domain.GameRankingEntity
 import kr.jiasoft.hiteen.feature.play.domain.GameScoreEntity
-import kr.jiasoft.hiteen.feature.play.domain.QuestionItemsEntity
+import kr.jiasoft.hiteen.feature.study.domain.QuestionItemsEntity
 import kr.jiasoft.hiteen.feature.play.domain.SeasonEntity
 import kr.jiasoft.hiteen.feature.play.infra.*
+import kr.jiasoft.hiteen.feature.study.infra.QuestionItemsRepository
+import kr.jiasoft.hiteen.feature.study.infra.QuestionRepository
 import kr.jiasoft.hiteen.feature.user.infra.UserRepository
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
