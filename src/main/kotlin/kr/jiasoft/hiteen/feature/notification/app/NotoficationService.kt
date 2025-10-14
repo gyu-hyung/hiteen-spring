@@ -1,69 +1,42 @@
 package kr.jiasoft.hiteen.feature.notification.app
 
-import kr.jiasoft.hiteen.feature.board.infra.BoardRepository
-import kr.jiasoft.hiteen.feature.chat.infra.ChatMessageRepository
-import kr.jiasoft.hiteen.feature.push.infra.PushRepository
-import kr.jiasoft.hiteen.feature.relationship.infra.FriendRepository
+import kr.jiasoft.hiteen.common.dto.ApiPageCursor
+import kr.jiasoft.hiteen.feature.notification.dto.PushNotificationResponse
+import kr.jiasoft.hiteen.feature.push.infra.PushDetailRepository
 import org.springframework.stereotype.Service
 
 @Service
 class NotificationService(
-    private val pushRepository: PushRepository,
-    private val chatMessageRepository: ChatMessageRepository,
-    private val boardRepository: BoardRepository,
-//    private val giftRepository: GiftRepository,
-    private val friendRepository: FriendRepository
+    private val pushDetailRepository: PushDetailRepository
 ) {
 
-//    suspend fun getAlerts(userId: Long): NotificationResponse {
-//        val push = pushRepository.findLatestByUserId(userId)?.let {
-//            NotificationItem(
-//                uid = it.seq?.let { seq -> UUID.nameUUIDFromBytes(seq.toString().toByteArray()) },
-//                message = it.message,
-//                createdAt = it.createdAt
-//            )
-//        }
-//
-//        val chat = chatMessageRepository.findLatestByUserId(userId)?.let {
-//            NotificationItem(
-//                uid = it.chatUid,
-//                message = it.message,
-//                createdAt = it.createdAt
-//            )
-//        }
-//
-//        val notice = boardRepository.findLatestNotice()?.let {
-//            NotificationItem(
-//                uid = it.uid,
-//                message = it.subject,
-//                createdAt = it.createdAt
-//            )
-//        }
-//
-//        val event = boardRepository.findLatestEvent()?.let {
-//            NotificationItem(
-//                uid = it.uid,
-//                message = it.subject,
-//                createdAt = it.createdAt
-//            )
-//        }
-//
-////        val gift = giftRepository.findLatestReceivedGift(userId)?.let {
-////            NotificationItem(
-////                uid = it.uid,
-////                message = it.memo ?: "받은 선물",
-////                createdAt = it.createdAt
-////            )
-////        }
-//
-//        val friend = friendRepository.findLatestFriendRequest(userId)?.let {
-//            NotificationItem(
-//                uid = it.userUid,
-//                message = "${it.userName}, 나에게 친구를 요청했어~",
-//                createdAt = it.statusDate
-//            )
-//        }
-//
-//        return NotificationResponse(push, chat, notice, event, gift, friend)
-//    }
+    suspend fun getPushNotifications(
+        userId: Long,
+        cursor: Long?,    // 마지막으로 조회된 push_detail.id
+        limit: Int        // 페이지당 개수
+    ): ApiPageCursor<PushNotificationResponse> {
+
+        val entities = pushDetailRepository.findByUserIdWithCursor(userId, cursor, limit)
+        val items = entities.map {
+            PushNotificationResponse(
+                id = it.id,
+                code = it.code,
+                title = it.title,
+                message = it.message,
+                success = it.success,
+                createdAt = it.createdAt
+            )
+        }
+
+        // 다음 커서 계산 (가장 마지막 id)
+        val nextCursor = items.lastOrNull()?.id?.toString()
+
+        return ApiPageCursor(
+            nextCursor = nextCursor,
+            items = items,
+            perPage = limit
+        )
+    }
+
+
 }

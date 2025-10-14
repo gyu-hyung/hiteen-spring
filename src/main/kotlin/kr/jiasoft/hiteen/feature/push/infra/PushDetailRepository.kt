@@ -1,5 +1,7 @@
 package kr.jiasoft.hiteen.feature.push.infra
 
+import kr.jiasoft.hiteen.common.dto.ApiPageCursor
+import kr.jiasoft.hiteen.feature.notification.dto.PushNotificationResponse
 import kr.jiasoft.hiteen.feature.push.domain.PushDetailEntity
 import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
@@ -8,6 +10,22 @@ import org.springframework.stereotype.Repository
 @Repository
 interface PushDetailRepository : CoroutineCrudRepository<PushDetailEntity, Long> {
 
-    @Query("SELECT * FROM push_detail WHERE push_id = :pushId")
-    suspend fun findAllByPushId(pushId: Long): List<PushDetailEntity>
+
+    @Query("""
+        SELECT d.id, d.push_id, p.code, p.title, p.message, d.success, d.created_at
+        FROM push_detail d
+        JOIN push p ON p.id = d.push_id
+        WHERE d.user_id = :userId
+        AND (:cursor IS NULL OR d.id < :cursor)
+        ORDER BY d.id DESC
+        LIMIT :limit
+    """)
+    suspend fun findByUserIdWithCursor(
+        userId: Long,
+        cursor: Long?,
+        limit: Int
+    ): List<PushNotificationResponse>
+
+
+
 }

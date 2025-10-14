@@ -10,6 +10,8 @@ import org.springframework.stereotype.Repository
 @Repository
 interface FollowRepository : CoroutineCrudRepository<FollowEntity, Long> {
 
+    suspend fun existsByUserIdAndFollowId(userId: Long, followId: Long): Boolean
+
     @Query("""
         SELECT user_id
         FROM follows
