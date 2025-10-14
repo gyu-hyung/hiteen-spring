@@ -14,6 +14,9 @@ import kr.jiasoft.hiteen.feature.chat.infra.ChatMessageRepository
 import kr.jiasoft.hiteen.feature.chat.infra.ChatRoomRepository
 import kr.jiasoft.hiteen.feature.chat.infra.ChatUserRepository
 import kr.jiasoft.hiteen.feature.level.app.ExpService
+import kr.jiasoft.hiteen.feature.push.app.PushService
+import kr.jiasoft.hiteen.feature.push.domain.PushTemplate
+import kr.jiasoft.hiteen.feature.push.domain.buildPushData
 import kr.jiasoft.hiteen.feature.soketi.app.SoketiBroadcaster
 import kr.jiasoft.hiteen.feature.soketi.domain.SoketiChannelPattern
 import kr.jiasoft.hiteen.feature.soketi.domain.SoketiEventType
@@ -33,7 +36,9 @@ class ChatService(
     private val msgAssets: ChatMessageAssetRepository,
     private val users: UserRepository,
     private val soketiBroadcaster: SoketiBroadcaster,
-    private val expService: ExpService
+
+    private val expService: ExpService,
+    private val pushService: PushService,
 ) {
 
     /** DM 방 생성 TODO 친구가 맞는지? */
@@ -176,7 +181,10 @@ class ChatService(
             } else if (req.kind == 1) {
                 expService.grantExp(sendUser.id, "CHAT_QUICK_EMOJI", member.userId)
             }
+
         }
+        val pushUserIds = activeMembers.map { it.userId }
+        pushService.sendAndSavePush(pushUserIds, PushTemplate.CHAT_MESSAGE.buildPushData("nickname" to sendUser.nickname))
 
         return savedMsg.uid
     }

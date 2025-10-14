@@ -25,6 +25,8 @@ data class UserDetailEntity (
     val pushService: String? = null,
     val pushMarketing: String? = null,
 
+    val pushItems: String,
+
     val memo: String? = null
 
 )

@@ -136,6 +136,7 @@ interface UserRepository : CoroutineCrudRepository<UserEntity, Long> {
     suspend fun findAllByPhoneIn(phones: Set<String>): Flow<UserEntity>
 
     suspend fun findAllByUidIn(uids: List<UUID>): List<UserEntity>
+    suspend fun findIdByUidIn(uids: List<UUID>): List<Long>
 
 
 }

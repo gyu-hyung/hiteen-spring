@@ -1,5 +1,7 @@
 package kr.jiasoft.hiteen.feature.push.app
 
+import com.fasterxml.jackson.core.type.TypeReference
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.firebase.messaging.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -16,7 +18,8 @@ class PushService(
     private val firebaseMessaging: FirebaseMessaging,
     private val userDetailRepository: UserDetailRepository,
     private val pushRepository: PushRepository,
-    private val pushDetailRepository: PushDetailRepository
+    private val pushDetailRepository: PushDetailRepository,
+    private val objectMapper: ObjectMapper
 ) {
 
     /**
@@ -63,10 +66,30 @@ class PushService(
         userIds: List<Long>,
         data: Map<String, Any>
     ): SendResult {
+        val code = data["code"]?.toString() ?: return SendResult(pushId, 0, 0)
+
+        // ① 유저 상세 정보 조회 (deviceToken이 존재하는 사용자만)
         val userDetails = userDetailRepository.findUsersWithDetail(userIds)
             .filter { !it.deviceToken.isNullOrBlank() }
 
-        val tokens = userDetails.mapNotNull { it.deviceToken }.distinct()
+        // ② pushItems 허용 여부 확인
+        val eligibleUsers = userDetails.filter { detail ->
+            try {
+                val pushList: List<String> = objectMapper.readValue(detail.pushItems ?: "[]", object : TypeReference<List<String>>() {})
+                pushList.contains(code) || pushList.contains("all")
+            } catch (e: Exception) {
+                println("⚠️ pushItems 파싱 실패 (userId=${detail.userId}): ${e.message}")
+                false
+            }
+        }
+
+        if (eligibleUsers.isEmpty()) {
+            println("⚠️ [PushService] '$code' 푸시를 허용한 사용자가 없습니다.")
+            return SendResult(pushId, 0, 0)
+        }
+
+        // ③ 실제 전송 대상 토큰 목록 구성
+        val tokens = eligibleUsers.mapNotNull { it.deviceToken }.distinct()
         if (tokens.isEmpty()) return SendResult(pushId, 0, 0)
 
         var totalSuccess = 0
@@ -84,7 +107,7 @@ class PushService(
 
                     response.responses.forEachIndexed { idx, res ->
                         val token = chunk[idx]
-                        val userDetail = userDetails.firstOrNull { it.deviceToken == token }
+                        val userDetail = eligibleUsers.firstOrNull { it.deviceToken == token }
 
                         pushDetailRepository.save(
                             PushDetailEntity(
@@ -104,10 +127,9 @@ class PushService(
 
                     println("🔥 Firebase sendEachForMulticast success=${response.successCount}, failure=${response.failureCount}")
                 } catch (ex: Exception) {
-                    // 전송 실패 시, chunk 전체 실패 처리
                     totalFailure += chunk.size
                     chunk.forEach { token ->
-                        val userDetail = userDetails.firstOrNull { it.deviceToken == token }
+                        val userDetail = eligibleUsers.firstOrNull { it.deviceToken == token }
                         pushDetailRepository.save(
                             PushDetailEntity(
                                 pushId = pushId,
@@ -130,6 +152,7 @@ class PushService(
 
         return SendResult(pushId, totalSuccess, totalFailure)
     }
+
 
     /**
      * 메시지 객체 구성

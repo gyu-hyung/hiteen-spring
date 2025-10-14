@@ -53,6 +53,11 @@ data class UserDetailRequest(
     @field:Schema(description = "마케팅 푸시 알림 수신 여부", example = "N")
     val pushMarketing: String? = null,
 
+    @field:Schema(description = "푸시 수신 항목", example = """
+        ["ALL","FRIEND_REQUEST","FRIEND_ACCEPT","FOLLOW","NEW_POST","PIN_ALERT","COMMENT_ALERT","CHAT_MESSAGE"]
+    """)
+    val pushItems: List<String> = emptyList(),
+
     @field:Schema(description = "관리자 메모", example = "VIP 고객, 빠른 응대 필요")
     val memo: String? = null
 )
@@ -103,6 +108,11 @@ data class UserDetailResponse(
 
     @field:Schema(description = "마케팅 푸시 알림 수신 여부", example = "N")
     val pushMarketing: String?,
+
+    @field:Schema(description = "푸시 수신 항목", example = """
+        ["ALL","FRIEND_REQUEST","FRIEND_ACCEPT","FOLLOW_REQUEST","FOLLOW_RESPONSE","NEW_POST","PIN_ALERT","COMMENT_ALERT","CHAT_MESSAGE"]
+    """)
+    val pushItems: List<String>? = null,
 
     @field:Schema(description = "관리자 메모", example = "앱 업데이트 권장")
     val memo: String?

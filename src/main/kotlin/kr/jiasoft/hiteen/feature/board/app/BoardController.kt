@@ -69,7 +69,7 @@ class BoardController(
     ): ResponseEntity<ApiResult<Map<String, Any>>> {
         val ip = request.remoteAddress?.address?.hostAddress
         val files: List<FilePart> = filesFlux?.collectList()?.awaitSingle().orEmpty()
-        val uid = service.create(boardCreateRequest, user.id, files, ip)
+        val uid = service.create(boardCreateRequest, user, files, ip)
         return ResponseEntity.ok(ApiResult.success(mapOf("uid" to uid)))
     }
 
@@ -174,7 +174,7 @@ class BoardController(
         @Parameter(description = "댓글 등록/수정 요청 DTO") boardCommentRegisterRequest: BoardCommentRegisterRequest,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ): ResponseEntity<ApiResult<Map<String, Any>>> {
-        val uid = service.createComment(boardCommentRegisterRequest.boardUid, boardCommentRegisterRequest, user.id)
+        val uid = service.createComment(boardCommentRegisterRequest.boardUid, boardCommentRegisterRequest, user)
         return ResponseEntity.ok(ApiResult.success(mapOf("uid" to uid)))
     }
 

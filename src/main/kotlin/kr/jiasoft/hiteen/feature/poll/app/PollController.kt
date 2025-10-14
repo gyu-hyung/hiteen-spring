@@ -149,7 +149,7 @@ class PollController(
         @Parameter(description = "댓글 등록/수정 요청 DTO") pollCommentRegisterRequest: PollCommentRegisterRequest,
         @AuthenticationPrincipal(expression = "user") user: UserEntity
     ): ResponseEntity<ApiResult<Long>> {
-        val commentId = service.createComment(pollCommentRegisterRequest, user.id)
+        val commentId = service.createComment(pollCommentRegisterRequest, user)
         return ResponseEntity.ok(ApiResult.success(commentId))
     }
 

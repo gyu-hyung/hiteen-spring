@@ -3,6 +3,9 @@ package kr.jiasoft.hiteen.feature.relationship.app
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kr.jiasoft.hiteen.feature.level.app.ExpService
+import kr.jiasoft.hiteen.feature.push.app.PushService
+import kr.jiasoft.hiteen.feature.push.domain.PushTemplate
+import kr.jiasoft.hiteen.feature.push.domain.buildPushData
 import kr.jiasoft.hiteen.feature.relationship.domain.FollowEntity
 import kr.jiasoft.hiteen.feature.relationship.domain.FollowStatus
 import kr.jiasoft.hiteen.feature.relationship.dto.RelationshipSummary
@@ -22,7 +25,8 @@ class FollowService(
     private val followRepository: FollowRepository,
     private val userRepository: UserRepository,
     private val userService: UserService,
-    private val expService: ExpService
+    private val expService: ExpService,
+    private val pushService: PushService,
 ) {
     private val now: OffsetDateTime get() = OffsetDateTime.now(ZoneOffset.UTC)
 
@@ -101,6 +105,10 @@ class FollowService(
                     )
                 )
                 expService.grantExp(meId, "FOLLOW_REQUEST", otherId)
+                pushService.sendAndSavePush(
+                    listOf(otherId),
+                    PushTemplate.FOLLOW_REQUEST.buildPushData("nickname" to me.nickname)
+                )
             }
             existing.status == FollowStatus.PENDING.name ->
                 throw ResponseStatusException(HttpStatus.CONFLICT, "already requested")
@@ -128,6 +136,10 @@ class FollowService(
             )
         )
         expService.grantExp(meId, "FOLLOW_ACCEPT", otherId)
+        pushService.sendAndSavePush(
+            listOf(otherId),
+            PushTemplate.FOLLOW_ACCEPT.buildPushData("nickname" to me.nickname)
+        )
     }
 
     /** 받은 팔로우 요청 거절 (삭제) */

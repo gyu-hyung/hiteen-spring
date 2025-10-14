@@ -24,7 +24,7 @@ interface UserDetailRepository : CoroutineCrudRepository<UserDetailEntity, Long>
     suspend fun deleteByUserId(userId: Long): Int
 
     @Query("""
-        SELECT u.id as user_id, u.phone, d.device_os, d.device_token
+        SELECT u.id as user_id, u.phone, d.device_os, d.device_token, d.push_items
         FROM users u
         JOIN user_details d ON u.id = d.user_id
         WHERE u.id IN (:userIds)
