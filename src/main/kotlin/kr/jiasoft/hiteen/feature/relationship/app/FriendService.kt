@@ -231,7 +231,7 @@ class FriendService(
         val meId = me.id
         val requesterId = requireUserIdByUid(requesterUid)
         val rel = friendRepository.findBetween(meId, requesterId)
-            ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "no request")
+            ?: throw IllegalStateException()
 
         if (rel.friendId != meId || rel.status != FriendStatus.PENDING.name) {
             throw ResponseStatusException(HttpStatus.CONFLICT, "not a pending incoming request")
@@ -244,17 +244,32 @@ class FriendService(
             )
         )
 
-        // === 팔로우 등록 (양방향) ===
-        followRepository.save(
-            FollowEntity(userId = meId, followId = requesterId,
-                status = FollowStatus.ACCEPTED.name,
-                statusAt = now, createdAt = now)
-        )
-        followRepository.save(
-            FollowEntity(userId = requesterId, followId = meId,
-                status = FollowStatus.ACCEPTED.name,
-                statusAt = now, createdAt = now)
-        )
+
+        // === 팔로우 등록 (양방향, 중복 체크) ===
+        if (!followRepository.existsByUserIdAndFollowId(meId, requesterId)) {
+            followRepository.save(
+                FollowEntity(
+                    userId = meId,
+                    followId = requesterId,
+                    status = FollowStatus.ACCEPTED.name,
+                    statusAt = now,
+                    createdAt = now
+                )
+            )
+        }
+
+        if (!followRepository.existsByUserIdAndFollowId(requesterId, meId)) {
+            followRepository.save(
+                FollowEntity(
+                    userId = requesterId,
+                    followId = meId,
+                    status = FollowStatus.ACCEPTED.name,
+                    statusAt = now,
+                    createdAt = now
+                )
+            )
+        }
+
 
         expService.grantExp(meId, "FRIEND_ADD", requesterId)
         expService.grantExp(requesterId, "FRIEND_ADD", meId)
