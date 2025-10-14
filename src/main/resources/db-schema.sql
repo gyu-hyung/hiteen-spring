@@ -250,6 +250,16 @@ CREATE INDEX idx_points_pointable ON points(pointable_type, pointable_id);
 
 
 -- ========================
+-- 포인트 요약정보
+-- ========================
+CREATE TABLE user_points_summary (
+  user_id BIGINT PRIMARY KEY,
+  total_point INT NOT NULL DEFAULT 0,
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+
+-- ========================
 -- 포인트
 -- ========================
 CREATE TABLE point_rules (
