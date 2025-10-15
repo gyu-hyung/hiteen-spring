@@ -1,6 +1,4 @@
 spring:
-  config:
-    import: "classpath:mbti.yml"
   application:
     name: hiteen
   r2dbc:
@@ -31,6 +29,8 @@ spring:
       enabled: true
     restart:
       enabled: true
+  config:
+    import: "classpath:mbti.yml"
 
 server:
   port: 8080
@@ -92,7 +92,7 @@ app:
   asset:
     storage-root: ${HOME}/assets
     allowed-exts: jpg,jpeg,png,gif,webp,bmp,svg,mp4,mov,avi,mkv,pdf,txt,csv,zip,rar,gz
-    max-size-bytes: 52428800 # 50MB
+    max-size-bytes: 5242880 # 50MB
 
 # ========================
 # 경험치 액션 정의
