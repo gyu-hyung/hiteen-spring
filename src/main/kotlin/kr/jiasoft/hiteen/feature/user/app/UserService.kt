@@ -6,6 +6,7 @@ import kotlinx.coroutines.reactor.mono
 import kr.jiasoft.hiteen.common.exception.BusinessValidationException
 import kr.jiasoft.hiteen.feature.asset.app.AssetService
 import kr.jiasoft.hiteen.feature.board.infra.BoardRepository
+import kr.jiasoft.hiteen.feature.interest.app.InterestUserService
 import kr.jiasoft.hiteen.feature.interest.infra.InterestUserRepository
 import kr.jiasoft.hiteen.feature.invite.app.InviteService
 import kr.jiasoft.hiteen.feature.level.domain.TierCode
@@ -53,6 +54,7 @@ class UserService (
     private val inviteService: InviteService,
     private val tierRepository: TierRepository,
     private val pointService: PointService,
+    private val interestUserService: InterestUserService,
 ) : ReactiveUserDetailsService {
 
     override fun findByUsername(username: String): Mono<UserDetails> = mono {
@@ -107,6 +109,9 @@ class UserService (
         } else {
             saved
         }
+
+        // 기본 관심사 등록 추천옵션 [관심사, 남학생, 여학생, 동급생, 선배, 후배]
+        interestUserService.initDefaultInterests(updated)
 
         // 초대코드 생성
         inviteService.registerInviteCode(updated)

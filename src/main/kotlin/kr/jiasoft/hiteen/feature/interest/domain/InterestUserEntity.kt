@@ -9,6 +9,6 @@ data class InterestUserEntity(
     @Id val id: Long = 0,
     val interestId: Long,
     val userId: Long,
-    val createdAt: OffsetDateTime,
+    val createdAt: OffsetDateTime = OffsetDateTime.now(),
     val updatedAt: OffsetDateTime? = null
 )

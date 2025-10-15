@@ -10,11 +10,10 @@ import kr.jiasoft.hiteen.feature.interest.domain.InterestUserEntity
 import kr.jiasoft.hiteen.feature.interest.dto.FriendRecommendationResponse
 import kr.jiasoft.hiteen.feature.interest.dto.InterestUserResponse
 import kr.jiasoft.hiteen.feature.interest.infra.InterestMatchHistoryRepository
+import kr.jiasoft.hiteen.feature.interest.infra.InterestRepository
 import kr.jiasoft.hiteen.feature.interest.infra.InterestUserRepository
 import kr.jiasoft.hiteen.feature.level.app.ExpService
 import kr.jiasoft.hiteen.feature.location.infra.cache.LocationCacheRedisService
-import kr.jiasoft.hiteen.feature.point.app.PointService
-import kr.jiasoft.hiteen.feature.point.domain.PointPolicy
 import kr.jiasoft.hiteen.feature.school.infra.SchoolRepository
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import kr.jiasoft.hiteen.feature.user.dto.UserResponse
@@ -33,9 +32,50 @@ class InterestUserService(
     private val userContactRepository: UserContactRepository,
 
     private val expService: ExpService,
-    private val pointService: PointService,
     private val locationCacheRedisService: LocationCacheRedisService,
+    private val interestRepository: InterestRepository,
 ) {
+
+    /**
+     * 기본 관심사 등록: 추천옵션 (관심사, 남학생, 여학생, 동급생, 선배, 후배)
+     */
+    suspend fun initDefaultInterests(user: UserEntity) {
+        // 기본 옵션 키워드
+        val defaultOptions = listOf("관심사", "남자", "여자", "동급생", "선배", "후배")
+
+        // ① 현재 등록된 관심사 조회
+        val existing = interestUserRepository.findByUserIdWithInterest(user.id)
+            .map { it.topic }
+            .toSet()
+
+        // ② 마스터 테이블에서 "추천옵션" 카테고리 중 기본 옵션에 해당하는 항목 조회
+        val masterOptions = interestRepository.findByCategoryAndTopicIn("추천옵션", defaultOptions).toList()
+
+        if (masterOptions.isEmpty()) {
+            println("⚠️ 기본 관심사(추천옵션) 마스터 데이터가 존재하지 않습니다.")
+            return
+        }
+
+        // ③ 등록되지 않은 항목만 필터링
+        val toInsert = masterOptions.filterNot { existing.contains(it.topic) }
+        if (toInsert.isEmpty()) {
+            println("✅ 기본 추천옵션 관심사가 이미 모두 등록되어 있습니다.")
+            return
+        }
+
+        // ④ interest_user 엔티티로 변환 후 저장
+        toInsert.forEach { master ->
+            interestUserRepository.save(
+                InterestUserEntity(
+                    interestId = master.id,
+                    userId = user.id,
+                )
+            )
+        }
+
+        println("🌱 ${user.nickname ?: "유저"} 기본 추천옵션 관심사 ${toInsert.size}개 등록 완료")
+    }
+
 
     /** 특정 사용자 관심사 등록 */
     suspend fun addInterestToUser(user: UserEntity, interestId: Long): InterestUserResponse? {
@@ -133,20 +173,38 @@ class InterestUserService(
         }
 
 
-        // 추천옵션 처리
+        // 추천옵션 처리 (AND + OR 혼합)
         val userGrade = user.grade?.toIntOrNull() ?: 0
+
         candidateUsers = candidateUsers.filter { target ->
-            var match = true
-            if (recommendOptions.contains("남학생")) match = match && target.gender == "M"
-            if (recommendOptions.contains("여학생")) match = match && target.gender == "F"
-
             val targetGrade = target.grade?.toIntOrNull() ?: 0
-            if (recommendOptions.contains("동급생")) match = match && targetGrade == userGrade
-            if (recommendOptions.contains("선배")) match = match && targetGrade > userGrade
-            if (recommendOptions.contains("후배")) match = match && targetGrade < userGrade
 
-            match
+            // ✅ 성별 조건 (OR)
+            val genderOk =
+                when {
+                    recommendOptions.contains("남학생") && recommendOptions.contains("여학생") -> true // 둘 다 선택시 모든 성별 허용
+                    recommendOptions.contains("남학생") -> target.gender == "M"
+                    recommendOptions.contains("여학생") -> target.gender == "F"
+                    else -> true // 성별 조건 선택 안했으면 무시
+                }
+
+            // ✅ 학년 조건 (OR)
+            val gradeOk =
+                when {
+                    listOf("동급생", "선배", "후배").none { recommendOptions.contains(it) } -> true // 학년 필터 미선택
+                    else -> {
+                        var ok = false
+                        if (recommendOptions.contains("동급생") && targetGrade == userGrade) ok = true
+                        if (recommendOptions.contains("선배") && targetGrade > userGrade) ok = true
+                        if (recommendOptions.contains("후배") && targetGrade < userGrade) ok = true
+                        ok
+                    }
+                }
+
+            // ✅ 전체 조건 AND 결합
+            genderOk && gradeOk
         }
+
 
         // 추천제외 처리
         if (recommendExcludes.contains("같은 학교") && user.schoolId != null) {
@@ -183,7 +241,6 @@ class InterestUserService(
             )
         )
 
-
         return FriendRecommendationResponse(
             user = targetUserResponse,
             interests = interests,
@@ -205,3 +262,4 @@ class InterestUserService(
         )
     }
 }
+

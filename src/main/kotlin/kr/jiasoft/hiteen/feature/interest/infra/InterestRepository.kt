@@ -13,6 +13,9 @@ interface InterestRepository : CoroutineCrudRepository<InterestEntity, Long> {
     @Query("SELECT * FROM interests ORDER BY category, id")
     fun findAllOrderByCategoryAndId(): Flow<InterestEntity>
 
+
+    suspend fun findByCategoryAndTopicIn(category: String, topic: List<String>): Flow<InterestEntity>
+
     @Query(
         """
         SELECT i.id,
