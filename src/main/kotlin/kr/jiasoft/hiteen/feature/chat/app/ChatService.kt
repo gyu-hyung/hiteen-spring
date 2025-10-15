@@ -22,9 +22,7 @@ import kr.jiasoft.hiteen.feature.soketi.domain.SoketiChannelPattern
 import kr.jiasoft.hiteen.feature.soketi.domain.SoketiEventType
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import kr.jiasoft.hiteen.feature.user.infra.UserRepository
-import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
-import org.springframework.web.server.ResponseStatusException
 import java.time.OffsetDateTime
 import java.util.UUID
 
@@ -40,6 +38,15 @@ class ChatService(
     private val expService: ExpService,
     private val pushService: PushService,
 ) {
+
+    /**
+     * 해당 채팅방 회원인지
+     */
+//    private suspend fun assertMember(roomUid: UUID, userId: Long) : {
+//        val room = rooms.findByUid(roomUid) ?: error("room not found")
+//        val me = chatUsers.findActive(room.id, userId) ?: return
+//    }
+
 
     /** DM 방 생성 TODO 친구가 맞는지? */
     suspend fun createDirectRoom(currentUserId: Long, peerUid: UUID): UUID {
@@ -80,7 +87,6 @@ class ChatService(
             ChatRoomEntity(
                 createdId = currentUserId,
                 createdAt = OffsetDateTime.now(),
-                updatedAt = OffsetDateTime.now()
             )
         )
 
@@ -191,15 +197,16 @@ class ChatService(
 
 
     /** 메세지 페이징 조회 */
-    suspend fun pageMessages(roomUid: UUID, cursor: OffsetDateTime?, size: Int): List<MessageSummary> {
+    suspend fun pageMessages(roomUid: UUID, cursor: OffsetDateTime?, size: Int, userId: Long): List<MessageSummary> {
         val room = rooms.findByUid(roomUid) ?: error("room not found")
+        chatUsers.findActive(room.id, userId) ?: error("not a member")
 
         // 최신 페이지 (DESC)
 //        val messagePage = messages.pageByRoom(room.id!!, cursor, size).toList()
         val messagePage = messages.pageByRoomWithEmoji(room.id, cursor, size).toList()
         if (messagePage.isEmpty()) return emptyList()
 
-        val memberCount = chatUsers.countActiveByRoom(room.id).toInt()
+        val memberCount = chatUsers.countActiveByRoomId(room.id).toInt()
 
         val minId = messagePage.minOf { it.id}
         val maxId = messagePage.maxOf { it.id}
@@ -210,9 +217,7 @@ class ChatService(
         return messagePage.map { m ->
             val assets = msgAssets.listByMessage(m.id).map { a ->
                 MessageAssetSummary(
-//                    a.id,
                     a.uid,
-//                    m.id ,
                     a.width,
                     a.height
                 )
@@ -230,7 +235,7 @@ class ChatService(
     /** 방 탈퇴 */
     suspend fun leaveRoom(roomUid: UUID, currentUserId: Long) {
         val room = rooms.findByUid(roomUid) ?: error("room not found")
-        val me = chatUsers.findActive(room.id, currentUserId) ?: return
+        val me = chatUsers.findActive(room.id, currentUserId) ?: error("not a member")
         chatUsers.save(me.copy(leavingAt = OffsetDateTime.now(), deletedAt = OffsetDateTime.now()))
     }
 
@@ -244,21 +249,16 @@ class ChatService(
 
 
     suspend fun assertMember(roomUid: UUID, userId: Long) {
-        val room = rooms.findByUid(roomUid) ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "room not found")
-        val me = chatUsers.findActive(room.id, userId)
-        if (me == null) {
-            throw ResponseStatusException(HttpStatus.FORBIDDEN, "not a member")
-        }
+        val room = rooms.findByUid(roomUid) ?: error("room not found")
+        chatUsers.findActive(room.id, userId) ?: error("not a member")
     }
 
 
-    suspend fun markRead(roomUid: UUID, currentUser: UserEntity, lastMessageUid: UUID) {
-        val room = rooms.findByUid(roomUid)
-            ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "room not found")
-        chatUsers.findActive(room.id, currentUser.id)
-            ?: throw ResponseStatusException(HttpStatus.FORBIDDEN, "not a member")
+    suspend fun markRead(roomUid: UUID, currentUser: UserEntity, readMessageUid: UUID) {
+        val room = rooms.findByUid(roomUid) ?: error("room not found")
+        chatUsers.findActive(room.id, currentUser.id) ?: error("not a member")
 
-        val msg = messages.findByUid(lastMessageUid) ?: return
+        val msg = messages.findByUid(readMessageUid) ?: error("message not found")
         chatUsers.updateReadCursor(room.id, currentUser.id, msg.id, OffsetDateTime.now())
 
         // ✅ 마지막 메시지 요약
@@ -297,13 +297,13 @@ class ChatService(
         val cursor = messages.findCurrentCursorByUserId(currentUserId)
 
         val roomsList = rooms.listRooms(currentUserId, limit, offset).map { r ->
-            val memberCount = chatUsers.countActiveByRoom(r.id)
+            val memberCount = chatUsers.countActiveByRoomId(r.id)
 
             // 마지막 메시지 + 작성자 조회
             val last = messages.findLastMessage(r.id)
             val sender = last?.userId?.let { uid -> users.findSummaryInfoById(uid) }
 
-            // 마지막 메시지의 assets
+            // 마지막 메시지 asset
             val lastAssets = last?.id?.let { msgAssets.listByMessage(it).map { a ->
                 MessageAssetSummary(
                     a.uid,
