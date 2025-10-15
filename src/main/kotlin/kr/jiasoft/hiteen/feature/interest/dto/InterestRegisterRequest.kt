@@ -7,7 +7,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 data class InterestRegisterRequest (
 
     @param:Schema(description = "관심사 ID", example = "1")
-    val id : Long,
+    val id : Long = 0,
 
     @param:Schema(description = "관심사", example = "운동")
     val topic: String,
@@ -16,5 +16,5 @@ data class InterestRegisterRequest (
     val category: String,
 
     @param:Schema(description = "상태", example = "Y")
-    val status: String,
+    val status: String? = null,
 )

@@ -50,7 +50,7 @@ class InterestService(
             id = updated.id,
             topic = updated.topic.takeIf { it.isNotBlank() } ?: exist.topic,
             category = updated.category.takeIf { it.isNotBlank() } ?: exist.category,
-            status = updated.status.takeIf { it.isNotBlank() } ?: exist.status,
+            status = updated.status.takeIf { it!!.isNotBlank() } ?: exist.status,
             updatedId = user.id,
             updatedAt = OffsetDateTime.now()
         )

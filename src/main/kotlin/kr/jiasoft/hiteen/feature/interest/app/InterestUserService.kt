@@ -41,7 +41,7 @@ class InterestUserService(
      */
     suspend fun initDefaultInterests(user: UserEntity) {
         // 기본 옵션 키워드
-        val defaultOptions = listOf("관심사", "남자", "여자", "동급생", "선배", "후배")
+        val defaultOptions = listOf("관심사", "남학생", "여학생", "동급생", "선배", "후배")
 
         // ① 현재 등록된 관심사 조회
         val existing = interestUserRepository.findByUserIdWithInterest(user.id)

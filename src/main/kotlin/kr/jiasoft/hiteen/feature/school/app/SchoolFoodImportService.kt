@@ -1,9 +1,9 @@
 package kr.jiasoft.hiteen.feature.school.app
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.withContext
 import kr.jiasoft.hiteen.feature.school.infra.SchoolFoodRepository
@@ -38,7 +38,7 @@ class SchoolFoodImportService(
 
 
 
-
+    @JsonIgnoreProperties(ignoreUnknown = true)
     data class MealRow(
         val MLSV_YMD: String,
         val MMEAL_SC_CODE: String,
