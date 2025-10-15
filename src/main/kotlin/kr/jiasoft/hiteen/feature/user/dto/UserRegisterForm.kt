@@ -13,8 +13,8 @@ import java.util.UUID
 @Schema(description = "사용자 회원가입 요청 DTO")
 data class UserRegisterForm(
 
-    @field:NotBlank(message = "아이디는 필수입니다.")
-    @param:Schema(description = "사용자 계정명 (로그인 ID)", example = "chat1", maxLength = 50)
+//    @field:NotBlank(message = "아이디는 필수입니다.")
+//    @param:Schema(description = "사용자 계정명 (로그인 ID)", example = "chat1", maxLength = 50)
     var username: String? = null,
 
     @field:NotBlank(message = "이메일은 필수입니다.")

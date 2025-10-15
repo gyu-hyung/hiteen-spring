@@ -33,7 +33,9 @@ interface InterestUserRepository : CoroutineCrudRepository<InterestUserEntity, L
         SELECT
             i.id,
             i.topic,
-            i.category
+            i.category,
+            i.status,
+            iu.created_at
         FROM interest_user iu LEFT JOIN interests i ON iu.interest_id = i.id
         WHERE user_id = :userId
     """)
