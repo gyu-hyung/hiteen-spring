@@ -65,7 +65,8 @@ class ChatController(
         @Parameter(description = "채팅방 UID") @PathVariable roomUid: UUID,
         @Parameter(description = "커서(이전 마지막 메시지의 createdAt)") @RequestParam(required = false) cursor: OffsetDateTime?,
         @Parameter(description = "조회 개수 (기본 30, 최대 100)") @RequestParam(defaultValue = "30") size: Int,
-    ) = ResponseEntity.ok(ApiResult.success(service.pageMessages(roomUid, cursor, size.coerceIn(1, 100))))
+        @AuthenticationPrincipal(expression = "user") user: UserEntity,
+    ) = ResponseEntity.ok(ApiResult.success(service.pageMessages(roomUid, cursor, size.coerceIn(1, 100), user.id)))
 
 
     //TODO 전송한 메세지 반환

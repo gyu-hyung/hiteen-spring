@@ -123,7 +123,6 @@ data class MessageAssetSummary(
 
     @param:Schema(description = "첨부파일 UUID", example = "a1a8990f-2443-4492-baad-699d59b272fa")
     val assetUid: UUID?,
-//    val messageId: Long?,
 
     @param:Schema(description = "첨부파일 너비", example = "100")
     val width: Int?,

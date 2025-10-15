@@ -16,7 +16,7 @@ interface ChatUserRepository : CoroutineCrudRepository<ChatUserEntity, Long> {
 
     /** 방 활성 멤버 수 (나간사람 제외) */
     @Query("SELECT COUNT(*) FROM chat_users WHERE chat_room_id=:roomId AND deleted_at IS NULL")
-    suspend fun countActiveByRoom(roomId: Long): Long
+    suspend fun countActiveByRoomId(roomId: Long): Long
 
     /** 방 활성 멤버 ID 목록 (나간사람 제외) */
     @Query("SELECT user_id FROM chat_users WHERE chat_room_id=:roomId AND deleted_at IS NULL")
