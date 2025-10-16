@@ -15,6 +15,7 @@ import kr.jiasoft.hiteen.feature.study.infra.QuestionItemsRepository
 import kr.jiasoft.hiteen.feature.study.infra.QuestionRepository
 import kr.jiasoft.hiteen.feature.study.infra.StudyRepository
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
+import org.springframework.core.io.ClassPathResource
 import org.springframework.stereotype.Service
 import java.time.OffsetDateTime
 
@@ -59,9 +60,9 @@ class StudyService(
                     questionId = q.id,
                     question = q.question,
                     symbol = q.symbol,
-                    sound = q.sound,
+                    sound = resolveSoundAsset(q.question),
                     options = options,
-                    image = q.content
+                    image = resolveImageAsset(q.question)
                 )
             }
 
@@ -88,9 +89,9 @@ class StudyService(
                 questionId = q.id,
                 question = q.question,
                 symbol = q.symbol,
-                sound = q.sound,
+                sound = resolveSoundAsset(q.question),
                 options = options,
-                image = q.content
+                image = resolveImageAsset(q.question)
             )
         }
 
@@ -145,4 +146,18 @@ class StudyService(
             completeDate = saved.completeDate
         )
     }
+
+
+    // 🔹 mp3 파일 경로 확인
+    private fun resolveSoundAsset(word: String): String? {
+        val path = "assets/sound/${word.lowercase()}.mp3"
+        return if (ClassPathResource(path).exists()) "/$path" else null
+    }
+
+    // 🔹 webp 파일 경로 확인
+    private fun resolveImageAsset(word: String): String? {
+        val path = "assets/word_img/${word.lowercase()}.webp"
+        return if (ClassPathResource(path).exists()) "/$path" else null
+    }
+
 }

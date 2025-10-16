@@ -1,6 +1,10 @@
 spring:
   application:
     name: hiteen
+#  webflux:
+#    static-path-pattern: /assets/**
+#    resources:
+#      static-locations: classpath:/assets/
   r2dbc:
     url: r2dbc:postgresql://127.0.0.1:5432/hiteen
     username: hiteen
@@ -91,6 +95,7 @@ tbmq:
 app:
   asset:
     storage-root: ${HOME}/assets
+    static-locations: classpath:/assets/
     allowed-exts: jpg,jpeg,png,gif,webp,bmp,svg,mp4,mov,avi,mkv,pdf,txt,csv,zip,rar,gz
     max-size-bytes: 5242880 # 50MB
 

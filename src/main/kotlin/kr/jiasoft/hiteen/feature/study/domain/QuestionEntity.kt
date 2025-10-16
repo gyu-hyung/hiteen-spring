@@ -10,7 +10,7 @@ data class QuestionEntity(
     val id: Long,
     val type: Int,
     val category: String?,
-    val question: String?,
+    val question: String,
     val symbol: String?,
     val sound: String?,
     val answer: String?,

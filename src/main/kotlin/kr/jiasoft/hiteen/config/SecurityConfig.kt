@@ -58,6 +58,7 @@ class SecurityConfig(
                     "/api/assets/{uid}/download",
                     "/api/user/nickname/{nickname}",
                     "/api-docs/**",
+                    "/assets/**",
                     "/v3/api-docs/**",
                     "/swagger-ui/**",
                 ).permitAll()
