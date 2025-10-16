@@ -4,6 +4,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
+import kr.jiasoft.hiteen.feature.asset.domain.AssetCategory
 import kr.jiasoft.hiteen.feature.asset.domain.AssetEntity
 import kr.jiasoft.hiteen.feature.asset.dto.AssetResponse
 import kr.jiasoft.hiteen.feature.asset.dto.StoredFile
@@ -44,16 +45,24 @@ class AssetService(
 
 
 
-    suspend fun upload(file: FilePart, originFileName: String?, currentUserId: Long): AssetResponse {
-        val stored = storage.save(file, allowedExts, maxSizeBytes)
-        return uploadStored(stored, originFileName, currentUserId) // 저장/DB 로직 단일화
+    suspend fun upload(
+        file: FilePart,
+        originFileName: String?,
+        currentUserId: Long,
+        category: AssetCategory = AssetCategory.COMMON
+    ): AssetResponse {
+        val stored = storage.save(file, allowedExts, maxSizeBytes, category)
+        return uploadStored(stored, originFileName ?: file.filename(), currentUserId) // 저장/DB 로직 단일화
     }
 
-    suspend fun uploadImage(file: FilePart, originFileName: String?, currentUserId: Long): AssetResponse {
-        val stored = storage.save(file, allowedImageExts, maxSizeBytes)
-
+    suspend fun uploadImage(
+        file: FilePart,
+        originFileName: String?,
+        currentUserId: Long,
+        category: AssetCategory = AssetCategory.COMMON
+    ): AssetResponse {
+        val stored = storage.save(file, allowedImageExts, maxSizeBytes, category)
         ensureImageOrDelete(stored)
-
         return uploadStored(stored, originFileName, currentUserId)
     }
 
@@ -88,7 +97,7 @@ class AssetService(
     /** ⬇️ 저장/DB 로직을 한 곳에 모음: upload / uploadImage 둘 다 여기로 온다 */
     private suspend fun uploadStored(stored: StoredFile, originFileName: String?, currentUserId: Long): AssetResponse {
         val entity = AssetEntity(
-            originFileName = originFileName ?: stored.absolutePath.fileName.toString(),
+            originFileName = originFileName ?: stored.originFileName,
             storeFileName = stored.absolutePath.fileName.toString(), // @Column("name_file_name") 매핑 확인
             filePath = stored.relativePath,
             type = stored.mimeTypeGuess,

@@ -1555,3 +1555,19 @@ VALUES
   ('WORD_CHALLENGE', '영단어 챌린지', '영단어 맞추기 게임', 'ACTIVE', now()),
   ('BINGO', '빙고 게임', '빙고판에서 숫자를 맞추는 게임', 'ACTIVE', now());
 
+
+INSERT INTO public.users
+(id, uid, username, email, nickname, "password", "role", address, detail_address, phone, mood, mood_emoji, mbti, exp_points, tier_id, asset_uid, school_id, grade, gender, birthday, profile_decoration_code, invite_code, invite_joins, created_id, created_at, updated_id, updated_at, deleted_id, deleted_at)
+VALUES(1, '6e330bdc-3062-4a14-80f2-a46e04278c5c'::uuid, '01095393637', 'qwe@chat', 'test1', '$2a$10$6xyxgK3PEmbDCnbVxUVaoOa2uKSRBFIiUcN2Ado74q6G5SNZRmhlq', 'USER', '광주광역시 북구 시청로 1', '2층', '01095393637', '기분좋음', 'E_001', NULL, 0, 1, NULL, 1, '1', 'M', '1999-12-01', NULL, 'TE1EQZEE4N', 0, NULL, '2025-10-15 17:33:01.891', NULL, NULL, NULL, NULL);
+INSERT INTO public.users
+(id, uid, username, email, nickname, "password", "role", address, detail_address, phone, mood, mood_emoji, mbti, exp_points, tier_id, asset_uid, school_id, grade, gender, birthday, profile_decoration_code, invite_code, invite_joins, created_id, created_at, updated_id, updated_at, deleted_id, deleted_at)
+VALUES(3, 'ade41de8-4276-4fb7-9473-cc69cf9e451f'::uuid, '01022222222', 'qwe@chat2', 'test2', '$2a$10$uNXxra/fBtTbEGuTxDaiDuiERktV/m/.IpN1hY20BIRFAbFLUPCSy', 'USER', '광주광역시 북구 시청로 1', '2층', '01022222222', '기분좋음', 'E_001', NULL, 0, 1, NULL, 1, '1', 'M', '1999-12-01', NULL, 'TS5N7EUYKM', 0, NULL, '2025-10-15 17:35:20.978', NULL, NULL, NULL, NULL);
+INSERT INTO public.users
+(id, uid, username, email, nickname, "password", "role", address, detail_address, phone, mood, mood_emoji, mbti, exp_points, tier_id, asset_uid, school_id, grade, gender, birthday, profile_decoration_code, invite_code, invite_joins, created_id, created_at, updated_id, updated_at, deleted_id, deleted_at)
+VALUES(4, 'ae67afaa-eb77-4480-a98b-08b48e4c197a'::uuid, '01033333333', 'qwe@chat3', 'test3', '$2a$10$uSUq24MIABgW5uUEFT4iEegTXFncyd5w7mIsl5.9RSTVzPlHfHemq', 'USER', '광주광역시 북구 시청로 1', '2층', '01033333333', '기분좋음', 'E_001', NULL, 0, 1, NULL, 1, '1', 'M', '1999-12-01', NULL, 'TFYCGURVJD', 0, NULL, '2025-10-15 17:35:33.794', NULL, NULL, NULL, NULL);
+INSERT INTO public.users
+(id, uid, username, email, nickname, "password", "role", address, detail_address, phone, mood, mood_emoji, mbti, exp_points, tier_id, asset_uid, school_id, grade, gender, birthday, profile_decoration_code, invite_code, invite_joins, created_id, created_at, updated_id, updated_at, deleted_id, deleted_at)
+VALUES(5, 'a6ce7727-80ee-4cd9-b574-0411a443d350'::uuid, '01044444444', 'qwe@chat4', 'test4', '$2a$10$6MgJCwIHmI1uM2WxQWo6ZuLnU82YZMwVpJY.Xw.Obyn4v5Q4/RpXe', 'USER', '광주광역시 북구 시청로 1', '2층', '01044444444', '기분좋음', 'E_001', NULL, 0, 1, NULL, 1, '1', 'M', '1999-12-01', NULL, 'TGOUEAYFA9', 0, NULL, '2025-10-15 17:35:40.946', NULL, NULL, NULL, NULL);
+INSERT INTO public.users
+(id, uid, username, email, nickname, "password", "role", address, detail_address, phone, mood, mood_emoji, mbti, exp_points, tier_id, asset_uid, school_id, grade, gender, birthday, profile_decoration_code, invite_code, invite_joins, created_id, created_at, updated_id, updated_at, deleted_id, deleted_at)
+VALUES(6, '2d9ce3a8-722c-4a2c-8def-b8fb5c9f707c'::uuid, '01055555555', 'qwe@chat5', 'test5', '$2a$10$fAggMGapoSSz9Lk9SbML4.GK.5ER37P2fOQ6hhsHu0IAlR/.Egw9q', 'USER', '광주광역시 북구 시청로 1', '2층', '01055555555', '기분좋음', 'E_001', NULL, 0, 1, NULL, 1, '1', 'M', '1999-12-01', NULL, 'TIZKPBDWB0', 0, NULL, '2025-10-15 17:35:48.171', NULL, NULL, NULL, NULL);

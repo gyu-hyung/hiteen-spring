@@ -109,7 +109,7 @@ class AssetController(
     ): ResponseEntity<FileSystemResource> {
         val updated = assetService.increase(uid) ?: return ResponseEntity.badRequest().build()
 
-        val path = assetService.resolveFilePath(updated.filePath)
+        val path = assetService.resolveFilePath(updated.filePath + updated.storeFileName)
         if (!assetService.existsFile(path)) return ResponseEntity.notFound().build()
 
         val resource = FileSystemResource(path)

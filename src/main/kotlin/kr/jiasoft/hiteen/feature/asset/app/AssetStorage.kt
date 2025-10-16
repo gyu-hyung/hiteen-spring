@@ -3,6 +3,7 @@ package kr.jiasoft.hiteen.feature.asset.app
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kotlinx.coroutines.withContext
+import kr.jiasoft.hiteen.feature.asset.domain.AssetCategory
 import kr.jiasoft.hiteen.feature.asset.dto.StoredFile
 import org.springframework.http.codec.multipart.FilePart
 import java.nio.file.Files
@@ -15,7 +16,12 @@ class AssetStorage(
     private val root: Path
 ) {
     /** 저장: 날짜 폴더/랜덤파일명. 확장자 유지 */
-    suspend fun save(filePart: FilePart, allowedExts: List<String>, maxSizeBytes: Long): StoredFile {
+    suspend fun save(
+        filePart: FilePart,
+        allowedExts: List<String>,
+        maxSizeBytes: Long,
+        category: AssetCategory = AssetCategory.COMMON
+    ): StoredFile {
         val orig = filePart.filename()
         val ext = orig.substringAfterLast('.', "").lowercase().ifBlank { null }
 
@@ -32,7 +38,9 @@ class AssetStorage(
             if (size > maxSizeBytes) throw IllegalArgumentException("파일 용량 초과: ${size}bytes")
 
             val today = LocalDate.now()
-            val dir = root.resolve("${today.year}/${"%02d".format(today.monthValue)}/${"%02d".format(today.dayOfMonth)}")
+            val dir = root.resolve(
+                "${category.folderName}/${today.year}/${"%02d".format(today.monthValue)}/${"%02d".format(today.dayOfMonth)}"
+            )
             Files.createDirectories(dir)
 
             val randomName = UUID.randomUUID().toString().replace("-", "")
@@ -51,10 +59,12 @@ class AssetStorage(
 
             val mime = try { Files.probeContentType(dest) } catch (_: Throwable) { null }
 
-            val rel = root.relativize(dest).toString().replace('\\','/')
+            val relDir = root.relativize(dir).toString().replace('\\', '/') + "/"
+
             return StoredFile(
-                relativePath = rel,
+                relativePath = relDir,
                 absolutePath = dest,
+                originFileName = orig,
                 ext = ext,
                 size = size,
                 width = w,
