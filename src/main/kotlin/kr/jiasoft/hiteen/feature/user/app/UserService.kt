@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactor.mono
 import kr.jiasoft.hiteen.common.exception.BusinessValidationException
 import kr.jiasoft.hiteen.feature.asset.app.AssetService
+import kr.jiasoft.hiteen.feature.asset.domain.AssetCategory
 import kr.jiasoft.hiteen.feature.board.infra.BoardRepository
 import kr.jiasoft.hiteen.feature.interest.app.InterestUserService
 import kr.jiasoft.hiteen.feature.interest.infra.InterestUserRepository
@@ -103,7 +104,8 @@ class UserService (
             val asset = assetService.uploadImage(
                 file = file,
                 originFileName = null,
-                currentUserId = saved.id
+                currentUserId = saved.id,
+                AssetCategory.PROFILE
             )
             userRepository.save(saved.copy(assetUid = asset.uid))
         } else {
@@ -199,7 +201,8 @@ class UserService (
             val uploaded = assetService.uploadImage(
                 file = part,
                 originFileName = null,
-                currentUserId = current.id
+                currentUserId = current.id,
+                AssetCategory.PROFILE
             )
             oldAssetUidToDelete = existing.assetUid
             newAssetUid = uploaded.uid

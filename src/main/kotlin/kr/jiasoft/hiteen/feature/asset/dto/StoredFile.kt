@@ -5,6 +5,7 @@ import java.nio.file.Path
 data class StoredFile(
     val relativePath: String,   // 예: 2025/08/25/xxxxxx.jpg
     val absolutePath: Path,
+    val originFileName: String,
     val ext: String?,
     val size: Long,
     val width: Int?,
