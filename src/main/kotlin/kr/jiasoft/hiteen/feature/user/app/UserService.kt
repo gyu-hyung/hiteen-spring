@@ -103,9 +103,8 @@ class UserService (
         val updated: UserEntity = if (file != null) {
             val asset = assetService.uploadImage(
                 file = file,
-                originFileName = null,
                 currentUserId = saved.id,
-                AssetCategory.PROFILE
+                AssetCategory.PROFILE,
             )
             userRepository.save(saved.copy(assetUid = asset.uid))
         } else {
@@ -200,7 +199,6 @@ class UserService (
         if (part != null) {
             val uploaded = assetService.uploadImage(
                 file = part,
-                originFileName = null,
                 currentUserId = current.id,
                 AssetCategory.PROFILE
             )

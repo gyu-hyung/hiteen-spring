@@ -27,7 +27,17 @@ data class CodeWithAssetResponse(
     val status: CodeStatus,      // "ACTIVE"
 
     @param:Schema(description = "첨부파일 UUID", example = "a1a8990f-2443-4492-baad-699d59b272fa")
-    val imageUid: UUID?         // 첨부파일이 있을 경우
+    val imageUid: UUID?,         // 첨부파일이 있을 경우
+
+    @param:Schema(description = "컬럼 1")
+    val col1: String?,
+
+    @param:Schema(description = "컬럼 2")
+    val col2: String?,
+
+    @param:Schema(description = "컬럼 3")
+    val col3: String?,
+
 ) {
     companion object {
         fun from(entity: CodeEntity): CodeWithAssetResponse {
@@ -38,7 +48,10 @@ data class CodeWithAssetResponse(
                 codeGroup = entity.codeGroup,
                 codeGroupName = entity.codeGroupName,
                 status = entity.status,
-                imageUid = entity.imageUid,
+                imageUid = entity.assetUid,
+                col1 = entity.col1,
+                col2 = entity.col2,
+                col3 = entity.col3,
             )
         }
     }

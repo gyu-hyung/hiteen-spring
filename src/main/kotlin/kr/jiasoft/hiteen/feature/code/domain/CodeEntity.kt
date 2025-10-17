@@ -14,11 +14,15 @@ data class CodeEntity(
     val codeGroupName: String,
     val codeGroup: String,
     val status: CodeStatus = CodeStatus.INACTIVE,
+    val assetUid: UUID? = null,
+    val col1: String? = null,
+    val col2: String? = null,
+    val col3: String? = null,
     val createdId: Long,
     val createdAt: OffsetDateTime,
     val updatedId: Long? = null,
     val updatedAt: OffsetDateTime? = null,
     val deletedId: Long? = null,
     val deletedAt: OffsetDateTime? = null,
-    val imageUid: UUID? = null,
-)
+
+    )

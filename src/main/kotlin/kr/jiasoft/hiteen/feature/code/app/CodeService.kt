@@ -2,6 +2,7 @@ package kr.jiasoft.hiteen.feature.code.app
 
 import kotlinx.coroutines.flow.toList
 import kr.jiasoft.hiteen.feature.asset.app.AssetService
+import kr.jiasoft.hiteen.feature.asset.domain.AssetCategory
 import kr.jiasoft.hiteen.feature.code.domain.CodeEntity
 import kr.jiasoft.hiteen.feature.code.domain.CodeStatus
 import kr.jiasoft.hiteen.feature.code.dto.CodeRequest
@@ -31,7 +32,7 @@ class CodeService(
         val lastCode = codeRepository.findLastCodeByGroup(group)
         var lastIndex = lastCode?.substringAfter("_")?.toIntOrNull() ?: 0
 
-        val uploaded = assetService.uploadImages(files, createdUserId)
+        val uploaded = assetService.uploadImages(files, createdUserId, AssetCategory.CODE)
         val results = mutableListOf<CodeEntity>()
 
         uploaded.forEach { asset ->
@@ -46,7 +47,7 @@ class CodeService(
                     codeGroupName = group,
                     codeGroup = group.uppercase(),
                     status = CodeStatus.ACTIVE,
-                    imageUid = asset.uid,
+                    assetUid = asset.uid,
                     createdId = createdUserId,
                     createdAt = OffsetDateTime.now()
                 )
@@ -69,7 +70,7 @@ class CodeService(
 
     /** 코드 단일 등록 (파일 첨부 지원) */
     suspend fun createCode(userId: Long, dto: CodeRequest, file: FilePart?): CodeWithAssetResponse {
-        val uploaded = file?.let { assetService.uploadImage(it, "", userId) }
+        val uploaded = file?.let { assetService.uploadImage(it, userId, AssetCategory.CODE) }
         val entity = CodeEntity(
             codeName = dto.codeName,
             code = dto.code,
@@ -78,7 +79,7 @@ class CodeService(
             status = dto.status,
             createdId = userId,
             createdAt = OffsetDateTime.now(),
-            imageUid = uploaded?.uid
+            assetUid = uploaded?.uid
         )
         val savedCode = codeRepository.save(entity)
         return CodeWithAssetResponse.from(savedCode)
@@ -91,7 +92,7 @@ class CodeService(
             ?: throw IllegalArgumentException("해당 코드가 존재하지 않습니다: id=$id")
 
         // 새 파일이 있으면 업로드
-        val uploaded = file?.let { assetService.uploadImage(it, "", userId) }
+        val uploaded = file?.let { assetService.uploadImage(it, userId, AssetCategory.CODE) }
 
         val updated = existing.copy(
             code = if (dto.code != existing.code) dto.code else existing.code,
@@ -99,7 +100,7 @@ class CodeService(
             codeGroupName = if (dto.group != existing.codeGroupName) dto.group else existing.codeGroupName,
             codeGroup = if (dto.group.uppercase() != existing.codeGroup) dto.group.uppercase() else existing.codeGroup,
             status = if (dto.status != existing.status) dto.status else existing.status,
-            imageUid = uploaded?.uid ?: existing.imageUid,
+            assetUid = uploaded?.uid ?: existing.assetUid,
             updatedId = userId,
             updatedAt = OffsetDateTime.now()
         )

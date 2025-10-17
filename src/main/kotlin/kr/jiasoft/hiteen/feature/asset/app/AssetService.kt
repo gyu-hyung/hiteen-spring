@@ -57,9 +57,9 @@ class AssetService(
 
     suspend fun uploadImage(
         file: FilePart,
-        originFileName: String?,
         currentUserId: Long,
-        category: AssetCategory = AssetCategory.COMMON
+        category: AssetCategory = AssetCategory.COMMON,
+        originFileName: String? = null,
     ): AssetResponse {
         val stored = storage.save(file, allowedImageExts, maxSizeBytes, category)
         ensureImageOrDelete(stored)
@@ -84,12 +84,13 @@ class AssetService(
     suspend fun uploadImages(
         files: List<FilePart>,
         currentUserId: Long,
+        category: AssetCategory = AssetCategory.COMMON,
         originFileNames: List<String>? = null
     ): List<AssetResponse> = coroutineScope {
         files.mapIndexed { idx, f ->
             async {
                 val origin = originFileNames?.getOrNull(idx)
-                uploadImage(f, origin, currentUserId)  // 이미지 전용 wrapper 사용
+                uploadImage(f, currentUserId, category, origin)  // 이미지 전용 wrapper 사용
             }
         }.awaitAll()
     }
