@@ -2,10 +2,10 @@
 -- hiteen DDL
 -- ========================
 
-CREATE EXTENSION IF NOT EXISTS pgcrypto; -- for gen_random_uuid()
-CREATE EXTENSION IF NOT EXISTS citext;   -- case-insensitive text
-CREATE EXTENSION IF NOT EXISTS cube;
-CREATE EXTENSION IF NOT EXISTS earthdistance;
+--CREATE EXTENSION IF NOT EXISTS pgcrypto; -- for gen_random_uuid()
+--CREATE EXTENSION IF NOT EXISTS citext;   -- case-insensitive text
+--CREATE EXTENSION IF NOT EXISTS cube;
+--CREATE EXTENSION IF NOT EXISTS earthdistance;
 
 
 
@@ -91,9 +91,9 @@ CREATE TABLE users (
 
 
 -- 이메일: 삭제되지 않은 사용자만 유니크, 대소문자 구분 없음
-CREATE UNIQUE INDEX users_email_key
-    ON users (lower(email))
-    WHERE deleted_at IS NULL;
+--CREATE UNIQUE INDEX users_email_key
+--    ON users (lower(email))
+--    WHERE deleted_at IS NULL;
 
 -- 사용자명: 삭제되지 않은 사용자만 유니크, 대소문자 구분 없음
 CREATE UNIQUE INDEX users_username_key
@@ -1183,72 +1183,72 @@ CREATE TABLE user_session (
 --===========================================drop==================================================
 
 
-DROP TABLE IF EXISTS
-  -- 관계(자식) 테이블들 먼저
-  chat_messages_assets,
-  chat_messages,
-  chat_users,
-  chat_rooms,
-  poll_comment_likes,
-  poll_comments,
-  poll_likes,
-  poll_users,
-  poll_photos,
-  polls,
-  poll_templates,
-  board_comment_likes,
-  board_comments,
-  board_likes,
-  board_assets,
-  boards,
-  friends,
-  follows,
-  follow_histories,
-  pin_users,
-  pin,
-  reports,
-  code_assets,
-  interest_match_history,
-  interest_user,
-  interests,
-  user_exp_history,
-  point_histories,
-  point_rules,
-  points,
-  user_points_summary,
-  rewards,
-  game_rankings,
-  game_scores,
-  season_participants,
-  seasons,
-  games,
-  question_items,
-  question,
-  study,
-  user_classes,
-  school_food_image,
-  school_food,
-  school_classes,
-  schools,
-  time_image,
-  time_table,
-  time_user,
-  user_contacts,
-  user_details,
-  user_photos,
-  invites,
-  attends,
-  sms_auth,
-  sms_details,
-  sms,
-  push_detail,
-  push,
-  admob_rewards,
-  assets,
-  tiers,
-  user_session,
-  codes,
-  users;
+--DROP TABLE IF EXISTS
+--  -- 관계(자식) 테이블들 먼저
+--  chat_messages_assets,
+--  chat_messages,
+--  chat_users,
+--  chat_rooms,
+--  poll_comment_likes,
+--  poll_comments,
+--  poll_likes,
+--  poll_users,
+--  poll_photos,
+--  polls,
+--  poll_templates,
+--  board_comment_likes,
+--  board_comments,
+--  board_likes,
+--  board_assets,
+--  boards,
+--  friends,
+--  follows,
+--  follow_histories,
+--  pin_users,
+--  pin,
+--  reports,
+--  code_assets,
+--  interest_match_history,
+--  interest_user,
+--  interests,
+--  user_exp_history,
+--  point_histories,
+--  point_rules,
+--  points,
+--  user_points_summary,
+--  rewards,
+--  game_rankings,
+--  game_scores,
+--  season_participants,
+--  seasons,
+--  games,
+--  question_items,
+--  question,
+--  study,
+--  user_classes,
+--  school_food_image,
+--  school_food,
+--  school_classes,
+--  schools,
+--  time_image,
+--  time_table,
+--  time_user,
+--  user_contacts,
+--  user_details,
+--  user_photos,
+--  invites,
+--  attends,
+--  sms_auth,
+--  sms_details,
+--  sms,
+--  push_detail,
+--  push,
+--  admob_rewards,
+--  assets,
+--  tiers,
+--  user_session,
+--  codes,
+--  users;
 
 
 
