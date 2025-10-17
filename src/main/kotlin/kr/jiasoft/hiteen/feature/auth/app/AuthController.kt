@@ -10,11 +10,13 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import kr.jiasoft.hiteen.common.dto.ApiResult
 import kr.jiasoft.hiteen.feature.auth.dto.AuthCodeRequest
+import kr.jiasoft.hiteen.feature.auth.dto.JwtResponse
 import kr.jiasoft.hiteen.feature.auth.dto.VerifyRequest
 import kr.jiasoft.hiteen.feature.auth.infra.BearerToken
 import kr.jiasoft.hiteen.feature.auth.infra.JwtProvider
 import kr.jiasoft.hiteen.feature.sms.app.SmsService
 import kr.jiasoft.hiteen.feature.sms.infra.SmsAuthRepository
+import kr.jiasoft.hiteen.feature.user.dto.UserResponseWithTokens
 import kr.jiasoft.hiteen.feature.user.infra.UserRepository
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
@@ -42,9 +44,6 @@ class AuthController(
         @Schema(description = "비밀번호") val password: String
     )
 
-    data class JwtResponse(
-        @Schema(description = "Access Token") val token: String
-    )
 
     //TODO 로그인 시 device 정보 user_details에 저장
     @Operation(
@@ -59,11 +58,11 @@ class AuthController(
     suspend fun login(
         @Parameter(description = "로그인 요청 DTO") form: LoginForm,
         response: ServerHttpResponse
-    ): JwtResponse =
+    ): UserResponseWithTokens =
         try {
-            val (access, refresh) = authService.login(form.username, form.password)
+            val userResponseWithTokens = authService.login(form.username, form.password)
 
-            val cookie = ResponseCookie.from("refreshToken", refresh)
+            val cookie = ResponseCookie.from("refreshToken", userResponseWithTokens.tokens.refreshToken.toString())
                 .httpOnly(true)
                 .secure(true)
                 .path("/")
@@ -72,7 +71,7 @@ class AuthController(
 
             response.addCookie(cookie)
 
-            JwtResponse(access)
+            userResponseWithTokens
         } catch (e: IllegalArgumentException) {
             throw ResponseStatusException(HttpStatus.UNAUTHORIZED)
         }
