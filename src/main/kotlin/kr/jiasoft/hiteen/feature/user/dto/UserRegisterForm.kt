@@ -17,7 +17,7 @@ data class UserRegisterForm(
 //    @param:Schema(description = "사용자 계정명 (로그인 ID)", example = "chat1", maxLength = 50)
     var username: String? = null,
 
-    @field:NotBlank(message = "이메일은 필수입니다.")
+//    @field:NotBlank(message = "이메일은 필수입니다.")
     @field:Email(message = "올바른 이메일 형식이어야 합니다.")
     @param:Schema(description = "이메일 주소", example = "user@example.com")
     val email: String? = null,

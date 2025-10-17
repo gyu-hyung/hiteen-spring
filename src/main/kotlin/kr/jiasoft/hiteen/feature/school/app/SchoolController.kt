@@ -4,9 +4,11 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import kotlinx.coroutines.flow.toList
 import kr.jiasoft.hiteen.common.dto.ApiPageCursor
+import kr.jiasoft.hiteen.common.dto.ApiResult
 import kr.jiasoft.hiteen.feature.school.domain.SchoolEntity
 import kr.jiasoft.hiteen.feature.school.dto.SchoolDto
 import kr.jiasoft.hiteen.feature.school.infra.SchoolRepository
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -27,7 +29,7 @@ class SchoolController(
         keyword: String?,
         cursor: Long?,
         limit: Int?
-    ): ApiPageCursor<SchoolDto> {
+    ): ResponseEntity<ApiResult<ApiPageCursor<SchoolDto>>> {
         val pageSize = limit ?: 20
         val entities = schoolRepository.findSchools(keyword, cursor, pageSize).toList()
         val items: List<SchoolDto> = entities.map {
@@ -35,11 +37,11 @@ class SchoolController(
         }
         val nextCursor = entities.lastOrNull()?.id?.toString()
 
-        return ApiPageCursor(
+        return ResponseEntity.ok(ApiResult.success(ApiPageCursor(
             nextCursor = nextCursor,
             items = items,
             perPage = pageSize
-        )
+        )))
     }
 
 }
