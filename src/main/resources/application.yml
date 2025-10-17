@@ -1,21 +1,22 @@
 spring:
   application:
     name: hiteen
-#  webflux:
-#    static-path-pattern: /assets/**
-#    resources:
-#      static-locations: classpath:/assets/
   r2dbc:
-    url: r2dbc:postgresql://127.0.0.1:5432/hiteen
     username: hiteen
-    password: 1234
+#    url: r2dbc:postgresql://127.0.0.1:5432/hiteen
+#    password: 1234
+#    =========================
+    url: r2dbc:postgresql://49.247.175.76:5432/hiteen
+    password: xxxxxxxx
     pool:
       enabled: true
       initial-size: 5
       max-size: 20
   data:
     mongodb:
-      uri: mongodb://hiteen:1234@127.0.0.1:27017/hiteen?authSource=admin
+#      uri: mongodb://hiteen:1234@127.0.0.1:27017/hiteen?authSource=admin
+#    =========================
+      uri: mongodb://hiteen:hiteen%402025@49.247.170.182:27017/hiteen?authSource=admin
     redis:
       host: 127.0.0.1
       port: 6379
@@ -34,7 +35,9 @@ spring:
     restart:
       enabled: true
   config:
-    import: "classpath:mbti.yml"
+    import:
+      - "classpath:mbti.yml"
+      - "classpath:exp.yml"
 
 server:
   port: 8080
@@ -98,158 +101,6 @@ app:
     static-locations: classpath:/assets/
     allowed-exts: jpg,jpeg,png,gif,webp,bmp,svg,mp4,mov,avi,mkv,pdf,txt,csv,zip,rar,gz
     max-size-bytes: 5242880 # 50MB
-
-# ========================
-# 경험치 액션 정의
-# ========================
-exp:
-  actions:
-    PIN_REGISTER:
-      description: "핀 등록"
-      points: 3
-
-
-    FRIEND_ADD:
-      description: "친구 추가"
-      points: 30
-
-    FRIEND_PROFILE_VISIT:
-      description: "친구 프로필 방문"
-      points: 3
-      dailyLimit: 1
-
-
-    CHAT:
-      description: "채팅"
-      points: 5
-
-    CHAT_QUICK_EMOJI:
-      description: "채팅 퀵 이모지 보내기"
-      points: 3
-      dailyLimit: 5
-
-
-    CREATE_BOARD:
-      description: "게시글 작성"
-      points: 10
-
-    CREATE_BOARD_COMMENT:
-      description: "게시글 댓글/대댓글 작성"
-      points: 5
-
-    LIKE_BOARD:
-      description: "게시글 좋아요"
-      points: 3
-      dailyLimit: 5
-
-    LIKE_BOARD_COMMENT:
-      description: "게시글 댓글 좋아요"
-      points: 3
-      dailyLimit: 5
-
-
-    CREATE_VOTE:
-      description: "투표 등록"
-      points: 10
-
-    VOTE_PARTICIPATE:
-      description: "투표 참여"
-      points: 5
-
-    CREATE_VOTE_COMMENT:
-      description: "투표 댓글/대댓글 작성"
-      points: 5
-
-    LIKE_VOTE:
-      description: "투표 좋아요"
-      points: 3
-      dailyLimit: 5
-
-    LIKE_VOTE_COMMENT:
-      description: "투표 댓글 좋아요"
-      points: 3
-      dailyLimit: 5
-
-
-    INTEREST_TAG_REGISTER:
-      description: "관심태그 등록"
-      points: 20
-
-    TODAY_FRIEND_CHECK:
-      description: "오늘의 친구 확인"
-      points: 5
-      dailyLimit: 1
-
-
-    FOLLOW_REQUEST:
-      description: "팔로우 요청"
-      points: 15
-
-    FOLLOW_ACCEPT:
-      description: "친구(팔로우) 수락"
-      points: 15
-
-
-    SHARE:
-      description: "공유하기"
-      points: 5
-      dailyLimit: 3
-
-    GAME_PLAY:
-      description: "게임 플레이"
-      points: 10
-
-    WATCH_AD:
-      description: "게임 광고 보기"
-      points: 3
-      dailyLimit: 5
-
-    ENGLISH_STUDY:
-      description: "영어 단어 학습"
-      points: 10
-
-    ENGLISH_CHALLENGE:
-      description: "영단어 챌린지 도전"
-      points: 5
-
-    POINT_CHARGE:
-      description: "포인트 충전"
-      points: 10
-
-#    NEW_PICK_ITEM:
-#      description: "새로운 픽넴 획득"
-#      points: 5
-
-    LEVEL_UP:
-      description: "레벨업"
-      points: 10
-
-    NOTICE_READ:
-      description: "공지/이벤트 확인"
-      points: 3
-
-    ATTENDANCE:
-      description: "출석 체크"
-      points: 3
-      dailyLimit: 1
-
-    FRIEND_INVITE:
-      description: "친구 초대"
-      points: 30
-
-    STREAK_ATTENDANCE:
-      description: "연속 출석"
-      points: 20
-
-    SESSION_REWARD:
-      points: 0
-      description: "일일 접속 시간 보상"
-
-
-
-    REPORT_CONTENT:
-      description: "부적절 컨텐츠 신고받음"
-      points: -10
 
 
 logging:

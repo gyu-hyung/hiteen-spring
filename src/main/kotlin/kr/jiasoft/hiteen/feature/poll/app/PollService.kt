@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kr.jiasoft.hiteen.common.exception.BusinessValidationException
 import kr.jiasoft.hiteen.feature.asset.app.AssetService
+import kr.jiasoft.hiteen.feature.asset.domain.AssetCategory
 import kr.jiasoft.hiteen.feature.level.app.ExpService
 import kr.jiasoft.hiteen.feature.point.app.PointService
 import kr.jiasoft.hiteen.feature.point.domain.PointPolicy
@@ -155,7 +156,7 @@ class PollService(
 
         // 사진 교체
         val uploadedPhoto: String? = if (file != null) {
-            val asset = assetService.uploadImage(file, null, userId)
+            val asset = assetService.uploadImage(file, userId, AssetCategory.POLL)
             asset.uid.toString()
         } else poll.photo
 

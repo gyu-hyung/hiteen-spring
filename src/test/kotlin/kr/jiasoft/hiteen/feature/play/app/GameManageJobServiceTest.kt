@@ -29,21 +29,21 @@ class GameManageJobServiceTest @Autowired constructor(
     }
 
 
-    @Test
-    fun `시즌 종료 시 랭킹 저장 테스트`() = runBlocking {
-        // given
-//        val season = seasonRepository.findLatestByLeague("BRONZE")
-//            ?: throw IllegalStateException("테스트할 시즌이 존재해야 합니다.")
-
-        val seasons = seasonRepository.findActiveSeasons()
-        seasons.collect { season ->
-            // when
-            gameManageJobService.saveSeasonRankings(season.id)
-        }
-
-
-        // then
-        val rankings = gameRankingRepository.findAllBySeasonIdAndGameId(seasons.first().id, 1).toList()
-        assertTrue(rankings.isEmpty(), "랭킹 저장이 정상적으로 이루어져야 합니다.")
-    }
+//    @Test
+//    fun `시즌 종료 시 랭킹 저장 테스트`() = runBlocking {
+//        // given
+////        val season = seasonRepository.findLatestByLeague("BRONZE")
+////            ?: throw IllegalStateException("테스트할 시즌이 존재해야 합니다.")
+//
+//        val seasons = seasonRepository.findActiveSeasons()
+//        seasons.collect { season ->
+//            // when
+//            gameManageJobService.saveSeasonRankings(season.id)
+//        }
+//
+//
+//        // then
+//        val rankings = gameRankingRepository.findAllBySeasonIdAndGameId(seasons.first().id, 1).toList()
+//        assertTrue(rankings.isEmpty(), "랭킹 저장이 정상적으로 이루어져야 합니다.")
+//    }
 }

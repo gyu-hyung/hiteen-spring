@@ -4,6 +4,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kr.jiasoft.hiteen.common.dto.ApiPageCursor
 import kr.jiasoft.hiteen.feature.asset.app.AssetService
+import kr.jiasoft.hiteen.feature.asset.domain.AssetCategory
 import kr.jiasoft.hiteen.feature.asset.dto.AssetResponse
 import kr.jiasoft.hiteen.feature.board.domain.BoardAssetEntity
 import kr.jiasoft.hiteen.feature.board.domain.BoardCommentEntity
@@ -158,7 +159,7 @@ class BoardService(
     ): UUID {
         // 1) 파일이 있다면 먼저 업로드 → 첫 번째 파일을 대표이미지 후보로
         val uploaded: List<AssetResponse> =
-            if (files.isNotEmpty()) assetService.uploadImages(files, user.id) else emptyList()
+            if (files.isNotEmpty()) assetService.uploadImages(files, user.id, AssetCategory.POST) else emptyList()
         val representativeUid: UUID? = uploaded.firstOrNull()?.uid
 
         // 2) 대표이미지(assetUid)를 반영해 게시글 생성
@@ -237,7 +238,7 @@ class BoardService(
 
         // 2) 파일 업로드 -> 매핑 추가 + 대표이미지 후보(첫 번째 업로드)
         if (files.isNotEmpty()) {
-            val uploadedFiles = assetService.uploadImages(files, currentUserId)
+            val uploadedFiles = assetService.uploadImages(files, currentUserId, AssetCategory.POST)
             uploadedFiles.forEach { a ->
                 boardAssetRepository.save(
                     BoardAssetEntity(
