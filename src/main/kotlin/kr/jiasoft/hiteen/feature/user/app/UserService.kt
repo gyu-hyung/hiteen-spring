@@ -2,10 +2,11 @@ package kr.jiasoft.hiteen.feature.user.app
 
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.reactor.mono
 import kr.jiasoft.hiteen.common.exception.BusinessValidationException
 import kr.jiasoft.hiteen.feature.asset.app.AssetService
 import kr.jiasoft.hiteen.feature.asset.domain.AssetCategory
+import kr.jiasoft.hiteen.feature.auth.dto.JwtResponse
+import kr.jiasoft.hiteen.feature.auth.infra.JwtProvider
 import kr.jiasoft.hiteen.feature.board.infra.BoardRepository
 import kr.jiasoft.hiteen.feature.interest.app.InterestUserService
 import kr.jiasoft.hiteen.feature.interest.infra.InterestUserRepository
@@ -14,8 +15,6 @@ import kr.jiasoft.hiteen.feature.level.domain.TierCode
 import kr.jiasoft.hiteen.feature.level.infra.TierRepository
 import kr.jiasoft.hiteen.feature.point.app.PointService
 import kr.jiasoft.hiteen.feature.point.domain.PointPolicy
-import kr.jiasoft.hiteen.feature.relationship.app.FollowService
-import kr.jiasoft.hiteen.feature.relationship.app.FriendService
 import kr.jiasoft.hiteen.feature.relationship.domain.FollowStatus
 import kr.jiasoft.hiteen.feature.relationship.dto.RelationshipCounts
 import kr.jiasoft.hiteen.feature.relationship.infra.FollowRepository
@@ -23,26 +22,24 @@ import kr.jiasoft.hiteen.feature.relationship.infra.FriendRepository
 import kr.jiasoft.hiteen.feature.school.infra.SchoolRepository
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import kr.jiasoft.hiteen.feature.user.domain.UserPhotosEntity
-import kr.jiasoft.hiteen.feature.user.dto.CustomUserDetails
 import kr.jiasoft.hiteen.feature.user.dto.UserRegisterForm
 import kr.jiasoft.hiteen.feature.user.dto.UserResponse
+import kr.jiasoft.hiteen.feature.user.dto.UserResponseWithTokens
 import kr.jiasoft.hiteen.feature.user.dto.UserSummary
 import kr.jiasoft.hiteen.feature.user.dto.UserUpdateForm
 import kr.jiasoft.hiteen.feature.user.infra.UserPhotosRepository
 import kr.jiasoft.hiteen.feature.user.infra.UserRepository
 import org.springframework.http.codec.multipart.FilePart
-import org.springframework.security.core.userdetails.ReactiveUserDetailsService
-import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
-import reactor.core.publisher.Mono
 import java.time.OffsetDateTime
 import java.util.UUID
 
 @Service
 class UserService (
     private val encoder: PasswordEncoder,
+    private val jwtProvider: JwtProvider,
     private val assetService: AssetService,
     private val followRepository: FollowRepository,
     private val friendRepository: FriendRepository,
@@ -56,14 +53,7 @@ class UserService (
     private val tierRepository: TierRepository,
     private val pointService: PointService,
     private val interestUserService: InterestUserService,
-) : ReactiveUserDetailsService {
-
-    override fun findByUsername(username: String): Mono<UserDetails> = mono {
-        val user = userRepository.findByUsername(username)
-            ?: throw UsernameNotFoundException("User not found: $username")
-
-        CustomUserDetails.from(user)
-    }
+) {
 
     suspend fun findByUid(uid: String): UserEntity? {
         return userRepository.findByUid(uid)
@@ -80,7 +70,56 @@ class UserService (
     }
 
 
-    suspend fun register(param: UserRegisterForm, file: FilePart?): UserResponse {
+    private suspend fun toUserResponse(targetUser: UserEntity, currentUserId: Long? = null): UserResponse {
+
+        val school = targetUser.schoolId?.let { id -> schoolRepository.findById(id) }
+        val tier = tierRepository.findById(targetUser.tierId)
+        val interests = interestUserRepository.getInterestResponseById(null, targetUser.id).toList()
+        val relationshipCounts = RelationshipCounts(
+            postCount = boardRepository.countByCreatedId(targetUser.id),
+            followerCount = followRepository.countByFollowIdAndStatus(targetUser.id, FollowStatus.ACCEPTED.name),
+            followingCount = followRepository.countByUserIdAndStatus(targetUser.id, FollowStatus.ACCEPTED.name),
+        )
+        val photos = getPhotosById(targetUser.id)
+
+        val isFollowed = currentUserId?.let { followRepository.existsFollow(it, targetUser.id) > 0 }  ?: false
+        val isFriend = currentUserId?.let { friendRepository.existsFriend(it, targetUser.id) > 0 } ?: false
+
+        return UserResponse.from(targetUser, school, tier, interests, relationshipCounts, photos, isFollowed, isFriend)
+    }
+
+    suspend fun findUserResponse(username: String): UserResponse {
+        val targetUser = userRepository.findByUsername(username)
+            ?: throw UsernameNotFoundException("User not found: $username")
+
+        return toUserResponse(targetUser)
+    }
+
+    suspend fun findUserResponse(targetUid: UUID, currentUserId: Long? = null): UserResponse {
+        val targetUser = userRepository.findByUid(targetUid.toString())
+            ?: throw UsernameNotFoundException("User not found: $targetUid")
+
+        return toUserResponse(targetUser, currentUserId)
+    }
+
+    suspend fun findUserResponse(targetId: Long, currentUserId: Long? = null): UserResponse {
+        val targetUser = userRepository.findById(targetId)
+            ?: throw UsernameNotFoundException("User not found: $targetId")
+
+        return toUserResponse(targetUser, currentUserId)
+    }
+
+
+    suspend fun findUserSummary(userId: Long): UserSummary {
+        return userRepository.findSummaryInfoById(userId)
+    }
+
+
+    suspend fun findUserSummaryList(userIds: List<Long>)
+            = userRepository.findSummaryByIds(userIds)
+
+
+    suspend fun register(param: UserRegisterForm, file: FilePart?): UserResponseWithTokens {
         val inviteCode = param.inviteCode
         param.inviteCode = null
         param.username = param.phone
@@ -102,8 +141,8 @@ class UserService (
 
         val updated: UserEntity = if (file != null) {
             val asset = assetService.uploadImage(
-                file = file,
-                currentUserId = saved.id,
+                file,
+                saved.id,
                 AssetCategory.PROFILE,
             )
             userRepository.save(saved.copy(assetUid = asset.uid))
@@ -127,63 +166,17 @@ class UserService (
             }
         }
 
+        // JWT 생성
+        val (access, refresh) = jwtProvider.generateTokens(saved.username)
+        JwtResponse(access.value, refresh.value)
         //포인트 지급
         pointService.applyPolicy(updated.id, PointPolicy.SIGNUP)
 
-        return UserResponse.from(updated, school)
-    }
-
-
-    suspend fun findUserResponse(targetUid: UUID, currentUserId: Long? = null): UserResponse {
-        val targetUser = userRepository.findByUid(targetUid.toString())
-            ?: throw UsernameNotFoundException("User not found: $targetUid")
-
-        val school = targetUser.schoolId?.let { id -> schoolRepository.findById(id) }
-        val tier = tierRepository.findById(targetUser.tierId)
-        val interests = interestUserRepository.getInterestResponseById(null, targetUser.id).toList()
-        val relationshipCounts = RelationshipCounts(
-            postCount = boardRepository.countByCreatedId(targetUser.id),
-            followerCount = followRepository.countByFollowIdAndStatus(targetUser.id, FollowStatus.ACCEPTED.name),
-            followingCount = followRepository.countByUserIdAndStatus(targetUser.id, FollowStatus.ACCEPTED.name),
+        return UserResponseWithTokens(
+            JwtResponse(access.value, access.value),
+            UserResponse.from(updated, school),
         )
-        val photos = getPhotosById(targetUser.id)
-
-        val isFollowed = currentUserId?.let { followRepository.existsFollow(it, targetUser.id) > 0 } ?: false
-        val isFriend = currentUserId?.let { friendRepository.existsFriend(it, targetUser.id) > 0 } ?: false
-
-        return UserResponse.from(targetUser, school, tier, interests, relationshipCounts, photos, isFollowed, isFriend)
     }
-
-    suspend fun findUserResponse(targetId: Long, currentUserId: Long? = null): UserResponse {
-        val targetUser = userRepository.findById(targetId)
-            ?: throw UsernameNotFoundException("User not found: $targetId")
-
-        val school = targetUser.schoolId?.let { id -> schoolRepository.findById(id) }
-        val tier = tierRepository.findById(targetUser.tierId)
-        val interests = interestUserRepository.getInterestResponseById(null, targetUser.id).toList()
-        val relationshipCounts = RelationshipCounts(
-            postCount = boardRepository.countByCreatedId(targetUser.id),
-            followerCount = followRepository.countByFollowIdAndStatus(targetUser.id, FollowStatus.ACCEPTED.name),
-            followingCount = followRepository.countByUserIdAndStatus(targetUser.id, FollowStatus.ACCEPTED.name),
-        )
-        val photos = getPhotosById(targetUser.id)
-
-        val isFollowed = currentUserId?.let { followRepository.existsFollow(it, targetUser.id) > 0 } ?: false
-        val isFriend = currentUserId?.let { friendRepository.existsFriend(it, targetId) > 0 } ?: false
-
-        return UserResponse.from(targetUser, school, tier, interests, relationshipCounts, photos, isFollowed, isFriend)
-    }
-
-
-
-    suspend fun findUserSummary(userId: Long): UserSummary {
-        return userRepository.findSummaryInfoById(userId)
-    }
-
-
-    suspend fun findUserSummaryList(userIds: List<Long>)
-            = userRepository.findSummaryByIds(userIds)
-
 
 
     // TODO 회원 정보 변경 시 로그아웃(토큰 무효화) 기준 정리 필요: 비밀번호/권한/중요 개인정보 변경 시 재로그인 유도 등
@@ -268,18 +261,7 @@ class UserService (
         }
 
         // 5) schoolId 있으면 조회해서 DTO 변환
-        val school = saved.schoolId?.let { id -> schoolRepository.findById(id) }
-        val tier = tierRepository.findById(current.tierId)
-        val interests = interestUserRepository.getInterestResponseById(null, saved.id).toList()
-//        val relationshipCounts = followService.getRelationshipCounts(saved.id)
-        val relationshipCounts = RelationshipCounts(
-            postCount = boardRepository.countByCreatedId(saved.id),
-            followerCount = followRepository.countByFollowIdAndStatus(saved.id, FollowStatus.ACCEPTED.name),
-            followingCount = followRepository.countByUserIdAndStatus(saved.id, FollowStatus.ACCEPTED.name),
-        )
-        val photos = getPhotosById(saved.id)
-
-        return UserResponse.from(saved, school, tier, interests, relationshipCounts, photos)
+        return toUserResponse(saved)
     }
 
 

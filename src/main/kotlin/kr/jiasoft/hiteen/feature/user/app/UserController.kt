@@ -13,6 +13,7 @@ import kr.jiasoft.hiteen.common.dto.ApiResult
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import kr.jiasoft.hiteen.feature.user.dto.UserRegisterForm
 import kr.jiasoft.hiteen.feature.user.dto.UserResponse
+import kr.jiasoft.hiteen.feature.user.dto.UserResponseWithTokens
 import kr.jiasoft.hiteen.feature.user.dto.UserSummary
 import kr.jiasoft.hiteen.feature.user.dto.UserUpdateForm
 import org.springframework.http.HttpStatus
@@ -65,7 +66,7 @@ class UserController(
     suspend fun register(
         @Valid userRegisterForm: UserRegisterForm,
         @RequestPart("file", required = false) file: FilePart?
-    ): ResponseEntity<ApiResult<UserResponse>> {
+    ): ResponseEntity<ApiResult<UserResponseWithTokens>> {
         val user = userService.register(userRegisterForm, file)
         return ResponseEntity.ok(ApiResult.success(user))
     }

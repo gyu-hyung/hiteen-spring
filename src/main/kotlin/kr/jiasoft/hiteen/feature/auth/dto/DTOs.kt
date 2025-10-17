@@ -27,3 +27,8 @@ data class VerifyRequest(
     @field:Size(min = 6, max = 6, message = "인증번호는 6자리야~")
     val code: String
 )
+
+data class JwtResponse(
+    @Schema(description = "Access Token") val accessToken: String,
+    @Schema(description = "Access Token") val refreshToken: String? = null
+)
