@@ -1,25 +1,34 @@
 spring:
   application:
     name: hiteen
+
   r2dbc:
     username: hiteen
-    url: r2dbc:postgresql://127.0.0.1:5432/hiteen
-    password: 1234
+#    url: r2dbc:postgresql://127.0.0.1:5432/hiteen
+#    password: 1234
 #    =========================
-#    url: r2dbc:postgresql://49.247.175.76:5432/hiteen
-#    password: xxxxxxxx
+    url: r2dbc:postgresql://49.247.175.76:5432/hiteen
+    password: xxxxxxxx
     pool:
       enabled: true
       initial-size: 5
       max-size: 20
+
   data:
+
     mongodb:
-      uri: mongodb://hiteen:1234@127.0.0.1:27017/hiteen?authSource=admin
+#      uri: mongodb://hiteen:1234@127.0.0.1:27017/hiteen?authSource=admin
 #    =========================
-#      uri: mongodb://hiteen:hiteen%402025@49.247.170.182:27017/hiteen?authSource=admin
+      uri: mongodb://hiteen:hiteen%402025@49.247.170.182:27017/hiteen?authSource=admin
+
     redis:
-      host: 127.0.0.1
-      port: 6379
+      cluster:
+        nodes:
+          - 10.8.1.51:6379
+          - 10.8.0.159:6379
+          - 10.8.0.12:6379
+      # ====================
+#      host: 127.0.0.1
       password: xxxxxxxx
       timeout: 5s
       client-type: lettuce
@@ -29,6 +38,7 @@ spring:
           max-idle: 8
           min-idle: 2
           time-between-eviction-runs: 60s
+
   devtools:
     livereload:
       enabled: true
