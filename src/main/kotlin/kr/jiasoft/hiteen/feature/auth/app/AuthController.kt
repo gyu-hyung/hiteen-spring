@@ -251,6 +251,25 @@ class AuthController(
     )
 
     @Operation(
+        summary = "비밀번호 변경 검증(로그인 상태)",
+        description = "입력한 비밀번호가 현재 비밀번호와 일치한지 검증합니다.",
+        security = [SecurityRequirement(name = "bearerAuth")]
+    )
+    @PostMapping("/password/change/valid")
+    suspend fun changePasswordValid(
+        @AuthenticationPrincipal(expression = "user") user: UserEntity,
+        @Parameter(description = "비밀번호 초기화 DTO") @Valid req: PasswordCheckRequest
+    ): ResponseEntity<Any> {
+
+        if (!encoder.matches(req.password, user.password)) {
+            throw IllegalArgumentException("비밀번호가 일치하지 않습니다.")
+        }
+
+        return ResponseEntity.ok(ApiResult.success(req.password, "통과"))
+    }
+
+
+    @Operation(
         summary = "비밀번호 변경 (로그인 상태)",
         description = "현재 비밀번호를 검증하고 새 비밀번호로 변경합니다.",
         security = [SecurityRequirement(name = "bearerAuth")]
