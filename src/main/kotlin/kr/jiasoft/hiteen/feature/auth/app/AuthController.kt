@@ -210,18 +210,19 @@ class AuthController(
 //            ?: return ResponseEntity.badRequest()
 //                .body(mapOf("code" to listOf("인증번호가 만료되었거나 유효하지 않아~")))
             ?: return ResponseEntity.badRequest()
-                .body(ApiResult.failure("실패", mapOf("code" to listOf("인증번호가 만료되었거나 유효하지 않아~"))))
+                .body(ApiResult.failure("인증번호가 만료되었거나 유효하지 않아~"))
 
         if (data.code != req.code) {
 //            return ResponseEntity.badRequest()
 //                .body(mapOf("code" to listOf("인증번호가 일치하지 않아~")))
             return ResponseEntity.badRequest()
-                .body(ApiResult.failure("실패", mapOf("code" to listOf("인증번호가 일치하지 않아~"))))
+                .body(ApiResult.failure("인증번호가 일치하지 않아~"))
         }
 
         val user = userRepository.findByPhone(phone)
             ?: return ResponseEntity.badRequest()
-                .body(ApiResult.failure("실패", mapOf("code" to listOf("가입되지 않은 번호야~"))))
+                .body(ApiResult.failure("가입되지 않은 번호야~"))
+
 
         if(req.newPassword != null) {
             // 비밀번호 암호화 후 업데이트
