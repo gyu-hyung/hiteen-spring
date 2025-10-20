@@ -5,9 +5,11 @@ import kr.jiasoft.hiteen.feature.auth.dto.JwtResponse
 import kr.jiasoft.hiteen.feature.auth.infra.JwtProvider
 import kr.jiasoft.hiteen.feature.user.app.UserService
 import kr.jiasoft.hiteen.feature.user.dto.UserResponseWithTokens
+import org.springframework.http.HttpStatus
 import org.springframework.security.core.userdetails.ReactiveUserDetailsService
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
+import org.springframework.web.server.ResponseStatusException
 
 @Service
 class AuthService(
@@ -21,7 +23,8 @@ class AuthService(
         val userDetails = reactiveUserDetailsService.findByUsername(username).awaitFirstOrNull()
             ?: throw IllegalArgumentException("Invalid credentials")
         if (!encoder.matches(rawPassword, userDetails.password)) {
-            throw IllegalArgumentException("Invalid credentials")
+//            throw IllegalArgumentException("Invalid credentials")
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid credentials")
         }
 
         val (access, refresh) = jwtProvider.generateTokens(userDetails.username)

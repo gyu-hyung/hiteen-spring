@@ -67,7 +67,7 @@ class AuthController(
     suspend fun login(
         @Parameter(description = "로그인 요청 DTO") form: LoginForm,
         response: ServerHttpResponse
-    ): UserResponseWithTokens =
+    ): ResponseEntity<ApiResult<UserResponseWithTokens>> =
         try {
             val userResponseWithTokens = authService.login(form.phone, form.password)
 
@@ -80,7 +80,7 @@ class AuthController(
 
             response.addCookie(cookie)
 
-            userResponseWithTokens
+            ResponseEntity.ok(ApiResult.success(userResponseWithTokens))
         } catch (e: IllegalArgumentException) {
             throw ResponseStatusException(HttpStatus.UNAUTHORIZED)
         }
@@ -90,11 +90,11 @@ class AuthController(
     @PostMapping("/code")
     suspend fun authCode(
         @Valid @Parameter(description = "휴대폰 인증 요청 DTO") req: AuthCodeRequest
-    ): ResponseEntity<Any> {
+    ): ResponseEntity<ApiResult<Any>> {
         val phone = req.phone.filter { it.isDigit() }
 
         userRepository.findByPhone(phone)?.let {
-            return ResponseEntity.ok(mapOf("message" to "이전에 가입한 회원이 있어~", "success" to false))
+            throw IllegalArgumentException("이전에 가입한 회원이 있어~")
         }
 
         val code = (100000..999999).random().toString()
@@ -102,9 +102,9 @@ class AuthController(
 
         val success = smsService.sendPhone(phone, message, code)
         if (success) {
-            return ResponseEntity.ok(mapOf("message" to "인증번호를 발송했어~", "success" to true))
+            return ResponseEntity.ok(ApiResult.success(true, "인증번호를 발송했어~"))
         }
-        return ResponseEntity.ok(mapOf("message" to "인증번호 발송이 실패했어~", "success" to false))
+        return ResponseEntity.internalServerError().body(ApiResult.failure("인증번호 발송 실패"))
     }
 
 
@@ -112,22 +112,22 @@ class AuthController(
     @PostMapping("/verify")
     suspend fun authVerify(
         @Valid @Parameter(description = "휴대폰 인증 검증 요청 DTO") req: VerifyRequest
-    ): ResponseEntity<Any> {
+    ): ResponseEntity<ApiResult<Any>> {
         val minute = 5
         val phone = req.phone.filter { it.isDigit() }
 
         //TODO: 회원가입 휴대폰 인증목적으로 요청한 코드인지 확인해야하나?
-        val data = smsAuthRepository.findValidAuthCode(phone, minute) ?: return ResponseEntity.badRequest()
-            .body(mapOf("code" to listOf("인증번호가 만료되었거나 유효하지 않아~")))
+        val data = smsAuthRepository.findValidAuthCode(phone, minute) ?:
+            throw IllegalStateException("인증번호가 만료되었거나 유효하지 않아~")
 
         if (data.code != req.code) {
-            return ResponseEntity.badRequest().body(mapOf("code" to listOf("인증번호가 일치하지 않아~")))
+            throw IllegalArgumentException("인증번호가 일치하지 않아~")
         }
 
         val updated = data.copy(status = "Verified")
         smsAuthRepository.save(updated)
 
-        return ResponseEntity.ok(mapOf("message" to "인증이 완료됐어~", "success" to true))
+        return ResponseEntity.ok(ApiResult.success(true))
     }
 
 
@@ -161,13 +161,12 @@ class AuthController(
     @PostMapping("/password/code")
     suspend fun sendResetPasswordCode(
         @Parameter(description = "비밀번호 재설정 코드 발송 요청 DTO") @Valid req: AuthCodeRequest
-    ): ResponseEntity<Any> {
+    ): ResponseEntity<ApiResult<Any>> {
         val phone = req.phone.filter { it.isDigit() }
 
         // 가입 여부 확인
         userRepository.findByPhone(phone)
-            ?: return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(mapOf("phone" to listOf("가입되지 않은 번호야~")))
+            ?: throw IllegalStateException("가입되지 않은 번호야~")
 
         // 인증번호 발송
         val code = (100000..999999).random().toString()
@@ -202,23 +201,27 @@ class AuthController(
     @PostMapping("/password/reset")
     suspend fun resetPassword(
         @Parameter(description = "비밀번호 재설정 요청 DTO") @Valid req: ResetPasswordRequest
-    ): ResponseEntity<Any> {
+    ): ResponseEntity<ApiResult<Any>> {
         val phone = req.phone.filter { it.isDigit() }
 
         // 인증번호 검증 (5분 유효)
         val minute = 5
         val data = smsAuthRepository.findValidAuthCode(phone, minute)
+//            ?: return ResponseEntity.badRequest()
+//                .body(mapOf("code" to listOf("인증번호가 만료되었거나 유효하지 않아~")))
             ?: return ResponseEntity.badRequest()
-                .body(mapOf("code" to listOf("인증번호가 만료되었거나 유효하지 않아~")))
+                .body(ApiResult.failure("실패", mapOf("code" to listOf("인증번호가 만료되었거나 유효하지 않아~"))))
 
         if (data.code != req.code) {
+//            return ResponseEntity.badRequest()
+//                .body(mapOf("code" to listOf("인증번호가 일치하지 않아~")))
             return ResponseEntity.badRequest()
-                .body(mapOf("code" to listOf("인증번호가 일치하지 않아~")))
+                .body(ApiResult.failure("실패", mapOf("code" to listOf("인증번호가 일치하지 않아~"))))
         }
 
         val user = userRepository.findByPhone(phone)
-            ?: return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(mapOf("phone" to listOf("가입되지 않은 번호야~")))
+            ?: return ResponseEntity.badRequest()
+                .body(ApiResult.failure("실패", mapOf("code" to listOf("가입되지 않은 번호야~"))))
 
         if(req.newPassword != null) {
             // 비밀번호 암호화 후 업데이트
@@ -259,7 +262,7 @@ class AuthController(
     suspend fun changePasswordValid(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
         @Parameter(description = "비밀번호 초기화 DTO") @Valid req: PasswordCheckRequest
-    ): ResponseEntity<Any> {
+    ): ResponseEntity<ApiResult<Any>> {
 
         if (!encoder.matches(req.password, user.password)) {
             throw IllegalArgumentException("비밀번호가 일치하지 않습니다.")
@@ -278,7 +281,7 @@ class AuthController(
     suspend fun changePassword(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
         @Parameter(description = "비밀번호 초기화 DTO") @Valid req: passWordChangeRequest
-    ): ResponseEntity<Any> {
+    ): ResponseEntity<ApiResult<Any>> {
 
         if (!encoder.matches(req.oldPassword, user.password)) {
             throw IllegalArgumentException("현재 비밀번호가 일치하지 않아~")
