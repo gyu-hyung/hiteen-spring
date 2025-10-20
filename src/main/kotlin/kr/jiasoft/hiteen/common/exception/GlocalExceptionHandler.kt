@@ -21,7 +21,7 @@ class GlobalExceptionHandler {
 
         return ResponseEntity
             .badRequest()
-            .body(ApiResult(success = false, errors = errors))
+            .body(ApiResult.failure(errors))
     }
 
     // 서비스단 비즈니스 검증 (중복 체크 등)
@@ -31,7 +31,7 @@ class GlobalExceptionHandler {
 
         return ResponseEntity
             .badRequest()
-            .body(ApiResult(success = false, errors = errors))
+            .body(ApiResult.failure(errors))
     }
 
     // DB UNIQUE 제약조건 위반 (중복 예외)
@@ -46,7 +46,7 @@ class GlobalExceptionHandler {
 
         return ResponseEntity
             .status(409) // 혹은 400 Bad Request로 맞춰도 됨
-            .body(ApiResult(success = false, errors = errors))
+            .body(ApiResult.failure(errors))
     }
 
 
@@ -56,7 +56,7 @@ class GlobalExceptionHandler {
         val errors = mapOf("state" to listOf(ex.message ?: "잘못된 요청입니다."))
         return ResponseEntity
             .badRequest()
-            .body(ApiResult(success = true, errors = errors))
+            .body(ApiResult.failure(errors))
     }
 
     // 잘못된 상태 예외
@@ -65,7 +65,7 @@ class GlobalExceptionHandler {
         val errors = mapOf("state" to listOf(e.message ?: "잘못된 상태입니다."))
         return ResponseEntity
             .badRequest()
-            .body(ApiResult(success = false, errors = errors))
+            .body(ApiResult.failure(errors))
     }
 
     // 404 Not Found 전용
@@ -76,13 +76,13 @@ class GlobalExceptionHandler {
                 val errors = mapOf("not_found" to listOf(e.reason ?: "요청하신 API 또는 리소스를 찾을 수 없습니다."))
                 ResponseEntity
                     .status(404)
-                    .body(ApiResult(success = false, errors = errors))
+                    .body(ApiResult.failure(errors))
             }
             else -> {
                 val errors = mapOf("error" to listOf(e.reason ?: "요청 처리 중 오류가 발생했습니다."))
                 ResponseEntity
                     .status(e.statusCode)
-                    .body(ApiResult(success = false, errors = errors))
+                    .body(ApiResult.failure(errors))
             }
         }
     }
@@ -94,7 +94,7 @@ class GlobalExceptionHandler {
         e.printStackTrace()
         return ResponseEntity
             .internalServerError()
-            .body(ApiResult(success = false, errors = errors))
+            .body(ApiResult.failure(errors))
     }
 
 
