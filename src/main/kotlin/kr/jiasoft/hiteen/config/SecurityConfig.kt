@@ -53,6 +53,7 @@ class SecurityConfig(
                 // 다운로드는 GET 허용
                 it.pathMatchers(
                     HttpMethod.GET,
+                    "/api/auth/**",
                     "/api/school",
                     "/api/assets/{uid}/download",
                     "/api/user/nickname/{nickname}",
