@@ -5,6 +5,7 @@ import kr.jiasoft.hiteen.feature.play.app.GameManageService
 import kr.jiasoft.hiteen.feature.school.app.SchoolFoodImportService
 import kr.jiasoft.hiteen.feature.school.app.SchoolImportService
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 
@@ -13,15 +14,11 @@ class BatchService(
     private val schoolImportService: SchoolImportService,
     private val schoolFoodImportService: SchoolFoodImportService,
     private val gameManageService: GameManageService,
+    @param:Value("\${batch.enabled:false}")//배치 활성화 여부
+    private val active: Boolean
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
-
-    /**
-     * 배치 활성화 여부
-     * (false 시 모든 스케줄 실행 방지)
-     */
-    private val active = false
 
 
     /**
