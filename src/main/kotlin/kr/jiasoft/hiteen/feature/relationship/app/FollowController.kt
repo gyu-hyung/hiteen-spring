@@ -23,7 +23,7 @@ class FollowController(
     @GetMapping("/following")
     suspend fun listFollowing(
         @AuthenticationPrincipal(expression = "user") user: UserEntity
-    ) = ResponseEntity.ok(ApiResult(true, followService.listFollowing(user)))
+    ) = ResponseEntity.ok(ApiResult.success(followService.listFollowing(user)))
 
 
     //TODO UserSummary -> UserResponse 관심사 필요해서
@@ -31,7 +31,7 @@ class FollowController(
     @GetMapping("/followers")
     suspend fun listFollowers(
         @AuthenticationPrincipal(expression = "user") user: UserEntity
-    ) = ResponseEntity.ok(ApiResult(true, followService.listFollowers(user)))
+    ) = ResponseEntity.ok(ApiResult.success(followService.listFollowers(user)))
 
 
     @Operation(summary = "내가 보낸 팔로우 요청", description = "아직 수락되지 않은 내가 보낸 팔로우 요청들을 조회합니다.")
@@ -45,7 +45,7 @@ class FollowController(
     @GetMapping("/requests/incoming")
     suspend fun incoming(
         @AuthenticationPrincipal(expression = "user") user: UserEntity
-    ) = ResponseEntity.ok(ApiResult(true, followService.listIncoming(user)))
+    ) = ResponseEntity.ok(ApiResult.success(followService.listIncoming(user)))
 
 
     @Operation(summary = "팔로우 요청 보내기", description = "현재 로그인한 사용자가 특정 사용자에게 팔로우 요청을 보냅니다.")
@@ -53,7 +53,7 @@ class FollowController(
     suspend fun request(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
         @Parameter(description = "팔로우 요청 대상 사용자 UID") @PathVariable userUid: String
-    ) = ResponseEntity.ok(ApiResult(true, followService.request(user, userUid)))
+    ) = ResponseEntity.ok(ApiResult.success(followService.request(user, userUid)))
 
 
     //TODO : 맞팔로우 플래그
@@ -62,7 +62,7 @@ class FollowController(
     suspend fun accept(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
         @Parameter(description = "팔로우 요청 보낸 사용자 UID") @PathVariable userUid: String
-    ) = ResponseEntity.ok(ApiResult(true, followService.accept(user, userUid)))
+    ) = ResponseEntity.ok(ApiResult.success(followService.accept(user, userUid)))
 
 
     @Operation(summary = "팔로우 요청 거절", description = "받은 팔로우 요청을 거절합니다.")
@@ -70,7 +70,7 @@ class FollowController(
     suspend fun reject(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
         @Parameter(description = "팔로우 요청 보낸 사용자 UID") @PathVariable userUid: String
-    ) = ResponseEntity.ok(ApiResult(true, followService.reject(user, userUid)))
+    ) = ResponseEntity.ok(ApiResult.success(followService.reject(user, userUid)))
 
 
     @Operation(summary = "팔로우 요청 취소", description = "내가 보낸 팔로우 요청을 취소합니다.")
@@ -78,7 +78,7 @@ class FollowController(
     suspend fun cancel(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
         @Parameter(description = "취소할 팔로우 요청 대상 UID") @PathVariable userUid: String
-    ) = ResponseEntity.ok(ApiResult(true, followService.cancel(user, userUid)))
+    ) = ResponseEntity.ok(ApiResult.success(followService.cancel(user, userUid)))
 
 
     @Operation(summary = "언팔로우", description = "이미 팔로우한 사용자를 언팔로우합니다.")
@@ -86,7 +86,7 @@ class FollowController(
     suspend fun unfollow(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
         @Parameter(description = "언팔로우할 사용자 UID") @PathVariable userUid: String
-    ) = ResponseEntity.ok(ApiResult(true, followService.unfollow(user, userUid)))
+    ) = ResponseEntity.ok(ApiResult.success(followService.unfollow(user, userUid)))
 
 
     @Operation(summary = "팔로워 강제 제거", description = "현재 사용자를 팔로우 중인 사용자를 강제로 팔로워 목록에서 제거합니다.")
@@ -94,5 +94,5 @@ class FollowController(
     suspend fun removeFollower(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
         @Parameter(description = "강제 제거할 팔로워 UID") @PathVariable userUid: String
-    ) = ResponseEntity.ok(ApiResult(true, followService.removeFollower(user, userUid)))
+    ) = ResponseEntity.ok(ApiResult.success(followService.removeFollower(user, userUid)))
 }

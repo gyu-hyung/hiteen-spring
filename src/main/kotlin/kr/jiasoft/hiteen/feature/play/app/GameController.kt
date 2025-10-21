@@ -66,8 +66,8 @@ class GameController(
         @Parameter(description = "리그") @PathVariable league: String,
         @Parameter(description = "친구만 여부") @RequestParam(required = false) friendOnly: Boolean? = false,
         @AuthenticationPrincipal(expression = "user") user: UserEntity
-    ): SeasonRankingResponse
-        = gameService.getRealtimeRanking(seasonId, gameId, league, user.id, friendOnly == true)
+    ): ResponseEntity<ApiResult<SeasonRankingResponse>>
+        = ResponseEntity.ok(ApiResult.success(gameService.getRealtimeRanking(seasonId, gameId, league, user.id, friendOnly == true)))
 
 
     @Operation(summary = "이전 랭킹 조회 ")
@@ -77,9 +77,8 @@ class GameController(
         @Parameter(description = "게임 ID") @PathVariable gameId: Long,
         @Parameter(description = "리그 (예: BRONZE, SILVER, GOLD...)") @PathVariable league: String,
         @AuthenticationPrincipal(expression = "user") user: UserEntity
-    ): SeasonRankingResponse {
-        return gameService.getSeasonRanking(seasonId, gameId, league, user.id)
-    }
+    ): ResponseEntity<ApiResult<SeasonRankingResponse>>
+    = ResponseEntity.ok(ApiResult.success(gameService.getSeasonRanking(seasonId, gameId, league, user.id)))
 
 
     @Operation(summary = "친구 랭킹 조회 (이력)")
@@ -89,12 +88,12 @@ class GameController(
         @Parameter(description = "게임 ID") @PathVariable gameId: Long,
         @Parameter(description = "리그 (예: BRONZE, SILVER, GOLD...)") @PathVariable league: String,
         @AuthenticationPrincipal(expression = "user") user: UserEntity
-    ): SeasonRankingResponse {
+    ): ResponseEntity<ApiResult<SeasonRankingResponse>> {
         val friendIds = friendRepository.findAllAccepted(user.id).map {
             if (it.userId == user.id) it.friendId else it.userId
         }.toList()
 
-        return gameService.getSeasonRankingFiltered(seasonId, gameId, league, user.id,  friendIds)
+        return ResponseEntity.ok(ApiResult.success(gameService.getSeasonRankingFiltered(seasonId, gameId, league, user.id, friendIds)))
     }
 
 

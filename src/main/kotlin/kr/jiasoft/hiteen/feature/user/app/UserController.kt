@@ -24,6 +24,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ResponseStatusException
 import reactor.core.publisher.Flux
+import java.io.File
 import java.util.*
 
 @Tag(name = "User", description = "사용자 관련 API")
@@ -107,12 +108,12 @@ class UserController(
     suspend fun registerImages(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
         @RequestPart("files", required = false) filesFlux: Flux<FilePart>?
-    ) {
+    ): ResponseEntity<ApiResult<List<FilePart>>> {
         val flux = filesFlux ?: filesFlux
         ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "files or file part is required")
 
         val files: List<FilePart> = flux.collectList().awaitSingle()
-        userService.registerPhotos(user, files)
+        return ResponseEntity.ok(ApiResult.success(files))
     }
 
     @Operation(summary = "사진 삭제", description = "사용자의 특정 사진을 삭제합니다.")
@@ -132,8 +133,8 @@ class UserController(
     @Operation(summary = "나를 추천인으로 등록한 친구 조회")
     @GetMapping("/referral")
     suspend fun referral(@AuthenticationPrincipal(expression = "user") user: UserEntity)
-            : ResponseEntity<ApiResult<List<UserSummary>>>
-            = ResponseEntity.ok(ApiResult.success(userService.myReferralList(user.id)))
+        : ResponseEntity<ApiResult<List<UserSummary>>>
+        = ResponseEntity.ok(ApiResult.success(userService.myReferralList(user.id)))
 
 
 }
