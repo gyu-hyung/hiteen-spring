@@ -21,4 +21,6 @@ interface PollUserRepository : CoroutineCrudRepository<PollUserEntity, Long> {
     """)
     fun countVotesByPollId(pollId: Long): Flow<VoteCountRow>
 
+    suspend fun countByPollId(pollId: Long) : Int
+
 }

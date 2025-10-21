@@ -754,7 +754,6 @@ CREATE TABLE polls (
   id             bigserial PRIMARY KEY,
   question       varchar(255),
   photo          uuid REFERENCES assets(uid),
-  selects        jsonb,
   color_start    varchar(20),
   color_end      varchar(20),
   vote_count	 smallint DEFAULT 0,
@@ -770,14 +769,41 @@ CREATE TABLE polls (
 
 
 -- ========================
--- 투표 > 사진
+-- 투표 > 본문 이미지
 -- ========================
 CREATE TABLE poll_photos (
   id          bigserial PRIMARY KEY,
   poll_id     bigint NOT NULL REFERENCES polls(id) ON DELETE CASCADE,
-  uid         uuid   NOT NULL REFERENCES assets(uid) ON DELETE CASCADE,
-  seq         smallint NOT NULL,
+  asset_uid   uuid REFERENCES assets(uid),
+  seq         smallint DEFAULT 0,
   created_at  timestamptz DEFAULT now()
+);
+
+
+
+-- ========================
+-- 투표 > 문항
+-- ========================
+CREATE TABLE poll_selects (
+  id           bigserial PRIMARY KEY,
+  poll_id      bigint NOT NULL REFERENCES polls(id) ON DELETE CASCADE,
+  seq          smallint NOT NULL,            -- 문항 순서
+  content      text,                         -- 문항 내용
+  vote_count   integer DEFAULT 0,            -- 해당 문항 투표 수
+  created_at   timestamptz DEFAULT now(),
+  updated_at   timestamptz
+);
+
+
+-- ========================
+-- 투표 > 문항 > 파일
+-- ========================
+CREATE TABLE poll_select_photos (
+  id           bigserial PRIMARY KEY,
+  select_id    bigint NOT NULL REFERENCES poll_selects(id) ON DELETE CASCADE,
+  asset_uid    uuid REFERENCES assets(uid),
+  seq          smallint DEFAULT 0,           -- 이미지 순서
+  created_at   timestamptz DEFAULT now()
 );
 
 
@@ -1198,6 +1224,8 @@ CREATE TABLE user_session (
 --  poll_likes,
 --  poll_users,
 --  poll_photos,
+--  poll_select_photos,
+--  poll_selects,
 --  polls,
 --  poll_templates,
 --  board_comment_likes,

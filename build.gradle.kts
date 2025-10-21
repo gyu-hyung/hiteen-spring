@@ -107,6 +107,11 @@ dependencies {
     //firebase
     implementation("com.google.firebase:firebase-admin:9.2.0")
 
+    //DB migration
+    implementation("org.liquibase:liquibase-core")
+    runtimeOnly ("org.postgresql:postgresql")
+    implementation("io.r2dbc:r2dbc-postgresql")
+
 }
 
 

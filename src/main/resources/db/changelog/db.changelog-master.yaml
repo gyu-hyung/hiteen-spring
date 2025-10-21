@@ -1,0 +1,4 @@
+databaseChangeLog:
+#예시
+#  - include:
+#      file: db/changelog/20251021-migrate-selects-jsonb.sql

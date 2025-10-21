@@ -59,7 +59,8 @@ class PointService(
         policy.dailyLimit?.let { limit ->
             val todayCount = pointRepository.countByUserAndPolicyAndDate(userId, policy.code, LocalDate.now())
             if (todayCount >= limit) {
-                throw IllegalStateException("오늘은 더 이상 '${policy.memoTemplate}' 포인트를 받을 수 없습니다. (일일 제한: $limit)")
+//                throw IllegalStateException("오늘은 더 이상 '${policy.memoTemplate}' 포인트를 받을 수 없습니다. (일일 제한: $limit)")
+                println("오늘은 더 이상 '${policy.memoTemplate}' 포인트를 받을 수 없습니다. (일일 제한: $limit)")
             }
         }
 

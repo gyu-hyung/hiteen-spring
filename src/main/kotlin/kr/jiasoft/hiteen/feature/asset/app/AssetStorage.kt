@@ -39,7 +39,7 @@ class AssetStorage(
 
             val today = LocalDate.now()
             val dir = root.resolve(
-                "${category.folderName}/${today.year}/${"%02d".format(today.monthValue)}/${"%02d".format(today.dayOfMonth)}"
+                "${category.fullPath()}/${today.year}/${"%02d".format(today.monthValue)}/${"%02d".format(today.dayOfMonth)}"
             )
             Files.createDirectories(dir)
 

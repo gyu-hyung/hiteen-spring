@@ -72,14 +72,20 @@ data class PollVoteRequest(
 @Schema(description = "투표 항목 결과")
 data class PollSelectResponse(
 
+    @param:Schema(description = "투표 선택지 ID", example = "1")
+    val id: Long,
+
     @param:Schema(description = "번호", example = "1")
     val seq: Int,
 
     @param:Schema(description = "선택", example = "선택항목 1")
-    val answer: String,
+    val content: String,
 
     @param:Schema(description = "투표수", example = "999")
-    val votes: Int
+    val voteCount: Int,
+
+    @param:Schema(description = "투표수", example = "999")
+    val photos: List<String> = emptyList(),
 )
 
 
@@ -102,6 +108,7 @@ data class PollSummaryRow(
     val likedByMe: Boolean = false,
     val votedByMe: Boolean = false,
     val votedSeq: Int? = null,
+    val allowComment: Int = 0,
     val createdId: Long,
     val createdAt: OffsetDateTime,
 )
@@ -116,11 +123,11 @@ data class PollResponse(
     @param:Schema(description = "질문", example = "오늘 점심 뭐 먹을래?")
     val question: String,
 
-    @param:Schema(description = "사진 URL", example = "https://example.com/poll.png")
-    val photo: String?,
+    @param:Schema(description = "사진 Uid", example = "")
+    val photos: List<String>? = emptyList(),
 
     @param:Schema(description = "선택지 목록")
-    val selects: List<PollSelectResponse>?,
+    val selects: List<PollSelectResponse> = emptyList(),
 
     @param:Schema(description = "배경 시작 색상", example = "#FF5733")
     val colorStart: String?,
@@ -146,64 +153,15 @@ data class PollResponse(
     @param:Schema(description = "내가 투표한 선택지 번호", example = "2")
     val votedSeq: Int? = null,
 
+    @param:Schema(description = "투표 허용여부", example = "")
+    val allowComment: Int,
+
     @param:Schema(description = "생성 일시", example = "2025.09.18 10:15")
     @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm")
     val createdAt: OffsetDateTime,
 
     val user: UserSummary?,
-) {
-    companion object {
-        fun build(
-            id: Long,
-            question: String,
-            photo: String?,
-            selectsJson: String?,
-            colorStart: String?,
-            colorEnd: String?,
-            commentCount: Int,
-            createdAt: OffsetDateTime,
-            user: UserSummary,
-            votedSeq: Int?,
-            likeCount: Int = 0,
-            likedByMe: Boolean = false,
-            votedByMe: Boolean = votedSeq != null,
-            voteCounts: Map<Int, Int> = emptyMap(),
-            objectMapper: ObjectMapper,
-        ): PollResponse {
-
-            val selects: List<PollSelectResponse> =
-                try {
-                    objectMapper.readValue(
-                        selectsJson ?: "[]",
-                        object : TypeReference<List<PollSelectResponse>>() {}
-                    ).map { sel ->
-                        if (voteCounts.isNotEmpty())
-                            sel.copy(votes = voteCounts[sel.seq] ?: 0)
-                        else sel
-                    }
-                } catch (_: Exception) {
-                    emptyList()
-                }
-
-            return PollResponse(
-                id = id,
-                question = question,
-                photo = photo,
-                selects = selects,
-                colorStart = colorStart,
-                colorEnd = colorEnd,
-                voteCount = if (voteCounts.isNotEmpty()) voteCounts.values.sum() else selects.sumOf { it.votes },
-                commentCount = commentCount,
-                likeCount = likeCount,
-                likedByMe = likedByMe,
-                votedByMe = votedByMe,
-                votedSeq = votedSeq,
-                createdAt = createdAt,
-                user = user
-            )
-        }
-    }
-}
+)
 
 @Schema(description = "투표 댓글 등록/수정 요청 DTO")
 data class PollCommentRegisterRequest(
