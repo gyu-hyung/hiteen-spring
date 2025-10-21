@@ -30,9 +30,8 @@ class SchoolFoodController(
         @Parameter(description = "조회 기준 타입(prev/next)") @RequestParam(required = false) type: String?,
         @Parameter(description = "기준 날짜") @RequestParam(required = false)
         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) date: LocalDate?
-    ): ResponseEntity<List<SchoolFoodEntity>> {
-        val meals = schoolFoodService.getMeals(schoolId, type, date)
-        return ResponseEntity.ok(meals)
+    ): ResponseEntity<ApiResult<List<SchoolFoodEntity>>> {
+        return ResponseEntity.ok(ApiResult.success(schoolFoodService.getMeals(schoolId, type, date)))
     }
 
 
@@ -55,7 +54,7 @@ class SchoolFoodController(
         @Parameter(description = "급식 사진 등록 요청 DTO") schoolFoodImageSaveRequest: SchoolFoodImageSaveRequest,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
         @Parameter(description = "첨부 사진 파일") @RequestPart("file", required = false) file: FilePart?
-    ): ResponseEntity<SchoolFoodAssetEntity> {
+    ): ResponseEntity<ApiResult<SchoolFoodAssetEntity>> {
         val saved = schoolFoodService.saveImage(
             schoolId = schoolFoodImageSaveRequest.schoolId,
             userId = user.id,
@@ -63,7 +62,7 @@ class SchoolFoodController(
             month = schoolFoodImageSaveRequest.month,
             file = file
         )
-        return ResponseEntity.ok(saved)
+        return ResponseEntity.ok(ApiResult.success(saved))
     }
 
 
@@ -74,9 +73,8 @@ class SchoolFoodController(
         @RequestParam schoolId: Long,
         @RequestParam year: Int,
         @RequestParam month: Int
-    ): ResponseEntity<SchoolFoodAssetEntity?> {
-        val data = schoolFoodService.viewImage(schoolId, year, month)
-        return ResponseEntity.ok(data)
+    ): ResponseEntity<ApiResult<SchoolFoodAssetEntity?>> {
+        return ResponseEntity.ok(ApiResult.success(schoolFoodService.viewImage(schoolId, year, month)))
     }
 
     /** 급식 사진 신고 */
@@ -84,8 +82,8 @@ class SchoolFoodController(
     @PostMapping("/meal/image/report")
     suspend fun reportImage(
         @RequestParam id: Long
-    ): ResponseEntity<String> {
+    ): ResponseEntity<ApiResult<String>> {
         schoolFoodService.reportImage(id)
-        return ResponseEntity.ok("신고 완료")
+        return ResponseEntity.ok(ApiResult.success("신고 완료"))
     }
 }

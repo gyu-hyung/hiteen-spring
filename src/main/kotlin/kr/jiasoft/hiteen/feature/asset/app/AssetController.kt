@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactor.awaitSingle
+import kr.jiasoft.hiteen.common.dto.ApiResult
 import kr.jiasoft.hiteen.feature.asset.dto.AssetResponse
 import kr.jiasoft.hiteen.feature.asset.dto.toResponse
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
@@ -44,9 +45,8 @@ class AssetController(
         @Parameter(description = "업로드할 파일") @RequestPart("file") file: FilePart,
         @Parameter(description = "원본 파일명 (선택)") @RequestPart(name = "originFileName", required = false) originFileName: String?,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
-    ): AssetResponse {
-        return assetService.upload(file, originFileName, currentUserId = user.id)
-    }
+    ): ResponseEntity<ApiResult<AssetResponse>>
+    = ResponseEntity.ok(ApiResult.success(assetService.upload(file, originFileName, currentUserId = user.id)))
 
     @Operation(
         summary = "여러 파일 업로드",
@@ -62,13 +62,13 @@ class AssetController(
         @Parameter(description = "업로드할 파일 목록") @RequestPart(name = "files", required = false) filesFlux: Flux<FilePart>?,
         @Parameter(description = "원본 파일명 목록") @RequestPart(name = "originFileNames", required = false) originFileNames: List<String>?,
         @AuthenticationPrincipal(expression = "user") user: UserEntity
-    ): List<AssetResponse> {
+    ): ResponseEntity<ApiResult<List<AssetResponse>>> {
         val flux = filesFlux ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "files or file part is required")
 
         val files: List<FilePart> = flux.collectList().awaitSingle()
         if (files.isEmpty()) throw ResponseStatusException(HttpStatus.BAD_REQUEST, "no files")
 
-        return assetService.uploadAll(files, currentUserId = user.id, originFileNames = originFileNames)
+        return ResponseEntity.ok(ApiResult.success(assetService.uploadAll(files, currentUserId = user.id, originFileNames = originFileNames)))
     }
 
     @Operation(summary = "단건 조회", description = "특정 파일 메타데이터를 조회합니다.")
@@ -85,10 +85,12 @@ class AssetController(
     suspend fun list(
         @Parameter(description = "조회 개수 (기본 20)") @RequestParam(defaultValue = "20") limit: Int,
         @Parameter(description = "조회 시작 offset (기본 0)") @RequestParam(defaultValue = "0") offset: Int
-    ): List<AssetResponse> {
-        return assetService.list(limit.coerceIn(1, 100), offset.coerceAtLeast(0))
+    ): ResponseEntity<ApiResult<List<AssetResponse>>> {
+        val result = assetService.list(limit.coerceIn(1, 100), offset.coerceAtLeast(0))
             .map { it.toResponse() }
             .toList()
+
+        return ResponseEntity.ok(ApiResult.success(result))
     }
 
     @Operation(
@@ -106,7 +108,7 @@ class AssetController(
     suspend fun download(
         @Parameter(description = "파일 UID") @PathVariable uid: UUID,
         @AuthenticationPrincipal(expression = "user") user: UserEntity
-    ): ResponseEntity<FileSystemResource> {
+    ): ResponseEntity<ApiResult<FileSystemResource>> {
         val updated = assetService.increase(uid) ?: return ResponseEntity.badRequest().build()
 
         val path = assetService.resolveFilePath(updated.filePath + updated.storeFileName)
@@ -122,9 +124,8 @@ class AssetController(
             contentLength = resource.contentLength()
             add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename*=UTF-8''$encoded")
         }
-        return ResponseEntity.ok()
-            .headers(headers)
-            .body(resource)
+        return ResponseEntity.ok().headers(headers).body(ApiResult.success(resource))
+
     }
 
     @Operation(summary = "파일 삭제", description = "특정 파일을 소프트 삭제(메타데이터만 변경)합니다.")
@@ -132,8 +133,8 @@ class AssetController(
     suspend fun delete(
         @Parameter(description = "파일 UID") @PathVariable uid: UUID,
         @AuthenticationPrincipal(expression = "user") user: UserEntity
-    ): ResponseEntity<AssetResponse> {
+    ): ResponseEntity<ApiResult<AssetResponse>> {
         val deleted = assetService.softDelete(uid, user.id) ?: return ResponseEntity.notFound().build()
-        return ResponseEntity.ok(deleted.toResponse())
+        return ResponseEntity.ok(ApiResult.success(deleted.toResponse()))
     }
 }

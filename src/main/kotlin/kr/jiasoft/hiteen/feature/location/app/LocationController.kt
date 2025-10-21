@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
+import kr.jiasoft.hiteen.common.dto.ApiResult
 import kr.jiasoft.hiteen.feature.location.domain.LocationHistory
 import kr.jiasoft.hiteen.feature.location.dto.LocationRequest
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
@@ -30,9 +31,9 @@ class LocationController(
     suspend fun saveLocation(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
         @Parameter(description = "위치 저장 요청 DTO") @RequestBody locationRequest: LocationRequest
-    ): ResponseEntity<LocationHistory> {
+    ): ResponseEntity<ApiResult<LocationHistory>> {
         val saved = locationAppService.saveLocation(user, locationRequest)
-        return ResponseEntity.status(HttpStatus.CREATED).body(saved)
+        return ResponseEntity.ok(ApiResult.success(saved))
     }
 
     @Operation(
@@ -42,8 +43,8 @@ class LocationController(
     @GetMapping("/latest/{userUid}")
     suspend fun getLatest(
         @Parameter(description = "조회할 사용자 UID") @PathVariable userUid: String
-    ): LocationHistory? =
-        locationAppService.getLatest(userUid)
+    ): ResponseEntity<ApiResult<LocationHistory?>> =
+        ResponseEntity.ok(ApiResult.success(locationAppService.getLatest(userUid)))
 
     @Operation(
         summary = "내 위치 기록 조회",
@@ -52,6 +53,6 @@ class LocationController(
     @GetMapping("/my")
     suspend fun getMy(
         @AuthenticationPrincipal(expression = "user") user: UserEntity
-    ): List<LocationHistory> =
-        locationAppService.getMyLocations(user)
+    ): ResponseEntity<ApiResult<List<LocationHistory>>> =
+        ResponseEntity.ok(ApiResult.success(locationAppService.getMyLocations(user)))
 }

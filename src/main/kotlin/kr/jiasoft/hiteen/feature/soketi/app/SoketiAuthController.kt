@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
+import kr.jiasoft.hiteen.common.dto.ApiResult
 import kr.jiasoft.hiteen.feature.auth.infra.BearerToken
 import kr.jiasoft.hiteen.feature.auth.infra.JwtProvider
 import org.springframework.beans.factory.annotation.Value
@@ -53,11 +54,11 @@ class SoketiAuthController(
     suspend fun authorize(
         @Parameter(hidden = true) @ModelAttribute formReq: AuthRequest2?,
         @RequestHeader("Authorization", required = false) authHeader: String?
-    ): Mono<ResponseEntity<Map<String, String>>> {
+    ): Mono<ResponseEntity<ApiResult<Map<String, String>>>> {
         val channelName = formReq?.channel_name
         val socketId = formReq?.socket_id
         if (channelName.isNullOrBlank() || socketId.isNullOrBlank()) {
-            return Mono.just(ResponseEntity.badRequest().body(mapOf("error" to "Missing channel_name or socket_id")))
+            throw IllegalArgumentException("Missing channel_name or socket_id")
         }
 
         var username = "anonymous"
@@ -73,12 +74,12 @@ class SoketiAuthController(
                 role = claims["role"] as? String ?: "user"
                 userIdFromJwt = claims["userId"] as? Long
             } catch (e: Exception) {
-                return Mono.just(ResponseEntity.status(403).body(mapOf("error" to "Unauthorized")))
+                throw IllegalArgumentException("Invalid JWT token")
             }
         }
 
         if (!channelAuthService.canSubscribe(userIdFromJwt, channelName)) {
-            return Mono.just(ResponseEntity.status(403).body(mapOf("error" to "Forbidden channel access")))
+            throw IllegalArgumentException("Forbidden channel access")
         }
 
         var stringToSign = "$socketId:$channelName"
@@ -99,7 +100,7 @@ class SoketiAuthController(
             mapOf("auth" to "$appKey:$signature")
         }
 
-        return Mono.just(ResponseEntity.ok(result))
+        return Mono.just(ResponseEntity.ok(ApiResult.success(result)))
     }
 
 //    @Operation(
