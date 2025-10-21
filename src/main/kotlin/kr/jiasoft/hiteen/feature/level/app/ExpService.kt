@@ -1,6 +1,6 @@
 package kr.jiasoft.hiteen.feature.level.app
 
-import kr.jiasoft.hiteen.feature.level.config.ExpProperties
+import kr.jiasoft.hiteen.feature.level.domain.ExpProperties
 import kr.jiasoft.hiteen.feature.level.domain.UserExpHistoryEntity
 import kr.jiasoft.hiteen.feature.level.infra.TierRepository
 import kr.jiasoft.hiteen.feature.level.infra.UserExpHistoryRepository
