@@ -1,4 +1,4 @@
-package kr.jiasoft.hiteen.feature.level.config
+package kr.jiasoft.hiteen.feature.level.domain
 
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.bind.ConstructorBinding

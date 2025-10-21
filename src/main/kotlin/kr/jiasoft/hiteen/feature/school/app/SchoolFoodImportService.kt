@@ -2,10 +2,11 @@ package kr.jiasoft.hiteen.feature.school.app
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.databind.ObjectMapper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.withContext
+import kr.jiasoft.hiteen.feature.school.domain.NeisProperties
 import kr.jiasoft.hiteen.feature.school.infra.SchoolFoodRepository
 import kr.jiasoft.hiteen.feature.school.infra.SchoolRepository
 import org.slf4j.LoggerFactory
@@ -18,14 +19,15 @@ import java.time.format.DateTimeFormatter
 @Service
 class SchoolFoodImportService(
     private val schoolRepository: SchoolRepository,
-    private val schoolFoodRepository: SchoolFoodRepository
+    private val schoolFoodRepository: SchoolFoodRepository,
+    private val props: NeisProperties,
+    private val objectMapper: ObjectMapper
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    private val mapper = jacksonObjectMapper()
 
     private val client = WebClient.builder()
-        .baseUrl("https://open.neis.go.kr/hub")
+        .baseUrl(props.baseUrl)
         .exchangeStrategies(
             ExchangeStrategies.builder()
                 .codecs { it.defaultCodecs().maxInMemorySize(10 * 1024 * 1024) } // 10MB 제한
@@ -33,7 +35,6 @@ class SchoolFoodImportService(
         )
         .build()
 
-    private val apiKey = "458d6485b25c46009758a4ab53413497"
     private val dateFmt = DateTimeFormatter.ofPattern("yyyyMMdd")
 
 
@@ -47,10 +48,6 @@ class SchoolFoodImportService(
         val CAL_INFO: String?
     )
 
-
-
-
-
     suspend fun import() = withContext(Dispatchers.IO) {
         logger.info("SchoolFood :: Import START =====================")
 
@@ -59,12 +56,12 @@ class SchoolFoodImportService(
         val to = today.plusDays(7).format(dateFmt)
 
         // ✅ Stream 방식으로 처리 (메모리 절약)
-        schoolRepository.findAllExcludeElementary().collect { school ->
+        schoolRepository.findAll().collect { school ->
             try {
                 val json = client.get()
                     .uri { builder ->
                         builder.path("/mealServiceDietInfo")
-                            .queryParam("KEY", apiKey)
+                            .queryParam("KEY", props.apiKey)
                             .queryParam("Type", "json")
                             .queryParam("pIndex", 1)
                             .queryParam("pSize", 1000)
@@ -87,7 +84,7 @@ class SchoolFoodImportService(
                 var count = 0
                 for (row in rows) {
                     // ✅ JsonNode → DTO 바로 매핑
-                    val dto = mapper.treeToValue(row, MealRow::class.java)
+                    val dto = objectMapper.treeToValue(row, MealRow::class.java)
 
                     val mealDate = LocalDate.parse(dto.MLSV_YMD, dateFmt)
                     val meals = dto.DDISH_NM
@@ -103,18 +100,6 @@ class SchoolFoodImportService(
                         meals = meals,
                         calorie = dto.CAL_INFO
                     )
-
-                    // ✅ 특정 학교 복사 로직
-                    if (school.id == 5896L) {
-                        schoolFoodRepository.upsert(
-                            schoolId = 12542L,
-                            mealDate = mealDate,
-                            code = dto.MMEAL_SC_CODE,
-                            codeName = dto.MMEAL_SC_NM,
-                            meals = meals,
-                            calorie = dto.CAL_INFO
-                        )
-                    }
 
                     count++
                 }

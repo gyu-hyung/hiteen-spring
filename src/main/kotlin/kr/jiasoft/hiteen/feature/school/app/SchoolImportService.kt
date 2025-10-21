@@ -6,6 +6,8 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactor.awaitSingleOrNull
+import kr.jiasoft.hiteen.feature.school.domain.KakaoProperties
+import kr.jiasoft.hiteen.feature.school.domain.NeisProperties
 import kr.jiasoft.hiteen.feature.school.domain.SchoolClassesEntity
 import kr.jiasoft.hiteen.feature.school.domain.SchoolEntity
 import kr.jiasoft.hiteen.feature.school.infra.SchoolClassesRepository
@@ -26,15 +28,14 @@ import java.util.*
 class SchoolImportService(
     private val schoolRepository: SchoolRepository,
     private val schoolClassesRepository: SchoolClassesRepository,
+    private val kakaoProperties: KakaoProperties,
+    private val neisProperties: NeisProperties,
 ) {
     private val logger = LoggerFactory.getLogger(SchoolImportService::class.java)
 
-    private val neisApiKey = "458d6485b25c46009758a4ab53413497"
-    private val kakaoApiKey = "6ba92dcdddc5dccc78dbbaa50eb95825"
-
     // NEIS client
     private val neisClient = WebClient.builder()
-        .baseUrl("https://open.neis.go.kr/hub")
+        .baseUrl(neisProperties.baseUrl)
         .exchangeStrategies(
             ExchangeStrategies.builder()
                 .codecs { it.defaultCodecs().maxInMemorySize(4 * 1024 * 1024) } // 줄임
@@ -51,8 +52,8 @@ class SchoolImportService(
 
     // Kakao client
     private val kakaoClient = WebClient.builder()
-        .baseUrl("https://dapi.kakao.com/v2/local")
-        .defaultHeader("Authorization", "KakaoAK $kakaoApiKey")
+        .baseUrl(kakaoProperties.baseUrl)
+        .defaultHeader("Authorization", "KakaoAK ${kakaoProperties.apiKey}")
         .exchangeStrategies(
             ExchangeStrategies.builder()
                 .codecs { it.defaultCodecs().maxInMemorySize(2 * 1024 * 1024) }
@@ -86,7 +87,7 @@ class SchoolImportService(
             neisClient.get()
                 .uri { builder ->
                     builder.path("/schoolInfo")
-                        .queryParam("KEY", neisApiKey)
+                        .queryParam("KEY", neisProperties.apiKey)
                         .queryParam("Type", "json")
                         .queryParam("pIndex", page)
                         .queryParam("pSize", pageSize)
@@ -155,6 +156,7 @@ class SchoolImportService(
         )?.let { schoolRepository.save(it) }
             ?: schoolRepository.save(entity.copy(updatedId = 0))
 
+        //반 정보 import
 //        val classes = fetchClasses(entity.sido ?: "", entity.code, entity.name)
 //        if (classes.isNotEmpty()) {
 //            saveClassesForSchool(saved, classes)
@@ -165,7 +167,7 @@ class SchoolImportService(
         val json = neisClient.get()
             .uri { builder ->
                 builder.path("/classInfo")
-                    .queryParam("KEY", neisApiKey)
+                    .queryParam("KEY", neisProperties.apiKey)
                     .queryParam("Type", "json")
                     .queryParam("ATPT_OFCDC_SC_CODE", sido)
                     .queryParam("SD_SCHUL_CODE", schoolCode)
@@ -239,7 +241,7 @@ class SchoolImportService(
         val json = neisClient.get()
             .uri { builder ->
                 builder.path("/schoolInfo")
-                    .queryParam("KEY", neisApiKey)
+                    .queryParam("KEY", neisProperties.apiKey)
                     .queryParam("Type", "json")
                     .queryParam("pIndex", 1)
                     .queryParam("pSize", 1)

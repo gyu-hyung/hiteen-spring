@@ -12,12 +12,11 @@ import kr.jiasoft.hiteen.feature.play.infra.*
 import kr.jiasoft.hiteen.feature.study.infra.QuestionItemsRepository
 import kr.jiasoft.hiteen.feature.study.infra.QuestionRepository
 import kr.jiasoft.hiteen.feature.user.infra.UserRepository
-import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 
 @Service
-class GameManageJobService(
+class GameManageService(
     private val seasonRepository: SeasonRepository,
     private val gameRepository: GameRepository,
     private val gameScoreRepository: GameScoreRepository,
@@ -34,7 +33,6 @@ class GameManageJobService(
      * - 시즌 종료 처리
      * - 시즌 생성
      */
-    @Scheduled(cron = "0 0 0 * * *")
     suspend fun autoManageSeasons() {
         val today = LocalDate.now()
         val yesterday = today.minusDays(1)
@@ -46,11 +44,15 @@ class GameManageJobService(
     /**
      * 1. 종료된 시즌 처리 및 랭킹 이력 저장
      */
-    suspend fun closeSeasons(endDate: LocalDate) {
-        val endedSeasons = seasonRepository.findAllByEndDate(endDate)
+    suspend fun closeSeasons(endDate: LocalDate? = null) {
+        val target = endDate ?: LocalDate.now()
+        val endedSeasons = seasonRepository.findAllByEndDate(target)
+        // 상태 먼저 CLOSED
+        endedSeasons.collect { season ->
+            seasonRepository.close(season.id)
+        }
         endedSeasons.collect { season ->
             saveSeasonRankings(season.id)  // 랭킹 저장
-            seasonRepository.close(season.id) // 상태 CLOSED
         }
     }
 
