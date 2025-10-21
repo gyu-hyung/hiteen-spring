@@ -1,10 +1,8 @@
 package kr.jiasoft.hiteen.feature.poll.app
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
-import io.r2dbc.postgresql.codec.Json
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.reactive.awaitSingle
 import kr.jiasoft.hiteen.common.exception.BusinessValidationException
 import kr.jiasoft.hiteen.feature.asset.app.AssetService
 import kr.jiasoft.hiteen.feature.asset.domain.AssetCategory
@@ -24,6 +22,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
+import reactor.core.publisher.Flux
 import java.time.OffsetDateTime
 import java.util.*
 
@@ -31,13 +30,15 @@ import java.util.*
 class PollService(
     private val polls: PollRepository,
     private val pollUsers: PollUserRepository,
+    private val pollPhotos: PollPhotoRepository,
     private val comments: PollCommentRepository,
     private val commentLikes: PollCommentLikeRepository,
-    private val assetService: AssetService,
-    private val objectMapper: ObjectMapper,
     private val pollLikes: PollLikeRepository,
-    private val userService: UserService,
+    private val pollSelects: PollSelectRepository,
+    private val pollSelectPhotos: PollSelectPhotoRepository,
 
+    private val userService: UserService,
+    private val assetService: AssetService,
     private val expService: ExpService,
     private val pointService: PointService,
     private val pushService: PushService,
@@ -57,130 +58,277 @@ class PollService(
         polls.findSummariesByCursor(cursor, size, currentUserId)
             .map { row ->
                 val user = userService.findUserSummary(row.createdId)
-                val voteCounts = pollUsers.countVotesByPollId(row.id).toList()
-                    .associateBy({ it.seq }, { it.votes.toInt() })
 
-                PollResponse.build(
+                val photos = pollPhotos.findAllByPollId(row.id)
+                    .toList()
+                    .sortedBy { it.seq }
+                    .map { it.assetUid.toString() }
+
+                // ③ 선택지 이미지 조회 (pollSelectPhotos)
+                val selects = pollSelects.findAllByPollId(row.id)
+                    .toList()
+                    .sortedBy { it.seq }
+                    .map { select ->
+                        val selectPhotos = pollSelectPhotos.findAllBySelectId(select.id)
+                            .toList()
+                            .sortedBy { it.seq }
+                            .mapNotNull { it.assetUid?.toString() }
+
+                        PollSelectResponse(
+                            id = select.id,
+                            seq = select.seq,
+                            content = select.content,
+                            voteCount = select.voteCount,
+                            photos = selectPhotos
+                        )
+                    }
+
+                // ④ 전체 투표수 계산
+                val totalVotes = selects.sumOf { it.voteCount }
+
+                // ⑤ 최종 응답 생성
+                PollResponse(
                     id = row.id,
                     question = row.question,
-                    photo = row.photo,
-                    selectsJson = row.selects,
+                    photos = photos,
+                    selects = selects,
                     colorStart = row.colorStart,
                     colorEnd = row.colorEnd,
+                    voteCount = totalVotes,
                     commentCount = row.commentCount,
-                    createdAt = row.createdAt,
-                    user = user,
-                    votedSeq = row.votedSeq,
                     likeCount = row.likeCount,
                     likedByMe = row.likedByMe,
                     votedByMe = row.votedByMe,
-                    voteCounts = voteCounts,
-                    objectMapper = objectMapper
+                    votedSeq = row.votedSeq,
+                    allowComment = row.allowComment,
+                    createdAt = row.createdAt,
+                    user = user,
                 )
+
             }.toList()
 
 
     suspend fun getPoll(id: Long, currentUserId: Long): PollResponse {
+        // ① 기본 요약 데이터 조회
         val poll = polls.findSummaryById(id, currentUserId) ?: throw notFound("poll")
-
         val user = userService.findUserSummary(poll.createdId)
 
-        val voteCounts = pollUsers.countVotesByPollId(id).toList()
-            .associateBy({ it.seq }, { it.votes.toInt() })
+        // ② 본문 이미지 (pollPhotos)
+        val photos = pollPhotos.findAllByPollId(id)
+            .toList()
+            .sortedBy { it.seq }
+            .map { it.assetUid.toString() }
 
-        return PollResponse.build(
+        // ③ 선택지 + 선택지 이미지
+        val selects = pollSelects.findAllByPollId(id)
+            .toList()
+            .sortedBy { it.seq }
+            .map { sel ->
+                val selectPhotos = pollSelectPhotos.findAllBySelectId(sel.id)
+                    .toList()
+                    .sortedBy { it.seq }
+                    .mapNotNull { it.assetUid?.toString() }
+
+                PollSelectResponse(
+                    id = sel.id,
+                    seq = sel.seq,
+                    content = sel.content,
+                    voteCount = sel.voteCount,
+                    photos = selectPhotos
+                )
+            }
+
+        // ④ 총 투표 수 계산
+        val totalVotes = selects.sumOf { it.voteCount }
+
+        // ⑤ PollResponse 반환
+        return PollResponse(
             id = poll.id,
             question = poll.question,
-            photo = poll.photo,
-            selectsJson = poll.selects,
+            photos = photos,
+            selects = selects,
             colorStart = poll.colorStart,
             colorEnd = poll.colorEnd,
+            voteCount = totalVotes,
             commentCount = poll.commentCount,
-            createdAt = poll.createdAt,
-            user = user,
-            votedSeq = poll.votedSeq,
             likeCount = poll.likeCount,
             likedByMe = poll.likedByMe,
-            voteCounts = voteCounts,
-            objectMapper = objectMapper
+            votedByMe = poll.votedByMe,
+            votedSeq = poll.votedSeq,
+            allowComment = poll.allowComment,
+            createdAt = poll.createdAt,
+            user = user,
         )
     }
 
 
 
 
+    // ---------------- 공통 로직 ----------------
 
-    suspend fun create(req: PollCreateRequest, userId: Long, file: FilePart?): Long {
-        val uploadedPhoto: String? = if (file != null) {
-            val asset = assetService.uploadImage(
-                file = file,
-                originFileName = null,
-                currentUserId = userId
+    private suspend fun savePollSelects(pollId: Long, answers: List<String>): List<PollSelectEntity> {
+        return answers.mapIndexed { idx, ans ->
+            pollSelects.save(
+                PollSelectEntity(
+                    pollId = pollId,
+                    seq = (idx + 1),
+                    content = ans
+                )
             )
-            asset.uid.toString()
-        } else null
-
-        val selects = req.answers.mapIndexed { idx, ans ->
-            mapOf("seq" to (idx + 1), "answer" to ans, "votes" to 0)
         }
+    }
 
-        // json 문자열 → R2DBC Json
-        val selectsJson: Json = Json.of(objectMapper.writeValueAsString(selects))
+    private suspend fun savePollImages(
+        pollId: Long,
+        selectEntities: List<PollSelectEntity>,
+        userId: Long,
+        fileFlux: Flux<FilePart>?
+    ) {
+        val regexSelect = Regex("select_([1-9]\\d*)_([1-9]\\d*)")
+        val regexPoll = Regex("poll_([1-9]\\d*)")
 
-        val saved = polls.save(
-            PollEntity(
-                question = req.question,
-                photo = uploadedPhoto,
-                selects = selectsJson,
-                colorStart = req.colorStart,
-                colorEnd = req.colorEnd,
-                allowComment = req.allowComment,
-                status = PollStatus.ACTIVE.name,
-                createdId = userId,
-                createdAt = OffsetDateTime.now()
-            )
-        )
+        val files = fileFlux?.collectList()?.awaitSingle().orEmpty()
+        for (file in files) {
+            val filename = file.filename()
 
-        expService.grantExp(userId, "CREATE_VOTE", saved.id)
-        pointService.applyPolicy(userId, PointPolicy.VOTE_QUESTION, saved.id)
+            when {
+                // ✅ 본문 이미지
+                regexPoll.containsMatchIn(filename) -> {
+                    val match = regexPoll.find(filename) ?: continue
+                    val pollNumber = match.groupValues[1].toIntOrNull() ?: continue
+                    if (pollNumber <= 0) continue
+
+                    val uploaded = assetService.uploadImage(file, userId, AssetCategory.POLL_MAIN)
+                    pollPhotos.save(
+                        PollPhotoEntity(
+                            pollId = pollId,
+                            assetUid = uploaded.uid,
+                            seq = pollNumber.toShort()
+                        )
+                    )
+                }
+
+                // ✅ 선택지 이미지
+                regexSelect.containsMatchIn(filename) -> {
+                    val match = regexSelect.find(filename) ?: continue
+                    val seq = match.groupValues[1].toIntOrNull() ?: continue
+                    val pollNum = match.groupValues[2].toIntOrNull() ?: continue
+                    if (seq <= 0 || pollNum <= 0) continue
+
+                    val select = selectEntities.find { it.seq == seq } ?: continue
+
+                    val uploaded = assetService.uploadImage(file, userId, AssetCategory.POLL_SELECT)
+                    pollSelectPhotos.save(
+                        PollSelectPhotoEntity(
+                            selectId = select.id,
+                            assetUid = uploaded.uid,
+                            seq = select.seq.toShort()
+                        )
+                    )
+                }
+            }
+        }
+    }
+
+
+    private suspend fun saveOrUpdatePoll(
+        pollEntity: PollEntity,
+        answers: List<String>,
+        userId: Long,
+        fileFlux: Flux<FilePart>?
+    ): Long {
+        val saved = polls.save(pollEntity)
+        val selects = savePollSelects(saved.id, answers)
+        savePollImages(saved.id, selects, userId, fileFlux)
         return saved.id
     }
 
 
-    suspend fun update(id: Long?, req: PollUpdateRequest, userId: Long, file: FilePart?): Long {
+    suspend fun create(req: PollCreateRequest, userId: Long, fileFlux: Flux<FilePart>?): Long {
+        val pollEntity = PollEntity(
+            question = req.question,
+            colorStart = req.colorStart,
+            colorEnd = req.colorEnd,
+            allowComment = req.allowComment,
+            status = PollStatus.ACTIVE.name,
+            createdId = userId,
+            createdAt = OffsetDateTime.now()
+        )
+
+        val id = saveOrUpdatePoll(pollEntity, req.answers, userId, fileFlux)
+
+        expService.grantExp(userId, "CREATE_VOTE", id)
+        pointService.applyPolicy(userId, PointPolicy.VOTE_QUESTION, id)
+
+        return id
+    }
+
+
+
+
+    /**
+     * 투표 메타데이터(제목, 색상, 댓글 허용 여부 등)만 간단히 수정하는 함수
+     * - 이미 투표가 진행 중이어도 수정 가능
+     * - 이미지, 선택지, 파일 변경 없음
+     */
+    suspend fun updateMeta(id: Long?, req: PollUpdateRequest, userId: Long): Long {
         val poll = polls.findById(id!!) ?: throw notFound("poll")
 
+        // ✅ 작성자 검증
         if (poll.createdId != userId) {
             throw ResponseStatusException(HttpStatus.FORBIDDEN, "only owner can update poll")
         }
 
-        // 사진 교체
-        val uploadedPhoto: String? = if (file != null) {
-            val asset = assetService.uploadImage(file, userId, AssetCategory.POLL)
-            asset.uid.toString()
-        } else poll.photo
+        val votedCount = pollUsers.countByPollId(poll.id)
+        if (votedCount > 0) throw IllegalStateException("already_voted, you can not update")
 
-        // answers 수정 시 JSON 직렬화
-        val selectsJson: Json? = req.answers?.let { answers ->
-            val selects = answers.mapIndexed { idx, ans ->
-                mapOf("seq" to (idx + 1), "answer" to ans, "votes" to 0)
-            }
-            Json.of(objectMapper.writeValueAsString(selects))
-        }
 
-        val updated = poll.copy(
+        // ✅ 간단한 필드만 수정
+        val updatedPoll = poll.copy(
             question = req.question ?: poll.question,
-            photo = uploadedPhoto,
-            selects = selectsJson ?: poll.selects,
             colorStart = req.colorStart ?: poll.colorStart,
             colorEnd = req.colorEnd ?: poll.colorEnd,
             allowComment = req.allowComment?.let { if (it) 1 else 0 } ?: poll.allowComment,
-            updatedAt = OffsetDateTime.now(),
+            updatedAt = OffsetDateTime.now()
         )
 
-        polls.save(updated)
-        return updated.id
+        polls.save(updatedPoll)
+        return updatedPoll.id
     }
+
+
+
+    /**
+     * 투표 수정
+     * -
+     * */
+    suspend fun update(id: Long?, req: PollUpdateRequest, userId: Long, fileFlux: Flux<FilePart>?): Long {
+        val poll = polls.findById(id!!) ?: throw notFound("poll")
+
+        if (poll.createdId != userId)
+            throw ResponseStatusException(HttpStatus.FORBIDDEN, "only owner can update poll")
+
+
+        val votedCount = pollUsers.countByPollId(poll.id)
+        if (votedCount > 0) throw IllegalStateException("already_voted, you can not update")
+
+
+        // 기존 데이터 정리
+        pollSelects.deleteAllByPollId(poll.id)
+        pollSelectPhotos.deleteAllByPollId(poll.id)
+        pollPhotos.deleteAllByPollId(poll.id)
+
+        val updatedPoll = poll.copy(
+            question = req.question ?: poll.question,
+            colorStart = req.colorStart ?: poll.colorStart,
+            colorEnd = req.colorEnd ?: poll.colorEnd,
+            allowComment = req.allowComment?.let { if (it) 1 else 0 } ?: poll.allowComment,
+            updatedAt = OffsetDateTime.now()
+        )
+
+        return saveOrUpdatePoll(updatedPoll, req.answers ?: emptyList(), userId, fileFlux)
+    }
+
 
 
     suspend fun softDelete(id: Long, currentUserId: Long) {
@@ -194,19 +342,14 @@ class PollService(
 
 
     suspend fun vote(pollId: Long?, seq: Int, userId: Long) {
-        val poll = polls.findById(pollId!!)
-            ?: throw IllegalArgumentException( "poll not found")
+        polls.findById(pollId!!) ?: throw IllegalArgumentException( "poll not found")
 
-        // ✅ ① 선택지 검증 (poll.selects JSON 내부에서 seq 존재 여부 확인)
-        val mapper = objectMapper
-        val selects: List<Map<String, Any>> = mapper.readValue(poll.selects.asString())
+        val select = pollSelects.findAllByPollId(pollId)
+            .toList()
+            .find { it.seq == seq }
+            ?: throw IllegalArgumentException("invalid choice")
 
-        val valid = selects.any { it["seq"]?.toString()?.toIntOrNull() == seq }
-        if (!valid) {
-            throw IllegalArgumentException("invalid choice")
-        }
-
-        // ✅ ② 중복 투표 예외 처리
+        // ② 중복 투표 예외 처리
         try {
             pollUsers.save(
                 PollUserEntity(
@@ -218,6 +361,7 @@ class PollService(
             )
 
             polls.increaseVoteCount(pollId)
+            pollSelects.increaseVoteCount(select.id)
             expService.grantExp(userId, "VOTE_PARTICIPATE", pollId)
         } catch (_: DuplicateKeyException) {
             throw BusinessValidationException(mapOf("error" to "already voted"))
@@ -263,6 +407,7 @@ class PollService(
 
     suspend fun createComment(req: PollCommentRegisterRequest, user: UserEntity): Long {
         val p = polls.findById(req.pollId)!!
+        if(p.allowComment == 0) throw BusinessValidationException(mapOf("error" to "comment_not_allowed"))
         val parent: PollCommentEntity? = req.parentId?.let { comments.findById(it) }
         val saved = comments.save(
             PollCommentEntity(

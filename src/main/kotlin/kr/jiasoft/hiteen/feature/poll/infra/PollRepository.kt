@@ -36,6 +36,7 @@ interface PollRepository : CoroutineCrudRepository<PollEntity, Long> {
             EXISTS (SELECT 1 FROM poll_likes pl2 WHERE pl2.poll_id = p.id AND pl2.user_id = :currentUserId) AS liked_by_me,
             EXISTS (SELECT 1 FROM poll_users pu WHERE pu.poll_id = p.id AND pu.user_id = :currentUserId) AS voted_by_me,
             (SELECT seq FROM poll_users pu WHERE pu.poll_id = p.id AND pu.user_id = :currentUserId) AS voted_seq,
+            p.allow_comment,
             p.created_id,
             p.created_at
         FROM polls p
@@ -66,6 +67,7 @@ interface PollRepository : CoroutineCrudRepository<PollEntity, Long> {
             EXISTS (SELECT 1 FROM poll_likes pl2 WHERE pl2.poll_id = p.id AND pl2.user_id = :currentUserId) AS liked_by_me,
             EXISTS (SELECT 1 FROM poll_users pu WHERE pu.poll_id = p.id AND pu.user_id = :currentUserId) AS voted_by_me,
             (SELECT seq FROM poll_users pu WHERE pu.poll_id = p.id AND pu.user_id = :currentUserId) AS voted_seq,
+            p.allow_comment,
             p.created_id,
             p.created_at
         FROM polls p

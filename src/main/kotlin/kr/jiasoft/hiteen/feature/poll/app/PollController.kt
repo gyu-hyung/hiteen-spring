@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
+import reactor.core.publisher.Flux
 import java.util.*
 
 @Tag(name = "Poll", description = "투표 관련 API")
@@ -57,25 +58,51 @@ class PollController(
         return ResponseEntity.ok(ApiResult.success(poll))
     }
 
-    @Operation(summary = "투표 생성", description = "새로운 투표를 생성합니다.")
+    @Operation(summary = "투표 생성", description = """
+        새로운 투표를 생성합니다.
+        `files` 로 투표 본문의 이미지와, 선택항목의 이미지를 받습니다.
+        파일명으로 아래와 같은 규칙의 파일만 인식합니다. (숫자는 1부터 시작, 이미지 없는 선택항목도 있음)
+        ex)
+        본문 : poll_1, poll_2, poll_3
+        선택항목 : select_1_1, select_1_2, select_2_1, select_4_1
+    """)
     @PostMapping(consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     suspend fun create(
         @Parameter(description = "투표 생성 요청 DTO") pollCreateRequest: PollCreateRequest,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
-        @Parameter(description = "첨부 파일") @RequestPart("file", required = false) file: FilePart?,
+        @Parameter(description = "첨부 파일") @RequestPart("files", required = false) files: Flux<FilePart>?,
     ): ResponseEntity<ApiResult<Long>> {
-        val id = service.create(pollCreateRequest, user.id, file)
+        val id = service.create(pollCreateRequest, user.id, files)
         return ResponseEntity.ok(ApiResult.success(id))
     }
 
-    @Operation(summary = "투표 수정", description = "기존 투표를 수정합니다.")
+
+    @Operation(summary = "투표 수정 메타정보만", description = """
+        투표 메타데이터(제목, 색상, 댓글 허용 여부 등)만 간단히 수정하는 함수
+        이미지, 선택지, 파일 변경 없음
+    """)
+    @PatchMapping("/{id}/meta")
+    suspend fun updatePollMeta(
+        @PathVariable id: Long,
+        @RequestBody req: PollUpdateRequest,
+        @AuthenticationPrincipal(expression = "user") user: UserEntity
+    ): ResponseEntity<ApiResult<Long>> {
+        val updatedId = service.updateMeta(id, req, user.id)
+        return ResponseEntity.ok(ApiResult.success(updatedId))
+    }
+
+
+    @Operation(summary = "투표 수정", description = """
+        기존 투표를 수정합니다. 선택항목, 이미지, 메타데이터 등
+        이미지, 선택지, 파일 변경 있음
+    """)
     @PostMapping("/{id}", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     suspend fun update(
         @Parameter(description = "투표 수정 요청 DTO") @ModelAttribute pollUpdateRequest: PollUpdateRequest,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
-        @Parameter(description = "첨부 파일") @RequestPart(required = false) file: FilePart?,
+        @Parameter(description = "첨부 파일") @RequestPart(required = false) files: Flux<FilePart>?,
     ): ResponseEntity<ApiResult<Long>> {
-        val updatedId = service.update(pollUpdateRequest.id, pollUpdateRequest, user.id, file)
+        val updatedId = service.update(pollUpdateRequest.id, pollUpdateRequest, user.id, files)
         return ResponseEntity.ok(ApiResult.success(updatedId))
     }
 
