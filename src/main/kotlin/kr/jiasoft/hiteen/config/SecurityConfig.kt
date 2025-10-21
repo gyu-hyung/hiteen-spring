@@ -56,6 +56,7 @@ class SecurityConfig(
                     "/api/auth/**",
                     "/api/school",
                     "/api/assets/{uid}/download",
+                    "/api/assets/{uid}/view",
                     "/api/user/nickname/{nickname}",
                     "/api-docs/**",
                     "/assets/**",
