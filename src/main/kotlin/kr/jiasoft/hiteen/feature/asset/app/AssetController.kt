@@ -19,6 +19,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ResponseStatusException
 import reactor.core.publisher.Flux
+import java.lang.IllegalArgumentException
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 import java.util.*
@@ -108,8 +109,9 @@ class AssetController(
     suspend fun download(
         @Parameter(description = "파일 UID") @PathVariable uid: UUID,
         @AuthenticationPrincipal(expression = "user") user: UserEntity
-    ): ResponseEntity<ApiResult<FileSystemResource>> {
-        val updated = assetService.increase(uid) ?: return ResponseEntity.badRequest().build()
+    ): ResponseEntity<FileSystemResource> {
+        assetService.increase(uid)
+        val updated = assetService.findByUid(uid)?: throw IllegalArgumentException("존재하지않는 uid")
 
         val path = assetService.resolveFilePath(updated.filePath + updated.storeFileName)
         if (!assetService.existsFile(path)) return ResponseEntity.notFound().build()
@@ -124,9 +126,38 @@ class AssetController(
             contentLength = resource.contentLength()
             add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename*=UTF-8''$encoded")
         }
-        return ResponseEntity.ok().headers(headers).body(ApiResult.success(resource))
-
+        return ResponseEntity.ok()
+            .headers(headers)
+            .body(resource)
     }
+
+
+
+    @GetMapping("/{uid}/view")
+    suspend fun view(
+        @PathVariable uid: UUID,
+        @AuthenticationPrincipal(expression = "user") user: UserEntity
+    ): ResponseEntity<FileSystemResource> {
+        val asset = assetService.findByUid(uid) ?: return ResponseEntity.notFound().build()
+
+        val path = assetService.resolveFilePath(asset.filePath + asset.storeFileName)
+        if (!assetService.existsFile(path)) return ResponseEntity.notFound().build()
+
+        val resource = FileSystemResource(path)
+        val mime = asset.type ?: MediaType.APPLICATION_OCTET_STREAM_VALUE
+
+        val headers = HttpHeaders().apply {
+            contentType = MediaType.parseMediaType(mime)
+            contentLength = resource.contentLength()
+            // ✅ inline으로 설정하면 브라우저가 바로 렌더링
+            add(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"${asset.originFileName}\"")
+        }
+
+        return ResponseEntity.ok()
+            .headers(headers)
+            .body(resource)
+    }
+
 
     @Operation(summary = "파일 삭제", description = "특정 파일을 소프트 삭제(메타데이터만 변경)합니다.")
     @DeleteMapping("/{uid}")

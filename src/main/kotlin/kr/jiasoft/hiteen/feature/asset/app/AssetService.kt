@@ -125,6 +125,8 @@ class AssetService(
         }
     }
 
+    suspend fun findByUid(uid: UUID): AssetEntity? = assetRepository.findByUid(uid)
+
     suspend fun get(uid: UUID): AssetEntity? =
         assetRepository.findByUid(uid)?.takeIf { it.deletedAt == null }
 
@@ -135,7 +137,7 @@ class AssetService(
         assetRepository.increaseDownloadAndReturn(uid, userId)
 
     suspend fun increase(uid: UUID): AssetEntity? =
-        assetRepository.increaseDownload(uid)
+        assetRepository.increaseDownloadCount(uid)
 
     suspend fun softDelete(uid: UUID, userId: Long): AssetEntity? =
         assetRepository.softDelete(uid, userId)

@@ -19,8 +19,8 @@ interface AssetRepository : CoroutineCrudRepository<AssetEntity, Long> {
     suspend fun increaseDownloadAndReturn(uid: UUID, updatedId: Long): AssetEntity?
 
 
-    @Query("UPDATE assets SET download_count = download_count + 1 WHERE uid = :uid AND deleted_at IS NULL RETURNING *")
-    suspend fun increaseDownload(uid: UUID): AssetEntity?
+    @Query("UPDATE assets SET download_count = download_count + 1 WHERE uid = :uid AND deleted_at IS NULL")
+    suspend fun increaseDownloadCount(uid: UUID): AssetEntity?
 
     @Query("""
         SELECT * FROM assets 
