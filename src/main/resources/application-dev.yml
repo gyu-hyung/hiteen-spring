@@ -3,9 +3,6 @@ spring:
     name: hiteen
   r2dbc:
     username: hiteen
-    #    url: r2dbc:postgresql://127.0.0.1:5432/hiteen
-    #    password: 1234
-    #    =========================
     url: r2dbc:postgresql://49.247.175.76:5432/hiteen
     password: xxxxxxxx
     pool:
@@ -13,16 +10,12 @@ spring:
       initial-size: 5
       max-size: 20
   liquibase:
-    #    url: jdbc:postgresql://127.0.0.1:5432/hiteen
-    #    ==========================
     url: jdbc:postgresql://49.247.175.76:5432/hiteen
     user: hiteen
     password: xxxxxxxx
     change-log: classpath:db/changelog/db.changelog-master.yaml
   data:
     mongodb:
-      #      uri: mongodb://hiteen:1234@127.0.0.1:27017/hiteen?authSource=admin
-      #    =========================
       uri: mongodb://hiteen:hiteen%402025@49.247.170.182:27017/hiteen?authSource=admin
     redis:
       cluster:
@@ -30,8 +23,6 @@ spring:
           - 10.8.1.51:6379
           - 10.8.0.159:6379
           - 10.8.0.12:6379
-      # ====================
-      #      host: 127.0.0.1
       password: xxxxxxxx
       timeout: 5s
       client-type: lettuce
@@ -82,6 +73,17 @@ sms:
     token-url: https://kakaoapi.aligo.in/akv10/token/create/30/s/
     alimtalk-url: https://kakaoapi.aligo.in/akv10/alimtalk/send/
     detail-url: https://kakaoapi.aligo.in/akv10/history/detail/
+
+batch:
+  enabled: false
+
+neis:
+  base-url: "https://open.neis.go.kr/hub"
+  api-key: "458d6485b25c46009758a4ab53413497"
+
+kakao:
+  base-url: "https://dapi.kakao.com/v2/local"
+  api-key: "6ba92dcdddc5dccc78dbbaa50eb95825"
 
 mqtt:
   broker:
