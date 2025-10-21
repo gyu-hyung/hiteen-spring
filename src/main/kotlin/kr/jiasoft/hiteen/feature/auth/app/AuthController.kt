@@ -198,6 +198,31 @@ class AuthController(
 
 
     @Operation(summary = "비밀번호 재설정", description = "휴대폰 인증번호를 검증하고, 새 비밀번호로 변경합니다.(인증번호만 보내면 검증)")
+    @PostMapping("/password/reset/valid")
+    suspend fun resetPasswordValid(
+        @Parameter(description = "비밀번호 재설정 요청 DTO") @Valid req: ResetPasswordRequest
+    ): ResponseEntity<ApiResult<Any>> {
+        val phone = req.phone.filter { it.isDigit() }
+
+        // 인증번호 검증 (5분 유효)
+        val minute = 5
+        val data = smsAuthRepository.findValidAuthCode(phone, minute)
+            ?: return ResponseEntity.badRequest()
+                .body(ApiResult.failure("인증번호가 만료되었거나 유효하지 않아~"))
+
+        if (data.code != req.code) {
+            return ResponseEntity.badRequest()
+                .body(ApiResult.failure("인증번호가 일치하지 않아~"))
+        }
+
+        userRepository.findByPhone(phone)
+            ?: throw java.lang.IllegalArgumentException("가입되지 않은 번호야~")
+
+        return ResponseEntity.ok(ApiResult.success("인증번호가 확인되었습니다."))
+    }
+
+
+    @Operation(summary = "비밀번호 재설정", description = "휴대폰 인증번호를 검증하고, 새 비밀번호로 변경합니다.(인증번호만 보내면 검증)")
     @PostMapping("/password/reset")
     suspend fun resetPassword(
         @Parameter(description = "비밀번호 재설정 요청 DTO") @Valid req: ResetPasswordRequest
@@ -235,7 +260,7 @@ class AuthController(
 
             return ResponseEntity.ok(ApiResult.success("비밀번호가 재설정되었어~"))
         } else {
-            return ResponseEntity.ok(ApiResult.success("인증번호가 확인되었습니다."))
+            throw IllegalArgumentException("newPassword is required")
         }
 
     }
