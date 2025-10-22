@@ -14,7 +14,7 @@ spring:
   liquibase:
     url: jdbc:postgresql://127.0.0.1:5432/hiteen
     user: hiteen
-    password: xxxxxxxx
+    password: 1234
     change-log: classpath:db/changelog/db.changelog-master.yaml
   data:
     mongodb:

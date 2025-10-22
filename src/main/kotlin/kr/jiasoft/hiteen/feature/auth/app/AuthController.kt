@@ -138,10 +138,11 @@ class AuthController(
     )
     @PostMapping("/refresh")
     fun refresh(
-        @Parameter(description = "Refresh Token") @RequestParam refreshToken: String,
-        @AuthenticationPrincipal(expression = "user") user: UserEntity,
+//        @Parameter(description = "Refresh Token") @RequestParam refreshToken: String,
+        @CookieValue(name = "refreshToken", required = true) refreshToken: String?,
     ): ResponseEntity<ApiResult<Map<String, String>>> {
-        println("user.id = ${user.id}")
+        requireNotNull(refreshToken) { "RefreshToken cookie not found" }
+
         val (access, refresh) = jwtProvider.refreshTokens(BearerToken(refreshToken))
 
         val cookie = ResponseCookie.from("refreshToken", refresh.value)

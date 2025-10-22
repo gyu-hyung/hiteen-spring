@@ -73,8 +73,10 @@ class GameService(
             throw IllegalArgumentException("유효하지 않은 게임 ID 입니다. (gameId=$gameId)")
         }
 
+        //참가정보
         val participant = getOrCreateParticipant(userId, tierId)
 
+        //해당하는 게임 이력
         val existing = gameScoreRepository.findBySeasonIdAndParticipantIdAndGameId(participant.seasonId, participant.id, gameId)
 
         return if (existing != null) {
@@ -92,8 +94,7 @@ class GameService(
                 val adjustedScore = (score - penalty).coerceAtLeast(0.0)
 
                 saveOrUpdateScore(existing, adjustedScore, nextTryCount)
-            }
-            else {
+            } else {
 
                 pointService.applyPolicy(userId, PointPolicy.GAME_PLAY, gameId)
                 grantExp(userId, gameId, wordChallengeGameId)
