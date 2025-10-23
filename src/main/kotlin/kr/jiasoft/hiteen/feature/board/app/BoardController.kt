@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import kotlinx.coroutines.reactive.awaitSingle
 import kr.jiasoft.hiteen.common.dto.ApiPageCursor
 import kr.jiasoft.hiteen.common.dto.ApiResult
+import kr.jiasoft.hiteen.feature.board.domain.BoardCategory
 import kr.jiasoft.hiteen.feature.board.dto.*
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import org.springframework.http.MediaType
@@ -32,7 +33,7 @@ class BoardController(
     )
     @GetMapping
     suspend fun list(
-        @Parameter(description = "카테고리") @RequestParam(required = false) category: String?,
+        @Parameter(description = "카테고리") @RequestParam(required = false) category: BoardCategory = BoardCategory.POST,
         @Parameter(description = "검색어") @RequestParam(required = false) q: String?,
         @Parameter(description = "조회 개수 (기본 20)") @RequestParam(defaultValue = "20") size: Int,
         @Parameter(description = "커서 UUID") @RequestParam(required = false) cursor: UUID?,
