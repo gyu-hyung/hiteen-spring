@@ -7,6 +7,7 @@ import kr.jiasoft.hiteen.feature.asset.app.AssetService
 import kr.jiasoft.hiteen.feature.asset.domain.AssetCategory
 import kr.jiasoft.hiteen.feature.asset.dto.AssetResponse
 import kr.jiasoft.hiteen.feature.board.domain.BoardAssetEntity
+import kr.jiasoft.hiteen.feature.board.domain.BoardCategory
 import kr.jiasoft.hiteen.feature.board.domain.BoardCommentEntity
 import kr.jiasoft.hiteen.feature.board.domain.BoardCommentLikeEntity
 import kr.jiasoft.hiteen.feature.board.domain.BoardEntity
@@ -115,14 +116,14 @@ class BoardService(
 
 
     suspend fun listBoardsByCursor(
-        category: String?, q: String?, size: Int, userId: Long,
+        category: BoardCategory, q: String?, size: Int, userId: Long,
         followOnly: Boolean, friendOnly: Boolean, sameSchoolOnly: Boolean,
         cursorUid: UUID?, authorUid: UUID?
     ): ApiPageCursor<BoardResponse> {
         val s = size.coerceIn(1, 100)
 
         val rows = boards.searchSummariesByCursor(
-            category, q, s + 1, userId, followOnly, friendOnly, sameSchoolOnly, cursorUid, authorUid
+            category.name, q, s + 1, userId, followOnly, friendOnly, sameSchoolOnly, cursorUid, authorUid
         ).toList()
 
         val hasMore = rows.size > s
@@ -165,7 +166,7 @@ class BoardService(
         // 2) 대표이미지(assetUid)를 반영해 게시글 생성
         val saved = boards.save(
             BoardEntity(
-                category = req.category,
+                category = req.category.name,
                 subject = req.subject,
                 content = req.content,
                 link = req.link,

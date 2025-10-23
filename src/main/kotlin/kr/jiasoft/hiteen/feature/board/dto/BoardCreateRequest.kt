@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonFormat
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size
+import kr.jiasoft.hiteen.feature.board.app.BoardService
+import kr.jiasoft.hiteen.feature.board.domain.BoardCategory
 import java.time.LocalDate
 
 @Schema(description = "게시판 글 등록 요청 DTO")
@@ -33,7 +35,7 @@ data class BoardCreateRequest(
         example = "STORY / EVENT / NOTICE",
         maxLength = 50
     )
-    val category: String,
+    val category: BoardCategory,
 
     @param:Schema(
         description = "참고 링크",
