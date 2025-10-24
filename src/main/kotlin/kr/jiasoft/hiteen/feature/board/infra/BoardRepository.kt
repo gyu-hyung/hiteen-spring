@@ -26,7 +26,10 @@ interface BoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
         SELECT COUNT(*)::int
         FROM boards b
         WHERE b.deleted_at IS NULL
-          AND (:category IS NULL OR b.category = :category)
+          AND (
+                (:category IS NULL AND b.category != 'NOTICE')
+                OR b.category = :category
+          )
           AND (
                 :q IS NULL 
                 OR :q = '' 
@@ -89,7 +92,10 @@ interface BoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
             ), ARRAY[]::uuid[]) AS attachments
         FROM boards b
         WHERE b.deleted_at IS NULL
-          AND (:category IS NULL OR b.category = :category)
+          AND (
+                (:category IS NULL AND b.category != 'NOTICE')
+                OR b.category = :category
+          )
           AND (
                 :q IS NULL 
                 OR :q = '' 
@@ -156,7 +162,10 @@ interface BoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
             ), ARRAY[]::uuid[]) AS attachments
         FROM boards b
         WHERE b.deleted_at IS NULL
-          AND (:category IS NULL OR b.category = :category)
+          AND (
+                (:category IS NULL AND b.category != 'NOTICE')
+                OR b.category = :category
+          )
           AND (
                 :q IS NULL 
                 OR :q = '' 
