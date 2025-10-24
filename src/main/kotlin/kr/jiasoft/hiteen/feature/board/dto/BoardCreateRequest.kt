@@ -69,11 +69,11 @@ data class BoardCreateRequest(
         example = "광주광역시 북구 시청로 1",
         required = true
     )
-    val address: String,
+    val address: String? = null,
 
     @param:Schema(
         description = "상세 주소",
         example = "2층 강당"
     )
-    val detailAddress: String,
+    val detailAddress: String? = null,
 )
