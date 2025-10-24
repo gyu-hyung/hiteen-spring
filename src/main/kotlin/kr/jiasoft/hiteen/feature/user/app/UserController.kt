@@ -11,10 +11,10 @@ import jakarta.validation.Valid
 import kotlinx.coroutines.reactor.awaitSingle
 import kr.jiasoft.hiteen.common.dto.ApiResult
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
+import kr.jiasoft.hiteen.feature.user.dto.ReferralSummary
 import kr.jiasoft.hiteen.feature.user.dto.UserRegisterForm
 import kr.jiasoft.hiteen.feature.user.dto.UserResponse
 import kr.jiasoft.hiteen.feature.user.dto.UserResponseWithTokens
-import kr.jiasoft.hiteen.feature.user.dto.UserSummary
 import kr.jiasoft.hiteen.feature.user.dto.UserUpdateForm
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -24,7 +24,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ResponseStatusException
 import reactor.core.publisher.Flux
-import java.io.File
 import java.util.*
 
 @Tag(name = "User", description = "사용자 관련 API")
@@ -133,7 +132,7 @@ class UserController(
     @Operation(summary = "나를 추천인으로 등록한 친구 조회")
     @GetMapping("/referral")
     suspend fun referral(@AuthenticationPrincipal(expression = "user") user: UserEntity)
-        : ResponseEntity<ApiResult<List<UserSummary>>>
+        : ResponseEntity<ApiResult<List<ReferralSummary>>>
         = ResponseEntity.ok(ApiResult.success(userService.myReferralList(user.id)))
 
 

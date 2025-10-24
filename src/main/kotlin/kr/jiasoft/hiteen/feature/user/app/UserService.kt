@@ -22,6 +22,7 @@ import kr.jiasoft.hiteen.feature.relationship.infra.FriendRepository
 import kr.jiasoft.hiteen.feature.school.infra.SchoolRepository
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import kr.jiasoft.hiteen.feature.user.domain.UserPhotosEntity
+import kr.jiasoft.hiteen.feature.user.dto.ReferralSummary
 import kr.jiasoft.hiteen.feature.user.dto.UserRegisterForm
 import kr.jiasoft.hiteen.feature.user.dto.UserResponse
 import kr.jiasoft.hiteen.feature.user.dto.UserResponseWithTokens
@@ -113,10 +114,6 @@ class UserService (
     suspend fun findUserSummary(userId: Long): UserSummary {
         return userRepository.findSummaryInfoById(userId)
     }
-
-
-    suspend fun findUserSummaryList(userIds: List<Long>)
-            = userRepository.findSummaryByIds(userIds)
 
 
     suspend fun register(param: UserRegisterForm, file: FilePart?): UserResponseWithTokens {
@@ -316,10 +313,24 @@ class UserService (
         return userPhotosRepository.findByUserId(userEntity.id)?.toList() ?: emptyList()
     }
 
-    suspend fun myReferralList(userId: Long): List<UserSummary> {
-        val ids = inviteService.findMyReferralList(userId).ifEmpty { return emptyList() }
-        return findUserSummaryList(ids)
+    suspend fun myReferralList(userId: Long): List<ReferralSummary> {
+        val referrals = inviteService.findMyReferralList(userId)
+        if (referrals.isEmpty()) return emptyList()
+
+        val (ids, dates) = referrals.unzip()
+        val users = userRepository.findSummaryByIds(ids)
+
+        // id -> referredAt 맵핑
+        val referredAtMap = referrals.toMap()
+
+        return users.map { user ->
+            ReferralSummary(
+                user = user,
+                referredAt = referredAtMap[user.id]!!
+            )
+        }
     }
+
 
 
 }
