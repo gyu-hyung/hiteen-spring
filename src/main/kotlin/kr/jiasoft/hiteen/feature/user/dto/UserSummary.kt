@@ -1,10 +1,15 @@
 package kr.jiasoft.hiteen.feature.user.dto
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import io.swagger.v3.oas.annotations.media.Schema
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 
 @Schema(description = "간단한 사용자 요약 정보")
 data class UserSummary(
+
+    @JsonIgnore
+    @param:Schema(description = "사용자 ID", example = "1")
+    val id: Long,
 
     @param:Schema(description = "사용자 고유 식별자 (UUID)", example = "6f9b90d6-96ca-49de-b9c2-b123e51ca7db")
     val uid: String,
@@ -48,6 +53,7 @@ data class UserSummary(
     companion object {
         fun from(user: UserEntity, isFriend: Boolean? = false, tierName: String? = null): UserSummary =
             UserSummary(
+                id = user.id,
                 uid = user.uid.toString(),
                 username = user.username,
                 nickname = user.nickname,
@@ -62,20 +68,5 @@ data class UserSummary(
                 assetUid = user.assetUid?.toString(),
                 isFriend = isFriend
             )
-        fun empty() = UserSummary(
-            uid = "",
-            username = "",
-            nickname = null,
-            phone = null,
-            address = null,
-            detailAddress = null,
-            mood = null,
-            moodEmoji = null,
-            mbti = null,
-            expPoints = 0,
-            tierName = "",
-            assetUid = null,
-            isFriend = false
-        )
     }
 }

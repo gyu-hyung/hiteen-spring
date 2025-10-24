@@ -24,15 +24,17 @@ class InviteService(
 
 
     /** 내 초대코드로 등록한 친구 목록 */
-    suspend fun findMyReferralList (userId: Long) : List<Long> {
-        return inviteRepository.findAllByUserId(userId).map { it.id }.toList()
+    suspend fun findMyReferralList(userId: Long): List<Pair<Long, OffsetDateTime>> {
+        return inviteRepository.findAllByUserId(userId)
+            .map { it.userId to it.joinDate }
+            .toList()
     }
+
 
     /** 초대 완료 시 경험치 부여 TODO 보안 */
     suspend fun giveInviteExp(userId: Long, targetUid: UUID) {
         userRepository.findByUid(targetUid.toString())?.let { user ->
             expService.grantExp(userId, "FRIEND_INVITE", user.id)
-            pointService.applyPolicy(userId, PointPolicy.FRIEND_INVITE, user.id)
         }
     }
 
@@ -48,7 +50,7 @@ class InviteService(
         val invitedCount = inviteRepository.countByPhone(newUser.phone)
         var invitePoint = 0
         if (invitedCount < 1) {
-            invitePoint = getInviteJoinPoint() // 설정값 또는 상수 (예: 100)
+            invitePoint = PointPolicy.FRIEND_INVITE.amount
         }
 
         // 초대한 회원 찾기
@@ -71,20 +73,10 @@ class InviteService(
         val updatedInviter = inviter.copy(inviteJoins = inviter.inviteJoins + 1)
         userRepository.save(updatedInviter)
 
-        // TODO: 포인트 지급 처리 (PointService 등과 연동)
-//        if (invitePoint > 0) {
-            // pointService.give(inviter, invitePoint, "Invite", invite.id, "[친구초대] ${newUser.nickname}님이 초대코드로 가입했어요!")
-//        }
-
-        // TODO: PushService 연동 시 알림 발송
-        // pushService.sendUser(newUser, inviter, message)
+        //point +1000
+        pointService.applyPolicy(inviter.id, PointPolicy.FRIEND_INVITE, newUser.id)
 
         return true
-    }
-
-    //TODO 포인트 상수화
-    private fun getInviteJoinPoint(): Int {
-        return 100
     }
 
 
