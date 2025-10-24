@@ -17,13 +17,15 @@ interface PushDetailRepository : CoroutineCrudRepository<PushDetailEntity, Long>
         JOIN push p ON p.id = d.push_id
         WHERE d.user_id = :userId
         AND (:cursor IS NULL OR d.id < :cursor)
+        AND (:code IS NULL OR p.code = :code)        
         ORDER BY d.id DESC
         LIMIT :limit
     """)
     suspend fun findByUserIdWithCursor(
         userId: Long,
         cursor: Long?,
-        limit: Int
+        limit: Int,
+        code: String?
     ): List<PushNotificationResponse>
 
 
