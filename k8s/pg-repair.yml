@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pg-repair
+  namespace: hiteen
+spec:
+  containers:
+    - name: postgres-repair
+      image: postgres:16
+      command: ["sleep", "infinity"]
+      volumeMounts:
+        - name: pgdata
+          mountPath: /var/lib/postgresql/data
+  volumes:
+    - name: pgdata
+      persistentVolumeClaim:
+        claimName: hiteen-postgres-pvc
