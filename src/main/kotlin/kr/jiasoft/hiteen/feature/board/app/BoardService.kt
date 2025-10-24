@@ -2,6 +2,7 @@ package kr.jiasoft.hiteen.feature.board.app
 
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
+import kr.jiasoft.hiteen.common.dto.ApiPage
 import kr.jiasoft.hiteen.common.dto.ApiPageCursor
 import kr.jiasoft.hiteen.feature.asset.app.AssetService
 import kr.jiasoft.hiteen.feature.asset.domain.AssetCategory
@@ -98,21 +99,36 @@ class BoardService(
     suspend fun listBoardsByPage(
         category: String?, q: String?, page: Int, size: Int, currentUserId: Long?,
         followOnly: Boolean, friendOnly: Boolean, sameSchoolOnly: Boolean
-    ): List<BoardResponse> {
+    ): ApiPage<BoardResponse> {
         val p = page.coerceAtLeast(0)
         val s = size.coerceIn(1, 100)
         val offset = p * s
         val uid = currentUserId ?: -1L
 
-        return boards.searchSummariesByPage(category, q, s, offset, uid, followOnly, friendOnly, sameSchoolOnly)
+        // 총 개수
+        val total = boards.countSearchResults(category, q, uid, followOnly, friendOnly, sameSchoolOnly)
+        val lastPage = if (total == 0) 0 else (total - 1) / s
+
+        val rows = boards.searchSummariesByPage(category, q, s, offset, uid, followOnly, friendOnly, sameSchoolOnly)
             .map { row ->
                 row.copy(
                     subject = row.subject,
-                    content = (row.content).take(160),
-                    user = userService.findUserSummary(row.createdId)
+                    content = row.content.take(160),
+                    user = userService.findUserSummary(row.createdId),
+                    attachments = boardAssetRepository.findAllByBoardId(row.id)?.map { it.uid }
                 )
-            }.toList()
+            }
+            .toList()
+
+        return ApiPage(
+            total = total,
+            lastPage = lastPage,
+            items = rows,
+            perPage = s,
+            currentPage = p
+        )
     }
+
 
 
     suspend fun listBoardsByCursor(

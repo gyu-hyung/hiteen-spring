@@ -23,7 +23,50 @@ interface BoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
 
 
     @Query("""
+        SELECT COUNT(*)::int
+        FROM boards b
+        WHERE b.deleted_at IS NULL
+          AND (:category IS NULL OR b.category = :category)
+          AND (
+                :q IS NULL 
+                OR :q = '' 
+                OR b.subject ILIKE '%' || :q || '%' 
+                OR b.content ILIKE '%' || :q || '%'
+          )
+          AND (
+              :followOnly = false OR EXISTS (
+                  SELECT 1 FROM follows f WHERE f.user_id = :userId AND f.follow_id = b.created_id
+              )
+          )
+          AND (
+              :friendOnly = false OR EXISTS (
+                  SELECT 1 FROM friends f 
+                  WHERE (f.user_id = :userId AND f.friend_id = b.created_id)
+                     OR (f.friend_id = :userId AND f.user_id = b.created_id)
+              )
+          )
+          AND (
+              :sameSchoolOnly = false OR EXISTS (
+                  SELECT 1 FROM users u 
+                  WHERE u.id = b.created_id 
+                    AND u.school_id = (SELECT school_id FROM users WHERE id = :userId)
+              )
+          )
+    """)
+    suspend fun countSearchResults(
+        category: String?,
+        q: String?,
+        userId: Long,
+        followOnly: Boolean,
+        friendOnly: Boolean,
+        sameSchoolOnly: Boolean
+    ): Int
+
+
+
+    @Query("""
         SELECT 
+            b.id,
             b.uid,
             b.category,
             b.subject,
@@ -31,6 +74,11 @@ interface BoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
             b.link,
             b.hits,
             b.asset_uid      AS asset_uid,
+            b.start_date,
+            b.end_date,
+            b.status,
+            b.address,
+            b.detail_address,
             b.created_at     AS created_at,
             b.created_id     AS created_id,
             (SELECT COUNT(*)::bigint FROM board_likes bl WHERE bl.board_id = b.id) AS like_count,
@@ -48,21 +96,25 @@ interface BoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
                 OR b.subject ILIKE '%' || :q || '%' 
                 OR b.content ILIKE '%' || :q || '%'
           )
-          AND (:followOnly = false OR b.created_id IN (
-                SELECT f.follow_id FROM follows f WHERE f.user_id = :userId
-          ))
-          AND (:friendOnly = false OR b.created_id IN (
-                SELECT CASE 
-                         WHEN f.user_id = :userId THEN f.friend_id 
-                         ELSE f.user_id 
-                       END
-                FROM friends f
-                WHERE f.user_id = :userId OR f.friend_id = :userId
-          ))
-          AND (:sameSchoolOnly = false OR b.created_id IN (
-                SELECT u.id FROM users u 
-                WHERE u.school_id = (SELECT school_id FROM users WHERE id = :userId)
-          ))
+          AND (
+              :followOnly = false OR EXISTS (
+                  SELECT 1 FROM follows f WHERE f.user_id = :userId AND f.follow_id = b.created_id
+              )
+          )
+          AND (
+              :friendOnly = false OR EXISTS (
+                  SELECT 1 FROM friends f 
+                  WHERE (f.user_id = :userId AND f.friend_id = b.created_id)
+                     OR (f.friend_id = :userId AND f.user_id = b.created_id)
+              )
+          )
+          AND (
+              :sameSchoolOnly = false OR EXISTS (
+                  SELECT 1 FROM users u 
+                  WHERE u.id = b.created_id 
+                    AND u.school_id = (SELECT school_id FROM users WHERE id = :userId)
+              )
+          )
         ORDER BY b.id DESC
         LIMIT :limit OFFSET :offset
     """)
@@ -76,6 +128,7 @@ interface BoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
         friendOnly: Boolean,
         sameSchoolOnly: Boolean
     ): Flow<BoardResponse>
+
 
 
     @Query("""

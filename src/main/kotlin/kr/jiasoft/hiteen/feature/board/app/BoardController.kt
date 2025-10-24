@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
 import kotlinx.coroutines.reactive.awaitSingle
+import kr.jiasoft.hiteen.common.dto.ApiPage
 import kr.jiasoft.hiteen.common.dto.ApiPageCursor
 import kr.jiasoft.hiteen.common.dto.ApiResult
 import kr.jiasoft.hiteen.feature.board.domain.BoardCategory
@@ -26,6 +27,31 @@ import java.util.*
 class BoardController(
     private val service: BoardService,
 ) {
+
+
+    @Operation(
+        summary = "게시글 목록 조회 (페이지 기반)",
+        description = "카테고리, 검색어, 페이지, 페이지 크기 등의 옵션을 이용해 게시글 목록을 조회합니다. 관리자 전용 페이지네이션 방식입니다."
+    )
+    @GetMapping("/page")
+    suspend fun listByPage(
+        @Parameter(description = "카테고리") @RequestParam(required = false) category: String?,
+        @Parameter(description = "검색어") @RequestParam(required = false) q: String?,
+        @Parameter(description = "페이지 번호 (0부터 시작)") @RequestParam(defaultValue = "0") page: Int,
+        @Parameter(description = "페이지 당 개수 (기본 20)") @RequestParam(defaultValue = "20") size: Int,
+        @Parameter(description = "팔로우한 사용자만") @RequestParam(defaultValue = "false") followOnly: Boolean,
+        @Parameter(description = "친구만") @RequestParam(defaultValue = "false") friendOnly: Boolean,
+        @Parameter(description = "같은 학교만") @RequestParam(defaultValue = "false") sameSchoolOnly: Boolean,
+        @AuthenticationPrincipal(expression = "user") user: UserEntity
+    ): ResponseEntity<ApiResult<ApiPage<BoardResponse>>> {
+        val boards = service.listBoardsByPage(
+            category, q, page, size, user.id,
+            followOnly, friendOnly, sameSchoolOnly
+        )
+        return ResponseEntity.ok(ApiResult.success(boards))
+    }
+
+
 
     @Operation(
         summary = "게시글 목록 조회",
