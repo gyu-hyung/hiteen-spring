@@ -18,7 +18,7 @@ data class RankingView(
     @field:Schema(description = "프로필 이미지 URL", example = "https://example.com/profile.jpg")
     val assetUid: String?,
 
-    @field:Schema(description = "점수", example = "100")
+    @field:Schema(description = "점수", example = "30.00")
     val score: Double,
 
     @field:Schema(description = "시도 횟수", example = "2")
