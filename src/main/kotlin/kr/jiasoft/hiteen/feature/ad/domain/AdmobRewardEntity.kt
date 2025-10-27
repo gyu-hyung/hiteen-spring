@@ -1,5 +1,6 @@
 package kr.jiasoft.hiteen.feature.ad.domain
 
+import io.r2dbc.postgresql.codec.Json
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Table
 import java.time.OffsetDateTime
@@ -11,6 +12,6 @@ data class AdmobRewardEntity(
     val transactionId: String,
     val userId: Long,
     val reward: Int,
-    val rawData: String? = null,
+    val rawData: Json? = null,
     val createdAt: OffsetDateTime = OffsetDateTime.now()
 )
