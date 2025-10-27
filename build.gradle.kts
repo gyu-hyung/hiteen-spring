@@ -112,6 +112,9 @@ dependencies {
     runtimeOnly ("org.postgresql:postgresql")
     implementation("io.r2dbc:r2dbc-postgresql")
 
+    //admob
+    implementation("com.nimbusds:nimbus-jose-jwt:9.31")
+
 }
 
 
