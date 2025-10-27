@@ -12,6 +12,7 @@ import kr.jiasoft.hiteen.feature.play.dto.ScoreRequest
 import kr.jiasoft.hiteen.feature.play.dto.SeasonRankingResponse
 import kr.jiasoft.hiteen.feature.play.dto.SeasonRoundResponse
 import kr.jiasoft.hiteen.feature.relationship.infra.FriendRepository
+import kr.jiasoft.hiteen.feature.user.domain.SeasonStatusType
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
@@ -33,13 +34,13 @@ class GameController(
 
 
     @Operation(summary = "시즌 회차 목록 조회 (연도 + 리그 + 상태)")
-    @GetMapping("/seasons/{year}/{league}")
+    @GetMapping("/seasons/{year}/{status}")
     suspend fun getSeasonsByYearAndLeague(
         @Parameter(description = "연도") @PathVariable year: Int,
-        @Parameter(description = "티어", example = "BRONZE") @PathVariable league: String,
-        @Parameter(description = "ACTIVE / CLOSED / PLANNED (없으면 전체)") @RequestParam(required = false) status: String?
+//        @Parameter(description = "티어", example = "BRONZE") @PathVariable league: String,
+        @Parameter(description = "ACTIVE / CLOSED / PLANNED (없으면 전체)") @RequestParam(required = false) status: SeasonStatusType?
     ): ResponseEntity<ApiResult<List<SeasonRoundResponse>>>
-        = ResponseEntity.ok(ApiResult.success(gameService.getSeasonRounds(year, league, status)))
+        = ResponseEntity.ok(ApiResult.success(gameService.getSeasonRounds(year, status)))
 
 
     @Operation(summary = "점수 등록")

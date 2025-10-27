@@ -19,7 +19,7 @@ class AdService(
     private val DAILY_AD_LIMIT = 5
 
     /**
-     * 광고 리워드 저장 + 포인트 지급 공통 처리, 보상 횟수 체크 포함
+     * 광고 리워드 저장 + 포인트 지급, 보상 횟수 체크
      */
     private suspend fun saveRewardAndGrantPoint(
         transactionId: String,

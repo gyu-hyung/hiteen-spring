@@ -17,6 +17,7 @@ import kr.jiasoft.hiteen.feature.play.infra.SeasonRepository
 import kr.jiasoft.hiteen.feature.point.app.PointService
 import kr.jiasoft.hiteen.feature.point.domain.PointPolicy
 import kr.jiasoft.hiteen.feature.relationship.infra.FriendRepository
+import kr.jiasoft.hiteen.feature.user.domain.SeasonStatusType
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.OffsetDateTime
@@ -50,8 +51,8 @@ class GameService(
     /**
      * 회차 목록 조회
      * */
-    suspend fun getSeasonRounds(year: Int, league: String, status: String?): List<SeasonRoundResponse> {
-        return seasonRepository.findSeasonsByYearAndLeagueAndStatus(year, league.uppercase(), status?.uppercase()).toList()
+    suspend fun getSeasonRounds(year: Int, status: SeasonStatusType? = null): List<SeasonRoundResponse> {
+        return seasonRepository.findSeasonsByYearAndLeagueAndStatus(year, status?.name).toList()
     }
 
 
@@ -76,22 +77,22 @@ class GameService(
         //참가정보
         val participant = getOrCreateParticipant(userId, tierId)
 
-        //해당하는 게임 이력
+        //게임 이력
         val existing = gameScoreRepository.findBySeasonIdAndParticipantIdAndGameId(participant.seasonId, participant.id, gameId)
 
         return if (existing != null) {
             val lastPlayedDate = existing.updatedAt?.toLocalDate() ?: existing.createdAt.toLocalDate()
 
             if (lastPlayedDate.isEqual(today)) {
-                handleRetry(retryType, transactionId, userId, gameId)
+                handleRetry(gameId, userId, retryType, transactionId)
                 grantExp(userId, gameId, wordChallengeGameId)
 
-                // 시도 횟수별 페널티 (0.08초 * n)
+                // 시도 횟수별 가산점 (0.08초 * n)
                 val nextTryCount = existing.tryCount + 1
-                val penalty = 0.08 * (nextTryCount - 1)
+                val advantage = 0.08 * (nextTryCount - 1)
 
                 // 0.08초 단위는 Double 이므로 Long score 변환 시 ms 단위로 보정 필요할 수 있음
-                val adjustedScore = (score - penalty).coerceAtLeast(0.0)
+                val adjustedScore = (score - advantage).coerceAtLeast(0.0)
 
                 saveOrUpdateScore(existing, adjustedScore, nextTryCount)
             } else {
@@ -124,8 +125,8 @@ class GameService(
             val tier = tierRepository.findById(tierId)
                 ?: throw IllegalStateException("유저의 리그를 확인할 수 없습니다.")
             val season = seasonRepository.findActiveSeason()
-                ?: throw IllegalStateException("현재 진행 중인 시즌이 없습니다.")
-            if (season.status != "ACTIVE" || season.endDate.isBefore(LocalDate.now())) {
+                ?: throw NoSuchElementException("현재 진행 중인 시즌이 없습니다. 관리자 문의")
+            if (season.status != SeasonStatusType.ACTIVE.name || season.endDate.isBefore(LocalDate.now())) {
                 throw IllegalStateException("이미 종료된 시즌입니다. (seasonId=${season.id})")
             }
             seasonParticipantRepository.save(
@@ -142,10 +143,10 @@ class GameService(
 
 
     private suspend fun handleRetry(
+        gameId: Long,
+        userId: Long,
         retryType: String?,
         transactionId: String?,
-        userId: Long,
-        gameId: Long
     ) {
         when (retryType) {
             "POINT" -> pointService.applyPolicy(userId, PointPolicy.GAME_PLAY, gameId)
