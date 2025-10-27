@@ -18,6 +18,7 @@ interface SeasonParticipantRepository : CoroutineCrudRepository<SeasonParticipan
         JOIN seasons s ON sp.season_id = s.id
         WHERE sp.user_id = :userId
           AND s.status = 'ACTIVE'
+        ORDER BY s.start_date DESC, s.id DESC
         LIMIT 1
         """
     )

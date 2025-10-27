@@ -23,7 +23,7 @@ interface SeasonRepository : CoroutineCrudRepository<SeasonEntity, Long> {
     @Query("SELECT EXISTS(SELECT 1 FROM seasons WHERE start_date = :date)")
     suspend fun existsByStartDate(date: LocalDate): Boolean
 
-    @Query("SELECT * FROM seasons WHERE status = 'ACTIVE' ORDER BY start_date DESC LIMIT 1")
+    @Query("SELECT * FROM seasons WHERE status = 'ACTIVE' ORDER BY start_date DESC, id DESC LIMIT 1")
     suspend fun findActiveSeason(): SeasonEntity?
 
     @Query("SELECT * FROM seasons WHERE status = 'ACTIVE'")
@@ -44,15 +44,13 @@ interface SeasonRepository : CoroutineCrudRepository<SeasonEntity, Long> {
                         EXTRACT(MONTH FROM s.start_date) AS month,
                         sp.league
         FROM seasons s
-                 JOIN season_participants sp ON sp.season_id = s.id
+        LEFT JOIN season_participants sp ON sp.season_id = s.id
         WHERE EXTRACT(YEAR FROM s.start_date) = :year
-          AND sp.league = :league
           AND (:status IS NULL OR s.status = :status)
         ORDER BY year DESC, month, s.season_no DESC
     """)
     fun findSeasonsByYearAndLeagueAndStatus(
         year: Int,
-        league: String,
         status: String?
     ): Flow<SeasonRoundResponse>
 
