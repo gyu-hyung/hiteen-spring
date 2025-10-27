@@ -160,7 +160,7 @@ class GameService(
     }
 
     private suspend fun saveOrUpdateScore(existing: GameScoreEntity, score: Double, tryCount: Int): GameScoreEntity {
-        val finalScore = maxOf(existing.score, score)
+        val finalScore = minOf(existing.score, score)
         val updated = existing.copy(
             score = finalScore,
             tryCount = tryCount,
