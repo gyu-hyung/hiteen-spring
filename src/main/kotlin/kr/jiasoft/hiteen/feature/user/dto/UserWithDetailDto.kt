@@ -6,4 +6,5 @@ data class UserWithDetailDto(
     val deviceOs: String?,
     val deviceToken: String?,
     val pushItems: String?,
+    val pushService: String?,
 )

@@ -71,6 +71,7 @@ class PushService(
         // ① 유저 상세 정보 조회 (deviceToken이 존재하는 사용자만)
         val userDetails = userDetailRepository.findUsersWithDetail(userIds)
             .filter { !it.deviceToken.isNullOrBlank() }
+            .filter { it.pushService == "Y" }
 
         // ② pushItems 허용 여부 확인
         val eligibleUsers = userDetails.filter { detail ->

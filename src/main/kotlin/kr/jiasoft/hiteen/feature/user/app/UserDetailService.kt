@@ -28,11 +28,18 @@ class UserDetailService(
             req.userId = it
         }
 
-        val pushItems = req.pushItems.joinToString(
-            prefix = "[\"",
-            postfix = "\"]",
-            separator = "\",\""
-        )
+        // 1️⃣ pushItems 안전 변환
+        val validPushItems = req.pushItems
+            .distinct()                 // 중복 제거
+            .takeIf { it.isNotEmpty() } // 비어있지 않으면 유지
+            ?: emptyList()               // null 또는 빈 경우 기본값
+
+        // 2️⃣ JSON 안전 직렬화
+        val pushItemsJson = try {
+            objectMapper.writeValueAsString(validPushItems)
+        } catch (e: Exception) {
+            "[]" // 실패 시 안전한 기본값
+        }
 
         val existing = userDetails.findByUid(userUid)
         val saved = existing?.copy(
@@ -50,30 +57,31 @@ class UserDetailService(
             agreeMarketing = req.agreeMarketing ?: existing.agreeMarketing,
             pushService = req.pushService ?: existing.pushService,
             pushMarketing = req.pushMarketing ?: existing.pushMarketing,
-            pushItems = pushItems,
+            pushItems = pushItemsJson,
             memo = req.memo ?: existing.memo,
+        ) ?: UserDetailEntity(
+            userId = req.userId!!,
+            deviceId = req.deviceId,
+            deviceOs = req.deviceOs,
+            deviceVersion = req.deviceVersion,
+            deviceDetail = req.deviceDetail,
+            deviceToken = req.deviceToken,
+            locationToken = req.locationToken,
+            aqnsToken = req.aqnsToken,
+            apiToken = req.apiToken,
+            agreeService = req.agreeService,
+            agreePrivacy = req.agreePrivacy,
+            agreeFinance = req.agreeFinance,
+            agreeMarketing = req.agreeMarketing,
+            pushService = req.pushService,
+            pushMarketing = req.pushMarketing,
+            pushItems = pushItemsJson,
+            memo = req.memo,
         )
-            ?: UserDetailEntity(
-                userId = req.userId!!,
-                deviceId = req.deviceId,
-                deviceOs = req.deviceOs,
-                deviceVersion = req.deviceVersion,
-                deviceDetail = req.deviceDetail,
-                deviceToken = req.deviceToken,
-                locationToken = req.locationToken,
-                aqnsToken = req.aqnsToken,
-                apiToken = req.apiToken,
-                agreeService = req.agreeService,
-                agreePrivacy = req.agreePrivacy,
-                agreeFinance = req.agreeFinance,
-                agreeMarketing = req.agreeMarketing,
-                pushService = req.pushService,
-                pushMarketing = req.pushMarketing,
-                pushItems = pushItems,
-                memo = req.memo,
-            )
+
         return userDetails.save(saved).toResponse()
     }
+
 
     suspend fun deleteUserDetail(userUid: UUID) {
         userDetails.deleteByUid(userUid)
@@ -99,20 +107,17 @@ class UserDetailService(
         memo = this.memo,
     )
 
-    private fun parsePushItems(pushItems: String): List<String> {
-        val normalized = pushItems
-            .trim()
-            .removePrefix("\"")
-            .removeSuffix("\"")
-            .replace("\\\"", "\"")
+    private fun parsePushItems(pushItems: String?): List<String> {
+        if (pushItems.isNullOrBlank()) return emptyList()
 
         return try {
-            objectMapper.readValue(normalized, object : TypeReference<List<String>>() {})
+            objectMapper.readValue(pushItems, object : TypeReference<List<String>>() {})
+                .filter { it.isNotBlank() } // 빈 항목 제거
         } catch (e: Exception) {
             emptyList()
         }
-
     }
+
 
 
 }
