@@ -30,28 +30,23 @@ data class RankingResponse(
     val tryCount: Long,
 
     @field:Schema(description = "랭킹 생성 시간", example = "2025.09.18 10:15")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm")
+    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm")
     val createdAt: OffsetDateTime? = null,
 
     @field:Schema(description = "랭킹 수정 시간", example = "2025.09.18 10:15")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm")
+    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm")
     val updatedAt: OffsetDateTime? = null,
 
     @field:Schema(description = "나의 랭킹인지 여부", example = "true")
     val isMe: Boolean = false
 ) {
     companion object {
-        /**
-         * Double 점수를 "MM:SS:MS" 형태로 포맷
-         * 예: 1013.08 → "00:10:13"
-         */
         private fun formatScore(score: Double): String {
-            val raw = score.toLong() // Double → Long 변환
-            val minutes = (raw / 10000).toInt()
-            val seconds = ((raw / 100) % 100).toInt()
-            val millis = (raw % 100).toInt()
+            val totalMillis = (score * 1000).toLong()
+            val minutes = (totalMillis / 60000) % 100
+            val seconds = (totalMillis / 1000) % 60
+            val millis = (totalMillis / 10) % 100
             return String.format("%02d:%02d:%02d", minutes, seconds, millis)
         }
     }
-
 }

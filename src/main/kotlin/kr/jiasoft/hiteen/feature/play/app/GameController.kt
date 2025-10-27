@@ -3,6 +3,7 @@ package kr.jiasoft.hiteen.feature.play.app
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.tags.Tag
+import jakarta.validation.Valid
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kr.jiasoft.hiteen.common.dto.ApiResult
@@ -46,7 +47,7 @@ class GameController(
     @Operation(summary = "점수 등록")
     @PostMapping("/scores")
     suspend fun recordScore(
-        @Parameter(description = "점수 등록 요청 DTO") req: ScoreRequest,
+        @Valid @Parameter(description = "점수 등록 요청 DTO") req: ScoreRequest,
         @AuthenticationPrincipal(expression = "user") user: UserEntity
     ): ResponseEntity<ApiResult<GameScoreEntity>> =
         ResponseEntity.ok(ApiResult.success(gameService.recordScore(
