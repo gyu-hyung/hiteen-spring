@@ -2,10 +2,9 @@ package kr.jiasoft.hiteen.feature.poll.dto
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonIgnore
-import com.fasterxml.jackson.core.type.TypeReference
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.constraints.NotBlank
+import kr.jiasoft.hiteen.feature.user.dto.UserResponse
 import kr.jiasoft.hiteen.feature.user.dto.UserSummary
 import java.time.OffsetDateTime
 import java.util.UUID
@@ -160,7 +159,7 @@ data class PollResponse(
     @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm")
     val createdAt: OffsetDateTime,
 
-    val user: UserSummary?,
+    val user: UserResponse?,
 )
 
 @Schema(description = "투표 댓글 등록/수정 요청 DTO")

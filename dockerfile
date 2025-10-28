@@ -1,15 +1,12 @@
-# ====== 1️⃣ Build Stage ======
-FROM gradle:8.5-jdk17 AS builder
+# 1단계: 빌드
+FROM gradle:8.7-jdk21 AS builder
 WORKDIR /app
 COPY . .
-RUN gradle clean build -x test
+RUN gradle clean build -x test -PreactBuild=true
 
-# ====== 2️⃣ Runtime Stage ======
-FROM eclipse-temurin:17-jdk-jammy
+# 2단계: 실행 이미지
+FROM eclipse-temurin:21-jdk
 WORKDIR /app
 COPY --from=builder /app/build/libs/*.jar app.jar
-
-# 환경변수 (application.yml override)
-ENV SPRING_PROFILES_ACTIVE=prod
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "app.jar"]
