@@ -57,7 +57,7 @@ class PollService(
     ): List<PollResponse> =
         polls.findSummariesByCursor(cursor, size, currentUserId)
             .map { row ->
-                val user = userService.findUserSummary(row.createdId)
+                val user = userService.findUserResponse(row.createdId)
 
                 val photos = pollPhotos.findAllByPollId(row.id)
                     .toList()
@@ -111,7 +111,7 @@ class PollService(
     suspend fun getPoll(id: Long, currentUserId: Long): PollResponse {
         // ① 기본 요약 데이터 조회
         val poll = polls.findSummaryById(id, currentUserId) ?: throw notFound("poll")
-        val user = userService.findUserSummary(poll.createdId)
+        val user = userService.findUserResponse(poll.createdId)
 
         // ② 본문 이미지 (pollPhotos)
         val photos = pollPhotos.findAllByPollId(id)

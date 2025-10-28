@@ -24,7 +24,6 @@ spring:
         nodes:
           - 10.8.1.51:6379
           - 10.8.0.159:6379
-          - 10.8.0.12:6379
       password: xxxxxxxx
       timeout: 5s
       client-type: lettuce
