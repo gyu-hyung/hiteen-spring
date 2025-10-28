@@ -18,6 +18,8 @@ spring:
     mongodb:
       uri: mongodb://hiteen:hiteen%402025@49.247.170.182:27017/hiteen?authSource=admin
     redis:
+      repositories:
+        enabled: false
       cluster:
         nodes:
           - 10.8.1.51:6379
@@ -111,15 +113,15 @@ kakao:
 #  keepAliveInterval: 60
 #  qos: 1
 
-#tbmq:
-#  url: http://192.168.49.2:30001
-#  admin:
-#    username: sysadmin@thingsboard.org
-#    password: sysadmin
-#  mqtt:
-#    host: 192.168.49.2
-#    port: 30002
-#    tls: false
+tbmq:
+  url: http://192.168.49.2:30001
+  admin:
+    username: sysadmin@thingsboard.org
+    password: sysadmin
+  mqtt:
+    host: 192.168.49.2
+    port: 30002
+    tls: false
 
 logging:
   level:
