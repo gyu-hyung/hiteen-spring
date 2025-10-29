@@ -71,14 +71,14 @@ class AuthController(
         try {
             val userResponseWithTokens = authService.login(form.phone, form.password)
 
-            val cookie = ResponseCookie.from("refreshToken", userResponseWithTokens.tokens.refreshToken.toString())
-                .httpOnly(true)
-                .secure(true)
-                .path("/")
-                .maxAge(Duration.ofDays(30))
-                .build()
-
-            response.addCookie(cookie)
+//            val cookie = ResponseCookie.from("refreshToken", userResponseWithTokens.tokens.refreshToken.toString())
+//                .httpOnly(true)
+//                .secure(true)
+//                .path("/")
+//                .maxAge(Duration.ofDays(30))
+//                .build()
+//
+//            response.addCookie(cookie)
 
             ResponseEntity.ok(ApiResult.success(userResponseWithTokens))
         } catch (e: IllegalArgumentException) {
@@ -145,15 +145,15 @@ class AuthController(
 
         val (access, refresh) = jwtProvider.refreshTokens(BearerToken(refreshToken))
 
-        val cookie = ResponseCookie.from("refreshToken", refresh.value)
-            .httpOnly(true)
-            .path("/")
-            .maxAge(Duration.ofDays(30))
-            .build()
+//        val cookie = ResponseCookie.from("refreshToken", refresh.value)
+//            .httpOnly(true)
+//            .path("/")
+//            .maxAge(Duration.ofDays(30))
+//            .build()
 
         return ResponseEntity.ok()
-            .header(HttpHeaders.SET_COOKIE, cookie.toString())
-            .body(ApiResult.success(mapOf("accessToken" to access.value)))
+//            .header(HttpHeaders.SET_COOKIE, cookie.toString())
+            .body(ApiResult.success(mapOf("accessToken" to access.value, "refreshToken" to refresh.value)))
     }
 
 
