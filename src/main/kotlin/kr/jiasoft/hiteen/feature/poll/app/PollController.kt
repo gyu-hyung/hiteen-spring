@@ -6,7 +6,6 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
 import kr.jiasoft.hiteen.common.dto.ApiPageCursor
 import kr.jiasoft.hiteen.common.dto.ApiResult
-import kr.jiasoft.hiteen.feature.poll.domain.PollCommentEntity
 import kr.jiasoft.hiteen.feature.poll.dto.*
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import org.springframework.http.MediaType
@@ -27,27 +26,28 @@ class PollController(
 
     @Operation(
         summary = "투표 목록",
-        description = "커서 기반 페이지네이션 방식으로 투표 목록을 조회합니다."
+        description = "커서 기반 페이지네이션 방식으로 투표 목록을 조회합니다. type 파라미터로 mine(내가 등록한), participated(내가 참여한) 필터링 가능."
     )
     @GetMapping
     suspend fun list(
         @Parameter(description = "이전 페이지의 마지막 ID") @RequestParam(required = false) cursor: Long?,
         @Parameter(description = "가져올 개수 (기본값 20)") @RequestParam(defaultValue = "20") size: Int,
+        @Parameter(description = "목록 타입: all, mine, participated") @RequestParam(defaultValue = "all") type: String,
         @AuthenticationPrincipal(expression = "user") user: UserEntity?
     ): ResponseEntity<ApiResult<ApiPageCursor<PollResponse>>> {
-        val list = service.listPollsByCursor(cursor, size + 1, user?.id)
+        val list = service.listPollsByCursor(cursor, size + 1, user?.id, type)
 
         val hasMore = list.size > size
         val items = if (hasMore) list.dropLast(1) else list
         val nextCursor = if (hasMore) items.lastOrNull()?.id?.toString() else null
 
-        val result = ApiPageCursor(
-            nextCursor = nextCursor,
-            items = items,
-            perPage = size
+        return ResponseEntity.ok(
+            ApiResult.success(
+                ApiPageCursor(nextCursor, items, size)
+            )
         )
-        return ResponseEntity.ok(ApiResult.success(result))
     }
+
 
     @Operation(summary = "투표 상세", description = "투표 ID로 투표 상세 정보를 조회합니다.")
     @GetMapping("/{id}")

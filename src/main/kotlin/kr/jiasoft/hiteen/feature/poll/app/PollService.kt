@@ -53,9 +53,10 @@ class PollService(
     open suspend fun listPollsByCursor(
         cursor: Long?,
         size: Int,
-        currentUserId: Long?
+        currentUserId: Long?,
+        type: String = "all"
     ): List<PollResponse> =
-        polls.findSummariesByCursor(cursor, size, currentUserId)
+        polls.findSummariesByCursor(cursor, size, currentUserId, type)
             .map { row ->
                 val user = userService.findUserResponse(row.createdId)
 
@@ -64,7 +65,6 @@ class PollService(
                     .sortedBy { it.seq }
                     .map { it.assetUid.toString() }
 
-                // ③ 선택지 이미지 조회 (pollSelectPhotos)
                 val selects = pollSelects.findAllByPollId(row.id)
                     .toList()
                     .sortedBy { it.seq }
@@ -83,10 +83,8 @@ class PollService(
                         )
                     }
 
-                // ④ 전체 투표수 계산
                 val totalVotes = selects.sumOf { it.voteCount }
 
-                // ⑤ 최종 응답 생성
                 PollResponse(
                     id = row.id,
                     question = row.question,
@@ -104,8 +102,8 @@ class PollService(
                     createdAt = row.createdAt,
                     user = user,
                 )
-
             }.toList()
+
 
 
     suspend fun getPoll(id: Long, currentUserId: Long): PollResponse {

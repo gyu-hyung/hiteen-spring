@@ -26,13 +26,11 @@ interface PollRepository : CoroutineCrudRepository<PollEntity, Long> {
         SELECT 
             p.id,
             p.question,
-            p.photo,
-            p.selects::text AS selects,
             p.color_start,
             p.color_end,
             p.vote_count,
-            (SELECT COUNT(*)::bigint FROM poll_comments pc WHERE pc.poll_id = p.id AND pc.deleted_at IS NULL) AS comment_count,
-            (SELECT COUNT(*)::bigint FROM poll_likes pl WHERE pl.poll_id = p.id) AS like_count,
+            (SELECT COUNT(*) FROM poll_comments pc WHERE pc.poll_id = p.id AND pc.deleted_at IS NULL) AS comment_count,
+            (SELECT COUNT(*) FROM poll_likes pl WHERE pl.poll_id = p.id) AS like_count,
             EXISTS (SELECT 1 FROM poll_likes pl2 WHERE pl2.poll_id = p.id AND pl2.user_id = :currentUserId) AS liked_by_me,
             EXISTS (SELECT 1 FROM poll_users pu WHERE pu.poll_id = p.id AND pu.user_id = :currentUserId) AS voted_by_me,
             (SELECT seq FROM poll_users pu WHERE pu.poll_id = p.id AND pu.user_id = :currentUserId) AS voted_seq,
@@ -40,8 +38,15 @@ interface PollRepository : CoroutineCrudRepository<PollEntity, Long> {
             p.created_id,
             p.created_at
         FROM polls p
-        JOIN users u ON u.id = p.created_id
         WHERE p.deleted_at IS NULL
+          AND (
+              :type = 'all'
+              OR (:type = 'mine' AND p.created_id = :currentUserId)
+              OR (:type = 'participated' AND (
+                    p.id IN (SELECT poll_id FROM poll_users WHERE user_id = :currentUserId)
+                    OR p.id IN (SELECT poll_id FROM poll_comments WHERE created_id = :currentUserId AND deleted_at IS NULL)
+              ))
+          )
           AND (:cursor IS NULL OR p.id < :cursor)
         ORDER BY p.id DESC
         LIMIT :size
@@ -49,7 +54,8 @@ interface PollRepository : CoroutineCrudRepository<PollEntity, Long> {
     fun findSummariesByCursor(
         cursor: Long?,
         size: Int,
-        currentUserId: Long?
+        currentUserId: Long?,
+        type: String
     ): Flow<PollSummaryRow>
 
 
