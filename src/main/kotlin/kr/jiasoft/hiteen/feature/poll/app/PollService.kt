@@ -404,9 +404,21 @@ class PollService(
                         )
                     }.toList()
 
+    suspend fun getComment(
+        pollId: Long,
+        commentUid: UUID,
+        currentUserId: Long,
+    ): PollCommentResponse?
+        = comments.findComment(pollId, commentUid, currentUserId)
+            .let { comment ->
+                comment?.copy(
+                    user = userService.findUserResponse(comment.createdId)
+                )
+            }
 
-    suspend fun createComment(req: PollCommentRegisterRequest, user: UserEntity): PollCommentEntity {
-        val p = polls.findById(req.pollId)!!
+
+    suspend fun createComment(req: PollCommentRegisterRequest, user: UserEntity): PollCommentResponse? {
+        val p = polls.findById(req.pollId)?: throw IllegalArgumentException("poll not found")
         if(p.allowComment == 0) throw BusinessValidationException(mapOf("error" to "comment_not_allowed"))
         val parent: PollCommentEntity? = req.parentId?.let { comments.findById(it) }
         val saved = comments.save(
@@ -424,7 +436,7 @@ class PollService(
         expService.grantExp(user.id, "CREATE_VOTE_COMMENT", saved.id)
         pointService.applyPolicy(user.id, PointPolicy.VOTE_COMMENT, saved.id)
         pushService.sendAndSavePush(listOf(p.createdId), PushTemplate.VOTE_COMMENT.buildPushData("nickname" to user.nickname))
-        return saved
+        return getComment(req.pollId, saved.uid, user.id)
     }
 
 
