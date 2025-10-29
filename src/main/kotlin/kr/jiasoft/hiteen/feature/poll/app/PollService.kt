@@ -405,7 +405,7 @@ class PollService(
                     }.toList()
 
 
-    suspend fun createComment(req: PollCommentRegisterRequest, user: UserEntity): Long {
+    suspend fun createComment(req: PollCommentRegisterRequest, user: UserEntity): PollCommentEntity {
         val p = polls.findById(req.pollId)!!
         if(p.allowComment == 0) throw BusinessValidationException(mapOf("error" to "comment_not_allowed"))
         val parent: PollCommentEntity? = req.parentId?.let { comments.findById(it) }
@@ -424,7 +424,7 @@ class PollService(
         expService.grantExp(user.id, "CREATE_VOTE_COMMENT", saved.id)
         pointService.applyPolicy(user.id, PointPolicy.VOTE_COMMENT, saved.id)
         pushService.sendAndSavePush(listOf(p.createdId), PushTemplate.VOTE_COMMENT.buildPushData("nickname" to user.nickname))
-        return saved.id
+        return saved
     }
 
 
