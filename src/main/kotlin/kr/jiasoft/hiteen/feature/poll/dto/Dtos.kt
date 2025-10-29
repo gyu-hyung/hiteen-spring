@@ -213,5 +213,5 @@ data class PollCommentResponse(
     val createdAt: OffsetDateTime,
 
     @param:Schema(description = "작성자 요약 정보")
-    val user: UserSummary? = null,
+    val user: UserResponse? = null,
 )

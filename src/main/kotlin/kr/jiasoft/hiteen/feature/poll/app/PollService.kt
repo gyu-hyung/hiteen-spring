@@ -400,7 +400,7 @@ class PollService(
             = comments.findComments(pollId, parentUid, currentUserId ?: -1L, cursor, perPage + 1)
                 .map { comment ->
                         comment.copy(
-                            user = userService.findUserSummary(comment.createdId)
+                            user = userService.findUserResponse(comment.createdId)
                         )
                     }.toList()
 
