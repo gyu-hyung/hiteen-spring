@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
 import kr.jiasoft.hiteen.common.dto.ApiPageCursor
 import kr.jiasoft.hiteen.common.dto.ApiResult
+import kr.jiasoft.hiteen.feature.poll.domain.PollCommentEntity
 import kr.jiasoft.hiteen.feature.poll.dto.*
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import org.springframework.http.MediaType
@@ -175,7 +176,7 @@ class PollController(
     suspend fun createComment(
         @Parameter(description = "댓글 등록/수정 요청 DTO") pollCommentRegisterRequest: PollCommentRegisterRequest,
         @AuthenticationPrincipal(expression = "user") user: UserEntity
-    ): ResponseEntity<ApiResult<Long>> {
+    ): ResponseEntity<ApiResult<PollCommentEntity>> {
         val commentId = service.createComment(pollCommentRegisterRequest, user)
         return ResponseEntity.ok(ApiResult.success(commentId))
     }
