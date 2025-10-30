@@ -27,6 +27,15 @@ resources:
     cpu: 1
     memory: 1Gi
 
+volumeMounts:
+  - name: asset-storage
+    mountPath: /home/spring
+
+volumes:
+  - name: asset-storage
+    emptyDir: {}
+
+
 env:
   PROFILE: dev
 

@@ -55,7 +55,7 @@ jobs:
             --set image.repository=$IMAGE \
             --set image.tag=$TAG \
             --set env.PROFILE=dev \
-            --wait --timeout 300s
+            --wait --timeout 80s
 
       - name: Verify deployment
         run: |
