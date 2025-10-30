@@ -1,0 +1,46 @@
+replicaCount: 2
+
+image:
+  repository: ghcr.io/gyu-hyung/hiteen-api
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8080
+
+ingress:
+  enabled: true
+  className: nginx
+  hosts:
+    - host: api.hiteen.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: [] # prod에서는 cert-manager 사용 권장
+
+resources:
+  requests:
+    cpu: 300m
+    memory: 512Mi
+  limits:
+    cpu: 1
+    memory: 1Gi
+
+env:
+  SPRING_R2DBC_URL: "r2dbc:postgresql://49.247.175.76:5432/hiteen"
+  SPRING_R2DBC_USERNAME: "hiteen"
+  SPRING_R2DBC_PASSWORD: "xxxxxxxx"
+  SPRING_DATA_MONGODB_URI: "mongodb://hiteen:hiteen%402025@49.247.170.182:27017/hiteen?authSource=admin"
+  SPRING_DATA_REDIS_CLUSTER_NODES: "10.8.1.51:6379,10.8.0.159:6379"
+  SPRING_DATA_REDIS_PASSWORD: "xxxxxxxx"
+  SOKETI_HOST: "soketi.hiteen-prod.svc.cluster.local"
+  SOKETI_PORT: "6001"
+  SOKETI_APP_ID: "hiteen-app"
+  SOKETI_APP_KEY: "hiteen-key"
+  SOKETI_APP_SECRET: "hiteen-secret"
+  JWT_SECRET: "ac0da6c32199d5d4829ca62b05f2a353ab926e2855de718e28286ca64bc2f9df"
+  NEIS_API_KEY: "458d6485b25c46009758a4ab53413497"
+  KAKAO_API_KEY: "6ba92dcdddc5dccc78dbbaa50eb95825"
+  SPRINGDOC_API_DOCS_PATH: "/api-docs"
+  SWAGGER_UI_PATH: "/swagger-ui"
