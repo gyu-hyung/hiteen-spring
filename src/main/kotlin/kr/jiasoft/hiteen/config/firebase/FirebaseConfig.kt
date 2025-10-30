@@ -6,16 +6,19 @@ import com.google.firebase.FirebaseOptions
 import com.google.firebase.messaging.FirebaseMessaging
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.core.io.ClassPathResource
+import java.io.FileInputStream
 
 @Configuration
 class FirebaseConfig {
+
     @Bean
     fun firebaseApp(): FirebaseApp {
-        val resource = ClassPathResource("firebase/gyuhyungfcm-firebase-adminsdk-fbsvc-783efd0df8.json")
+        val path = System.getenv("FIREBASE_CREDENTIAL_PATH")
+            ?: throw IllegalStateException("Missing FIREBASE_CREDENTIAL_PATH environment variable")
+
+        val serviceAccount = FileInputStream(path)
         val options = FirebaseOptions.builder()
-            .setCredentials(GoogleCredentials.fromStream(resource.inputStream))
-//            .setProjectId("back-end-template01")
+            .setCredentials(GoogleCredentials.fromStream(serviceAccount))
             .build()
 
         return if (FirebaseApp.getApps().isEmpty()) {
@@ -29,5 +32,3 @@ class FirebaseConfig {
     fun firebaseMessaging(app: FirebaseApp): FirebaseMessaging =
         FirebaseMessaging.getInstance(app)
 }
-
-

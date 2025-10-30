@@ -80,6 +80,13 @@ env:
   SPRING_DATA_REDIS_CLUSTER_NODES: "10.8.1.51:6379,10.8.0.159:6379"
   SPRING_DATA_REDIS_PASSWORD: "hiteen1234"
 
+
+  # ---------------------------
+  # Firebase
+  FIREBASE_CREDENTIAL_PATH: "/secrets/firebase-key.json"
+  # ---------------------------
+
+
   # ---------------------------
   # Soketi (WebSocket)
   # ---------------------------
