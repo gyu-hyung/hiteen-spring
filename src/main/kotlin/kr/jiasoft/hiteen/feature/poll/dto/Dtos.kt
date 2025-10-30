@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.constraints.NotBlank
 import kr.jiasoft.hiteen.feature.user.dto.UserResponse
-import kr.jiasoft.hiteen.feature.user.dto.UserSummary
 import java.time.OffsetDateTime
 import java.util.UUID
 
@@ -175,8 +174,8 @@ data class PollCommentRegisterRequest(
     @param:Schema(description = "댓글 내용", example = "저는 이 영화가 최고라고 생각합니다!")
     val content: String,
 
-    @param:Schema(description = "부모 댓글 ID (대댓글일 경우 지정)", example = "202")
-    val parentId: Long? = null
+    @param:Schema(description = "부모 댓글 UID (대댓글일 경우 지정)", example = "202")
+    val parentUid: UUID? = null
 )
 
 

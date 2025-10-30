@@ -418,11 +418,11 @@ class PollService(
     suspend fun createComment(req: PollCommentRegisterRequest, user: UserEntity): PollCommentResponse? {
         val p = polls.findById(req.pollId)?: throw IllegalArgumentException("poll not found")
         if(p.allowComment == 0) throw BusinessValidationException(mapOf("error" to "comment_not_allowed"))
-        val parent: PollCommentEntity? = req.parentId?.let { comments.findById(it) }
+        val parent: PollCommentEntity? = req.parentUid?.let { comments.findByUid(it) }
         val saved = comments.save(
             PollCommentEntity(
                 pollId = p.id,
-                parentId = req.parentId,
+                parentId = parent?.id,
                 content = req.content,
                 createdId = user.id,
                 createdAt = OffsetDateTime.now(),
