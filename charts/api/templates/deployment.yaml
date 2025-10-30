@@ -14,7 +14,6 @@ spec:
       labels:
         app: {{ include "hiteen-api.name" . }}
     spec:
-      # ✅ spring 유저 UID와 맞추기 (권한 문제 방지)
       securityContext:
         runAsUser: 10001
         runAsGroup: 10001
@@ -30,7 +29,6 @@ spec:
           ports:
             - containerPort: 8080
 
-          # ✅ 환경 변수 주입
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: "{{ .Values.env.PROFILE }}"
@@ -39,7 +37,6 @@ spec:
               value: "{{ $value }}"
             {{- end }}
 
-          # ✅ Health Check 설정
           readinessProbe:
             httpGet:
               path: /actuator/health/readiness
@@ -54,17 +51,22 @@ spec:
             initialDelaySeconds: 30
             periodSeconds: 15
 
-          # ✅ 리소스 설정
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
 
-          # ✅ 볼륨 마운트
+          # ✅ 볼륨 마운트 (assets + firebase secret)
           volumeMounts:
             - name: {{ .Values.persistence.name }}
               mountPath: {{ .Values.persistence.mountPath }}
+            - name: firebase-secret
+              mountPath: /secrets
+              readOnly: true
 
-      # ✅ PVC 볼륨 설정
+      # ✅ PVC 및 Firebase Secret 볼륨 설정
       volumes:
         - name: {{ .Values.persistence.name }}
           persistentVolumeClaim:
             claimName: {{ include "hiteen-api.fullname" . }}-pvc
+        - name: firebase-secret
+          secret:
+            secretName: firebase-secret
