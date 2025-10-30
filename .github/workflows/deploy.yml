@@ -48,19 +48,7 @@ jobs:
         run: |
           kubectl get ns $NAMESPACE || kubectl create ns $NAMESPACE
 
-      # ✅ main 브랜치 → prod / dev 브랜치 → dev
-      - name: Helm upgrade (prod)
-        if: github.ref_name == 'main'
-        run: |
-          helm upgrade --install hiteen-api $CHART_PATH \
-            -n $NAMESPACE \
-            --set image.repository=$IMAGE \
-            --set image.tag=$TAG \
-            --set env.PROFILE=prod \
-            --wait --timeout 300s
-
-      - name: Helm upgrade (dev)
-        if: github.ref_name != 'main'
+      - name: Helm upgrade
         run: |
           helm upgrade --install hiteen-api $CHART_PATH \
             -n $NAMESPACE \
