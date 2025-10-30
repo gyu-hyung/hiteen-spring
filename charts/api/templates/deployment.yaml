@@ -23,12 +23,12 @@ spec:
           ports:
             - containerPort: 8080
           env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "{{ .Values.env.PROFILE }}"
             {{- range $key, $value := .Values.env }}
             - name: {{ $key }}
               value: "{{ $value }}"
             {{- end }}
-            - name: SPRING_PROFILES_ACTIVE
-              value: "{{ .Values.env.PROFILE }}"
           readinessProbe:
             httpGet:
               path: /actuator/health/readiness
