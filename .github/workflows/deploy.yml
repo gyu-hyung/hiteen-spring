@@ -50,7 +50,7 @@ jobs:
             --set image.repository=$IMAGE \
             --set image.tag=$TAG \
             --set env.PROFILE=${{ github.ref_name == 'main' && 'prod' || 'dev' }} \
-            --atomic --wait --timeout 300s
+            --wait --timeout 300s
 
       - name: Verify deployment
         run: |

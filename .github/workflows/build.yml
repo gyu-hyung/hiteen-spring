@@ -40,4 +40,5 @@ jobs:
 
       - name: Notify success
         if: success()
-        run: echo "✅ Build & Push to GHCR success"
+        run: |
+          echo "✅ Build & Push to GHCR success: ${IMAGE}:${TAG}"
