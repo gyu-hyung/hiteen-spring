@@ -2,7 +2,7 @@ name: Build & Push Docker Image
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, dev ]
 
 jobs:
   build:
@@ -15,8 +15,8 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v4
 
-      # ✅ Gradle 캐시 적용 (속도 향상)
-      - uses: actions/cache@v4
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v4
         with:
           path: ~/.gradle/caches
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
@@ -24,21 +24,19 @@ jobs:
             ${{ runner.os }}-gradle-
 
       - name: Log in to GitHub Container Registry
-        run: echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+        run: echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
 
-      # ✅ BuildKit 활성화 + dev 프로필 빌드
       - name: Build and push Docker image
         env:
           DOCKER_BUILDKIT: 1
         run: |
           IMAGE=ghcr.io/${{ github.repository_owner }}/hiteen-api
           TAG=${{ github.sha }}
-          docker build -t $IMAGE:$TAG -t $IMAGE:latest \
+          docker build -f Dockerfile -t $IMAGE:$TAG -t $IMAGE:latest \
             --build-arg SPRING_PROFILES_ACTIVE=dev .
           docker push $IMAGE:$TAG
           docker push $IMAGE:latest
 
       - name: Notify success
         if: success()
-        run: |
-          echo "✅ Build & Push to GHCR success: ${IMAGE}:${TAG}"
+        run: echo "✅ Build & Push to GHCR success: ghcr.io/${{ github.repository_owner }}/hiteen-api:${{ github.sha }}"
