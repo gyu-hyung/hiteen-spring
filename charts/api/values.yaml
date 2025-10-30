@@ -29,7 +29,7 @@ resources:
 
 volumeMounts:
   - name: asset-storage
-    mountPath: /home/spring
+    mountPath: /app/assets
 
 volumes:
   - name: asset-storage
