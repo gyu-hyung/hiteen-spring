@@ -11,13 +11,20 @@ jobs:
 
     env:
       NAMESPACE: hiteen-prod
-      CHART_PATH: ./hiteen-api
+      CHART_PATH: ./charts/api
       IMAGE: ghcr.io/${{ github.repository_owner }}/hiteen-api
       TAG: ${{ github.event.workflow_run.head_sha }}
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Debug workspace (임시 확인용)
+        run: |
+          echo "현재 작업 디렉토리:"
+          pwd
+          echo "파일 목록:"
+          ls -R .
 
       - name: Set up kubectl
         uses: azure/setup-kubectl@v4
