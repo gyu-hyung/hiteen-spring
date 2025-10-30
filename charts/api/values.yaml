@@ -46,7 +46,7 @@ persistence:
   enabled: true
   name: asset-storage
   mountPath: /app/assets
-  storageClass: gp2         # AWS EBS → gp2 / gp3
+  storageClass: local-path
   # storageClass: standard   # minikube, local-path 환경일 경우 교체
   accessModes:
     - ReadWriteOnce
