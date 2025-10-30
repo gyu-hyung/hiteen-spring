@@ -5,9 +5,8 @@ metadata:
   name: {{ include "hiteen-api.fullname" . }}
   labels:
     app: {{ include "hiteen-api.name" . }}
-  annotations:
-    kubernetes.io/ingress.class: {{ .Values.ingress.className | quote }}
 spec:
+  ingressClassName: {{ .Values.ingress.className | quote }}
   rules:
     {{- range .Values.ingress.hosts }}
     - host: {{ .host }}

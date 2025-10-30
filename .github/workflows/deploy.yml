@@ -57,7 +57,7 @@ jobs:
             --set image.repository=$IMAGE \
             --set image.tag=$TAG \
             --set env.PROFILE=prod \
-            --wait --timeout 30s
+            --wait --timeout 300s
 
       - name: Helm upgrade (dev)
         if: github.ref_name != 'main'
