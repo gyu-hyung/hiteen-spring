@@ -10,6 +10,12 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
+    env:
+      NAMESPACE: hiteen-prod
+      CHART_PATH: ./charts/api
+      IMAGE: ghcr.io/${{ github.repository_owner }}/hiteen-api
+      TAG: ${{ github.sha }}
+
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -28,20 +34,22 @@ jobs:
         run: |
           mkdir -p ~/.kube
           echo "${{ secrets.KUBECONFIG }}" | base64 --decode > ~/.kube/config
+          kubectl config use-context $(kubectl config current-context)
 
-      - name: Helm upgrade hiteen-api
+      - name: Create namespace if not exists
         run: |
-          IMAGE=ghcr.io/${{ github.repository_owner }}/hiteen-api
-          TAG=${{ github.sha }}
+          kubectl get ns $NAMESPACE || kubectl create ns $NAMESPACE
 
-          # Helm 설치 혹은 업데이트
-          helm upgrade --install hiteen-api ./charts/api \
-            -n hiteen-prod \
+      - name: Helm upgrade (deploy new image)
+        run: |
+          helm upgrade --install hiteen-api $CHART_PATH \
+            -n $NAMESPACE \
             --set image.repository=$IMAGE \
             --set image.tag=$TAG \
+            --set env.PROFILE=${{ github.ref_name == 'main' && 'prod' || 'dev' }} \
             --wait --timeout 300s
 
       - name: Verify deployment
         run: |
-          kubectl get pods -n hiteen-prod
-          kubectl rollout status deploy/hiteen-api -n hiteen-prod
+          kubectl rollout status deploy/hiteen-api -n $NAMESPACE
+          kubectl get pods -n $NAMESPACE -o wide

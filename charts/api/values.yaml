@@ -28,6 +28,7 @@ resources:
     memory: 1Gi
 
 env:
+  PROFILE: dev
   SPRING_R2DBC_URL: "r2dbc:postgresql://49.247.175.76:5432/hiteen"
   SPRING_R2DBC_USERNAME: "hiteen"
   SPRING_R2DBC_PASSWORD: "hiteen@2025"
