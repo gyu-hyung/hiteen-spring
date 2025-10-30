@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: loc
+    active: dev
   application:
     name: hiteen
   r2dbc:
