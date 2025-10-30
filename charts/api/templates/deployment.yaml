@@ -27,6 +27,8 @@ spec:
             - name: {{ $key }}
               value: "{{ $value }}"
             {{- end }}
+            - name: SPRING_PROFILES_ACTIVE
+              value: "{{ .Values.env.PROFILE }}"
           readinessProbe:
             httpGet:
               path: /actuator/health/readiness
