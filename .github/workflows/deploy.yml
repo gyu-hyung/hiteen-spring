@@ -34,7 +34,9 @@ jobs:
         run: |
           mkdir -p ~/.kube
           echo "${{ secrets.KUBECONFIG }}" | base64 --decode > ~/.kube/config
+          chmod 600 ~/.kube/config
           kubectl config use-context $(kubectl config current-context)
+          kubectl get nodes
 
       - name: Create namespace if not exists
         run: |
@@ -44,12 +46,21 @@ jobs:
         run: |
           helm upgrade --install hiteen-api $CHART_PATH \
             -n $NAMESPACE \
+            --create-namespace \
             --set image.repository=$IMAGE \
             --set image.tag=$TAG \
             --set env.PROFILE=${{ github.ref_name == 'main' && 'prod' || 'dev' }} \
-            --wait --timeout 300s
+            --atomic --wait --timeout 300s
 
       - name: Verify deployment
         run: |
           kubectl rollout status deploy/hiteen-api -n $NAMESPACE
           kubectl get pods -n $NAMESPACE -o wide
+
+      - name: Notify success
+        if: success()
+        run: echo "✅ hiteen-api deployed successfully to $NAMESPACE"
+
+      - name: Notify failure
+        if: failure()
+        run: echo "❌ hiteen-api deploy failed. Check Helm/K8s logs."
