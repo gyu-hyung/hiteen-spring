@@ -56,12 +56,13 @@ jobs:
           kubectl get ns $NAMESPACE || kubectl create ns $NAMESPACE
 
       # 6️⃣ Firebase Secret 생성 (자동)
+      # secrets.FIREBASE_KEY_JSON 은 base64 인코딩된 JSON 문자열이어야 합니다.
       - name: Create firebase-secret
         run: |
-          echo "${{ secrets.FIREBASE_KEY_JSON }}" > firebase-key.json
+          echo "${{ secrets.FIREBASE_KEY_JSON }}" | base64 --decode > firebase-key.json
           kubectl create secret generic firebase-secret \
             -n $NAMESPACE \
-            --from-file=firebase-key.json=firebase-key.json \
+            --from-file=firebase-key.json=./firebase-key.json \
             --dry-run=client -o yaml | kubectl apply -f -
           echo "✅ firebase-secret created/updated in namespace $NAMESPACE"
 
