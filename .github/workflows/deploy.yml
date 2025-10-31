@@ -74,7 +74,7 @@ jobs:
             --set image.repository=$IMAGE \
             --set image.tag=$TAG \
             --set env.PROFILE=dev \
-            --wait --timeout 90s
+            --wait --timeout 30s
 
       # 8️⃣ 배포 상태 확인
       - name: Verify deployment

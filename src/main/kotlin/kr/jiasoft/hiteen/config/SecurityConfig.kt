@@ -64,6 +64,7 @@ class SecurityConfig(
                     "/v3/api-docs/**",
                     "/swagger-ui/**",
                     "/favicon.ico",
+                    "/actuator/**"
                 ).permitAll()
 
                 it.pathMatchers("/ws/**").permitAll()
