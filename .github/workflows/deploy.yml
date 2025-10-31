@@ -73,7 +73,8 @@ jobs:
             -n $NAMESPACE \
             --set image.repository=$IMAGE \
             --set image.tag=$TAG \
-            --set env.PROFILE=dev 
+            --set env.PROFILE=dev \
+            --wait --timeout 300s
 
       # 8️⃣ 배포 상태 확인
       - name: Verify deployment
