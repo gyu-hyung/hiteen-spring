@@ -33,8 +33,6 @@ spec:
             # ✅ JVM 자동 주입
             - name: JAVA_TOOL_OPTIONS
               value: "{{ .Values.java.options | default "-XX:MaxRAMPercentage=75.0 -XX:InitialRAMPercentage=25.0" }}"
-
-            # ✅ Spring profile
             - name: SPRING_PROFILES_ACTIVE
               value: "{{ .Values.env.PROFILE }}"
             {{- range $key, $value := .Values.env }}
