@@ -44,4 +44,4 @@ out/
 
 
 # Firebase service account credentials
-#src/main/resources/firebase/*.json
+src/main/resources/firebase/*.json
