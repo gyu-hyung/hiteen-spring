@@ -16,7 +16,7 @@ spring:
     change-log: classpath:db/changelog/db.changelog-master.yaml
   data:
     mongodb:
-      uri: mongodb://hiteen:hiteen%402025@49.247.170.182:27017/hiteen?authSource=admin
+      uri: mongodb://hiteen:hiteen%402025@10.8.2.156:27017/hiteen?authSource=admin
     redis:
       repositories:
         enabled: false
