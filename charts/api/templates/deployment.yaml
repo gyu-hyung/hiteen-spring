@@ -71,5 +71,5 @@ spec:
           persistentVolumeClaim:
             claimName: {{ include "hiteen-api.fullname" . }}-pvc
         - name: firebase-secret
-        secret:
-          secretName: firebase-secret
+          secret:
+            secretName: firebase-secret
