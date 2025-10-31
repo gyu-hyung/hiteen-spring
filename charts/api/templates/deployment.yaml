@@ -37,8 +37,6 @@ spec:
             # ✅ Spring profile
             - name: SPRING_PROFILES_ACTIVE
               value: "{{ .Values.env.PROFILE }}"
-
-            # ✅ 기타 환경 변수 반복 주입
             {{- range $key, $value := .Values.env }}
             - name: {{ $key }}
               value: "{{ $value }}"
