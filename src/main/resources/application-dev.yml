@@ -3,14 +3,14 @@ spring:
     name: hiteen
   r2dbc:
     username: hiteen
-    url: r2dbc:postgresql://49.247.175.76:5432/hiteen
+    url: r2dbc:postgresql://10.8.3.89:5432/hiteen
     password: xxxxxxxx
     pool:
       enabled: true
       initial-size: 5
       max-size: 20
   liquibase:
-    url: jdbc:postgresql://49.247.175.76:5432/hiteen
+    url: jdbc:postgresql://10.8.3.89:5432/hiteen
     user: hiteen
     password: xxxxxxxx
     change-log: classpath:db/changelog/db.changelog-master.yaml
