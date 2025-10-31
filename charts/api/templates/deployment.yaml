@@ -30,11 +30,15 @@ spec:
             - containerPort: 8080
 
           env:
+            # ✅ JVM 자동 주입
             - name: JAVA_TOOL_OPTIONS
-              value: "-XX:MaxRAMPercentage=75.0"
+              value: "{{ .Values.java.options | default "-XX:MaxRAMPercentage=75.0 -XX:InitialRAMPercentage=25.0" }}"
 
+            # ✅ Spring profile
             - name: SPRING_PROFILES_ACTIVE
               value: "{{ .Values.env.PROFILE }}"
+
+            # ✅ 기타 환경 변수 반복 주입
             {{- range $key, $value := .Values.env }}
             - name: {{ $key }}
               value: "{{ $value }}"
@@ -49,7 +53,6 @@ spec:
             timeoutSeconds: 5
             failureThreshold: 5
 
-
           livenessProbe:
             httpGet:
               path: /actuator/health/liveness
@@ -60,7 +63,6 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
 
-          # ✅ 볼륨 마운트 (assets + firebase secret)
           volumeMounts:
             - name: {{ .Values.persistence.name }}
               mountPath: {{ .Values.persistence.mountPath }}
@@ -68,11 +70,10 @@ spec:
               mountPath: /secrets
               readOnly: true
 
-      # ✅ PVC 및 Firebase Secret 볼륨 설정
       volumes:
         - name: {{ .Values.persistence.name }}
           persistentVolumeClaim:
             claimName: {{ include "hiteen-api.fullname" . }}-pvc
         - name: firebase-secret
-          secret:
-            secretName: firebase-secret
+        secret:
+          secretName: firebase-secret
