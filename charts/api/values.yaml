@@ -61,18 +61,18 @@ env:
   # ---------------------------
   # Database (R2DBC + Liquibase)
   # ---------------------------
-  SPRING_R2DBC_URL: "r2dbc:postgresql://49.247.175.76:5432/hiteen"
+  SPRING_R2DBC_URL: "r2dbc:postgresql://10.8.3.89:5432/hiteen"
   SPRING_R2DBC_USERNAME: "hiteen"
   SPRING_R2DBC_PASSWORD: "hiteen@2025"
 
-  SPRING_LIQUIBASE_URL: "jdbc:postgresql://49.247.175.76:5432/hiteen"
+  SPRING_LIQUIBASE_URL: "jdbc:postgresql://10.8.3.89:5432/hiteen"
   SPRING_LIQUIBASE_USER: "hiteen"
   SPRING_LIQUIBASE_PASSWORD: "hiteen@2025"
 
   # ---------------------------
   # MongoDB
   # ---------------------------
-  SPRING_DATA_MONGODB_URI: "mongodb://hiteen:hiteen%402025@49.247.170.182:27017/hiteen?authSource=admin"
+  SPRING_DATA_MONGODB_URI: "mongodb://hiteen:hiteen%402025@10.8.2.156:27017/hiteen?authSource=admin"
 
   # ---------------------------
   # Redis Cluster
