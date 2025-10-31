@@ -13,12 +13,19 @@ class FirebaseConfig {
 
     @Bean
     fun firebaseApp(): FirebaseApp {
-        val path = System.getenv("FIREBASE_CREDENTIAL_PATH")
-            ?: throw IllegalStateException("Missing FIREBASE_CREDENTIAL_PATH environment variable")
+        val envPath = System.getenv("FIREBASE_CREDENTIAL_PATH")
+        val inputStream = if (envPath != null) {
+            FileInputStream(envPath)
+        } else {
+            // ✅ 로컬 환경일 경우 resources 폴더에서 로드
+            javaClass.getResourceAsStream("/firebase/gyuhyungfcm-firebase-adminsdk-fbsvc-783efd0df8.json")
+                ?: throw IllegalStateException("Firebase credentials not found")
+        }
 
-        val serviceAccount = FileInputStream(path)
+//        val inputStream = javaClass.getResourceAsStream("/firebase/gyuhyungfcm-firebase-adminsdk-fbsvc-783efd0df8.json")
+
         val options = FirebaseOptions.builder()
-            .setCredentials(GoogleCredentials.fromStream(serviceAccount))
+            .setCredentials(GoogleCredentials.fromStream(inputStream))
             .build()
 
         return if (FirebaseApp.getApps().isEmpty()) {
