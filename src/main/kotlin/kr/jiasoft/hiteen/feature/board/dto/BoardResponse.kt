@@ -27,7 +27,7 @@ data class BoardResponse(
     val category: String,
 
     @param:Schema(description = "제목", example = "학교 행사 안내")
-    val subject: String,
+    val subject: String? = null,
 
     @param:Schema(description = "내용", example = "이번 주 금요일에 체육대회가 열립니다.")
     val content: String,

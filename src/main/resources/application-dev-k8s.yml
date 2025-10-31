@@ -1,28 +1,29 @@
 spring:
-  profiles:
-    active: dev
   application:
     name: hiteen
   r2dbc:
     username: hiteen
-    url: r2dbc:postgresql://127.0.0.1:5432/hiteen
-    password: 1234
+    url: r2dbc:postgresql://10.8.3.89:5432/hiteen
+    password: hiteen@2025
     pool:
       enabled: true
       initial-size: 5
       max-size: 20
   liquibase:
-    url: jdbc:postgresql://127.0.0.1:5432/hiteen
+    url: jdbc:postgresql://10.8.3.89:5432/hiteen
     user: hiteen
-    password: 1234
+    password: hiteen@2025
     change-log: classpath:db/changelog/db.changelog-master.yaml
   data:
     mongodb:
-      uri: mongodb://hiteen:1234@127.0.0.1:27017/hiteen?authSource=admin
+      uri: mongodb://hiteen:hiteen%402025@10.8.2.156:27017/hiteen?authSource=admin
     redis:
       repositories:
         enabled: false
-      host: 127.0.0.1
+      cluster:
+        nodes:
+          - 10.8.1.51:6379
+          - 10.8.0.159:6379
       password: hiteen1234
       timeout: 5s
       client-type: lettuce
@@ -47,7 +48,8 @@ server:
 
 app:
   asset:
-    storage-root: ${HOME}/assets
+#    storage-root: ${HOME}/assets
+    storage-root: /app/assets
     static-locations: classpath:/assets/
     allowed-exts: jpg,jpeg,png,gif,webp,bmp,svg,mp4,mov,avi,mkv,pdf,txt,csv,zip,rar,gz
     max-size-bytes: 5242880 # 50MB
@@ -85,7 +87,7 @@ sms:
     detail-url: https://kakaoapi.aligo.in/akv10/history/detail/
 
 batch:
-  enabled: true
+  enabled: false
 
 neis:
   base-url: "https://open.neis.go.kr/hub"
@@ -94,6 +96,8 @@ neis:
 kakao:
   base-url: "https://dapi.kakao.com/v2/local"
   api-key: "6ba92dcdddc5dccc78dbbaa50eb95825"
+
+
 
 #mqtt:
 #  broker:

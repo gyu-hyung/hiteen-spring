@@ -3,6 +3,7 @@ spring:
     name: hiteen
   r2dbc:
     username: hiteen
+#    url: r2dbc:postgresql://49.247.175.76:5432/hiteen
     url: r2dbc:postgresql://10.8.3.89:5432/hiteen
     password: hiteen@2025
     pool:
@@ -10,12 +11,14 @@ spring:
       initial-size: 5
       max-size: 20
   liquibase:
+#    url: jdbc:postgresql://49.247.175.76:5432/hiteen
     url: jdbc:postgresql://10.8.3.89:5432/hiteen
     user: hiteen
     password: hiteen@2025
     change-log: classpath:db/changelog/db.changelog-master.yaml
   data:
     mongodb:
+#      uri: mongodb://hiteen:hiteen%402025@49.247.170.182:27017/hiteen?authSource=admin
       uri: mongodb://hiteen:hiteen%402025@10.8.2.156:27017/hiteen?authSource=admin
     redis:
       repositories:
@@ -48,8 +51,8 @@ server:
 
 app:
   asset:
-#    storage-root: ${HOME}/assets
-    storage-root: /app/assets
+    storage-root: ${HOME}/assets
+#    storage-root: /app/assets
     static-locations: classpath:/assets/
     allowed-exts: jpg,jpeg,png,gif,webp,bmp,svg,mp4,mov,avi,mkv,pdf,txt,csv,zip,rar,gz
     max-size-bytes: 5242880 # 50MB
