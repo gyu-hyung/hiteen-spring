@@ -11,15 +11,15 @@ import java.time.LocalDate
 @Schema(description = "게시판 글 등록 요청 DTO")
 data class BoardCreateRequest(
 
-    @field:NotBlank
-    @field:Size(max = 200)
+//    @field:NotBlank
+//    @field:Size(max = 200)
     @param:Schema(
         description = "게시글 제목",
         example = "오늘 저녁 같이 운동하실 분?",
         maxLength = 200,
         required = true
     )
-    val subject: String,
+    val subject: String?,
 
     @field:NotBlank
     @param:Schema(
