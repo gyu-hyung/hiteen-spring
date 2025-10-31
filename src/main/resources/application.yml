@@ -42,6 +42,21 @@ spring:
       - "classpath:mbti.yml"
       - "classpath:exp.yml"
 
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    tags:
+      application: hiteen   # 앱 이름(식별용)
+
+
+
 server:
   port: 8080
 
