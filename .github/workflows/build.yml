@@ -1,4 +1,4 @@
-name: 🏗️ Build & Push Docker Image (Fast AMD64)
+name: 🏗️ Build & Push Docker Image
 
 on:
   push:
