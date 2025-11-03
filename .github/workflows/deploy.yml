@@ -74,6 +74,7 @@ jobs:
 
       - name: 🔍 Verify rollout
         run: |
+          
           kubectl rollout status deployment/hiteen-test -n $NAMESPACE
           kubectl get pods -n $NAMESPACE -o wide
 

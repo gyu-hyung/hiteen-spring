@@ -29,6 +29,8 @@ app:
       value: redis-0.redis.hiteen.svc.cluster.local
     - name: REDIS_PORT
       value: "6379"
+    - name: FIREBASE_CREDENTIAL_PATH
+      value: /app/firebase/firebase-key.json
   resources:
     requests:
       cpu: 300m
