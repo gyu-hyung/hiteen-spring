@@ -45,10 +45,13 @@ jobs:
 
       - name: 🔐 Create Firebase Secret
         run: |
-          echo "${{ secrets.FIREBASE_KEY_JSON }}" | base64 --decode > firebase-key.json
+          echo "${{ secrets.FIREBASE_KEY_JSON }}" > firebase-key.json
+          kubectl delete secret firebase-credentials -n $NAMESPACE --ignore-not-found
           kubectl create secret generic firebase-credentials \
-            --from-file=firebase-key.json \
-            -n $NAMESPACE --dry-run=client -o yaml | kubectl apply -f -
+            --from-file=firebase-key.json=firebase-key.json \
+            -n $NAMESPACE
+          rm -f firebase-key.json
+        shell: bash
 
       - name: 🧹 Clean up pending Helm release
         run: |
@@ -74,7 +77,6 @@ jobs:
 
       - name: 🔍 Verify rollout
         run: |
-          
           kubectl rollout status deployment/hiteen-test -n $NAMESPACE
           kubectl get pods -n $NAMESPACE -o wide
 
