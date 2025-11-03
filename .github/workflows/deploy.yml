@@ -44,6 +44,12 @@ jobs:
         run: |
           kubectl get ns $NAMESPACE || kubectl create ns $NAMESPACE
 
+      - name: 🔐 Create Firebase Secret
+        run: |
+          echo "${{ secrets.FIREBASE_KEY_JSON }}" | base64 --decode > firebase-key.json
+          kubectl create secret generic firebase-credentials --from-file=firebase-key.json -n hiteen --dry-run=client -o yaml | kubectl apply -f -
+
+
       - name: 🪶 Deploy via Helm
         run: |
           helm upgrade --install hiteen $CHART_PATH \
