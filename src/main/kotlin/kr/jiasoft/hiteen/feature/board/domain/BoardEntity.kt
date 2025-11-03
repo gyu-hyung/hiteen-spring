@@ -1,5 +1,6 @@
 package kr.jiasoft.hiteen.feature.board.domain
 
+import io.swagger.v3.oas.annotations.media.Schema
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Table
 import java.time.LocalDate
@@ -24,6 +25,8 @@ data class BoardEntity (
     val status: String,
     val address: String? = null,
     val detailAddress: String? = null,
+    val lat: Double? = null,
+    val lng: Double? = null,
     val createdId: Long,
     val createdAt: OffsetDateTime,
     val updatedId: Long? = null,
