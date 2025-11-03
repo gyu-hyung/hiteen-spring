@@ -49,6 +49,14 @@ jobs:
           echo "${{ secrets.FIREBASE_KEY_JSON }}" | base64 --decode > firebase-key.json
           kubectl create secret generic firebase-credentials --from-file=firebase-key.json -n hiteen --dry-run=client -o yaml | kubectl apply -f -
 
+      - name: 🧹 Clean up pending Helm release
+        run: |
+          if helm status hiteen -n hiteen | grep -q "pending"; then
+            echo "🔧 Found pending release. Cleaning up..."
+            helm uninstall hiteen -n hiteen || true
+          fi
+          
+          
 
       - name: 🪶 Deploy via Helm
         run: |
