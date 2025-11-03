@@ -1,46 +1,35 @@
-name: Deploy to Kubernetes (SmileServer)
+name: 🚀 Deploy to Kubernetes (Helm)
 
 on:
   workflow_run:
-    workflows: ["Build & Push Docker Image"]
+    workflows: ["🏗️ Build & Push Docker Image"]
     types: [completed]
 
 jobs:
   deploy:
-    runs-on: [self-hosted]
+    runs-on: [self-hosted]   # EC2 Runner (이미 쿠버네티스 클러스터 접근 가능)
 
     env:
-      NAMESPACE: hiteen-prod
-      CHART_PATH: ./charts/api
+      NAMESPACE: hiteen
+      CHART_PATH: ./hiteen-chart
       IMAGE: ghcr.io/${{ github.repository_owner }}/hiteen-api
       TAG: ${{ github.event.workflow_run.head_sha }}
 
     steps:
-      # 1️⃣ 리포지토리 체크아웃
-      - name: Checkout repository
+      - name: 📥 Checkout repository
         uses: actions/checkout@v4
 
-      # 2️⃣ 디버깅용 (임시)
-      - name: Debug workspace (임시 확인용)
-        run: |
-          echo "현재 작업 디렉토리:"
-          pwd
-          echo "파일 목록:"
-          ls -R .
-
-      # 3️⃣ kubectl & helm 설치
-      - name: Set up kubectl
+      - name: 🔧 Set up kubectl
         uses: azure/setup-kubectl@v4
         with:
           version: v1.30.0
 
-      - name: Set up Helm
+      - name: 🧰 Set up Helm
         uses: azure/setup-helm@v4
         with:
           version: v3.14.0
 
-      # 4️⃣ kubeconfig 설정
-      - name: Configure kubeconfig
+      - name: 🔐 Configure kubeconfig
         run: |
           mkdir -p ~/.kube
           echo "${{ secrets.KUBECONFIG }}" | base64 --decode > ~/.kube/config
@@ -50,44 +39,28 @@ jobs:
           kubectl config current-context
           kubectl get nodes -o wide
 
-      # 5️⃣ 네임스페이스 생성 (없으면)
-      - name: Create namespace if not exists
+      - name: 🧱 Create namespace if not exists
         run: |
           kubectl get ns $NAMESPACE || kubectl create ns $NAMESPACE
 
-      # 6️⃣ Firebase Secret 생성 (자동)
-      # secrets.FIREBASE_KEY_JSON 은 base64 인코딩된 JSON 문자열이어야 합니다.
-      - name: Create firebase-secret
+      - name: 🪶 Deploy via Helm
         run: |
-          echo "${{ secrets.FIREBASE_KEY_JSON }}" | base64 --decode > firebase-key.json
-          kubectl create secret generic firebase-secret \
+          helm upgrade --install hiteen $CHART_PATH \
             -n $NAMESPACE \
-            --from-file=firebase-key.json=./firebase-key.json \
-            --dry-run=client -o yaml | kubectl apply -f -
-          echo "✅ firebase-secret created/updated in namespace $NAMESPACE"
-
-      # 7️⃣ Helm 배포
-      - name: Helm upgrade
-        run: |
-          helm upgrade --install hiteen-api $CHART_PATH \
-            -n $NAMESPACE \
-            --set image.repository=$IMAGE \
-            --set image.tag=$TAG \
-            --set env.PROFILE=dev \
+            --set app.image.repository=$IMAGE \
+            --set app.image.tag=$TAG \
+            --set ingress.enabled=true \
             --wait --timeout 300s
 
-      # 8️⃣ 배포 상태 확인
-      - name: Verify deployment
+      - name: 🔍 Verify rollout
         run: |
-          kubectl rollout status deploy/hiteen-api -n $NAMESPACE
+          kubectl rollout status deployment/hiteen-test -n $NAMESPACE
           kubectl get pods -n $NAMESPACE -o wide
 
-      # 9️⃣ 성공 시 메시지
-      - name: Notify success
+      - name: ✅ Success notification
         if: success()
-        run: echo "✅ hiteen-api deployed successfully to $NAMESPACE"
+        run: echo "✅ hiteen deployed successfully!"
 
-      # 🔟 실패 시 메시지
-      - name: Notify failure
+      - name: ❌ Failure notification
         if: failure()
-        run: echo "❌ hiteen-api deploy failed. Check Helm/K8s logs."
+        run: echo "❌ Deployment failed. Check logs."

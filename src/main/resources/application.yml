@@ -124,6 +124,7 @@ kakao:
 #  keepAliveInterval: 60
 #  qos: 1
 
+# 미사용
 tbmq:
   url: http://192.168.49.2:30001
   admin:

@@ -1,0 +1,127 @@
+# ============================================
+# Global Settings
+# ============================================
+namespace: hiteen
+
+nodeSelector:
+  node-type: private
+
+imagePullSecrets:
+  - name: ghcr-secret
+
+# ============================================
+# Backend (Spring Boot)
+# ============================================
+app:
+  name: hiteen-test
+  replicaCount: 1
+  image:
+    repository: ghcr.io/gyu-hyung/hiteen-api
+    tag: latest
+    pullPolicy: Always
+  service:
+    type: ClusterIP
+    port: 8080
+  env:
+    - name: SPRING_PROFILES_ACTIVE
+      value: prod
+    - name: REDIS_HOST
+      value: redis-0.redis.hiteen.svc.cluster.local
+    - name: REDIS_PORT
+      value: "6379"
+  resources:
+    requests:
+      cpu: 300m
+      memory: 512Mi
+    limits:
+      cpu: 1
+      memory: 1Gi
+
+# ============================================
+# Soketi (WebSocket Server)
+# ============================================
+soketi:
+  name: soketi
+  replicaCount: 1
+  image:
+    repository: quay.io/soketi/soketi
+    tag: 1.4-16-debian
+    pullPolicy: Always
+  service:
+    type: ClusterIP
+    port: 6001
+  env:
+    - name: SOKETI_DEBUG
+      value: "1"
+    - name: SOKETI_DEFAULT_APP_ID
+      value: hiteen-app
+    - name: SOKETI_DEFAULT_APP_KEY
+      value: hiteen-key
+    - name: SOKETI_DEFAULT_APP_SECRET
+      value: hiteen-secret
+    - name: SOKETI_DEFAULT_APP_NAME
+      value: hiteen
+    - name: SOKETI_ADAPTER
+      value: redis
+    - name: SOKETI_REDIS_HOST
+      value: redis-0.redis.hiteen.svc.cluster.local
+    - name: SOKETI_REDIS_PORT
+      value: "6379"
+    - name: SOKETI_DEFAULT_APP_ALLOW_ORIGIN
+      value: "*"
+    - name: SOKETI_DEFAULT_APP_ENABLE_CLIENT_MESSAGES
+      value: "true"
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+# ============================================
+# Redis Cluster
+# ============================================
+redis:
+  replicas: 6
+  clusterReplicas: 1
+  image:
+    repository: redis
+    tag: 7.2
+    pullPolicy: IfNotPresent
+  service:
+    port: 6379
+    clusterPort: 16379
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 300m
+      memory: 256Mi
+
+# ============================================
+# Ingress (Nginx)
+# ============================================
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/proxy-buffering: "off"
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/websocket-services: "soketi"
+  hosts:
+    - host:
+      paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            serviceName: hiteen-test
+            servicePort: 8080
+        - path: /apps
+          pathType: Prefix
+          backend:
+            serviceName: soketi-svc
+            servicePort: 6001
+
