@@ -91,9 +91,7 @@ class InviteService(
         while (attempts < 10) {
             val code = "T" + randomUpperNumeric(9)
             val exists = userRepository.findByInviteCode(code) != null
-            if (!exists) {
-                return code
-            }
+            if (!exists) return code
             attempts++
         }
         return null
