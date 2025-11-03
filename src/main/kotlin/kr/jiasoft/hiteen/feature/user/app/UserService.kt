@@ -137,11 +137,7 @@ class UserService (
         val saved = userRepository.save(toEntity)
 
         val updated: UserEntity = if (file != null) {
-            val asset = assetService.uploadImage(
-                file,
-                saved.id,
-                AssetCategory.PROFILE,
-            )
+            val asset = assetService.uploadImage(file,saved.id,AssetCategory.PROFILE)
             userRepository.save(saved.copy(assetUid = asset.uid))
         } else {
             saved
@@ -165,13 +161,18 @@ class UserService (
 
         // JWT 생성
         val (access, refresh) = jwtProvider.generateTokens(saved.username)
-        JwtResponse(access.value, refresh.value)
+
         //포인트 지급
         pointService.applyPolicy(updated.id, PointPolicy.SIGNUP)
 
+        // school 정보 최신화
+        val responseUser = userRepository.findById(updated.id)?.let {
+            UserResponse.from(it, school, tier)
+        } ?: UserResponse.empty()
+
         return UserResponseWithTokens(
-            JwtResponse(access.value, access.value),
-            UserResponse.from(updated, school),
+            tokens = JwtResponse(access.value, access.value),
+            userResponse = responseUser.copy(inviteCode = updated.inviteCode)
         )
     }
 
