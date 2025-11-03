@@ -30,11 +30,14 @@ spec:
             - containerPort: 8080
 
           env:
-            # ✅ JVM 자동 주입
+            # ✅ JVM 설정
             - name: JAVA_TOOL_OPTIONS
               value: "{{ .Values.java.options | default "-XX:MaxRAMPercentage=75.0 -XX:InitialRAMPercentage=25.0" }}"
+
+            # ✅ Spring 프로파일
             - name: SPRING_PROFILES_ACTIVE
               value: "{{ .Values.env.PROFILE }}"
+
             {{- range $key, $value := .Values.env }}
             - name: {{ $key }}
               value: "{{ $value }}"
@@ -60,19 +63,25 @@ spec:
             {{- toYaml .Values.resources | nindent 12 }}
 
           volumeMounts:
+            # ✅ 일반 볼륨
             - name: {{ .Values.persistence.name }}
               mountPath: {{ .Values.persistence.mountPath }}
-            - name: firebase-secret
-              mountPath: /secrets
+
+            # ✅ Firebase Secret 볼륨 (Spring 코드 기준 경로)
+            - name: firebase-credentials
+              mountPath: /app/firebase
               readOnly: true
 
       volumes:
+        # ✅ PVC 볼륨
         - name: {{ .Values.persistence.name }}
           persistentVolumeClaim:
             claimName: {{ include "hiteen-api.fullname" . }}-pvc
+
+        # ✅ Firebase Secret 볼륨 정의
         - name: firebase-credentials
-        secret:
-          secretName: firebase-credentials
-          items:
-            - key: firebase-key.json
-              path: firebase-key.json
+          secret:
+            secretName: firebase-credentials
+            items:
+              - key: firebase-key.json
+                path: firebase-key.json
