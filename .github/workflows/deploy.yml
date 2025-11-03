@@ -39,7 +39,6 @@ jobs:
           kubectl config current-context
           kubectl get nodes -o wide
 
-
       - name: 🧱 Create namespace if not exists
         run: |
           kubectl get ns $NAMESPACE || kubectl create ns $NAMESPACE
@@ -47,16 +46,22 @@ jobs:
       - name: 🔐 Create Firebase Secret
         run: |
           echo "${{ secrets.FIREBASE_KEY_JSON }}" | base64 --decode > firebase-key.json
-          kubectl create secret generic firebase-credentials --from-file=firebase-key.json -n hiteen --dry-run=client -o yaml | kubectl apply -f -
+          kubectl create secret generic firebase-credentials \
+            --from-file=firebase-key.json \
+            -n $NAMESPACE --dry-run=client -o yaml | kubectl apply -f -
 
       - name: 🧹 Clean up pending Helm release
         run: |
-          if helm status hiteen -n hiteen | grep -q "pending"; then
+          if helm status hiteen -n $NAMESPACE | grep -q "pending"; then
             echo "🔧 Found pending release. Cleaning up..."
-            helm uninstall hiteen -n hiteen || true
+            helm uninstall hiteen -n $NAMESPACE || true
           fi
-          
-          
+
+          # ✅ Redis cluster post-install Job 정리 (중복 에러 방지)
+          if kubectl get job redis-cluster-create -n $NAMESPACE >/dev/null 2>&1; then
+            echo "🧹 Removing existing redis-cluster-create job..."
+            kubectl delete job redis-cluster-create -n $NAMESPACE --ignore-not-found=true
+          fi
 
       - name: 🪶 Deploy via Helm
         run: |
@@ -65,6 +70,7 @@ jobs:
             --set app.image.repository=$IMAGE \
             --set app.image.tag=$TAG \
             --set ingress.enabled=true \
+            --wait --timeout 300s
 
       - name: 🔍 Verify rollout
         run: |
