@@ -152,11 +152,9 @@ class UserService (
         //초대코드를 통해 회원가입 할 경우
         if(!inviteCode.isNullOrBlank()) {
             val success = inviteService.handleInviteJoin(updated, inviteCode)
-            if (!success) {
-                throw BusinessValidationException(
-                    mapOf("inviteCode" to "유효하지 않은 초대코드입니다.")
-                )
-            }
+            if (!success)
+                throw BusinessValidationException(mapOf("inviteCode" to "유효하지 않은 초대코드입니다."))
+
         }
 
         // JWT 생성
