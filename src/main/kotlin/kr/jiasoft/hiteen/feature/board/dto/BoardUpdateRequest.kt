@@ -73,6 +73,12 @@ data class BoardUpdateRequest(
     )
     val detailAddress: String? = null,
 
+    @param:Schema(description = "위도", example = "37.5666")
+    val lat: Double? = null,
+
+    @param:Schema(description = "경도", example = "127.0000")
+    val lng: Double? = null,
+
     @param:Schema(
         description = "삭제할 첨부파일 UID 목록 (null = 변경 없음, [] = 모두 제거)",
         example = "[\"550e8400-e29b-41d4-a716-446655440001\", \"550e8400-e29b-41d4-a716-446655440002\"]"

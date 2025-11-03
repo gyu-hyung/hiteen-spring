@@ -672,6 +672,8 @@ CREATE TABLE boards (
   status         varchar(20),
   address        varchar(255),
   detail_address varchar(255),
+  lat            numeric(9,6),
+  lng            numeric(9,6),
   created_id     bigint ,
   created_at     timestamptz DEFAULT now(),
   updated_id     bigint ,

@@ -76,4 +76,10 @@ data class BoardCreateRequest(
         example = "2층 강당"
     )
     val detailAddress: String? = null,
+
+    @param:Schema(description = "위도", example = "37.5666")
+    val lat: Double? = null,
+
+    @param:Schema(description = "경도", example = "127.0000")
+    val lng: Double? = null,
 )
