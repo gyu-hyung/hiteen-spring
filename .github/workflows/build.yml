@@ -1,4 +1,4 @@
-name: 🏗️ Build & Push Docker Image
+name: 🏗️ Build & Push Docker Image (Fast AMD64)
 
 on:
   push:
@@ -27,11 +27,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      # ✅ 3. Set up Docker Buildx (multi-arch builder)
+      # ✅ 3. Set up Docker Buildx
       - name: 🧱 Set up Buildx
         uses: docker/setup-buildx-action@v3
 
-      # ✅ 4. Cache Docker Buildx layers (speed boost)
+      # ✅ 4. Cache Docker Buildx layers
       - name: 🗂️ Cache Docker layers
         uses: actions/cache@v4
         with:
@@ -44,23 +44,23 @@ jobs:
       - name: 🔐 Log in to GHCR
         run: echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
 
-      # ✅ 6. Build & Push (multi-arch)
-      - name: 🏗️ Build & Push multi-arch image
+      # ✅ 6. Build & Push (AMD64 only for speed)
+      - name: 🏗️ Build & Push Docker image
         env:
           DOCKER_BUILDKIT: 1
         run: |
           IMAGE=ghcr.io/${{ github.repository_owner }}/hiteen-api
           TAG=${{ github.sha }}
-          echo "🚀 Building image: $IMAGE:$TAG"
+          echo "🚀 Building fast image: $IMAGE:$TAG"
 
           docker buildx build \
-            --platform linux/amd64,linux/arm64 \
+            --platform linux/amd64 \
             -t $IMAGE:$TAG -t $IMAGE:latest \
             --push \
             --cache-from type=local,src=/tmp/.buildx-cache \
             --cache-to type=local,dest=/tmp/.buildx-cache-new,mode=max .
 
-      # ✅ 7. Persist new cache
+      # ✅ 7. Persist new Docker cache
       - name: 💾 Move updated Docker cache
         run: |
           rm -rf /tmp/.buildx-cache
@@ -69,4 +69,4 @@ jobs:
       # ✅ 8. Confirm success
       - name: ✅ Build complete
         if: success()
-        run: echo "✅ Multi-arch Docker image built & pushed successfully 🎉"
+        run: echo "✅ Fast AMD64 Docker image built & pushed successfully 🎉"
