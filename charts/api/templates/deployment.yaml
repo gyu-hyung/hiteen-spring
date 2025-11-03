@@ -70,6 +70,9 @@ spec:
         - name: {{ .Values.persistence.name }}
           persistentVolumeClaim:
             claimName: {{ include "hiteen-api.fullname" . }}-pvc
-        - name: firebase-secret
-          secret:
-            secretName: firebase-secret
+        - name: firebase-credentials
+        secret:
+          secretName: firebase-credentials
+          items:
+            - key: firebase-key.json
+              path: firebase-key.json
