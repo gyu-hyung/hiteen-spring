@@ -1,0 +1,99 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: redis-config
+  namespace: {{ .Values.namespace }}
+data:
+  redis.conf: |
+    port 6379
+    bind 0.0.0.0
+    cluster-enabled yes
+    cluster-config-file nodes.conf
+    cluster-node-timeout 5000
+    appendonly yes
+    protected-mode no
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+  namespace: {{ .Values.namespace }}
+spec:
+  clusterIP: None
+  ports:
+    - name: redis
+      port: {{ .Values.redis.service.port | default 6379 }}
+    - name: cluster-bus
+      port: {{ .Values.redis.service.clusterPort | default 16379 }}
+  selector:
+    app: redis
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: redis
+  namespace: {{ .Values.namespace }}
+spec:
+  serviceName: "redis"
+  replicas: {{ .Values.redis.replicas }}
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      nodeSelector:
+        {{- toYaml .Values.nodeSelector | nindent 8 }}
+      containers:
+        - name: redis
+          image: "{{ .Values.redis.image.repository }}:{{ .Values.redis.image.tag }}"
+          imagePullPolicy: {{ .Values.redis.image.pullPolicy | default "IfNotPresent" }}
+          command:
+            - "redis-server"
+            - "/usr/local/etc/redis/redis.conf"
+          ports:
+            - containerPort: {{ .Values.redis.service.port | default 6379 }}
+            - containerPort: {{ .Values.redis.service.clusterPort | default 16379 }}
+          resources:
+            {{- toYaml .Values.redis.resources | nindent 12 }}
+          volumeMounts:
+            - name: config
+              mountPath: /usr/local/etc/redis
+      volumes:
+        - name: config
+          configMap:
+            name: redis-config
+
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: redis-cluster-create
+  namespace: {{ .Values.namespace }}
+spec:
+  template:
+    spec:
+      restartPolicy: OnFailure
+      nodeSelector:
+        {{- toYaml .Values.nodeSelector | nindent 8 }}
+      containers:
+        - name: redis-cluster-create
+          image: "{{ .Values.redis.image.repository }}:{{ .Values.redis.image.tag }}"
+          imagePullPolicy: {{ .Values.redis.image.pullPolicy | default "IfNotPresent" }}
+          command:
+            - "sh"
+            - "-c"
+            - |
+              echo "Waiting for Redis pods to be ready..."
+              sleep 15
+              echo "Creating Redis cluster..."
+              redis-cli --cluster create \
+              {{- range $i := until (.Values.redis.replicas | int) }}
+              redis-{{ $i }}.redis.{{ $.Values.namespace }}.svc.cluster.local:{{ $.Values.redis.service.port | default 6379 }} \
+              {{- end }}
+              --cluster-replicas {{ .Values.redis.clusterReplicas }} --cluster-yes
+

@@ -1,4 +1,4 @@
-name: Build & Push Docker Image
+name: 🏗️ Build & Push Docker Image
 
 on:
   push:
@@ -12,10 +12,10 @@ jobs:
       packages: write
 
     steps:
-      - name: Checkout source
+      - name: 🧩 Checkout source
         uses: actions/checkout@v4
 
-      - name: Cache Gradle dependencies
+      - name: ⚡ Cache Gradle dependencies
         uses: actions/cache@v4
         with:
           path: ~/.gradle/caches
@@ -23,20 +23,21 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      - name: Log in to GitHub Container Registry
+      - name: 🔐 Log in to GitHub Container Registry
         run: echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
 
-      - name: Build and push Docker image
+      - name: 🏗️ Build & Push Docker image (multi-arch)
         env:
           DOCKER_BUILDKIT: 1
         run: |
+          docker buildx create --use
           IMAGE=ghcr.io/${{ github.repository_owner }}/hiteen-api
           TAG=${{ github.sha }}
-          docker build -f Dockerfile -t $IMAGE:$TAG -t $IMAGE:latest \
-            --build-arg SPRING_PROFILES_ACTIVE=dev .
-          docker push $IMAGE:$TAG
-          docker push $IMAGE:latest
+          docker buildx build \
+            --platform linux/amd64,linux/arm64 \
+            -t $IMAGE:$TAG -t $IMAGE:latest \
+            --push .
 
-      - name: Notify success
+      - name: ✅ Build complete
         if: success()
-        run: echo "✅ Build & Push to GHCR success"
+        run: echo "✅ Docker image pushed to GHCR successfully"

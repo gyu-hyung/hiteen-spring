@@ -4,7 +4,7 @@
 FROM gradle:8.9-jdk17 AS build
 WORKDIR /app
 COPY . .
-RUN ./gradlew clean build -x test -Pspring.profiles.active=dev
+RUN ./gradlew clean build -x test -Pspring.profiles.active=dev-k8s
 
 # -----------------------------
 # 2️⃣ Runtime stage
@@ -17,16 +17,13 @@ WORKDIR /app
 RUN useradd -m -u 10001 -d /home/spring spring && \
     mkdir -p /app/assets && \
     chown -R spring:spring /app && \
-    chmod -R 755 /app && \
-    echo "[DEBUG] created /app/assets and assigned to spring" && \
-    ls -ld /app /app/assets && id spring
+    chmod -R 755 /app
 
 # JAR 복사
 COPY --from=build /app/build/libs/*.jar app.jar
 
-# spring 유저로 실행
 USER spring
 
 EXPOSE 8080
 
-ENTRYPOINT ["sh", "-c", "echo '[DEBUG] whoami:' $(whoami) && ls -ld /app /app/assets && java -Dspring.profiles.active=dev -jar /app/app.jar"]
+ENTRYPOINT ["sh", "-c", "echo '[DEBUG] whoami:' $(whoami) && java -Dspring.profiles.active=dev-k8s -jar /app/app.jar"]

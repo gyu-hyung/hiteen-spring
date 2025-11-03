@@ -1,0 +1,7 @@
+apiVersion: v2
+name: hiteen
+description: Helm chart for Hiteen project (API + Soketi + Redis)
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+

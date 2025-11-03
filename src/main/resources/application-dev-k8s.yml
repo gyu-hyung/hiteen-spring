@@ -22,8 +22,12 @@ spring:
         enabled: false
       cluster:
         nodes:
-          - 10.8.1.51:6379
-          - 10.8.0.159:6379
+          - redis-0.redis.hiteen.svc.cluster.local:6379
+          - redis-1.redis.hiteen.svc.cluster.local:6379
+          - redis-2.redis.hiteen.svc.cluster.local:6379
+          - redis-3.redis.hiteen.svc.cluster.local:6379
+          - redis-4.redis.hiteen.svc.cluster.local:6379
+          - redis-5.redis.hiteen.svc.cluster.local:6379
       password: hiteen1234
       timeout: 5s
       client-type: lettuce
@@ -48,7 +52,6 @@ server:
 
 app:
   asset:
-#    storage-root: ${HOME}/assets
     storage-root: /app/assets
     static-locations: classpath:/assets/
     allowed-exts: jpg,jpeg,png,gif,webp,bmp,svg,mp4,mov,avi,mkv,pdf,txt,csv,zip,rar,gz
@@ -69,7 +72,7 @@ springdoc:
     path: /swagger-ui
 
 soketi:
-  host: 127.0.0.1
+  host: soketi.hiteen.svc.cluster.local
   port: 6001
   app-id: hiteen-app
   app-key: hiteen-key
@@ -113,6 +116,7 @@ kakao:
 #  keepAliveInterval: 60
 #  qos: 1
 
+# 미사용
 tbmq:
   url: http://192.168.49.2:30001
   admin:
