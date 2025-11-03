@@ -34,8 +34,10 @@ jobs:
           mkdir -p ~/.kube
           echo "${{ secrets.KUBECONFIG }}" | base64 --decode > ~/.kube/config
           chmod 600 ~/.kube/config
-          echo "🔍 kubeconfig preview (CA section only):"
-          grep -A 3 "certificate-authority" ~/.kube/config || grep -A 3 "certificate-authority-data" ~/.kube/config
+          kubectl config set-cluster kubernetes --insecure-skip-tls-verify=true
+          echo "✅ Current context:"
+          kubectl config current-context
+          kubectl get nodes -o wide
 
 
       - name: 🧱 Create namespace if not exists
