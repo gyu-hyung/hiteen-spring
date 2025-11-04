@@ -195,8 +195,8 @@ class PollController(
     @Operation(summary = "댓글 삭제", description = "특정 댓글을 삭제합니다.")
     @DeleteMapping("/comments/{pollId}/{commentUid}")
     suspend fun deleteComment(
-        @Parameter(description = "투표 ID") pollId: Long,
-        @Parameter(description = "댓글 UUID") commentUid: UUID,
+        @Parameter(description = "투표 ID") @PathVariable pollId: Long,
+        @Parameter(description = "댓글 UUID") @PathVariable commentUid: UUID,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ): ResponseEntity<ApiResult<Map<String, Any>>> {
         val uid = service.deleteComment(pollId, commentUid, user.id)

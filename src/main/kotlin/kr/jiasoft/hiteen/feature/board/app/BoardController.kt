@@ -218,8 +218,8 @@ class BoardController(
     @Operation(summary = "댓글 삭제", description = "특정 댓글을 삭제합니다.")
     @DeleteMapping("/comments/{boardUid}/{commentUid}")
     suspend fun deleteComment(
-        @Parameter(description = "게시글 UUID") boardUid: UUID,
-        @Parameter(description = "댓글 UUID") commentUid: UUID,
+        @Parameter(description = "게시글 UUID") @PathVariable boardUid: UUID,
+        @Parameter(description = "댓글 UUID") @PathVariable commentUid: UUID,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ): ResponseEntity<ApiResult<Map<String, Any>>> {
         val uid = service.deleteComment(boardUid, commentUid, user.id)
