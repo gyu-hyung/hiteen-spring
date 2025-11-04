@@ -5,7 +5,6 @@ on:
     workflows: ["🏗️ Build & Push Docker Image"]
     types: [completed]
 
-
 jobs:
   deploy:
     runs-on: [self-hosted]   # EC2 Runner (이미 쿠버네티스 클러스터 접근 가능)
@@ -66,6 +65,26 @@ jobs:
             echo "🧹 Removing existing redis-cluster-create job..."
             kubectl delete job redis-cluster-create -n $NAMESPACE --ignore-not-found=true
           fi
+
+      - name: ⚙️ Pre-check StatefulSet compatibility
+        run: |
+          echo "🔍 Checking for immutable field changes in Redis StatefulSet..."
+          if kubectl get statefulset redis -n $NAMESPACE >/dev/null 2>&1; then
+            echo "✅ Found existing redis StatefulSet. Checking for immutable spec changes..."
+            kubectl get statefulset redis -n $NAMESPACE -o yaml > old_redis.yaml
+            helm template hiteen $CHART_PATH -n $NAMESPACE > new_render.yaml
+
+            if ! diff <(yq '.spec' old_redis.yaml) <(yq '.spec' new_render.yaml) | grep -Eq 'serviceName|volumeClaimTemplates|selector'; then
+              echo "ℹ️ No immutable field differences detected. Proceeding with Helm upgrade."
+            else
+              echo "⚠️ Immutable fields changed. Deleting existing StatefulSet redis to avoid Helm upgrade failure..."
+              kubectl delete statefulset redis -n $NAMESPACE --cascade=orphan
+              echo "✅ Deleted old StatefulSet. Will be recreated by Helm."
+            fi
+          else
+            echo "ℹ️ No existing redis StatefulSet found. Proceeding with Helm install."
+          fi
+        shell: bash
 
       - name: 🪶 Deploy via Helm
         run: |
