@@ -26,6 +26,7 @@ import kr.jiasoft.hiteen.feature.board.infra.BoardRepository
 import kr.jiasoft.hiteen.feature.level.app.ExpService
 import kr.jiasoft.hiteen.feature.point.app.PointService
 import kr.jiasoft.hiteen.feature.point.domain.PointPolicy
+import kr.jiasoft.hiteen.feature.poll.dto.PollCommentResponse
 import kr.jiasoft.hiteen.feature.push.app.PushService
 import kr.jiasoft.hiteen.feature.push.domain.PushTemplate
 import kr.jiasoft.hiteen.feature.push.domain.buildPushData
@@ -331,6 +332,13 @@ class BoardService(
                 }.toList()
 
 
+    suspend fun getComment(
+        boardUid: UUID,
+        commentUid: UUID,
+        currentUserId: Long,
+    ): BoardCommentResponse? = comments.findComment(boardUid, commentUid, currentUserId)
+
+
     suspend fun listMyComments(
         userId: Long,
         cursor: UUID?,
@@ -344,7 +352,7 @@ class BoardService(
             }.toList()
 
 
-    suspend fun createComment(boardUid: UUID, req: BoardCommentRegisterRequest, user: UserEntity): UUID {
+    suspend fun createComment(boardUid: UUID, req: BoardCommentRegisterRequest, user: UserEntity): BoardCommentResponse? {
         val b = boards.findByUid(boardUid) ?: throw notFound("board")
         val parent: BoardCommentEntity? = req.parentUid?.let { comments.findByUid(it) }
         val saved = comments.save(
@@ -361,7 +369,7 @@ class BoardService(
         expService.grantExp(user.id, "CREATE_BOARD_COMMENT", saved.id)
         pointService.applyPolicy(user.id, PointPolicy.STORY_COMMENT, saved.id)
         pushService.sendAndSavePush(listOf(b.createdId), PushTemplate.BOARD_COMMENT.buildPushData("nickname" to user.nickname))
-        return saved.uid
+        return getComment(b.uid, saved.uid, user.id)
     }
 
 
