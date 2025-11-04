@@ -25,8 +25,7 @@ spec:
           imagePullPolicy: {{ .Values.app.image.pullPolicy }}
           ports:
             - containerPort: {{ .Values.app.service.port }}
-          env:
-            {{- toYaml .Values.app.env | nindent 12 }}
+          env: {{- toYaml .Values.app.env | nindent 12 }}
           volumeMounts:
             - name: firebase-credentials
               mountPath: /app/firebase/firebase-key.json
