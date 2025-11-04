@@ -5,6 +5,8 @@ import com.pusher.rest.data.Result
 import kr.jiasoft.hiteen.feature.soketi.domain.SoketiEventType
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
+import java.net.InetSocketAddress
+import java.net.Socket
 
 @Component
 class SoketiBroadcaster(
@@ -32,4 +34,18 @@ class SoketiBroadcaster(
             throw RuntimeException("Soketi trigger failed: ${result.status} ${result.message}")
         }
     }
+
+
+    fun testConnection(): Boolean {
+        return try {
+            Socket().use { socket ->
+                socket.connect(InetSocketAddress(host, port), 2000)
+            }
+            true
+        } catch (ex: Exception) {
+            false
+        }
+    }
+
+
 }

@@ -92,5 +92,11 @@ class LocationCacheRedisService(
     }
 
 
+    suspend fun testConnection(): String {
+        val result = redisTemplate.execute { it.ping() }.awaitFirstOrNull()
+        return result ?: "NO RESPONSE"
+    }
+
+
 
 }
