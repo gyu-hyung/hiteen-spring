@@ -102,6 +102,16 @@ class UserController(
     ): ResponseEntity<ApiResult<UserResponse>> =
         ResponseEntity.ok(ApiResult.success(userService.updateUser(user, userUpdateForm, file)))
 
+
+    @Operation(summary = "회원 탈퇴", description = "현재 로그인한 사용자를 탈퇴 처리합니다.")
+    @DeleteMapping("/withdraw")
+    suspend fun withdraw(
+        @AuthenticationPrincipal(expression = "user") user: UserEntity
+    ): ResponseEntity<ApiResult<String>> {
+        userService.withdraw(user)
+        return ResponseEntity.ok(ApiResult.success("회원 탈퇴가 완료되었습니다."))
+    }
+
     @Operation(summary = "프로필 이미지 등록", description = "여러 장의 프로필 이미지를 업로드합니다.")
     @PostMapping("/photos", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     suspend fun registerImages(

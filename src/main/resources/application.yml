@@ -66,6 +66,9 @@ app:
     static-locations: classpath:/assets/
     allowed-exts: jpg,jpeg,png,gif,webp,bmp,svg,mp4,mov,avi,mkv,pdf,txt,csv,zip,rar,gz
     max-size-bytes: 5242880 # 50MB
+  join:
+    rejoin-days: 30
+    dev-allow-always: true
 
 admob:
   key-url: https://www.gstatic.com/admob/reward/verifier-keys.json

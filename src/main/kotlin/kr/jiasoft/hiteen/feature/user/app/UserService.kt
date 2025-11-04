@@ -30,6 +30,7 @@ import kr.jiasoft.hiteen.feature.user.dto.UserSummary
 import kr.jiasoft.hiteen.feature.user.dto.UserUpdateForm
 import kr.jiasoft.hiteen.feature.user.infra.UserPhotosRepository
 import kr.jiasoft.hiteen.feature.user.infra.UserRepository
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.crypto.password.PasswordEncoder
@@ -56,6 +57,14 @@ class UserService (
     private val interestUserService: InterestUserService,
 ) {
 
+
+    @Value("\${app.join.rejoin-days:30}")
+    private val rejoinDays: Int = 30
+
+    @Value("\${app.join.dev-allow-always:true}")  // 개발중엔 true로 두면 언제든 재가입 가능
+    private val devAllowAlways: Boolean = true
+
+
     suspend fun findByUid(uid: String): UserEntity? {
         return userRepository.findByUid(uid)
     }
@@ -65,10 +74,15 @@ class UserService (
         return user != null
     }
 
-    suspend fun phoneDuplicationCheck(phone: String): Boolean {
-        val user = userRepository.findAllByPhone(phone).firstOrNull()
-        return user != null
+//    suspend fun phoneDuplicationCheck(phone: String): Boolean {
+//        val user = userRepository.findAllByPhone(phone).firstOrNull()
+//        return user != null
+//    }
+
+    suspend fun phoneDuplicationCheckActiveOnly(phone: String): Boolean {
+        return userRepository.findActiveByPhone(phone) != null
     }
+
 
 
     private suspend fun toUserResponse(targetUser: UserEntity, currentUserId: Long? = null): UserResponse {
@@ -117,62 +131,115 @@ class UserService (
 
 
     suspend fun register(param: UserRegisterForm, file: FilePart?): UserResponseWithTokens {
-        val inviteCode = param.inviteCode
-        param.inviteCode = null
-        param.username = param.phone
+        val now = OffsetDateTime.now()
 
-        val nicknameExists = nicknameDuplicationCheck(param.nickname)
-        if (nicknameExists) {
+        // username == phone 정책
+        val phone = param.phone.trim()
+        param.username = phone
+
+        // 닉네임 중복(활성만)
+        if (userRepository.existsByNicknameActive(param.nickname)) {
             throw BusinessValidationException(mapOf("nickname" to "이미 사용 중인 닉네임입니다."))
         }
-
-        val phoneExists = phoneDuplicationCheck(param.phone)
-        if (phoneExists) {
+        // 휴대폰(=username) 중복(활성만)
+        if (phoneDuplicationCheckActiveOnly(phone)) {
             throw BusinessValidationException(mapOf("phone" to "이미 사용 중인 휴대폰 번호입니다."))
         }
 
-        val school = param.schoolId?.let { id -> schoolRepository.findById(id) }
-        val tier = tierRepository.findByTierCode(TierCode.BRONZE_STAR)
-        val toEntity = param.toEntity(encoder.encode(param.password), tier.id)
-        val saved = userRepository.save(toEntity)
+        // 최근 탈퇴 사용자 조회
+        val latestDeleted = userRepository.findLatestDeletedByPhone(phone)
 
-        val updated: UserEntity = if (file != null) {
-            val asset = assetService.uploadImage(file,saved.id,AssetCategory.PROFILE)
-            userRepository.save(saved.copy(assetUid = asset.uid))
+        // 개발 모드가 아니고, 최근 탈퇴가 존재하며, 30일 경과 여부로 복구/신규 분기
+        val canAlways = devAllowAlways
+        val shouldRestore =
+            latestDeleted != null &&
+                    (canAlways || now.isBefore(latestDeleted.deletedAt!!.plusDays(rejoinDays.toLong())))
+
+        // 초대코드 분리 (신규만 처리)
+        val inviteCode = param.inviteCode
+        param.inviteCode = null
+
+        return if (shouldRestore) {
+            // =========================
+            // A) 계정 복구(삭제 해제)
+            // =========================
+            val existing = latestDeleted!!
+
+            // 비밀번호/닉네임 등 가입 폼에서 온 값으로 업데이트할지 정책 결정:
+            // - 보통 복구는 기록 보존을 위해 최소 변경만 권장.
+            // - 여기선 "비밀번호는 새로 설정 가능"하게 반영 예시.
+            val updated = existing.copy(
+                // username/phone은 동일 유지 (중복 Unique 일관성)
+                // 사용자가 새 비번을 입력했다면 갱신
+                password = encoder.encode(param.password),
+                nickname = param.nickname.ifBlank { existing.nickname },
+                email = param.email ?: existing.email,
+                // 프로필은 파일 있으면 교체
+                // assetUid는 아래에서 파일 업로드 후 set
+                updatedAt = now,
+                updatedId = existing.id,
+                deletedAt = null,
+                deletedId = null
+            )
+
+            val saved = userRepository.save(updated)
+
+            // 프로필 이미지 갱신 (선택)
+            val finalSaved = if (file != null) {
+                val asset = assetService.uploadImage(file, saved.id, AssetCategory.PROFILE)
+                userRepository.save(saved.copy(assetUid = asset.uid))
+            } else saved
+
+            // JWT
+            val (access, refresh) = jwtProvider.generateTokens(finalSaved.username)
+
+            // 복구 시에는 관심사/초대코드/포인트 등은 **기존 데이터 유지**가 일반적
+            val responseUser = findUserResponse(finalSaved.id)
+
+            UserResponseWithTokens(
+                tokens = JwtResponse(access.value, refresh.value),
+                userResponse = responseUser
+            )
         } else {
-            saved
+            // =========================
+            // B) 신규 생성 (30일 이후)
+            // =========================
+            val school = param.schoolId?.let { id -> schoolRepository.findById(id) }
+            val tier = tierRepository.findByTierCode(TierCode.BRONZE_STAR)
+
+            val toEntity = param.toEntity(encoder.encode(param.password), tier.id)
+            val saved = userRepository.save(toEntity)
+
+            val updated: UserEntity = if (file != null) {
+                val asset = assetService.uploadImage(file, saved.id, AssetCategory.PROFILE)
+                userRepository.save(saved.copy(assetUid = asset.uid))
+            } else saved
+
+            // 기본 관심사
+            interestUserService.initDefaultInterests(updated)
+            // 초대코드 생성
+            inviteService.registerInviteCode(updated)
+            // 초대코드로 가입 처리
+            if (!inviteCode.isNullOrBlank()) {
+                val ok = inviteService.handleInviteJoin(updated, inviteCode)
+                if (!ok) throw BusinessValidationException(mapOf("inviteCode" to "유효하지 않은 초대코드입니다."))
+            }
+            // JWT
+            val (access, refresh) = jwtProvider.generateTokens(updated.username)
+            // 포인트 지급
+            pointService.applyPolicy(updated.id, PointPolicy.SIGNUP)
+
+            val responseUser = userRepository.findById(updated.id)?.let {
+                UserResponse.from(it, school, tier)
+            } ?: UserResponse.empty()
+
+            UserResponseWithTokens(
+                tokens = JwtResponse(access.value, refresh.value),
+                userResponse = responseUser.copy(inviteCode = updated.inviteCode)
+            )
         }
-
-        // 기본 관심사 등록 추천옵션 [관심사, 남학생, 여학생, 동급생, 선배, 후배]
-        interestUserService.initDefaultInterests(updated)
-
-        // 초대코드 생성
-        inviteService.registerInviteCode(updated)
-
-        //초대코드를 통해 회원가입 할 경우
-        if(!inviteCode.isNullOrBlank()) {
-            val success = inviteService.handleInviteJoin(updated, inviteCode)
-            if (!success)
-                throw BusinessValidationException(mapOf("inviteCode" to "유효하지 않은 초대코드입니다."))
-
-        }
-
-        // JWT 생성
-        val (access, refresh) = jwtProvider.generateTokens(saved.username)
-
-        //포인트 지급
-        pointService.applyPolicy(updated.id, PointPolicy.SIGNUP)
-
-        // school 정보 최신화
-        val responseUser = userRepository.findById(updated.id)?.let {
-            UserResponse.from(it, school, tier)
-        } ?: UserResponse.empty()
-
-        return UserResponseWithTokens(
-            tokens = JwtResponse(access.value, access.value),
-            userResponse = responseUser.copy(inviteCode = updated.inviteCode)
-        )
     }
+
 
 
     // TODO 회원 정보 변경 시 로그아웃(토큰 무효화) 기준 정리 필요: 비밀번호/권한/중요 개인정보 변경 시 재로그인 유도 등
@@ -258,6 +325,21 @@ class UserService (
 
         // 5) schoolId 있으면 조회해서 DTO 변환
         return toUserResponse(saved)
+    }
+
+
+    suspend fun withdraw(user: UserEntity) {
+        val existing = userRepository.findById(user.id)
+            ?: throw UsernameNotFoundException("User not found: ${user.username}")
+
+        val now = OffsetDateTime.now()
+
+        // soft delete 처리
+        val deleted = existing.copy(
+            deletedAt = now,
+            deletedId = user.id
+        )
+        userRepository.save(deleted)
     }
 
 
