@@ -27,6 +27,13 @@ spec:
             - containerPort: {{ .Values.app.service.port }}
           env:
             {{- toYaml .Values.app.env | nindent 12 }}
+          volumeMounts:
+            - name: firebase-credentials
+              mountPath: /app/firebase/firebase-key.json
+              subPath: firebase-key.json
           resources:
             {{- toYaml .Values.app.resources | nindent 12 }}
-
+      volumes:
+        - name: firebase-credentials
+          secret:
+            secretName: firebase-secret
