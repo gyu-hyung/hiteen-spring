@@ -34,13 +34,6 @@ spec:
         - name: config
           configMap:
             name: redis-config
-
-  volumeClaimTemplates:
-    - metadata:
-        name: redis-data
-      spec:
-        accessModes: ["ReadWriteOnce"]
-        storageClassName: {{ .Values.redis.storageClass | quote }}
-        resources:
-          requests:
-            storage: {{ .Values.redis.storage | default "1Gi" }}
+        - name: redis-data
+          persistentVolumeClaim:
+            claimName: redis-pvc
