@@ -76,12 +76,9 @@ spec:
           volumeMounts:
             - name: config
               mountPath: /usr/local/etc/redis
-            - name: data
+            - name: redis-data
               mountPath: /data
       volumes:
-        - name: config
-          configMap:
-            name: redis-config
         - name: data
           persistentVolumeClaim:
             claimName: redis-pvc
