@@ -138,8 +138,8 @@ class AuthController(
     )
     @PostMapping("/refresh")
     fun refresh(
-//        @Parameter(description = "Refresh Token") @RequestParam refreshToken: String,
-        @CookieValue(name = "refreshToken", required = true) refreshToken: String?,
+        @Parameter(description = "Refresh Token") @RequestParam refreshToken: String,
+//        @CookieValue(name = "refreshToken", required = true) refreshToken: String?,
     ): ResponseEntity<ApiResult<Map<String, String>>> {
         requireNotNull(refreshToken) { "RefreshToken cookie not found" }
 
