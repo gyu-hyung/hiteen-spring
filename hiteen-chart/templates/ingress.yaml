@@ -5,15 +5,15 @@ metadata:
   name: hiteen-ingress
   namespace: {{ .Values.namespace }}
   annotations:
-{{ toYaml .Values.ingress.annotations | indent 4 }}
+    {{- toYaml .Values.ingress.annotations | nindent 4 }}
 spec:
   ingressClassName: {{ .Values.ingress.className }}
   rules:
-{{- range .Values.ingress.hosts }}
+    {{- range .Values.ingress.hosts }}
     - host: {{ .host }}
       http:
         paths:
-{{- range .paths }}
+          {{- range .paths }}
           - path: {{ .path }}
             pathType: {{ .pathType }}
             backend:
@@ -21,7 +21,20 @@ spec:
                 name: {{ .backend.serviceName }}
                 port:
                   number: {{ .backend.servicePort }}
-{{- end }}
-{{- end }}
-{{- end }}
+          {{- end }}
+    {{- end }}
 
+  {{- if and .Values.minio.enabled .Values.minio.ingress.enabled }}
+  rules:
+    - host: {{ .Values.minio.ingress.host | default (printf "minio.%s" (index .Values.ingress.hosts 0).host) }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "hiteen.fullname" . }}-minio
+                port:
+                  number: 9000
+  {{- end }}
+  {{- end }}
