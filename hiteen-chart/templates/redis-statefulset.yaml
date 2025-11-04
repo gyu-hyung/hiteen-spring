@@ -24,8 +24,7 @@ spec:
           ports:
             - containerPort: {{ .Values.redis.service.port | default 6379 }}
             - containerPort: {{ .Values.redis.service.clusterPort | default 16379 }}
-          resources:
-            {{- toYaml .Values.redis.resources | nindent 12 }}
+          resources: {{- toYaml .Values.redis.resources | nindent 12 }}
           volumeMounts:
             - name: config
               mountPath: /usr/local/etc/redis
