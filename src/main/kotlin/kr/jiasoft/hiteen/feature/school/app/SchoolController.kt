@@ -32,14 +32,11 @@ class SchoolController(
     ): ResponseEntity<ApiResult<ApiPageCursor<SchoolDto>>> {
         val pageSize = limit ?: 20
         val entities = schoolRepository.findSchools(keyword, cursor, pageSize).toList()
-        val items: List<SchoolDto> = entities.map {
-            SchoolDto.from(it, schoolRepository.countMembersBySchoolId(it.id))
-        }
         val nextCursor = entities.lastOrNull()?.id?.toString()
 
         return ResponseEntity.ok(ApiResult.success(ApiPageCursor(
             nextCursor = nextCursor,
-            items = items,
+            items = entities,
             perPage = pageSize
         )))
     }

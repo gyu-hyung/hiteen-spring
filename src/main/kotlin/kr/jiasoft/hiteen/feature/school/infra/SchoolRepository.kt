@@ -2,6 +2,7 @@ package kr.jiasoft.hiteen.feature.school.infra
 
 import kotlinx.coroutines.flow.Flow
 import kr.jiasoft.hiteen.feature.school.domain.SchoolEntity
+import kr.jiasoft.hiteen.feature.school.dto.SchoolDto
 import org.springframework.data.r2dbc.repository.Modifying
 import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
@@ -24,7 +25,7 @@ interface SchoolRepository : CoroutineCrudRepository<SchoolEntity, Long> {
         keyword: String?,
         cursor: Long?,
         limit: Int
-    ): Flow<SchoolEntity>
+    ): Flow<SchoolDto>
 
     @Query("""
         SELECT COUNT(*) 
