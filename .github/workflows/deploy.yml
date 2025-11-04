@@ -7,7 +7,7 @@ on:
 
 jobs:
   deploy:
-    runs-on: [self-hosted]   # EC2 Runner (이미 쿠버네티스 클러스터 접근 가능)
+    runs-on: [self-hosted]   # EC2 Runner (K8s 클러스터 접근 가능)
 
     env:
       NAMESPACE: hiteen
@@ -53,6 +53,15 @@ jobs:
           rm -f firebase-key.json
         shell: bash
 
+      - name: 🔐 Create Redis Secret
+        run: |
+          REDIS_PASS="hiteen1234"
+          kubectl delete secret redis-secret -n $NAMESPACE --ignore-not-found
+          kubectl create secret generic redis-secret \
+            --from-literal=redis-password=$REDIS_PASS \
+            -n $NAMESPACE
+        shell: bash
+
       - name: 🧹 Clean up pending Helm release
         run: |
           if helm status hiteen -n $NAMESPACE | grep -q "pending"; then
@@ -66,34 +75,32 @@ jobs:
             kubectl delete job redis-cluster-create -n $NAMESPACE --ignore-not-found=true
           fi
 
-      - name: ⚙️ Pre-check StatefulSet compatibility
-        run: |
-          echo "🔍 Checking for immutable field changes in Redis StatefulSet..."
-          if kubectl get statefulset redis -n $NAMESPACE >/dev/null 2>&1; then
-            echo "✅ Found existing redis StatefulSet. Checking for immutable spec changes..."
-            kubectl get statefulset redis -n $NAMESPACE -o yaml > old_redis.yaml
-            helm template hiteen $CHART_PATH -n $NAMESPACE > new_render.yaml
-
-            if ! diff <(yq '.spec' old_redis.yaml) <(yq '.spec' new_render.yaml) | grep -Eq 'serviceName|volumeClaimTemplates|selector'; then
-              echo "ℹ️ No immutable field differences detected. Proceeding with Helm upgrade."
-            else
-              echo "⚠️ Immutable fields changed. Deleting existing StatefulSet redis to avoid Helm upgrade failure..."
-              kubectl delete statefulset redis -n $NAMESPACE --cascade=orphan
-              echo "✅ Deleted old StatefulSet. Will be recreated by Helm."
-            fi
-          else
-            echo "ℹ️ No existing redis StatefulSet found. Proceeding with Helm install."
-          fi
-        shell: bash
-
-      - name: 🪶 Deploy via Helm
+      - name: 🪶 Deploy via Helm (App + Redis Cluster)
         run: |
           helm upgrade --install hiteen $CHART_PATH \
             -n $NAMESPACE \
             --set app.image.repository=$IMAGE \
             --set app.image.tag=$TAG \
             --set ingress.enabled=true \
-            --wait --timeout 60s
+            --set redis.password=hiteen1234 \
+            --set redis.storageClass=local-path \
+            --wait --timeout 300s
+        shell: bash
+
+      - name: 🕓 Wait for Redis Pods to be Ready
+        run: |
+          echo "⏳ Waiting for Redis pods to be ready..."
+          for i in $(seq 0 5); do
+            kubectl wait --for=condition=ready pod/redis-$i -n $NAMESPACE --timeout=90s || true
+          done
+          kubectl get pods -n $NAMESPACE -o wide
+        shell: bash
+
+      - name: 🔍 Verify Redis Cluster creation job
+        run: |
+          echo "🔎 Checking Redis cluster job status..."
+          kubectl get job redis-cluster-create -n $NAMESPACE || true
+          kubectl logs job/redis-cluster-create -n $NAMESPACE || true
 
       - name: 🔍 Verify rollout
         run: |
@@ -102,7 +109,7 @@ jobs:
 
       - name: ✅ Success notification
         if: success()
-        run: echo "✅ hiteen deployed successfully!"
+        run: echo "✅ hiteen + redis-cluster deployed successfully!"
 
       - name: ❌ Failure notification
         if: failure()

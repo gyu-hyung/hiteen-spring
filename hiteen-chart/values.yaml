@@ -9,7 +9,6 @@ nodeSelector:
 imagePullSecrets:
   - name: ghcr-secret
 
-
 # ============================================
 # Backend (Spring Boot)
 # ============================================
@@ -44,7 +43,6 @@ app:
     limits:
       cpu: 1
       memory: 1Gi
-
 
 # ============================================
 # Soketi (WebSocket Server)
@@ -93,9 +91,8 @@ soketi:
       cpu: 500m
       memory: 512Mi
 
-
 # ============================================
-# Redis Cluster (Persistent StatefulSet)
+# Redis Cluster (StatefulSet + PVC)
 # ============================================
 redis:
   replicas: 6
@@ -119,12 +116,10 @@ redis:
       cpu: 300m
       memory: 256Mi
 
-  # --- Persistent Volume settings (Per Pod) ---
-  storageClass: local-path           # Kind: local-path, AWS: gp2/gp3
-  storage: 2Gi                       # PVC 크기
+  storageClass: local-path
+  storageSize: 2Gi
   accessModes:
     - ReadWriteOnce
-
 
 # ============================================
 # Ingress (Nginx)
