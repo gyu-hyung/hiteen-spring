@@ -208,7 +208,8 @@ data class PollCommentResponse(
     @param:Schema(description = "작성자 내부 ID (응답에 노출되지 않음)", example = "42")
     val createdId: Long,
 
-    @param:Schema(description = "댓글 작성 시각", example = "2025-09-18T10:30:00Z")
+    @param:Schema(description = "작성 일시", example = "2025.09.18 10:15")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm")
     val createdAt: OffsetDateTime,
 
     @param:Schema(description = "작성자 요약 정보")
