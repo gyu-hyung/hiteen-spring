@@ -9,6 +9,7 @@ nodeSelector:
 imagePullSecrets:
   - name: ghcr-secret
 
+
 # ============================================
 # Backend (Spring Boot)
 # ============================================
@@ -43,6 +44,7 @@ app:
     limits:
       cpu: 1
       memory: 1Gi
+
 
 # ============================================
 # Soketi (WebSocket Server)
@@ -91,17 +93,18 @@ soketi:
       cpu: 500m
       memory: 512Mi
 
+
 # ============================================
-# Redis Cluster (Persistent version)
+# Redis Cluster (Persistent StatefulSet version)
 # ============================================
 redis:
   replicas: 6
   clusterReplicas: 1
-  password: xxxxxxxx   # <<< 클러스터 전체 공유 비밀번호
+  password: xxxxxxxx
 
   image:
     repository: redis
-    tag: 7.2
+    tag: "7.2"
     pullPolicy: IfNotPresent
 
   service:
@@ -116,15 +119,12 @@ redis:
       cpu: 300m
       memory: 256Mi
 
-  # --- Persistent Volume settings ---
-  persistence:
-    enabled: true
-    type: hostPath
-    size: 2Gi
-    storageClass: local-path
-    hostPath: /data/redis
-    accessModes:
-      - ReadWriteOnce
+  # --- Persistent Volume settings (Per Pod) ---
+  storageClass: local-path           # storageClassName (kind/local은 local-path, AWS면 gp2/gp3)
+  storage: 2Gi                       # PVC 크기
+  accessModes:
+    - ReadWriteOnce
+
 
 # ============================================
 # Ingress (Nginx)
