@@ -4,6 +4,8 @@ on:
   workflow_run:
     workflows: ["🏗️ Build & Push Docker Image"]
     types: [completed]
+  workflow_dispatch:
+
 
 jobs:
   deploy:
