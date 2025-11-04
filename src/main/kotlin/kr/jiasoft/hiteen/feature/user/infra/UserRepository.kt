@@ -17,6 +17,28 @@ interface UserRepository : CoroutineCrudRepository<UserEntity, Long> {
     suspend fun findAllByPhone(phone: String): Flow<UserEntity>
     suspend fun findByInviteCode(inviteCode: String): UserEntity?
 
+
+    // ✅ 활성(미삭제) 사용자 - username(=phone)로 조회
+    @Query("""SELECT * FROM users WHERE username = :username AND deleted_at IS NULL LIMIT 1""")
+    suspend fun findActiveByUsername(username: String): UserEntity?
+
+    // ✅ 활성 사용자 - phone으로 조회 (username과 동일하지만, 명시적 함수)
+    @Query("""SELECT * FROM users WHERE phone = :phone AND deleted_at IS NULL LIMIT 1""")
+    suspend fun findActiveByPhone(phone: String): UserEntity?
+
+    // ✅ 탈퇴(삭제)된 사용자 중 가장 최근
+    @Query("""SELECT * FROM users WHERE phone = :phone AND deleted_at IS NOT NULL ORDER BY deleted_at DESC LIMIT 1""")
+    suspend fun findLatestDeletedByPhone(phone: String): UserEntity?
+
+    // ✅ 닉네임 활성 중복 체크
+    @Query("""SELECT EXISTS(SELECT 1 FROM users WHERE nickname = :nickname AND deleted_at IS NULL)""")
+    suspend fun existsByNicknameActive(nickname: String): Boolean
+
+    // ✅ email 활성 중복 체크(선택)
+    @Query("""SELECT EXISTS(SELECT 1 FROM users WHERE lower(email) = lower(:email) AND deleted_at IS NULL)""")
+    suspend fun existsByEmailActive(email: String): Boolean
+
+
     @Query("""
         UPDATE users SET mbti = :mbti WHERE id = :userId
     """)
