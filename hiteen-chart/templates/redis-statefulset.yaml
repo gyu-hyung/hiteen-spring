@@ -20,9 +20,7 @@ spec:
         - name: redis
           image: "{{ .Values.redis.image.repository }}:{{ .Values.redis.image.tag }}"
           imagePullPolicy: {{ .Values.redis.image.pullPolicy | default "IfNotPresent" }}
-          command:
-            - "redis-server"
-            - "/usr/local/etc/redis/redis.conf"
+          command: [ "sh", "-c", "redis-server /usr/local/etc/redis/redis.conf --protected-mode no" ]
           ports:
             - containerPort: {{ .Values.redis.service.port | default 6379 }}
             - containerPort: {{ .Values.redis.service.clusterPort | default 16379 }}
