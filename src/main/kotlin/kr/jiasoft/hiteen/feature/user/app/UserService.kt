@@ -61,8 +61,8 @@ class UserService (
     @Value("\${app.join.rejoin-days:30}")
     private val rejoinDays: Int = 30
 
-    @Value("\${app.join.dev-allow-always:true}")  // 개발중엔 true로 두면 언제든 재가입 가능
-    private val devAllowAlways: Boolean = true
+    @Value("\${app.join.dev-allow-always:false}")  // 개발중엔 true로 두면 언제든 새로 가입
+    private val devAllowAlways: Boolean = false
 
 
     suspend fun findByUid(uid: String): UserEntity? {

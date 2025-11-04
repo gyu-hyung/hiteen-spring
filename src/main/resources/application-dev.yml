@@ -55,7 +55,7 @@ app:
     max-size-bytes: 5242880 # 50MB
   join:
     rejoin-days: 30
-    dev-allow-always: true
+    dev-allow-always: false
 
 admob:
   key-url: https://www.gstatic.com/admob/reward/verifier-keys.json
