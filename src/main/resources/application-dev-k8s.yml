@@ -1,19 +1,22 @@
 spring:
   application:
     name: hiteen
+
   r2dbc:
-    username: hiteen
     url: r2dbc:postgresql://10.8.3.89:5432/hiteen
+    username: hiteen
     password: hiteen@2025
     pool:
       enabled: true
       initial-size: 5
       max-size: 20
+
   liquibase:
     url: jdbc:postgresql://10.8.3.89:5432/hiteen
     user: hiteen
     password: hiteen@2025
     change-log: classpath:db/changelog/db.changelog-master.yaml
+
   data:
     mongodb:
       uri: mongodb://hiteen:hiteen%402025@10.8.2.156:27017/hiteen?authSource=admin
@@ -37,29 +40,49 @@ spring:
           max-idle: 8
           min-idle: 2
           time-between-eviction-runs: 60s
-  devtools:
-    livereload:
-      enabled: true
-    restart:
-      enabled: true
+
   config:
     import:
       - "classpath:mbti.yml"
       - "classpath:exp.yml"
 
+  devtools:
+    livereload.enabled: true
+    restart.enabled: true
+
 server:
   port: 8080
 
+# --------------------
+# Custom Application Settings
+# --------------------
 app:
   asset:
-    storage-root: /app/assets
+    # 실제 파일 저장 위치 (MinIO를 사용할 경우 S3 URL로 매핑됨)
+    storage-root: s3://hiteen-assets
     static-locations: classpath:/assets/
     allowed-exts: jpg,jpeg,png,gif,webp,bmp,svg,mp4,mov,avi,mkv,pdf,txt,csv,zip,rar,gz
-    max-size-bytes: 5242880 # 50MB
+    max-size-bytes: 52428800  # 50MB
   join:
     rejoin-days: 30
     dev-allow-always: false
 
+
+# --------------------
+# MinIO (S3 호환) 설정 추가
+# --------------------
+cloud:
+  aws:
+    s3:
+      endpoint: http://hiteen-minio.hiteen.svc.cluster.local:9000
+      access-key: minioadmin
+      secret-key: minioadmin123
+      path-style-access-enabled: true
+
+
+# --------------------
+# External Integrations
+# --------------------
 admob:
   key-url: https://www.gstatic.com/admob/reward/verifier-keys.json
 
@@ -69,10 +92,8 @@ jwt:
   refresh-expiration: 1209600000
 
 springdoc:
-  api-docs:
-    path: /api-docs
-  swagger-ui:
-    path: /swagger-ui
+  api-docs.path: /api-docs
+  swagger-ui.path: /swagger-ui
 
 soketi:
   host: soketi-svc.hiteen.svc.cluster.local
