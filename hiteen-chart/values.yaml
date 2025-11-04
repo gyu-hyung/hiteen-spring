@@ -54,9 +54,14 @@ soketi:
     repository: quay.io/soketi/soketi
     tag: 1.4-16-debian
     pullPolicy: Always
+
+  # ✅ Soketi 서비스 정의
   service:
+    name: soketi-svc        # 💡 서비스 이름 명시 (Deployment와 매칭)
     type: ClusterIP
     port: 6001
+
+  # ✅ 환경 변수
   env:
     - name: SOKETI_DEBUG
       value: "1"
@@ -83,6 +88,7 @@ soketi:
       value: "*"
     - name: SOKETI_DEFAULT_APP_ENABLE_CLIENT_MESSAGES
       value: "true"
+
   resources:
     requests:
       cpu: 100m
@@ -90,6 +96,10 @@ soketi:
     limits:
       cpu: 500m
       memory: 512Mi
+
+  # ✅ Soketi 내부 서비스 접근용 Host 정보 (Spring에서 참고 가능)
+  host: soketi-svc.hiteen.svc.cluster.local
+
 
 # ============================================
 # Redis Cluster (StatefulSet + PVC)

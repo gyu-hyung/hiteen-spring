@@ -72,7 +72,7 @@ springdoc:
     path: /swagger-ui
 
 soketi:
-  host: soketi.hiteen.svc.cluster.local
+  host: soketi-svc.hiteen.svc.cluster.local
   port: 6001
   app-id: hiteen-app
   app-key: hiteen-key
