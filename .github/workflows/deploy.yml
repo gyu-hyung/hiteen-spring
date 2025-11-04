@@ -73,7 +73,7 @@ jobs:
             --set app.image.repository=$IMAGE \
             --set app.image.tag=$TAG \
             --set ingress.enabled=true \
-            --wait --timeout 60s
+            --wait --timeout 300s
 
       - name: 🔍 Verify rollout
         run: |
