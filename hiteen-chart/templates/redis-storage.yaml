@@ -1,0 +1,27 @@
+{{- if and .Values.redis.persistence.enabled (eq .Values.redis.persistence.type "hostPath") }}
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: redis-pv
+spec:
+  capacity:
+    storage: {{ .Values.redis.persistence.size | default "5Gi" }}
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: {{ .Values.redis.persistence.storageClass | quote }}
+  hostPath:
+    path: {{ .Values.redis.persistence.hostPath | default "/data/redis" }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: redis-pvc
+  namespace: {{ .Values.namespace }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.redis.persistence.size | default "5Gi" }}
+  storageClassName: {{ .Values.redis.persistence.storageClass | quote }}
+  {{- end }}
