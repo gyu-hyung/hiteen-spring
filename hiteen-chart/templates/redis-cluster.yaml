@@ -16,6 +16,9 @@ data:
     appendonly yes
     dir /data
     protected-mode no
+    requirepass {{ .Values.redis.password }}
+    masterauth {{ .Values.redis.password }}
+
 
 ---
 # ==============================
@@ -118,8 +121,9 @@ spec:
                 done
               done
               echo "All Redis pods are ready. Creating cluster..."
-              redis-cli --cluster create \
+              redis-cli -a {{ .Values.redis.password }} --cluster create \
               {{- range $i := until (.Values.redis.replicas | int) }}
               redis-{{ $i }}.redis.{{ $.Values.namespace }}.svc.cluster.local:{{ $.Values.redis.service.port | default 6379 }} \
-              {{- end }}
+              {{- end }} \
               --cluster-replicas {{ .Values.redis.clusterReplicas }} --cluster-yes
+

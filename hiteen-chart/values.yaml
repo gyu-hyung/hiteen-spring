@@ -29,6 +29,11 @@ app:
       value: redis-0.redis.hiteen.svc.cluster.local
     - name: REDIS_PORT
       value: "6379"
+    - name: REDIS_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: redis-secret
+          key: redis-password
     - name: FIREBASE_CREDENTIAL_PATH
       value: /app/firebase/firebase-key.json
   resources:
@@ -69,6 +74,11 @@ soketi:
       value: redis-0.redis.hiteen.svc.cluster.local
     - name: SOKETI_REDIS_PORT
       value: "6379"
+    - name: SOKETI_REDIS_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: redis-secret
+          key: redis-password
     - name: SOKETI_DEFAULT_APP_ALLOW_ORIGIN
       value: "*"
     - name: SOKETI_DEFAULT_APP_ENABLE_CLIENT_MESSAGES
@@ -87,6 +97,7 @@ soketi:
 redis:
   replicas: 6
   clusterReplicas: 1
+  password: xxxxxxxx   # <<< 클러스터 전체 공유 비밀번호
 
   image:
     repository: redis
@@ -108,10 +119,10 @@ redis:
   # --- Persistent Volume settings ---
   persistence:
     enabled: true
-    type: hostPath         # 직접 설치형 kubeadm 환경이므로 hostPath 사용
+    type: hostPath
     size: 2Gi
     storageClass: local-path
-    hostPath: /data/redis  # 실제 노드 디스크 경로
+    hostPath: /data/redis
     accessModes:
       - ReadWriteOnce
 
