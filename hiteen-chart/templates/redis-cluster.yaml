@@ -19,7 +19,6 @@ data:
     requirepass {{ .Values.redis.password }}
     masterauth {{ .Values.redis.password }}
 
-
 ---
 # ==============================
 # Redis Headless Service
@@ -38,50 +37,6 @@ spec:
       port: {{ .Values.redis.service.clusterPort | default 16379 }}
   selector:
     app: redis
-
----
-# ==============================
-# Redis StatefulSet
-# ==============================
-apiVersion: apps/v1
-kind: StatefulSet
-metadata:
-  name: redis
-  namespace: {{ .Values.namespace }}
-spec:
-  serviceName: "redis"
-  replicas: {{ .Values.redis.replicas }}
-  selector:
-    matchLabels:
-      app: redis
-  template:
-    metadata:
-      labels:
-        app: redis
-    spec:
-      nodeSelector:
-        {{- toYaml .Values.nodeSelector | nindent 8 }}
-      containers:
-        - name: redis
-          image: "{{ .Values.redis.image.repository }}:{{ .Values.redis.image.tag }}"
-          imagePullPolicy: {{ .Values.redis.image.pullPolicy | default "IfNotPresent" }}
-          command:
-            - "redis-server"
-            - "/usr/local/etc/redis/redis.conf"
-          ports:
-            - containerPort: {{ .Values.redis.service.port | default 6379 }}
-            - containerPort: {{ .Values.redis.service.clusterPort | default 16379 }}
-          resources:
-            {{- toYaml .Values.redis.resources | nindent 12 }}
-          volumeMounts:
-            - name: config
-              mountPath: /usr/local/etc/redis
-            - name: redis-data
-              mountPath: /data
-      volumes:
-        - name: data
-          persistentVolumeClaim:
-            claimName: redis-pvc
 
 ---
 # ==============================
@@ -123,4 +78,3 @@ spec:
               redis-{{ $i }}.redis.{{ $.Values.namespace }}.svc.cluster.local:{{ $.Values.redis.service.port | default 6379 }} \
               {{- end }} \
               --cluster-replicas {{ .Values.redis.clusterReplicas }} --cluster-yes
-

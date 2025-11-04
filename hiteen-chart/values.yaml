@@ -95,7 +95,7 @@ soketi:
 
 
 # ============================================
-# Redis Cluster (Persistent StatefulSet version)
+# Redis Cluster (Persistent StatefulSet)
 # ============================================
 redis:
   replicas: 6
@@ -120,7 +120,7 @@ redis:
       memory: 256Mi
 
   # --- Persistent Volume settings (Per Pod) ---
-  storageClass: local-path           # storageClassName (kind/local은 local-path, AWS면 gp2/gp3)
+  storageClass: local-path           # Kind: local-path, AWS: gp2/gp3
   storage: 2Gi                       # PVC 크기
   accessModes:
     - ReadWriteOnce
