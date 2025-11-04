@@ -45,7 +45,7 @@ jobs:
 
       - name: 🔐 Create Firebase Secret
         run: |
-          echo "${{ secrets.FIREBASE_KEY_JSON }}" > firebase-key.json
+          echo "${{ secrets.FIREBASE_KEY_JSON }}" | base64 --decode > firebase-key.json
           kubectl delete secret firebase-secret -n $NAMESPACE --ignore-not-found
           kubectl create secret generic firebase-secret \
             --from-file=firebase-key.json=firebase-key.json \
