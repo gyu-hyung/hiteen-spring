@@ -20,11 +20,14 @@ spec:
         - name: redis
           image: "{{ .Values.redis.image.repository }}:{{ .Values.redis.image.tag }}"
           imagePullPolicy: {{ .Values.redis.image.pullPolicy | default "IfNotPresent" }}
-          command: [ "sh", "-c", "redis-server /usr/local/etc/redis/redis.conf --protected-mode no" ]
+          command:
+            - "redis-server"
+            - "/usr/local/etc/redis/redis.conf"
           ports:
             - containerPort: {{ .Values.redis.service.port | default 6379 }}
             - containerPort: {{ .Values.redis.service.clusterPort | default 16379 }}
-          resources: {{- toYaml .Values.redis.resources | nindent 12 }}
+          resources:
+            {{- toYaml .Values.redis.resources | nindent 12 }}
           volumeMounts:
             - name: config
               mountPath: /usr/local/etc/redis
@@ -34,6 +37,11 @@ spec:
         - name: config
           configMap:
             name: redis-config
-        - name: redis-data
-          persistentVolumeClaim:
-            claimName: redis-pvc
+  volumeClaimTemplates:
+    - metadata:
+        name: redis-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: {{ .Values.redis.storageSize | default "1Gi" }}
