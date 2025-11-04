@@ -200,9 +200,9 @@ class BoardController(
     suspend fun createComment(
         @Parameter(description = "댓글 등록/수정 요청 DTO") boardCommentRegisterRequest: BoardCommentRegisterRequest,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
-    ): ResponseEntity<ApiResult<Map<String, Any>>> {
-        val uid = service.createComment(boardCommentRegisterRequest.boardUid, boardCommentRegisterRequest, user)
-        return ResponseEntity.ok(ApiResult.success(mapOf("uid" to uid)))
+    ): ResponseEntity<ApiResult<BoardCommentResponse>> {
+        val result = service.createComment(boardCommentRegisterRequest.boardUid, boardCommentRegisterRequest, user)
+        return ResponseEntity.ok(ApiResult.success(result))
     }
 
     @Operation(summary = "댓글 수정", description = "특정 댓글을 수정합니다.")
