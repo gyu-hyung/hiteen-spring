@@ -1,3 +1,6 @@
+# ==============================
+# Redis ConfigMap
+# ==============================
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -11,9 +14,13 @@ data:
     cluster-config-file nodes.conf
     cluster-node-timeout 5000
     appendonly yes
+    dir /data
     protected-mode no
 
 ---
+# ==============================
+# Redis Headless Service
+# ==============================
 apiVersion: v1
 kind: Service
 metadata:
@@ -30,6 +37,9 @@ spec:
     app: redis
 
 ---
+# ==============================
+# Redis StatefulSet
+# ==============================
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -63,12 +73,20 @@ spec:
           volumeMounts:
             - name: config
               mountPath: /usr/local/etc/redis
+            - name: data
+              mountPath: /data
       volumes:
         - name: config
           configMap:
             name: redis-config
+        - name: data
+          persistentVolumeClaim:
+            claimName: redis-pvc
 
 ---
+# ==============================
+# Redis Cluster Initialization Job
+# ==============================
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -92,11 +110,16 @@ spec:
             - "-c"
             - |
               echo "Waiting for Redis pods to be ready..."
-              sleep 15
-              echo "Creating Redis cluster..."
+              for i in $(seq 0 {{ sub .Values.redis.replicas 1 }}); do
+                echo "Checking pod redis-$i..."
+                until redis-cli -h redis-$i.redis.{{ $.Values.namespace }}.svc.cluster.local ping | grep -q PONG; do
+                  echo "Pod redis-$i not ready yet..."
+                  sleep 3
+                done
+              done
+              echo "All Redis pods are ready. Creating cluster..."
               redis-cli --cluster create \
               {{- range $i := until (.Values.redis.replicas | int) }}
               redis-{{ $i }}.redis.{{ $.Values.namespace }}.svc.cluster.local:{{ $.Values.redis.service.port | default 6379 }} \
               {{- end }}
               --cluster-replicas {{ .Values.redis.clusterReplicas }} --cluster-yes
-

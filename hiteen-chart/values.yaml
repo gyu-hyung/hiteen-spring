@@ -82,18 +82,21 @@ soketi:
       memory: 512Mi
 
 # ============================================
-# Redis Cluster
+# Redis Cluster (Persistent version)
 # ============================================
 redis:
   replicas: 6
   clusterReplicas: 1
+
   image:
     repository: redis
     tag: 7.2
     pullPolicy: IfNotPresent
+
   service:
     port: 6379
     clusterPort: 16379
+
   resources:
     requests:
       cpu: 100m
@@ -101,6 +104,16 @@ redis:
     limits:
       cpu: 300m
       memory: 256Mi
+
+  # --- Persistent Volume settings ---
+  persistence:
+    enabled: true
+    type: hostPath         # 직접 설치형 kubeadm 환경이므로 hostPath 사용
+    size: 2Gi
+    storageClass: local-path
+    hostPath: /data/redis  # 실제 노드 디스크 경로
+    accessModes:
+      - ReadWriteOnce
 
 # ============================================
 # Ingress (Nginx)
@@ -126,4 +139,3 @@ ingress:
           backend:
             serviceName: soketi-svc
             servicePort: 6001
-
