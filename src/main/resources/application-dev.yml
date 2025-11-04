@@ -134,4 +134,4 @@ logging:
     org.mongodb.driver.protocol.command: DEBUG
     org.mongodb.driver.protocol.query: DEBUG
     org.mongodb.driver.connection: DEBUG
-    org.springframework.security: DEBUG
+    org.springframework.security: INFO
