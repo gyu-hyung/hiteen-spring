@@ -78,12 +78,6 @@ jobs:
             kubectl delete job redis-cluster-create -n $NAMESPACE --ignore-not-found=true
           fi
 
-      - name: 🧩 Build Helm dependencies (MinIO)
-        run: |
-          cd $CHART_PATH
-          helm repo add bitnami https://charts.bitnami.com/bitnami
-          helm dependency update
-
       - name: 🪶 Deploy via Helm (App + Redis + MinIO)
         run: |
           helm upgrade --install hiteen $CHART_PATH \
@@ -93,10 +87,6 @@ jobs:
             --set ingress.enabled=true \
             --set redis.password=xxxxxxxx \
             --set redis.storageClass=local-path \
-            --set minio.enabled=true \
-            --set minio.auth.rootUser=minioadmin \
-            --set minio.auth.rootPassword=minioadmin123 \
-            --set minio.image.tag=2024.9.23-debian-12-r0 \
             --wait --timeout 300s
 
 
