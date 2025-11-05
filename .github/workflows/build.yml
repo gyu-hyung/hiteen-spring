@@ -46,7 +46,7 @@ jobs:
       - name: 🔐 Log in to GHCR
         run: echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
 
-      # ✅ 6. Build & Push (AMD64 only for speed)
+      # ✅ 6. Build & Push (AMD64 only)
       - name: 🏗️ Build & Push Docker image
         env:
           DOCKER_BUILDKIT: 1
