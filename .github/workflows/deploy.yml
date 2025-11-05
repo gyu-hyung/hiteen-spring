@@ -91,21 +91,6 @@ jobs:
             --wait --timeout 300s
 
 
-      - name: 🕓 Wait for Redis Pods to be Ready
-        run: |
-          echo "⏳ Waiting for Redis pods to be ready..."
-          for i in $(seq 0 5); do
-            kubectl wait --for=condition=ready pod/redis-$i -n $NAMESPACE --timeout=90s || true
-          done
-          kubectl get pods -n $NAMESPACE -o wide
-        shell: bash
-
-      - name: 🔍 Verify Redis Cluster creation job
-        run: |
-          echo "🔎 Checking Redis cluster job status..."
-          kubectl get job redis-cluster-create -n $NAMESPACE || true
-          kubectl logs job/redis-cluster-create -n $NAMESPACE || true
-
       - name: 🔍 Verify rollout
         run: |
           kubectl rollout status deployment/hiteen-test -n $NAMESPACE
