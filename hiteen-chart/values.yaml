@@ -50,9 +50,12 @@ app:
 minio:
   enabled: true
 
+
+  auth:
+    rootUser: minioadmin
+    rootPassword: minioadmin123
+
   mode: standalone   # 테스트나 내부용이면 standalone으로 충분
-  rootUser: minioadmin
-  rootPassword: minioadmin123
 
   persistence:
     enabled: true

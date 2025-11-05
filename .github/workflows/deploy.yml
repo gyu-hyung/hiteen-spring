@@ -81,7 +81,7 @@ jobs:
           helm repo add bitnami https://charts.bitnami.com/bitnami
           helm dependency update
 
-      - name: 🪶 Deploy via Helm (App + Redis Cluster)
+      - name: 🪶 Deploy via Helm (App + Redis + MinIO)
         run: |
           helm upgrade --install hiteen $CHART_PATH \
             -n $NAMESPACE \
@@ -91,8 +91,10 @@ jobs:
             --set redis.password=xxxxxxxx \
             --set redis.storageClass=local-path \
             --set minio.enabled=true \
+            --set minio.auth.rootUser=minioadmin \
+            --set minio.auth.rootPassword=minioadmin123 \
             --wait --timeout 300s
-        shell: bash
+
 
       - name: 🕓 Wait for Redis Pods to be Ready
         run: |
