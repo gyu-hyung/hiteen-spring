@@ -75,12 +75,6 @@ jobs:
             kubectl delete job redis-cluster-create -n $NAMESPACE --ignore-not-found=true
           fi
 
-      - name: 🧩 Build Helm dependencies (MinIO)
-        run: |
-          cd $CHART_PATH
-          helm repo add minio https://charts.min.io/
-          helm dependency update
-
       - name: 🪶 Deploy via Helm (App + Redis Cluster)
         run: |
           helm upgrade --install hiteen $CHART_PATH \
