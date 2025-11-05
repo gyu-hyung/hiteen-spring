@@ -30,6 +30,8 @@ spec:
             - name: firebase-credentials
               mountPath: /app/firebase/firebase-key.json
               subPath: firebase-key.json
+            - name: nfs-assets
+              mountPath: /app/assets
           resources:
             {{- toYaml .Values.app.resources | nindent 12 }}
       volumes:
