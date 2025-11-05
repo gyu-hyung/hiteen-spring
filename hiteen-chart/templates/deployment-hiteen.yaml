@@ -38,3 +38,6 @@ spec:
         - name: firebase-credentials
           secret:
             secretName: firebase-secret
+        - name: nfs-assets
+          persistentVolumeClaim:
+            claimName: nfs-pv-images

@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: nfs-pvc-images
+  name: nfs-pv-images
   namespace: {{ .Values.namespace }}
 spec:
   accessModes:
