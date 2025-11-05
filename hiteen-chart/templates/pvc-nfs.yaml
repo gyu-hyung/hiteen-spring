@@ -10,3 +10,4 @@ spec:
     requests:
       storage: {{ .Values.nfs.storage }}
   volumeName: nfs-pv-images
+  storageClassName: ""
