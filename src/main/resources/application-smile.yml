@@ -1,0 +1,140 @@
+spring:
+  application:
+    name: hiteen
+  r2dbc:
+    username: hiteen
+    url: r2dbc:postgresql://10.8.3.89:5432/hiteen
+    password: hiteen@2025
+    pool:
+      enabled: true
+      initial-size: 5
+      max-size: 20
+  liquibase:
+    url: jdbc:postgresql://10.8.3.89:5432/hiteen
+    user: hiteen
+    password: hiteen@2025
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+  data:
+    mongodb:
+      uri: mongodb://hiteen:hiteen%402025@10.8.2.156:27017/hiteen?authSource=admin
+    redis:
+      repositories:
+        enabled: false
+      cluster:
+        nodes:
+          - 10.8.3.67:6379
+          - 10.8.3.188:6379
+      password: hiteen1234
+      timeout: 5s
+      client-type: lettuce
+      lettuce:
+        pool:
+          max-active: 16
+          max-idle: 8
+          min-idle: 2
+          time-between-eviction-runs: 60s
+  devtools:
+    livereload:
+      enabled: true
+    restart:
+      enabled: true
+  config:
+    import:
+      - "classpath:mbti.yml"
+      - "classpath:exp.yml"
+
+server:
+  port: 8080
+
+app:
+  asset:
+    storage-root: ${HOME}/assets
+#    storage-root: /app/assets
+    static-locations: classpath:/assets/
+    allowed-exts: jpg,jpeg,png,gif,webp,bmp,svg,mp4,mov,avi,mkv,pdf,txt,csv,zip,rar,gz
+    max-size-bytes: 5242880 # 50MB
+  join:
+    rejoin-days: 30
+    dev-allow-always: false
+
+admob:
+  key-url: https://www.gstatic.com/admob/reward/verifier-keys.json
+
+jwt:
+  secret: ac0da6c32199d5d4829ca62b05f2a353ab926e2855de718e28286ca64bc2f9df
+  access-expiration: 864000000
+  refresh-expiration: 1209600000
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui
+
+soketi:
+  host: 127.0.0.1
+  port: 6001
+  app-id: hiteen-app
+  app-key: hiteen-key
+  app-secret: hiteen-secret
+
+sms:
+  callback: "1577-5993"
+  api-key: 0rsw46blu616mp6geidaldsy9z6o0pgi
+  api-url: https://apis.aligo.in/send/
+  user-id: jiasoft
+  kakao:
+    sender-key: KAKAO_SENDER_KEY
+    token-url: https://kakaoapi.aligo.in/akv10/token/create/30/s/
+    alimtalk-url: https://kakaoapi.aligo.in/akv10/alimtalk/send/
+    detail-url: https://kakaoapi.aligo.in/akv10/history/detail/
+
+batch:
+  enabled: false
+
+neis:
+  base-url: "https://open.neis.go.kr/hub"
+  api-key: "458d6485b25c46009758a4ab53413497"
+
+kakao:
+  base-url: "https://dapi.kakao.com/v2/local"
+  api-key: "6ba92dcdddc5dccc78dbbaa50eb95825"
+
+
+
+#mqtt:
+#  broker:
+#    uri: tcp://192.168.49.2:30002
+#  topic: $share/group1/location/#
+#  client:
+#    id: tbmq_spring
+#  username: tbmq_spring
+#  password: tbmq_spring
+#  cleanStart: false
+#  automaticReconnect: true
+#  sessionExpiryInterval: 604800
+#  keepAliveInterval: 60
+#  qos: 1
+
+# 미사용
+tbmq:
+  url: http://192.168.49.2:30001
+  admin:
+    username: sysadmin@thingsboard.org
+    password: sysadmin
+  mqtt:
+    host: 192.168.49.2
+    port: 30002
+    tls: false
+
+logging:
+  level:
+    io.r2dbc.postgresql.QUERY: DEBUG
+    io.r2dbc.postgresql.PARAM: DEBUG
+    org.springframework.data.mongodb.core.MongoTemplate: DEBUG
+    org.springframework.data.mongodb.core.ReactiveMongoTemplate: DEBUG
+    org.springframework.boot.autoconfigure.liquibase: DEBUG
+    org.mongodb.driver.protocol.command: DEBUG
+    org.mongodb.driver.protocol.query: DEBUG
+    org.mongodb.driver.connection: DEBUG
+    org.springframework.security: INFO
