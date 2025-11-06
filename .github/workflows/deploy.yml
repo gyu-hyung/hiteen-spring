@@ -85,8 +85,7 @@ jobs:
             --set app.image.tag=$TAG \
             --set ingress.enabled=true \
             --set redis.password=hiteen1234 \
-            --set redis.storageClass=local-path \
-            --wait --timeout 300s
+            --set redis.storageClass=local-path
 
       - name: ⏳ Wait for Redis StatefulSet to be Ready
         run: |
