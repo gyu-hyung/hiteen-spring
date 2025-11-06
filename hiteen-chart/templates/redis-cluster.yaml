@@ -1,7 +1,94 @@
 # ==============================
-# Redis Cluster Initialization Job (with cluster_state check)
+# Redis ConfigMap
 # ==============================
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: redis-config
+  namespace: {{ .Values.namespace }}
+data:
+  redis.conf: |
+    port 6379
+    bind 0.0.0.0
+    cluster-enabled yes
+    cluster-config-file nodes.conf
+    cluster-node-timeout 5000
+    appendonly yes
+    dir /data
+    protected-mode no
+    requirepass {{ .Values.redis.password }}
+    masterauth {{ .Values.redis.password }}
+
+
+---
+# ==============================
+# Redis Headless Service
+# ==============================
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+  namespace: {{ .Values.namespace }}
+spec:
+  clusterIP: None
+  ports:
+    - name: redis
+      port: {{ .Values.redis.service.port | default 6379 }}
+    - name: cluster-bus
+      port: {{ .Values.redis.service.clusterPort | default 16379 }}
+  selector:
+    app: redis
+
+---
+# ==============================
+# Redis StatefulSet
+# ==============================
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: redis
+  namespace: {{ .Values.namespace }}
+spec:
+  serviceName: "redis"
+  replicas: {{ .Values.redis.replicas }}
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      nodeSelector:
+        {{- toYaml .Values.nodeSelector | nindent 8 }}
+      containers:
+        - name: redis
+          image: "{{ .Values.redis.image.repository }}:{{ .Values.redis.image.tag }}"
+          imagePullPolicy: {{ .Values.redis.image.pullPolicy | default "IfNotPresent" }}
+          command:
+            - "redis-server"
+            - "/usr/local/etc/redis/redis.conf"
+          ports:
+            - containerPort: {{ .Values.redis.service.port | default 6379 }}
+            - containerPort: {{ .Values.redis.service.clusterPort | default 16379 }}
+          resources:
+            {{- toYaml .Values.redis.resources | nindent 12 }}
+          volumeMounts:
+            - name: config
+              mountPath: /usr/local/etc/redis
+            - name: redis-data
+              mountPath: /data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: redis-pvc
+
+---
+# ==============================
+  # Redis Cluster Initialization Job (with condition: run only if NOT already initialized, with waitTimeout)
+  # ==============================
   {{- if .Values.redis.clusterInit.enabled }}
+  {{- $replicas := int .Values.redis.replicas }}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -21,29 +108,46 @@ spec:
             - "bash"
             - "-c"
             - |
+              set -eu
+
+              PING_INTERVAL={{ $.Values.redis.clusterInit.pingInterval | default 3 }}
+              WAIT_TIMEOUT={{ $.Values.redis.clusterInit.waitTimeout | default 300 }}
+              NOW=$(date +%s)
+
               echo "🕓 Waiting for Redis pods to be ready..."
-              for i in $(seq 0 5); do
-                until redis-cli -a {{ .Values.redis.password }} -h redis-$i.redis.{{ $.Values.namespace }}.svc.cluster.local ping | grep -q PONG; do
+              for i in $(seq 0 {{ sub $replicas 1 }}); do
+                COUNT=0
+                while true; do
+                  if redis-cli -a {{ .Values.redis.password }} -h redis-$i.redis.{{ $.Values.namespace }}.svc.cluster.local ping | grep -q PONG; then
+                    echo "Pod redis-$i ready!"
+                    break
+                  fi
+
+                  COUNT=$((COUNT + PING_INTERVAL))
+                  if (( COUNT > WAIT_TIMEOUT )); then
+                    echo "⛔ Pod redis-$i not ready after $WAIT_TIMEOUT seconds. Exiting."
+                    exit 1
+                  fi
+
                   echo "Pod redis-$i not ready yet..."
-                  sleep 3
+                  sleep $PING_INTERVAL
                 done
               done
 
               echo "✅ All Redis pods are ready. Checking cluster state..."
-              cluster_state=$(redis-cli -a {{ .Values.redis.password }} -h redis-0.redis.{{ $.Values.namespace }}.svc.cluster.local cluster info | grep cluster_state | awk -F: '{print $2}' | tr -d '\r')
+              CLUSTER_STATE=$(redis-cli -a {{ .Values.redis.password }} -h redis-0.redis.{{ $.Values.namespace }}.svc.cluster.local cluster info | grep cluster_state | awk -F':' '{print $2}' | xargs || true)
 
-              if [ "$cluster_state" = "ok" ]; then
-                echo "✅ Cluster already initialized. Skipping creation."
+              if [ "$CLUSTER_STATE" = "ok" ]; then
+                echo "🔵 Redis cluster already initialized. Skip
+              
+              ping cluster creation."
                 exit 0
               fi
 
               echo "⚡ Creating Redis cluster..."
               redis-cli -a {{ .Values.redis.password }} --cluster create \
-                redis-0.redis.{{ $.Values.namespace }}.svc.cluster.local:6379 \
-                redis-1.redis.{{ $.Values.namespace }}.svc.cluster.local:6379 \
-                redis-2.redis.{{ $.Values.namespace }}.svc.cluster.local:6379 \
-                redis-3.redis.{{ $.Values.namespace }}.svc.cluster.local:6379 \
-                redis-4.redis.{{ $.Values.namespace }}.svc.cluster.local:6379 \
-                redis-5.redis.{{ $.Values.namespace }}.svc.cluster.local:6379 \
+                {{- range $i, $e := until $replicas }}
+                redis-{{ $i }}.redis.{{ $.Values.namespace }}.svc.cluster.local:6379 \
+                {{- end }}
                 --cluster-replicas {{ .Values.redis.clusterReplicas }} --cluster-yes
   {{- end }}
