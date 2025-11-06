@@ -139,7 +139,7 @@ spec:
                 COUNT=0
                 while true; do
                   if redis-cli -a "$PASSWORD" -h redis-$i.redis.$NAMESPACE.svc.cluster.local ping 2>/dev/null | grep -q PONG; then
-                    echo "✅ Pod redis-$i is ready."
+                    echo "✅ Pod redis-$i is ready"
                     break
                   fi
                   COUNT=$((COUNT + PING_INTERVAL))
