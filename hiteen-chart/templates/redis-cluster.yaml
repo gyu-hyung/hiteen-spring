@@ -72,8 +72,8 @@ spec:
           
               echo "✅ All Redis pods are ready. Creating cluster..."
               redis-cli -a {{ .Values.redis.password }} --cluster create \
-              {{- range $i, $_ := until (.Values.redis.replicas | int) -}}
+              {{ range $i, $_ := until (.Values.redis.replicas | int) }}
               {{ printf "redis-%d.redis.%s.svc.cluster.local:%d " $i $.Values.namespace (int $.Values.redis.service.port) }}\
-              {{- end}} \
+              {{ end }} \
               --cluster-replicas {{ .Values.redis.clusterReplicas }} --cluster-yes
   {{- end }}
