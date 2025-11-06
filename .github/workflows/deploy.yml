@@ -1,5 +1,9 @@
 name: 🚀 Deploy to Kubernetes (Helm)
 
+#on:
+#  workflow_run:
+#    workflows: ["🏗️ Build & Push Docker Image"]
+#    types: [completed]
 on:
   push:
     branches: [ main ]
@@ -87,7 +91,7 @@ jobs:
             --set redis.password=hiteen1234 \
             --set redis.storageClass=local-path \
             --set redis.cluster.enabled=true \
-            --wait --timeout 80s
+            --wait --timeout 300s
 
       - name: ⏳ Wait for Redis StatefulSet to be Ready
         run: |

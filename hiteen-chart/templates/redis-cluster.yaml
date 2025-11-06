@@ -97,7 +97,7 @@ spec:
 
 ---
 # ==============================
-  # Redis Cluster Initialization Job
+  # Redis Cluster Initialization Job (Helm Hook)
   # ==============================
   {{- if .Values.redis.clusterInit.enabled }}
   {{- $replicas := int .Values.redis.replicas }}
