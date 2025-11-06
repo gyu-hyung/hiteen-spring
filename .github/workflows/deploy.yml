@@ -1,9 +1,5 @@
 name: 🚀 Deploy to Kubernetes (Helm)
 
-#on:
-#  workflow_run:
-#    workflows: ["🏗️ Build & Push Docker Image"]
-#    types: [completed]
 on:
   push:
     branches: [ main ]
@@ -56,13 +52,16 @@ jobs:
           rm -f firebase-key.json
         shell: bash
 
-      - name: 🔐 Create Redis Secret
+      - name: 🔐 Create Redis Secret (Helm ownership 라벨/어노테이션 부여)
         run: |
           REDIS_PASS="xxxxxxxx"
           kubectl delete secret redis-secret -n $NAMESPACE --ignore-not-found
           kubectl create secret generic redis-secret \
             --from-literal=redis-password=$REDIS_PASS \
             -n $NAMESPACE
+          kubectl label secret redis-secret -n $NAMESPACE app.kubernetes.io/managed-by=Helm --overwrite
+          kubectl annotate secret redis-secret -n $NAMESPACE meta.helm.sh/release-name=hiteen --overwrite
+          kubectl annotate secret redis-secret -n $NAMESPACE meta.helm.sh/release-namespace=hiteen --overwrite
         shell: bash
 
       - name: 🧹 Clean up pending Helm release
@@ -88,7 +87,6 @@ jobs:
             --set redis.password=xxxxxxxx \
             --set redis.storageClass=local-path \
             --wait --timeout 180s
-
 
       - name: 🔍 Verify rollout
         run: |
