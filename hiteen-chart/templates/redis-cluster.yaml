@@ -40,9 +40,10 @@ spec:
 
 ---
 # ==============================
-# Redis Cluster Initialization Job
-# ==============================
+  # Redis Cluster Initialization Job
+  # ==============================
   {{- if .Values.redis.clusterInit.enabled }}
+  {{- $replicas := int .Values.redis.replicas }}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -63,7 +64,7 @@ spec:
             - "-c"
             - |
               echo "🕓 Waiting for Redis pods to be ready..."
-              for i in $(seq 0 {{ sub .Values.redis.replicas 1 }}); do
+              for i in $(seq 0 {{ sub $replicas 1 }}); do
                 until redis-cli -a {{ .Values.redis.password }} -h redis-$i.redis.{{ $.Values.namespace }}.svc.cluster.local ping | grep -q PONG; do
                   echo "Pod redis-$i not ready yet..."
                   sleep {{ $.Values.redis.clusterInit.pingInterval | default 3 }}
@@ -72,7 +73,7 @@ spec:
 
               echo "✅ All Redis pods are ready. Creating cluster..."
               redis-cli -a {{ .Values.redis.password }} --cluster create \
-                {{- range $i, $e := until .Values.redis.replicas }}
+                {{- range $i, $e := until $replicas }}
                 redis-{{ $i }}.redis.{{ $.Values.namespace }}.svc.cluster.local:6379 \
                 {{- end }}
                 --cluster-replicas {{ .Values.redis.clusterReplicas }} --cluster-yes
