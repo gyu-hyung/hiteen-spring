@@ -107,10 +107,10 @@ metadata:
   name: redis-cluster-create
   namespace: {{ .Values.namespace }}
   annotations:
-    "helm.sh/hook": post-install-success,post-upgrade-success
+    "helm.sh/hook": post-install,post-upgrade
     "helm.sh/hook-weight": "80"
     "helm.sh/hook-wait": "true"
-    "helm.sh/hook-delete-policy": hook-succeeded,hook-failed
+#    "helm.sh/hook-delete-policy": hook-succeeded,hook-failed
 spec:
   backoffLimit: 0
   template:
