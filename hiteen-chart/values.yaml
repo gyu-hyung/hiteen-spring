@@ -166,14 +166,10 @@ ingress:
         - path: /
           pathType: Prefix
           backend:
-            service:
-              name: hiteen-test
-              port:
-                number: 8080
+            serviceName: hiteen-test
+            servicePort: 8080
         - path: /apps
           pathType: Prefix
           backend:
-            service:
-              name: soketi-svc
-              port:
-                number: 6001
+            serviceName: soketi-svc
+            servicePort: 6001
