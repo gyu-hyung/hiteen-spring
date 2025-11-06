@@ -88,7 +88,7 @@ jobs:
             --set ingress.enabled=true \
             --set redis.password=xxxxxxxx \
             --set redis.storageClass=local-path \
-            --wait --timeout 300s
+            --wait --timeout 180s
 
 
       - name: 🔍 Verify rollout
