@@ -97,8 +97,8 @@ spec:
 
 ---
 # ==============================
-  # Redis Cluster Initialization Job (Helm Hook)
-  # ==============================
+# Redis Cluster Initialization Job (Helm Hook)
+# ==============================
   {{- if .Values.redis.clusterInit.enabled }}
   {{- $replicas := int .Values.redis.replicas }}
 apiVersion: batch/v1
@@ -110,12 +110,12 @@ metadata:
     "helm.sh/hook": post-upgrade
     "helm.sh/hook-weight": "80"
     "helm.sh/hook-wait": "true"
-#    "helm.sh/hook-delete-policy": hook-succeeded,hook-failed
 spec:
   backoffLimit: 0
   template:
     spec:
       restartPolicy: Never
+      serviceAccountName: default
       containers:
         - name: redis-cluster-create
           image: redis:7.2
@@ -124,15 +124,24 @@ spec:
             - "-c"
             - |
               set -eu
-
-              echo "📦 Installing redis-tools (for redis-cli)..."
-              apt-get update -qq && apt-get install -y -qq redis-tools > /dev/null
+              echo "📦 Installing redis-tools..."
+              apt-get update -qq && apt-get install -y -qq redis-tools kubectl > /dev/null
 
               PING_INTERVAL={{ $.Values.redis.clusterInit.pingInterval | default 3 }}
               WAIT_TIMEOUT={{ $.Values.redis.clusterInit.waitTimeout | default 300 }}
               REPLICAS={{ $replicas }}
               PASSWORD="{{ .Values.redis.password }}"
               NAMESPACE="{{ $.Values.namespace }}"
+
+              echo "🕓 Waiting for Redis StatefulSet to exist..."
+              for i in $(seq 1 30); do
+                if kubectl get statefulset redis -n "$NAMESPACE" >/dev/null 2>&1; then
+                  echo "✅ Redis StatefulSet found!"
+                  break
+                fi
+                echo "Redis StatefulSet not found yet... waiting 5s."
+                sleep 5
+              done
 
               echo "🕓 Waiting for Redis pods to be ready..."
               for i in $(seq 0 $((REPLICAS - 1))); do
