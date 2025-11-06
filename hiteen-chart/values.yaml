@@ -209,7 +209,7 @@ ingress:
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
     nginx.ingress.kubernetes.io/websocket-services: "soketi"
   hosts:
-    - host:
+    - host: "49.247.169.182"
       paths:
         - path: /
           pathType: Prefix
