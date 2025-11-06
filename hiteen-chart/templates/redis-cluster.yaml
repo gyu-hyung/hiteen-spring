@@ -115,7 +115,6 @@ spec:
   template:
     spec:
       restartPolicy: Never
-      serviceAccountName: default
       containers:
         - name: redis-cluster-create
           image: redis:7.2
