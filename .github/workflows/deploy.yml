@@ -40,7 +40,7 @@ jobs:
 
       - name: 🧱 Create namespace if not exists
         run: |
-          kubectl get ns $NAMESPACE || kubectl create ns $NAMESPACE
+          kubectl get ns $NAMESPACE || kubectl create ns $NAMESPACE 
 
       - name: 🔐 Create Firebase Secret
         run: |
