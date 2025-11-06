@@ -123,24 +123,12 @@ spec:
             - "-c"
             - |
               set -eu
-              echo "📦 Installing redis-tools.."
-              apt-get update -qq && apt-get install -y -qq redis-tools kubectl > /dev/null
 
               PING_INTERVAL={{ $.Values.redis.clusterInit.pingInterval | default 3 }}
               WAIT_TIMEOUT={{ $.Values.redis.clusterInit.waitTimeout | default 300 }}
               REPLICAS={{ $replicas }}
               PASSWORD="{{ .Values.redis.password }}"
               NAMESPACE="{{ $.Values.namespace }}"
-
-              echo "🕓 Waiting for Redis StatefulSet to exist..."
-              for i in $(seq 1 30); do
-                if kubectl get statefulset redis -n "$NAMESPACE" >/dev/null 2>&1; then
-                  echo "✅ Redis StatefulSet found!"
-                  break
-                fi
-                echo "Redis StatefulSet not found yet... waiting 5s."
-                sleep 5
-              done
 
               echo "🕓 Waiting for Redis pods to be ready..."
               for i in $(seq 0 $((REPLICAS - 1))); do
