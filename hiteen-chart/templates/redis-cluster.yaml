@@ -109,6 +109,7 @@ metadata:
   annotations:
     "helm.sh/hook": post-install,post-upgrade
     "helm.sh/hook-weight": "80"
+    "helm.sh/hook-wait": "true"
     "helm.sh/hook-delete-policy": hook-succeeded,hook-failed
 spec:
   backoffLimit: 0
@@ -137,7 +138,7 @@ spec:
               for i in $(seq 0 $((REPLICAS - 1))); do
                 COUNT=0
                 while true; do
-                  if redis-cli -a "$PASSWORD" -h redis-$i.redis.$NAMESPACE.svc.cluster.local ping | grep -q PONG; then
+                  if redis-cli -a "$PASSWORD" -h redis-$i.redis.$NAMESPACE.svc.cluster.local ping 2>/dev/null | grep -q PONG; then
                     echo "✅ Pod redis-$i is ready."
                     break
                   fi
