@@ -42,11 +42,12 @@ spec:
 # ==============================
 # Redis Cluster Initialization Job
 # ==============================
+{{- if .Values.redis.clusterInit.enabled }}
 apiVersion: batch/v1
 kind: Job
 metadata:
   name: redis-cluster-create
-  namespace: {{ .Values.namespace }}
+  namespace: {{ .Values.redis.clusterInit.namespace }}
   annotations:
     "helm.sh/hook": post-install,post-upgrade
     "helm.sh/hook-delete-policy": hook-succeeded,hook-failed
@@ -54,27 +55,25 @@ spec:
   template:
     spec:
       restartPolicy: OnFailure
-      nodeSelector:
-        {{- toYaml .Values.nodeSelector | nindent 8 }}
       containers:
         - name: redis-cluster-create
           image: "{{ .Values.redis.image.repository }}:{{ .Values.redis.image.tag }}"
-          imagePullPolicy: {{ .Values.redis.image.pullPolicy | default "IfNotPresent" }}
           command:
-            - "sh"
+            - "bash"
             - "-c"
             - |
-              echo "Waiting for Redis pods to be ready..."
+              echo "🕓 Waiting for Redis pods to be ready..."
               for i in $(seq 0 {{ sub .Values.redis.replicas 1 }}); do
-                echo "Checking pod redis-$i..."
-                until redis-cli -h redis-$i.redis.{{ $.Values.namespace }}.svc.cluster.local ping | grep -q PONG; do
+                until redis-cli -a {{ .Values.redis.password }} -h redis-$i.{{ .Values.redis.service.name }}.{{ .Values.redis.clusterInit.namespace }}.svc.cluster.local ping | grep -q PONG; do
                   echo "Pod redis-$i not ready yet..."
-                  sleep 3
+                  sleep {{ .Values.redis.clusterInit.pingInterval }}
                 done
               done
-              echo "All Redis pods are ready. Creating cluster..."
+
+              echo "✅ All Redis pods are ready. Creating cluster..."
               redis-cli -a {{ .Values.redis.password }} --cluster create \
               {{- range $i := until (.Values.redis.replicas | int) }}
-              redis-{{ $i }}.redis.{{ $.Values.namespace }}.svc.cluster.local:{{ $.Values.redis.service.port | default 6379 }} \
+              redis-{{ $i }}.{{ $.Values.redis.service.name }}.{{ $.Values.redis.clusterInit.namespace }}.svc.cluster.local:{{ $.Values.redis.service.port }} \
               {{- end }} \
               --cluster-replicas {{ .Values.redis.clusterReplicas }} --cluster-yes
+{{- end }}

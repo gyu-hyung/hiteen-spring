@@ -165,7 +165,7 @@ soketi:
 redis:
   replicas: 6
   clusterReplicas: 1
-  password: hiteen1234
+  password: "hiteen1234"
 
   image:
     repository: redis
@@ -173,6 +173,7 @@ redis:
     pullPolicy: IfNotPresent
 
   service:
+    name: redis
     port: 6379
     clusterPort: 16379
 
@@ -188,6 +189,13 @@ redis:
   storageSize: 2Gi
   accessModes:
     - ReadWriteOnce
+
+  # ✅ Cluster init job이 사용할 값들 명시 (Job 내에서 사용됨)
+  clusterInit:
+    enabled: true
+    waitTimeout: 300          # Redis pod 준비 대기 시간 (초)
+    pingInterval: 3           # ping 재시도 간격 (초)
+    namespace: hiteen         # 클러스터 네임스페이스 지정 (변수 주입용)
 
 # ============================================
 # Ingress (Nginx)

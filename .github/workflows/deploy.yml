@@ -1,12 +1,12 @@
 name: 🚀 Deploy to Kubernetes (Helm)
 
-on:
-  workflow_run:
-    workflows: ["🏗️ Build & Push Docker Image"]
-    types: [completed]
 #on:
-#  push:
-#    branches: [ main ]
+#  workflow_run:
+#    workflows: ["🏗️ Build & Push Docker Image"]
+#    types: [completed]
+on:
+  push:
+    branches: [ main ]
 
 jobs:
   deploy:
