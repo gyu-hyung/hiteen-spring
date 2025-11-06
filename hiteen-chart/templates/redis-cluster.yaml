@@ -40,7 +40,7 @@ spec:
 
 ---
 # ==============================
-  # Redis Cluster Initialization Job
+  # Redis Cluster Initialization Job (클러스터 상태 확인 후 생성)
   # ==============================
   {{- if .Values.redis.clusterInit.enabled }}
   {{- $replicas := int .Values.redis.replicas }}
@@ -71,7 +71,15 @@ spec:
                 done
               done
 
-              echo "✅ All Redis pods are ready. Creating cluster..."
+              echo "✅ All Redis pods are ready. Checking cluster state..."
+              CLUSTER_STATE=$(redis-cli -a {{ .Values.redis.password }} -h redis-0.redis.{{ $.Values.namespace }}.svc.cluster.local cluster info | grep cluster_state | awk -F':' '{print $2}' | xargs)
+
+              if [ "$CLUSTER_STATE" = "ok" ]; then
+                echo "🔵 Redis cluster already initialized. Skipping cluster creation."
+                exit 0
+              fi
+
+              echo "⚡ Creating Redis cluster..."
               redis-cli -a {{ .Values.redis.password }} --cluster create \
                 {{- range $i, $e := until $replicas }}
                 redis-{{ $i }}.redis.{{ $.Values.namespace }}.svc.cluster.local:6379 \
