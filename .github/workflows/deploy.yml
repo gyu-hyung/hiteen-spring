@@ -71,7 +71,6 @@ jobs:
             helm uninstall hiteen -n $NAMESPACE || true
           fi
 
-          # ✅ Redis cluster post-install Job 정리 (중복 에러 방지)
           if kubectl get job redis-cluster-create -n $NAMESPACE >/dev/null 2>&1; then
             echo "🧹 Removing existing redis-cluster-create job..."
             kubectl delete job redis-cluster-create -n $NAMESPACE --ignore-not-found=true
@@ -84,11 +83,24 @@ jobs:
             --set app.image.repository=$IMAGE \
             --set app.image.tag=$TAG \
             --set ingress.enabled=true \
+            --set redis.enabled=true \
             --set redis.password=xxxxxxxx \
-            --set redis.storageClass=local-path
+            --set redis.storageClass=local-path \
+            --set redis.cluster.enabled=true
 
       - name: ⏳ Wait for Redis StatefulSet to be Ready
         run: |
+          echo "Waiting for Redis StatefulSet to be created..."
+          for i in {1..30}; do
+            if kubectl get statefulset redis -n $NAMESPACE >/dev/null 2>&1; then
+              echo "✅ Redis StatefulSet found. Waiting 3s to ensure registration..."
+              sleep 3
+              break
+            fi
+            echo "Redis StatefulSet not found yet... waiting 5s."
+            sleep 5
+          done
+          
           echo "Waiting for Redis StatefulSet to be ready..."
           for i in {1..60}; do
             READY=$(kubectl get statefulset redis -n $NAMESPACE -o jsonpath='{.status.readyReplicas}')
