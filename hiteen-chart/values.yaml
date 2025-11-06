@@ -13,6 +13,7 @@ imagePullSecrets:
 # Backend (Spring Boot)
 # ============================================
 app:
+  fullnameOverride: hiteen-test
   name: hiteen-test
   replicaCount: 1
   image:
@@ -52,55 +53,10 @@ nfs:
   path: "/srv/nfs/assets"
   storage: "100Gi"
 
-# ============================================
-# NFS (Assets)
-# ============================================
 backupNfs:
   server: "10.8.0.159"
   path: "/srv/nfs/assets"
   storage: "50Gi"
-
-# ============================================
-# minIO (Assets)
-# ============================================
-#minio:
-#  enabled: true
-#  image:
-#    repository: minio/minio
-#    tag: 2024.9.23-debian-12-r0
-#    pullPolicy: IfNotPresent
-#
-#  auth:
-#    rootUser: minioadmin
-#    rootPassword: minioadmin123
-#
-#  mode: standalone   # 테스트나 내부용이면 standalone으로 충분
-#
-#  persistence:
-#    enabled: true
-#    size: 5Gi
-#    storageClass: "local-path"
-#
-#  service:
-#    type: ClusterIP
-#    port: 9000
-#    annotations: {}
-#
-#  resources:
-#    requests:
-#      memory: 256Mi
-#      cpu: 100m
-#    limits:
-#      memory: 512Mi
-#      cpu: 250m
-#
-#  console:
-#    enabled: true
-#    port: 9001
-#    ingress:
-#      enabled: true  # 외부에서 접속하려면 true로 설정하고 host 지정
-
-
 
 # ============================================
 # Soketi (WebSocket Server)
@@ -113,13 +69,11 @@ soketi:
     tag: 1.4-16-debian
     pullPolicy: Always
 
-  # ✅ Soketi 서비스 정의
   service:
-    name: soketi-svc        # 💡 서비스 이름 명시 (Deployment와 매칭)
+    name: soketi-svc
     type: ClusterIP
     port: 6001
 
-  # ✅ 환경 변수
   env:
     - name: SOKETI_DEBUG
       value: "1"
@@ -155,9 +109,7 @@ soketi:
       cpu: 500m
       memory: 512Mi
 
-  # ✅ Soketi 내부 서비스 접근용 Host 정보 (Spring에서 참고 가능)
   host: soketi-svc.hiteen.svc.cluster.local
-
 
 # ============================================
 # Redis Cluster (StatefulSet + PVC)
@@ -198,7 +150,7 @@ redis:
     namespace: hiteen         # 클러스터 네임스페이스 지정 (변수 주입)
 
 # ============================================
-# Ingress (Nginx)
+# Ingress (Nginx, 최신 문법)
 # ============================================
 ingress:
   enabled: true
@@ -214,10 +166,14 @@ ingress:
         - path: /
           pathType: Prefix
           backend:
-            serviceName: hiteen-test
-            servicePort: 8080
+            service:
+              name: hiteen-test
+              port:
+                number: 8080
         - path: /apps
           pathType: Prefix
           backend:
-            serviceName: soketi-svc
-            servicePort: 6001
+            service:
+              name: soketi-svc
+              port:
+                number: 6001
