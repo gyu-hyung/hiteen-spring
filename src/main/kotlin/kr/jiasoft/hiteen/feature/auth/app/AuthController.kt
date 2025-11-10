@@ -90,7 +90,7 @@ class AuthController(
     ): ResponseEntity<ApiResult<Any>> {
         val phone = req.phone.filter { it.isDigit() }
 
-        userRepository.findByPhone(phone)?.let {
+        userRepository.findActiveByUsername(phone)?.let {
             throw IllegalArgumentException("이전에 가입한 회원이 있어~")
         }
 
@@ -155,8 +155,6 @@ class AuthController(
 
 
 
-
-
     @Operation(summary = "비밀번호 재설정 코드 발송", description = "비밀번호를 잊은 사용자가 휴대폰으로 인증코드를 받습니다.")
     @PostMapping("/password/code")
     suspend fun sendResetPasswordCode(
@@ -165,7 +163,7 @@ class AuthController(
         val phone = req.phone.filter { it.isDigit() }
 
         // 가입 여부 확인
-        userRepository.findByPhone(phone)
+        userRepository.findActiveByUsername(phone)
             ?: throw IllegalStateException("가입되지 않은 번호야~")
 
         // 인증번호 발송
