@@ -121,7 +121,7 @@ class AuthController(
             throw IllegalArgumentException("인증번호가 일치하지 않아~")
         }
 
-        val updated = data.copy(status = "Verified")
+        val updated = data.copy(status = "VERIFIED")
         smsAuthRepository.save(updated)
 
         return ResponseEntity.ok(ApiResult.success(true))
@@ -254,7 +254,7 @@ class AuthController(
             userRepository.save(updated)
 
             // 인증코드 재사용 방지
-            smsAuthRepository.save(data.copy(status = "Used"))
+            smsAuthRepository.save(data.copy(status = "VERIFIED"))
 
             return ResponseEntity.ok(ApiResult.success("비밀번호가 재설정되었어~"))
         } else {
