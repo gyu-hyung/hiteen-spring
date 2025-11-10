@@ -48,7 +48,7 @@ class SmsService(
             .awaitSingle()
 
         val result: AligoResponse = objectMapper.readValue(response)
-        logger.debug("SMS successfully sent $result")
+        println("result = ${result}")
 
         val success = result.isSuccess()
 
