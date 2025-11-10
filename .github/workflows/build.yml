@@ -68,7 +68,19 @@ jobs:
           rm -rf /tmp/.buildx-cache
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
-      # ✅ 8. Confirm success
+      # ✅ 8. Save built tag (sha) to file
+      - name: 📄 Save built tag (sha) to file
+        run: |
+          echo "${{ github.sha }}" > build_tag.txt
+
+      # ✅ 9. Upload build tag artifact
+      - name: 📦 Upload build tag artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-tag
+          path: build_tag.txt
+
+      # ✅ 10. Confirm success
       - name: ✅ Build complete
         if: success()
         run: echo "✅ Fast AMD64 Docker image built & pushed successfully 🎉"
