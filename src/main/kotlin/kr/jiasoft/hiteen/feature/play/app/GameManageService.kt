@@ -42,10 +42,12 @@ class GameManageService(
     }
 
     /**
-     * 1. 종료된 시즌 처리 및 랭킹 이력 저장
+     * 1. 종료된 시즌 처리 및 랭킹 이력 저장 TODO : Reward
      */
     suspend fun closeSeasons(endDate: LocalDate? = null) {
         val target = endDate ?: LocalDate.now()
+
+        //TODO Flow -> Mono
         val endedSeasons = seasonRepository.findAllByEndDate(target)
         // 상태 먼저 CLOSED
         endedSeasons.collect { season ->
@@ -88,6 +90,9 @@ class GameManageService(
         // 4️⃣ 시즌 생성
         val season = SeasonEntity(
             seasonNo = seasonNoFormatted, // DB 컬럼은 숫자형 유지 가능
+            year = today.year,
+            month = today.monthValue,
+            round = nextRoundNo,
             startDate = startDate,
             endDate = endDate,
             status = "ACTIVE"

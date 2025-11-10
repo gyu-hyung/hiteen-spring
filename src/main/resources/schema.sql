@@ -886,6 +886,9 @@ CREATE TABLE poll_templates (
 CREATE TABLE seasons (
   id          bigserial PRIMARY KEY,
   season_no   VARCHAR(50) NOT NULL, -- 1,2,3... (자동 계산용)
+  year        smallint NOT NULL,
+  month       smallint NOT NULL,
+  round       smallint NOT NULL,
   start_date  date NOT NULL,
   end_date    date NOT NULL,
   status      varchar(20) DEFAULT 'ACTIVE', -- ACTIVE, CLOSED
