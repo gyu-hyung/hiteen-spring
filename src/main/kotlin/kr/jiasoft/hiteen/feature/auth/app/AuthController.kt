@@ -67,9 +67,8 @@ class AuthController(
     suspend fun login(
         @Parameter(description = "로그인 요청 DTO") form: LoginForm,
         response: ServerHttpResponse
-    ): ResponseEntity<ApiResult<UserResponseWithTokens>> =
-        try {
-            val userResponseWithTokens = authService.login(form.phone, form.password)
+    ): ResponseEntity<ApiResult<UserResponseWithTokens>> {
+        val userResponseWithTokens = authService.login(form.phone, form.password)
 
 //            val cookie = ResponseCookie.from("refreshToken", userResponseWithTokens.tokens.refreshToken.toString())
 //                .httpOnly(true)
@@ -80,10 +79,8 @@ class AuthController(
 //
 //            response.addCookie(cookie)
 
-            ResponseEntity.ok(ApiResult.success(userResponseWithTokens))
-        } catch (e: IllegalArgumentException) {
-            throw ResponseStatusException(HttpStatus.UNAUTHORIZED)
-        }
+        return ResponseEntity.ok(ApiResult.success(userResponseWithTokens))
+    }
 
 
     @Operation(summary = "휴대폰 인증번호 발송", description = "회원가입 시 휴대폰 번호로 6자리 인증번호를 발송합니다.")
