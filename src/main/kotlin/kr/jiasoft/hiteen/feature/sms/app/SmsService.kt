@@ -9,6 +9,7 @@ import kr.jiasoft.hiteen.feature.sms.domain.SmsProperties
 import kr.jiasoft.hiteen.feature.sms.dto.AligoResponse
 import kr.jiasoft.hiteen.feature.sms.infra.SmsAuthRepository
 import kr.jiasoft.hiteen.feature.sms.infra.SmsRepository
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.web.reactive.function.BodyInserters
@@ -24,6 +25,7 @@ class SmsService(
     private val objectMapper: ObjectMapper
 ) {
 
+    private val logger = LoggerFactory.getLogger(this::class.java)
     enum class Status {WAITING, VERIFIED}
 
     /** 기본 SMS 전송 */
@@ -46,6 +48,7 @@ class SmsService(
             .awaitSingle()
 
         val result: AligoResponse = objectMapper.readValue(response)
+        logger.debug("SMS successfully sent $result")
 
         val success = result.isSuccess()
 
