@@ -79,6 +79,7 @@ class UserService (
 //        return user != null
 //    }
 
+    /** 삭제되지 않은 휴대폰 번호가 있는지 확인 */
     suspend fun phoneDuplicationCheckActiveOnly(phone: String): Boolean {
         return userRepository.findActiveByPhone(phone) != null
     }
