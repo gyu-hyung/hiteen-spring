@@ -73,7 +73,7 @@ class InterestUserService(
             )
         }
 
-        println("🌱 ${user.nickname ?: "유저"} 기본 추천옵션 관심사 ${toInsert.size}개 등록 완료")
+        println("🌱 ${user.nickname} 기본 추천옵션 관심사 ${toInsert.size}개 등록 완료")
     }
 
 
@@ -100,9 +100,9 @@ class InterestUserService(
     }
 
     /** 특정 사용자의 모든 관심사 조회 */
-    suspend fun getUserInterests(userUid: String): List<InterestUserResponse> {
-        val userEntity = userRepository.findByUid(userUid)
-        return interestUserRepository.getInterestResponseById(null, userEntity?.id!!).toList()
+    suspend fun getUserInterests(userUid: String): List<InterestUserResponse>? {
+        val userEntity = userRepository.findByUid(userUid) ?: throw IllegalArgumentException("존재하지 않는 회원정보야~")
+        return interestUserRepository.getInterestResponseById(null, userEntity.id).toList()
     }
 
     /** 특정 관심사 삭제 */
