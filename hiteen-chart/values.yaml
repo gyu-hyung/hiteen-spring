@@ -15,7 +15,7 @@ imagePullSecrets:
 app:
   fullnameOverride: hiteen-test
   name: hiteen-test
-  replicaCount: 1
+  replicaCount: 2
   image:
     repository: ghcr.io/gyu-hyung/hiteen-api
     tag: latest
