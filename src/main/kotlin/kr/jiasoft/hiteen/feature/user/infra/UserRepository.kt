@@ -19,7 +19,7 @@ interface UserRepository : CoroutineCrudRepository<UserEntity, Long> {
 
 
     // ✅ 활성(미삭제) 사용자 - username(=phone)로 조회
-    @Query("""SELECT * FROM users WHERE username = :username AND deleted_at IS NULL LIMIT 1""")
+    @Query("""SELECT * FROM users WHERE username = :username AND deleted_at IS NULL ORDER BY id DESC LIMIT 1""")
     suspend fun findActiveByUsername(username: String): UserEntity?
 
     // ✅ 활성 사용자 - phone으로 조회 (username과 동일하지만, 명시적 함수)
