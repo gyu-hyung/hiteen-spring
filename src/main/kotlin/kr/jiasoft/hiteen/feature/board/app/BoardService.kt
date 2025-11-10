@@ -336,7 +336,11 @@ class BoardService(
         boardUid: UUID,
         commentUid: UUID,
         currentUserId: Long,
-    ): BoardCommentResponse? = comments.findComment(boardUid, commentUid, currentUserId)
+    ): BoardCommentResponse? = comments.findComment(boardUid, commentUid, currentUserId).let { comment ->
+        comment?.copy(
+            user = userService.findUserSummary(comment.createdId)
+        )
+    }
 
 
     suspend fun listMyComments(
