@@ -16,21 +16,11 @@ jobs:
       NAMESPACE: hiteen
       CHART_PATH: ./hiteen-chart
       IMAGE: ghcr.io/${{ github.repository_owner }}/hiteen-api
+      TAG: latest
 
     steps:
       - name: 📥 Checkout repository
         uses: actions/checkout@v4
-
-      - name: 🧩 Download build tag artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: build-tag
-
-      - name: 🏷️ Set IMAGE TAG env var
-        id: set_tag
-        run: |
-          TAG=$(cat build_tag.txt)
-          echo "TAG=$TAG" >> $GITHUB_ENV
 
       - name: 🔧 Set up kubectl
         uses: azure/setup-kubectl@v4
