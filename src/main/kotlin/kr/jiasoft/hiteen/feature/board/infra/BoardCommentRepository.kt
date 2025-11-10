@@ -47,7 +47,7 @@ interface BoardCommentRepository : CoroutineCrudRepository<BoardCommentEntity, L
           AND b.uid = :boardUid
           AND c.uid = :uid
     """)
-    fun findComment(
+    suspend fun findComment(
         boardUid: UUID,
         uid: UUID,
         userId: Long,
