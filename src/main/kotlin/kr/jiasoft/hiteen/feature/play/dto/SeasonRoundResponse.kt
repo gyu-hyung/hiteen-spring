@@ -15,8 +15,10 @@ data class SeasonRoundResponse(
     val year: Int,
     @field:Schema(description = "월", example = "12")
     val month: Int,
+    @field:Schema(description = "월 회차", example = "1")
+    val round: Int,
 //    val roundNo: Int,   // 같은 달 안에서 1회차, 2회차 ...
-    val league: String? = null,
+//    val league: String? = null,
     val status: String,
     val startDate: LocalDate,
     val endDate: LocalDate

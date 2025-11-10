@@ -30,26 +30,21 @@ interface SeasonRepository : CoroutineCrudRepository<SeasonEntity, Long> {
     fun findActiveSeasons(): Flow<SeasonEntity>
 
 
-//    ,ROW_NUMBER() OVER (
-//    PARTITION BY EXTRACT(YEAR FROM s.start_date), EXTRACT(MONTH FROM s.start_date), s.league
-//    ORDER BY s.start_date
-//    ) AS round_no
     @Query("""
-        SELECT DISTINCT s.id,
-                        s.season_no,
-                        s.start_date,
-                        s.end_date,
-                        s.status,
-                        EXTRACT(YEAR FROM s.start_date)  AS year,
-                        EXTRACT(MONTH FROM s.start_date) AS month,
-                        sp.league
+        SELECT  s.id,
+                s.season_no,
+                s.year,
+                s.month,
+                s.round,
+                s.start_date,
+                s.end_date,
+                s.status
         FROM seasons s
-        LEFT JOIN season_participants sp ON sp.season_id = s.id
         WHERE EXTRACT(YEAR FROM s.start_date) = :year
           AND (:status IS NULL OR s.status = :status)
-        ORDER BY year DESC, month, s.season_no DESC
+        ORDER BY s.season_no
     """)
-    fun findSeasonsByYearAndLeagueAndStatus(
+    fun findSeasonsByYearAndStatus(
         year: Int,
         status: String?
     ): Flow<SeasonRoundResponse>

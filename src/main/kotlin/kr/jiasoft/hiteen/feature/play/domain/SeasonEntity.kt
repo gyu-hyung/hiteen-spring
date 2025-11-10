@@ -10,6 +10,9 @@ data class SeasonEntity(
     @Id
     val id: Long = 0L,
     val seasonNo: String,
+    val year: Int,
+    val month: Int,
+    val round: Int,
     val startDate: LocalDate,
     val endDate: LocalDate,
     val status: String = "ACTIVE",

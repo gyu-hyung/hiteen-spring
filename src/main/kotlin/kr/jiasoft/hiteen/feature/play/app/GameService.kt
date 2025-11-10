@@ -52,7 +52,7 @@ class GameService(
      * 회차 목록 조회
      * */
     suspend fun getSeasonRounds(year: Int, status: SeasonStatusType? = null): List<SeasonRoundResponse> {
-        return seasonRepository.findSeasonsByYearAndLeagueAndStatus(year, status?.name).toList()
+        return seasonRepository.findSeasonsByYearAndStatus(year, status?.name).toList()
     }
 
 
@@ -194,10 +194,10 @@ class GameService(
         friendOnly: Boolean = false
     ): SeasonRankingResponse {
 
-        // 전체 랭킹 조회
-        val all = rankingViewRepository.findSeasonRanking(seasonId, gameId, league).toList()
+        // 1️⃣ Top 100 랭킹 조회
+        val all = rankingViewRepository.findSeasonRanking(seasonId, gameId, league, 100).toList()
 
-        // DTO 변환 (displayTime은 DTO 내부에서 자동 계산됨)
+        // 2️⃣ DTO 변환
         val dtoList = all.map {
             RankingResponse(
                 rank = it.rank,
@@ -212,31 +212,46 @@ class GameService(
             )
         }
 
-        // 내 친구 ID 조회
+        // 3️⃣ 친구 목록
         val friendIds = if (friendOnly) {
             friendRepository.findAllAccepted(currentUserId)
                 .map { if (it.userId == currentUserId) it.friendId else it.userId }
                 .toList()
         } else emptyList()
 
-        // 조건에 따라 전체 or 친구 랭킹 필터링
+        // 4️⃣ 친구만 보기 필터링
         val filtered = if (friendOnly) {
             val onlyFriends = dtoList.filter { it.userId in friendIds || it.isMe }
-            // 순위를 1부터 다시 매기기
-            onlyFriends.mapIndexed { index, r ->
-                r.copy(rank = index + 1)
-            }
+            onlyFriends.mapIndexed { index, r -> r.copy(rank = index + 1) }
         } else {
             dtoList
         }
 
-        val myRanking = filtered.find { it.isMe }
+        // 5️⃣ 내 랭킹이 Top 100에 없을 경우 → 별도 쿼리
+        var myRanking = filtered.find { it.isMe }
+        if (myRanking == null) {
+            val myRankEntity = rankingViewRepository.findMyRanking(seasonId, gameId, league, currentUserId)
+            if (myRankEntity != null) {
+                myRanking = RankingResponse(
+                    rank = myRankEntity.rank,
+                    userId = myRankEntity.userId,
+                    nickname = myRankEntity.nickname,
+                    profileImageUrl = myRankEntity.assetUid,
+                    score = myRankEntity.score,
+                    tryCount = myRankEntity.tryCount,
+                    createdAt = myRankEntity.createdAt,
+                    updatedAt = myRankEntity.updatedAt,
+                    isMe = true
+                )
+            }
+        }
 
         return SeasonRankingResponse(
             rankings = filtered,
             myRanking = myRanking
         )
     }
+
 
 
     /**
