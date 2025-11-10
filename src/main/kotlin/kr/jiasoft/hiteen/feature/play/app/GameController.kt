@@ -35,11 +35,11 @@ class GameController(
 
 
     @Operation(summary = "시즌 회차 목록 조회 (연도 + 리그 + 상태)")
-    @GetMapping("/seasons/{year}/{status}")
+    @GetMapping(value = ["/seasons/{year}", "/seasons/{year}/{status}"])
     suspend fun getSeasonsByYearAndLeague(
         @Parameter(description = "연도") @PathVariable year: Int,
 //        @Parameter(description = "티어", example = "BRONZE") @PathVariable league: String,
-        @Parameter(description = "ACTIVE / CLOSED / PLANNED (없으면 전체)") @RequestParam(required = false) status: SeasonStatusType?
+        @Parameter(description = "ACTIVE / CLOSED / PLANNED (없으면 전체)") @PathVariable(required = false) status: SeasonStatusType?
     ): ResponseEntity<ApiResult<List<SeasonRoundResponse>>>
         = ResponseEntity.ok(ApiResult.success(gameService.getSeasonRounds(year, status)))
 
