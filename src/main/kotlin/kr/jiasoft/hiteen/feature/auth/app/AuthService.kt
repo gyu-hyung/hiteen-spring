@@ -20,10 +20,10 @@ class AuthService(
 
     suspend fun login(username: String, rawPassword: String): UserResponseWithTokens {
         val userDetails = userRepository.findActiveByUsername(username)
-            ?: throw IllegalArgumentException("Invalid credentials")
+            ?: throw IllegalArgumentException("유효하지 않은 사용자야~")
         if (!encoder.matches(rawPassword, userDetails.password)) {
 //            throw IllegalArgumentException("Invalid credentials")
-            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid credentials")
+            throw IllegalArgumentException("유효하지 않은 사용자야~")
         }
         val userResponse = userService.findUserResponse(userDetails.username)
 
