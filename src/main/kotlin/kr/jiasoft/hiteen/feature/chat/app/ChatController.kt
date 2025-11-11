@@ -4,12 +4,15 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
+import kotlinx.coroutines.reactor.awaitSingle
 import kr.jiasoft.hiteen.common.dto.ApiResult
 import kr.jiasoft.hiteen.feature.chat.dto.*
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import org.springframework.http.ResponseEntity
+import org.springframework.http.codec.multipart.FilePart
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
+import reactor.core.publisher.Flux
 import java.time.OffsetDateTime
 import java.util.*
 
@@ -76,7 +79,12 @@ class ChatController(
         @Parameter(description = "채팅방 UID") @PathVariable roomUid: UUID,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
         @Parameter(description = "메시지 전송 요청 DTO") req: SendMessageRequest,
-    ) = ResponseEntity.ok(ApiResult.success(service.sendMessage(roomUid, user, req)))
+        @Parameter(description = "첨부 파일들") @RequestPart(name = "files", required = false) filesFlux: Flux<FilePart>?,
+    ) : ResponseEntity<ApiResult<Any>> {
+
+        val files: List<FilePart> = filesFlux?.collectList()?.awaitSingle() ?: emptyList()
+        return ResponseEntity.ok(ApiResult.success(service.sendMessage(roomUid, user, req, files)))
+    }
 
 
     @Operation(summary = "메시지 읽음 처리", description = "특정 메시지를 읽음 처리합니다.")

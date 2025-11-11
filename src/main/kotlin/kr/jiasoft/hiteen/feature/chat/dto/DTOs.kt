@@ -25,8 +25,8 @@ data class SendMessageRequest(
     @param:Schema(description = "메시지 내용")
     val content: String? = null,
 
-    @param:Schema(description = "첨부 파일 UIDs", example = "[a1a8990f-2443-4492-baad-699d59b272fa,a1a8990f-2443-4492-baad-699d59b272fa]")
-    val assetUids: List<UUID>? = null,
+//    @param:Schema(description = "첨부 파일 UIDs", example = "[a1a8990f-2443-4492-baad-699d59b272fa,a1a8990f-2443-4492-baad-699d59b272fa]")
+//    val assetUids: List<UUID>? = null,
 
 //    @param:Schema(description = "메시지 종류", example = "0")
 //    val kind: Int = 0,
