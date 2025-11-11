@@ -5,6 +5,7 @@ enum class AssetCategory(
     val subPath: String? = null // 2차 세부 구분
 ) {
     PROFILE("profile"),
+    USER_PHOTO("user-photo"),
     POST("post"),
     POST_THUMBNAIL("post", "thumbnail"),
     POST_ATTACHMENT("post", "attachment"),

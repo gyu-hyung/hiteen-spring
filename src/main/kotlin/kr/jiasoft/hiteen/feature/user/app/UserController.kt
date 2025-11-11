@@ -117,12 +117,12 @@ class UserController(
     suspend fun registerImages(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
         @RequestPart("files", required = false) filesFlux: Flux<FilePart>?
-    ): ResponseEntity<ApiResult<List<FilePart>>> {
+    ): ResponseEntity<ApiResult<UserResponse>> {
         val flux = filesFlux ?: filesFlux
         ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "files or file part is required")
-
         val files: List<FilePart> = flux.collectList().awaitSingle()
-        return ResponseEntity.ok(ApiResult.success(files))
+        val userResponse = userService.registerPhotos(user, files)
+        return ResponseEntity.ok(ApiResult.success(userResponse))
     }
 
     @Operation(summary = "사진 삭제", description = "사용자의 특정 사진을 삭제합니다.")
