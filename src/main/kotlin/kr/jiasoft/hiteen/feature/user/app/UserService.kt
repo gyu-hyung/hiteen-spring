@@ -344,18 +344,14 @@ class UserService (
     }
 
 
-    suspend fun registerPhotos(user: UserEntity, files: List<FilePart>?) {
+    suspend fun registerPhotos(user: UserEntity, files: List<FilePart>?) : UserResponse {
         if (files.isNullOrEmpty()) {
             throw BusinessValidationException(mapOf("file" to "이미지가 필요합니다."))
         }
 
         files.forEach { file ->
             // 1) 에셋 업로드
-            val asset = assetService.uploadImage(
-                file = file,
-                originFileName = null,
-                currentUserId = user.id
-            )
+            val asset = assetService.uploadImage(file, user.id, AssetCategory.USER_PHOTO)
 
             // 2) user_photos row 생성
             val photoEntity = UserPhotosEntity(
@@ -365,6 +361,8 @@ class UserService (
 
             userPhotosRepository.save(photoEntity)
         }
+
+        return toUserResponse(user)
     }
 
 
