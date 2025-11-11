@@ -58,7 +58,14 @@ class InterestUserController(
     = ResponseEntity.ok(ApiResult.success(service.recommendableCheck(user.id)))
 
 
-    @Operation(summary = "친구 추천", description = "관심사 기반으로 친구를 추천받습니다.")
+    @Operation(summary = "친구 추천", description = """
+        관심사 기반으로 친구를 추천받습니다.
+        조건 ) 
+        같은 관심사를 1개 이상 가져야함. 
+        회원 프로필 등록 3개 이상 등록해야함.
+        친구, 팔로우 안 된 사람.
+        한 번도 추천을 받지 않은 사람.
+    """)
     @GetMapping("/recommend")
     suspend fun recommend(
         @AuthenticationPrincipal(expression = "user") user: UserEntity
