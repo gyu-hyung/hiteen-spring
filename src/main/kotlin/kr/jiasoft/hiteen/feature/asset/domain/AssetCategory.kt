@@ -4,16 +4,22 @@ enum class AssetCategory(
     val basePath: String,  // 1차 도메인
     val subPath: String? = null // 2차 세부 구분
 ) {
+    CODE("code"),
+    COMMON("common"),
+
     PROFILE("profile"),
     USER_PHOTO("user-photo"),
+
     POST("post"),
     POST_THUMBNAIL("post", "thumbnail"),
     POST_ATTACHMENT("post", "attachment"),
-    COMMON("common"),
-    CODE("code"),
+
     POLL_MAIN("poll", "main"),
     POLL_SELECT("poll", "select"),
-    POLL_COMMENT("poll", "comment");
+    POLL_COMMENT("poll", "comment"),
+
+    CHAT_MESSAGE("chat", "message")
+    ;
 
     fun fullPath(): String =
         if (subPath != null) "$basePath/$subPath" else basePath

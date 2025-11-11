@@ -3,6 +3,8 @@ package kr.jiasoft.hiteen.feature.chat.app
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kr.jiasoft.hiteen.common.exception.BusinessValidationException
+import kr.jiasoft.hiteen.feature.asset.app.AssetService
+import kr.jiasoft.hiteen.feature.asset.domain.AssetCategory
 import kr.jiasoft.hiteen.feature.chat.domain.*
 import kr.jiasoft.hiteen.feature.chat.dto.MessageAssetSummary
 import kr.jiasoft.hiteen.feature.chat.dto.MessageSummary
@@ -22,6 +24,7 @@ import kr.jiasoft.hiteen.feature.soketi.domain.SoketiChannelPattern
 import kr.jiasoft.hiteen.feature.soketi.domain.SoketiEventType
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import kr.jiasoft.hiteen.feature.user.infra.UserRepository
+import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
 import java.time.OffsetDateTime
 import java.util.UUID
@@ -37,6 +40,7 @@ class ChatService(
 
     private val expService: ExpService,
     private val pushService: PushService,
+    private val assetService: AssetService,
 ) {
 
     /**
@@ -113,7 +117,7 @@ class ChatService(
 
 
     /** 메시지 전송 */
-    suspend fun sendMessage(roomUid: UUID, sendUser: UserEntity, req: SendMessageRequest): UUID {
+    suspend fun sendMessage(roomUid: UUID, sendUser: UserEntity, req: SendMessageRequest, files: List<FilePart>): UUID {
         val room = rooms.findByUidAndDeletedAtIsNull(roomUid) ?: error("room not found")
         chatUsers.findActive(room.id, sendUser.id) ?: error("not a member")
 
@@ -130,9 +134,23 @@ class ChatService(
         )
 
         // 첨부 파일 저장
-        req.assetUids?.forEach { au ->
-            msgAssets.save(ChatMessageAssetEntity(uid = au, messageId = savedMsg.id))
+        files.forEach { file ->
+            // 1) 에셋 업로드
+            val asset = assetService.uploadImage(file, sendUser.id, AssetCategory.CHAT_MESSAGE)
+
+            // 2) user_photos row 생성
+            val photoEntity = ChatMessageAssetEntity(
+                uid = asset.uid,
+                messageId = savedMsg.id,
+                width = asset.width,
+                height = asset.height,
+            )
+
+            msgAssets.save(photoEntity)
         }
+//        req.assetUids?.forEach { au ->
+//            msgAssets.save(ChatMessageAssetEntity(uid = au, messageId = savedMsg.id))
+//        }
 
         // 채팅방 업데이트
         rooms.save(
