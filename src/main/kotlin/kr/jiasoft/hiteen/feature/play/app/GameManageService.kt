@@ -5,13 +5,11 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.flow.toSet
 import kr.jiasoft.hiteen.feature.play.domain.GameRankingEntity
-import kr.jiasoft.hiteen.feature.play.domain.GameScoreEntity
 import kr.jiasoft.hiteen.feature.study.domain.QuestionItemsEntity
 import kr.jiasoft.hiteen.feature.play.domain.SeasonEntity
 import kr.jiasoft.hiteen.feature.play.infra.*
 import kr.jiasoft.hiteen.feature.study.infra.QuestionItemsRepository
 import kr.jiasoft.hiteen.feature.study.infra.QuestionRepository
-import kr.jiasoft.hiteen.feature.user.infra.UserRepository
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 
@@ -20,9 +18,7 @@ class GameManageService(
     private val seasonRepository: SeasonRepository,
     private val gameRepository: GameRepository,
     private val gameScoreRepository: GameScoreRepository,
-    private val seasonParticipantRepository: SeasonParticipantRepository,
     private val gameRankingRepository: GameRankingRepository,
-    private val userRepository: UserRepository,
 
     private val questionRepository: QuestionRepository,
     private val questionItemsRepository: QuestionItemsRepository
@@ -179,38 +175,34 @@ class GameManageService(
         val games = gameRepository.findAllByDeletedAtIsNull().toList()
 
         for (game in games) {
-            // 전체 점수 조회 (리그 포함)
-            val scoresFlow = gameScoreRepository.findScoresWithParticipantsBySeasonAndGame(seasonId, game.id)
+            // 전체 점수 + 참가자 + 사용자 한 번에 조회
+            val scores = gameScoreRepository
+                .findScoresWithParticipantsBySeasonAndGame(seasonId, game.id)
+                .toList()
 
-            // 리그별로 그룹화하기 위한 Map<League, MutableList<GameScoreEntity>>
-            val leagueScoreMap = mutableMapOf<String, MutableList<GameScoreEntity>>()
+            // 리그별 그룹화
+            val groupedByLeague = scores.groupBy { it.league }
 
-            scoresFlow.collect { score ->
-                val participant = seasonParticipantRepository.findById(score.participantId) ?: return@collect
-                leagueScoreMap.getOrPut(participant.league) { mutableListOf() }.add(score)
-            }
+            for ((league, leagueScores) in groupedByLeague) {
+                // 낮은 점수가 1등
+                val sorted = leagueScores.sortedWith(compareBy({ it.score }, { it.createdAt }))
 
-            // 리그별 순위 계산 및 저장
-            for ((league, scores) in leagueScoreMap) {
-                scores.sortBy { it.score } // 낮은 점수 = 높은 랭킹
-
-                scores.forEachIndexed { idx, score ->
-                    val participant = seasonParticipantRepository.findById(score.participantId) ?: return@forEachIndexed
-                    val user = userRepository.findById(participant.userId) ?: return@forEachIndexed
-
-                    gameRankingRepository.save(
-                        GameRankingEntity(
-                            seasonId = seasonId,
-                            league = league,
-                            participantId = participant.id,
-                            gameId = game.id,
-                            userId = user.id,
-                            rank = idx + 1,
-                            score = score.score,
-                            nickname = user.nickname,
-                            profileImage = user.assetUid?.toString()
-                        )
+                // 순위 계산 및 저장
+                sorted.forEachIndexed { index, s ->
+                    val ranking = GameRankingEntity(
+                        seasonId = seasonId,
+                        league = league,
+                        gameId = game.id,
+                        rank = index + 1,
+                        score = s.score,
+                        participantId = s.participantId,
+                        userId = s.userId,
+                        nickname = s.userNickname,
+                        profileImage = s.userAssetUid?.toString(),
+                        createdAt = s.createdAt
                     )
+
+                    gameRankingRepository.save(ranking)
                 }
             }
         }

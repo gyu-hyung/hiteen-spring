@@ -954,7 +954,7 @@ CREATE TABLE game_rankings (
   league 		 varchar(20),
   game_id        BIGINT NOT NULL REFERENCES games(id) ON DELETE CASCADE,
   rank           INTEGER NOT NULL,
-  score          INTEGER NOT NULL,
+  score          DOUBLE PRECISION NOT NULL,
   participant_id BIGINT NOT NULL REFERENCES season_participants(id) ON DELETE CASCADE,
   user_id        BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   nickname       VARCHAR(50) NOT NULL,
