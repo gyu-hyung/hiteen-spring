@@ -2,6 +2,7 @@ package kr.jiasoft.hiteen.feature.play.infra
 
 import kotlinx.coroutines.flow.Flow
 import kr.jiasoft.hiteen.feature.play.domain.GameScoreEntity
+import kr.jiasoft.hiteen.feature.play.dto.GameScoreWithParticipantView
 import kr.jiasoft.hiteen.feature.play.dto.RankingView
 import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
@@ -76,18 +77,28 @@ interface GameScoreRepository : CoroutineCrudRepository<GameScoreEntity, Long> {
 
 
     @Query("""
-        SELECT gs.*
+        SELECT 
+            gs.id             AS score_id,
+            sp.id             AS participant_id,
+            u.id              AS user_id,
+            sp.league         AS league,
+            gs.score          AS score,
+            gs.try_count      AS try_count,
+            gs.created_at     AS created_at,
+            u.nickname        AS user_nickname,
+            u.asset_uid       AS user_asset_uid
         FROM game_scores gs
         JOIN season_participants sp ON sp.id = gs.participant_id
+        JOIN users u ON u.id = sp.user_id
         WHERE gs.season_id = :seasonId
-          AND gs.game_id = :gameId
-          AND sp.season_id = :seasonId
+          AND gs.game_id   = :gameId
         ORDER BY sp.league ASC, gs.score ASC, gs.created_at ASC
     """)
     fun findScoresWithParticipantsBySeasonAndGame(
         seasonId: Long,
         gameId: Long
-    ): Flow<GameScoreEntity>
+    ): Flow<GameScoreWithParticipantView>
+
 
 
 
