@@ -22,4 +22,22 @@ interface InterestMatchHistoryRepository : CoroutineCrudRepository<InterestMatch
     """)
     suspend fun countTodayRecommendations(userId: Long): Long
 
+
+    @Query("""
+        SELECT COUNT(*)
+        FROM interest_match_history 
+        WHERE user_id = :userId
+          AND created_at >= NOW() - INTERVAL '24 hours'
+    """)
+    suspend fun countLast24HoursRecommendations(userId: Long): Long
+
+    @Query("""
+        SELECT * 
+        FROM interest_match_history 
+        WHERE user_id = :userId
+        ORDER BY created_at DESC LIMIT 1
+    """)
+    suspend fun findLastRecommendations(userId: Long): InterestMatchHistoryEntity?
+
+
 }

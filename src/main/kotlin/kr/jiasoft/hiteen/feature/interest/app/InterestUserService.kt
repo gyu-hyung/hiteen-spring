@@ -117,11 +117,16 @@ class InterestUserService(
     }
 
 
+    /** 마지막 추천 조회 */
+    suspend fun recommendableCheck(userId: Long) : InterestMatchHistoryEntity?
+        = interestMatchHistoryRepository.findLastRecommendations(userId)
+
+
     /** 오늘의 추천 친구 1명 뽑기 */
     suspend fun recommendFriend(user: UserEntity, dailyLimit: Int = 1): FriendRecommendationResponse? {
 
         // 하루 추천 제한 확인
-        val todayCount = interestMatchHistoryRepository.countTodayRecommendations(user.id)
+        val todayCount = interestMatchHistoryRepository.countLast24HoursRecommendations(user.id)
         if (todayCount >= dailyLimit) {
             throw BusinessValidationException(mapOf("message" to "오늘은 추천 친구를 더 뽑을 수 없습니다."))
         }
