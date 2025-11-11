@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
 import kr.jiasoft.hiteen.common.dto.ApiResult
+import kr.jiasoft.hiteen.feature.interest.domain.InterestMatchHistoryEntity
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
@@ -47,6 +48,14 @@ class InterestUserController(
     suspend fun clear(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ) = ResponseEntity.ok(ApiResult.success(service.clearUserInterests(user.id)))
+
+
+    @Operation(summary = "마지막 추천이력 조회", description = "마지막 추천받은 이력을 조회합니다.")
+    @GetMapping("/recommend/check")
+    suspend fun recommendCheck(
+        @AuthenticationPrincipal(expression = "user") user: UserEntity
+    ) : ResponseEntity<ApiResult<InterestMatchHistoryEntity>>
+    = ResponseEntity.ok(ApiResult.success(service.recommendableCheck(user.id)))
 
 
     @Operation(summary = "친구 추천", description = "관심사 기반으로 친구를 추천받습니다.")
