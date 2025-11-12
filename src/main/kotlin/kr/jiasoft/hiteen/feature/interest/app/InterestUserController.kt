@@ -32,7 +32,7 @@ class InterestUserController(
     suspend fun addInterest(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
         @Parameter(description = "등록할 관심사 ID") @RequestParam interestId: Long
-    ) = ResponseEntity.ok(service.addInterestToUser(user, interestId))
+    ) = ResponseEntity.ok(ApiResult.success(service.addInterestToUser(user, interestId)))
 
 
     @Operation(summary = "사용자 관심사 삭제", description = "로그인한 사용자의 특정 관심사를 삭제합니다.")
