@@ -158,6 +158,51 @@ interface UserRepository : CoroutineCrudRepository<UserEntity, Long> {
     suspend fun findAllByPhoneIn(phones: Set<String>): Flow<UserEntity>
 
     suspend fun findAllByUidIn(uids: List<UUID>): List<UserEntity>
+
+
+    @Query("""
+        SELECT 
+            u.id AS id,
+            u.uid AS uid,
+            u.username AS username,
+            u.nickname AS nickname,
+            u.address AS address,
+            u.detail_address AS detail_address,
+            u.phone AS phone,
+            u.mood AS mood,
+            u.mood_emoji AS mood_emoji,
+            u.mbti AS mbti,
+            u.exp_points AS exp_points,
+            t.id AS tier_id,
+            t.tier_name_kr AS tier_name,
+            u.asset_uid AS asset_uid,
+            CASE 
+                WHEN f.id IS NOT NULL THEN true 
+                ELSE false 
+            END AS is_friend,
+            CASE 
+                WHEN fr.id IS NOT NULL THEN true 
+                ELSE false 
+            END AS is_friend_request
+        FROM users u
+        LEFT JOIN tiers t ON u.tier_id = t.id
+        LEFT JOIN friends f 
+            ON ((f.user_id = :currentUserId AND f.friend_id = u.id) 
+             OR (f.friend_id = :currentUserId AND f.user_id = u.id))
+            AND f.status = 'ACCEPTED'
+        LEFT JOIN friends fr 
+            ON fr.user_id = :currentUserId 
+            AND fr.friend_id = u.id 
+            AND fr.status = 'PENDING'
+        WHERE u.phone IN (:phones)
+    """)
+    fun findAllUserSummaryByPhoneIn(
+        phones: Set<String>,
+        currentUserId: Long
+    ): Flow<UserSummary>
+
+
+
     suspend fun findIdByUidIn(uids: List<UUID>): List<Long>
 
 
