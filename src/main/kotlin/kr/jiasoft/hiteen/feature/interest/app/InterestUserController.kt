@@ -39,7 +39,7 @@ class InterestUserController(
     @DeleteMapping("/{interestId}")
     suspend fun delete(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
-        @Parameter(description = "삭제할 관심사 ID") @RequestParam interestId: Long
+        @Parameter(description = "삭제할 관심사 ID") @PathVariable interestId: Long
     ) = ResponseEntity.ok(ApiResult.success(service.removeInterestFromUser(user.id, interestId)))
 
 
