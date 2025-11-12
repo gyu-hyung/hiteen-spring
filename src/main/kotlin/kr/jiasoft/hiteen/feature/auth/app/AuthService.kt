@@ -17,17 +17,15 @@ class AuthService(
 ) {
 
     suspend fun login(username: String, rawPassword: String): UserResponseWithTokens {
-        val userDetails = userRepository.findActiveByUsername(username)
+        val userEntity = userRepository.findActiveByUsername(username)
             ?: throw IllegalArgumentException("유효하지 않은 사용자야~")
-        if (!encoder.matches(rawPassword, userDetails.password)) {
+        if (!encoder.matches(rawPassword, userEntity.password)) {
 //            throw IllegalArgumentException("Invalid credentials")
             throw IllegalArgumentException("유효하지 않은 사용자야~")
         }
-        val userResponse = userService.findUserResponse(userDetails.username)
+        val userResponse = userService.findUserResponse(userEntity.username)
 
-        val (access, refresh) = jwtProvider.generateTokens(userDetails.username)
-
-
+        val (access, refresh) = jwtProvider.generateTokens(userEntity.username)
 
         return UserResponseWithTokens(
             userResponse = userResponse,
