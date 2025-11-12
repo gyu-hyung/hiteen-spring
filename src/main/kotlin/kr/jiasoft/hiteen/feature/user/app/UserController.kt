@@ -16,13 +16,11 @@ import kr.jiasoft.hiteen.feature.user.dto.UserRegisterForm
 import kr.jiasoft.hiteen.feature.user.dto.UserResponse
 import kr.jiasoft.hiteen.feature.user.dto.UserResponseWithTokens
 import kr.jiasoft.hiteen.feature.user.dto.UserUpdateForm
-import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
-import org.springframework.web.server.ResponseStatusException
 import reactor.core.publisher.Flux
 import java.util.*
 
@@ -116,11 +114,9 @@ class UserController(
     @PostMapping("/photos", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     suspend fun registerImages(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
-        @RequestPart("files", required = false) filesFlux: Flux<FilePart>?
+        @RequestPart("files", required = false) filesFlux: Flux<FilePart>
     ): ResponseEntity<ApiResult<UserResponse>> {
-        val flux = filesFlux ?: filesFlux
-        ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "files or file part is required")
-        val files: List<FilePart> = flux.collectList().awaitSingle()
+        val files: List<FilePart> = filesFlux.collectList().awaitSingle()
         val userResponse = userService.registerPhotos(user, files)
         return ResponseEntity.ok(ApiResult.success(userResponse))
     }

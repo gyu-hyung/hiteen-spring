@@ -60,6 +60,5 @@ interface FriendRepository : CoroutineCrudRepository<FriendEntity, Long> {
     """)
     suspend fun findAllIncomingPending(me: Long): Flow<FriendEntity>
 
-    suspend fun findByUserIdOrFriendIdAndStatus(userId: Long, friendId: Long, status: String): Flow<FriendEntity>
 
 }
