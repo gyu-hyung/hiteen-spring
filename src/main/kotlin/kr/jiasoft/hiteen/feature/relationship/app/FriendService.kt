@@ -96,9 +96,7 @@ class FriendService(
         val registeredUsers = userRepository.findAllUserSummaryByPhoneIn(phones, user.id).toList()
 
         // 4. 친구 관계 조회
-        val friendIds = friendRepository.findByUserIdOrFriendIdAndStatus(user.id, user.id, FriendStatus.ACCEPTED.name).map {
-            if (it.userId == user.id) it.friendId else it.userId
-        }.toSet()
+        val friendIds = friendRepository.findAllFriendship(user.id).toSet()
 
         // 5. 그룹 분류
         val friendList = registeredUsers.filter { it.id in friendIds }
