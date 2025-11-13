@@ -122,7 +122,7 @@ class UserService (
     }
 
 
-    @Cacheable(cacheNames = ["userResponse"], key = "#targetUid")
+//    @Cacheable(cacheNames = ["userResponse"], key = "#targetUid")
     suspend fun findUserResponse(targetUid: UUID, currentUserId: Long? = null): UserResponse {
         println("🧠 findUserResponse(targetUid 캐시 미적용 - 실제 DB 조회 발생! Thread = ${Thread.currentThread().name}")
         val targetUser = userRepository.findByUid(targetUid.toString())
@@ -131,13 +131,13 @@ class UserService (
         return toUserResponse(targetUser, currentUserId)
     }
 
-    @Cacheable(cacheNames = ["userSummary"], key = "#userId")
+//    @Cacheable(cacheNames = ["userSummary"], key = "#userId")
     suspend fun findUserSummary(userId: Long): UserSummary {
         println("🧠 findUserSummary(userId 캐시 미적용 - 실제 DB 조회 발생! Thread = ${Thread.currentThread().name}")
         return userRepository.findSummaryInfoById(userId)
     }
 
-    @Cacheable(cacheNames = ["userEntity"], key = "#username")
+//    @Cacheable(cacheNames = ["userEntity"], key = "#username")
     suspend fun findByUsernamee(username: String): UserEntity {
         println("🧠 findByUsernamee(username 캐시 미적용 - 실제 DB 조회 발생! Thread = ${Thread.currentThread().name}")
         return userRepository.findByUsername(username)
