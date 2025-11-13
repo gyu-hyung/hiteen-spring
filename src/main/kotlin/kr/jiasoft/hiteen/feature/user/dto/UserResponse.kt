@@ -19,6 +19,10 @@ import java.time.LocalDateTime
 @Table("users")
 data class UserResponse(
 
+    // redis cache 문제로 임시 추가
+    val friend: Boolean = false,
+    val followed: Boolean = false,
+
     @Id
     @JsonIgnore
     @param:Schema(description = "사용자 내부 식별자 (DB PK)", example = "1", hidden = true)
