@@ -33,6 +33,7 @@ import kr.jiasoft.hiteen.feature.push.domain.buildPushData
 import kr.jiasoft.hiteen.feature.relationship.infra.FollowRepository
 import kr.jiasoft.hiteen.feature.user.app.UserService
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.dao.DuplicateKeyException
 import org.springframework.http.HttpStatus
 import org.springframework.http.codec.multipart.FilePart
@@ -58,7 +59,9 @@ class BoardService(
 ) {
 
 
+    @Cacheable(cacheNames = ["boardDetail"], key = "#uid")
     suspend fun getBoard(uid: UUID, currentUserId: Long?): BoardResponse {
+
         val userId = currentUserId ?: -1L
         val b = boards.findDetailByUid(uid, userId) ?: throw IllegalArgumentException("board not found")
         val userSummary = userService.findUserSummary(b.createdId)

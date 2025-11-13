@@ -31,6 +31,7 @@ import kr.jiasoft.hiteen.feature.user.dto.UserUpdateForm
 import kr.jiasoft.hiteen.feature.user.infra.UserPhotosRepository
 import kr.jiasoft.hiteen.feature.user.infra.UserRepository
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.crypto.password.PasswordEncoder
@@ -85,9 +86,7 @@ class UserService (
     }
 
 
-
     private suspend fun toUserResponse(targetUser: UserEntity, currentUserId: Long? = null): UserResponse {
-
         val school = targetUser.schoolId?.let { id -> schoolRepository.findById(id) }
         val tier = tierRepository.findById(targetUser.tierId)
         val interests = interestUserRepository.getInterestResponseById(null, targetUser.id).toList()
@@ -111,14 +110,11 @@ class UserService (
         return toUserResponse(targetUser)
     }
 
-    suspend fun findUserResponse(targetUid: UUID, currentUserId: Long? = null): UserResponse {
-        val targetUser = userRepository.findByUid(targetUid.toString())
-            ?: throw UsernameNotFoundException("User not found: $targetUid")
 
-        return toUserResponse(targetUser, currentUserId)
-    }
-
+    //    @Cacheable(cacheNames = ["userResponse"], key = "#targetId")
     suspend fun findUserResponse(targetId: Long, currentUserId: Long? = null): UserResponse {
+        println("🧠  findUserResponse(targetId  캐시 미적용 - 실제 DB 조회 발생! Thread = ${Thread.currentThread().name}")
+
         val targetUser = userRepository.findById(targetId)
             ?: throw UsernameNotFoundException("User not found: $targetId")
 
@@ -126,8 +122,26 @@ class UserService (
     }
 
 
+    @Cacheable(cacheNames = ["userResponse"], key = "#targetUid")
+    suspend fun findUserResponse(targetUid: UUID, currentUserId: Long? = null): UserResponse {
+        println("🧠 findUserResponse(targetUid 캐시 미적용 - 실제 DB 조회 발생! Thread = ${Thread.currentThread().name}")
+        val targetUser = userRepository.findByUid(targetUid.toString())
+            ?: throw UsernameNotFoundException("User not found: $targetUid")
+
+        return toUserResponse(targetUser, currentUserId)
+    }
+
+    @Cacheable(cacheNames = ["userSummary"], key = "#userId")
     suspend fun findUserSummary(userId: Long): UserSummary {
+        println("🧠 findUserSummary(userId 캐시 미적용 - 실제 DB 조회 발생! Thread = ${Thread.currentThread().name}")
         return userRepository.findSummaryInfoById(userId)
+    }
+
+    @Cacheable(cacheNames = ["userEntity"], key = "#username")
+    suspend fun findByUsernamee(username: String): UserEntity {
+        println("🧠 findByUsernamee(username 캐시 미적용 - 실제 DB 조회 발생! Thread = ${Thread.currentThread().name}")
+        return userRepository.findByUsername(username)
+            ?: throw UsernameNotFoundException("User not found: $username")
     }
 
 
