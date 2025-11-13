@@ -100,7 +100,7 @@ class CacheConfig (
             .entryTtl(Duration.ofMinutes(30))
             .disableCachingNullValues()
             .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(StringRedisSerializer()))
-            .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(GenericJackson2JsonRedisSerializer()))
+            .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(serializer))
 
         val connectionFactory = reactiveRedisConnectionFactory as RedisConnectionFactory
         return RedisCacheManager.builder(connectionFactory)
