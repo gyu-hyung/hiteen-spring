@@ -6,9 +6,12 @@ import kr.jiasoft.hiteen.feature.user.dto.UserSummary
 import org.springframework.data.r2dbc.repository.Modifying
 import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
+import org.springframework.stereotype.Repository
 import java.util.UUID
 
+@Repository
 interface UserRepository : CoroutineCrudRepository<UserEntity, Long> {
+//    @Cacheable(cacheNames = ["userEntity"], key = "#name")
     suspend fun findByUsername(name: String): UserEntity?
     suspend fun findByNickname(name: String): UserEntity?
     suspend fun findByPhone(phone: String): UserEntity?

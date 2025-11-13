@@ -77,6 +77,7 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-data-redis-reactive")
 
     // Reactive Cache
+    implementation("org.springframework.boot:spring-boot-starter-cache")
     implementation("com.github.ben-manes.caffeine:caffeine:3.1.8")
 
     // Mongo DB

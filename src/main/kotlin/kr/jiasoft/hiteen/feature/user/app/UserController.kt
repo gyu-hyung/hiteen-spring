@@ -15,6 +15,7 @@ import kr.jiasoft.hiteen.feature.user.dto.ReferralSummary
 import kr.jiasoft.hiteen.feature.user.dto.UserRegisterForm
 import kr.jiasoft.hiteen.feature.user.dto.UserResponse
 import kr.jiasoft.hiteen.feature.user.dto.UserResponseWithTokens
+import kr.jiasoft.hiteen.feature.user.dto.UserSummary
 import kr.jiasoft.hiteen.feature.user.dto.UserUpdateForm
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -89,6 +90,35 @@ class UserController(
             )
         )
     }
+
+
+    @Operation(summary = "회원 프로필 조회", description = "특정 회원의 프로필 정보를 조회합니다.")
+    @GetMapping("/profile/s/{id}")
+    suspend fun profile(
+        @Parameter(description = "조회할 사용자 UID") @PathVariable id: Long,
+        @AuthenticationPrincipal(expression = "user") currentUser: UserEntity?
+    ): ResponseEntity<ApiResult<UserSummary>> {
+        return ResponseEntity.ok(
+            ApiResult.success(
+                userService.findUserSummary(id)
+            )
+        )
+    }
+
+
+    @Operation(summary = "회원 프로필 조회", description = "특정 회원의 프로필 정보를 조회합니다.")
+    @GetMapping("/profile/ss/{id}")
+    suspend fun profiless(
+        @Parameter(description = "조회할 사용자 UID") @PathVariable id: Long,
+        @AuthenticationPrincipal(expression = "user") currentUser: UserEntity?
+    ): ResponseEntity<ApiResult<UserEntity>> {
+        return ResponseEntity.ok(
+            ApiResult.success(
+                userService.findByUsernamee("01095393637")
+            )
+        )
+    }
+
 
     //TODO 나만 수정가능?
     @Operation(summary = "회원정보 수정", description = "내 회원 정보를 수정합니다.")
