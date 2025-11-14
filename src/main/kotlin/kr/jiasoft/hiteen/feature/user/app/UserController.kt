@@ -114,7 +114,7 @@ class UserController(
     ): ResponseEntity<ApiResult<UserEntity>> {
         return ResponseEntity.ok(
             ApiResult.success(
-                userService.findByUsernamee("01095393637")
+                userService.findByUsername(id)
             )
         )
     }

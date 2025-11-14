@@ -135,12 +135,12 @@ class UserService (
     }
 
     @Cacheable(cacheNames = ["userEntity"], key = "#username")
-    suspend fun findByUsernamee(username: String): UserEntity {
+    suspend fun findByUsername(id: Long): UserEntity {
         println("✅✅✅✅✅✅✅✅✅✅✅✅✅ VVVV")
-        val user = userRepository.findByUsername(username)
+        val user = userRepository.findById(id)
         println("✅✅✅✅✅✅✅✅✅✅✅✅✅ AAAA ")
         return user
-            ?: throw UsernameNotFoundException("User not found: $username")
+            ?: throw UsernameNotFoundException("User not found: $id")
     }
 
 

@@ -66,6 +66,7 @@ class SecurityConfig(
                     "/favicon.ico",
                     "/actuator/**",
                     "/api/health",
+                    "/api/user/profile/ss/{id}",
                 ).permitAll()
 
                 it.pathMatchers("/ws/**").permitAll()
