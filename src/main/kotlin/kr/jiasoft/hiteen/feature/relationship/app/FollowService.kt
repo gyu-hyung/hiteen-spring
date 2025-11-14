@@ -82,7 +82,7 @@ class FollowService(
     suspend fun listIncoming(me: UserEntity): List<RelationshipSummary> {
         return followRepository.findAllByFollowIdAndStatus(me.id, FollowStatus.PENDING.name)
             .map { e ->
-                val other = userService.findUserResponse(e.followId, me.id)
+                val other = userService.findUserResponse(e.userId, me.id)
                 toFollowSummary(e, other)
             }.toList()
     }
