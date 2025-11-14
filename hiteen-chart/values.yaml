@@ -58,9 +58,6 @@ backupNfs:
   path: "/srv/nfs/assets"
   storage: "50Gi"
 
-# ============================================
-# Soketi (WebSocket Server)
-# ============================================
 soketi:
   name: soketi
   replicaCount: 1
@@ -75,34 +72,39 @@ soketi:
     port: 6001
 
   env:
-    - name: SOKETI_DEBUG
-      value: "1"
-    - name: SOKETI_DEFAULT_APP_ID
-      value: hiteen-app
-    - name: SOKETI_DEFAULT_APP_KEY
-      value: hiteen-key
-    - name: SOKETI_DEFAULT_APP_SECRET
-      value: hiteen-secret
-    - name: SOKETI_DEFAULT_APP_NAME
-      value: hiteen
-    - name: SOKETI_ADAPTER
-      value: redis
-    - name: SOKETI_REDIS_HOST
-      value: redis-0.redis.hiteen.svc.cluster.local
-    - name: SOKETI_REDIS_PORT
-      value: "6379"
-    - name: SOKETI_HOST
+    # 기본 앱 설정
+    - name: DEFAULT_APP_ID
+      value: "hiteen-app"
+    - name: DEFAULT_APP_KEY
+      value: "hiteen-key"
+    - name: DEFAULT_APP_SECRET
+      value: "hiteen-secret"
+
+    # 서버 설정
+    - name: HOST
       value: "0.0.0.0"
-    - name: SOKETI_PORT
+    - name: PORT
       value: "6001"
-    - name: SOKETI_REDIS_PASSWORD
+    - name: DEBUG
+      value: "1"
+
+    # Redis Adapter (핵심!)
+    - name: ADAPTER_DRIVER
+      value: "redis"
+    - name: REDIS_HOST
+      value: "redis-0.redis.hiteen.svc.cluster.local"
+    - name: REDIS_PORT
+      value: "6379"
+    - name: REDIS_PASSWORD
       valueFrom:
         secretKeyRef:
           name: redis-secret
           key: redis-password
-    - name: SOKETI_DEFAULT_APP_ALLOW_ORIGIN
+
+    # CORS 및 클라이언트 설정
+    - name: CORS_ALLOW_ORIGIN
       value: "*"
-    - name: SOKETI_DEFAULT_APP_ENABLE_CLIENT_MESSAGES
+    - name: CLIENT_MESSAGES_ENABLED
       value: "true"
 
   resources:
