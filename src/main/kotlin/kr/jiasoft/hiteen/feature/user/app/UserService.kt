@@ -137,7 +137,7 @@ class UserService (
         return userRepository.findSummaryInfoById(userId)
     }
 
-//    @Cacheable(cacheNames = ["userEntity"], key = "#username")
+    @Cacheable(cacheNames = ["userEntity"], key = "#username")
     suspend fun findByUsernamee(username: String): UserEntity {
         println("🧠 findByUsernamee(username 캐시 미적용 - 실제 DB 조회 발생! Thread = ${Thread.currentThread().name}")
         return userRepository.findByUsername(username)
