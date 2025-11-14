@@ -113,7 +113,7 @@ class UserService (
 
     //    @Cacheable(cacheNames = ["userResponse"], key = "#targetId")
     suspend fun findUserResponse(targetId: Long, currentUserId: Long? = null): UserResponse {
-        println("🧠  findUserResponse(targetId  캐시 미적용 - 실제 DB 조회 발생! Thread = ${Thread.currentThread().name}")
+        println("🧠  findUserResponse(targetId  캐시 미적용 - 실제 DB 조회 발생! Thread    = ${Thread.currentThread().name}")
 
         val targetUser = userRepository.findById(targetId)
             ?: throw UsernameNotFoundException("User not found: $targetId")
