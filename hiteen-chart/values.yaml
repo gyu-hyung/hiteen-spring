@@ -91,6 +91,10 @@ soketi:
       value: redis-0.redis.hiteen.svc.cluster.local
     - name: SOKETI_REDIS_PORT
       value: "6379"
+    - name: SOKETI_HOST
+      value: "0.0.0.0"
+    - name: SOKETI_PORT
+      value: "6001"
     - name: SOKETI_REDIS_PASSWORD
       valueFrom:
         secretKeyRef:
@@ -159,7 +163,7 @@ ingress:
     nginx.ingress.kubernetes.io/rewrite-target: /
     nginx.ingress.kubernetes.io/proxy-buffering: "off"
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
-    nginx.ingress.kubernetes.io/websocket-services: "soketi"
+    nginx.ingress.kubernetes.io/websocket-services: "soketi-svc"
   hosts:
     - host:
       paths:
@@ -171,5 +175,9 @@ ingress:
         - path: /apps
           pathType: Prefix
           backend:
-            serviceName: soketi-svc
-            servicePort: 6001
+            service:
+              name: soketi-svc
+              port:
+                number: 6001
+#            serviceName: soketi-svc
+#            servicePort: 6001
