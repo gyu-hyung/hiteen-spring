@@ -12,7 +12,7 @@ import java.util.UUID
 
 @Repository
 interface UserRepository : CoroutineCrudRepository<UserEntity, Long> {
-    @Cacheable(cacheNames = ["userEntity"], key = "#name")
+    @Cacheable(cacheNames = ["userEntityTest"], key = "#name")
     suspend fun findByUsername(name: String): UserEntity?
     suspend fun findByNickname(name: String): UserEntity?
     suspend fun findByPhone(phone: String): UserEntity?
