@@ -23,7 +23,13 @@ spring:
     redis:
       repositories:
         enabled: false
+      password: hiteen1234
+      timeout: 5s
+      client-type: lettuce
+
       cluster:
+        enabled: true
+        max-redirects: 5
         nodes:
           - redis-0.redis.hiteen.svc.cluster.local:6379
           - redis-1.redis.hiteen.svc.cluster.local:6379
@@ -31,15 +37,14 @@ spring:
           - redis-3.redis.hiteen.svc.cluster.local:6379
           - redis-4.redis.hiteen.svc.cluster.local:6379
           - redis-5.redis.hiteen.svc.cluster.local:6379
-      password: hiteen1234
-      timeout: 5s
-      client-type: lettuce
+
       lettuce:
         pool:
           max-active: 16
           max-idle: 8
           min-idle: 2
           time-between-eviction-runs: 60s
+
 
   config:
     import:
