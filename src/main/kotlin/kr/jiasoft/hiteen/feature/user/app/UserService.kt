@@ -133,7 +133,7 @@ class UserService (
 
 //    @Cacheable(cacheNames = ["userSummary"], key = "#userId")
     suspend fun findUserSummary(userId: Long): UserSummary {
-        println("🧠 findUserSummary(userId 캐시 미적용 - 실제 DB 조회 발생! Thread = ${Thread.currentThread().name}")
+        println("🧠 findUserSummary(userId 캐시 미적용sssss - 실제 DB 조회 발생! Thread = ${Thread.currentThread().name}")
         return userRepository.findSummaryInfoById(userId)
     }
 
