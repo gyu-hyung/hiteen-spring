@@ -175,9 +175,9 @@ ingress:
         - path: /apps
           pathType: Prefix
           backend:
-            service:
-              name: soketi-svc
-              port:
-                number: 6001
-#            serviceName: soketi-svc
-#            servicePort: 6001
+#            service:
+#              name: soketi-svc
+#              port:
+#                number: 6001
+            serviceName: soketi-svc
+            servicePort: 6001
