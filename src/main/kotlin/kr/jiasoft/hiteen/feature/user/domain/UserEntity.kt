@@ -8,7 +8,7 @@ import java.time.OffsetDateTime
 import java.util.UUID
 
 @Table(name = "users")
-data class UserEntity(
+data class UserEntity (
     /* 고유번호 */
     @Id
     @JsonIgnore
@@ -18,20 +18,20 @@ data class UserEntity(
     val uid: UUID = UUID.randomUUID(),
 
     /* 로그인 아이디 */
-    val username: String,
+    val username: String = "",
 
     /* 이메일(고유) */
     val email: String? = null,
 
     /* 닉네임 */
-    val nickname: String,
+    val nickname: String = "",
 
     /* 비밀번호 해시 */
     @JsonIgnore
-    val password: String,
+    val password: String = "",
 
     /* 권한(예: ADMIN/USER) */
-    val role: String,
+    val role: String = "",
 
     /* 주소 */
     val address: String? = null,
@@ -40,7 +40,7 @@ data class UserEntity(
     val detailAddress: String? = null,
 
     /* 전화번호 */
-    val phone: String,
+    val phone: String = "",
 
     /* 사용자 상태/기분 코드 */
     val mood: String? = null,
@@ -55,7 +55,7 @@ data class UserEntity(
     val expPoints: Long = 0,
 
     /* 티어 id */
-    val tierId: Long,
+    val tierId: Long = 0,
 
     /* 프로필 썸네일 Asset UID(assets.uid) */
     val assetUid: UUID? = null,
