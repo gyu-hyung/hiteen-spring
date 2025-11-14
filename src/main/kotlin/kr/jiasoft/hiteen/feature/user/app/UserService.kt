@@ -122,7 +122,7 @@ class UserService (
     }
 
 
-    @Cacheable(cacheNames = ["userResponse"], key = "#targetUid")
+//    @Cacheable(cacheNames = ["userResponse"], key = "#targetUid")
     suspend fun findUserResponse(targetUid: UUID, currentUserId: Long? = null): UserResponse {
         println("🧠 findUserResponse(targetUid 캐시 미적용 - 실제 DB 조회 발생! Thread = ${Thread.currentThread().name}")
         val targetUser = userRepository.findByUid(targetUid.toString())
