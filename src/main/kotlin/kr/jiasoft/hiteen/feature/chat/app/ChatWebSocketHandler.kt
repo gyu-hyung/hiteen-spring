@@ -21,9 +21,12 @@ import java.util.*
 
 /**
  * ws://{host}/ws/chat?room={roomUid}&token=Bearer%20{JWT}
- *  websocat --ping-interval=20 "ws://49.247.169.182:30080/ws/chat?room=8921f90a-609c-4dd5-a7b0-fe25321b1e7c&token=Bearer%20eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIwMTA5NTM5MzYzNyIsImlhdCI6MTc2MzM0NDg3NSwiZXhwIjoxNzY0MjA4ODc1fQ.Iwj9PnUVkQ8w83dCXh1vBhTjn7334OhuW_QO5RbPArutqxQ0GXL7QdGYbbiSefYvt-FtnqCc8MndTpMpjS6tnQ"
- *  websocat --ping-interval=20 "ws://49.247.169.182:30080/ws/chat?room=8921f90a-609c-4dd5-a7b0-fe25321b1e7c&token=Bearer%20eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIwMTAyMjIyMjIyMiIsImlhdCI6MTc2MzM0NDg4OSwiZXhwIjoxNzY0MjA4ODg5fQ.Fr3fXHjBI6injuYE751TfyFI_YsETxZDZ2rBegfjVtUBy373hcGjJW_aq9VfY0vhYtrD7cKA2yAZU6b17p7RIA"
- *  {"type":"send","content":"CLI에서 보냄!","clientMsgId":"cli-test-1","assetUids":[]}
+websocat --ping-interval=20 "ws://49.247.169.182:30080/ws/chat?room=8921f90a-609c-4dd5-a7b0-fe25321b1e7c&token=Bearer%20eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIwMTA5NTM5MzYzNyIsImlhdCI6MTc2MzM0NDg3NSwiZXhwIjoxNzY0MjA4ODc1fQ.Iwj9PnUVkQ8w83dCXh1vBhTjn7334OhuW_QO5RbPArutqxQ0GXL7QdGYbbiSefYvt-FtnqCc8MndTpMpjS6tnQ"
+websocat --ping-interval=20 "ws://49.247.169.182:30080/ws/chat?room=8921f90a-609c-4dd5-a7b0-fe25321b1e7c&token=Bearer%20eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIwMTAyMjIyMjIyMiIsImlhdCI6MTc2MzM0NDg4OSwiZXhwIjoxNzY0MjA4ODg5fQ.Fr3fXHjBI6injuYE751TfyFI_YsETxZDZ2rBegfjVtUBy373hcGjJW_aq9VfY0vhYtrD7cKA2yAZU6b17p7RIA"
+
+websocat --ping-interval=20 "ws://localhost:8080/ws/chat?room=fefe5b56-6dfc-455d-ab1e-935a9bb63c03&token=Bearer%20eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIwMTA5NTM5MzYzNyIsImlhdCI6MTc2MzMzOTY4NSwiZXhwIjoxNzY0MjAzNjg1fQ.KB6e_w3L5k22L9EqkYjGIBOQshxwccRrOVVPYhtkiIYO8pJ9vfsQ1bmMzpumelNbFPlDAG8_jsYqwLeIoK0jUg"
+websocat --ping-interval=20 "ws://localhost:8080/ws/chat?room=fefe5b56-6dfc-455d-ab1e-935a9bb63c03&token=Bearer%20eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIwMTAyMjIyMjIyMiIsImlhdCI6MTc2MzMzOTczOSwiZXhwIjoxNzY0MjAzNzM5fQ.A6_vqyr5XmLsUJ65wteGEz488CxpX86x46fKB-g_872AYeg-RLiNxqInuM4KBKnHnVU_tUcf5jteWmOABhCKRA"
+*  {"type":"send","content":"CLI에서 보냄!","clientMsgId":"cli-test-1","assetUids":[]}
  */
 @Component
 class ChatWebSocketHandler(
@@ -109,73 +112,44 @@ class ChatWebSocketHandler(
     ): Mono<Void> = mono {
         val node = mapper.readTree(raw)
         val type = node.get("type")?.asText() ?: return@mono
+        val dataNode = node.get("data")
 
         when (type) {
 
-            //{"type":"send","content":"채팅!!!","clientMsgId":"ibox-1","assetUids":[]}
+            // { "type": "send", "data": { "content": "...", "emojiCode": "E_001" } }
             // TODO 안읽은 메세지가 있는 상태에서 메세지를 보냈을때 unread를 0으로 갱신할것인지?
             "send" -> {
-                val content = node.get("content")?.asText()
-                val clientMsgId = node.get("clientMsgId")?.asText()
-                val msgUid = chatService.sendMessage(ctx.roomUid, ctx.user, SendMessageRequest(content), emptyList())
+                if (dataNode == null) {
+                    val err = errorJson("bad_format", "send requires 'data' field")
+                    session.send(Mono.just(session.textMessage(err))).subscribe()
+                    return@mono
+                }
 
-//                val assetUids: List<UUID> =
-//                    node.get("assetUids")?.let { arr: JsonNode ->
-//                        arr.elements().asSequence()
-//                            .mapNotNull { it.asText(null) }
-//                            .mapNotNull { runCatching { UUID.fromString(it) }.getOrNull() }
-//                            .toList()
-//                    } ?: emptyList()
+                val request = mapper.treeToValue(dataNode, SendMessageRequest::class.java)
+                val msgUid = chatService.sendMessage(ctx.roomUid, ctx.user, request, emptyList())
 
                 val payload = mapper.writeValueAsString(
                     mapOf(
                         "type" to "message",
                         "roomUid" to ctx.roomUid.toString(),
                         "messageUid" to msgUid.toString(),
-                        "userId" to ctx.user.id,
-                        "senderUid" to ctx.user.uid.toString(),
-                        "content" to content,
-//                        "assetUids" to assetUids.map { it.toString() },
-                        "clientMsgId" to clientMsgId
+                        "userUid" to ctx.user.uid.toString(),
+                        "content" to request.content,
+                        "emojiCode" to request.emojiCode,
+                        "kind" to request.kind
                     )
                 )
                 chatHub.publish(ctx.roomUid, payload)
             }
 
-            //{"type":"emoji","emojiCode":"party_popper"}
-            //{"type":"emoji","emojiCode":"laugh","clientMsgId":"123e4567-e89b-12d3-a456-426614174000"}
-            //{"type":"emoji","emojiCode":"heart","meta":{"color":"red","size":"large"}}
-            "emoji" -> {
-                val code = node.get("emojiCode")?.asText() ?: return@mono
-
-                val msgUid = chatService.sendMessage(
-                    ctx.roomUid,
-                    ctx.user,
-                    SendMessageRequest(content = null, code),
-                    emptyList()
-                )
-
-                // 즉시 WS 브로드캐스트(서버에서 이미 이모지 전용 payload를 publish했으면 생략 가능)
-                val payload = mapper.writeValueAsString(
-                    mapOf(
-                        "type" to "emoji",
-                        "roomUid" to ctx.roomUid.toString(),
-                        "messageUid" to msgUid.toString(),
-                        "senderUid" to ctx.user.uid.toString(),
-                        "emojiCode" to code
-                    )
-                )
-                chatHub.publish(ctx.roomUid, payload)
-            }
-
-            //{"type":"typing","isTyping":true}
+            // { "type": "typing", "data": { "isTyping": true } }
             "typing" -> {
-                val isTyping = node.get("isTyping")?.asBoolean() ?: true
+                val isTyping = dataNode?.get("isTyping")?.asBoolean() ?: true
+
                 val payload = mapper.writeValueAsString(
                     mapOf(
                         "type" to "typing",
                         "roomUid" to ctx.roomUid.toString(),
-                        "userId" to ctx.user.id,
                         "userUid" to ctx.user.uid.toString(),
                         "isTyping" to isTyping
                     )
@@ -183,21 +157,23 @@ class ChatWebSocketHandler(
                 chatHub.publish(ctx.roomUid, payload)
             }
 
-            //{"type":"read","lastMessageUid":"8d0c9302-5382-449f-9cdb-ec40d0bb9251"}
+            // { "type": "read", "data": { "lastMessageUid": "UUID" } }
             "read" -> {
-                val lastMessageUid = node.get("lastMessageUid")?.asText() ?: return@mono
+                val lastMessageUid = dataNode?.get("lastMessageUid")?.asText() ?: return@mono
+
                 chatService.markRead(ctx.roomUid, ctx.user, UUID.fromString(lastMessageUid))
+
                 val payload = mapper.writeValueAsString(
                     mapOf(
                         "type" to "read",
                         "roomUid" to ctx.roomUid.toString(),
-                        "userId" to ctx.user.id,
                         "userUid" to ctx.user.uid.toString(),
                         "lastMessageUid" to lastMessageUid
                     )
                 )
                 chatHub.publish(ctx.roomUid, payload)
             }
+
 
             "ping" -> {
                 // 단일 사용자에게만 회신
