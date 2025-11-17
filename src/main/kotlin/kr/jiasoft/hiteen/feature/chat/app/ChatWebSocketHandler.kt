@@ -18,6 +18,7 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
+import java.time.Duration
 import java.util.*
 
 /**
@@ -83,11 +84,16 @@ class ChatWebSocketHandler(
 
             val broadcast: Flux<String> = chatHub.subscribe(ctx.roomUid)
 
+            val heartbeat = Flux.interval(Duration.ofSeconds(30))
+                .map { session.pingMessage { buf -> buf.wrap("ping".toByteArray())} }
+
             val outgoing: Flux<WebSocketMessage> =
-                Flux.concat(greetings, broadcast)
-                    .map { session.textMessage(it) }
-                    .doOnSubscribe { chatHub.join(ctx.roomUid, ctx.user.id, ctx.user.uid) }
-                    .doFinally { chatHub.leave(ctx.roomUid, ctx.user.id, ctx.user.uid) }
+                Flux.merge(
+                    heartbeat,
+                    Flux.concat(greetings, broadcast).map { session.textMessage(it) }
+                )
+                .doOnSubscribe { chatHub.join(ctx.roomUid, ctx.user.id, ctx.user.uid) }
+                .doFinally { chatHub.leave(ctx.roomUid, ctx.user.id, ctx.user.uid) }
 
             val incoming = session.receive()
                 .map(WebSocketMessage::getPayloadAsText)
@@ -117,23 +123,16 @@ class ChatWebSocketHandler(
             // TODO 안읽은 메세지가 있는 상태에서 메세지를 보냈을때 unread를 0으로 갱신할것인지?
             "send" -> {
                 val content = node.get("content")?.asText()
-
                 val clientMsgId = node.get("clientMsgId")?.asText()
+                val msgUid = chatService.sendMessage(ctx.roomUid, ctx.user, SendMessageRequest(content), emptyList())
 
-                val assetUids: List<UUID> =
-                    node.get("assetUids")?.let { arr: JsonNode ->
-                        arr.elements().asSequence()
-                            .mapNotNull { it.asText(null) }
-                            .mapNotNull { runCatching { UUID.fromString(it) }.getOrNull() }
-                            .toList()
-                    } ?: emptyList()
-
-                val msgUid = chatService.sendMessage(
-                    ctx.roomUid,
-                    ctx.user,
-                    SendMessageRequest(content),
-                    emptyList()
-                )
+//                val assetUids: List<UUID> =
+//                    node.get("assetUids")?.let { arr: JsonNode ->
+//                        arr.elements().asSequence()
+//                            .mapNotNull { it.asText(null) }
+//                            .mapNotNull { runCatching { UUID.fromString(it) }.getOrNull() }
+//                            .toList()
+//                    } ?: emptyList()
 
                 val payload = mapper.writeValueAsString(
                     mapOf(
@@ -143,7 +142,7 @@ class ChatWebSocketHandler(
                         "userId" to ctx.user.id,
                         "senderUid" to ctx.user.uid.toString(),
                         "content" to content,
-                        "assetUids" to assetUids.map { it.toString() },
+//                        "assetUids" to assetUids.map { it.toString() },
                         "clientMsgId" to clientMsgId
                     )
                 )
