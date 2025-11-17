@@ -1,9 +1,11 @@
 package kr.jiasoft.hiteen.feature.location.app
 
+import org.springframework.data.redis.core.ReactiveStringRedisTemplate
 import org.springframework.data.redis.listener.ChannelTopic
 import org.springframework.data.redis.listener.ReactiveRedisMessageListenerContainer
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Flux
+import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -12,6 +14,7 @@ import java.util.concurrent.ConcurrentHashMap
  */
 @Component
 class LocationHub(
+    private val publisher: ReactiveStringRedisTemplate,
     private val subscriber: ReactiveRedisMessageListenerContainer
 ) {
     private val localBridges = ConcurrentHashMap<String, Flux<String>>()
@@ -19,7 +22,7 @@ class LocationHub(
     /** 단일 유저 구독 */
     fun subscribeUser(userUid: String): Flux<String> =
         localBridges.computeIfAbsent(userUid) { uid ->
-            val topic = ChannelTopic(userTopic(uid))
+            val topic = ChannelTopic(userTopic(UUID.fromString(uid)))
             subscriber.receive(topic)          // Redis Pub/Sub 구독
                 .map { it.message }           // payload(String, JSON 가정)
                 .share()                      // 동일 userUid 다중 세션 공유
@@ -29,5 +32,10 @@ class LocationHub(
     fun subscribeUsers(userUids: List<String>): Flux<String> =
         Flux.merge(userUids.map { subscribeUser(it) })
 
-    private fun userTopic(userUid: String) = "loc:user:$userUid"
+
+    fun publish(userUid: UUID, json: String) {
+        publisher.convertAndSend(userTopic(userUid), json).subscribe()
+    }
+
+    private fun userTopic(userUid: UUID) = "loc:user:$userUid"
 }
