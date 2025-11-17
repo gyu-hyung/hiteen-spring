@@ -308,7 +308,7 @@ class AuthController(
         if (phone == user.phone) throw IllegalArgumentException("이미 사용 중인 번호야~")
 
         // 사용중인 번호인지 체크
-        userRepository.findActiveByUsername(phone)
+        userRepository.findActiveByUsernameOrDeletedAtBeforeDays(phone, 30)
             ?.let { throw IllegalStateException("이미 사용중인 휴대폰 번호야~") }
 
         // 인증번호 검증 (5분 유효)
