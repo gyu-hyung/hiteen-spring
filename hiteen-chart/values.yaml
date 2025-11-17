@@ -162,10 +162,21 @@ ingress:
   enabled: true
   className: nginx
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
-    nginx.ingress.kubernetes.io/proxy-buffering: "off"
+    nginx.ingress.kubernetes.io/rewrite-target: "/"
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
-    nginx.ingress.kubernetes.io/websocket-services: "soketi-svc"
+    nginx.ingress.kubernetes.io/proxy-buffering: "off"
+
+    # 🔥 WebSocket 안정성 핵심
+    nginx.ingress.kubernetes.io/websocket-services: "hiteen-test"
+    nginx.ingress.kubernetes.io/connection-proxying: "on"
+
+    # 🔥 Idle timeout 해결
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "10"
+
+
+
   hosts:
     - host:
       paths:
