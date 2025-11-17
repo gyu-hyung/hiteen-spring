@@ -22,7 +22,8 @@ import java.util.*
 
 /**
  * ws://{host}/ws/chat?room={roomUid}&token=Bearer%20{JWT}
- *  websocat "ws://localhost:8080/ws/chat?room=fefe5b56-6dfc-455d-ab1e-935a9bb63c03&token=Bearer%20eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIwMTA5NTM5MzYzNyIsImlhdCI6MTc2MzMzOTY4NSwiZXhwIjoxNzY0MjAzNjg1fQ.KB6e_w3L5k22L9EqkYjGIBOQshxwccRrOVVPYhtkiIYO8pJ9vfsQ1bmMzpumelNbFPlDAG8_jsYqwLeIoK0jUg"
+ *  websocat --ping-interval=20 "ws://49.247.169.182:30080/ws/chat?room=8921f90a-609c-4dd5-a7b0-fe25321b1e7c&token=Bearer%20eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIwMTA5NTM5MzYzNyIsImlhdCI6MTc2MzM0NDg3NSwiZXhwIjoxNzY0MjA4ODc1fQ.Iwj9PnUVkQ8w83dCXh1vBhTjn7334OhuW_QO5RbPArutqxQ0GXL7QdGYbbiSefYvt-FtnqCc8MndTpMpjS6tnQ"
+ *  websocat --ping-interval=20 "ws://49.247.169.182:30080/ws/chat?room=8921f90a-609c-4dd5-a7b0-fe25321b1e7c&token=Bearer%20eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIwMTAyMjIyMjIyMiIsImlhdCI6MTc2MzM0NDg4OSwiZXhwIjoxNzY0MjA4ODg5fQ.Fr3fXHjBI6injuYE751TfyFI_YsETxZDZ2rBegfjVtUBy373hcGjJW_aq9VfY0vhYtrD7cKA2yAZU6b17p7RIA"
  *  {"type":"send","content":"CLI에서 보냄!","clientMsgId":"cli-test-1","assetUids":[]}
  */
 @Component
@@ -83,14 +84,8 @@ class ChatWebSocketHandler(
 
             val broadcast: Flux<String> = chatHub.subscribe(ctx.roomUid)
 
-            val heartbeat = Flux.interval(Duration.ofSeconds(30))
-                .map { session.pingMessage { buf -> buf.wrap("ping".toByteArray())} }
-
             val outgoing: Flux<WebSocketMessage> =
-                Flux.merge(
-                    heartbeat,
-                    Flux.concat(greetings, broadcast).map { session.textMessage(it) }
-                )
+                Flux.concat(greetings, broadcast).map { session.textMessage(it) }
                 .doOnSubscribe { chatHub.join(ctx.roomUid, ctx.user.id, ctx.user.uid) }
                 .doFinally { chatHub.leave(ctx.roomUid, ctx.user.id, ctx.user.uid) }
 
