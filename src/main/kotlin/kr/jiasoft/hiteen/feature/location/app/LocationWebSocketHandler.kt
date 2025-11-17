@@ -17,6 +17,11 @@ import reactor.core.publisher.Mono
 import java.net.URLDecoder
 import java.time.OffsetDateTime
 
+
+/**
+websocat --ping-interval=20 "ws://localhost:8080/ws/loc?users=6e330bdc-3062-4a14-80f2-a46e04278c5c,ade41de8-4276-4fb7-9473-cc69cf9e451f,ae67afaa-eb77-4480-a98b-08b48e4c197a&token=Bearer%20eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIwMTA5NTM5MzYzNyIsImlhdCI6MTc2MzMzOTY4NSwiZXhwIjoxNzY0MjAzNjg1fQ.KB6e_w3L5k22L9EqkYjGIBOQshxwccRrOVVPYhtkiIYO8pJ9vfsQ1bmMzpumelNbFPlDAG8_jsYqwLeIoK0jUg"
+websocat --ping-interval=20 "ws://localhost:8080/ws/loc?users=6e330bdc-3062-4a14-80f2-a46e04278c5c,ade41de8-4276-4fb7-9473-cc69cf9e451f&token=Bearer%20eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIwMTA5NTM5MzYzNyIsImlhdCI6MTc2MzMzOTY4NSwiZXhwIjoxNzY0MjAzNjg1fQ.KB6e_w3L5k22L9EqkYjGIBOQshxwccRrOVVPYhtkiIYO8pJ9vfsQ1bmMzpumelNbFPlDAG8_jsYqwLeIoK0jUg"
+ * */
 @Component
 class LocationWebSocketHandler(
     private val jwt: JwtProvider,

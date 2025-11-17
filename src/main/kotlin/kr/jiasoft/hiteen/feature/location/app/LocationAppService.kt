@@ -1,20 +1,19 @@
 package kr.jiasoft.hiteen.feature.location.app
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import kr.jiasoft.hiteen.feature.location.domain.LocationHistory
-import kr.jiasoft.hiteen.feature.location.dto.LocationEvent
 import kr.jiasoft.hiteen.feature.location.dto.LocationRequest
 import kr.jiasoft.hiteen.feature.location.infra.cache.LocationCacheRedisService
-import kr.jiasoft.hiteen.feature.soketi.app.SoketiBroadcaster
-import kr.jiasoft.hiteen.feature.soketi.domain.SoketiChannelPattern
-import kr.jiasoft.hiteen.feature.soketi.domain.SoketiEventType
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import org.springframework.stereotype.Service
 
 @Service
-    class LocationAppService(
-        private val locationService: LocationService,
-        private val locationCacheRedisService: LocationCacheRedisService,
-        private val soketiBroadcaster: SoketiBroadcaster,
+class LocationAppService(
+    private val locationService: LocationService,
+    private val locationCacheRedisService: LocationCacheRedisService,
+    private val locationHub: LocationHub,
+    private val objectMapper: ObjectMapper,
+//    private val soketiBroadcaster: SoketiBroadcaster,
     ) {
 
     suspend fun getLatest(userId: String): LocationHistory? =
@@ -35,27 +34,29 @@ import org.springframework.stereotype.Service
 
         val saved = locationService.saveLocation(entity)
         if (saved != null) {
-            val event = LocationEvent(
-                userId = userUid,
-                lat = req.lat,
-                lng = req.lng,
-                timestamp = req.timestamp,
-                source = "http"
-            )
+//            val event = LocationEvent(
+//                userId = userUid,
+//                lat = req.lat,
+//                lng = req.lng,
+//                timestamp = req.timestamp,
+//                source = "http"
+//            )
 
-            val payload = mapOf(
-                "userId" to userUid,
-                "lat" to event.lat,
-                "lng" to event.lng,
-                "timestamp" to event.timestamp.toString(),
-                "source" to event.source
-            )
+//            val payload = mapOf(
+//                "userId" to userUid,
+//                "lat" to event.lat,
+//                "lng" to event.lng,
+//                "timestamp" to event.timestamp.toString(),
+//                "source" to event.source
+//            )
 
-            soketiBroadcaster.broadcast(
-                SoketiChannelPattern.PRIVATE_USER_LOCATION.format(userUid),
-                SoketiEventType.LOCATION,
-                payload
-            )
+//            soketiBroadcaster.broadcast(
+//                SoketiChannelPattern.PRIVATE_USER_LOCATION.format(userUid),
+//                SoketiEventType.LOCATION,
+//                payload
+//            )
+            val writeValueAsString = objectMapper.writeValueAsString(saved)
+            locationHub.publish(user.uid, writeValueAsString)
             locationCacheRedisService.cacheLatest(saved)
         }
 

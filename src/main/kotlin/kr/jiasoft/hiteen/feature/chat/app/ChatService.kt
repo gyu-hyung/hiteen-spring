@@ -36,7 +36,7 @@ class ChatService(
     private val messages: ChatMessageRepository,
     private val msgAssets: ChatMessageAssetRepository,
     private val users: UserRepository,
-    private val soketiBroadcaster: SoketiBroadcaster,
+//    private val soketiBroadcaster: SoketiBroadcaster,
 
     private val expService: ExpService,
     private val pushService: PushService,
@@ -173,15 +173,15 @@ class ChatService(
         )
 
         // 채팅방 채널 broadcast (message-created)
-        val messagePayload = mapOf(
-            "roomUid" to room.uid.toString(),
-            "message" to lastMessageSummary
-        )
-        soketiBroadcaster.broadcast(
-            SoketiChannelPattern.PRIVATE_CHAT_ROOM.format(room.uid),
-            SoketiEventType.MESSAGE_CREATED,
-            messagePayload
-        )
+//        val messagePayload = mapOf(
+//            "roomUid" to room.uid.toString(),
+//            "message" to lastMessageSummary
+//        )
+//        soketiBroadcaster.broadcast(
+//            SoketiChannelPattern.PRIVATE_CHAT_ROOM.format(room.uid),
+//            SoketiEventType.MESSAGE_CREATED,
+//            messagePayload
+//        )
 
         // 채팅방 멤버들에게 broadcast (ROOM_UPDATED + unreadCount)
         val activeMembers = chatUsers.listActiveUserUids(room.id).toList()
@@ -195,11 +195,11 @@ class ChatService(
                 "unreadCount" to unreadCount.toString()
             )
 
-            soketiBroadcaster.broadcast(
-                SoketiChannelPattern.PRIVATE_USER.format(member.userUid),
-                SoketiEventType.ROOM_UPDATED,
-                payload
-            )
+//            soketiBroadcaster.broadcast(
+//                SoketiChannelPattern.PRIVATE_USER.format(member.userUid),
+//                SoketiEventType.ROOM_UPDATED,
+//                payload
+//            )
             if (req.kind == 0) {
                 expService.grantExp(sendUser.id, "CHAT", member.userId)
             } else if (req.kind == 1) {
@@ -280,31 +280,31 @@ class ChatService(
         chatUsers.updateReadCursor(room.id, currentUser.id, msg.id, OffsetDateTime.now())
 
         // ✅ 마지막 메시지 요약
-        val lastMsgEntity = messages.findById(msg.id) ?: return
-        val senderUid = users.findById(lastMsgEntity.userId)?.uid
+//        val lastMsgEntity = messages.findById(msg.id) ?: return
+//        val senderUid = users.findById(lastMsgEntity.userId)?.uid
 
-        val lastMessageSummary = mapOf(
-            "messageUid" to lastMsgEntity.uid,
-            "userUid" to senderUid,
-            "content" to lastMsgEntity.content,
-            "kind" to lastMsgEntity.kind,
-            "emojiCode" to lastMsgEntity.emojiCode,
-            "createdAt" to lastMsgEntity.createdAt.toString()
-        )
+//        val lastMessageSummary = mapOf(
+//            "messageUid" to lastMsgEntity.uid,
+//            "userUid" to senderUid,
+//            "content" to lastMsgEntity.content,
+//            "kind" to lastMsgEntity.kind,
+//            "emojiCode" to lastMsgEntity.emojiCode,
+//            "createdAt" to lastMsgEntity.createdAt.toString()
+//        )
 
-        val unreadCount = messages.countUnread(room.id, currentUser.id)
+//        val unreadCount = messages.countUnread(room.id, currentUser.id)
 
-        val payload = mapOf(
-            "roomUid" to room.uid.toString(),
-            "lastMessage" to lastMessageSummary,
-            "unreadCount" to unreadCount.toString()
-        )
+//        val payload = mapOf(
+//            "roomUid" to room.uid.toString(),
+//            "lastMessage" to lastMessageSummary,
+//            "unreadCount" to unreadCount.toString()
+//        )
 
-        soketiBroadcaster.broadcast(
-            SoketiChannelPattern.PRIVATE_USER.format(currentUser.uid),
-            SoketiEventType.ROOM_UPDATED,
-            payload
-        )
+//        soketiBroadcaster.broadcast(
+//            SoketiChannelPattern.PRIVATE_USER.format(currentUser.uid),
+//            SoketiEventType.ROOM_UPDATED,
+//            payload
+//        )
     }
 
 

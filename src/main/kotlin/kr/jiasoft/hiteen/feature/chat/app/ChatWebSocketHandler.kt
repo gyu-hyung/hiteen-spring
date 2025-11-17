@@ -13,6 +13,7 @@ import org.springframework.web.reactive.socket.CloseStatus
 import org.springframework.web.reactive.socket.WebSocketHandler
 import org.springframework.web.reactive.socket.WebSocketMessage
 import org.springframework.web.reactive.socket.WebSocketSession
+import reactor.core.publisher.BufferOverflowStrategy
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.net.URLDecoder
@@ -90,6 +91,7 @@ class ChatWebSocketHandler(
                 Flux.concat(greetings, broadcast).map { session.textMessage(it) }
                 .doOnSubscribe { chatHub.join(ctx.roomUid, ctx.user.id, ctx.user.uid) }
                 .doFinally { chatHub.leave(ctx.roomUid, ctx.user.id, ctx.user.uid) }
+                .onBackpressureBuffer(1024, {}, BufferOverflowStrategy.DROP_OLDEST)
 
             val incoming = session.receive()
                 .map(WebSocketMessage::getPayloadAsText)
