@@ -20,8 +20,8 @@ class LocationHub(
     private val localBridges = ConcurrentHashMap<String, Flux<String>>()
 
     /** 단일 유저 구독 */
-    fun subscribeUser(userUid: String): Flux<String> =
-        localBridges.computeIfAbsent(userUid) { uid ->
+    fun subscribeUser(userUid: UUID): Flux<String> =
+        localBridges.computeIfAbsent(userUid.toString()) { uid ->
             val topic = ChannelTopic(userTopic(UUID.fromString(uid)))
             subscriber.receive(topic)          // Redis Pub/Sub 구독
                 .map { it.message }           // payload(String, JSON 가정)
@@ -29,7 +29,7 @@ class LocationHub(
         }
 
     /** 여러 유저 병합 구독 */
-    fun subscribeUsers(userUids: List<String>): Flux<String> =
+    fun subscribeUsers(userUids: List<UUID>): Flux<String> =
         Flux.merge(userUids.map { subscribeUser(it) })
 
 
