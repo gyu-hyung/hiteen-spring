@@ -5,13 +5,13 @@ import kotlinx.coroutines.reactor.mono
 import kr.jiasoft.hiteen.feature.auth.infra.BearerToken
 import kr.jiasoft.hiteen.feature.auth.infra.JwtProvider
 import kr.jiasoft.hiteen.feature.user.app.UserReader
+import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.socket.*
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
-import java.util.UUID
 
 @Component
 class InboxWebSocketHandler(
@@ -22,7 +22,7 @@ class InboxWebSocketHandler(
 
     private val mapper = jacksonObjectMapper()
 
-    private data class Auth(val userId: Long, val userUid: UUID)
+    private data class Auth(val user: UserEntity)
 
     override fun handle(session: WebSocketSession): Mono<Void> {
         val params = session.handshakeInfo.uri.query?.let { parseQuery(it) } ?: emptyMap()
@@ -32,9 +32,8 @@ class InboxWebSocketHandler(
         val authMono = mono {
             val jws = jwt.parseAndValidateOrThrow(token)
             val username = jws.payload.subject ?: error("no-subject")
-            val userId = userReader.findIdByUsername(username) ?: error("user not found: $username")
-            val userUid = userReader.findUidById(username) ?: error("user uid not found: $username")
-            Auth(userId = userId, userUid = userUid)
+            val user = userReader.findByUsername(username) ?: throw IllegalStateException("user not found: $username")
+            Auth(user)
         }.onErrorResume {
             session.send(Mono.just(session.textMessage(error("auth_failed", it.message))))
                 .then(session.close(CloseStatus.POLICY_VIOLATION))
@@ -45,10 +44,10 @@ class InboxWebSocketHandler(
             val hello = mapper.writeValueAsString(mapOf(
                 "type" to "hello",
 //                "userId" to a.userId,
-                "userUid" to a.userUid,
+                "userUid" to a.user.uid,
             ))
             val greetings = Mono.just(hello)
-            val stream: Flux<String> = inbox.subscribe(a.userUid)
+            val stream: Flux<String> = inbox.subscribe(a.user.uid)
 
             val outgoing = Flux.concat(greetings, stream).map { session.textMessage(it) }
             val incoming = session.receive()

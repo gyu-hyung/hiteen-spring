@@ -6,8 +6,9 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotlinx.coroutines.reactor.mono
 import kr.jiasoft.hiteen.feature.auth.infra.BearerToken
 import kr.jiasoft.hiteen.feature.auth.infra.JwtProvider
-import kr.jiasoft.hiteen.feature.user.app.UserReader
 import kr.jiasoft.hiteen.feature.chat.dto.SendMessageRequest
+import kr.jiasoft.hiteen.feature.user.app.UserReader
+import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.socket.CloseStatus
 import org.springframework.web.reactive.socket.WebSocketHandler
@@ -23,7 +24,6 @@ import java.util.*
  * ws://{host}/ws/chat?room={roomUid}&token=Bearer%20{JWT}
  *  websocat "ws://localhost:8080/ws/chat?room=fefe5b56-6dfc-455d-ab1e-935a9bb63c03&token=Bearer%20eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIwMTA5NTM5MzYzNyIsImlhdCI6MTc2MzMzOTY4NSwiZXhwIjoxNzY0MjAzNjg1fQ.KB6e_w3L5k22L9EqkYjGIBOQshxwccRrOVVPYhtkiIYO8pJ9vfsQ1bmMzpumelNbFPlDAG8_jsYqwLeIoK0jUg"
  *  {"type":"send","content":"CLI에서 보냄!","clientMsgId":"cli-test-1","assetUids":[]}
- *
  */
 @Component
 class ChatWebSocketHandler(
@@ -53,13 +53,13 @@ class ChatWebSocketHandler(
         val authMono = mono {
             val jws = jwt.parseAndValidateOrThrow(token) // 실패 시 JwtException
             val username = jws.payload.subject ?: throw IllegalStateException("no-subject")
-            val userId = userReader.findIdByUsername(username) ?: throw IllegalStateException("user not found: $username")
-            val userUid = userReader.findUidById(username) ?: throw IllegalStateException("user uid not found: $username")
+
+            val user = userReader.findByUsername(username) ?: throw IllegalStateException("user not found: $username")
 
             // 방 멤버 여부 검증 (없으면 403 유사 종료)
-            chatService.assertMember(roomUid, userId)
+            chatService.assertMember(roomUid, user.id)
 
-            AuthContext(roomUid, userId, userUid, username)
+            AuthContext(roomUid, user, username)
         }.onErrorResume {
             session.send(Mono.just(session.textMessage(errorJson("auth_failed", it.message))))
                 .then(session.close(CloseStatus.POLICY_VIOLATION))
@@ -75,7 +75,7 @@ class ChatWebSocketHandler(
                             mapOf(
                                 "type" to "hello",
                                 "roomUid" to ctx.roomUid.toString(),
-                                "userUid" to ctx.userUid.toString(),
+                                "userUid" to ctx.user.uid.toString(),
                                 "members" to mc
                             )
                         )
@@ -86,8 +86,8 @@ class ChatWebSocketHandler(
             val outgoing: Flux<WebSocketMessage> =
                 Flux.concat(greetings, broadcast)
                     .map { session.textMessage(it) }
-                    .doOnSubscribe { chatHub.join(ctx.roomUid, ctx.userId, ctx.userUid) }
-                    .doFinally { chatHub.leave(ctx.roomUid, ctx.userId, ctx.userUid) }
+                    .doOnSubscribe { chatHub.join(ctx.roomUid, ctx.user.id, ctx.user.uid) }
+                    .doFinally { chatHub.leave(ctx.roomUid, ctx.user.id, ctx.user.uid) }
 
             val incoming = session.receive()
                 .map(WebSocketMessage::getPayloadAsText)
@@ -128,19 +128,20 @@ class ChatWebSocketHandler(
                             .toList()
                     } ?: emptyList()
 
-//                val msgUid = chatService.sendMessage(
-//                    ctx.roomUid,
-//                    ctx.userId,
-//                    SendMessageRequest(content, "")
-//                )
+                val msgUid = chatService.sendMessage(
+                    ctx.roomUid,
+                    ctx.user,
+                    SendMessageRequest(content),
+                    emptyList()
+                )
 
                 val payload = mapper.writeValueAsString(
                     mapOf(
                         "type" to "message",
                         "roomUid" to ctx.roomUid.toString(),
-//                        "messageUid" to msgUid.toString(),
-//                        "userId" to ctx.userId,
-                        "senderUid" to ctx.userUid.toString(),
+                        "messageUid" to msgUid.toString(),
+                        "userId" to ctx.user.id,
+                        "senderUid" to ctx.user.uid.toString(),
                         "content" to content,
                         "assetUids" to assetUids.map { it.toString() },
                         "clientMsgId" to clientMsgId
@@ -155,19 +156,20 @@ class ChatWebSocketHandler(
             "emoji" -> {
                 val code = node.get("emojiCode")?.asText() ?: return@mono
 
-//                val msgUid = chatService.sendMessage(
-//                    ctx.roomUid,
-//                    ctx.userId,
-//                    SendMessageRequest(kind = 2, emojiCode = code)
-//                )
+                val msgUid = chatService.sendMessage(
+                    ctx.roomUid,
+                    ctx.user,
+                    SendMessageRequest(content = null, code),
+                    emptyList()
+                )
 
                 // 즉시 WS 브로드캐스트(서버에서 이미 이모지 전용 payload를 publish했으면 생략 가능)
                 val payload = mapper.writeValueAsString(
                     mapOf(
                         "type" to "emoji",
                         "roomUid" to ctx.roomUid.toString(),
-//                        "messageUid" to msgUid.toString(),
-                        "senderUid" to ctx.userUid.toString(),
+                        "messageUid" to msgUid.toString(),
+                        "senderUid" to ctx.user.uid.toString(),
                         "emojiCode" to code
                     )
                 )
@@ -181,8 +183,8 @@ class ChatWebSocketHandler(
                     mapOf(
                         "type" to "typing",
                         "roomUid" to ctx.roomUid.toString(),
-//                        "userId" to ctx.userId,
-                        "userUid" to ctx.userUid.toString(),
+                        "userId" to ctx.user.id,
+                        "userUid" to ctx.user.uid.toString(),
                         "isTyping" to isTyping
                     )
                 )
@@ -192,13 +194,13 @@ class ChatWebSocketHandler(
             //{"type":"read","lastMessageUid":"8d0c9302-5382-449f-9cdb-ec40d0bb9251"}
             "read" -> {
                 val lastMessageUid = node.get("lastMessageUid")?.asText() ?: return@mono
-//                chatService.markRead(ctx.roomUid, ctx.userId, UUID.fromString(lastMessageUid))
+                chatService.markRead(ctx.roomUid, ctx.user, UUID.fromString(lastMessageUid))
                 val payload = mapper.writeValueAsString(
                     mapOf(
                         "type" to "read",
                         "roomUid" to ctx.roomUid.toString(),
-//                        "userId" to ctx.userId,
-                        "userUid" to ctx.userUid.toString(),
+                        "userId" to ctx.user.id,
+                        "userUid" to ctx.user.uid.toString(),
                         "lastMessageUid" to lastMessageUid
                     )
                 )
@@ -219,7 +221,7 @@ class ChatWebSocketHandler(
         }
     }.then()
 
-    private data class AuthContext(val roomUid: UUID, val userId: Long, val userUid: UUID, val username: String)
+    private data class AuthContext(val roomUid: UUID, val user: UserEntity, val username: String)
 
     private fun parseQuery(q: String): Map<String, List<String>> =
         q.split("&")
