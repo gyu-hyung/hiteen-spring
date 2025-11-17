@@ -8,10 +8,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
-import jakarta.validation.constraints.NotBlank
 import kr.jiasoft.hiteen.common.dto.ApiResult
 import kr.jiasoft.hiteen.feature.auth.dto.AuthCodeRequest
+import kr.jiasoft.hiteen.feature.auth.dto.ChangePhoneRequest
 import kr.jiasoft.hiteen.feature.auth.dto.JwtResponse
+import kr.jiasoft.hiteen.feature.auth.dto.LoginForm
+import kr.jiasoft.hiteen.feature.auth.dto.PassWordChangeRequest
+import kr.jiasoft.hiteen.feature.auth.dto.PasswordCheckRequest
 import kr.jiasoft.hiteen.feature.auth.dto.VerifyRequest
 import kr.jiasoft.hiteen.feature.auth.infra.BearerToken
 import kr.jiasoft.hiteen.feature.auth.infra.JwtProvider
@@ -21,17 +24,11 @@ import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import kr.jiasoft.hiteen.feature.user.dto.ResetPasswordRequest
 import kr.jiasoft.hiteen.feature.user.dto.UserResponseWithTokens
 import kr.jiasoft.hiteen.feature.user.infra.UserRepository
-import kr.jiasoft.hiteen.validation.ValidPassword
-import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpStatus
-import org.springframework.http.ResponseCookie
 import org.springframework.http.ResponseEntity
 import org.springframework.http.server.reactive.ServerHttpResponse
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.web.bind.annotation.*
-import org.springframework.web.server.ResponseStatusException
-import java.time.Duration
 
 @Tag(name = "Auth", description = "인증 관련 API")
 @RestController
@@ -47,11 +44,7 @@ class AuthController(
     private val authService: AuthService,
 ) {
 
-    @Schema(description = "로그인 요청 DTO")
-    data class LoginForm(
-        @Schema(description = "아이디") val phone: String,
-        @Schema(description = "비밀번호") val password: String
-    )
+
 
 
     //TODO 로그인 시 device 정보 user_details에 저장
@@ -154,7 +147,6 @@ class AuthController(
     }
 
 
-
     @Operation(summary = "비밀번호 재설정 코드 발송", description = "비밀번호를 잊은 사용자가 휴대폰으로 인증코드를 받습니다.")
     @PostMapping("/password/code")
     suspend fun sendResetPasswordCode(
@@ -176,14 +168,6 @@ class AuthController(
         }
         throw IllegalStateException("인증번호 발송을 실패했어~ 나중에 다시 시도해줘~")
     }
-
-
-    data class PasswordCheckRequest(
-        @field:NotBlank(message = "비밀번호는 필수입니다.")
-        @field:ValidPassword
-        @Schema(description = "비밀번호", example = "P@ssw0rd!")
-        val password: String
-    )
 
 
     @Operation(summary = "비밀번호 검증", description = "비밀번호 검증용 API")
@@ -264,18 +248,7 @@ class AuthController(
     }
 
 
-    @Schema(description = "비밀번호 변경 요청 DTO")
-    data class passWordChangeRequest(
-        @field:NotBlank(message = "비밀번호는 필수입니다.")
-        @field:ValidPassword
-        @Schema(description = "비밀번호", example = "P@ssw0rd!")
-        val oldPassword: String,
 
-        @field:NotBlank(message = "비밀번호는 필수입니다.")
-        @field:ValidPassword
-        @Schema(description = "비밀번호", example = "P@ssw0rd!")
-        val newPassword: String,
-    )
 
     @Operation(
         summary = "비밀번호 변경 검증(로그인 상태)",
@@ -304,7 +277,7 @@ class AuthController(
     @PostMapping("/password/change")
     suspend fun changePassword(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
-        @Parameter(description = "비밀번호 초기화 DTO") @Valid req: passWordChangeRequest
+        @Parameter(description = "비밀번호 초기화 DTO") @Valid req: PassWordChangeRequest
     ): ResponseEntity<ApiResult<Any>> {
 
         if (!encoder.matches(req.oldPassword, user.password)) {
@@ -317,5 +290,45 @@ class AuthController(
         return ResponseEntity.ok(ApiResult.success("비밀번호가 변경되었어~"))
     }
 
+
+    @Operation(
+        summary = "연락처 변경 (로그인 상태)",
+        description = "현재 비밀번호를 검증하고 새 비밀번호로 변경합니다.",
+        security = [SecurityRequirement(name = "bearerAuth")]
+    )
+    @PostMapping("/phone/change")
+    suspend fun changePhone(
+        @AuthenticationPrincipal(expression = "user") user: UserEntity,
+        @Parameter(description = "비밀번호 초기화 DTO") @Valid req: ChangePhoneRequest
+    ): ResponseEntity<ApiResult<Any>> {
+
+        val phone = req.phone.filter { it.isDigit() }
+
+        // 자기 번호로 변경 시 실패 처리
+        if (phone == user.phone) throw IllegalArgumentException("이미 사용 중인 번호야~")
+
+        // 사용중인 번호인지 체크
+        userRepository.findActiveByUsername(phone)
+            ?.let { throw IllegalStateException("이미 사용중인 휴대폰 번호야~") }
+
+        // 인증번호 검증 (5분 유효)
+        val minute = 5
+        val data = smsAuthRepository.findValidAuthCode(phone, minute)
+            ?: return ResponseEntity.badRequest().body(ApiResult.failure("인증번호가 만료되었거나 유효하지 않아~"))
+
+        if (data.code != req.code) {
+            return ResponseEntity.badRequest().body(ApiResult.failure("인증번호가 일치하지 않아~"))
+        }
+
+        // 유저 휴대폰 변경
+        val updated = user.copy(username = phone, phone = phone)
+        userRepository.save(updated)
+
+        // 인증 코드 재사용 방지
+        smsAuthRepository.save(data.copy(status = "VERIFIED"))
+
+        return ResponseEntity.ok(ApiResult.success("휴대폰 번호가 변경되었어~"))
+
+    }
 
 }
