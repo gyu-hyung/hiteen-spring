@@ -144,6 +144,11 @@ class UserService (
     }
 
 
+    /**
+     * 회원 가입
+     * 재가입 규칙: 탈퇴 후 같은 번호로 30일 이전에 재가입 가능
+     * dev-allow-always -> false 면 언제나 새로 가입
+     * */
     suspend fun register(param: UserRegisterForm, file: FilePart?): UserResponseWithTokens {
         val now = OffsetDateTime.now()
 
