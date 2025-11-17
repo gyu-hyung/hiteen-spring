@@ -63,7 +63,7 @@ class ChatWebSocketHandler(
             // 방 멤버 여부 검증 (없으면 403 유사 종료)
             chatService.assertMember(roomUid, user.id)
 
-            AuthContext(roomUid, user, username)
+            ChatCtx(roomUid, user, username)
         }.onErrorResume {
             session.send(Mono.just(session.textMessage(errorJson("auth_failed", it.message))))
                 .then(session.close(CloseStatus.POLICY_VIOLATION))
@@ -109,7 +109,7 @@ class ChatWebSocketHandler(
     // 메세지 수신
     private fun handleClientMessage(
         session: WebSocketSession,
-        ctx: AuthContext,
+        ctx: ChatCtx,
         raw: String
     ): Mono<Void> = mono {
         val node = mapper.readTree(raw)
@@ -117,6 +117,13 @@ class ChatWebSocketHandler(
         val dataNode = node.get("data")
 
         when (type) {
+
+            // { "type": "ping" }
+            "ping" -> {
+                // 단일 사용자에게만 회신
+                val pong = mapper.writeValueAsString(mapOf("type" to "pong"))
+                session.send(Mono.just(session.textMessage(pong))).subscribe()
+            }
 
             // { "type": "send", "data": { "content": "...", "emojiCode": "E_001" } }
             // TODO 안읽은 메세지가 있는 상태에서 메세지를 보냈을때 unread를 0으로 갱신할것인지?
@@ -133,12 +140,14 @@ class ChatWebSocketHandler(
                 val payload = mapper.writeValueAsString(
                     mapOf(
                         "type" to "message",
-                        "roomUid" to ctx.roomUid.toString(),
-                        "messageUid" to msgUid.toString(),
-                        "userUid" to ctx.user.uid.toString(),
-                        "content" to request.content,
-                        "emojiCode" to request.emojiCode,
-                        "kind" to request.kind
+                        "data" to mapOf(
+                            "roomUid" to ctx.roomUid.toString(),
+                            "messageUid" to msgUid.toString(),
+                            "userUid" to ctx.user.uid.toString(),
+                            "content" to request.content,
+                            "emojiCode" to request.emojiCode,
+                            "kind" to request.kind
+                        )
                     )
                 )
                 chatHub.publish(ctx.roomUid, payload)
@@ -176,13 +185,6 @@ class ChatWebSocketHandler(
                 chatHub.publish(ctx.roomUid, payload)
             }
 
-
-            "ping" -> {
-                // 단일 사용자에게만 회신
-                val pong = mapper.writeValueAsString(mapOf("type" to "pong"))
-                session.send(Mono.just(session.textMessage(pong))).subscribe()
-            }
-
             else -> {
                 // 알 수 없는 타입
                 val err = errorJson("bad_type", "Unsupported type: $type")
@@ -191,7 +193,7 @@ class ChatWebSocketHandler(
         }
     }.then()
 
-    private data class AuthContext(val roomUid: UUID, val user: UserEntity, val username: String)
+    private data class ChatCtx(val roomUid: UUID, val user: UserEntity, val username: String)
 
     private fun parseQuery(q: String): Map<String, List<String>> =
         q.split("&")
