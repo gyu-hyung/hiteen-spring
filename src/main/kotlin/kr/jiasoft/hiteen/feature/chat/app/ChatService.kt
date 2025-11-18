@@ -187,13 +187,13 @@ class ChatService(
         val activeMembers = chatUsers.listActiveUserUids(room.id).toList()
         for (member in activeMembers) {
 
-            val unreadCount = messages.countUnread(room.id, member.userId)
+//            val unreadCount = messages.countUnread(room.id, member.userId)
 
-            val payload = mapOf(
-                "roomUid" to room.uid.toString(),
-                "lastMessage" to lastMessageSummary,
-                "unreadCount" to unreadCount.toString()
-            )
+//            val payload = mapOf(
+//                "roomUid" to room.uid.toString(),
+//                "lastMessage" to lastMessageSummary,
+//                "unreadCount" to unreadCount.toString()
+//            )
 
 //            soketiBroadcaster.broadcast(
 //                SoketiChannelPattern.PRIVATE_USER.format(member.userUid),
