@@ -56,7 +56,7 @@ class ChatHub(
         publisher.opsForSet().size(roomMembersKey(roomUid)).map { it?.toInt() ?: 0 }.defaultIfEmpty(0)
 
     private fun publishSystem(roomUid: UUID, event: String, userUid: UUID) {
-        val json = """{"type":"system","event":"$event","userUid":"$userUid","at":"${OffsetDateTime.now()}"}"""
+        val json = """{"type":"system","data":{ "event":"$event", "userUid":"$userUid", "at":"${OffsetDateTime.now()}" }}""".trimIndent()
         publish(roomUid, json)
     }
 
