@@ -19,9 +19,6 @@ import kr.jiasoft.hiteen.feature.level.app.ExpService
 import kr.jiasoft.hiteen.feature.push.app.PushService
 import kr.jiasoft.hiteen.feature.push.domain.PushTemplate
 import kr.jiasoft.hiteen.feature.push.domain.buildPushData
-import kr.jiasoft.hiteen.feature.soketi.app.SoketiBroadcaster
-import kr.jiasoft.hiteen.feature.soketi.domain.SoketiChannelPattern
-import kr.jiasoft.hiteen.feature.soketi.domain.SoketiEventType
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import kr.jiasoft.hiteen.feature.user.infra.UserRepository
 import org.springframework.http.codec.multipart.FilePart
@@ -118,8 +115,8 @@ class ChatService(
 
     /** 메시지 전송 */
     suspend fun sendMessage(roomUid: UUID, sendUser: UserEntity, req: SendMessageRequest, files: List<FilePart>): UUID {
-        val room = rooms.findByUidAndDeletedAtIsNull(roomUid) ?: error("room not found")
-        chatUsers.findActive(room.id, sendUser.id) ?: error("not a member")
+        val room = rooms.findByUidAndDeletedAtIsNull(roomUid) ?: throw IllegalArgumentException("room not found")
+        chatUsers.findActive(room.id, sendUser.id) ?: throw IllegalArgumentException("not a member")
 
         // 메시지 저장
         val savedMsg = messages.save(

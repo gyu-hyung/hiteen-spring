@@ -6,96 +6,118 @@ import kotlinx.coroutines.reactor.mono
 import kr.jiasoft.hiteen.feature.auth.infra.BearerToken
 import kr.jiasoft.hiteen.feature.auth.infra.JwtProvider
 import kr.jiasoft.hiteen.feature.chat.dto.SendMessageRequest
+import kr.jiasoft.hiteen.feature.chat.infra.ChatUserRepository
 import kr.jiasoft.hiteen.feature.user.app.UserReader
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.socket.CloseStatus
 import org.springframework.web.reactive.socket.WebSocketHandler
 import org.springframework.web.reactive.socket.WebSocketMessage
 import org.springframework.web.reactive.socket.WebSocketSession
+import reactor.core.Disposable
 import reactor.core.publisher.BufferOverflowStrategy
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import reactor.core.publisher.Sinks
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
-import java.util.*
+import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicReference
 
 /**
- * ws://{host}/ws/chat?room={roomUid}&token=Bearer%20{JWT}
-websocat --ping-interval=20 "ws://49.247.169.182:30080/ws/chat?room=8921f90a-609c-4dd5-a7b0-fe25321b1e7c&token=Bearer%20eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIwMTA5NTM5MzYzNyIsImlhdCI6MTc2MzM0NDg3NSwiZXhwIjoxNzY0MjA4ODc1fQ.Iwj9PnUVkQ8w83dCXh1vBhTjn7334OhuW_QO5RbPArutqxQ0GXL7QdGYbbiSefYvt-FtnqCc8MndTpMpjS6tnQ"
-websocat --ping-interval=20 "ws://49.247.169.182:30080/ws/chat?room=8921f90a-609c-4dd5-a7b0-fe25321b1e7c&token=Bearer%20eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIwMTAyMjIyMjIyMiIsImlhdCI6MTc2MzM0NDg4OSwiZXhwIjoxNzY0MjA4ODg5fQ.Fr3fXHjBI6injuYE751TfyFI_YsETxZDZ2rBegfjVtUBy373hcGjJW_aq9VfY0vhYtrD7cKA2yAZU6b17p7RIA"
-
-websocat --ping-interval=20 "ws://localhost:8080/ws/chat?room=fefe5b56-6dfc-455d-ab1e-935a9bb63c03&token=Bearer%20eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIwMTA5NTM5MzYzNyIsImlhdCI6MTc2MzMzOTY4NSwiZXhwIjoxNzY0MjAzNjg1fQ.KB6e_w3L5k22L9EqkYjGIBOQshxwccRrOVVPYhtkiIYO8pJ9vfsQ1bmMzpumelNbFPlDAG8_jsYqwLeIoK0jUg"
-websocat --ping-interval=20 "ws://localhost:8080/ws/chat?room=fefe5b56-6dfc-455d-ab1e-935a9bb63c03&token=Bearer%20eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIwMTAyMjIyMjIyMiIsImlhdCI6MTc2MzMzOTczOSwiZXhwIjoxNzY0MjAzNzM5fQ.A6_vqyr5XmLsUJ65wteGEz488CxpX86x46fKB-g_872AYeg-RLiNxqInuM4KBKnHnVU_tUcf5jteWmOABhCKRA"
-*  {"type":"send","content":"CLI에서 보냄!","clientMsgId":"cli-test-1","assetUids":[]}
+ * ✅ 새로운 프로토콜
+ *
+ * WebSocket 연결:
+ *   ws://{host}/ws/chat?token=Bearer%20{JWT}
+websocat --ping-interval=20 "ws://localhost:8080/ws/chat?token=Bearer%20eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIwMTA5NTM5MzYzNyIsImlhdCI6MTc2MzMzOTY4NSwiZXhwIjoxNzY0MjAzNjg1fQ.KB6e_w3L5k22L9EqkYjGIBOQshxwccRrOVVPYhtkiIYO8pJ9vfsQ1bmMzpumelNbFPlDAG8_jsYqwLeIoK0jUg"
+websocat --ping-interval=20 "ws://localhost:8080/ws/chat?token=Bearer%20eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIwMTAyMjIyMjIyMiIsImlhdCI6MTc2MzMzOTczOSwiZXhwIjoxNzY0MjAzNzM5fQ.A6_vqyr5XmLsUJ65wteGEz488CxpX86x46fKB-g_872AYeg-RLiNxqInuM4KBKnHnVU_tUcf5jteWmOABhCKRA"
+websocat --ping-interval=20 "ws://localhost:8080/ws/chat?token=Bearer%20eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIwMTAzMzMzMzMzMyIsImlhdCI6MTc2MzQ0MTk2MiwiZXhwIjoxNzY0MzA1OTYyfQ.wQilm0xLD2OgVUGCNzmTSZtMgrhhXWGop2b-3Kf6DPIvFr15m7VDER_JbvnQlQ5V1I0jp46BL7-p6Oj4CUMXtw"
+ * 클라이언트 → 서버 메시지 예시:
+ *
+ * 1) 채팅방 목록 진입 / 이탈
+ *   { "type": "list_subscribe" }
+ *   { "type": "list_unsubscribe" }
+ *
+ * 2) 방 입장 / 퇴장
+ *   { "type": "join", "data": { "roomUid": "fefe5b56-6dfc-455d-ab1e-935a9bb63c03" } }
+ *   { "type": "leave", "data": { "roomUid": "fefe5b56-6dfc-455d-ab1e-935a9bb63c03" } }
+ *
+ * 3) 메시지 전송
+ *   { "type": "send", "data": { "roomUid": "fefe5b56-6dfc-455d-ab1e-935a9bb63c03", "content": "...", "emojiCode": "E_001"} }
+ *   { "type": "send", "data": { "roomUid": "c84fa195-4491-4bea-af11-073f292d5472", "content": "...", "emojiCode": "E_001"} }
+ *
+ * 4) 타이핑
+ *   { "type": "typing", "data": { "roomUid": "fefe5b56-6dfc-455d-ab1e-935a9bb63c03", "isTyping": true } }
+ *
+ * 5) 읽음 처리
+ *   { "type": "read", "data": { "roomUid": "fefe5b56-6dfc-455d-ab1e-935a9bb63c03", "lastMessageUid": "UUID" } }
  */
 @Component
 class ChatWebSocketHandler(
     private val jwt: JwtProvider,
     private val chatHub: ChatHub,
     private val chatService: ChatService,
+    private val chatUserRepository: ChatUserRepository,
     private val userReader: UserReader,
     private val mapper: ObjectMapper = jacksonObjectMapper()
 ) : WebSocketHandler {
 
+    private val log = LoggerFactory.getLogger(javaClass)
 
-    //socket 연결 시
     override fun handle(session: WebSocketSession): Mono<Void> {
         val params = session.handshakeInfo.uri.query?.let { parseQuery(it) } ?: emptyMap()
-        val roomParam = params["room"]?.firstOrNull()
         val tokenParam = params["token"]?.firstOrNull()
 
-        if (roomParam.isNullOrBlank() || tokenParam.isNullOrBlank()) {
+        if (tokenParam.isNullOrBlank()) {
             return session.close(CloseStatus.BAD_DATA)
         }
 
-        val roomUid = try { UUID.fromString(roomParam) } catch (_: Exception) { return session.close(CloseStatus.BAD_DATA) }
         val tokenStr = tokenParam.removePrefix("Bearer ").trim()
         val token = BearerToken(tokenStr)
 
         // 인증 (JWT 유효성 + 사용자 조회)
         val authMono = mono {
-            val jws = jwt.parseAndValidateOrThrow(token) // 실패 시 JwtException
+            val jws = jwt.parseAndValidateOrThrow(token)
             val username = jws.payload.subject ?: throw IllegalStateException("no-subject")
 
-            val user = userReader.findByUsername(username) ?: throw IllegalStateException("user not found: $username")
+            val user = userReader.findByUsername(username)
+                ?: throw IllegalStateException("user not found: $username")
 
-            // 방 멤버 여부 검증 (없으면 403 유사 종료)
-            chatService.assertMember(roomUid, user.id)
-
-            ChatCtx(roomUid, user, username)
+            ChatCtx(user, username)
         }.onErrorResume {
             session.send(Mono.just(session.textMessage(errorJson("auth_failed", it.message))))
                 .then(session.close(CloseStatus.POLICY_VIOLATION))
                 .then(Mono.error(it))
-
         }
 
         return authMono.flatMap { ctx ->
-            val greetings: Mono<String> =
-                chatHub.memberCountMono(ctx.roomUid)
-                    .map { mc ->
-                        mapper.writeValueAsString(
-                            mapOf(
-                                "type" to "hello",
-                                "roomUid" to ctx.roomUid.toString(),
-                                "userUid" to ctx.user.uid.toString(),
-                                "members" to mc
-                            )
-                        )
-                    }
-
-            val broadcast: Flux<String> = chatHub.subscribe(ctx.roomUid)
+            // 이 WebSocket 세션 전용 outbound sink
+            val sink = Sinks.many().multicast().onBackpressureBuffer<String>()
+            // 이 세션이 join() 해놓은 roomUid -> Redis 구독
+            val roomSubscriptions = ConcurrentHashMap<UUID, Disposable>()
+            // 이 세션의 "채팅 목록 notify" 구독
+            val listSubscriptionRef = AtomicReference<Disposable?>()
 
             val outgoing: Flux<WebSocketMessage> =
-                Flux.concat(greetings, broadcast).map { session.textMessage(it) }
-                .doOnSubscribe { chatHub.join(ctx.roomUid, ctx.user.id, ctx.user.uid) }
-                .doFinally { chatHub.leave(ctx.roomUid, ctx.user.id, ctx.user.uid) }
-                .onBackpressureBuffer(1024, {}, BufferOverflowStrategy.DROP_OLDEST)
+                sink.asFlux()
+                    .map { session.textMessage(it) }
+                    .onBackpressureBuffer(1024, {}, BufferOverflowStrategy.DROP_OLDEST)
+                    .doOnSubscribe { log.debug("ws connected userId={}", ctx.user.id) }
+                    .doFinally { signal ->
+                        println("@@@@@@@@@@@@@@@@@")
+                        log.debug("ws disconnected userId={} signal={}", ctx.user.id, signal)
+                        // 방 구독 해제
+                        roomSubscriptions.values.forEach { it.dispose() }
+                        roomSubscriptions.clear()
+                        // 목록 notify 구독 해제
+                        listSubscriptionRef.getAndSet(null)?.dispose()
+                    }
 
             val incoming = session.receive()
                 .map(WebSocketMessage::getPayloadAsText)
-                .flatMap { handleClientMessage(session, ctx, it) }
+                .flatMap { handleClientMessage(session, ctx, it, sink, roomSubscriptions, listSubscriptionRef) }
                 .onErrorResume { e ->
                     session.send(Mono.just(session.textMessage(errorJson("recv_error", e.message))))
                 }
@@ -103,14 +125,16 @@ class ChatWebSocketHandler(
 
             session.send(outgoing).and(incoming)
         }
-
     }
 
-    // 메세지 수신
+    // 클라이언트 → 서버 메시지 처리
     private fun handleClientMessage(
         session: WebSocketSession,
         ctx: ChatCtx,
-        raw: String
+        raw: String,
+        sink: Sinks.Many<String>,
+        roomSubscriptions: MutableMap<UUID, Disposable>,
+        listSubscriptionRef: AtomicReference<Disposable?>
     ): Mono<Void> = mono {
         val node = mapper.readTree(raw)
         val type = node.get("type")?.asText() ?: return@mono
@@ -118,15 +142,75 @@ class ChatWebSocketHandler(
 
         when (type) {
 
+            // 채팅방 목록 화면 진입
+            // { "type": "list_subscribe" }
+            "list_subscribe" -> {
+                if (listSubscriptionRef.get() == null) {
+                    val d = chatHub.subscribeUserNotify(ctx.user.uid)
+                        .subscribe { msg -> sink.tryEmitNext(msg) }
+                    listSubscriptionRef.set(d)
+                    log.debug("userId={} list_subscribe", ctx.user.nickname)
+                }
+            }
+
+            // 채팅방 목록 화면 이탈
+            // { "type": "list_unsubscribe" }
+            "list_unsubscribe" -> {
+                listSubscriptionRef.getAndSet(null)?.dispose()
+                log.debug("userId={} list_unsubscribe", ctx.user.nickname)
+            }
+
+            // 채팅방 입장
+            // { "type": "join", "data": { "roomUid": "fefe5b56-6dfc-455d-ab1e-935a9bb63c03" } }
+            "join" -> {
+                val roomUidStr = dataNode?.get("roomUid")?.asText() ?: return@mono
+                val roomUid = try { UUID.fromString(roomUidStr) } catch (_: Exception) { return@mono }
+
+                // 방 멤버 여부 검증
+                chatService.assertMember(roomUid, ctx.user.id)
+
+                // 분산 presence + system join 메시지
+                chatHub.join(roomUid, ctx.user.id, ctx.user.uid)
+
+                // 이 세션이 해당 방의 메시지를 수신하도록 Redis 구독 추가
+                if (!roomSubscriptions.containsKey(roomUid)) {
+                    val d = chatHub.subscribe(roomUid)
+                        .subscribe { msg -> sink.tryEmitNext(msg) }
+                    roomSubscriptions[roomUid] = d
+                }
+
+                // hello 메시지 (선택)
+                chatHub.memberCountMono(roomUid)
+                    .map { mc ->
+                        mapper.writeValueAsString(
+                            mapOf(
+                                "type" to "hello",
+                                "roomUid" to roomUid.toString(),
+                                "userUid" to ctx.user.uid.toString(),
+                                "members" to mc
+                            )
+                        )
+                    }
+                    .subscribe { json -> sink.tryEmitNext(json) }
+            }
+
+            // 채팅방 퇴장
+            // { "type": "leave", "data": { "roomUid": "fefe5b56-6dfc-455d-ab1e-935a9bb63c03" } }
+            "leave" -> {
+                val roomUidStr = dataNode?.get("roomUid")?.asText() ?: return@mono
+                val roomUid = try { UUID.fromString(roomUidStr) } catch (_: Exception) { return@mono }
+
+                chatHub.leave(roomUid, ctx.user.id, ctx.user.uid)
+                roomSubscriptions.remove(roomUid)?.dispose()
+            }
+
             // { "type": "ping" }
             "ping" -> {
-                // 단일 사용자에게만 회신
                 val pong = mapper.writeValueAsString(mapOf("type" to "pong"))
                 session.send(Mono.just(session.textMessage(pong))).subscribe()
             }
 
-            // { "type": "send", "data": { "content": "...", "emojiCode": "E_001" } }
-            // TODO 안읽은 메세지가 있는 상태에서 메세지를 보냈을때 unread를 0으로 갱신할것인지?
+            // { "type": "send", "data": { "roomUid": "fefe5b56-6dfc-455d-ab1e-935a9bb63c03", "content": "...", "emojiCode": "E_001"} }
             "send" -> {
                 if (dataNode == null) {
                     val err = errorJson("bad_format", "send requires 'data' field")
@@ -134,14 +218,18 @@ class ChatWebSocketHandler(
                     return@mono
                 }
 
+                val roomUidStr = dataNode.get("roomUid")?.asText() ?: return@mono
+                val roomUid = runCatching { UUID.fromString(roomUidStr) }.getOrNull() ?: return@mono
+
                 val request = mapper.treeToValue(dataNode, SendMessageRequest::class.java)
-                val msgUid = chatService.sendMessage(ctx.roomUid, ctx.user, request, emptyList())
+                val msgUid = runCatching { chatService.sendMessage(roomUid, ctx.user, request, emptyList()) }.getOrNull() ?: return@mono
+
 
                 val payload = mapper.writeValueAsString(
                     mapOf(
                         "type" to "message",
                         "data" to mapOf(
-                            "roomUid" to ctx.roomUid.toString(),
+                            "roomUid" to roomUid.toString(),
                             "messageUid" to msgUid.toString(),
                             "userUid" to ctx.user.uid.toString(),
                             "content" to request.content,
@@ -150,50 +238,62 @@ class ChatWebSocketHandler(
                         )
                     )
                 )
-                chatHub.publish(ctx.roomUid, payload)
+                chatHub.publish(roomUid, payload)
+
+                runCatching {
+                    chatUserRepository.listActiveUserUidsByUid(roomUid).collect { userUid ->
+                        chatHub.publishUserNotify(userUid, payload)
+                    }
+                }.getOrNull() ?: return@mono
+
+
             }
 
-            // { "type": "typing", "data": { "isTyping": true } }
+            // { "type": "typing", "data": { "roomUid": "fefe5b56-6dfc-455d-ab1e-935a9bb63c03", "isTyping": true } }
             "typing" -> {
-                val isTyping = dataNode?.get("isTyping")?.asBoolean() ?: true
+                val roomUidStr = dataNode?.get("roomUid")?.asText() ?: return@mono
+                val roomUid = try { UUID.fromString(roomUidStr) } catch (_: Exception) { return@mono }
+                val isTyping = dataNode.get("isTyping")?.asBoolean() ?: true
 
                 val payload = mapper.writeValueAsString(
                     mapOf(
                         "type" to "typing",
-                        "roomUid" to ctx.roomUid.toString(),
+                        "roomUid" to roomUid.toString(),
                         "userUid" to ctx.user.uid.toString(),
                         "isTyping" to isTyping
                     )
                 )
-                chatHub.publish(ctx.roomUid, payload)
+                chatHub.publish(roomUid, payload)
             }
 
-            // { "type": "read", "data": { "lastMessageUid": "UUID" } }
+            // { "type": "read", "data": { "roomUid": "fefe5b56-6dfc-455d-ab1e-935a9bb63c03", "lastMessageUid": "UUID" } }
             "read" -> {
-                val lastMessageUid = dataNode?.get("lastMessageUid")?.asText() ?: return@mono
+                val roomUidStr = dataNode?.get("roomUid")?.asText() ?: return@mono
+                val roomUid = try { UUID.fromString(roomUidStr) } catch (_: Exception) { return@mono }
+                val lastMessageUidStr = dataNode.get("lastMessageUid")?.asText() ?: return@mono
+                val lastMessageUid = try { UUID.fromString(lastMessageUidStr) } catch (_: Exception) { return@mono }
 
-                chatService.markRead(ctx.roomUid, ctx.user, UUID.fromString(lastMessageUid))
+                chatService.markRead(roomUid, ctx.user, lastMessageUid)
 
                 val payload = mapper.writeValueAsString(
                     mapOf(
                         "type" to "read",
-                        "roomUid" to ctx.roomUid.toString(),
+                        "roomUid" to roomUid.toString(),
                         "userUid" to ctx.user.uid.toString(),
-                        "lastMessageUid" to lastMessageUid
+                        "lastMessageUid" to lastMessageUid.toString()
                     )
                 )
-                chatHub.publish(ctx.roomUid, payload)
+                chatHub.publish(roomUid, payload)
             }
 
             else -> {
-                // 알 수 없는 타입
                 val err = errorJson("bad_type", "Unsupported type: $type")
                 session.send(Mono.just(session.textMessage(err))).subscribe()
             }
         }
     }.then()
 
-    private data class ChatCtx(val roomUid: UUID, val user: UserEntity, val username: String)
+    private data class ChatCtx(val user: UserEntity, val username: String)
 
     private fun parseQuery(q: String): Map<String, List<String>> =
         q.split("&")
