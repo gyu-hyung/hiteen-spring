@@ -8,7 +8,8 @@ import kr.jiasoft.hiteen.feature.asset.domain.AssetCategory
 import kr.jiasoft.hiteen.feature.auth.dto.JwtResponse
 import kr.jiasoft.hiteen.feature.auth.infra.JwtProvider
 import kr.jiasoft.hiteen.feature.board.infra.BoardRepository
-import kr.jiasoft.hiteen.feature.interest.app.InterestUserService
+import kr.jiasoft.hiteen.feature.interest.domain.InterestUserEntity
+import kr.jiasoft.hiteen.feature.interest.infra.InterestRepository
 import kr.jiasoft.hiteen.feature.interest.infra.InterestUserRepository
 import kr.jiasoft.hiteen.feature.invite.app.InviteService
 import kr.jiasoft.hiteen.feature.level.domain.TierCode
@@ -55,7 +56,8 @@ class UserService (
     private val inviteService: InviteService,
     private val tierRepository: TierRepository,
     private val pointService: PointService,
-    private val interestUserService: InterestUserService,
+    private val interestRepository: InterestRepository,
+//    private val interestUserService: InterestUserService,
 ) {
 
 
@@ -234,8 +236,50 @@ class UserService (
                 userRepository.save(saved.copy(assetUid = asset.uid))
             } else saved
 
+            // =========================================================
+            //                       기본 관심사 init
+            // =========================================================
             // 기본 관심사
-            interestUserService.initDefaultInterests(updated)
+//            interestUserService.initDefaultInterests(updated)
+            // 기본 옵션 키워드
+            val defaultOptions = listOf("관심사", "남학생", "여학생", "동급생", "선배", "후배")
+
+            // ① 현재 등록된 관심사 조회
+            val existing = interestUserRepository.findByUserIdWithInterest(updated.id)
+                .map { it.topic }
+                .toSet()
+
+            // ② 마스터 테이블에서 "추천옵션" 카테고리 중 기본 옵션에 해당하는 항목 조회
+            val masterOptions = interestRepository.findByCategoryAndTopicIn("추천옵션", defaultOptions).toList()
+
+            if (masterOptions.isEmpty()) {
+                println("⚠️ 기본 관심사(추천옵션) 마스터 데이터가 존재하지 않습니다.")
+//                return
+            }
+
+            // ③ 등록되지 않은 항목만 필터링
+            val toInsert = masterOptions.filterNot { existing.contains(it.topic) }
+            if (toInsert.isEmpty()) {
+                println("✅ 기본 추천옵션 관심사가 이미 모두 등록되어 있습니다.")
+//                return
+            }
+
+            // ④ interest_user 엔티티로 변환 후 저장
+            toInsert.forEach { master ->
+                interestUserRepository.save(
+                    InterestUserEntity(
+                        interestId = master.id,
+                        userId = updated.id,
+                    )
+                )
+            }
+
+            println("🌱 ${updated.nickname} 기본 추천옵션 관심사 ${toInsert.size}개 등록 완료")
+
+            // =========================================================
+            //                       기본 관심사 init
+            // =========================================================
+
             // 초대코드 생성
             inviteService.registerInviteCode(updated)
             // 초대코드로 가입 처리

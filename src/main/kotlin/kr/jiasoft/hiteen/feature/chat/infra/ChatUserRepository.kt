@@ -26,6 +26,15 @@ interface ChatUserRepository : CoroutineCrudRepository<ChatUserEntity, Long> {
     @Query("SELECT (select uid from users u where u.id = cu.user_id) user_uid, cu.user_id FROM chat_users cu WHERE cu.chat_room_id = :roomId AND cu.deleted_at IS NULL")
     fun listActiveUserUids(roomId: Long): Flow<ActiveUsersRow>
 
+    /** 방 활성 멤버 UID 목록 (나간사람 제외) */
+    @Query("""
+        SELECT (select uid from users u where u.id = cu.user_id) user_uid
+        FROM chat_users cu 
+        left join chat_rooms cr on cr.id = cu.chat_room_id 
+        WHERE cr.uid = :roomUid AND cu.deleted_at IS null
+    """)
+    fun listActiveUserUidsByUid(roomUid: UUID): Flow<UUID>
+
     /** 방 활성 멤버 중 한 명 찾기 (나간사람 제외) */
     @Query("SELECT * FROM chat_users WHERE chat_room_id=:roomId AND user_id=:userId AND deleted_at IS NULL")
     suspend fun findActive(roomId: Long, userId: Long): ChatUserEntity?

@@ -33,6 +33,12 @@ data class TierEntity(
     val divisionNo: Int,
 
     @field:Schema(
+        description = "세부 구분 번호 (1=브론즈, 2=실버, 3=골드)",
+        example = "1"
+    )
+    val level: Int,
+
+    @field:Schema(
         description = "전체 등급 순서 (1=브론즈1, 2=브론즈2 ...)",
         example = "3"
     )

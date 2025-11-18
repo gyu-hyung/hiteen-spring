@@ -14,9 +14,8 @@ import kr.jiasoft.hiteen.feature.interest.infra.InterestRepository
 import kr.jiasoft.hiteen.feature.interest.infra.InterestUserRepository
 import kr.jiasoft.hiteen.feature.level.app.ExpService
 import kr.jiasoft.hiteen.feature.location.infra.cache.LocationCacheRedisService
-import kr.jiasoft.hiteen.feature.school.infra.SchoolRepository
+import kr.jiasoft.hiteen.feature.user.app.UserService
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
-import kr.jiasoft.hiteen.feature.user.dto.UserResponse
 import kr.jiasoft.hiteen.feature.user.infra.UserPhotosRepository
 import kr.jiasoft.hiteen.feature.user.infra.UserRepository
 import org.springframework.stereotype.Service
@@ -28,8 +27,9 @@ class InterestUserService(
     private val interestMatchHistoryRepository: InterestMatchHistoryRepository,
     private val userPhotosRepository: UserPhotosRepository,
     private val userRepository: UserRepository,
-    private val schoolRepository: SchoolRepository,
+//    private val schoolRepository: SchoolRepository,
     private val userContactRepository: UserContactRepository,
+    private val userService: UserService,
 
     private val expService: ExpService,
     private val locationCacheRedisService: LocationCacheRedisService,
@@ -210,7 +210,6 @@ class InterestUserService(
             genderOk && gradeOk
         }
 
-
         // 추천제외 처리
         if (recommendExcludes.contains("같은 학교") && user.schoolId != null) {
             candidateUsers = candidateUsers.filterNot { it.schoolId == user.schoolId }
@@ -228,11 +227,10 @@ class InterestUserService(
             }
         }
 
-
         val targetUser = candidateUsers.randomOrNull() ?: return null
-        val fullUser = userRepository.findById(targetUser.id) ?: return null
-        val school = fullUser.schoolId?.let { schoolRepository.findById(it) }
-        val targetUserResponse = UserResponse.from(fullUser, school)
+        val targetUserResponse = userService.findUserResponse(targetUser.id, user.id)
+//        val fullUser = userRepository.findById(targetUser.id) ?: return null
+//        val school = fullUser.schoolId?.let { schoolRepository.findById(it) }
 
         val interests = interestUserRepository.getInterestResponseById(null, targetUser.id).toList()
         val photos = userPhotosRepository.findByUserId(targetUser.id)?.toList() ?: emptyList()
