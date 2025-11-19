@@ -3,10 +3,12 @@ package kr.jiasoft.hiteen.feature.chat.app
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotlinx.coroutines.reactor.mono
+import kr.jiasoft.hiteen.config.websocket.RedisChannelPattern
 import kr.jiasoft.hiteen.feature.auth.infra.BearerToken
 import kr.jiasoft.hiteen.feature.auth.infra.JwtProvider
 import kr.jiasoft.hiteen.feature.chat.dto.SendMessageRequest
 import kr.jiasoft.hiteen.feature.chat.infra.ChatUserRepository
+import kr.jiasoft.hiteen.feature.soketi.app.ChannelAuthorizationService
 import kr.jiasoft.hiteen.feature.user.app.UserReader
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import org.springframework.stereotype.Component
@@ -16,20 +18,18 @@ import org.springframework.web.reactive.socket.WebSocketMessage
 import org.springframework.web.reactive.socket.WebSocketSession
 import reactor.core.Disposable
 import reactor.core.publisher.BufferOverflowStrategy
-import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.core.publisher.Sinks
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.atomic.AtomicReference
 
 /**
  * ✅ 새로운 프로토콜
 
  WebSocket 연결:
-   ws://{host}/ws/chat?token=Bearer%20{JWT}
+   ws://{host}/ws/chat?room={roomUid}&token=Bearer%20{JWT}
 websocat --ping-interval=20 "ws://localhost:8080/ws/chat?room=fefe5b56-6dfc-455d-ab1e-935a9bb63c03&token=Bearer%20eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIwMTA5NTM5MzYzNyIsImlhdCI6MTc2MzMzOTY4NSwiZXhwIjoxNzY0MjAzNjg1fQ.KB6e_w3L5k22L9EqkYjGIBOQshxwccRrOVVPYhtkiIYO8pJ9vfsQ1bmMzpumelNbFPlDAG8_jsYqwLeIoK0jUg"
 websocat --ping-interval=20 "ws://localhost:8080/ws/chat?room=fefe5b56-6dfc-455d-ab1e-935a9bb63c03&token=Bearer%20eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIwMTAyMjIyMjIyMiIsImlhdCI6MTc2MzMzOTczOSwiZXhwIjoxNzY0MjAzNzM5fQ.A6_vqyr5XmLsUJ65wteGEz488CxpX86x46fKB-g_872AYeg-RLiNxqInuM4KBKnHnVU_tUcf5jteWmOABhCKRA"
 websocat --ping-interval=20 "ws://localhost:8080/ws/chat?token=Bearer%20eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIwMTAzMzMzMzMzMyIsImlhdCI6MTc2MzQ0MTk2MiwiZXhwIjoxNzY0MzA1OTYyfQ.wQilm0xLD2OgVUGCNzmTSZtMgrhhXWGop2b-3Kf6DPIvFr15m7VDER_JbvnQlQ5V1I0jp46BL7-p6Oj4CUMXtw"
@@ -60,6 +60,7 @@ class ChatWebSocketHandler(
     private val chatService: ChatService,
     private val chatUserRepository: ChatUserRepository,
     private val userReader: UserReader,
+    private val channelAuth: ChannelAuthorizationService,
     private val mapper: ObjectMapper = jacksonObjectMapper()
 ) : WebSocketHandler {
 
@@ -86,8 +87,15 @@ class ChatWebSocketHandler(
             val user = userReader.findByUsername(username)
                 ?: throw IllegalStateException("user not found: $username")
 
-            // 방 멤버 여부 검증 (없으면 403 유사 종료)
-            chatService.assertMember(roomUid, user.id)
+            // Redis 패턴 기반 채널 이름 생성
+            val redisChannel = RedisChannelPattern.CHAT_ROOM.format(roomUid)
+
+            // 🔥 권한 체크 replacing chatService.assertMember()
+            val allowed = channelAuth.canSubscribe(user.id, redisChannel)
+
+            if (!allowed) {
+                throw IllegalAccessException("Access denied: $redisChannel")
+            }
 
             ChatCtx(user, username, roomUid)
         }.onErrorResume {
