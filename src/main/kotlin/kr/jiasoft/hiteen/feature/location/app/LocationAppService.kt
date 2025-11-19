@@ -11,8 +11,6 @@ import org.springframework.stereotype.Service
 class LocationAppService(
     private val locationService: LocationService,
     private val locationCacheRedisService: LocationCacheRedisService,
-    private val locationHub: LocationHub,
-    private val objectMapper: ObjectMapper,
 //    private val soketiBroadcaster: SoketiBroadcaster,
     ) {
 
@@ -55,8 +53,7 @@ class LocationAppService(
 //                SoketiEventType.LOCATION,
 //                payload
 //            )
-            val writeValueAsString = objectMapper.writeValueAsString(saved)
-            locationHub.publish(user.uid, writeValueAsString)
+
             locationCacheRedisService.cacheLatest(saved)
         }
 
