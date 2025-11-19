@@ -7,6 +7,12 @@ metadata:
     app: {{ .Values.app.name }}
 spec:
   replicas: {{ .Values.app.replicaCount }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+
   selector:
     matchLabels:
       app: {{ .Values.app.name }}
