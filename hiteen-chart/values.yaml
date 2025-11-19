@@ -166,6 +166,13 @@ ingress:
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
     nginx.ingress.kubernetes.io/proxy-buffering: "off"
 
+    # 무중단
+    nginx.ingress.kubernetes.io/service-upstream: "true"
+
+    # 🚀 장애시 재시도 (새 Pod 준비될 때까지 서비스가 fallback 처리)
+    nginx.ingress.kubernetes.io/proxy-next-upstream: "error timeout http_502 http_503 http_504"
+    nginx.ingress.kubernetes.io/proxy-next-upstream-tries: "5"
+
     # 🔥 WebSocket 안정성 핵심
     nginx.ingress.kubernetes.io/websocket-services: "hiteen-test"
     nginx.ingress.kubernetes.io/connection-proxying: "on"
