@@ -1,5 +1,6 @@
 package kr.jiasoft.hiteen.feature.location.app
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
@@ -8,7 +9,6 @@ import kr.jiasoft.hiteen.common.dto.ApiResult
 import kr.jiasoft.hiteen.feature.location.domain.LocationHistory
 import kr.jiasoft.hiteen.feature.location.dto.LocationRequest
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
-import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.validation.annotation.Validated
@@ -20,7 +20,9 @@ import org.springframework.web.bind.annotation.*
 @Validated
 @SecurityRequirement(name = "bearerAuth")   // 🔑 JWT 인증 필요
 class LocationController(
-    private val locationAppService: LocationAppService
+    private val locationAppService: LocationAppService,
+    private val locationHub: LocationHub,
+    private val objectMapper: ObjectMapper,
 ) {
 
     @Operation(
@@ -32,8 +34,18 @@ class LocationController(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
         @Parameter(description = "위치 저장 요청 DTO") @RequestBody locationRequest: LocationRequest
     ): ResponseEntity<ApiResult<LocationHistory>> {
-        val saved = locationAppService.saveLocation(user, locationRequest)
-        return ResponseEntity.ok(ApiResult.success(saved))
+        val history = locationAppService.saveLocation(user, locationRequest)
+
+        // Broadcast payload
+        val payload = objectMapper.writeValueAsString(
+            mapOf(
+                "type" to "location_updated",
+                "data" to history,
+            )
+        )
+        locationHub.publish(user.uid, payload)
+
+        return ResponseEntity.ok(ApiResult.success(history))
     }
 
     @Operation(

@@ -13,12 +13,14 @@ import org.springframework.web.reactive.socket.CloseStatus
 import org.springframework.web.reactive.socket.WebSocketHandler
 import org.springframework.web.reactive.socket.WebSocketMessage
 import org.springframework.web.reactive.socket.WebSocketSession
+import reactor.core.Disposable
 import reactor.core.publisher.BufferOverflowStrategy
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.net.URLDecoder
 import java.time.OffsetDateTime
 import java.util.UUID
+import java.util.concurrent.atomic.AtomicReference
 
 
 /**
@@ -80,6 +82,7 @@ class LocationWebSocketHandler(
             )
             val helloMono = Mono.just(session.textMessage(mapper.writeValueAsString(hello)))
 
+            val subscriptionRef = AtomicReference<Disposable?>()
 
             val outgoing: Flux<WebSocketMessage> =
                 Flux.concat(
@@ -95,7 +98,11 @@ class LocationWebSocketHandler(
                 }
                 .then()
 
-            session.send(outgoing).and(incoming)
+            session.send(outgoing)
+                .and(incoming)
+                .doFinally {
+                    subscriptionRef.getAndSet(null)?.dispose()
+                }
         }
     }
 
@@ -137,14 +144,7 @@ class LocationWebSocketHandler(
                 val payload = mapper.writeValueAsString(
                     mapOf(
                         "type" to "location_updated",
-                        "data" to mapOf(
-                            "userUid" to ctx.user.uid.toString(),
-                            "lat" to request.lat,
-                            "lng" to request.lng,
-//                            "accuracy" to request.accuracy,
-//                            "capturedAt" to (request.capturedAt ?: OffsetDateTime.now().toString()),
-                            "historyId" to history?.id
-                        )
+                        "data" to history,
                     )
                 )
 

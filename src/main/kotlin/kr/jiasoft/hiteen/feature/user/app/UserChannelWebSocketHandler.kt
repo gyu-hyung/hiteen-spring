@@ -72,7 +72,7 @@ class UserChannelWebSocketHandler(
 
             val incoming = session.receive()
                 .map(WebSocketMessage::getPayloadAsText)
-                .flatMap { handleClientMessage(session, ctx, it, sink) }
+                .flatMap { handleClientMessage(session, ctx, it) }
                 .onErrorResume { e ->
                     session.send(Mono.just(session.textMessage(errorJson("recv_error", e.message))))
                 }
@@ -86,7 +86,6 @@ class UserChannelWebSocketHandler(
         session: WebSocketSession,
         ctx: UserCtx,
         raw: String,
-        sink: Sinks.Many<String>
     ): Mono<Void> = mono {
         val node = mapper.readTree(raw)
         val type = node.get("type")?.asText() ?: return@mono
