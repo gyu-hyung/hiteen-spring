@@ -1,4 +1,5 @@
 databaseChangeLog:
-#예시
-#  - include:
-#      file: db/changelog/20251021-migrate-selects-jsonb.sql
+  - include:
+      file: db/changelog/2025-11-19-create-gift-type.sql
+  - include:
+      file: db/changelog/2025-11-19-add-gift-table.yaml

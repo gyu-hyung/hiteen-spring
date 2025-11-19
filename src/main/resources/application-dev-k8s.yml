@@ -167,6 +167,6 @@ logging:
     org.springframework.boot.autoconfigure.liquibase: DEBUG
 #    org.mongodb.driver.protocol.command: DEBUG
 #    org.mongodb.driver.protocol.query: DEBUG
-#    org.mongodb.driver.connection: DEBUG
+    org.mongodb.driver.connection: INFO
     org.springframework.security: INFO
     org.springframework.cache: TRACE
