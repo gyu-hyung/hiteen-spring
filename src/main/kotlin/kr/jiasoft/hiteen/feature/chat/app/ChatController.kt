@@ -1,5 +1,6 @@
 package kr.jiasoft.hiteen.feature.chat.app
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
@@ -7,6 +8,7 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import kotlinx.coroutines.reactor.awaitSingle
 import kr.jiasoft.hiteen.common.dto.ApiResult
 import kr.jiasoft.hiteen.feature.chat.dto.*
+import kr.jiasoft.hiteen.feature.chat.infra.ChatUserRepository
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import org.springframework.http.ResponseEntity
 import org.springframework.http.codec.multipart.FilePart
@@ -22,6 +24,9 @@ import java.util.*
 @SecurityRequirement(name = "bearerAuth")   // 🔑 JWT 인증 필요
 class ChatController(
     private val service: ChatService,
+    private val chatHub: ChatHub,
+    private val mapper: ObjectMapper,
+    private val chatUserRepository: ChatUserRepository
 ) {
 
     @Operation(summary = "내 채팅방 목록 조회", description = "내가 속한 채팅방 목록을 최근순으로 조회합니다.")
@@ -83,7 +88,23 @@ class ChatController(
     ) : ResponseEntity<ApiResult<Any>> {
 
         val files: List<FilePart> = filesFlux?.collectList()?.awaitSingle() ?: emptyList()
-        return ResponseEntity.ok(ApiResult.success(service.sendMessage(roomUid, user, req, files)))
+
+        //메세지 송신
+        val msgRes = service.sendMessage(roomUid, user, req, files)
+
+        //message broadcast
+        val payload = mapper.writeValueAsString(
+            mapOf(
+                "type" to "message",
+                "data" to msgRes
+            )
+        )
+        chatHub.publish(roomUid, payload)
+
+        chatUserRepository.listActiveUserUidsByUid(roomUid).collect { userUid ->
+            chatHub.publishUserNotify(userUid, payload)
+        }
+        return ResponseEntity.ok(ApiResult.success(msgRes))
     }
 
 
