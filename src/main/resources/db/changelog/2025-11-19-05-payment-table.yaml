@@ -1,0 +1,108 @@
+databaseChangeLog:
+  - changeSet:
+      id: 2025-11-19-05-payment-table
+      author: gyuhyung
+      changes:
+        - createTable:
+            tableName: payment
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: uid
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+                    unique: true
+
+              - column:
+                  name: user_id
+                  type: BIGINT
+
+              - column:
+                  name: type
+                  type: payment_type
+
+              - column:
+                  name: order_name
+                  type: VARCHAR(255)
+
+              - column:
+                  name: goods_id
+                  type: BIGINT
+
+              - column:
+                  name: goods_code
+                  type: VARCHAR(50)
+
+              - column:
+                  name: goods_name
+                  type: VARCHAR(255)
+
+              - column:
+                  name: goods_price
+                  type: INT
+                  defaultValueNumeric: 0
+
+              - column:
+                  name: amount
+                  type: INT
+                  defaultValueNumeric: 0
+
+              - column:
+                  name: pay_price
+                  type: INT
+                  defaultValueNumeric: 0
+
+              - column:
+                  name: point
+                  type: INT
+                  defaultValueNumeric: 0
+
+              - column:
+                  name: tax
+                  type: INT
+                  defaultValueNumeric: 0
+
+              - column:
+                  name: sales
+                  type: INT
+                  defaultValueNumeric: 0
+
+              - column:
+                  name: status
+                  type: payment_status
+
+              - column:
+                  name: purchase_token
+                  type: VARCHAR(200)
+
+              - column:
+                  name: memo
+                  type: TEXT
+
+              - column:
+                  name: created_at
+                  type: TIMESTAMPTZ
+                  defaultValueComputed: CURRENT_TIMESTAMP
+
+              - column:
+                  name: updated_at
+                  type: TIMESTAMPTZ
+                  defaultValueComputed: CURRENT_TIMESTAMP
+
+              - column:
+                  name: deleted_at
+                  type: TIMESTAMPTZ
+
+        - addForeignKeyConstraint:
+            constraintName: fk_payment_goods
+            baseTableName: payment
+            baseColumnNames: goods_id
+            referencedTableName: goods
+            referencedColumnNames: id

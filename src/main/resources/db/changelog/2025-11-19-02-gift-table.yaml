@@ -1,6 +1,6 @@
 databaseChangeLog:
   - changeSet:
-      id: 2025-11-19-add-gift-table
+      id: 2025-11-19-02-gift-table
       author: gyuhyung
       changes:
         - createTable:
@@ -12,7 +12,6 @@ databaseChangeLog:
                   constraints:
                     primaryKey: true
                     nullable: false
-                    primaryKeyName: pk_gift
 
               - column:
                   name: uid
@@ -50,23 +49,23 @@ databaseChangeLog:
               - column:
                   name: users
                   type: JSONB
-                  remarks: "JSON Array: 회원번호 목록"
+                  remarks: "JSON Array: member ids"
 
               - column:
                   name: created_at
-                  type: TIMESTAMP
+                  type: TIMESTAMPTZ
                   defaultValueComputed: CURRENT_TIMESTAMP
                   constraints:
                     nullable: false
 
               - column:
                   name: updated_at
-                  type: TIMESTAMP
+                  type: TIMESTAMPTZ
                   defaultValueComputed: CURRENT_TIMESTAMP
 
               - column:
                   name: deleted_at
-                  type: TIMESTAMP
+                  type: TIMESTAMPTZ
 
         - addUniqueConstraint:
             tableName: gift
@@ -94,9 +93,9 @@ databaseChangeLog:
             referencedTableName: users
             referencedColumnNames: id
 
-#        - addForeignKeyConstraint:
-#            constraintName: fk_gift_payment
-#            baseTableName: gift
-#            baseColumnNames: pay_id
-#            referencedTableName: tb_payment
-#            referencedColumnNames: id
+        - addForeignKeyConstraint:
+            constraintName: fk_gift_payment
+            baseTableName: gift
+            baseColumnNames: pay_id
+            referencedTableName: payment
+            referencedColumnNames: id
