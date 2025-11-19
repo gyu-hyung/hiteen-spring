@@ -7,6 +7,7 @@ import kr.jiasoft.hiteen.feature.asset.app.AssetService
 import kr.jiasoft.hiteen.feature.asset.domain.AssetCategory
 import kr.jiasoft.hiteen.feature.auth.dto.JwtResponse
 import kr.jiasoft.hiteen.feature.auth.infra.JwtProvider
+import kr.jiasoft.hiteen.feature.board.infra.BoardCommentRepository
 import kr.jiasoft.hiteen.feature.board.infra.BoardRepository
 import kr.jiasoft.hiteen.feature.interest.domain.InterestUserEntity
 import kr.jiasoft.hiteen.feature.interest.infra.InterestRepository
@@ -16,6 +17,8 @@ import kr.jiasoft.hiteen.feature.level.domain.TierCode
 import kr.jiasoft.hiteen.feature.level.infra.TierRepository
 import kr.jiasoft.hiteen.feature.point.app.PointService
 import kr.jiasoft.hiteen.feature.point.domain.PointPolicy
+import kr.jiasoft.hiteen.feature.poll.infra.PollRepository
+import kr.jiasoft.hiteen.feature.poll.infra.PollUserRepository
 import kr.jiasoft.hiteen.feature.relationship.domain.FollowStatus
 import kr.jiasoft.hiteen.feature.relationship.dto.RelationshipCounts
 import kr.jiasoft.hiteen.feature.relationship.infra.FollowRepository
@@ -53,6 +56,8 @@ class UserService (
     private val schoolRepository: SchoolRepository,
     private val interestUserRepository: InterestUserRepository,
     private val boardRepository: BoardRepository,
+    private val pollUserRepository: PollUserRepository,
+    private val boardCommentRepository: BoardCommentRepository,
     private val inviteService: InviteService,
     private val tierRepository: TierRepository,
     private val pointService: PointService,
@@ -94,6 +99,8 @@ class UserService (
         val interests = interestUserRepository.getInterestResponseById(null, targetUser.id).toList()
         val relationshipCounts = RelationshipCounts(
             postCount = boardRepository.countByCreatedId(targetUser.id),
+            voteCount = pollUserRepository.countByUserId(targetUser.id),
+            commentCount = boardCommentRepository.countByCreatedId(targetUser.id),
             followerCount = followRepository.countByFollowIdAndStatus(targetUser.id, FollowStatus.ACCEPTED.name),
             followingCount = followRepository.countByUserIdAndStatus(targetUser.id, FollowStatus.ACCEPTED.name),
         )

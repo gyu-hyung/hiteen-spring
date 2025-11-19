@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository
 @Repository
 interface PollUserRepository : CoroutineCrudRepository<PollUserEntity, Long> {
 
+
     @Query("SELECT * FROM poll_users WHERE poll_id = :pollId AND user_id = :userId LIMIT 1")
     suspend fun findByPollIdAndUserId(pollId: Long, userId: Long): PollUserEntity?
 
@@ -22,5 +23,6 @@ interface PollUserRepository : CoroutineCrudRepository<PollUserEntity, Long> {
     fun countVotesByPollId(pollId: Long): Flow<VoteCountRow>
 
     suspend fun countByPollId(pollId: Long) : Int
+    suspend fun countByUserId(userId: Long) : Int
 
 }
