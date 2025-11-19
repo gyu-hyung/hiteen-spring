@@ -5,19 +5,22 @@ spring:
     active: loc
   application:
     name: hiteen
+
   r2dbc:
-    username: hiteen
     url: r2dbc:postgresql://127.0.0.1:5432/hiteen
+    username: hiteen
     password: 1234
     pool:
       enabled: true
       initial-size: 5
       max-size: 20
+
   liquibase:
     url: jdbc:postgresql://127.0.0.1:5432/hiteen
     user: hiteen
     password: 1234
     change-log: classpath:db/changelog/db.changelog-master.yaml
+
   data:
     mongodb:
       uri: mongodb://hiteen:1234@127.0.0.1:27017/hiteen?authSource=admin
@@ -29,6 +32,7 @@ spring:
       password: xxxxxxxx
       timeout: 5s
       client-type: lettuce
+
       lettuce:
         pool:
           max-active: 16
@@ -150,6 +154,6 @@ logging:
     org.springframework.boot.autoconfigure.liquibase: DEBUG
     org.mongodb.driver.protocol.command: DEBUG
     org.mongodb.driver.protocol.query: DEBUG
-    org.mongodb.driver.connection: DEBUG
+    org.mongodb.driver.connection: INFO
     org.springframework.security: INFO
     org.springframework.cache: TRACE

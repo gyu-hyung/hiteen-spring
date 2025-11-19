@@ -1,0 +1,102 @@
+databaseChangeLog:
+  - changeSet:
+      id: 2025-11-19-add-gift-table
+      author: gyuhyung
+      changes:
+        - createTable:
+            tableName: gift
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                    primaryKeyName: pk_gift
+
+              - column:
+                  name: uid
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+                    unique: true
+
+              - column:
+                  name: type
+                  type: gift_type
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: category
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: user_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: pay_id
+                  type: BIGINT
+
+              - column:
+                  name: memo
+                  type: TEXT
+
+              - column:
+                  name: users
+                  type: JSONB
+                  remarks: "JSON Array: 회원번호 목록"
+
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+
+              - column:
+                  name: deleted_at
+                  type: TIMESTAMP
+
+        - addUniqueConstraint:
+            tableName: gift
+            columnNames: uid
+            constraintName: uk_gift_uid
+
+        - createIndex:
+            indexName: ik_gift_category
+            tableName: gift
+            columns:
+              - column:
+                  name: category
+
+        - createIndex:
+            indexName: ik_gift_date
+            tableName: gift
+            columns:
+              - column:
+                  name: created_at
+
+        - addForeignKeyConstraint:
+            constraintName: fk_gift_user
+            baseTableName: gift
+            baseColumnNames: user_id
+            referencedTableName: users
+            referencedColumnNames: id
+
+#        - addForeignKeyConstraint:
+#            constraintName: fk_gift_payment
+#            baseTableName: gift
+#            baseColumnNames: pay_id
+#            referencedTableName: tb_payment
+#            referencedColumnNames: id
