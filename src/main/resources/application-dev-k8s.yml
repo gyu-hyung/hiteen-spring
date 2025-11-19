@@ -162,11 +162,12 @@ logging:
   level:
     io.r2dbc.postgresql.QUERY: DEBUG
     io.r2dbc.postgresql.PARAM: DEBUG
-    org.springframework.data.mongodb.core.MongoTemplate: DEBUG
-    org.springframework.data.mongodb.core.ReactiveMongoTemplate: DEBUG
-    org.springframework.boot.autoconfigure.liquibase: DEBUG
-#    org.mongodb.driver.protocol.command: DEBUG
-#    org.mongodb.driver.protocol.query: DEBUG
+
+    org.mongodb.driver: INFO
     org.mongodb.driver.connection: INFO
+    org.mongodb.driver.protocol.command: INFO
+    org.mongodb.driver.protocol.query: INFO
+    org.mongodb.driver.cluster: INFO
+
     org.springframework.security: INFO
-    org.springframework.cache: TRACE
+    org.springframework.cache: INFO
