@@ -111,8 +111,13 @@ class ChatWebSocketHandler(
                     .map { session.textMessage(it) }
                     .onBackpressureBuffer(1024, {}, BufferOverflowStrategy.DROP_OLDEST)
                     .doOnSubscribe {
-//                        chatHub.join(ctx.roomUid, ctx.user.id, ctx.user.uid)
-                        chatHub.subscribe(ctx.roomUid)
+
+                        chatHub.join(ctx.roomUid, ctx.user.id, ctx.user.uid)
+
+                        val disposable = chatHub.subscribe(ctx.roomUid)
+                            .subscribe{ msg -> sink.tryEmitNext(msg)}
+
+                        roomSubscriptions[ctx.roomUid] = disposable
                     }
                     .doFinally {
                         chatHub.leave(ctx.roomUid, ctx.user.id, ctx.user.uid)
