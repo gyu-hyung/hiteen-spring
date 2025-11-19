@@ -78,13 +78,13 @@ app:
 # --------------------
 # MinIO (S3 호환) 설정 추가
 # --------------------
-cloud:
-  aws:
-    s3:
-      endpoint: http://hiteen-minio.hiteen.svc.cluster.local:9000
-      access-key: minioadmin
-      secret-key: minioadmin123
-      path-style-access-enabled: true
+#cloud:
+#  aws:
+#    s3:
+#      endpoint: http://hiteen-minio.hiteen.svc.cluster.local:9000
+#      access-key: minioadmin
+#      secret-key: minioadmin123
+#      path-style-access-enabled: true
 
 
 # --------------------
@@ -165,6 +165,5 @@ logging:
     org.springframework.data.mongodb.core.MongoTemplate: DEBUG
     org.springframework.data.mongodb.core.ReactiveMongoTemplate: DEBUG
     org.springframework.boot.autoconfigure.liquibase: DEBUG
-    org.mongodb.driver.protocol.command: DEBUG
     org.mongodb.driver.protocol.query: DEBUG
     org.springframework.security: INFO

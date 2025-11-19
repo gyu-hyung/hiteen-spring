@@ -63,6 +63,7 @@ interface UserRepository : CoroutineCrudRepository<UserEntity, Long> {
     @Query("""
         SELECT a.*
         , (select tier_name_kr from tiers where id = tier_id) tier_name
+        , (select id from tiers where id = tier_id) tier_id
         FROM users a
         WHERE (LOWER(username) LIKE LOWER(CONCAT('%', :q, '%'))
            OR  LOWER(COALESCE(nickname,'')) LIKE LOWER(CONCAT('%', :q, '%'))
@@ -75,6 +76,7 @@ interface UserRepository : CoroutineCrudRepository<UserEntity, Long> {
     @Query("""
         SELECT a.*
         , (select tier_name_kr from tiers where id = tier_id) tier_name
+        , (select id from tiers where id = tier_id) tier_id
         FROM users a WHERE id = :id
     """)
     suspend fun findSummaryInfoById(id: Long): UserSummary
@@ -83,6 +85,7 @@ interface UserRepository : CoroutineCrudRepository<UserEntity, Long> {
     @Query("""
         SELECT a.*
         , (select tier_name_kr from tiers where id = tier_id) tier_name
+        , (select id from tiers where id = tier_id) tier_id
         FROM users a WHERE id IN (:ids)
     """)
     suspend fun findSummaryByIds(ids: List<Long>): List<UserSummary>
