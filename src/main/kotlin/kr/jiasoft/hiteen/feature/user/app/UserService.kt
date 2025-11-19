@@ -17,7 +17,7 @@ import kr.jiasoft.hiteen.feature.level.domain.TierCode
 import kr.jiasoft.hiteen.feature.level.infra.TierRepository
 import kr.jiasoft.hiteen.feature.point.app.PointService
 import kr.jiasoft.hiteen.feature.point.domain.PointPolicy
-import kr.jiasoft.hiteen.feature.poll.infra.PollRepository
+import kr.jiasoft.hiteen.feature.poll.infra.PollCommentRepository
 import kr.jiasoft.hiteen.feature.poll.infra.PollUserRepository
 import kr.jiasoft.hiteen.feature.relationship.domain.FollowStatus
 import kr.jiasoft.hiteen.feature.relationship.dto.RelationshipCounts
@@ -58,6 +58,7 @@ class UserService (
     private val boardRepository: BoardRepository,
     private val pollUserRepository: PollUserRepository,
     private val boardCommentRepository: BoardCommentRepository,
+    private val pollCommentRepository: PollCommentRepository,
     private val inviteService: InviteService,
     private val tierRepository: TierRepository,
     private val pointService: PointService,
@@ -100,7 +101,9 @@ class UserService (
         val relationshipCounts = RelationshipCounts(
             postCount = boardRepository.countByCreatedId(targetUser.id),
             voteCount = pollUserRepository.countByUserId(targetUser.id),
-            commentCount = boardCommentRepository.countByCreatedId(targetUser.id),
+            boardCommentCount = boardCommentRepository.countByCreatedId(targetUser.id),
+            pollCommentCount = pollCommentRepository.countByCreatedId(targetUser.id),
+            friendCount = friendRepository.countFriendship(targetUser.id),
             followerCount = followRepository.countByFollowIdAndStatus(targetUser.id, FollowStatus.ACCEPTED.name),
             followingCount = followRepository.countByUserIdAndStatus(targetUser.id, FollowStatus.ACCEPTED.name),
         )
