@@ -1,5 +1,6 @@
 package kr.jiasoft.hiteen.feature.chat.app
 
+import kr.jiasoft.hiteen.config.websocket.RedisChannelPattern
 import org.slf4j.LoggerFactory
 import org.springframework.data.redis.core.ReactiveStringRedisTemplate
 import org.springframework.data.redis.listener.ChannelTopic
@@ -85,11 +86,11 @@ class ChatHub(
         publish(roomUid, json)
     }
 
-    private fun roomTopic(roomUid: UUID) = "chat:room:$roomUid"
+    private fun roomTopic(roomUid: UUID) = RedisChannelPattern.CHAT_ROOM.format(roomUid)
 
-    private fun roomMembersKey(roomUid: UUID) = "chat:room:$roomUid:members"
+    private fun roomMembersKey(roomUid: UUID) = RedisChannelPattern.CHAT_ROOM_MEMBERS.format(roomUid)
 
-    private fun presenceKey(roomUid: UUID, userId: Long) = "chat:room:$roomUid:presence:$userId"
+//    private fun presenceKey(roomUid: UUID, userId: Long) = RedisChannelPattern.CHAT_ROOM_MEMBERS.format(roomUid, userId)
 
-    private fun userNotifyTopic(userUid: UUID) = "user:$userUid:notify"
+    private fun userNotifyTopic(userUid: UUID) = RedisChannelPattern.USER_NOTIFY.format(userUid)
 }

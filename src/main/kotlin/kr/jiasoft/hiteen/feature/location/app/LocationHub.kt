@@ -1,5 +1,6 @@
 package kr.jiasoft.hiteen.feature.location.app
 
+import kr.jiasoft.hiteen.config.websocket.RedisChannelPattern
 import org.springframework.data.redis.core.ReactiveStringRedisTemplate
 import org.springframework.data.redis.listener.ChannelTopic
 import org.springframework.data.redis.listener.ReactiveRedisMessageListenerContainer
@@ -37,5 +38,5 @@ class LocationHub(
         publisher.convertAndSend(userTopic(userUid), json).subscribe()
     }
 
-    private fun userTopic(userUid: UUID) = "loc:user:$userUid"
+    private fun userTopic(userUid: UUID) = RedisChannelPattern.USER_LOCATION.format(userUid)
 }

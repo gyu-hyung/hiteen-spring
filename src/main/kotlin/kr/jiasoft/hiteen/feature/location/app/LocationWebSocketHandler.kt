@@ -3,9 +3,11 @@ package kr.jiasoft.hiteen.feature.location.app
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotlinx.coroutines.reactor.mono
+import kr.jiasoft.hiteen.config.websocket.RedisChannelPattern
 import kr.jiasoft.hiteen.feature.auth.infra.BearerToken
 import kr.jiasoft.hiteen.feature.auth.infra.JwtProvider
 import kr.jiasoft.hiteen.feature.location.dto.LocationRequest
+import kr.jiasoft.hiteen.feature.soketi.app.ChannelAuthorizationService
 import kr.jiasoft.hiteen.feature.user.app.UserReader
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import org.springframework.stereotype.Component
@@ -24,6 +26,8 @@ import java.util.concurrent.atomic.AtomicReference
 
 
 /**
+ *
+ws://{host}/ws/loc?users={userUid},{userUid}&token=Bearer%20{JWT}
 websocat --ping-interval=20 "ws://localhost:8080/ws/loc?users=6e330bdc-3062-4a14-80f2-a46e04278c5c,ade41de8-4276-4fb7-9473-cc69cf9e451f,ae67afaa-eb77-4480-a98b-08b48e4c197a&token=Bearer%20eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIwMTA5NTM5MzYzNyIsImlhdCI6MTc2MzMzOTY4NSwiZXhwIjoxNzY0MjAzNjg1fQ.KB6e_w3L5k22L9EqkYjGIBOQshxwccRrOVVPYhtkiIYO8pJ9vfsQ1bmMzpumelNbFPlDAG8_jsYqwLeIoK0jUg"
 websocat --ping-interval=20 "ws://localhost:8080/ws/loc?users=6e330bdc-3062-4a14-80f2-a46e04278c5c,ade41de8-4276-4fb7-9473-cc69cf9e451f&token=Bearer%20eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIwMTA5NTM5MzYzNyIsImlhdCI6MTc2MzMzOTY4NSwiZXhwIjoxNzY0MjAzNjg1fQ.KB6e_w3L5k22L9EqkYjGIBOQshxwccRrOVVPYhtkiIYO8pJ9vfsQ1bmMzpumelNbFPlDAG8_jsYqwLeIoK0jUg"
 
@@ -33,10 +37,10 @@ websocat --ping-interval=20 "ws://localhost:8080/ws/loc?users=6e330bdc-3062-4a14
 class LocationWebSocketHandler(
     private val jwt: JwtProvider,
     private val userReader: UserReader,
-    private val authz: LocationAuthorizationServiceImpl,
     private val hub: LocationHub,
     private val mapper: ObjectMapper = jacksonObjectMapper(),
     private val locationAppService: LocationAppService,
+    private val channelAuthService: ChannelAuthorizationService,
 ) : WebSocketHandler {
 
     override fun handle(session: WebSocketSession): Mono<Void> {
@@ -66,7 +70,12 @@ class LocationWebSocketHandler(
 
             if (userUids.isEmpty()) error("no users")
 
-            authz.assertCanSubscribe(user.id, userUids) // 필요 정책대로 구현
+            // 🔥 RedisChannelPattern 기반 권한 검증
+            userUids.forEach { targetUid ->
+                val redisChannel = RedisChannelPattern.USER_LOCATION.format(targetUid)
+                val allowed = channelAuthService.canSubscribe(user.id, redisChannel)
+                if (!allowed) throw IllegalAccessException("Access denied to $redisChannel")
+            }
 
             LocationCtx(user, userUids)
         }.onErrorResume { e ->
