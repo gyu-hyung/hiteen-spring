@@ -91,5 +91,5 @@ class ChatHub(
 
     private fun presenceKey(roomUid: UUID, userId: Long) = "chat:room:$roomUid:presence:$userId"
 
-    private fun userNotifyTopic(userUid: UUID) = "chat:user:$userUid:notify"
+    private fun userNotifyTopic(userUid: UUID) = "user:$userUid:notify"
 }

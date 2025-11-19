@@ -3,6 +3,7 @@ package kr.jiasoft.hiteen.config.websocket
 import kr.jiasoft.hiteen.feature.chat.app.ChatWebSocketHandler
 import kr.jiasoft.hiteen.feature.chat.app.InboxWebSocketHandler
 import kr.jiasoft.hiteen.feature.location.app.LocationWebSocketHandler
+import kr.jiasoft.hiteen.feature.user.app.UserChannelWebSocketHandler
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.web.reactive.HandlerMapping
@@ -15,6 +16,7 @@ class WebSocketRouter(
     private val locationWebSocketHandler: LocationWebSocketHandler,
     private val chatWebSocketHandler: ChatWebSocketHandler,
     private val inboxWebSocketHandler: InboxWebSocketHandler,
+    private val userChannelWebSocketHandler: UserChannelWebSocketHandler,
 ) {
     @Bean
     fun webSocketMapping(): HandlerMapping {
@@ -23,6 +25,7 @@ class WebSocketRouter(
                 "/ws/loc" to locationWebSocketHandler,
                 "/ws/chat" to chatWebSocketHandler,
                 "/ws/inbox" to inboxWebSocketHandler,
+                "/ws/user" to userChannelWebSocketHandler,
             ),
             -1
         )
