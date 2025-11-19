@@ -25,7 +25,7 @@ app:
     port: 8080
   env:
     - name: SPRING_PROFILES_ACTIVE
-      value: prod
+      value: dev-k8s
     - name: REDIS_HOST
       value: redis-0.redis.hiteen.svc.cluster.local
     - name: REDIS_PORT
