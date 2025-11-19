@@ -7,11 +7,20 @@ metadata:
     app: {{ .Values.app.name }}
 spec:
   replicas: {{ .Values.app.replicaCount }}
+
   strategy:
     type: RollingUpdate
     rollingUpdate:
-      maxUnavailable: 1
+      maxUnavailable: 0
       maxSurge: 1
+
+
+  # 🚀 Ready 후 안정화 시간
+  minReadySeconds: 5
+  # 🚀 Pod 종료 지연 → connection draining
+  terminationGracePeriodSeconds: 30
+
+
 
   selector:
     matchLabels:
@@ -47,3 +56,23 @@ spec:
         - name: nfs-assets
           persistentVolumeClaim:
             claimName: nfs-pv-images
+
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: {{ .Values.app.service.port }}
+            initialDelaySeconds: 8
+            periodSeconds: 5
+
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: {{ .Values.app.service.port }}
+            initialDelaySeconds: 20
+            periodSeconds: 10
+
+          # 🔥 Pod 바로 죽지 않도록 연결 드레이닝
+          lifecycle:
+            preStop:
+              exec:
+                command: ["sh","-c","sleep 15"]
