@@ -1,4 +1,4 @@
-package kr.jiasoft.hiteen.feature.payment.domain
+package kr.jiasoft.hiteen.feature.goods.domain
 
 import io.swagger.v3.oas.annotations.media.Schema
 import org.springframework.data.annotation.Id
@@ -16,14 +16,14 @@ data class PaymentEntity(
     val id: Long = 0,
 
     @field:Schema(description = "결제 UID")
-    val uid: UUID = UUID.randomUUID(),
+    val uid: String = UUID.randomUUID().toString(),
 
     @field:Schema(description = "회원 ID (FK)")
     @Column("user_id")
     val userId: Long? = null,
 
-    @field:Schema(description = "결제 유형 (Gift, Point 충전)")
-    val type: PaymentType,
+    @field:Schema(description = "결제 카테고리")
+    val type: String? = null,
 
     @field:Schema(description = "주문자명")
     @Column("order_name")
