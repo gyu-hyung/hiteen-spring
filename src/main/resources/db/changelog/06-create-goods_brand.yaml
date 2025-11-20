@@ -1,0 +1,72 @@
+databaseChangeLog:
+
+  # ----------------------------------
+  # GOODS BRAND
+  # ----------------------------------
+  - changeSet:
+      id: create-goods-brand
+      author: system
+      changes:
+        - createTable:
+            tableName: goods_brand
+            columns:
+              - column:
+                  name: id
+                  type: bigserial
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: brand_seq
+                  type: int
+              - column:
+                  name: brand_code
+                  type: varchar(50)
+              - column:
+                  name: brand_name
+                  type: varchar(255)
+              - column:
+                  name: brand_banner_img
+                  type: varchar(255)
+              - column:
+                  name: brand_icon_img
+                  type: varchar(255)
+              - column:
+                  name: mms_thum_img
+                  type: varchar(255)
+              - column:
+                  name: content
+                  type: text
+              - column:
+                  name: category1_seq
+                  type: int
+              - column:
+                  name: category1_name
+                  type: varchar(255)
+              - column:
+                  name: category2_seq
+                  type: int
+              - column:
+                  name: category2_name
+                  type: varchar(255)
+              - column:
+                  name: new_flag
+                  type: varchar(10)
+              - column:
+                  name: sort
+                  type: int
+              - column:
+                  name: del_yn
+                  type: int
+              - column:
+                  name: status
+                  type: int
+              - column:
+                  name: created_at
+                  type: timestamptz
+              - column:
+                  name: updated_at
+                  type: timestamptz
+              - column:
+                  name: deleted_at
+                  type: timestamptz
+

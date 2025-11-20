@@ -1,0 +1,72 @@
+databaseChangeLog:
+
+  # ----------------------------------
+  # GIFT
+  # ----------------------------------
+  - changeSet:
+      id: create-gift
+      author: system
+      changes:
+        - createTable:
+            tableName: gift
+            columns:
+              - column:
+                  name: id
+                  type: bigserial
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: uid
+                  type: varchar(100)
+
+              - column:
+                  name: type
+                  type: varchar(8)
+
+              - column:
+                  name: category
+                  type: varchar(20)
+
+              - column:
+                  name: user_id
+                  type: bigint
+
+              - column:
+                  name: pay_id
+                  type: bigint
+
+              - column:
+                  name: memo
+                  type: text
+
+              - column:
+                  name: users
+                  type: text
+
+              - column:
+                  name: created_at
+                  type: timestamptz
+
+              - column:
+                  name: updated_at
+                  type: timestamptz
+
+              - column:
+                  name: deleted_at
+                  type: timestamptz
+
+        - createIndex:
+            tableName: gift
+            columns:
+              - column:
+                  name: uid
+            indexName: idx_gift_uid
+
+        - createIndex:
+            tableName: gift
+            columns:
+              - column:
+                  name: user_id
+            indexName: idx_gift_user_id

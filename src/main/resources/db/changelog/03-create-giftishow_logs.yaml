@@ -1,0 +1,131 @@
+databaseChangeLog:
+
+  # ----------------------------------
+  # GIFTISHOW LOGS
+  # ----------------------------------
+  - changeSet:
+      id: create-giftishow-logs
+      author: system
+      changes:
+        - createTable:
+            tableName: giftishow_logs
+            columns:
+              - column:
+                  name: id
+                  type: bigserial
+                  constraints:
+                    primaryKey: true
+
+              - column:
+                  name: gift_user_id
+                  type: bigint
+
+              - column:
+                  name: goods_code
+                  type: varchar(50)
+
+              - column:
+                  name: goods_name
+                  type: varchar(50)
+
+              - column:
+                  name: order_no
+                  type: varchar(100)
+
+              - column:
+                  name: mms_msg
+                  type: varchar(255)
+
+              - column:
+                  name: mms_title
+                  type: varchar(255)
+
+              - column:
+                  name: callback_no
+                  type: varchar(20)
+
+              - column:
+                  name: phone_no
+                  type: varchar(20)
+
+              - column:
+                  name: tr_id
+                  type: varchar(50)
+
+              - column:
+                  name: rev_info_yn
+                  type: varchar(1)
+
+              - column:
+                  name: rev_info_date
+                  type: varchar(10)
+
+              - column:
+                  name: rev_info_time
+                  type: varchar(10)
+
+              - column:
+                  name: template_id
+                  type: varchar(20)
+
+              - column:
+                  name: banner_id
+                  type: varchar(20)
+
+              - column:
+                  name: user_id
+                  type: varchar(50)
+
+              - column:
+                  name: gubun
+                  type: varchar(1)
+
+              - column:
+                  name: response
+                  type: text
+
+              - column:
+                  name: code
+                  type: varchar(10)
+
+              - column:
+                  name: message
+                  type: text
+
+              - column:
+                  name: pin_no
+                  type: varchar(20)
+
+              - column:
+                  name: coupon_img_url
+                  type: varchar(255)
+
+              - column:
+                  name: memo
+                  type: text
+
+              - column:
+                  name: status
+                  type: int
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: created_at
+                  type: timestamptz
+
+              - column:
+                  name: updated_at
+                  type: timestamptz
+
+              - column:
+                  name: deleted_at
+                  type: timestamptz
+
+        - addForeignKeyConstraint:
+            baseTableName: giftishow_logs
+            baseColumnNames: gift_user_id
+            referencedTableName: gift_users
+            referencedColumnNames: id
+            constraintName: fk_giftishow_logs_gift_users
+

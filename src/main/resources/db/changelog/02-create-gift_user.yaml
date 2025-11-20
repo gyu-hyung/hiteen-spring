@@ -1,0 +1,106 @@
+databaseChangeLog:
+
+  # ----------------------------------
+  # GIFT USERS
+  # ----------------------------------
+  - changeSet:
+      id: create-gift-users
+      author: system
+      changes:
+        - createTable:
+            tableName: gift_users
+            columns:
+              - column:
+                  name: id
+                  type: bigserial
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: gift_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: user_id
+                  type: bigint
+
+              - column:
+                  name: status
+                  type: int
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: receive_date
+                  type: timestamptz
+
+              - column:
+                  name: coupon_no
+                  type: varchar(30)
+
+              - column:
+                  name: coupon_img
+                  type: varchar(200)
+
+              - column:
+                  name: request_date
+                  type: timestamptz
+
+              - column:
+                  name: pub_date
+                  type: timestamptz
+
+              - column:
+                  name: use_date
+                  type: timestamptz
+
+              - column:
+                  name: pub_expired_date
+                  type: date
+
+              - column:
+                  name: use_expired_date
+                  type: date
+
+              - column:
+                  name: challenge_id
+                  type: bigint
+
+              - column:
+                  name: challenge_rank
+                  type: int
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: delivery_name
+                  type: varchar(50)
+
+              - column:
+                  name: delivery_phone
+                  type: varchar(20)
+
+              - column:
+                  name: delivery_address1
+                  type: varchar(100)
+
+              - column:
+                  name: delivery_address2
+                  type: varchar(255)
+
+        - addForeignKeyConstraint:
+            baseTableName: gift_users
+            baseColumnNames: gift_id
+            referencedTableName: gift
+            referencedColumnNames: id
+            constraintName: fk_gift_users_gift
+
+        - createIndex:
+            tableName: gift_users
+            indexName: idx_gift_users_user_id
+            columns:
+              - column:
+                  name: user_id

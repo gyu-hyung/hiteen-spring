@@ -11,13 +11,13 @@ import java.util.UUID
 data class GoodsAssetEntity(
 
     @Id
-    @Schema(description = "파일 PK")
-    val id: Long? = null,
+    @field:Schema(description = "파일 PK")
+    val id: Long = 0,
 
-    @Schema(description = "상품 번호")
+    @field:Schema(description = "상품 번호")
     @Column("goods_id")
     val goodsId: Long,
 
-    @Schema(description = "파일 UUID")
+    @field:Schema(description = "파일 UUID")
     val uid: UUID,
 )
