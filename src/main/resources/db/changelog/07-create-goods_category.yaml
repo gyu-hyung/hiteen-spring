@@ -1,8 +1,7 @@
 databaseChangeLog:
 
-
   # ----------------------------------
-  # GOODS CATEGORY
+  # GOODS CATEGORY (기프티쇼 > 카테고리)
   # ----------------------------------
   - changeSet:
       id: create-goods-category
@@ -10,33 +9,84 @@ databaseChangeLog:
       changes:
         - createTable:
             tableName: goods_category
+            remarks: "기프티쇼 > 카테고리"
             columns:
               - column:
                   name: id
                   type: bigserial
+                  remarks: "고유번호"
                   constraints:
                     primaryKey: true
+                    nullable: false
+
               - column:
                   name: seq
                   type: int
+                  remarks: "카테고리 일련번호"
+                  constraints:
+                    nullable: false
+
               - column:
                   name: name
                   type: varchar(50)
+                  remarks: "카테고리명"
+                  constraints:
+                    nullable: false
+
               - column:
                   name: sort
                   type: int
+                  remarks: "정렬번호"
+                  defaultValueNumeric: 9999
+                  constraints:
+                    nullable: false
+
               - column:
                   name: del_yn
                   type: int
+                  remarks: "삭제여부 (0/1)"
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+
               - column:
                   name: status
                   type: int
+                  remarks: "노출여부 (0/1)"
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+
               - column:
                   name: created_at
                   type: timestamptz
+                  remarks: "등록일시"
+
               - column:
                   name: updated_at
                   type: timestamptz
+                  remarks: "수정일시"
+
               - column:
                   name: deleted_at
                   type: timestamptz
+                  remarks: "삭제일시"
+
+
+        # -------- UNIQUE --------
+        - createIndex:
+            tableName: goods_category
+            indexName: uk_goods_category_seq
+            unique: true
+            columns:
+              - column:
+                  name: seq
+
+
+        # -------- INDEX --------
+        - createIndex:
+            tableName: goods_category
+            indexName: idx_goods_category_status
+            columns:
+              - column:
+                  name: status
