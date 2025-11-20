@@ -80,12 +80,12 @@ databaseChangeLog:
                   remarks: "상품 교환(수령) 만료일"
 
               - column:
-                  name: challenge_id
+                  name: season_id
                   type: bigint
                   remarks: "챌린지 회차번호"
 
               - column:
-                  name: challenge_rank
+                  name: season_rank
                   type: int
                   remarks: "챌린지 랭킹"
                   defaultValueNumeric: 0
@@ -130,10 +130,10 @@ databaseChangeLog:
 
         - createIndex:
             tableName: gift_users
-            indexName: idx_gift_users_challenge_id
+            indexName: idx_gift_users_season_id
             columns:
               - column:
-                  name: challenge_id
+                  name: season_id
 
 
         # -------- FOREIGN KEYS --------
@@ -157,9 +157,9 @@ databaseChangeLog:
 
         - addForeignKeyConstraint:
             baseTableName: gift_users
-            baseColumnNames: challenge_id
-            referencedTableName: challenge
+            baseColumnNames: season_id
+            referencedTableName: seasons
             referencedColumnNames: id
             onDelete: SET NULL
             onUpdate: CASCADE
-            constraintName: fk_gift_users_challenge
+            constraintName: fk_gift_users_season

@@ -1,0 +1,19 @@
+databaseChangeLog:
+
+  # ----------------------------------
+  # GIFT (선물 내역 테이블)
+  # ----------------------------------
+  - changeSet:
+      id: create-gift
+      author: system
+      changes:
+        -
+        # ----------- Foreign Keys -----------
+        - addForeignKeyConstraint:
+            baseTableName: gift
+            baseColumnNames: pay_id
+            referencedTableName: payment
+            referencedColumnNames: id
+            onDelete: SET NULL
+            onUpdate: CASCADE
+            constraintName: fk_gift_payment

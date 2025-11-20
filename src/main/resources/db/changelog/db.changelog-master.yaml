@@ -17,3 +17,5 @@ databaseChangeLog:
       file: db/changelog/08-create-goods_giftishow.yaml
   - include:
       file: db/changelog/09-create-payment.yaml
+  - include:
+      file: db/changelog/10-create-gift-payment-foreign-keys.yaml
