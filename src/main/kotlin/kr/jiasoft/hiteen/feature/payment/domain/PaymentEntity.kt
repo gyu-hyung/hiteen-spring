@@ -91,7 +91,7 @@ data class PaymentEntity(
     val logs: String? = null,
 
     @field:Schema(description = "결제 상태")
-    val status: String = "0",
+    val status: PaymentStatus,
 
     @field:Schema(description = "등록일시")
     @Column("created_at")
