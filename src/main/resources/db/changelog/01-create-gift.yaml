@@ -1,7 +1,7 @@
 databaseChangeLog:
 
   # ----------------------------------
-  # GIFT
+  # GIFT (선물 내역 테이블)
   # ----------------------------------
   - changeSet:
       id: create-gift
@@ -9,10 +9,12 @@ databaseChangeLog:
       changes:
         - createTable:
             tableName: gift
+            remarks: "선물 > 내역"
             columns:
               - column:
                   name: id
                   type: bigserial
+                  remarks: "선물번호"
                   constraints:
                     primaryKey: true
                     nullable: false
@@ -20,53 +22,105 @@ databaseChangeLog:
               - column:
                   name: uid
                   type: varchar(100)
+                  remarks: "선물 UID"
 
               - column:
                   name: type
                   type: varchar(8)
+                  remarks: "구분 (Point, Voucher, Delivery, Etc)"
 
               - column:
                   name: category
                   type: varchar(20)
+                  remarks: "선물구분"
 
               - column:
                   name: user_id
                   type: bigint
+                  remarks: "회원번호"
 
               - column:
                   name: pay_id
                   type: bigint
+                  remarks: "결제번호"
 
               - column:
                   name: memo
                   type: text
+                  remarks: "선물메모"
 
               - column:
                   name: users
                   type: text
+                  remarks: "받은 회원목록"
 
               - column:
                   name: created_at
                   type: timestamptz
+                  remarks: "등록일시"
 
               - column:
                   name: updated_at
                   type: timestamptz
+                  remarks: "수정일시"
 
               - column:
                   name: deleted_at
                   type: timestamptz
+                  remarks: "삭제일시"
 
+        # ----------- Indexes -----------
         - createIndex:
             tableName: gift
+            indexName: uk_gift_uid
+            unique: true
             columns:
               - column:
                   name: uid
-            indexName: idx_gift_uid
 
         - createIndex:
             tableName: gift
+            indexName: idx_gift_category
+            columns:
+              - column:
+                  name: category
+
+        - createIndex:
+            tableName: gift
+            indexName: idx_gift_created_at
+            columns:
+              - column:
+                  name: created_at
+
+        - createIndex:
+            tableName: gift
+            indexName: idx_gift_user_id
             columns:
               - column:
                   name: user_id
-            indexName: idx_gift_user_id
+
+        - createIndex:
+            tableName: gift
+            indexName: idx_gift_pay_id
+            columns:
+              - column:
+                  name: pay_id
+
+        # ----------- Foreign Keys -----------
+        - addForeignKeyConstraint:
+            baseTableName: gift
+            baseColumnNames: pay_id
+            referencedTableName: payment
+            referencedColumnNames: id
+            onDelete: SET NULL
+            onUpdate: CASCADE
+            constraintName: fk_gift_payment
+
+        - addForeignKeyConstraint:
+            baseTableName: gift
+            baseColumnNames: user_id
+            referencedTableName: users
+            referencedColumnNames: id
+            onDelete: SET NULL
+            onUpdate: CASCADE
+            constraintName: fk_gift_user

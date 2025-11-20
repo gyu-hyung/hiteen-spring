@@ -1,7 +1,7 @@
 databaseChangeLog:
 
   # ----------------------------------
-  # GOODS ASSET
+  # GOODS ASSET (상품 이미지)
   # ----------------------------------
   - changeSet:
       id: create-goods-asset
@@ -9,26 +9,60 @@ databaseChangeLog:
       changes:
         - createTable:
             tableName: goods_asset
+            remarks: "상품 이미지"
             columns:
               - column:
                   name: id
                   type: bigserial
+                  remarks: "파일번호"
                   constraints:
                     primaryKey: true
+                    nullable: false
 
               - column:
                   name: goods_id
                   type: bigint
+                  remarks: "상품번호"
                   constraints:
                     nullable: false
 
               - column:
                   name: uid
                   type: varchar(100)
+                  remarks: "파일 UID"
+                  constraints:
+                    nullable: false
 
+        # -------- INDEXES --------
+        - createIndex:
+            tableName: goods_asset
+            indexName: idx_goods_asset_goods_id
+            columns:
+              - column:
+                  name: goods_id
+
+        - createIndex:
+            tableName: goods_asset
+            indexName: idx_goods_asset_uid
+            columns:
+              - column:
+                  name: uid
+
+        # -------- FOREIGN KEYS --------
         - addForeignKeyConstraint:
             baseTableName: goods_asset
             baseColumnNames: goods_id
             referencedTableName: goods
             referencedColumnNames: id
+            onDelete: CASCADE
+            onUpdate: CASCADE
             constraintName: fk_goods_asset_goods
+
+        - addForeignKeyConstraint:
+            baseTableName: goods_asset
+            baseColumnNames: uid
+            referencedTableName: asset   # <-- 기존 tb_asset의 Postgres 변환 테이블명
+            referencedColumnNames: uid
+            onDelete: CASCADE
+            onUpdate: CASCADE
+            constraintName: fk_goods_asset_uid

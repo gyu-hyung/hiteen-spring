@@ -1,7 +1,7 @@
 databaseChangeLog:
 
   # ----------------------------------
-  # GOODS GIFTISHOW
+  # GOODS GIFTISHOW (기프티쇼 > 상품정보)
   # ----------------------------------
   - changeSet:
       id: create-goods-giftishow
@@ -9,167 +9,278 @@ databaseChangeLog:
       changes:
         - createTable:
             tableName: goods_giftishow
+            remarks: "기프티쇼 > 상품정보"
             columns:
               - column:
                   name: id
                   type: bigserial
+                  remarks: "상품 번호"
                   constraints:
                     primaryKey: true
+                    nullable: false
+
               - column:
                   name: goods_no
                   type: int
+                  remarks: "상품 일련번호"
+                  constraints:
+                    nullable: false
+
               - column:
                   name: goods_code
                   type: varchar(50)
+                  remarks: "상품 코드"
+                  constraints:
+                    nullable: false
+
               - column:
                   name: goods_name
                   type: varchar(255)
+                  remarks: "상품명"
+
               - column:
                   name: brand_code
                   type: varchar(50)
+                  remarks: "브랜드 코드"
+
               - column:
                   name: brand_name
                   type: varchar(255)
+                  remarks: "브랜드명"
+
               - column:
                   name: content
                   type: text
+                  remarks: "상품 설명"
+
               - column:
                   name: content_add_desc
                   type: text
+                  remarks: "상품 추가설명"
+
               - column:
                   name: srch_keyword
                   type: varchar(2000)
+                  remarks: "상품 검색어"
+
               - column:
                   name: md_code
                   type: varchar(20)
+                  remarks: "MD 코드"
+
               - column:
                   name: category1_seq
                   type: int
+                  remarks: "카테고리1 일련번호"
+
               - column:
                   name: category1_name
                   type: varchar(255)
+                  remarks: "카테고리1 명칭"
+
               - column:
                   name: goods_type_cd
                   type: varchar(20)
+                  remarks: "상품유형 코드"
+
               - column:
                   name: goods_type_nm
                   type: varchar(100)
+                  remarks: "상품유형 명칭"
+
               - column:
                   name: goods_type_dtl_nm
                   type: varchar(100)
+                  remarks: "상세상품유형 명칭"
+
               - column:
                   name: goods_img_s
                   type: varchar(255)
+                  remarks: "상품 이미지 (S)"
+
               - column:
                   name: goods_img_b
                   type: varchar(255)
+                  remarks: "상품 이미지 (B)"
+
               - column:
                   name: goods_desc_img_web
                   type: varchar(255)
+                  remarks: "상품 설명 이미지 URL"
+
               - column:
                   name: brand_icon_img
                   type: varchar(255)
+                  remarks: "브랜드 아이콘 이미지"
+
               - column:
                   name: mms_goods_img
                   type: varchar(255)
+                  remarks: "상품 MMS 이미지"
+
               - column:
                   name: sale_price
                   type: int
+                  remarks: "권장소비자가격"
+                  defaultValueNumeric: 0
+
               - column:
                   name: real_price
                   type: int
+                  remarks: "할인반영 공급가"
+                  defaultValueNumeric: 0
+
               - column:
                   name: discount_rate
                   type: float8
+                  remarks: "할인율"
+                  defaultValueNumeric: 0
+
               - column:
                   name: discount_price
                   type: int
+                  remarks: "최종 구매가격"
+                  defaultValueNumeric: 0
+
               - column:
                   name: goods_com_id
                   type: varchar(100)
+                  remarks: "공급사 ID"
+
               - column:
                   name: goods_com_name
                   type: varchar(100)
+                  remarks: "공급사명"
+
               - column:
                   name: mms_barcd_create_yn
                   type: varchar(10)
+                  remarks: "MMS 바코드 생성 여부"
+
               - column:
                   name: affiliate_id
                   type: varchar(100)
+                  remarks: "교환처 ID"
+
               - column:
                   name: affiliate
                   type: varchar(100)
+                  remarks: "교환처명"
+
               - column:
                   name: exh_gender_cd
                   type: varchar(20)
+                  remarks: "전시 성별 코드"
+
               - column:
                   name: exh_age_cd
                   type: varchar(20)
+                  remarks: "전시 연령 코드"
+
               - column:
                   name: valid_prd_type_cd
                   type: varchar(5)
+                  remarks: "유효기간 유형 (01:일수/02:일자)"
+                  defaultValue: "01"
+
               - column:
                   name: limit_day
                   type: int
+                  remarks: "유효기간(일수)"
+
               - column:
                   name: valid_prd_day
                   type: varchar(10)
+                  remarks: "유효기간(일자)"
+
               - column:
                   name: goods_state_cd
                   type: varchar(20)
+                  remarks: "상품상태 코드"
+
               - column:
                   name: end_date
                   type: date
+                  remarks: "판매 종료일"
+
               - column:
                   name: gold_price
                   type: int
+
               - column:
                   name: vip_price
                   type: int
+
               - column:
                   name: platinum_price
                   type: int
+
               - column:
                   name: gold_discount_rate
                   type: float8
+
               - column:
                   name: vip_discount_rate
                   type: float8
+
               - column:
                   name: platinum_discount_rate
                   type: float8
+
               - column:
                   name: rm_cnt_flag
                   type: varchar(10)
+                  remarks: "총 판매수량 제한 여부"
+
               - column:
                   name: rm_id_buy_cnt_flag_cd
                   type: varchar(50)
+                  remarks: "ID별 구매 제한 코드"
 
               - column:
                   name: sale_date_flag_cd
                   type: varchar(50)
+                  remarks: "판매일시 설정 코드"
+
               - column:
                   name: sale_date_flag
                   type: varchar(10)
+                  remarks: "판매일시 설정 여부"
+
               - column:
                   name: mms_reserve_flag
                   type: varchar(10)
+                  remarks: "예약발송 여부"
+
               - column:
                   name: del_yn
                   type: int
+                  remarks: "삭제 여부"
+                  defaultValueNumeric: 0
+
               - column:
                   name: status
                   type: int
+                  remarks: "노출 여부"
+                  defaultValueNumeric: 0
+
               - column:
                   name: created_at
                   type: timestamptz
+                  remarks: "등록일시"
+
               - column:
                   name: updated_at
                   type: timestamptz
+                  remarks: "수정일시"
+
               - column:
                   name: deleted_at
                   type: timestamptz
+                  remarks: "삭제일시"
 
+
+        # -------- UNIQUE INDEX --------
         - createIndex:
             tableName: goods_giftishow
             indexName: uk_goods_giftishow_goods_code
