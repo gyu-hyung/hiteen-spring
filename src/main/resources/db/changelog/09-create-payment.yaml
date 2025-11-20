@@ -21,7 +21,7 @@ databaseChangeLog:
 
               - column:
                   name: uid
-                  type: varchar(100)
+                  type: uuid
                   remarks: "결제코드"
                   constraints:
                     nullable: false
