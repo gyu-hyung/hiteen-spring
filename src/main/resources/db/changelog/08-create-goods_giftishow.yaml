@@ -200,7 +200,7 @@ databaseChangeLog:
 
               - column:
                   name: end_date
-                  type: date
+                  type: timestamptz
                   remarks: "판매 종료일"
 
               - column:

@@ -4,7 +4,6 @@ import io.swagger.v3.oas.annotations.media.Schema
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
-import java.time.LocalDate
 import java.time.OffsetDateTime
 
 @Table("goods_giftishow")
@@ -151,7 +150,7 @@ data class GoodsGiftishowEntity(
 
     @field:Schema(description = "판매 종료일")
     @Column("end_date")
-    val endDate: LocalDate? = null,
+    val endDate: OffsetDateTime? = null,
 
     @Column("gold_price")
     val goldPrice: Int? = null,
