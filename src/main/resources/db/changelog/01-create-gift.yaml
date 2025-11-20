@@ -107,14 +107,6 @@ databaseChangeLog:
                   name: pay_id
 
         # ----------- Foreign Keys -----------
-        - addForeignKeyConstraint:
-            baseTableName: gift
-            baseColumnNames: pay_id
-            referencedTableName: payment
-            referencedColumnNames: id
-            onDelete: SET NULL
-            onUpdate: CASCADE
-            constraintName: fk_gift_payment
 
         - addForeignKeyConstraint:
             baseTableName: gift

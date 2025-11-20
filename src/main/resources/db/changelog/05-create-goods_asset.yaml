@@ -28,7 +28,7 @@ databaseChangeLog:
 
               - column:
                   name: uid
-                  type: varchar(100)
+                  type: uuid
                   remarks: "파일 UID"
                   constraints:
                     nullable: false
@@ -61,8 +61,9 @@ databaseChangeLog:
         - addForeignKeyConstraint:
             baseTableName: goods_asset
             baseColumnNames: uid
-            referencedTableName: asset   # <-- 기존 tb_asset의 Postgres 변환 테이블명
+            referencedTableName: assets
             referencedColumnNames: uid
+            constraintName: fk_goods_asset_uid
             onDelete: CASCADE
             onUpdate: CASCADE
-            constraintName: fk_goods_asset_uid
+
