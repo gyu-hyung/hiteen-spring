@@ -1,15 +1,19 @@
 databaseChangeLog:
   - include:
-      file: db/changelog/2025-11-19-01-enums.sql
-
+      file: db/changelog/01-create-gift.yaml
   - include:
-      file: db/changelog/2025-11-19-03-goods-table.yaml
-
+      file: db/changelog/02-create-gift_user.yaml
   - include:
-      file: db/changelog/2025-11-19-04-goods-asset-table.yaml
-
+      file: db/changelog/03-create-giftishow_logs.yaml
   - include:
-      file: db/changelog/2025-11-19-05-payment-table.yaml
-
+      file: db/changelog/04-create-goods.yaml
   - include:
-      file: db/changelog/2025-11-19-02-gift-table.yaml
+      file: db/changelog/05-create-goods_asset.yaml
+  - include:
+      file: db/changelog/06-create-goods_brand.yaml
+  - include:
+      file: db/changelog/07-create-goods_category.yaml
+  - include:
+      file: db/changelog/08-create-goods_giftishow.yaml
+  - include:
+      file: db/changelog/09-create-payment.yaml

@@ -1,0 +1,42 @@
+databaseChangeLog:
+
+
+  # ----------------------------------
+  # GOODS CATEGORY
+  # ----------------------------------
+  - changeSet:
+      id: create-goods-category
+      author: system
+      changes:
+        - createTable:
+            tableName: goods_category
+            columns:
+              - column:
+                  name: id
+                  type: bigserial
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: seq
+                  type: int
+              - column:
+                  name: name
+                  type: varchar(50)
+              - column:
+                  name: sort
+                  type: int
+              - column:
+                  name: del_yn
+                  type: int
+              - column:
+                  name: status
+                  type: int
+              - column:
+                  name: created_at
+                  type: timestamptz
+              - column:
+                  name: updated_at
+                  type: timestamptz
+              - column:
+                  name: deleted_at
+                  type: timestamptz

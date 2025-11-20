@@ -1,0 +1,99 @@
+databaseChangeLog:
+
+  # ----------------------------------
+  # GOODS
+  # ----------------------------------
+  - changeSet:
+      id: create-goods
+      author: system
+      changes:
+        - createTable:
+            tableName: goods
+            columns:
+              - column:
+                  name: id
+                  type: bigserial
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: uid
+                  type: varchar(100)
+
+              - column:
+                  name: type
+                  type: varchar(8)
+
+              - column:
+                  name: category
+                  type: varchar(255)
+
+              - column:
+                  name: name
+                  type: varchar(255)
+
+              - column:
+                  name: description
+                  type: text
+
+              - column:
+                  name: brand
+                  type: varchar(255)
+
+              - column:
+                  name: seller
+                  type: varchar(255)
+
+              - column:
+                  name: exchange
+                  type: varchar(255)
+
+              - column:
+                  name: limit_days
+                  type: int
+
+              - column:
+                  name: sale_price
+                  type: int
+
+              - column:
+                  name: discount
+                  type: int
+
+              - column:
+                  name: price
+                  type: int
+
+              - column:
+                  name: point
+                  type: int
+
+              - column:
+                  name: bonus_point
+                  type: int
+
+              - column:
+                  name: memo
+                  type: text
+
+              - column:
+                  name: status
+                  type: VARCHAR(20)
+
+              - column:
+                  name: created_at
+                  type: timestamptz
+
+              - column:
+                  name: updated_at
+                  type: timestamptz
+
+              - column:
+                  name: deleted_at
+                  type: timestamptz
+
+        - createIndex:
+            tableName: goods
+            indexName: idx_goods_uid
+            columns:
+              - column:
+                  name: uid

@@ -1,40 +1,34 @@
 databaseChangeLog:
+
+  # ----------------------------------
+  # GOODS ASSET
+  # ----------------------------------
   - changeSet:
-      id: 2025-11-19-04-goods-asset-table
-      author: gyuhyung
+      id: create-goods-asset
+      author: system
       changes:
         - createTable:
             tableName: goods_asset
             columns:
               - column:
                   name: id
-                  type: BIGINT
+                  type: bigserial
                   constraints:
                     primaryKey: true
-                    nullable: false
 
               - column:
                   name: goods_id
-                  type: BIGINT
+                  type: bigint
                   constraints:
                     nullable: false
 
               - column:
                   name: uid
-                  type: VARCHAR(100)
-                  constraints:
-                    nullable: false
+                  type: varchar(100)
 
         - addForeignKeyConstraint:
-            constraintName: fk_goods_asset_goods
             baseTableName: goods_asset
             baseColumnNames: goods_id
             referencedTableName: goods
             referencedColumnNames: id
-
-        - createIndex:
-            indexName: ik_goods_asset_goods
-            tableName: goods_asset
-            columns:
-              - column:
-                  name: goods_id
+            constraintName: fk_goods_asset_goods
