@@ -1,6 +1,6 @@
 package kr.jiasoft.hiteen.feature.giftishow.dto.goods
 
-data class GoodsDto(
+data class GiftishowGoodsDto(
     val goodsNo: Int,
     val goodsCode: String,
     val goodsName: String?,
