@@ -1,4 +1,4 @@
-package kr.jiasoft.hiteen.feature.goods.domain
+package kr.jiasoft.hiteen.feature.giftishow.domain
 
 import io.swagger.v3.oas.annotations.media.Schema
 import org.springframework.data.annotation.Id
@@ -57,6 +57,7 @@ data class GoodsBrandEntity(
     @Column("category2_name")
     val category2Name: String? = null,
 
+    //
     @field:Schema(description = "신규 여부 (Y/N)")
     @Column("new_flag")
     val newFlag: String? = null,
@@ -64,10 +65,12 @@ data class GoodsBrandEntity(
     @field:Schema(description = "정렬 번호")
     val sort: Int? = null,
 
+    //
     @field:Schema(description = "삭제 여부 (0/1)")
     @Column("del_yn")
     val delYn: Int,
 
+    //
     @field:Schema(description = "노출 여부 (0/1)")
     val status: Int,
 

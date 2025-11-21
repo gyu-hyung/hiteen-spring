@@ -1,6 +1,6 @@
 package kr.jiasoft.hiteen.feature.giftishow.infra
 
-import kr.jiasoft.hiteen.feature.goods.domain.GoodsGiftishowEntity
+import kr.jiasoft.hiteen.feature.giftishow.domain.GoodsGiftishowEntity
 import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 

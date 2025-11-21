@@ -2,10 +2,16 @@ package kr.jiasoft.hiteen.feature.giftishow.app
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import kotlinx.coroutines.coroutineScope
-import kr.jiasoft.hiteen.feature.giftishow.dto.detail.GiftishowGoodsDetailResponse
+import kr.jiasoft.hiteen.feature.giftishow.domain.GoodsBrandEntity
+import kr.jiasoft.hiteen.feature.giftishow.dto.brand.BrandDto
+import kr.jiasoft.hiteen.feature.giftishow.dto.brand.BrandListResponse
+import kr.jiasoft.hiteen.feature.giftishow.dto.goods.detail.GiftishowGoodsDetailResponse
 import kr.jiasoft.hiteen.feature.giftishow.dto.goods.GiftishowGoodsResponse
 import kr.jiasoft.hiteen.feature.giftishow.infra.GiftishowGoodsRepository
-import kr.jiasoft.hiteen.feature.goods.domain.GoodsGiftishowEntity
+import kr.jiasoft.hiteen.feature.giftishow.infra.GoodsBrandRepository
+import kr.jiasoft.hiteen.feature.giftishow.infra.GoodsCategoryRepository
+import kr.jiasoft.hiteen.feature.giftishow.domain.GoodsCategoryEntity
+import kr.jiasoft.hiteen.feature.giftishow.domain.GoodsGiftishowEntity
 import org.springframework.stereotype.Service
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
@@ -13,6 +19,9 @@ import java.time.format.DateTimeFormatter
 @Service
 class GiftishowSyncService(
     private val repo: GiftishowGoodsRepository,
+    private val brandRepository: GoodsBrandRepository,
+    private val categoryRepository: GoodsCategoryRepository,
+
     private val objectMapper: ObjectMapper
 ) {
 
@@ -117,6 +126,51 @@ class GiftishowSyncService(
             """.trimIndent()
 
 
+
+    private val mockBrandListJson = """
+            {
+              "code": "0000",
+              "message": null,
+              "result": {
+                "listNum": 2,
+                "brandList": [
+                  {
+                    "brandName": "BHC",
+                    "brandSeq": 612,
+                    "category1Name": "피자/버거/치킨",
+                    "sort": 1,
+                    "content": "",
+                    "brandBannerImg": "https://biz.giftishow.com/Resource/brand/BR_20140807_103157_1.jpg",
+                    "mmsThumImg": "https://biz.giftishow.com/Resource/brand/BR_20140807_103157_4.jpg",
+                    "category2Seq": 0,
+                    "brandIConImg": "https://biz.giftishow.com/Resource/brand/BR_20140807_104934_3.jpg",
+                    "category1Seq": 5,
+                    "brandCode": "BR00109",
+                    "category2Name": "편의점/마트"
+                  },
+                  {
+                    "brandName": "도미노피자",
+                    "brandSeq": 592,
+                    "category1Name": "피자/버거/치킨",
+                    "sort": 4,
+                    "content": "",
+                    "brandBannerImg": "https://biz.giftishow.com/Resource/brand/BR_20140729_173930_1.jpg",
+                    "mmsThumImg": "https://biz.giftishow.com/Resource/brand/20170821_143358479.jpg",
+                    "category2Seq": 0,
+                    "brandIConImg": "https://biz.giftishow.com/Resource/brand/20170821_143401538.jpg",
+                    "category1Seq": 5,
+                    "brandCode": "BR00026",
+                    "category2Name": "편의점/마트"
+                  }
+                ]
+              }
+            }
+            """.trimIndent()
+
+
+
+
+
     suspend fun syncGoods() = coroutineScope {
 
         println("📌 [Giftishow Sync] 상품 동기화 시작")
@@ -205,6 +259,99 @@ class GiftishowSyncService(
         }
 
         println("🎉 상품 동기화 완료 — 총 ${goodsList.size}개 업데이트")
+    }
+
+
+
+
+
+
+    /**
+     * 브랜드 + 카테고리 동기화
+     * - 모든 브랜드 del_yn = 1 로 초기화
+     * - 응답에 있는 brandCode 기준 upsert
+     * - category1Seq / category1Name 기반으로 goods_category upsert
+     */
+    suspend fun syncBrandsAndCategories() = coroutineScope {
+        println("📌 [Giftishow Sync] 브랜드/카테고리 동기화 시작")
+
+        val response = objectMapper.readValue(mockBrandListJson, BrandListResponse::class.java)
+
+        if (response.code != "0000") {
+            println("❌ 브랜드 리스트 응답 오류: ${response.message}")
+            return@coroutineScope
+        }
+
+        val brandList = response.result?.brandList ?: emptyList()
+
+        // 1) 전체 브랜드 soft delete
+        brandRepository.markAllDeleted()
+        // 2) 카테고리도 일단 del_yn=1 처리 후 다시 살리는 패턴이면 아래 주석 해제
+        // categoryRepository.markAllDeleted()
+
+        val seenCategorySeq = mutableSetOf<Int>()
+
+        brandList.forEach { dto ->
+            upsertBrand(dto)
+
+            // 카테고리 1차 기준으로 goods_category 구성
+            val c1Seq = dto.category1Seq
+            val c1Name = dto.category1Name
+
+            if (c1Seq != null && c1Name != null && seenCategorySeq.add(c1Seq)) {
+                upsertCategory(c1Seq, c1Name)
+            }
+        }
+
+        println("🎉 브랜드/카테고리 동기화 완료 — 브랜드 ${brandList.size}건, 카테고리 ${seenCategorySeq.size}건")
+    }
+
+    private suspend fun upsertBrand(dto: BrandDto) {
+        val existing = brandRepository.findByBrandCode(dto.brandCode)
+
+        val entity = GoodsBrandEntity(
+            id = existing?.id ?: 0,
+            brandSeq = dto.brandSeq,
+            brandCode = dto.brandCode,
+            brandName = dto.brandName,
+            brandBannerImg = dto.brandBannerImg,
+            brandIconImg = dto.brandIConImg,
+            mmsThumbImg = dto.mmsThumImg,
+            content = dto.content,
+            category1Seq = dto.category1Seq,
+            category1Name = dto.category1Name,
+            category2Seq = dto.category2Seq,
+            category2Name = dto.category2Name,
+            newFlag = existing?.newFlag, // API에 newFlag 없음 → 기존 값 유지
+            sort = dto.sort,
+            delYn = 0,                  // 살아있는 브랜드
+            status = existing?.status ?: 1,
+            createdAt = existing?.createdAt ?: OffsetDateTime.now(),
+            updatedAt = OffsetDateTime.now(),
+            deletedAt = null
+        )
+
+        brandRepository.save(entity)
+        println("✔ 브랜드 저장: ${dto.brandName} (${dto.brandCode})")
+    }
+
+    private suspend fun upsertCategory(seq: Int, name: String) {
+        val existing = categoryRepository.findBySeq(seq)
+
+        val entity = GoodsCategoryEntity(
+            id = existing?.id ?: 0,
+            seq = seq,
+            name = name,
+            sort = existing?.sort ?: 9999,
+            delYn = 0,
+            status = existing?.status ?: 1,
+            createdAt = existing?.createdAt ?: OffsetDateTime.now(),
+            updatedAt = OffsetDateTime.now(),
+            deletedAt = null
+        )
+
+        categoryRepository.save(entity)
+        println("  ↳ 카테고리 저장: $name ($seq)")
     }
 
 }

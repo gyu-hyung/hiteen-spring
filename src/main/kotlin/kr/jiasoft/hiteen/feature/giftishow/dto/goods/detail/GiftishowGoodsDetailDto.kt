@@ -1,6 +1,6 @@
-package kr.jiasoft.hiteen.feature.giftishow.dto.detail
+package kr.jiasoft.hiteen.feature.giftishow.dto.goods.detail
 
-data class GoodsDetailDto(
+data class GiftishowGoodsDetailDto(
     val rmIdBuyCntFlagCd: String?,
     val discountRate: Double?,
     val goldPrice: Int?,
