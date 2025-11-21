@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.toList
 import kr.jiasoft.hiteen.common.exception.BusinessValidationException
 import kr.jiasoft.hiteen.feature.asset.app.AssetService
 import kr.jiasoft.hiteen.feature.asset.domain.AssetCategory
+import kr.jiasoft.hiteen.feature.asset.dto.AssetResponse
 import kr.jiasoft.hiteen.feature.chat.domain.*
 import kr.jiasoft.hiteen.feature.chat.dto.MessageAssetSummary
 import kr.jiasoft.hiteen.feature.chat.dto.MessageSummary
@@ -142,21 +143,9 @@ class ChatService(
             )
         )
 
-        // 첨부 파일 처리
-        val assetIds = mutableListOf<Long>()
-        files.forEach { file ->
-            val asset = assetService.uploadImage(file, sendUser.id, AssetCategory.CHAT_MESSAGE)
+//        val uploaded: List<AssetResponse> =
+        if (files.isNotEmpty()) assetService.uploadImages(files, sendUser.id, AssetCategory.CHAT_MESSAGE) else emptyList()
 
-            msgAssets.save(
-                ChatMessageAssetEntity(
-                    uid = asset.uid,
-                    messageId = savedMsg.id,
-                    width = asset.width,
-                    height = asset.height,
-                )
-            )
-            assetIds += asset.id
-        }
 
         // 채팅방 업데이트
         rooms.save(
