@@ -112,6 +112,16 @@ sms:
 batch:
   enabled: true
 
+giftishow:
+  url: "https://bizapi.giftishow.com/bizApi"
+  auth-key: "REAL626e92ac568f4330947dd8793622e9ac"
+  token-key: "0F3WhVAAAx6iuIFzIcF7Gg=="
+  template-id: "202404120253800"
+  banner-id: "202404120290767"
+  callback: "15775993"
+  user-id: "ceo@jiasoft.kr"
+  admin-phone: "01026490217|01066227103|01099136543"
+
 neis:
   base-url: "https://open.neis.go.kr/hub"
   api-key: "458d6485b25c46009758a4ab53413497"

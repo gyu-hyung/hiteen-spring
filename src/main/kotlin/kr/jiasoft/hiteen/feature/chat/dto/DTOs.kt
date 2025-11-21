@@ -34,7 +34,7 @@ data class SendMessageRequest(
     @param:Schema(description = "이모지 코드", example = "E_001")
     val emojiCode: String? = null,
 ) {
-    @get:Schema(description = "메시지 종류 (자동 결정: 0=텍스트, 1=이모지)")
+    @get:Schema(description = "메시지 종류 (자동 결정: 0=텍스트, 1=이모지, 2=이미지)")
     val kind: Int
         get() = if (emojiCode != null) 1 else 0
 }
