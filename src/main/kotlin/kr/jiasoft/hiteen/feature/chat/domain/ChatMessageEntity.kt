@@ -25,6 +25,11 @@ data class ChatMessageEntity(
 //    @Column("read_count")
 //    val readCount: Int? = 0,
 
+    val kind: Int = 0,// 0: 텍스트, 1: 이모지
+
+    @Column("emoji_code")
+    val emojiCode: String? = null,
+
     @Column("created_at")
     val createdAt: OffsetDateTime,
 
@@ -33,10 +38,5 @@ data class ChatMessageEntity(
 
     @Column("deleted_at")
     val deletedAt: OffsetDateTime? = null,
-
-    val kind: Int = 0,// 0: 텍스트, 1: 이모지
-
-    @Column("emoji_code")
-    val emojiCode: String? = null,
 
 )

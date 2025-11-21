@@ -59,7 +59,7 @@ class BoardService(
 ) {
 
 
-    @Cacheable(cacheNames = ["boardDetail"], key = "#uid")
+//    @Cacheable(cacheNames = ["boardDetail"], key = "#uid")
     suspend fun getBoard(uid: UUID, currentUserId: Long?): BoardResponse {
 
         val userId = currentUserId ?: -1L

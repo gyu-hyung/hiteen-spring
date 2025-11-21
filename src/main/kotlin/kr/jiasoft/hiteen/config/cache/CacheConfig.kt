@@ -1,146 +1,58 @@
 package kr.jiasoft.hiteen.config.cache
-//import com.fasterxml.jackson.annotation.JsonTypeInfo
-//import com.fasterxml.jackson.databind.ObjectMapper
-//import com.fasterxml.jackson.databind.SerializationFeature
-//import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator
-//import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-//import com.fasterxml.jackson.datatype.jsr310.deser.JavaTimeDeserializerModifier
-//import com.fasterxml.jackson.module.kotlin.kotlinModule
-//import org.springframework.cache.annotation.EnableCaching
-//import org.springframework.context.annotation.Bean
-//import org.springframework.context.annotation.Configuration
-//import org.springframework.data.redis.cache.RedisCacheConfiguration
-//import org.springframework.data.redis.cache.RedisCacheManager
-//import org.springframework.data.redis.connection.RedisConnectionFactory
-//import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer
-//import org.springframework.data.redis.serializer.RedisSerializationContext
-//import org.springframework.data.redis.serializer.StringRedisSerializer
-//import java.time.Duration
-//
-//@Configuration
-//@EnableCaching
-//class CacheConfig {
-//
-//
-//
-//    @Bean
-//    fun cacheManager(redisConnectionFactory: RedisConnectionFactory): RedisCacheManager {
-//        // 1. Jackson ObjectMapper 설정 (Polymorphic Type 지원)
-//        val objectMapper = ObjectMapper().apply {
-//            registerModule(kotlinModule())
-//            registerModule(JavaTimeModule())
-//                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-//        }
-//
-//        // 2. 기본 캐시 설정: JSON 직렬화, TTL 5분
-//        val defaultConfig = RedisCacheConfiguration.defaultCacheConfig()
-//            .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(StringRedisSerializer()))
-//            .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(GenericJackson2JsonRedisSerializer()))
-//            .entryTtl(Duration.ofMinutes(5))
-//
-//        // 3. 캐시 이름("products")별로 TTL을 다르게 설정
-//        val customConfigs = mapOf(
-//            "userResponse" to defaultConfig.entryTtl(Duration.ofMinutes(10)),
-//            "userEntity" to defaultConfig.entryTtl(Duration.ofMinutes(1))
-//        )
-//
-//        return RedisCacheManager.builder(redisConnectionFactory)
-//            .cacheDefaults(defaultConfig)
-//            .withInitialCacheConfigurations(customConfigs)
-//            .build()
-//    }
-//}
 
 
-
+import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.github.benmanes.caffeine.cache.Caffeine
+import com.fasterxml.jackson.module.kotlin.KotlinModule
 import org.springframework.cache.annotation.EnableCaching
-import org.springframework.cache.caffeine.CaffeineCacheManager
-import org.springframework.cache.support.CompositeCacheManager
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.context.annotation.Primary
 import org.springframework.data.redis.cache.RedisCacheConfiguration
 import org.springframework.data.redis.cache.RedisCacheManager
-import org.springframework.data.redis.connection.ReactiveRedisConnectionFactory
 import org.springframework.data.redis.connection.RedisConnectionFactory
-import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer
 import org.springframework.data.redis.serializer.RedisSerializationContext
 import org.springframework.data.redis.serializer.StringRedisSerializer
 import java.time.Duration
-import java.util.concurrent.TimeUnit
 
 @Configuration
 @EnableCaching
-class CacheConfig (
-    private val reactiveRedisConnectionFactory: ReactiveRedisConnectionFactory
-) {
+class CacheConfig {
 
-    @Bean
     fun objectMapper(): ObjectMapper {
-        return ObjectMapper()
-            .registerModule(JavaTimeModule())
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+        val mapper = ObjectMapper()
+        mapper.registerModule(JavaTimeModule())
+        mapper.registerModule(KotlinModule.Builder().build())
+        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+        mapper.activateDefaultTyping(
+            mapper.polymorphicTypeValidator,
+            ObjectMapper.DefaultTyping.EVERYTHING,
+            JsonTypeInfo.As.WRAPPER_OBJECT
+        );
+        return mapper
     }
 
-    /**
-     * Redis CacheManager (동기 방식)
-     * - Spring Cacheable에 사용 가능
-     * - TTL 30분
-     */
+    // 일반 RedisConnectionFactory는 auto-config로 제공됨(Spring Boot)
     @Bean
-    fun redisCacheManager(objectMapper: ObjectMapper): RedisCacheManager {
-        val serializer = GenericJackson2JsonRedisSerializer(objectMapper)
+    fun redisCacheManager(factory: RedisConnectionFactory): RedisCacheManager {
 
-        val cacheConfig = RedisCacheConfiguration.defaultCacheConfig()
-            .entryTtl(Duration.ofMinutes(30))
-            .disableCachingNullValues()
-            .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(StringRedisSerializer()))
-            .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(serializer))
+        val keySerializer = StringRedisSerializer()
+        val valueSerializer = GenericJackson2JsonRedisSerializer(objectMapper())
+        val key = RedisSerializationContext.SerializationPair.fromSerializer(keySerializer)
+        val value = RedisSerializationContext.SerializationPair.fromSerializer(valueSerializer)
 
-        val connectionFactory = reactiveRedisConnectionFactory as RedisConnectionFactory
-        return RedisCacheManager.builder(connectionFactory)
-            .cacheDefaults(cacheConfig)
+        val config = RedisCacheConfiguration.defaultCacheConfig()
+            .serializeKeysWith(key)
+            .serializeValuesWith(value)
+            .entryTtl(Duration.ofMinutes(10)) // 선택
+
+        return RedisCacheManager.builder(factory)
+            .cacheDefaults(config)
             .build()
     }
 
-//    @Bean
-//    fun compositeCacheManager(
-//        caffeineCacheManager: CaffeineCacheManager,
-//        redisCacheManager: RedisCacheManager,
-//    ): CompositeCacheManager {
-//        val manager = CompositeCacheManager()
-//        manager.setCacheManagers(listOf(caffeineCacheManager, redisCacheManager))
-//        manager.setFallbackToNoOpCache(false)
-//        return manager
-//    }
-
-    /**
-     * Caffeine 기반 Spring Cache 설정
-     * - asyncCacheMode = true → CompletableFuture / Mono / Flux 캐시 지원
-     * - expireAfterWrite(10분)
-     * - 최대 항목 1000개
-     */
-//    @Bean
-//    fun caffeineCacheManager(): CaffeineCacheManager {
-//        val manager = CaffeineCacheManager().apply {
-//            isAllowNullValues = false         // null 캐시 비허용
-//            setAsyncCacheMode(true)
-//            setCaffeine(
-//                Caffeine.newBuilder()
-//                    .expireAfterWrite(14400, TimeUnit.MINUTES)
-//                    .maximumSize(1000)
-//            )
-//        }
-//
-//        // 미리 등록할 캐시 이름들 (선택 사항)
-////        manager.setCacheNames(listOf("userDetails", "authToken", "gameData"))
-//        return manager
-//    }
 }
 
 

@@ -1,0 +1,165 @@
+databaseChangeLog:
+
+  # ----------------------------------
+  # GIFT USERS (선물 > 받은 회원 목록)
+  # ----------------------------------
+  - changeSet:
+      id: create-gift-users
+      author: system
+      changes:
+        - createTable:
+            tableName: gift_users
+            remarks: "선물 > 받은 회원 목록"
+            columns:
+              - column:
+                  name: id
+                  type: bigserial
+                  remarks: "고유번호"
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: gift_id
+                  type: bigint
+                  remarks: "선물번호"
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: user_id
+                  type: bigint
+                  remarks: "받은 회원번호"
+
+              - column:
+                  name: status
+                  type: int
+                  remarks: "수신상태"
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: receive_date
+                  type: timestamptz
+                  remarks: "받은 일시"
+
+              - column:
+                  name: coupon_no
+                  type: varchar(30)
+                  remarks: "쿠폰 번호"
+
+              - column:
+                  name: coupon_img
+                  type: varchar(200)
+                  remarks: "쿠폰 이미지 URL"
+
+              - column:
+                  name: request_date
+                  type: timestamptz
+                  remarks: "상품 발급(배송) 요청일시"
+
+              - column:
+                  name: pub_date
+                  type: timestamptz
+                  remarks: "상품 발급(배송) 일시"
+
+              - column:
+                  name: use_date
+                  type: timestamptz
+                  remarks: "상품 교환(수령) 일시"
+
+              - column:
+                  name: pub_expired_date
+                  type: date
+                  remarks: "상품 발급 만료일"
+
+              - column:
+                  name: use_expired_date
+                  type: date
+                  remarks: "상품 교환(수령) 만료일"
+
+              - column:
+                  name: season_id
+                  type: bigint
+                  remarks: "챌린지 회차번호"
+
+              - column:
+                  name: season_rank
+                  type: int
+                  remarks: "챌린지 랭킹"
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: delivery_name
+                  type: varchar(50)
+                  remarks: "상품수령 수취인명"
+
+              - column:
+                  name: delivery_phone
+                  type: varchar(20)
+                  remarks: "상품수령 연락처"
+
+              - column:
+                  name: delivery_address1
+                  type: varchar(100)
+                  remarks: "상품수령 주소"
+
+              - column:
+                  name: delivery_address2
+                  type: varchar(255)
+                  remarks: "상품수령 상세주소"
+
+
+        # -------- INDEXES --------
+        - createIndex:
+            tableName: gift_users
+            indexName: idx_gift_users_gift_id
+            columns:
+              - column:
+                  name: gift_id
+
+        - createIndex:
+            tableName: gift_users
+            indexName: idx_gift_users_user_id
+            columns:
+              - column:
+                  name: user_id
+
+        - createIndex:
+            tableName: gift_users
+            indexName: idx_gift_users_season_id
+            columns:
+              - column:
+                  name: season_id
+
+
+        # -------- FOREIGN KEYS --------
+        - addForeignKeyConstraint:
+            baseTableName: gift_users
+            baseColumnNames: gift_id
+            referencedTableName: gift
+            referencedColumnNames: id
+            onDelete: CASCADE
+            onUpdate: CASCADE
+            constraintName: fk_gift_users_gift
+
+        - addForeignKeyConstraint:
+            baseTableName: gift_users
+            baseColumnNames: user_id
+            referencedTableName: users
+            referencedColumnNames: id
+            onDelete: CASCADE
+            onUpdate: CASCADE
+            constraintName: fk_gift_users_user
+
+        - addForeignKeyConstraint:
+            baseTableName: gift_users
+            baseColumnNames: season_id
+            referencedTableName: seasons
+            referencedColumnNames: id
+            onDelete: SET NULL
+            onUpdate: CASCADE
+            constraintName: fk_gift_users_season

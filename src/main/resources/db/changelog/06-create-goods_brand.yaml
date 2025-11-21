@@ -1,0 +1,152 @@
+databaseChangeLog:
+
+  # ----------------------------------
+  # GOODS BRAND (기프티쇼 > 브랜드)
+  # ----------------------------------
+  - changeSet:
+      id: create-goods-brand
+      author: system
+      changes:
+        - createTable:
+            tableName: goods_brand
+            remarks: "기프티쇼 > 브랜드"
+            columns:
+              - column:
+                  name: id
+                  type: bigserial
+                  remarks: "브랜드 번호"
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: brand_seq
+                  type: int
+                  remarks: "브랜드 일련번호"
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: brand_code
+                  type: varchar(50)
+                  remarks: "브랜드 코드"
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: brand_name
+                  type: varchar(255)
+                  remarks: "브랜드명"
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: brand_banner_img
+                  type: varchar(255)
+                  remarks: "웹배너 이미지"
+
+              - column:
+                  name: brand_icon_img
+                  type: varchar(255)
+                  remarks: "브랜드 아이콘 이미지"
+
+              - column:
+                  name: mms_thum_img
+                  type: varchar(255)
+                  remarks: "브랜드 썸네일 이미지"
+
+              - column:
+                  name: content
+                  type: text
+                  remarks: "브랜드 설명"
+
+              - column:
+                  name: category1_seq
+                  type: int
+                  remarks: "카테고리1 일련번호"
+
+              - column:
+                  name: category1_name
+                  type: varchar(255)
+                  remarks: "카테고리1 명칭"
+
+              - column:
+                  name: category2_seq
+                  type: int
+                  remarks: "카테고리2 일련번호"
+
+              - column:
+                  name: category2_name
+                  type: varchar(255)
+                  remarks: "카테고리2 명칭"
+
+              - column:
+                  name: new_flag
+                  type: varchar(10)
+                  remarks: "신상품 여부 (Y/N)"
+
+              - column:
+                  name: sort
+                  type: int
+                  remarks: "정렬번호"
+
+              - column:
+                  name: del_yn
+                  type: int
+                  remarks: "삭제여부 (0/1)"
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: status
+                  type: int
+                  remarks: "노출여부 (0/1)"
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: created_at
+                  type: timestamptz
+                  remarks: "등록일시"
+
+              - column:
+                  name: updated_at
+                  type: timestamptz
+                  remarks: "수정일시"
+
+              - column:
+                  name: deleted_at
+                  type: timestamptz
+                  remarks: "삭제일시"
+
+
+        # -------- UNIQUE --------
+        - createIndex:
+            tableName: goods_brand
+            indexName: uk_goods_brand_code
+            unique: true
+            columns:
+              - column:
+                  name: brand_code
+
+        # -------- INDEXES --------
+        - createIndex:
+            tableName: goods_brand
+            indexName: idx_goods_brand_sort
+            columns:
+              - column:
+                  name: sort
+
+        - createIndex:
+            tableName: goods_brand
+            indexName: idx_goods_brand_status
+            columns:
+              - column:
+                  name: status
+
+        - createIndex:
+            tableName: goods_brand
+            indexName: idx_goods_brand_del_yn
+            columns:
+              - column:
+                  name: del_yn

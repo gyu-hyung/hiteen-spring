@@ -7,14 +7,18 @@ import kr.jiasoft.hiteen.feature.asset.app.AssetService
 import kr.jiasoft.hiteen.feature.asset.domain.AssetCategory
 import kr.jiasoft.hiteen.feature.auth.dto.JwtResponse
 import kr.jiasoft.hiteen.feature.auth.infra.JwtProvider
+import kr.jiasoft.hiteen.feature.board.infra.BoardCommentRepository
 import kr.jiasoft.hiteen.feature.board.infra.BoardRepository
-import kr.jiasoft.hiteen.feature.interest.app.InterestUserService
+import kr.jiasoft.hiteen.feature.interest.domain.InterestUserEntity
+import kr.jiasoft.hiteen.feature.interest.infra.InterestRepository
 import kr.jiasoft.hiteen.feature.interest.infra.InterestUserRepository
 import kr.jiasoft.hiteen.feature.invite.app.InviteService
 import kr.jiasoft.hiteen.feature.level.domain.TierCode
 import kr.jiasoft.hiteen.feature.level.infra.TierRepository
 import kr.jiasoft.hiteen.feature.point.app.PointService
 import kr.jiasoft.hiteen.feature.point.domain.PointPolicy
+import kr.jiasoft.hiteen.feature.poll.infra.PollCommentRepository
+import kr.jiasoft.hiteen.feature.poll.infra.PollUserRepository
 import kr.jiasoft.hiteen.feature.relationship.domain.FollowStatus
 import kr.jiasoft.hiteen.feature.relationship.dto.RelationshipCounts
 import kr.jiasoft.hiteen.feature.relationship.infra.FollowRepository
@@ -52,10 +56,14 @@ class UserService (
     private val schoolRepository: SchoolRepository,
     private val interestUserRepository: InterestUserRepository,
     private val boardRepository: BoardRepository,
+    private val pollUserRepository: PollUserRepository,
+    private val boardCommentRepository: BoardCommentRepository,
+    private val pollCommentRepository: PollCommentRepository,
     private val inviteService: InviteService,
     private val tierRepository: TierRepository,
     private val pointService: PointService,
-    private val interestUserService: InterestUserService,
+    private val interestRepository: InterestRepository,
+//    private val interestUserService: InterestUserService,
 ) {
 
 
@@ -92,6 +100,10 @@ class UserService (
         val interests = interestUserRepository.getInterestResponseById(null, targetUser.id).toList()
         val relationshipCounts = RelationshipCounts(
             postCount = boardRepository.countByCreatedId(targetUser.id),
+            voteCount = pollUserRepository.countByUserId(targetUser.id),
+            boardCommentCount = boardCommentRepository.countByCreatedId(targetUser.id),
+            pollCommentCount = pollCommentRepository.countByCreatedId(targetUser.id),
+            friendCount = friendRepository.countFriendship(targetUser.id),
             followerCount = followRepository.countByFollowIdAndStatus(targetUser.id, FollowStatus.ACCEPTED.name),
             followingCount = followRepository.countByUserIdAndStatus(targetUser.id, FollowStatus.ACCEPTED.name),
         )
@@ -113,7 +125,6 @@ class UserService (
 
     //    @Cacheable(cacheNames = ["userResponse"], key = "#targetId")
     suspend fun findUserResponse(targetId: Long, currentUserId: Long? = null): UserResponse {
-        println("🧠  findUserResponse(targetId  캐시 미적용 - 실제 DB 조회 발생! Thread = ${Thread.currentThread().name}")
 
         val targetUser = userRepository.findById(targetId)
             ?: throw UsernameNotFoundException("User not found: $targetId")
@@ -124,7 +135,6 @@ class UserService (
 
 //    @Cacheable(cacheNames = ["userResponse"], key = "#targetUid")
     suspend fun findUserResponse(targetUid: UUID, currentUserId: Long? = null): UserResponse {
-        println("🧠 findUserResponse(targetUid 캐시 미적용 - 실제 DB 조회 발생! Thread = ${Thread.currentThread().name}")
         val targetUser = userRepository.findByUid(targetUid.toString())
             ?: throw UsernameNotFoundException("User not found: $targetUid")
 
@@ -133,18 +143,24 @@ class UserService (
 
 //    @Cacheable(cacheNames = ["userSummary"], key = "#userId")
     suspend fun findUserSummary(userId: Long): UserSummary {
-        println("🧠 findUserSummary(userId 캐시 미적용 - 실제 DB 조회 발생! Thread = ${Thread.currentThread().name}")
         return userRepository.findSummaryInfoById(userId)
     }
 
-//    @Cacheable(cacheNames = ["userEntity"], key = "#username")
-    suspend fun findByUsernamee(username: String): UserEntity {
-        println("🧠 findByUsernamee(username 캐시 미적용 - 실제 DB 조회 발생! Thread = ${Thread.currentThread().name}")
-        return userRepository.findByUsername(username)
-            ?: throw UsernameNotFoundException("User not found: $username")
+    @Cacheable(cacheNames = ["userEntity"], key = "#username")
+    suspend fun findByUsername(id: Long): UserEntity {
+        println("✅✅✅✅✅✅✅✅✅✅✅✅✅ VVVV")
+        val user = userRepository.findById(id)
+        println("✅✅✅✅✅✅✅✅✅✅✅✅✅ AAAA ")
+        return user
+            ?: throw UsernameNotFoundException("User not found: $id")
     }
 
 
+    /**
+     * 회원 가입
+     * 재가입 규칙: 탈퇴 후 같은 번호로 30일 이전에 재가입 가능
+     * dev-allow-always -> false 면 언제나 새로 가입
+     * */
     suspend fun register(param: UserRegisterForm, file: FilePart?): UserResponseWithTokens {
         val now = OffsetDateTime.now()
 
@@ -230,8 +246,50 @@ class UserService (
                 userRepository.save(saved.copy(assetUid = asset.uid))
             } else saved
 
+            // =========================================================
+            //                       기본 관심사 init
+            // =========================================================
             // 기본 관심사
-            interestUserService.initDefaultInterests(updated)
+//            interestUserService.initDefaultInterests(updated)
+            // 기본 옵션 키워드
+            val defaultOptions = listOf("관심사", "남학생", "여학생", "동급생", "선배", "후배")
+
+            // ① 현재 등록된 관심사 조회
+            val existing = interestUserRepository.findByUserIdWithInterest(updated.id)
+                .map { it.topic }
+                .toSet()
+
+            // ② 마스터 테이블에서 "추천옵션" 카테고리 중 기본 옵션에 해당하는 항목 조회
+            val masterOptions = interestRepository.findByCategoryAndTopicIn("추천옵션", defaultOptions).toList()
+
+            if (masterOptions.isEmpty()) {
+                println("⚠️ 기본 관심사(추천옵션) 마스터 데이터가 존재하지 않습니다.")
+//                return
+            }
+
+            // ③ 등록되지 않은 항목만 필터링
+            val toInsert = masterOptions.filterNot { existing.contains(it.topic) }
+            if (toInsert.isEmpty()) {
+                println("✅ 기본 추천옵션 관심사가 이미 모두 등록되어 있습니다.")
+//                return
+            }
+
+            // ④ interest_user 엔티티로 변환 후 저장
+            toInsert.forEach { master ->
+                interestUserRepository.save(
+                    InterestUserEntity(
+                        interestId = master.id,
+                        userId = updated.id,
+                    )
+                )
+            }
+
+            println("🌱 ${updated.nickname} 기본 추천옵션 관심사 ${toInsert.size}개 등록 완료")
+
+            // =========================================================
+            //                       기본 관심사 init
+            // =========================================================
+
             // 초대코드 생성
             inviteService.registerInviteCode(updated)
             // 초대코드로 가입 처리

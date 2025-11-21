@@ -13,6 +13,8 @@ interface PollCommentRepository : CoroutineCrudRepository<PollCommentEntity, Lon
 
     suspend fun findByUid(uid: UUID): PollCommentEntity?
 
+    suspend fun countByCreatedId(createdId: Long) : Int
+
     @Query("SELECT id FROM poll_comments WHERE uid = :uid")
     suspend fun findIdByUid(uid: UUID): Long?
 
