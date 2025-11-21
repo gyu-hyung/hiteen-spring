@@ -132,7 +132,11 @@ class ChatService(
                 chatRoomId = room.id,
                 userId = sendUser.id,
                 content = req.content,
-                kind = if (req.emojiCode != null) 1 else 0,
+                kind = when {
+                    files.isNotEmpty() -> 2
+                    req.emojiCode != null -> 1
+                    else -> 0
+                },
                 emojiCode = req.emojiCode,
                 createdAt = OffsetDateTime.now(),
             )
