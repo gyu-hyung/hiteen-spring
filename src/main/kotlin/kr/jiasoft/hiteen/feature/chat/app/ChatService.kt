@@ -144,8 +144,18 @@ class ChatService(
         )
 
 //        val uploaded: List<AssetResponse> =
-        if (files.isNotEmpty()) assetService.uploadImages(files, sendUser.id, AssetCategory.CHAT_MESSAGE) else emptyList()
-
+        if (files.isNotEmpty())
+            assetService.uploadImages(files, sendUser.id, AssetCategory.CHAT_MESSAGE).toList()
+                .forEach { asset ->
+                    msgAssets.save(
+                        ChatMessageAssetEntity(
+                            uid = asset.uid,
+                            messageId = savedMsg.id,
+                            width = asset.width,
+                            height = asset.height,
+                        )
+                    )
+        }
 
         // 채팅방 업데이트
         rooms.save(
