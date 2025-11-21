@@ -1,4 +1,4 @@
-package kr.jiasoft.hiteen.feature.goods.domain
+package kr.jiasoft.hiteen.feature.giftishow.domain
 
 import io.swagger.v3.oas.annotations.media.Schema
 import org.springframework.data.annotation.Id
