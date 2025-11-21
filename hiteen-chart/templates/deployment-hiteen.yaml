@@ -7,9 +7,19 @@ metadata:
     app: {{ .Values.app.name }}
 spec:
   replicas: {{ .Values.app.replicaCount }}
+
+  strategy:
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+
+  minReadySeconds: 5
+  terminationGracePeriodSeconds: 30
+
   selector:
     matchLabels:
       app: {{ .Values.app.name }}
+
   template:
     metadata:
       labels:
@@ -19,25 +29,55 @@ spec:
         {{- toYaml .Values.nodeSelector | nindent 8 }}
       imagePullSecrets:
         {{- toYaml .Values.imagePullSecrets | nindent 8 }}
+
       containers:
         - name: {{ .Values.app.name }}
           image: "{{ .Values.app.image.repository }}:{{ .Values.app.image.tag }}"
           imagePullPolicy: {{ .Values.app.image.pullPolicy }}
+
           ports:
             - containerPort: {{ .Values.app.service.port }}
-          env: {{- toYaml .Values.app.env | nindent 12 }}
+
+          env:
+            {{- toYaml .Values.app.env | nindent 12 }}
+
           volumeMounts:
             - name: firebase-credentials
               mountPath: /app/firebase/firebase-key.json
               subPath: firebase-key.json
             - name: nfs-assets
               mountPath: /app/assets
+
           resources:
             {{- toYaml .Values.app.resources | nindent 12 }}
+
+          # ✅ readinessProbe container-level
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: {{ .Values.app.service.port }}
+            initialDelaySeconds: 8
+            periodSeconds: 5
+
+          # 🩺 livenessProbe
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: {{ .Values.app.service.port }}
+            initialDelaySeconds: 20
+            periodSeconds: 10
+
+          # 🚦 graceful shutdown
+          lifecycle:
+            preStop:
+              exec:
+                command: ["sh", "-c", "sleep 15"]
+
       volumes:
         - name: firebase-credentials
           secret:
             secretName: firebase-secret
+
         - name: nfs-assets
           persistentVolumeClaim:
             claimName: nfs-pv-images

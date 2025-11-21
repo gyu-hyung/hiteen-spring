@@ -1,0 +1,161 @@
+databaseChangeLog:
+
+  # ----------------------------------
+  # GOODS (상품 정보)
+  # ----------------------------------
+  - changeSet:
+      id: create-goods
+      author: system
+      changes:
+        - createTable:
+            tableName: goods
+            remarks: "상품 정보(포인트)"
+            columns:
+              - column:
+                  name: id
+                  type: bigserial
+                  remarks: "상품번호"
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: uid
+                  type: varchar(100)
+                  remarks: "상품 UID"
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: type
+                  type: varchar(8)
+                  remarks: "상품구분 (Point, Voucher, Delivery, Etc)"
+                  defaultValue: "Etc"
+
+              - column:
+                  name: category
+                  type: varchar(255)
+                  remarks: "카테고리"
+
+              - column:
+                  name: name
+                  type: varchar(255)
+                  remarks: "상품명"
+
+              - column:
+                  name: description
+                  type: text
+                  remarks: "상품설명"
+
+              - column:
+                  name: brand
+                  type: varchar(255)
+                  remarks: "브랜드명"
+
+              - column:
+                  name: seller
+                  type: varchar(255)
+                  remarks: "판매처명"
+
+              - column:
+                  name: exchange
+                  type: varchar(255)
+                  remarks: "교환처명"
+
+              - column:
+                  name: limit_days
+                  type: int
+                  remarks: "유효기간(일수)"
+                  defaultValueNumeric: 0
+
+              - column:
+                  name: sale_price
+                  type: int
+                  remarks: "판매가격"
+                  defaultValueNumeric: 0
+
+              - column:
+                  name: discount
+                  type: int
+                  remarks: "할인금액"
+                  defaultValueNumeric: 0
+
+              - column:
+                  name: price
+                  type: int
+                  remarks: "구매가격"
+                  defaultValueNumeric: 0
+
+              - column:
+                  name: point
+                  type: int
+                  remarks: "적립 포인트"
+                  defaultValueNumeric: 0
+
+              - column:
+                  name: bonus_point
+                  type: int
+                  remarks: "보너스 포인트"
+                  defaultValueNumeric: 0
+
+              - column:
+                  name: memo
+                  type: text
+                  remarks: "메모사항"
+
+              - column:
+                  name: status
+                  type: VARCHAR(20)
+
+              - column:
+                  name: created_at
+                  type: timestamptz
+                  remarks: "등록일시"
+
+              - column:
+                  name: updated_at
+                  type: timestamptz
+                  remarks: "수정일시"
+
+              - column:
+                  name: deleted_at
+                  type: timestamptz
+                  remarks: "삭제일시"
+
+
+        # -------- INDEXES --------
+        - createIndex:
+            tableName: goods
+            indexName: uk_goods_uid
+            unique: true
+            columns:
+              - column:
+                  name: uid
+
+        - createIndex:
+            tableName: goods
+            indexName: idx_goods_type
+            columns:
+              - column:
+                  name: type
+
+        - createIndex:
+            tableName: goods
+            indexName: idx_goods_category
+            columns:
+              - column:
+                  name: category
+
+        - createIndex:
+            tableName: goods
+            indexName: idx_goods_status
+            columns:
+              - column:
+                  name: status
+
+        - createIndex:
+            tableName: goods
+            indexName: idx_goods_created_at
+            columns:
+              - column:
+                  name: created_at

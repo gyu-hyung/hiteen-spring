@@ -3,6 +3,7 @@ package kr.jiasoft.hiteen.feature.user.infra
 import kotlinx.coroutines.flow.Flow
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import kr.jiasoft.hiteen.feature.user.dto.UserSummary
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.data.r2dbc.repository.Modifying
 import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
@@ -11,7 +12,7 @@ import java.util.UUID
 
 @Repository
 interface UserRepository : CoroutineCrudRepository<UserEntity, Long> {
-//    @Cacheable(cacheNames = ["userEntity"], key = "#name")
+//    @Cacheable(cacheNames = ["userEntityTest"], key = "#name")
     suspend fun findByUsername(name: String): UserEntity?
     suspend fun findByNickname(name: String): UserEntity?
     suspend fun findByPhone(phone: String): UserEntity?
@@ -24,6 +25,16 @@ interface UserRepository : CoroutineCrudRepository<UserEntity, Long> {
     // ✅ 활성(미삭제) 사용자 - username(=phone)로 조회
     @Query("""SELECT * FROM users WHERE username = :username AND deleted_at IS NULL ORDER BY id DESC LIMIT 1""")
     suspend fun findActiveByUsername(username: String): UserEntity?
+
+    // ✅ 활성(미삭제) 사용자 - username(=phone)로 조회
+    @Query("""
+        SELECT * FROM users 
+        WHERE username = :username 
+        AND (deleted_at IS NULL OR deleted_at >= NOW() - (INTERVAL '1 day' * :days)) 
+        ORDER BY id DESC 
+        LIMIT 1
+    """)
+    suspend fun findActiveByUsernameOrDeletedAtBeforeDays(username: String, days: Int): UserEntity?
 
     // ✅ 활성 사용자 - phone으로 조회 (username과 동일하지만, 명시적 함수)
     @Query("""SELECT * FROM users WHERE phone = :phone AND deleted_at IS NULL LIMIT 1""")
@@ -52,6 +63,7 @@ interface UserRepository : CoroutineCrudRepository<UserEntity, Long> {
     @Query("""
         SELECT a.*
         , (select tier_name_kr from tiers where id = tier_id) tier_name
+        , (select id from tiers where id = tier_id) tier_id
         FROM users a
         WHERE (LOWER(username) LIKE LOWER(CONCAT('%', :q, '%'))
            OR  LOWER(COALESCE(nickname,'')) LIKE LOWER(CONCAT('%', :q, '%'))
@@ -64,6 +76,7 @@ interface UserRepository : CoroutineCrudRepository<UserEntity, Long> {
     @Query("""
         SELECT a.*
         , (select tier_name_kr from tiers where id = tier_id) tier_name
+        , (select id from tiers where id = tier_id) tier_id
         FROM users a WHERE id = :id
     """)
     suspend fun findSummaryInfoById(id: Long): UserSummary
@@ -72,6 +85,7 @@ interface UserRepository : CoroutineCrudRepository<UserEntity, Long> {
     @Query("""
         SELECT a.*
         , (select tier_name_kr from tiers where id = tier_id) tier_name
+        , (select id from tiers where id = tier_id) tier_id
         FROM users a WHERE id IN (:ids)
     """)
     suspend fun findSummaryByIds(ids: List<Long>): List<UserSummary>

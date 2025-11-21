@@ -1,4 +1,6 @@
 spring:
+  jackson:
+    time-zone: Asia/Seoul
   application:
     name: hiteen
 
@@ -23,7 +25,13 @@ spring:
     redis:
       repositories:
         enabled: false
+      password: hiteen1234
+      timeout: 5s
+      client-type: lettuce
+
       cluster:
+        enabled: true
+        max-redirects: 5
         nodes:
           - redis-0.redis.hiteen.svc.cluster.local:6379
           - redis-1.redis.hiteen.svc.cluster.local:6379
@@ -31,15 +39,14 @@ spring:
           - redis-3.redis.hiteen.svc.cluster.local:6379
           - redis-4.redis.hiteen.svc.cluster.local:6379
           - redis-5.redis.hiteen.svc.cluster.local:6379
-      password: hiteen1234
-      timeout: 5s
-      client-type: lettuce
+
       lettuce:
         pool:
           max-active: 16
           max-idle: 8
           min-idle: 2
           time-between-eviction-runs: 60s
+
 
   config:
     import:
@@ -71,13 +78,13 @@ app:
 # --------------------
 # MinIO (S3 호환) 설정 추가
 # --------------------
-cloud:
-  aws:
-    s3:
-      endpoint: http://hiteen-minio.hiteen.svc.cluster.local:9000
-      access-key: minioadmin
-      secret-key: minioadmin123
-      path-style-access-enabled: true
+#cloud:
+#  aws:
+#    s3:
+#      endpoint: http://hiteen-minio.hiteen.svc.cluster.local:9000
+#      access-key: minioadmin
+#      secret-key: minioadmin123
+#      path-style-access-enabled: true
 
 
 # --------------------
@@ -153,12 +160,16 @@ tbmq:
 
 logging:
   level:
-    io.r2dbc.postgresql.QUERY: DEBUG
+    io.r2dbc.postgresql.QUERY: INFO
     io.r2dbc.postgresql.PARAM: DEBUG
-    org.springframework.data.mongodb.core.MongoTemplate: DEBUG
-    org.springframework.data.mongodb.core.ReactiveMongoTemplate: DEBUG
-    org.springframework.boot.autoconfigure.liquibase: DEBUG
-    org.mongodb.driver.protocol.command: DEBUG
-    org.mongodb.driver.protocol.query: DEBUG
-    org.mongodb.driver.connection: DEBUG
+
+    org.springframework.r2dbc.core: DEBUG
+
+    org.mongodb.driver: INFO
+    org.mongodb.driver.connection: INFO
+    org.mongodb.driver.protocol.command: INFO
+    org.mongodb.driver.protocol.query: INFO
+    org.mongodb.driver.cluster: INFO
+
     org.springframework.security: INFO
+    org.springframework.cache: INFO

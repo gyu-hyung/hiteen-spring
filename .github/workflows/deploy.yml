@@ -92,7 +92,7 @@ jobs:
             --set redis.password=hiteen1234 \
             --set redis.storageClass=local-path \
             --set redis.cluster.enabled=true \
-            --wait --timeout 300s
+            --wait --timeout 80s
 
       - name: ⏳ Wait for Redis StatefulSet to be Ready
         run: |

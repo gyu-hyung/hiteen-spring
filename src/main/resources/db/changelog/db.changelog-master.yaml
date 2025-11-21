@@ -1,4 +1,21 @@
 databaseChangeLog:
-#예시
-#  - include:
-#      file: db/changelog/20251021-migrate-selects-jsonb.sql
+  - include:
+      file: db/changelog/01-create-gift.yaml
+  - include:
+      file: db/changelog/02-create-gift_user.yaml
+  - include:
+      file: db/changelog/03-create-giftishow_logs.yaml
+  - include:
+      file: db/changelog/04-create-goods.yaml
+  - include:
+      file: db/changelog/05-create-goods_asset.yaml
+  - include:
+      file: db/changelog/06-create-goods_brand.yaml
+  - include:
+      file: db/changelog/07-create-goods_category.yaml
+  - include:
+      file: db/changelog/08-create-goods_giftishow.yaml
+  - include:
+      file: db/changelog/09-create-payment.yaml
+  - include:
+      file: db/changelog/10-create-gift-payment-foreign-keys.yaml

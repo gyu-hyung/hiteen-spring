@@ -1,0 +1,196 @@
+databaseChangeLog:
+
+  # ----------------------------------
+  # GIFTISHOW LOGS (기프티쇼 > 발송 로그)
+  # ----------------------------------
+  - changeSet:
+      id: create-giftishow-logs
+      author: system
+      changes:
+        - createTable:
+            tableName: giftishow_logs
+            remarks: "기프티쇼 > 발송 로그"
+            columns:
+              - column:
+                  name: id
+                  type: bigserial
+                  remarks: "고유번호"
+                  constraints:
+                    primaryKey: true
+
+              - column:
+                  name: gift_user_id
+                  type: bigint
+                  remarks: "선물회원번호"
+
+              - column:
+                  name: goods_code
+                  type: varchar(50)
+                  remarks: "상품코드"
+
+              - column:
+                  name: goods_name
+                  type: varchar(50)
+                  remarks: "상품명"
+
+              - column:
+                  name: order_no
+                  type: varchar(100)
+                  remarks: "주문번호"
+
+              - column:
+                  name: mms_msg
+                  type: varchar(255)
+                  remarks: "MMS 메시지"
+
+              - column:
+                  name: mms_title
+                  type: varchar(255)
+                  remarks: "MMS 제목"
+
+              - column:
+                  name: callback_no
+                  type: varchar(20)
+                  remarks: "발신번호(- 제외)"
+
+              - column:
+                  name: phone_no
+                  type: varchar(20)
+                  remarks: "수신번호(- 제외)"
+
+              - column:
+                  name: tr_id
+                  type: varchar(50)
+                  remarks: "거래 아이디(최대 25자)"
+
+              - column:
+                  name: rev_info_yn
+                  type: varchar(1)
+                  remarks: "예약발송여부 (Y:예약,N:실시간)"
+                  defaultValue: "N"
+
+              - column:
+                  name: rev_info_date
+                  type: varchar(10)
+                  remarks: "예약일자(yyyyMMdd)"
+
+              - column:
+                  name: rev_info_time
+                  type: varchar(10)
+                  remarks: "예약시간(HHmm)"
+
+              - column:
+                  name: template_id
+                  type: varchar(20)
+                  remarks: "카드 아이디"
+
+              - column:
+                  name: banner_id
+                  type: varchar(20)
+                  remarks: "배너 아이디"
+
+              - column:
+                  name: user_id
+                  type: varchar(50)
+                  remarks: "회원 아이디"
+
+              - column:
+                  name: gubun
+                  type: varchar(1)
+                  remarks: "발급구분(Y:핀번호수신,N:MMS,I:이미지수신)"
+                  defaultValue: "I"
+
+              - column:
+                  name: response
+                  type: text
+                  remarks: "응답결과"
+
+              - column:
+                  name: code
+                  type: varchar(10)
+                  remarks: "응답코드"
+
+              - column:
+                  name: message
+                  type: text
+                  remarks: "응답메시지"
+
+              - column:
+                  name: pin_no
+                  type: varchar(20)
+                  remarks: "쿠폰번호"
+
+              - column:
+                  name: coupon_img_url
+                  type: varchar(255)
+                  remarks: "쿠폰 이미지 URL"
+
+              - column:
+                  name: memo
+                  type: text
+                  remarks: "메모사항"
+
+              - column:
+                  name: status
+                  type: int
+                  remarks: "발급상태"
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: created_at
+                  type: timestamptz
+                  remarks: "등록일시"
+
+              - column:
+                  name: updated_at
+                  type: timestamptz
+                  remarks: "수정일시"
+
+              - column:
+                  name: deleted_at
+                  type: timestamptz
+                  remarks: "삭제일시"
+
+
+        # -------- INDEXES --------
+        - createIndex:
+            tableName: giftishow_logs
+            indexName: uk_giftishow_logs_tr_id
+            unique: true
+            columns:
+              - column:
+                  name: tr_id
+
+        - createIndex:
+            tableName: giftishow_logs
+            indexName: idx_giftishow_logs_created_at
+            columns:
+              - column:
+                  name: created_at
+
+        - createIndex:
+            tableName: giftishow_logs
+            indexName: idx_giftishow_logs_gift_user_id
+            columns:
+              - column:
+                  name: gift_user_id
+
+        - createIndex:
+            tableName: giftishow_logs
+            indexName: idx_giftishow_logs_goods_code
+            columns:
+              - column:
+                  name: goods_code
+
+
+        # -------- FOREIGN KEYS --------
+        - addForeignKeyConstraint:
+            baseTableName: giftishow_logs
+            baseColumnNames: gift_user_id
+            referencedTableName: gift_users
+            referencedColumnNames: id
+            onDelete: SET NULL
+            onUpdate: CASCADE
+            constraintName: fk_giftishow_logs_gift_users

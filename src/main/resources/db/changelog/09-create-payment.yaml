@@ -1,0 +1,248 @@
+databaseChangeLog:
+
+  # ----------------------------------
+  # PAYMENT (결제 정보)
+  # ----------------------------------
+  - changeSet:
+      id: create-payment
+      author: system
+      changes:
+        - createTable:
+            tableName: payment
+            remarks: "결제 정보"
+            columns:
+              - column:
+                  name: id
+                  type: bigserial
+                  remarks: "결제번호"
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: uid
+                  type: uuid
+                  remarks: "결제코드"
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: user_id
+                  type: bigint
+                  remarks: "회원번호"
+
+              - column:
+                  name: type
+                  type: varchar(20)
+                  remarks: "카테고리"
+
+              - column:
+                  name: order_name
+                  type: varchar(255)
+                  remarks: "구매자명"
+
+              - column:
+                  name: goods_id
+                  type: bigint
+                  remarks: "상품번호"
+
+              - column:
+                  name: goods_code
+                  type: varchar(50)
+                  remarks: "기프트쇼 상품코드"
+
+              - column:
+                  name: goods_name
+                  type: varchar(255)
+                  remarks: "상품명"
+
+              - column:
+                  name: goods_price
+                  type: int
+                  remarks: "상품가격"
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: amount
+                  type: int
+                  remarks: "구매수량"
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: pay_price
+                  type: int
+                  remarks: "결제금액"
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: point
+                  type: int
+                  remarks: "지급 포인트"
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: tax
+                  type: int
+                  remarks: "수수료"
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: sales
+                  type: int
+                  remarks: "매출금액"
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: os_type
+                  type: varchar(20)
+                  remarks: "OS 구분"
+
+              - column:
+                  name: order_id
+                  type: varchar(200)
+                  remarks: "주문 ID"
+
+              - column:
+                  name: package_name
+                  type: varchar(50)
+                  remarks: "패키지명"
+
+              - column:
+                  name: purchase_token
+                  type: text
+                  remarks: "구매토큰"
+
+              - column:
+                  name: table_ids
+                  type: text
+                  remarks: "참조 테이블 ID 목록"
+
+              - column:
+                  name: response
+                  type: text
+                  remarks: "응답결과 RAW"
+
+              - column:
+                  name: memo
+                  type: text
+                  remarks: "결제 메모"
+
+              - column:
+                  name: logs
+                  type: text
+                  remarks: "결제 로그"
+
+              - column:
+                  name: status
+                  type: VARCHAR(20)
+                  remarks: 결제상태
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: created_at
+                  type: timestamptz
+                  remarks: "결제일시"
+
+              - column:
+                  name: updated_at
+                  type: timestamptz
+                  remarks: "수정일시"
+
+              - column:
+                  name: deleted_at
+                  type: timestamptz
+                  remarks: "삭제일시"
+
+        # ---------------- INDEX ----------------
+        - createIndex:
+            tableName: payment
+            indexName: uk_payment_uid
+            unique: true
+            columns:
+              - column:
+                  name: uid
+
+        - createIndex:
+            tableName: payment
+            indexName: idx_payment_type
+            columns:
+              - column:
+                  name: type
+
+        - createIndex:
+            tableName: payment
+            indexName: idx_payment_status
+            columns:
+              - column:
+                  name: status
+
+        - createIndex:
+            tableName: payment
+            indexName: idx_payment_created_at
+            columns:
+              - column:
+                  name: created_at
+
+        - createIndex:
+            tableName: payment
+            indexName: idx_payment_user_id
+            columns:
+              - column:
+                  name: user_id
+
+        - createIndex:
+            tableName: payment
+            indexName: idx_payment_goods_id
+            columns:
+              - column:
+                  name: goods_id
+
+        - createIndex:
+            tableName: payment
+            indexName: idx_payment_goods_code
+            columns:
+              - column:
+                  name: goods_code
+
+
+        # ---------------- FOREIGN KEYS ----------------
+        - addForeignKeyConstraint:
+            baseTableName: payment
+            baseColumnNames: user_id
+            referencedTableName: users
+            referencedColumnNames: id
+            onDelete: SET NULL
+            onUpdate: CASCADE
+            constraintName: fk_payment_user
+
+        - addForeignKeyConstraint:
+            baseTableName: payment
+            baseColumnNames: goods_id
+            referencedTableName: goods
+            referencedColumnNames: id
+            onDelete: SET NULL
+            onUpdate: CASCADE
+            constraintName: fk_payment_goods
+
+        - addForeignKeyConstraint:
+            baseTableName: payment
+            baseColumnNames: goods_code
+            referencedTableName: goods_giftishow
+            referencedColumnNames: goods_code
+            onDelete: SET NULL
+            onUpdate: CASCADE
+            constraintName: fk_payment_goods_code

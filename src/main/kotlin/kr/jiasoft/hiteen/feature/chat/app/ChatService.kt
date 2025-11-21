@@ -6,6 +6,7 @@ import kr.jiasoft.hiteen.common.exception.BusinessValidationException
 import kr.jiasoft.hiteen.feature.asset.app.AssetService
 import kr.jiasoft.hiteen.feature.asset.domain.AssetCategory
 import kr.jiasoft.hiteen.feature.chat.domain.*
+import kr.jiasoft.hiteen.feature.chat.dto.ChatMessageResponse
 import kr.jiasoft.hiteen.feature.chat.dto.MessageAssetSummary
 import kr.jiasoft.hiteen.feature.chat.dto.MessageSummary
 import kr.jiasoft.hiteen.feature.chat.dto.RoomSummaryResponse
@@ -19,9 +20,6 @@ import kr.jiasoft.hiteen.feature.level.app.ExpService
 import kr.jiasoft.hiteen.feature.push.app.PushService
 import kr.jiasoft.hiteen.feature.push.domain.PushTemplate
 import kr.jiasoft.hiteen.feature.push.domain.buildPushData
-import kr.jiasoft.hiteen.feature.soketi.app.SoketiBroadcaster
-import kr.jiasoft.hiteen.feature.soketi.domain.SoketiChannelPattern
-import kr.jiasoft.hiteen.feature.soketi.domain.SoketiEventType
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import kr.jiasoft.hiteen.feature.user.infra.UserRepository
 import org.springframework.http.codec.multipart.FilePart
@@ -36,7 +34,7 @@ class ChatService(
     private val messages: ChatMessageRepository,
     private val msgAssets: ChatMessageAssetRepository,
     private val users: UserRepository,
-    private val soketiBroadcaster: SoketiBroadcaster,
+//    private val soketiBroadcaster: SoketiBroadcaster,
 
     private val expService: ExpService,
     private val pushService: PushService,
@@ -117,9 +115,16 @@ class ChatService(
 
 
     /** 메시지 전송 */
-    suspend fun sendMessage(roomUid: UUID, sendUser: UserEntity, req: SendMessageRequest, files: List<FilePart>): UUID {
-        val room = rooms.findByUidAndDeletedAtIsNull(roomUid) ?: error("room not found")
-        chatUsers.findActive(room.id, sendUser.id) ?: error("not a member")
+    suspend fun sendMessage(
+        roomUid: UUID,
+        sendUser: UserEntity,
+        req: SendMessageRequest,
+        files: List<FilePart>
+    ): ChatMessageResponse {
+        val room = rooms.findByUidAndDeletedAtIsNull(roomUid)
+            ?: throw IllegalArgumentException("room not found")
+        chatUsers.findActive(room.id, sendUser.id)
+            ?: throw IllegalArgumentException("not a member")
 
         // 메시지 저장
         val savedMsg = messages.save(
@@ -127,30 +132,28 @@ class ChatService(
                 chatRoomId = room.id,
                 userId = sendUser.id,
                 content = req.content,
-                createdAt = OffsetDateTime.now(),
                 kind = if (req.emojiCode != null) 1 else 0,
                 emojiCode = req.emojiCode,
+                createdAt = OffsetDateTime.now(),
             )
         )
 
-        // 첨부 파일 저장
+        // 첨부 파일 처리
+        val assetUids = mutableListOf<UUID>()
         files.forEach { file ->
-            // 1) 에셋 업로드
             val asset = assetService.uploadImage(file, sendUser.id, AssetCategory.CHAT_MESSAGE)
 
-            // 2) user_photos row 생성
-            val photoEntity = ChatMessageAssetEntity(
-                uid = asset.uid,
-                messageId = savedMsg.id,
-                width = asset.width,
-                height = asset.height,
+            msgAssets.save(
+                ChatMessageAssetEntity(
+                    uid = asset.uid,
+                    messageId = savedMsg.id,
+                    width = asset.width,
+                    height = asset.height,
+                )
             )
 
-            msgAssets.save(photoEntity)
+            assetUids += asset.uid
         }
-//        req.assetUids?.forEach { au ->
-//            msgAssets.save(ChatMessageAssetEntity(uid = au, messageId = savedMsg.id))
-//        }
 
         // 채팅방 업데이트
         rooms.save(
@@ -162,55 +165,31 @@ class ChatService(
             )
         )
 
-        // 마지막 메시지 요약
-        val lastMessageSummary = mapOf(
-            "messageUid" to savedMsg.uid,
-            "userUid" to sendUser.uid,
-            "content" to req.content,
-            "kind" to req.kind,
-            "emojiCode" to req.emojiCode,
-            "createdAt" to savedMsg.createdAt.toString()
-        )
-
-        // 채팅방 채널 broadcast (message-created)
-        val messagePayload = mapOf(
-            "roomUid" to room.uid.toString(),
-            "message" to lastMessageSummary
-        )
-        soketiBroadcaster.broadcast(
-            SoketiChannelPattern.PRIVATE_CHAT_ROOM.format(room.uid),
-            SoketiEventType.MESSAGE_CREATED,
-            messagePayload
-        )
-
-        // 채팅방 멤버들에게 broadcast (ROOM_UPDATED + unreadCount)
+        //경험치 부여
         val activeMembers = chatUsers.listActiveUserUids(room.id).toList()
-        for (member in activeMembers) {
-
-            val unreadCount = messages.countUnread(room.id, member.userId)
-
-            val payload = mapOf(
-                "roomUid" to room.uid.toString(),
-                "lastMessage" to lastMessageSummary,
-                "unreadCount" to unreadCount.toString()
-            )
-
-            soketiBroadcaster.broadcast(
-                SoketiChannelPattern.PRIVATE_USER.format(member.userUid),
-                SoketiEventType.ROOM_UPDATED,
-                payload
-            )
+        activeMembers.forEach { member ->
             if (req.kind == 0) {
                 expService.grantExp(sendUser.id, "CHAT", member.userId)
             } else if (req.kind == 1) {
                 expService.grantExp(sendUser.id, "CHAT_QUICK_EMOJI", member.userId)
             }
-
         }
+
+        // 푸시 전송
         val pushUserIds = activeMembers.map { it.userId }
         pushService.sendAndSavePush(pushUserIds, PushTemplate.CHAT_MESSAGE.buildPushData("nickname" to sendUser.nickname))
 
-        return savedMsg.uid
+        // 메시지 응답 DTO 반환
+        return ChatMessageResponse(
+            messageUid = savedMsg.uid,
+            roomUid = roomUid,
+            userUid = sendUser.uid,
+            content = savedMsg.content,
+            kind = savedMsg.kind,
+            emojiCode = savedMsg.emojiCode,
+            createdAt = savedMsg.createdAt,
+            assetUids = assetUids
+        )
     }
 
 
@@ -280,31 +259,31 @@ class ChatService(
         chatUsers.updateReadCursor(room.id, currentUser.id, msg.id, OffsetDateTime.now())
 
         // ✅ 마지막 메시지 요약
-        val lastMsgEntity = messages.findById(msg.id) ?: return
-        val senderUid = users.findById(lastMsgEntity.userId)?.uid
+//        val lastMsgEntity = messages.findById(msg.id) ?: return
+//        val senderUid = users.findById(lastMsgEntity.userId)?.uid
 
-        val lastMessageSummary = mapOf(
-            "messageUid" to lastMsgEntity.uid,
-            "userUid" to senderUid,
-            "content" to lastMsgEntity.content,
-            "kind" to lastMsgEntity.kind,
-            "emojiCode" to lastMsgEntity.emojiCode,
-            "createdAt" to lastMsgEntity.createdAt.toString()
-        )
+//        val lastMessageSummary = mapOf(
+//            "messageUid" to lastMsgEntity.uid,
+//            "userUid" to senderUid,
+//            "content" to lastMsgEntity.content,
+//            "kind" to lastMsgEntity.kind,
+//            "emojiCode" to lastMsgEntity.emojiCode,
+//            "createdAt" to lastMsgEntity.createdAt.toString()
+//        )
 
-        val unreadCount = messages.countUnread(room.id, currentUser.id)
+//        val unreadCount = messages.countUnread(room.id, currentUser.id)
 
-        val payload = mapOf(
-            "roomUid" to room.uid.toString(),
-            "lastMessage" to lastMessageSummary,
-            "unreadCount" to unreadCount.toString()
-        )
+//        val payload = mapOf(
+//            "roomUid" to room.uid.toString(),
+//            "lastMessage" to lastMessageSummary,
+//            "unreadCount" to unreadCount.toString()
+//        )
 
-        soketiBroadcaster.broadcast(
-            SoketiChannelPattern.PRIVATE_USER.format(currentUser.uid),
-            SoketiEventType.ROOM_UPDATED,
-            payload
-        )
+//        soketiBroadcaster.broadcast(
+//            SoketiChannelPattern.PRIVATE_USER.format(currentUser.uid),
+//            SoketiEventType.ROOM_UPDATED,
+//            payload
+//        )
     }
 
 
