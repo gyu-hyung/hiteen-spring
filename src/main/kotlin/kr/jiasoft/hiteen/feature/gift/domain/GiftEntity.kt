@@ -32,9 +32,9 @@ data class GiftEntity (
     @Column("user_id")
     val userId: Long,
 
-    @field:Schema(description = "결제 번호")
-    @Column("pay_id")
-    val payId: Long? = null,
+//    @field:Schema(description = "결제 번호")
+//    @Column("pay_id")
+//    val payId: Long? = null,
 
     @field:Schema(description = "메모")
     val memo: String? = null,

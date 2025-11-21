@@ -194,3 +194,12 @@ databaseChangeLog:
             onDelete: SET NULL
             onUpdate: CASCADE
             constraintName: fk_giftishow_logs_gift_users
+
+        - addForeignKeyConstraint:
+            baseTableName: giftishow_logs
+            baseColumnNames: goods_code
+            referencedTableName: goods_giftishow
+            referencedColumnNames: goods_code
+            onDelete: SET NULL
+            onUpdate: CASCADE
+            constraintName: fk_giftishow_logs_goods_giftishow
