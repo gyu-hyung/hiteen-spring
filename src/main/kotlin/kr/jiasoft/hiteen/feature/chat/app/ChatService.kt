@@ -6,7 +6,6 @@ import kr.jiasoft.hiteen.common.exception.BusinessValidationException
 import kr.jiasoft.hiteen.feature.asset.app.AssetService
 import kr.jiasoft.hiteen.feature.asset.domain.AssetCategory
 import kr.jiasoft.hiteen.feature.chat.domain.*
-import kr.jiasoft.hiteen.feature.chat.dto.ChatMessageResponse
 import kr.jiasoft.hiteen.feature.chat.dto.MessageAssetSummary
 import kr.jiasoft.hiteen.feature.chat.dto.MessageSummary
 import kr.jiasoft.hiteen.feature.chat.dto.RoomSummaryResponse
@@ -120,7 +119,8 @@ class ChatService(
         sendUser: UserEntity,
         req: SendMessageRequest,
         files: List<FilePart>
-    ): ChatMessageResponse {
+    ): MessageSummary {
+
         val room = rooms.findByUidAndDeletedAtIsNull(roomUid)
             ?: throw IllegalArgumentException("room not found")
         chatUsers.findActive(room.id, sendUser.id)
@@ -139,7 +139,7 @@ class ChatService(
         )
 
         // 첨부 파일 처리
-        val assetUids = mutableListOf<UUID>()
+        val assetIds = mutableListOf<Long>()
         files.forEach { file ->
             val asset = assetService.uploadImage(file, sendUser.id, AssetCategory.CHAT_MESSAGE)
 
@@ -151,8 +151,7 @@ class ChatService(
                     height = asset.height,
                 )
             )
-
-            assetUids += asset.uid
+            assetIds += asset.id
         }
 
         // 채팅방 업데이트
@@ -165,7 +164,23 @@ class ChatService(
             )
         )
 
-        //경험치 부여
+        val sender = users.findSummaryInfoById(sendUser.id)
+
+        val assets = msgAssets.listByMessage(savedMsg.id).map { a ->
+            MessageAssetSummary(
+                a.uid,
+                a.width,
+                a.height
+            )
+        }.toList()
+
+        // unread 계산: 방의 전체 인원 - 읽은 사람 수 - 본인
+        val memberCount = chatUsers.countActiveByRoomId(room.id).toInt()
+//        val readers = messages.countReaders(savedMsg.id)
+//        val unread = ((memberCount - 1) - readers).coerceAtLeast(0)
+
+
+        // 경험치 부여
         val activeMembers = chatUsers.listActiveUserUids(room.id).toList()
         activeMembers.forEach { member ->
             if (req.kind == 0) {
@@ -179,18 +194,14 @@ class ChatService(
         val pushUserIds = activeMembers.map { it.userId }
         pushService.sendAndSavePush(pushUserIds, PushTemplate.CHAT_MESSAGE.buildPushData("nickname" to sendUser.nickname))
 
-        // 메시지 응답 DTO 반환
-        return ChatMessageResponse(
-            messageUid = savedMsg.uid,
-            roomUid = roomUid,
-            userUid = sendUser.uid,
-            content = savedMsg.content,
-            kind = savedMsg.kind,
-            emojiCode = savedMsg.emojiCode,
-            createdAt = savedMsg.createdAt,
-            assetUids = assetUids
+        return MessageSummary.from(
+            entity = savedMsg,
+            sender = sender,
+            assets = assets,
+            unreadCount = (memberCount - 1)
         )
     }
+
 
 
     /** 메세지 페이징 조회 */
@@ -242,12 +253,6 @@ class ChatService(
         val room = rooms.findByUid(roomUid) ?: error("room not found")
         val me = chatUsers.findActive(room.id, currentUserId) ?: throw BusinessValidationException(mapOf("error" to "not a member"))
         chatUsers.save(me.copy(push = enabled, pushAt = OffsetDateTime.now()))
-    }
-
-
-    suspend fun assertMember(roomUid: UUID, userId: Long) {
-        val room = rooms.findByUid(roomUid) ?: error("room not found")
-        chatUsers.findActive(room.id, userId) ?: error("not a member")
     }
 
 
