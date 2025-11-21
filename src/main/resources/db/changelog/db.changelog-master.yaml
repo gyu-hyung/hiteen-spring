@@ -4,18 +4,10 @@ databaseChangeLog:
   - include:
       file: db/changelog/02-create-gift_user.yaml
   - include:
-      file: db/changelog/03-create-giftishow_logs.yaml
+      file: db/changelog/03-create-goods_brand.yaml
   - include:
-      file: db/changelog/04-create-goods.yaml
+      file: db/changelog/04-create-goods_category.yaml
   - include:
-      file: db/changelog/05-create-goods_asset.yaml
+      file: db/changelog/05-create-goods_giftishow.yaml
   - include:
-      file: db/changelog/06-create-goods_brand.yaml
-  - include:
-      file: db/changelog/07-create-goods_category.yaml
-  - include:
-      file: db/changelog/08-create-goods_giftishow.yaml
-  - include:
-      file: db/changelog/09-create-payment.yaml
-  - include:
-      file: db/changelog/10-create-gift-payment-foreign-keys.yaml
+      file: db/changelog/06-create-giftishow_logs.yaml
