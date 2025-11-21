@@ -39,10 +39,10 @@ databaseChangeLog:
                   type: bigint
                   remarks: "회원번호"
 
-              - column:
-                  name: pay_id
-                  type: bigint
-                  remarks: "결제번호"
+#              - column:
+#                  name: pay_id
+#                  type: bigint
+#                  remarks: "결제번호"
 
               - column:
                   name: memo
@@ -99,12 +99,12 @@ databaseChangeLog:
               - column:
                   name: user_id
 
-        - createIndex:
-            tableName: gift
-            indexName: idx_gift_pay_id
-            columns:
-              - column:
-                  name: pay_id
+#        - createIndex:
+#            tableName: gift
+#            indexName: idx_gift_pay_id
+#            columns:
+#              - column:
+#                  name: pay_id
 
         # ----------- Foreign Keys -----------
 
