@@ -102,6 +102,9 @@ INSERT INTO public.users
 (uid, username, email, nickname, "password", "role", address, detail_address, phone, mood, mood_emoji, mbti, exp_points, tier_id, asset_uid, school_id, grade, gender, birthday, profile_decoration_code, invite_code, invite_joins, created_id, created_at, updated_id, updated_at, deleted_id, deleted_at)
 VALUES('2d9ce3a8-722c-4a2c-8def-b8fb5c9f707c'::uuid, '01055555555', 'qwe@chat5', 'test5', '$2a$10$fAggMGapoSSz9Lk9SbML4.GK.5ER37P2fOQ6hhsHu0IAlR/.Egw9q', 'USER', '광주광역시 북구 시청로 1', '2층', '01055555555', '기분좋음', 'E_001', NULL, 0, 1, NULL, 1, '1', 'M', '1999-12-01', NULL, 'TIZKPBDWB0', 0, NULL, '2025-10-15 17:35:48.171', NULL, NULL, NULL, NULL);
 
+INSERT INTO public.users
+(uid, username, email, nickname, "password", "role", address, detail_address, phone, mood, mood_emoji, mbti, exp_points, tier_id, asset_uid, school_id, grade, gender, birthday, profile_decoration_code, invite_code, invite_joins, created_id, created_at, updated_id, updated_at, deleted_id, deleted_at)
+VALUES(gen_random_uuid(), 'admin', 'admin@admin.com', 'admin', '$2a$10$oxMsTG2UWVu8pQPA58asde3yRpt4NWzMv9U8yHfKavBqrvWX/NQdm', 'USER', '광주광역시 북구 시청로 1', '2층', '01055555555', '기분좋음', 'E_001', NULL, 0, 1, NULL, 1, '1', 'M', '1999-12-01', NULL, 'TIZKPBDWB0', 0, NULL, '2025-10-15 17:35:48.171', NULL, NULL, NULL, NULL);
 
 
 INSERT INTO public.assets
