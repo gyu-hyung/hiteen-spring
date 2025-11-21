@@ -71,7 +71,7 @@ class GiftishowSendService(
             callback_no = callbackNo,
             user_id = userId,
             mms_title = "[하이틴] 기프티콘 도착!",
-            mms_msg = "$goodsName 쿠폰이 도착했어요~ 🎁",
+            mms_msg = "$goodsName 쿠폰이 도착했어요 ~ 🎁",
             banner_id = bannerId,
             template_id = templateId
         )
