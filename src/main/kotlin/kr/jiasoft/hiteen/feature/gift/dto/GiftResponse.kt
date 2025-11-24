@@ -3,6 +3,7 @@ package kr.jiasoft.hiteen.feature.gift.dto
 import io.swagger.v3.oas.annotations.media.Schema
 import kr.jiasoft.hiteen.feature.gift.domain.GiftCategory
 import kr.jiasoft.hiteen.feature.gift.domain.GiftType
+import kr.jiasoft.hiteen.feature.giftishow.dto.GiftishowGoodsResponse
 import java.time.OffsetDateTime
 import java.util.UUID
 
@@ -24,8 +25,8 @@ data class GiftResponse(
     @field:Schema(description = "회원 ID")
     val userId: Long,
 
-    @field:Schema(description = "결제 ID")
-    val payId: Long?,
+//    @field:Schema(description = "결제 ID")
+//    val payId: Long?,
 
     @field:Schema(description = "메모")
     val memo: String?,
@@ -35,4 +36,8 @@ data class GiftResponse(
 
     @field:Schema(description = "생성일시")
     val createdAt: OffsetDateTime?,
+
+    @field:Schema(description = "기프티쇼 정보")
+    val giftishowGoods: GiftishowGoodsResponse?
+
 )

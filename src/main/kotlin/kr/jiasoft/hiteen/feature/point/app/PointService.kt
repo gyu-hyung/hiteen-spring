@@ -53,7 +53,8 @@ class PointService(
     suspend fun applyPolicy(
         userId: Long,
         policy: PointPolicy,
-        refId: Long? = null
+        refId: Long? = null,
+        dynamicPoint: Int? = null,
     ): PointEntity {
         // 1. 일일 제한 체크
         policy.dailyLimit?.let { limit ->
@@ -63,25 +64,25 @@ class PointService(
                 println("오늘은 더 이상 '${policy.memoTemplate}' 포인트를 받을 수 없습니다. (일일 제한: $limit)")
             }
         }
-
+        val pointAmount = dynamicPoint ?: policy.amount
         // 2. 포인트 차감인 경우 보유 포인트 확인
-        if (policy.amount < 0) {
+        if (pointAmount < 0) {
             val totalPoints = getUserTotalPoints(userId)
-            if (totalPoints < -policy.amount) {
-                throw IllegalStateException("포인트가 부족합니다. (보유=${totalPoints}, 필요=${-policy.amount})")
+            if (totalPoints < -pointAmount) {
+                throw IllegalStateException("포인트가 부족합니다. (보유=${totalPoints}, 필요=${-pointAmount})")
             }
         }
 
         // 3. 기록 저장
         val point = PointEntity(
             userId = userId,
-            point = policy.amount,
-            type = if (policy.amount > 0) "CREDIT" else "DEBIT",
+            point = pointAmount,
+            type = if (pointAmount > 0) "CREDIT" else "DEBIT",
             pointableType = policy.code,
             pointableId = refId,
             memo = policy.memoTemplate
         )
-        pointSummaryRepository.upsertAddPoint(userId, policy.amount)
+        pointSummaryRepository.upsertAddPoint(userId, pointAmount)
         return pointRepository.save(point)
     }
 

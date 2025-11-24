@@ -37,7 +37,7 @@ databaseChangeLog:
               - column:
                   name: user_id
                   type: bigint
-                  remarks: "회원번호"
+                  remarks: "발송 회원번호"
 
 #              - column:
 #                  name: pay_id

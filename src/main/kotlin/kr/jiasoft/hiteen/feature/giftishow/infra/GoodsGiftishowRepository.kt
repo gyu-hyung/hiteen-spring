@@ -11,4 +11,7 @@ interface GiftishowGoodsRepository : CoroutineCrudRepository<GoodsGiftishowEntit
     @Query("UPDATE goods_giftishow SET del_yn = 1")
     suspend fun markAllDeleted()
 
+    suspend fun findAllByOrderByCreatedAtDesc(): List<GoodsGiftishowEntity>
+
+
 }
