@@ -11,7 +11,7 @@ import java.util.UUID
 @Repository
 interface BoardCommentRepository : CoroutineCrudRepository<BoardCommentEntity, Long> {
 
-    suspend fun countByCreatedId(createdId: Long) : Int
+    suspend fun countByCreatedIdAndDeletedAtIsNull(createdId: Long) : Int
 
     suspend fun findByUid(uid: UUID): BoardCommentEntity?
     fun findAllByBoardIdAndParentIdIsNullOrderByIdAsc(boardId: Long): Flow<BoardCommentEntity>

@@ -23,6 +23,13 @@ interface PollUserRepository : CoroutineCrudRepository<PollUserEntity, Long> {
     fun countVotesByPollId(pollId: Long): Flow<VoteCountRow>
 
     suspend fun countByPollId(pollId: Long) : Int
-    suspend fun countByUserId(userId: Long) : Int
+
+    @Query("""
+        SELECT COUNT(*)        
+        FROM poll_users pu
+        LEFT JOIN polls p ON pu.poll_id = p.id 
+        WHERE p.deleted_at is null AND pu.user_id = :userId
+    """)
+    suspend fun countByUserIdAndDeletedAtIsNull(userId: Long) : Int
 
 }
