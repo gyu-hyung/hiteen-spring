@@ -18,8 +18,8 @@ data class GiftRequest(
     @field:Schema(description = "회원 ID")
     val userId: Long,
 
-    @field:Schema(description = "결제 ID(Optional)")
-    val payId: Long? = null,
+//    @field:Schema(description = "결제 ID(Optional)")
+//    val payId: Long? = null,
 
     @field:Schema(description = "메모(Optional)")
     val memo: String? = null,

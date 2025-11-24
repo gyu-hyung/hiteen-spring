@@ -29,7 +29,7 @@ databaseChangeLog:
               - column:
                   name: user_id
                   type: bigint
-                  remarks: "받은 회원번호"
+                  remarks: "수신 회원번호"
 
               - column:
                   name: status
@@ -80,6 +80,13 @@ databaseChangeLog:
                   remarks: "상품 교환(수령) 만료일"
 
               - column:
+                  name: goods_code
+                  type: varchar(50)
+                  remarks: "상품 코드"
+#                  constraints:
+#                    nullable: false
+
+              - column:
                   name: season_id
                   type: bigint
                   remarks: "챌린지 회차번호"
@@ -91,6 +98,11 @@ databaseChangeLog:
                   defaultValueNumeric: 0
                   constraints:
                     nullable: false
+
+              - column:
+                  name: point
+                  type: bigint
+                  remarks: "선물 받은 포인트"
 
               - column:
                   name: delivery_name

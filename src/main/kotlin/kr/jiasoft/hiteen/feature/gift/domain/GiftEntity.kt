@@ -23,10 +23,10 @@ data class GiftEntity (
     val uid: UUID = UUID.randomUUID(),
 
     @field:Schema(description = "선물 구분 (Point, Voucher, Delivery, Etc)")
-    val type: String,
+    val type: GiftType,
 
     @field:Schema(description = "카테고리(친구, 챌린지, 관리자 등)")
-    val category: String,
+    val category: GiftCategory,
 
     @field:Schema(description = "회원 번호")
     @Column("user_id")

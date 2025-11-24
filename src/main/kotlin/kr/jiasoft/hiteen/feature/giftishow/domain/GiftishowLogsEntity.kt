@@ -74,7 +74,7 @@ data class GiftishowLogsEntity(
     @Column("user_id")
     val userId: String? = null,
 
-    @field:Schema(description = "발급방식 (Y/N/I)")
+    @field:Schema(description = "발급방식 (Y:핀번호수신, N:MMS, I:이미지수신)")
     @Column("gubun")
     val gubun: String = "I",
 
