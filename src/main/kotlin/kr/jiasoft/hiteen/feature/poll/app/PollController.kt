@@ -33,9 +33,10 @@ class PollController(
         @Parameter(description = "이전 페이지의 마지막 ID") @RequestParam(required = false) cursor: Long?,
         @Parameter(description = "가져올 개수 (기본값 20)") @RequestParam(defaultValue = "20") size: Int,
         @Parameter(description = "목록 타입: all, mine, participated") @RequestParam(defaultValue = "all") type: String,
+        @Parameter(description = "작성자 UUID") @RequestParam(required = false) author: UUID?,
         @AuthenticationPrincipal(expression = "user") user: UserEntity?
     ): ResponseEntity<ApiResult<ApiPageCursor<PollResponse>>> {
-        val list = service.listPollsByCursor(cursor, size + 1, user?.id, type)
+        val list = service.listPollsByCursor(cursor, size + 1, user?.id, type, author)
 
         val hasMore = list.size > size
         val items = if (hasMore) list.dropLast(1) else list

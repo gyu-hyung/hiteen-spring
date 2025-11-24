@@ -54,9 +54,10 @@ class PollService(
         cursor: Long?,
         size: Int,
         currentUserId: Long?,
-        type: String = "all"
+        type: String = "all",
+        author: UUID?
     ): List<PollResponse> =
-        polls.findSummariesByCursor(cursor, size, currentUserId, type)
+        polls.findSummariesByCursor(cursor, size, currentUserId, type, author)
             .map { row ->
                 val user = userService.findUserResponse(row.createdId)
 
