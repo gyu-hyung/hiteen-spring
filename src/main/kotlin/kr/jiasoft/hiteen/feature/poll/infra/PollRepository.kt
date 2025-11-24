@@ -6,6 +6,7 @@ import kr.jiasoft.hiteen.feature.poll.dto.PollSummaryRow
 import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 import org.springframework.stereotype.Repository
+import java.util.UUID
 
 @Repository
 interface PollRepository : CoroutineCrudRepository<PollEntity, Long> {
@@ -48,6 +49,7 @@ interface PollRepository : CoroutineCrudRepository<PollEntity, Long> {
               ))
           )
           AND (:cursor IS NULL OR p.id < :cursor)
+          AND (:authorUid IS NULL OR p.created_id = (SELECT id FROM users WHERE uid = :authorUid))
         ORDER BY p.id DESC
         LIMIT :size
     """)
@@ -55,7 +57,8 @@ interface PollRepository : CoroutineCrudRepository<PollEntity, Long> {
         cursor: Long?,
         size: Int,
         currentUserId: Long?,
-        type: String
+        type: String,
+        authorUid: UUID?
     ): Flow<PollSummaryRow>
 
 
