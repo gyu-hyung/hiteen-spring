@@ -99,10 +99,10 @@ class UserService (
         val tier = tierRepository.findById(targetUser.tierId)
         val interests = interestUserRepository.getInterestResponseById(null, targetUser.id).toList()
         val relationshipCounts = RelationshipCounts(
-            postCount = boardRepository.countByCreatedId(targetUser.id),
-            voteCount = pollUserRepository.countByUserId(targetUser.id),
-            boardCommentCount = boardCommentRepository.countByCreatedId(targetUser.id),
-            pollCommentCount = pollCommentRepository.countByCreatedId(targetUser.id),
+            postCount = boardRepository.countByCreatedIdAndDeletedAtIsNull(targetUser.id),
+            voteCount = pollUserRepository.countByUserIdAndDeletedAtIsNull(targetUser.id),
+            boardCommentCount = boardCommentRepository.countByCreatedIdAndDeletedAtIsNull(targetUser.id),
+            pollCommentCount = pollCommentRepository.countByCreatedIdAndDeletedAtIsNull(targetUser.id),
             friendCount = friendRepository.countFriendship(targetUser.id),
             followerCount = followRepository.countByFollowIdAndStatus(targetUser.id, FollowStatus.ACCEPTED.name),
             followingCount = followRepository.countByUserIdAndStatus(targetUser.id, FollowStatus.ACCEPTED.name),
