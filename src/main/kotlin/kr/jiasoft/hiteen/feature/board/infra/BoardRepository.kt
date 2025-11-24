@@ -19,7 +19,7 @@ interface BoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
     @Query("UPDATE boards SET hits = hits + 1 WHERE id = :id")
     suspend fun increaseHits(id: Long)
 
-    suspend fun countByCreatedId(id: Long): Int
+    suspend fun countByCreatedIdAndDeletedAtIsNull(id: Long): Int
 
 
     @Query("""
