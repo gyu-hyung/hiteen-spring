@@ -21,7 +21,7 @@ data class GiftUsersEntity(
 
     @field:Schema(description = "받은 회원 ID (FK: users.id)")
     @Column("user_id")
-    val userId: Long? = null,
+    val userId: Long,
 
     @field:Schema(description = "수신 상태 (0: 대기, 1: 발송, 2: 사용, 3: 만료 등)")
     val status: Int = 0,
@@ -58,27 +58,35 @@ data class GiftUsersEntity(
     @Column("use_expired_date")
     val useExpiredDate: LocalDate? = null,
 
-    @field:Schema(description = "챌린지 시즌 번호 (Null 가능)")
+    @field:Schema(description = "상품 코드")
+    @Column("goods_code")
+    val goodsCode: String? = null,
+
+    @field:Schema(description = "챌린지 회차번호 -- GiftCategory.Challenge 일 경우")
     @Column("season_id")
     val seasonId: Long? = null,
 
-    @field:Schema(description = "챌린지 순위")
+    @field:Schema(description = "챌린지 랭킹 -- GiftCategory.Challenge 일 경우")
     @Column("season_rank")
-    val seasonRank: Int = 0,
+    val seasonRank: Int? = 0,
 
-    @field:Schema(description = "수령자 이름")
+    @field:Schema(description = "선물 받은 포인트 -- GiftType.Point 일 경우")
+    @Column("point")
+    val point: Int? = 0,
+
+    @field:Schema(description = "수령자 이름 -- GiftType.Delivery 일 경우")
     @Column("delivery_name")
     val deliveryName: String? = null,
 
-    @field:Schema(description = "수령자 연락처")
+    @field:Schema(description = "수령자 연락처 -- GiftType.Delivery 일 경우")
     @Column("delivery_phone")
     val deliveryPhone: String? = null,
 
-    @field:Schema(description = "배송지 주소")
+    @field:Schema(description = "배송지 주소 -- GiftType.Delivery 일 경우")
     @Column("delivery_address1")
     val deliveryAddress1: String? = null,
 
-    @field:Schema(description = "배송지 상세주소")
+    @field:Schema(description = "배송지 상세주소 -- GiftType.Delivery 일 경우")
     @Column("delivery_address2")
     val deliveryAddress2: String? = null,
 )

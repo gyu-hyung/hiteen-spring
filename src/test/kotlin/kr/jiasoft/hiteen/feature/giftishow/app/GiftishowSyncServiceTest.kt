@@ -14,8 +14,8 @@ class GiftishowSyncServiceTest {
     @Test
     fun `기프티쇼 상품 정보 import` (){
         runBlocking {
-//            giftishowSyncService.syncGoods()
-//            giftishowSyncService.syncBrandsAndCategories()
+            giftishowSyncService.syncGoods()
+            giftishowSyncService.syncBrandsAndCategories()
         }
     }
 

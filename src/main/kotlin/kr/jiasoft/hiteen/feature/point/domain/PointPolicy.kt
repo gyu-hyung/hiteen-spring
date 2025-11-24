@@ -45,6 +45,9 @@ enum class PointPolicy(
     PAYMENT_5000("PAYMENT_5000", 5500, null, "포인트 충전 (5,000원)"),
     PAYMENT_10000("PAYMENT_10000", 11000, null, "포인트 충전 (10,000원)"),
 
+    // --- ADMIN 지급 ---
+    ADMIN("ADMIN", 0, null, "관리자 포인트 지급"),
+
     // --- 기타 ---
     ETC("ETC", 0, null, "기타")
 }

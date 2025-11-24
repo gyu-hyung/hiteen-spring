@@ -1,16 +1,13 @@
 package kr.jiasoft.hiteen.feature.giftishow.app
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import kotlinx.coroutines.reactor.awaitSingle
 import kr.jiasoft.hiteen.feature.giftishow.domain.GiftishowLogsEntity
 import kr.jiasoft.hiteen.feature.giftishow.dto.send.GiftishowSendRequest
 import kr.jiasoft.hiteen.feature.giftishow.dto.send.GiftishowSendResponse
 import kr.jiasoft.hiteen.feature.giftishow.infra.GiftishowLogsRepository
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
-import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
-import java.time.OffsetDateTime
 import java.util.UUID
 
 @Service
@@ -47,8 +44,7 @@ class GiftishowSendService(
               "result": {
                 "pinNo": "GIFT1234567890",
                 "couponImgUrl": "https://giftishow.com/coupon/GIFT1234567890.png",
-                "tr_id": "202511210001",
-                "goodsName": "스타벅스 아메리카노"
+                "tr_id": "202511210001"
               }
             }
             """.trimIndent()
@@ -58,7 +54,19 @@ class GiftishowSendService(
 
     private val client = WebClient.create()
 
-    suspend fun sendCoupon(giftUserId: Long, goodsCode: String, phone: String, goodsName: String): GiftishowLogsEntity {
+    suspend fun sendCoupon(
+        giftUserId: Long,
+        goodsCode: String,
+        goodsName: String,
+        orderNo: String? = null,
+        mmsTitle: String,
+        mmsMsg: String,
+        phone: String,
+        revInfoYn: String = "N",
+        revInfoDate: String? = null,
+        revInfoTime: String? = null,
+        gubun: String = "I",
+    ): GiftishowLogsEntity {
 
         val trId = UUID.randomUUID().toString().replace("-", "").take(16)
 
@@ -66,14 +74,18 @@ class GiftishowSendService(
             custom_auth_code = authKey,
             custom_auth_token = token,
             goods_code = goodsCode,
-            tr_id = trId,
-            phone_no = phone,
+            order_no = orderNo,
+            mms_title = mmsTitle,
+            mms_msg = mmsMsg,
             callback_no = callbackNo,
-            user_id = userId,
-            mms_title = "[하이틴] 기프티콘 도착!",
-            mms_msg = "$goodsName 쿠폰이 도착했어요 ~ 🎁",
+            phone_no = phone,
+            tr_id = trId,
+            rev_info_yn = revInfoYn,
+            rev_info_time = revInfoTime,
+            template_id = templateId,
             banner_id = bannerId,
-            template_id = templateId
+            user_id = userId,
+            gubun = gubun,
         )
 
         // [현재는 Mock 요청] → 실제 호출 시 내부 수정
@@ -84,21 +96,26 @@ class GiftishowSendService(
             giftUserId = giftUserId,
             goodsCode = goodsCode,
             goodsName = goodsName,
+            orderNo = orderNo,
+            mmsMsg = requestBody.mms_msg,
+            mmsTitle = requestBody.mms_title,
+            callbackNo = callbackNo,
             phoneNo = phone,
             trId = trId,
-            callbackNo = callbackNo,
-            mmsTitle = requestBody.mms_title,
-            mmsMsg = requestBody.mms_msg,
+            reserveYn = revInfoYn,
+            reserveDate = revInfoDate,
+            reserveTime = revInfoTime,
             templateId = templateId,
             bannerId = bannerId,
             userId = userId,
+            gubun = gubun,
             response = mockSendCouponResponse, // 실 API에서는 실제 raw 응답
             code = response.code,
             message = response.message,
             pinNo = response.result?.pinNo,
             couponImgUrl = response.result?.couponImgUrl,
+            memo = null,
             status = if (response.code == "0000") 1 else -1,
-            createdAt = OffsetDateTime.now()
         )
 
         return logRepository.save(log)
