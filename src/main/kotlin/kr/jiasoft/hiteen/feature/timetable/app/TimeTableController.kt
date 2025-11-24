@@ -5,7 +5,9 @@ import io.swagger.v3.oas.annotations.Parameter
 import kr.jiasoft.hiteen.common.dto.ApiResult
 import kr.jiasoft.hiteen.feature.timetable.dto.TimeTableRequest
 import kr.jiasoft.hiteen.feature.timetable.dto.TimeTableResponse
+import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import org.springframework.http.ResponseEntity
+import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -40,6 +42,18 @@ class TimeTableController(
         @PathVariable period: Int
     ): ResponseEntity<ApiResult<Unit>> {
         timeTableService.delete(userUid, week, period)
+        return ResponseEntity.ok(ApiResult.success())
+    }
+
+    @Operation(summary = "시간표 과목 삭제", description = "특정 요일, 교시의 과목을 삭제(빈칸)")
+    @DeleteMapping("/all/{userUid}")
+    suspend fun deleteAll(
+        @AuthenticationPrincipal(expression = "user") user: UserEntity,
+        @PathVariable userUid: String,
+    ): ResponseEntity<ApiResult<Unit>> {
+        if(user.uid.toString() != userUid) throw IllegalArgumentException("본인의 시간표만 수정 가능해~")
+
+        timeTableService.deleteAll(userUid)
         return ResponseEntity.ok(ApiResult.success())
     }
 }

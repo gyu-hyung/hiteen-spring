@@ -14,6 +14,10 @@ interface TimeUserRepository : CoroutineCrudRepository<TimeUserEntity, Long> {
     @Query("SELECT * FROM time_user WHERE user_id = :userId AND week = :week AND period = :period")
     suspend fun findByUserAndSlot(userId: Long, week: Int, period: Int): TimeUserEntity?
 
+    //전체삭제
+    @Query("DELETE FROM time_user WHERE user_id = :userId")
+    suspend fun deleteAllByUserId(userId: Long)
+
     @Query("SELECT * FROM users WHERE uid = :uid")
     suspend fun findByUid(uid: String): UserEntity?
 }

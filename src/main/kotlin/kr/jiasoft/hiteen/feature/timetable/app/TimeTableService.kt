@@ -72,4 +72,11 @@ class TimeTableService(
             timeUserRepository.delete(existing)
         }
     }
+
+    suspend fun deleteAll(userUid: String) {
+        val user = userRepository.findByUid(userUid)
+            ?: throw IllegalArgumentException("User not found: $userUid")
+
+        timeUserRepository.deleteAllByUserId(user.id)
+    }
 }
