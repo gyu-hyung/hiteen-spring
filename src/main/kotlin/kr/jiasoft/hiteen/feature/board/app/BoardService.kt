@@ -26,18 +26,18 @@ import kr.jiasoft.hiteen.feature.board.infra.BoardRepository
 import kr.jiasoft.hiteen.feature.level.app.ExpService
 import kr.jiasoft.hiteen.feature.point.app.PointService
 import kr.jiasoft.hiteen.feature.point.domain.PointPolicy
-import kr.jiasoft.hiteen.feature.poll.dto.PollCommentResponse
 import kr.jiasoft.hiteen.feature.push.app.PushService
 import kr.jiasoft.hiteen.feature.push.domain.PushTemplate
 import kr.jiasoft.hiteen.feature.push.domain.buildPushData
 import kr.jiasoft.hiteen.feature.relationship.infra.FollowRepository
 import kr.jiasoft.hiteen.feature.user.app.UserService
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
-import org.springframework.cache.annotation.Cacheable
 import org.springframework.dao.DuplicateKeyException
 import org.springframework.http.HttpStatus
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
+import org.springframework.transaction.reactive.TransactionalOperator
+import org.springframework.transaction.reactive.executeAndAwait
 import org.springframework.web.server.ResponseStatusException
 import java.time.OffsetDateTime
 import java.util.UUID
@@ -56,6 +56,7 @@ class BoardService(
     private val pushService: PushService,
 
     private val followRepository: FollowRepository,
+    private val txOperator: TransactionalOperator,
 ) {
 
 
@@ -178,53 +179,55 @@ class BoardService(
         files: List<FilePart>,
         ip: String?
     ): UUID {
-        // 1) 파일이 있다면 먼저 업로드 → 첫 번째 파일을 대표이미지 후보로
-        val uploaded: List<AssetResponse> =
-            if (files.isNotEmpty()) assetService.uploadImages(files, user.id, AssetCategory.POST) else emptyList()
-        val representativeUid: UUID? = uploaded.firstOrNull()?.uid
+        return txOperator.executeAndAwait {
+            // 1) 파일이 있다면 먼저 업로드 → 첫 번째 파일을 대표이미지 후보로
+            val uploaded: List<AssetResponse> =
+                if (files.isNotEmpty()) assetService.uploadImages(files, user.id, AssetCategory.POST) else emptyList()
+            val representativeUid: UUID? = uploaded.firstOrNull()?.uid
 
-        // 2) 대표이미지(assetUid)를 반영해 게시글 생성
-        val saved = boards.save(
-            BoardEntity(
-                category = req.category.name,
-                subject = req.subject,
-                content = req.content,
-                link = req.link,
-                ip = ip,
-                startDate = req.startDate,
-                endDate = req.endDate,
-                status = req.status,
-                address = req.address,
-                detailAddress = req.detailAddress,
-                lat = req.lat,
-                lng = req.lng,
-                assetUid = representativeUid,
-                createdId = user.id,
-                createdAt = OffsetDateTime.now(),
-            )
-        )
-
-        // 3) 업로드된 모든 파일을 board_assets 매핑에 저장
-        if (uploaded.isNotEmpty()) {
-            uploaded.forEach { a ->
-                boardAssetRepository.save(
-                    BoardAssetEntity(
-                        boardId = saved.id,
-                        uid = a.uid
-                    )
+            // 2) 대표이미지(assetUid)를 반영해 게시글 생성
+            val saved = boards.save(
+                BoardEntity(
+                    category = req.category.name,
+                    subject = req.subject,
+                    content = req.content,
+                    link = req.link,
+                    ip = ip,
+                    startDate = req.startDate,
+                    endDate = req.endDate,
+                    status = req.status,
+                    address = req.address,
+                    detailAddress = req.detailAddress,
+                    lat = req.lat,
+                    lng = req.lng,
+                    assetUid = representativeUid,
+                    createdId = user.id,
+                    createdAt = OffsetDateTime.now(),
                 )
+            )
+
+            // 3) 업로드된 모든 파일을 board_assets 매핑에 저장
+            if (uploaded.isNotEmpty()) {
+                uploaded.forEach { a ->
+                    boardAssetRepository.save(
+                        BoardAssetEntity(
+                            boardId = saved.id,
+                            uid = a.uid
+                        )
+                    )
+                }
             }
+
+            //경험치
+            expService.grantExp(user.id, "CREATE_BOARD", saved.id)
+            //포인트
+            pointService.applyPolicy(user.id, PointPolicy.STORY_POST, saved.id)
+            //포스팅 알림
+            val followerIds = followRepository.findAllFollowerIds(user.id).toList()
+            pushService.sendAndSavePush(followerIds, PushTemplate.NEW_POST.buildPushData("nickname" to user))
+
+            saved.uid
         }
-
-        //경험치
-        expService.grantExp(user.id, "CREATE_BOARD", saved.id)
-        //포인트
-        pointService.applyPolicy(user.id, PointPolicy.STORY_POST, saved.id)
-        //포스팅 알림
-        val followerIds = followRepository.findAllFollowerIds(user.id).toList()
-        pushService.sendAndSavePush(followerIds, PushTemplate.NEW_POST.buildPushData("nickname" to user))
-
-        return saved.uid
     }
 
     /**
