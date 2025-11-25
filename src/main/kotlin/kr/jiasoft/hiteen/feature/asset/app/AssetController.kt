@@ -158,6 +158,43 @@ class AssetController(
             .body(resource)
     }
 
+    @Operation(
+        summary = "썸네일 이미지 조회 or 생성",
+        description = "지정된 해상도의 썸네일이 존재하면 재사용하고, 없으면 생성한 뒤 반환합니다."
+    )
+    @GetMapping("/{uid}/view/{size}")
+    suspend fun getThumbnail(
+        @PathVariable uid: UUID,
+        @PathVariable size: String,
+        @AuthenticationPrincipal(expression = "user") user: UserEntity
+    ): ResponseEntity<FileSystemResource> {
+
+        val regex = Regex("""(\d+)x(\d+)""")
+        val match = regex.matchEntire(size)
+            ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "크기는 {width}x{height} 형태여야 합니다. 예: 300x300")
+
+        val (width, height) = match.destructured.toList().map { it.toInt() }
+
+        // Thumbnail 생성 또는 가져오기
+        val asset = assetService.getOrCreateThumbnail(uid, width, height, user.id)
+
+        val path = assetService.resolveFilePath(asset.filePath + asset.storeFileName)
+        if (!assetService.existsFile(path)) return ResponseEntity.notFound().build()
+
+        val resource = FileSystemResource(path)
+        val mime = asset.type ?: MediaType.APPLICATION_OCTET_STREAM_VALUE
+
+        val headers = HttpHeaders().apply {
+            contentType = MediaType.parseMediaType(mime)
+            contentLength = resource.contentLength()
+            add(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"${asset.originFileName}\"")
+        }
+
+        return ResponseEntity.ok()
+            .headers(headers)
+            .body(resource)
+    }
+
 
     @Operation(summary = "파일 삭제", description = "특정 파일을 소프트 삭제(메타데이터만 변경)합니다.")
     @DeleteMapping("/{uid}")

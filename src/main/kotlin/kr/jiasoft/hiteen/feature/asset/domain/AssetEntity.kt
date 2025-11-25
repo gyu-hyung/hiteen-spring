@@ -17,6 +17,7 @@ data class AssetEntity(
     val size: Long,       // mime-type 같은 용도
     val width: Int?,
     val height: Int?,
+    val originId: Long? = null,
     val ext: String?,        // 확장자(소문자)
     val downloadCount: Int = 0,
     val createdId: Long,
