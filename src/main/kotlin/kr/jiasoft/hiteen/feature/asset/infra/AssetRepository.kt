@@ -37,4 +37,15 @@ interface AssetRepository : CoroutineCrudRepository<AssetEntity, Long> {
         RETURNING *
     """)
     suspend fun softDelete(uid: UUID, deletedId: Long): AssetEntity?
+
+    @Query("""
+        SELECT * FROM assets
+        WHERE origin_id = :id 
+          AND width = :width 
+          AND height = :height 
+          AND deleted_at IS NULL 
+        LIMIT 1
+    """)
+    suspend fun findByOriginAndSize(id: Long, width: Int, height: Int): AssetEntity?
+
 }
