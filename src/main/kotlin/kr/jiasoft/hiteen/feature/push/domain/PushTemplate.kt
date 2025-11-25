@@ -110,7 +110,19 @@ enum class PushTemplate(
         code = "CHAT_MESSAGE",
         title = "새로운 채팅 💬",
         message = "{nickname}님이 새로운 메시지를 보냈어요~"
-    );
+    ),
+
+    /**
+     * 선물 알림
+     */
+    GIFT_MESSAGE(
+    code = "GIFT_MESSAGE",
+    title = "새로운 선물 도착! 🎁",
+    message = "새로운 선물 도착! 🎁"
+    ),
+
+
+    ;
 }
 
 

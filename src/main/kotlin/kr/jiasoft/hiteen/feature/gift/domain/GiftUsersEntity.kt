@@ -62,6 +62,10 @@ data class GiftUsersEntity(
     @Column("goods_code")
     val goodsCode: String? = null,
 
+    @field:Schema(description = "게임 ID -- GiftCategory.Challenge 일 경우")
+    @Column("season_id")
+    val gameId: Long? = null,
+
     @field:Schema(description = "챌린지 회차번호 -- GiftCategory.Challenge 일 경우")
     @Column("season_id")
     val seasonId: Long? = null,
