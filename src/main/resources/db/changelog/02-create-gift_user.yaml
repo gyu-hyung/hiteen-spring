@@ -87,6 +87,11 @@ databaseChangeLog:
 #                    nullable: false
 
               - column:
+                  name: game_id
+                  type: bigint
+                  remarks: "게임 id"
+
+              - column:
                   name: season_id
                   type: bigint
                   remarks: "챌린지 회차번호"
@@ -95,9 +100,6 @@ databaseChangeLog:
                   name: season_rank
                   type: int
                   remarks: "챌린지 랭킹"
-                  defaultValueNumeric: 0
-                  constraints:
-                    nullable: false
 
               - column:
                   name: point

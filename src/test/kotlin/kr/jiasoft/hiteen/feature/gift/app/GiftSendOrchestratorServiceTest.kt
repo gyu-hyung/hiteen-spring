@@ -20,8 +20,9 @@ class GiftSendOrchestratorServiceTest {
                 giftType = GiftType.Voucher,
                 giftCategory = GiftCategory.Challenge,
                 senderUserId = 1,
-                receiverUserId = 3,
+                receiverUserId = 1,
                 goodsCode = "G00000280811",
+                gameId = 1,
                 seasonId = 4,
                 seasonRank = 1,
             )
@@ -36,7 +37,7 @@ class GiftSendOrchestratorServiceTest {
                 giftType = GiftType.Point,
                 giftCategory = GiftCategory.Admin,
                 senderUserId = 1,
-                receiverUserId = 3,
+                receiverUserId = 1,
                 point = 1000,
 
             )
@@ -51,7 +52,7 @@ class GiftSendOrchestratorServiceTest {
                 giftType = GiftType.Delivery,
                 giftCategory = GiftCategory.Admin,
                 senderUserId = 1,
-                receiverUserId = 3,
+                receiverUserId = 1,
                 deliveryName = "홍길동",
                 deliveryPhone = "01095393637",
                 deliveryAddress1 = "서울특별시 강남구 봉은사로 1",
