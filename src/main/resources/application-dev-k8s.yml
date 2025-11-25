@@ -121,7 +121,7 @@ sms:
     detail-url: https://kakaoapi.aligo.in/akv10/history/detail/
 
 batch:
-  enabled: false
+  enabled: true
 
 giftishow:
   url: "https://bizapi.giftishow.com/bizApi"
