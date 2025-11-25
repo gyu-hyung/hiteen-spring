@@ -42,6 +42,7 @@ CREATE TABLE assets (
   size             bigint,        -- bytes
   width            integer,
   height           integer,
+  origin_id        bigint,
   ext              varchar(10),
   download_count   integer        DEFAULT 0,
   created_id       bigint,
@@ -52,6 +53,9 @@ CREATE TABLE assets (
   deleted_at       timestamptz,
   UNIQUE (uid)
 );
+
+CREATE INDEX IF NOT EXISTS idx_assets_origin_size
+ON public.assets (origin_id, width, height);
 
 
 -- ========================

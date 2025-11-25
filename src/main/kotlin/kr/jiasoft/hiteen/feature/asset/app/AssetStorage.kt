@@ -6,6 +6,7 @@ import kotlinx.coroutines.withContext
 import kr.jiasoft.hiteen.feature.asset.domain.AssetCategory
 import kr.jiasoft.hiteen.feature.asset.dto.StoredFile
 import org.springframework.http.codec.multipart.FilePart
+import java.awt.image.BufferedImage
 import java.nio.file.Files
 import java.nio.file.Path
 import java.time.LocalDate
@@ -76,6 +77,52 @@ class AssetStorage(
             throw e
         }
     }
+
+    suspend fun createThumbnail(
+        sourcePath: Path,
+        ext: String,
+        width: Int,
+        height: Int
+    ): StoredFile = withContext(Dispatchers.IO) {
+
+        val image = ImageIO.read(sourcePath.toFile())
+            ?: throw IllegalArgumentException("이미지 파일이 아닙니다")
+
+        val resized = BufferedImage(width, height, image.type.takeIf { it != 0 } ?: BufferedImage.TYPE_INT_RGB)
+        val graphics = resized.createGraphics()
+        graphics.drawImage(image, 0, 0, width, height, null)
+        graphics.dispose()
+
+        // 저장 경로: thumb/{width}x{height}/YYYY/MM/DD/
+        val today = LocalDate.now()
+        val dir = root.resolve(
+            "thumb/${width}x${height}/${today.year}/${"%02d".format(today.monthValue)}/${"%02d".format(today.dayOfMonth)}"
+        )
+        Files.createDirectories(dir)
+
+        val newName = "${UUID.randomUUID()}.$ext"
+        val dest = dir.resolve(newName)
+
+        ImageIO.write(resized, ext, dest.toFile())
+
+        val mime = Files.probeContentType(dest)
+        val size = Files.size(dest)
+
+        val relDir = root.relativize(dir).toString().replace('\\', '/') + "/"
+
+        StoredFile(
+            relativePath = relDir,
+            absolutePath = dest,
+            originFileName = newName,
+            ext = ext,
+            size = size,
+            width = width,
+            height = height,
+            mimeTypeGuess = mime
+        )
+    }
+
+
 
     fun resolve(relativePath: String): Path = root.resolve(relativePath)
 }

@@ -125,6 +125,48 @@ class AssetService(
         }
     }
 
+
+    suspend fun getOrCreateThumbnail(
+        uid: UUID,
+        width: Int,
+        height: Int,
+        currentUserId: Long
+    ): AssetEntity {
+
+        val original = findByUid(uid) ?: throw IllegalArgumentException("존재하지 않는 파일")
+
+        // 이미 동일한 크기 썸네일이 존재하면 재사용
+        val existing =
+            assetRepository.findByOriginAndSize(original.id, width, height)
+
+        if (existing != null) return existing
+
+        val originalPath = resolveFilePath(original.filePath + original.storeFileName)
+        if (!existsFile(originalPath)) throw IllegalArgumentException("원본 파일 없음")
+
+        if (original.ext?.lowercase() in listOf("gif", "svg"))
+            throw IllegalArgumentException("GIF, SVG는 리사이즈 불가")
+
+        val resizedStored = storage.createThumbnail(originalPath, original.ext!!, width, height)
+
+        val entity = AssetEntity(
+            originFileName = "${original.originFileName.removeSuffix(".${original.ext}")}_${width}x${height}.${original.ext}",
+            storeFileName = resizedStored.absolutePath.fileName.toString(),
+            filePath = resizedStored.relativePath,
+            type = resizedStored.mimeTypeGuess,
+            size = resizedStored.size,
+            width = resizedStored.width,
+            height = resizedStored.height,
+            originId = original.id,
+            ext = resizedStored.ext,
+            createdId = currentUserId,
+            createdAt = OffsetDateTime.now(),
+        )
+
+        return assetRepository.save(entity)
+    }
+
+
     suspend fun findByUid(uid: UUID): AssetEntity? = assetRepository.findByUid(uid)
 
     suspend fun get(uid: UUID): AssetEntity? =
