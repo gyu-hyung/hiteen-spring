@@ -64,11 +64,14 @@ class CodeController(
     @PostMapping("/group/{group}", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     suspend fun createCodes(
         @Parameter(description = "코드 그룹명") @PathVariable group: String,
+        @Parameter(description = "임시컬럼1") @RequestPart(name = "col1", required = false) col1: String? = null,
+        @Parameter(description = "임시컬럼1") @RequestPart(name = "col2", required = false) col2: String? = null,
+        @Parameter(description = "임시컬럼1") @RequestPart(name = "col3", required = false) col3: String? = null,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
         @Parameter(description = "첨부할 파일들") @RequestPart(name = "files", required = false) filesFlux: Flux<FilePart>?,
     ): ResponseEntity<ApiResult<List<Map<String, Any>>>> {
         val files: List<FilePart> = filesFlux?.collectList()?.awaitSingle().orEmpty()
-        val saved = codeService.createCodesWithFiles(group, user.id, files)
+        val saved = codeService.createCodesWithFiles(group, user.id, files, "", col1, col2, col3)
         return ResponseEntity.ok(
             ApiResult.success(
                 saved.map { mapOf("id" to it.id, "code" to it.code) }
