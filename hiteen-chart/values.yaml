@@ -191,7 +191,7 @@ ingress:
   hosts:
     - host:
       paths:
-        - path: /
+        - path: /api
           pathType: Prefix
           backend:
             serviceName: hiteen-test
