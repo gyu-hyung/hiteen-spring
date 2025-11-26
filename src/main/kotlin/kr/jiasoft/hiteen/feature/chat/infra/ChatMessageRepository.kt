@@ -16,7 +16,7 @@ interface ChatMessageRepository : CoroutineCrudRepository<ChatMessageEntity, Lon
         SELECT * FROM chat_messages
         WHERE chat_room_id = :roomId
           AND (:cursor IS NULL OR created_at < :cursor)
-        ORDER BY created_at DESC
+        ORDER BY created_at DESC, id DESC
         LIMIT :size
     """)
     fun pageByRoom(roomId: Long, cursor: OffsetDateTime?, size: Int): Flow<ChatMessageEntity>
@@ -25,7 +25,7 @@ interface ChatMessageRepository : CoroutineCrudRepository<ChatMessageEntity, Lon
     @Query("""
         SELECT * FROM chat_messages
         WHERE chat_room_id = :roomId
-        ORDER BY created_at DESC
+        ORDER BY created_at DESC, id DESC
         LIMIT 1
     """)
     suspend fun findLastMessage(roomId: Long): ChatMessageEntity?
@@ -83,7 +83,7 @@ interface ChatMessageRepository : CoroutineCrudRepository<ChatMessageEntity, Lon
           AND deleted_at IS NULL
           AND kind <> 2
           AND (:cursor IS NULL OR created_at < :cursor)
-        ORDER BY created_at DESC
+        ORDER BY created_at DESC, id DESC
         LIMIT :size
     """)
     fun pageByRoomNoEmoji(roomId: Long, cursor: OffsetDateTime?, size: Int): Flow<ChatMessageEntity>
@@ -94,7 +94,7 @@ interface ChatMessageRepository : CoroutineCrudRepository<ChatMessageEntity, Lon
         WHERE chat_room_id = :roomId
           AND deleted_at IS NULL
           AND (:cursor IS NULL OR created_at < :cursor)
-        ORDER BY created_at DESC
+        ORDER BY created_at DESC, id DESC
         LIMIT :size
     """)
     fun pageByRoomWithEmoji(roomId: Long, cursor: OffsetDateTime?, size: Int): Flow<ChatMessageEntity>

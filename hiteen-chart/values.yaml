@@ -195,6 +195,7 @@ ingress:
           backend:
             serviceName: hiteen-test
             servicePort: 8080
+
         - path: /apps
           pathType: Prefix
           backend:
@@ -204,10 +205,4 @@ ingress:
 #                number: 6001
             serviceName: soketi-svc
             servicePort: 6001
-
-        - path: /grafana
-          pathType: Prefix
-          backend:
-            serviceName: prometheus-grafana
-            servicePort: 80
 
