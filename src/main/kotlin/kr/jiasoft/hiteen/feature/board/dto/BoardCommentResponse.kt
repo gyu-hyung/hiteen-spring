@@ -24,6 +24,9 @@ data class BoardCommentResponse(
     @param:Schema(description = "댓글 내용", example = "좋은 글이네요! 감사합니다.")
     val content: String,
 
+    @param:Schema(description = "게시글 UID", example = "550e8400-e29b-41d4-a716-446655440000")
+    val boardUid: UUID,
+
     @param:Schema(description = "게시글 내용", example = "맛집정보 공유합니다.맛집정보 공유합니다.맛집정보 공유합니다.맛집정보 공유합니다.맛집정보 공유합니다.")
     val boardContent: String? = null,
 
