@@ -15,23 +15,36 @@ import org.springframework.data.redis.listener.ReactiveRedisMessageListenerConta
 class RedisConfig {
 
     @Bean
-    fun redisClusterConfig(properties: RedisProperties): RedisClusterConfiguration =
-        RedisClusterConfiguration(properties.cluster.nodes).apply {
-            maxRedirects = properties.cluster.maxRedirects
-            properties.password?.let { setPassword(it) }
+    fun redisConnectionFactory(properties: RedisProperties): RedisConnectionFactory {
+        return if (properties.cluster?.nodes?.isNotEmpty() == true) {
+            // 🚀 Cluster mode
+            println("🔗 Redis Mode: CLUSTER → nodes = ${properties.cluster.nodes}")
+
+            val config = RedisClusterConfiguration(properties.cluster.nodes).apply {
+                maxRedirects = properties.cluster.maxRedirects
+                properties.password?.let { setPassword(it) }
+            }
+
+            LettuceConnectionFactory(config)
+
+        } else {
+            // 🧩 Standalone mode (local)
+            println("🔗 Redis Mode: STANDALONE → ${properties.host}:${properties.port}")
+
+            val standalone = org.springframework.data.redis.connection.RedisStandaloneConfiguration().apply {
+                hostName = properties.host
+                port = properties.port
+                properties.password?.let { setPassword(it) }
+            }
+
+            LettuceConnectionFactory(standalone)
         }
+    }
 
-    /** 🔹 Sync Redis Factory */
     @Bean
-    fun redisConnectionFactory(clusterConfig: RedisClusterConfiguration): RedisConnectionFactory =
-        LettuceConnectionFactory(clusterConfig)
+    fun reactiveRedisConnectionFactory(factory: RedisConnectionFactory): ReactiveRedisConnectionFactory =
+        factory as ReactiveRedisConnectionFactory
 
-    /** 🔹 Reactive Redis Factory */
-    @Bean
-    fun reactiveRedisConnectionFactory(clusterConfig: RedisClusterConfiguration): ReactiveRedisConnectionFactory =
-        LettuceConnectionFactory(clusterConfig)
-
-    /** 🔹 Reactive Redis Template */
     @Bean
     fun reactiveStringRedisTemplate(cf: ReactiveRedisConnectionFactory) =
         ReactiveStringRedisTemplate(cf)
@@ -41,10 +54,11 @@ class RedisConfig {
         ReactiveRedisMessageListenerContainer(cf)
 
     @Bean
-    fun checkRedis(factory: RedisConnectionFactory) = CommandLineRunner {
-        println("🚀 Redis Factory: ${factory::class.simpleName}")
+    fun check(factory: RedisConnectionFactory) = CommandLineRunner {
+        println("🚀 Redis Factory = ${factory::class.simpleName}")
     }
 }
+
 
 
 
