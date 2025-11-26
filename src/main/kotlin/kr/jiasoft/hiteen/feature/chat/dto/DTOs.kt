@@ -33,6 +33,9 @@ data class SendMessageRequest(
 
     @param:Schema(description = "이모지 코드", example = "E_001")
     val emojiCode: String? = null,
+
+    @param:Schema(description = "이모지 개수", example = "1")
+    val emojiCount: Int? = null,
 ) {
     @get:Schema(description = "메시지 종류 (자동 결정: 0=텍스트, 1=이모지, 2=이미지)")
     val kind: Int
@@ -77,6 +80,9 @@ data class MessageSummary(
 
     @param:Schema(description = "이모지 코드", example = "👍")
     val emojiCode: String? = null,
+
+    @param:Schema(description = "이모지 개수", example = "1")
+    val emojiCount: Int? = null,
 
     @param:Schema(description = "읽지 않은 사용자 수", example = "3")
     val unreadCount: Int? = null,
