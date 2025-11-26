@@ -160,7 +160,7 @@ class ChatWebSocketHandler(
                 session.send(Mono.just(session.textMessage(pong))).subscribe()
             }
 
-            // { "type": "send", "data": { "roomUid": "fefe5b56-6dfc-455d-ab1e-935a9bb63c03", "content": "...", "emojiCode": "E_001"} }
+            // { "type": "send", "data": { "roomUid": "fefe5b56-6dfc-455d-ab1e-935a9bb63c03", "content": "...", "emojiCode": "E_001", "emojiCount": "1" } }
             "send" -> {
                 if (dataNode == null) {
                     val err = errorJson("bad_format", "send requires 'data' field")
