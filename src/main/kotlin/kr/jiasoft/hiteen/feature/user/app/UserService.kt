@@ -146,7 +146,7 @@ class UserService (
         return userRepository.findSummaryInfoById(userId)
     }
 
-    @Cacheable(cacheNames = ["userEntity"], key = "#username")
+    @Cacheable(cacheNames = ["userEntity"], key = "#id")
     suspend fun findByUsername(id: Long): UserEntity {
         println("✅✅✅✅✅✅✅✅✅✅✅✅✅ VVVV")
         val user = userRepository.findById(id)
