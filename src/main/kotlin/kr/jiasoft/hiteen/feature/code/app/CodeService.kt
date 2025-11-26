@@ -24,29 +24,38 @@ class CodeService(
         group: String,
         createdUserId: Long,
         files: List<FilePart>,
-        codeNamePrefix: String = ""
+        codeNamePrefix: String = "",
+        col1: String? = null,
+        col2: String? = null,
+        col3: String? = null,
     ): List<CodeEntity> {
         if (files.isEmpty()) throw IllegalArgumentException("업로드할 파일이 필요합니다.")
 
-        // 마지막 코드 번호 찾기 (그룹별 시퀀스)
-        val lastCode = codeRepository.findLastCodeByGroup(group)
-        var lastIndex = lastCode?.substringAfter("_")?.toIntOrNull() ?: 0
+        val normalizedGroup = group.uppercase()
+
+        // 마지막 코드 번호 찾기 (EX: EMOJI_001 → 1 추출)
+        val lastCode = codeRepository.findLastCodeByGroup(normalizedGroup)
+        var lastIndex = lastCode?.substringAfterLast("_")?.toIntOrNull() ?: 0
 
         val uploaded = assetService.uploadImages(files, createdUserId, AssetCategory.CODE)
         val results = mutableListOf<CodeEntity>()
 
         uploaded.forEach { asset ->
             lastIndex += 1
-            val newCode = "${group.uppercase().take(1)}_%03d".format(lastIndex) // 예: E_001, C_001
+
+            // 🔥 새로운 코드 규칙 적용
+            val newCode = "%s_%03d".format(normalizedGroup, lastIndex)
 
             val savedCode = codeRepository.save(
                 CodeEntity(
-//                    codeName = "$codeNamePrefix${idx + 1}",
                     codeName = asset.originFileName,
                     code = newCode,
                     codeGroupName = group,
-                    codeGroup = group.uppercase(),
+                    codeGroup = normalizedGroup,
                     status = CodeStatus.ACTIVE,
+                    col1 = col1,
+                    col2 = col2,
+                    col3 = col3,
                     assetUid = asset.uid,
                     createdId = createdUserId,
                     createdAt = OffsetDateTime.now()
@@ -58,6 +67,7 @@ class CodeService(
 
         return results
     }
+
 
 
     /**
@@ -77,9 +87,13 @@ class CodeService(
             codeGroupName = dto.groupName,
             codeGroup = dto.group.uppercase(),
             status = dto.status,
+            assetUid = uploaded?.uid,
+            col1 = dto.col1,
+            col2 = dto.col2,
+            col3 = dto.col3,
             createdId = userId,
             createdAt = OffsetDateTime.now(),
-            assetUid = uploaded?.uid
+
         )
         val savedCode = codeRepository.save(entity)
         return CodeWithAssetResponse.from(savedCode)
@@ -101,6 +115,9 @@ class CodeService(
             codeGroup = if (dto.group.uppercase() != existing.codeGroup) dto.group.uppercase() else existing.codeGroup,
             status = if (dto.status != existing.status) dto.status else existing.status,
             assetUid = uploaded?.uid ?: existing.assetUid,
+            col1 = if (dto.col1 != existing.col1) dto.col1 else existing.col1,
+            col2 = if (dto.col2 != existing.col2) dto.col2 else existing.col2,
+            col3 = if (dto.col3 != existing.col3) dto.col3 else existing.col3,
             updatedId = userId,
             updatedAt = OffsetDateTime.now()
         )
