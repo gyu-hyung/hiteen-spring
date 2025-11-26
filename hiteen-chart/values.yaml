@@ -162,6 +162,7 @@ ingress:
   enabled: true
   className: nginx
   annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: "/"
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
     nginx.ingress.kubernetes.io/proxy-buffering: "on"
     nginx.ingress.kubernetes.io/proxy-cache: "assets-cache"
@@ -190,19 +191,19 @@ ingress:
   hosts:
     - host:
       paths:
-        - path: /api
+        - path: /
           pathType: Prefix
           backend:
             serviceName: hiteen-test
             servicePort: 8080
 
-        - path: /apps
-          pathType: Prefix
-          backend:
-#            service:
-#              name: soketi-svc
-#              port:
-#                number: 6001
-            serviceName: soketi-svc
-            servicePort: 6001
-
+#        - path: /apps
+#          pathType: Prefix
+#          backend:
+##            service:
+##              name: soketi-svc
+##              port:
+##                number: 6001
+#            serviceName: soketi-svc
+#            servicePort: 6001
+#
