@@ -3,6 +3,7 @@ package kr.jiasoft.hiteen.feature.school.app
 import kotlinx.coroutines.flow.toList
 import kr.jiasoft.hiteen.feature.asset.app.AssetService
 import kr.jiasoft.hiteen.feature.school.domain.SchoolFoodAssetEntity
+import kr.jiasoft.hiteen.feature.school.domain.SchoolFoodEntity
 import kr.jiasoft.hiteen.feature.school.dto.SchoolFoodSaveRequest
 import kr.jiasoft.hiteen.feature.school.infra.SchoolFoodAssetRepository
 import kr.jiasoft.hiteen.feature.school.infra.SchoolFoodRepository
@@ -21,7 +22,7 @@ class SchoolFoodService(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     /** 급식 식단 조회 */
-    suspend fun getMeals(schoolId: Long, type: String?, date: LocalDate?): List<kr.jiasoft.hiteen.feature.school.domain.SchoolFoodEntity> {
+    suspend fun getMeals(schoolId: Long, type: String?, date: LocalDate?): List<SchoolFoodEntity> {
         val now = LocalDate.now()
         val startDate: LocalDate
         val endDate: LocalDate
@@ -49,7 +50,7 @@ class SchoolFoodService(
             schoolId, startDate, endDate
         ).toList()
 
-        val result = mutableListOf<kr.jiasoft.hiteen.feature.school.domain.SchoolFoodEntity>()
+        val result = mutableListOf<SchoolFoodEntity>()
         for (i in 0 until days) {
             val targetDate = startDate.plusDays(i.toLong())
             val found = rows.filter { it.mealDate == targetDate }
@@ -58,7 +59,7 @@ class SchoolFoodService(
             } else {
                 // 빈 값 채워주기
                 result.add(
-                    kr.jiasoft.hiteen.feature.school.domain.SchoolFoodEntity(
+                    SchoolFoodEntity(
                         id = 0,
                         schoolId = schoolId,
                         mealDate = targetDate,
