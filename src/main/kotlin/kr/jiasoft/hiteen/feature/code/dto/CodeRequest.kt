@@ -19,5 +19,14 @@ data class CodeRequest(
     val groupName: String,
 
     @param:Schema(description = "코드 상태", example = "ACTIVE")
-    val status: CodeStatus = CodeStatus.ACTIVE
+    val status: CodeStatus = CodeStatus.ACTIVE,
+
+    @param:Schema(description = "임시컬럼1", example = "")
+    val col1: String? = null,
+
+    @param:Schema(description = "임시컬럼1", example = "")
+    val col2: String? = null,
+
+    @param:Schema(description = "임시컬럼1", example = "")
+    val col3: String? = null,
 )
