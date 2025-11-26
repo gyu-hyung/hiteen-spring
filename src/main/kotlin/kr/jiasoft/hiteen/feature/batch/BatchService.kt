@@ -1,6 +1,7 @@
 package kr.jiasoft.hiteen.feature.batch
 
 import kotlinx.coroutines.runBlocking
+import kr.jiasoft.hiteen.feature.giftishow.app.GiftishowSyncService
 import kr.jiasoft.hiteen.feature.play.app.GameManageService
 import kr.jiasoft.hiteen.feature.school.app.SchoolFoodImportService
 import kr.jiasoft.hiteen.feature.school.app.SchoolImportService
@@ -14,6 +15,7 @@ class BatchService(
     private val schoolImportService: SchoolImportService,
     private val schoolFoodImportService: SchoolFoodImportService,
     private val gameManageService: GameManageService,
+    private val giftishowSyncService: GiftishowSyncService,
     @param:Value("\${batch.enabled:false}")//배치 활성화 여부
     private val active: Boolean
 ) {
@@ -82,4 +84,26 @@ class BatchService(
         }
         logger.info("===== Game Close Batch END =====")
     }
+
+    /**
+     * 매일 4시에 기프트쇼 정보 싱크
+     */
+//    @Scheduled(cron = "0 0 4 * * *", zone = "Asia/Seoul")
+    fun syncGiftishowData() = runBlocking {
+        if (!active) {
+            logger.info("===== Giftishow Sync Batch SKIPPED (inactive) =====")
+            return@runBlocking
+        }
+
+        logger.info("===== Giftishow Sync Batch START =====")
+        try {
+            giftishowSyncService.syncGoods()
+            giftishowSyncService.syncBrandsAndCategories()
+            logger.info("===== Giftishow Sync Batch SUCCESS =====")
+        } catch (e: Exception) {
+            logger.error("===== Giftishow Sync Batch ERROR: ${e.message}", e)
+        }
+        logger.info("===== Giftishow Sync Batch END =====")
+    }
+
 }
