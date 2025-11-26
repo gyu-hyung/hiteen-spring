@@ -58,6 +58,9 @@ backupNfs:
   path: "/srv/nfs/assets"
   storage: "50Gi"
 
+# ============================================
+# Soketi
+# ============================================
 soketi:
   name: soketi
   replicaCount: 1
@@ -72,15 +75,12 @@ soketi:
     port: 6001
 
   env:
-    # 기본 앱 설정
     - name: DEFAULT_APP_ID
       value: "hiteen-app"
     - name: DEFAULT_APP_KEY
       value: "hiteen-key"
     - name: DEFAULT_APP_SECRET
       value: "hiteen-secret"
-
-    # 서버 설정
     - name: HOST
       value: "0.0.0.0"
     - name: PORT
@@ -88,7 +88,7 @@ soketi:
     - name: DEBUG
       value: "1"
 
-    # Redis Adapter (핵심!)
+    # Redis Cluster adapter
     - name: ADAPTER_DRIVER
       value: "redis"
     - name: REDIS_HOST
@@ -101,24 +101,13 @@ soketi:
           name: redis-secret
           key: redis-password
 
-    # CORS 및 클라이언트 설정
     - name: CORS_ALLOW_ORIGIN
       value: "*"
     - name: CLIENT_MESSAGES_ENABLED
       value: "true"
 
-  resources:
-    requests:
-      cpu: 100m
-      memory: 256Mi
-    limits:
-      cpu: 500m
-      memory: 512Mi
-
-  host: soketi-svc.hiteen.svc.cluster.local
-
 # ============================================
-# Redis Cluster (StatefulSet + PVC)
+# Redis Cluster
 # ============================================
 redis:
   replicas: 6
@@ -156,7 +145,7 @@ redis:
     namespace: hiteen         # 클러스터 네임스페이스 지정 (변수 주입)
 
 # ============================================
-# Ingress (Nginx, 최신 문법)
+# Ingress (Nginx)
 # ============================================
 ingress:
   enabled: true
@@ -200,11 +189,11 @@ ingress:
         - path: /grafana
           pathType: Prefix
           backend:
-            serviceName: grafana
-            servicePort: 3000
+            serviceName: prometheus-grafana
+            servicePort: 80
 
         - path: /prometheus
           pathType: Prefix
           backend:
-            serviceName: prometheus-server
+            serviceName: prometheus-kube-prometheus-prometheus
             servicePort: 9090
