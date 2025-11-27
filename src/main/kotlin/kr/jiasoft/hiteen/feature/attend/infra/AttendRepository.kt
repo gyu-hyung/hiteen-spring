@@ -18,33 +18,63 @@ interface AttendRepository : CoroutineCrudRepository<AttendEntity, Long> {
     suspend fun findByUserIdAndAttendDate(userId: Long, date: LocalDate): AttendEntity?
 
     @Query("""
-        WITH consecutive AS (
-            SELECT attend_date,
-                   ROW_NUMBER() OVER (ORDER BY attend_date DESC) AS rn
-            FROM attends
-            WHERE user_id = :userId
-        )
-        SELECT COUNT(*)
-        FROM consecutive
-        WHERE attend_date = CURRENT_DATE - ((rn - 1) * INTERVAL '1 day')
+    WITH sorted AS (
+        SELECT attend_date,
+               ROW_NUMBER() OVER (ORDER BY attend_date) AS rn
+        FROM attends
+        WHERE user_id = :userId
+    ),
+    grouped AS (
+        SELECT attend_date,
+               rn,
+               attend_date - (rn * INTERVAL '1 day') AS grp
+        FROM sorted
+    ),
+    recent_chain AS (
+        SELECT attend_date
+        FROM grouped
+        WHERE grp = (SELECT grp FROM grouped ORDER BY attend_date DESC LIMIT 1)
+    )
+    SELECT COUNT(*) % 7 AS streak_mod
+    FROM recent_chain
     """)
     suspend fun countConsecutiveAttendDays(userId: Long): Int
 
 
     @Query("""
-    WITH consecutive AS (
-        SELECT attend_date,
-               ROW_NUMBER() OVER (ORDER BY attend_date DESC) AS rn
-        FROM attends
-        WHERE user_id = :userId
-    )
-    SELECT attend_date,
-           rn
-    FROM consecutive
-    WHERE attend_date = CURRENT_DATE - ((rn - 1) * INTERVAL '1 day')
-    ORDER BY attend_date ASC
-""")
+            WITH sorted AS (
+                SELECT attend_date,
+                       ROW_NUMBER() OVER (ORDER BY attend_date) AS rn
+                FROM attends
+                WHERE user_id = :userId
+            ),
+            grouped AS (
+                SELECT attend_date,
+                       rn,
+                       attend_date - (rn * INTERVAL '1 day') AS grp
+                FROM sorted
+            ),
+            recent_chain AS (
+                SELECT attend_date
+                FROM grouped
+                WHERE grp = (SELECT grp FROM grouped ORDER BY attend_date DESC LIMIT 1)
+            ),
+            counter AS (
+                SELECT COUNT(*) % 7 AS streak_mod FROM recent_chain
+            )
+            SELECT attend_date,
+                   ROW_NUMBER() OVER (ORDER BY attend_date) AS rn
+            FROM (
+                SELECT attend_date
+                FROM recent_chain, counter
+                WHERE counter.streak_mod > 0
+                ORDER BY attend_date DESC
+                LIMIT (SELECT streak_mod FROM counter)
+            ) AS limited
+            ORDER BY attend_date ASC
+        """)
     fun findConsecutiveAttendDays(userId: Long): Flow<ConsecutiveAttendDay>
+
 
 
 }
