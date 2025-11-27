@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.toList
 import kr.jiasoft.hiteen.common.dto.ApiResult
 import kr.jiasoft.hiteen.feature.play.domain.GameEntity
 import kr.jiasoft.hiteen.feature.play.domain.GameScoreEntity
+import kr.jiasoft.hiteen.feature.play.dto.GameStartRequest
 import kr.jiasoft.hiteen.feature.play.dto.ScoreRequest
 import kr.jiasoft.hiteen.feature.play.dto.SeasonRankingResponse
 import kr.jiasoft.hiteen.feature.play.dto.SeasonRoundResponse
@@ -44,19 +45,33 @@ class GameController(
         = ResponseEntity.ok(ApiResult.success(gameService.getSeasonRounds(year, status)))
 
 
-    @Operation(summary = "점수 등록")
-    @PostMapping("/scores")
+    @Operation(summary = "게임시작")
+    @PostMapping("/start")
+    suspend fun start(
+        @Valid @Parameter(description = "점수 등록 요청 DTO") req: GameStartRequest,
+        @AuthenticationPrincipal(expression = "user") user: UserEntity
+    ): ResponseEntity<ApiResult<Any>> =
+        ResponseEntity.ok(ApiResult.success(gameService.gameStart(
+            gameId = req.gameId,
+            userId = user.id,
+            tierId = user.tierId,
+            retryType = req.retryType,
+            transactionId = req.transactionId
+        )))
+
+
+    @Operation(summary = "게임종료")
+    @PostMapping("/end")
     suspend fun recordScore(
         @Valid @Parameter(description = "점수 등록 요청 DTO") req: ScoreRequest,
         @AuthenticationPrincipal(expression = "user") user: UserEntity
     ): ResponseEntity<ApiResult<GameScoreEntity>> =
         ResponseEntity.ok(ApiResult.success(gameService.recordScore(
+            gameHistoryUid = req.gameHistoryUid,
             gameId = req.gameId,
             score = req.score,
             userId = user.id,
             tierId = user.tierId,
-            retryType = req.retryType,
-            transactionId = req.transactionId
         )))
 
 

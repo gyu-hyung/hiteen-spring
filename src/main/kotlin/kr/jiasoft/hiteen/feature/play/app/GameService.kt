@@ -9,6 +9,7 @@ import kr.jiasoft.hiteen.feature.play.domain.*
 import kr.jiasoft.hiteen.feature.play.dto.RankingResponse
 import kr.jiasoft.hiteen.feature.play.dto.SeasonRankingResponse
 import kr.jiasoft.hiteen.feature.play.dto.SeasonRoundResponse
+import kr.jiasoft.hiteen.feature.play.infra.GameHistoryRepository
 import kr.jiasoft.hiteen.feature.play.infra.GameRankingRepository
 import kr.jiasoft.hiteen.feature.play.infra.GameRepository
 import kr.jiasoft.hiteen.feature.play.infra.GameScoreRepository
@@ -19,13 +20,17 @@ import kr.jiasoft.hiteen.feature.point.domain.PointPolicy
 import kr.jiasoft.hiteen.feature.relationship.infra.FriendRepository
 import kr.jiasoft.hiteen.feature.user.domain.SeasonStatusType
 import org.springframework.stereotype.Service
+import org.springframework.transaction.reactive.TransactionalOperator
+import org.springframework.transaction.reactive.executeAndAwait
 import java.time.LocalDate
 import java.time.OffsetDateTime
+import java.util.UUID
 
 @Service
 class GameService(
     private val gameRepository: GameRepository,
     private val gameScoreRepository: GameScoreRepository,
+    private val gameHistoryRepository: GameHistoryRepository,
     private val gameRankingRepository: GameRankingRepository,
     private val seasonRepository: SeasonRepository,
     private val seasonParticipantRepository: SeasonParticipantRepository,
@@ -37,9 +42,16 @@ class GameService(
     private val pointService: PointService,
 
     private val adService: AdService,
+    private val txOperator: TransactionalOperator,
+    ) {
 
-) {
 
+    /**
+     * 영단어 챌린지 조회
+     * */
+    private suspend fun getWordChallenge(): Long {
+        return gameRepository.findByCode("WORD_CHALLENGE")!!.id
+    }
 
     /**
      * 게임 목록 조회
@@ -57,57 +69,154 @@ class GameService(
 
 
     /**
-     * 점수 등록
+     * 게임 시작
      * */
-    suspend fun recordScore(
+    suspend fun gameStart(
         gameId: Long,
-        score: Double,
         userId: Long,
         tierId: Long,
         retryType: String? = null,
         transactionId: String? = null
-    ): GameScoreEntity {
-        val today = LocalDate.now()
-        val wordChallengeGameId = gameRepository.findByCode("WORD_CHALLENGE")?.id
+    ): UUID {
+        return txOperator.executeAndAwait {
+            if (!gameRepository.existsByIdAndDeletedAtIsNull(gameId))
+                throw IllegalArgumentException("유효하지 않은 게임 ID 입니다. (gameId=$gameId)")
 
-        if (!gameRepository.existsByIdAndDeletedAtIsNull(gameId)) {
-            throw IllegalArgumentException("유효하지 않은 게임 ID 입니다. (gameId=$gameId)")
+            //참가정보
+            val participant = getOrCreateParticipant(userId, tierId)
+
+            // 기존 진행중이었던 게임 확인
+            val pending = gameHistoryRepository
+                .findTop1ByParticipantIdAndGameIdAndStatusOrderByCreatedAtDesc(
+                    participant.id,
+                    gameId,
+                    GameHistoryStatus.PLAYING.name
+                )
+
+            pending?.uid?.let { return@executeAndAwait it }
+
+            //게임 스코어
+            val existing = gameScoreRepository.findBySeasonIdAndParticipantIdAndGameId(participant.seasonId, participant.id, gameId)
+            if (existing != null) {
+                val lastPlayedDate = existing.updatedAt?.toLocalDate() ?: existing.createdAt.toLocalDate()
+
+                //오늘 게임한 적이 있다면
+                if (lastPlayedDate.isEqual(LocalDate.now())) {
+                    handleRetry(gameId, userId, retryType, transactionId)
+                }
+            }
+
+            val history = gameHistoryRepository.save(
+                GameHistoryEntity(
+                    seasonId = participant.seasonId,
+                    participantId = participant.id,
+                    gameId = gameId,
+                    status = GameHistoryStatus.PLAYING.name,
+                )
+            )
+
+            history.uid
         }
+
+    }
+
+    /**
+     * 게임 종료 (점수 등록)
+     * */
+    suspend fun recordScore(
+        gameHistoryUid: UUID,
+        gameId: Long,
+        score: Double,
+        userId: Long,
+        tierId: Long,
+    ): GameScoreEntity {
+
+        val wordChallengeGameId = getWordChallenge()
+
+        if (!gameRepository.existsByIdAndDeletedAtIsNull(gameId))
+            throw IllegalArgumentException("유효하지 않은 게임 ID 입니다. (gameId=$gameId)")
 
         //참가정보
         val participant = getOrCreateParticipant(userId, tierId)
 
+        //경험치 부여
+        grantExp(userId, gameId, wordChallengeGameId)
+
         //게임 이력
         val existing = gameScoreRepository.findBySeasonIdAndParticipantIdAndGameId(participant.seasonId, participant.id, gameId)
-
         return if (existing != null) {
             val lastPlayedDate = existing.updatedAt?.toLocalDate() ?: existing.createdAt.toLocalDate()
-
-            if (lastPlayedDate.isEqual(today)) {
-                handleRetry(gameId, userId, retryType, transactionId)
-                grantExp(userId, gameId, wordChallengeGameId)
-
+            if (lastPlayedDate.isEqual(LocalDate.now())) {
                 // 시도 횟수별 가산점 (0.08초 * n)
                 val nextTryCount = existing.tryCount + 1
                 val advantage = 0.08 * (nextTryCount - 1)
 
-                // 0.08초 단위는 Double 이므로 Long score 변환 시 ms 단위로 보정 필요할 수 있음
                 val adjustedScore = (score - advantage).coerceAtLeast(0.0)
-
+                saveHistory(gameHistoryUid,  participant.seasonId, participant.id, gameId, adjustedScore)
                 saveOrUpdateScore(existing, adjustedScore, nextTryCount)
             } else {
-
-                pointService.applyPolicy(userId, PointPolicy.GAME_PLAY, gameId)
-                grantExp(userId, gameId, wordChallengeGameId)
+                saveHistory(gameHistoryUid,  participant.seasonId, participant.id, gameId, score)
                 saveOrUpdateScore(existing, score, 1)
             }
-        } else {
 
-            pointService.applyPolicy(userId, PointPolicy.GAME_PLAY, gameId)
-            grantExp(userId, gameId, wordChallengeGameId)
+        } else {
+            saveHistory(gameHistoryUid,  participant.seasonId, participant.id, gameId, score)
             createNewScore(participant.seasonId, participant.id, gameId, score)
         }
     }
+
+
+//    /**
+//     * 게임 종료 (점수 등록)
+//     * */
+//    suspend fun recordScore(
+//        gameId: Long,
+//        score: Double,
+//        userId: Long,
+//        tierId: Long,
+//        retryType: String? = null,
+//        transactionId: String? = null
+//    ): GameScoreEntity {
+//        val today = LocalDate.now()
+//        val wordChallengeGameId = getWordChallenge()
+//
+//        if (!gameRepository.existsByIdAndDeletedAtIsNull(gameId))
+//            throw IllegalArgumentException("유효하지 않은 게임 ID 입니다. (gameId=$gameId)")
+//
+//        //참가정보
+//        val participant = getOrCreateParticipant(userId, tierId)
+//
+//        //게임 이력
+//        val existing = gameScoreRepository.findBySeasonIdAndParticipantIdAndGameId(participant.seasonId, participant.id, gameId)
+//
+//        return if (existing != null) {
+//            val lastPlayedDate = existing.updatedAt?.toLocalDate() ?: existing.createdAt.toLocalDate()
+//
+//            if (lastPlayedDate.isEqual(today)) {
+//                handleRetry(gameId, userId, retryType, transactionId)
+//                grantExp(userId, gameId, wordChallengeGameId)
+//
+//                // 시도 횟수별 가산점 (0.08초 * n)
+//                val nextTryCount = existing.tryCount + 1
+//                val advantage = 0.08 * (nextTryCount - 1)
+//
+//                // 0.08초 단위는 Double 이므로 Long score 변환 시 ms 단위로 보정 필요할 수 있음
+//                val adjustedScore = (score - advantage).coerceAtLeast(0.0)
+//
+//                saveOrUpdateScore(existing, adjustedScore, nextTryCount)
+//            } else {
+//
+//                pointService.applyPolicy(userId, PointPolicy.GAME_PLAY, gameId)
+//                grantExp(userId, gameId, wordChallengeGameId)
+//                saveOrUpdateScore(existing, score, 1)
+//            }
+//        } else {
+//
+//            pointService.applyPolicy(userId, PointPolicy.GAME_PLAY, gameId)
+//            grantExp(userId, gameId, wordChallengeGameId)
+//            createNewScore(participant.seasonId, participant.id, gameId, score)
+//        }
+//    }
 
     private suspend fun grantExp(userId: Long, gameId: Long, wordChallengeGameId: Long?) {
         if (gameId == wordChallengeGameId) {
@@ -121,7 +230,8 @@ class GameService(
     // =============== 헬퍼 메서드 ===============
 
     private suspend fun getOrCreateParticipant(userId: Long, tierId: Long): SeasonParticipantEntity {
-        return seasonParticipantRepository.findActiveParticipant(userId) ?: run {
+        val season = seasonRepository.findActiveSeason() ?: throw NoSuchElementException("현재 진행 중인 시즌이 없습니다. 관리자 문의")
+        return seasonParticipantRepository.findActiveParticipant(userId, season.id) ?: run {
             val tier = tierRepository.findById(tierId)
                 ?: throw IllegalStateException("유저의 리그를 확인할 수 없습니다.")
 
@@ -136,18 +246,14 @@ class GameService(
                 8 -> "CHALLENGER"
                 else -> "BRONZE"
             }
-            val season = seasonRepository.findActiveSeason()
-                ?: throw NoSuchElementException("현재 진행 중인 시즌이 없습니다. 관리자 문의")
-            if (season.status != SeasonStatusType.ACTIVE.name || season.endDate.isBefore(LocalDate.now())) {
-                throw IllegalStateException("이미 종료된 시즌입니다. (seasonId=${season.id})")
-            }
+
             seasonParticipantRepository.save(
                 SeasonParticipantEntity(
                     seasonId = season.id,
                     userId = userId,
                     tierId = tierId,
-//                    league = tier.tierCode.split("_")[0],
                     league = league,
+//                    league = tier.tierCode.split("_")[0],
                     joinedType = "AUTO_JOIN"
                 )
             )
@@ -193,6 +299,13 @@ class GameService(
         return gameScoreRepository.save(newScore)
     }
 
+    private suspend fun saveHistory(gameHistoryUid: UUID, seasonId: Long, participantId: Long, gameId: Long, score: Double){
+        val history = gameHistoryRepository.findByUidAndSeasonIdAndParticipantIdAndGameId(gameHistoryUid, seasonId, participantId, gameId)
+            ?: throw IllegalArgumentException("유효하지 않은 게임 이력 ID 입니다. (gameHistoryUid=$gameHistoryUid)")
+        gameHistoryRepository.save(
+            history.copy(status = GameHistoryStatus.DONE.name, score = score)
+        )
+    }
 
 
     /**
