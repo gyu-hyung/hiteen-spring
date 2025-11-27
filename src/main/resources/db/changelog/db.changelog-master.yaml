@@ -15,3 +15,5 @@ databaseChangeLog:
       file: db/changelog/07-create-mbti.yaml
   - include:
       file: db/changelog/08-create-batch_history.yaml
+  - include:
+      file: db/changelog/09-create-game_history.yaml
