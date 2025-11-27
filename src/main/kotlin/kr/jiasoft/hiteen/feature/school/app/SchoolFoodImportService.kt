@@ -15,6 +15,7 @@ import org.springframework.web.reactive.function.client.ExchangeStrategies
 import org.springframework.web.reactive.function.client.WebClient
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import kotlin.time.measureTime
 
 @Service
 class SchoolFoodImportService(
@@ -55,61 +56,75 @@ class SchoolFoodImportService(
         val from = today.format(dateFmt)
         val to = today.plusDays(7).format(dateFmt)
 
-        // ✅ Stream 방식으로 처리 (메모리 절약)
         schoolRepository.findAll().collect { school ->
-            try {
-                val json = client.get()
-                    .uri { builder ->
-                        builder.path("/mealServiceDietInfo")
-                            .queryParam("KEY", props.apiKey)
-                            .queryParam("Type", "json")
-                            .queryParam("pIndex", 1)
-                            .queryParam("pSize", 1000)
-                            .queryParam("ATPT_OFCDC_SC_CODE", school.sido)
-                            .queryParam("SD_SCHUL_CODE", school.code)
-                            .queryParam("MLSV_FROM_YMD", from)
-                            .queryParam("MLSV_TO_YMD", to)
-                            .build()
+
+            val totalTime = measureTime {
+
+                try {
+                    lateinit var json: JsonNode
+
+                    val apiTime = measureTime {
+                        json = client.get()
+                            .uri { builder ->
+                                builder.path("/mealServiceDietInfo")
+                                    .queryParam("KEY", props.apiKey)
+                                    .queryParam("Type", "json")
+                                    .queryParam("pIndex", 1)
+                                    .queryParam("pSize", 1000)
+                                    .queryParam("ATPT_OFCDC_SC_CODE", school.sido)
+                                    .queryParam("SD_SCHUL_CODE", school.code)
+                                    .queryParam("MLSV_FROM_YMD", from)
+                                    .queryParam("MLSV_TO_YMD", to)
+                                    .build()
+                            }
+                            .retrieve()
+                            .bodyToMono(JsonNode::class.java)
+                            .awaitSingle()
                     }
-                    .retrieve()
-                    .bodyToMono(JsonNode::class.java)
-                    .awaitSingle()
 
-                val rows = json["mealServiceDietInfo"]?.get(1)?.get("row")
-                if (rows == null || !rows.isArray || rows.isEmpty) {
-                    logger.debug("${school.name} :: 0 meals")
-                    return@collect
+                    logger.info("📡 ${school.name} API Response Time: ${apiTime.inWholeMilliseconds}ms")
+
+                    val rows = json["mealServiceDietInfo"]?.get(1)?.get("row")
+                    if (rows == null || !rows.isArray || rows.isEmpty) {
+                        logger.debug("${school.name} :: 0 meals")
+                        return@collect
+                    }
+
+                    val dbTime = measureTime {
+                        var count = 0
+                        for (row in rows) {
+                            val dto = objectMapper.treeToValue(row, MealRow::class.java)
+
+                            val mealDate = LocalDate.parse(dto.MLSV_YMD, dateFmt)
+                            val meals = dto.DDISH_NM
+                                .replace("<br/>", "\n")
+                                .replace(Regex(" \\(\\d+(\\.\\d+)*\\)"), "")
+
+                            schoolFoodRepository.upsert(
+                                schoolId = school.id,
+                                mealDate = mealDate,
+                                code = dto.MMEAL_SC_CODE,
+                                codeName = dto.MMEAL_SC_NM,
+                                meals = meals,
+                                calorie = dto.CAL_INFO
+                            )
+                            count++
+                        }
+                        logger.info("${school.name} :: $count meals saved")
+                    }
+
+                    logger.info("💾 ${school.name} DB Write Time: ${dbTime.inWholeMilliseconds}ms")
+
+                } catch (e: Exception) {
+                    logger.error("${school.name} error :: ${e.message}", e)
                 }
-
-                var count = 0
-                for (row in rows) {
-                    // ✅ JsonNode → DTO 바로 매핑
-                    val dto = objectMapper.treeToValue(row, MealRow::class.java)
-
-                    val mealDate = LocalDate.parse(dto.MLSV_YMD, dateFmt)
-                    val meals = dto.DDISH_NM
-                        .replace("<br/>", "\n")
-                        .replace(Regex(" \\(\\d+(\\.\\d+)*\\)"), "")
-
-                    // ✅ UPSERT 실행
-                    schoolFoodRepository.upsert(
-                        schoolId = school.id,
-                        mealDate = mealDate,
-                        code = dto.MMEAL_SC_CODE,
-                        codeName = dto.MMEAL_SC_NM,
-                        meals = meals,
-                        calorie = dto.CAL_INFO
-                    )
-
-                    count++
-                }
-                logger.info("${school.name} :: $count meals")
-
-            } catch (e: Exception) {
-                logger.error("${school.name} error :: ${e.message}", e)
             }
+
+            logger.info("⏳ Total Processing Time for ${school.name}: ${totalTime.inWholeMilliseconds}ms\n")
         }
 
         logger.info("SchoolFood :: Import END =====================")
     }
+
+
 }

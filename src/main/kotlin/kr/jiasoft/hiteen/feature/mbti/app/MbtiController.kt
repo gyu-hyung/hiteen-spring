@@ -35,7 +35,7 @@ class MbtiController(
         @RequestBody req: MbtiAnswerRequest,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ): ResponseEntity<ApiResult<Map<String, Any>>> {
-        val result = mbtiService.calculateResult(req.answers)
+        val result = mbtiService.calculateAndSave(user.id, req.answers)
         userRepository.updateMbti(user.id, result["result"] as String)
 
         if(!user.mbti.isNullOrBlank()) {
@@ -46,11 +46,12 @@ class MbtiController(
     }
 
     @Operation(summary = "MBTI 상세 결과 조회")
-    @GetMapping("/view")
+    @GetMapping("/view/{userUid}")
     suspend fun view(
-        @RequestParam mbti: String
+        @PathVariable userUid: String
     ): ResponseEntity<ApiResult<Map<String, Any>>> {
-        val detail = mbtiService.viewResult(mbti)
+        val detail = mbtiService.viewResult(userUid)
         return ResponseEntity.ok(ApiResult.success(detail))
     }
+
 }
