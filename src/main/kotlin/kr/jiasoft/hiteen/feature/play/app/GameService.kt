@@ -124,6 +124,18 @@ class GameService(
         return seasonParticipantRepository.findActiveParticipant(userId) ?: run {
             val tier = tierRepository.findById(tierId)
                 ?: throw IllegalStateException("유저의 리그를 확인할 수 없습니다.")
+
+            val league: String = when (tier.level) {
+                1 -> "BRONZE"
+                2 -> "BRONZE"
+                3 -> "BRONZE"
+                4 -> "PLATINUM"
+                5 -> "PLATINUM"
+                6 -> "PLATINUM"
+                7 -> "CHALLENGER"
+                8 -> "CHALLENGER"
+                else -> "BRONZE"
+            }
             val season = seasonRepository.findActiveSeason()
                 ?: throw NoSuchElementException("현재 진행 중인 시즌이 없습니다. 관리자 문의")
             if (season.status != SeasonStatusType.ACTIVE.name || season.endDate.isBefore(LocalDate.now())) {
@@ -134,7 +146,8 @@ class GameService(
                     seasonId = season.id,
                     userId = userId,
                     tierId = tierId,
-                    league = tier.tierCode.split("_")[0],
+//                    league = tier.tierCode.split("_")[0],
+                    league = league,
                     joinedType = "AUTO_JOIN"
                 )
             )
