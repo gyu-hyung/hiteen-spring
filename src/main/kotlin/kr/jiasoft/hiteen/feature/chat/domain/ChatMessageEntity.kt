@@ -31,7 +31,7 @@ data class ChatMessageEntity(
     val emojiCode: String? = null,
 
     @Column("emoji_count")
-    val emojiCount: String? = null,
+    val emojiCount: Int? = null,
 
     @Column("created_at")
     val createdAt: OffsetDateTime,

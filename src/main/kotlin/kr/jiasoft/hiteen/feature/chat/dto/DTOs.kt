@@ -98,12 +98,13 @@ data class MessageSummary(
     val assets: List<MessageAssetSummary>?,
 ) {
     companion object {
-            fun from(entity: ChatMessageEntity, sender: UserSummary?, assets: List<MessageAssetSummary>?, unreadCount: Int? = null): MessageSummary {
+        fun from(entity: ChatMessageEntity, sender: UserSummary?, assets: List<MessageAssetSummary>?, unreadCount: Int? = null): MessageSummary {
             return MessageSummary(
                 messageUid = entity.uid,
                 content = entity.content,
                 kind = entity.kind,
                 emojiCode = entity.emojiCode,
+                emojiCount = entity.emojiCount,
                 unreadCount = unreadCount,
                 createdAt = entity.createdAt,
                 sender = sender,
