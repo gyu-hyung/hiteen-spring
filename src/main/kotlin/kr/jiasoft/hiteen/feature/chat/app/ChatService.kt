@@ -139,6 +139,7 @@ class ChatService(
                     else -> 0
                 },
                 emojiCode = req.emojiCode,
+                emojiCount = req.emojiCount,
                 createdAt = OffsetDateTime.now(),
             )
         )
