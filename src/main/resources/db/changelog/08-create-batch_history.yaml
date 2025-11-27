@@ -1,0 +1,67 @@
+databaseChangeLog:
+
+  # ----------------------------------
+  # BATCH HISTORY TABLE
+  # ----------------------------------
+  - changeSet:
+      id: create-batch-history
+      author: system
+      changes:
+        - createTable:
+            tableName: batch_history
+            remarks: "배치 실행 이력"
+            columns:
+              - column:
+                  name: id
+                  type: bigserial
+                  remarks: "고유번호"
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: job_name
+                  type: varchar(100)
+                  remarks: "배치 작업명"
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: status
+                  type: varchar(20)
+                  remarks: "상태 (STARTED / SUCCESS / FAILED / SKIPPED)"
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: started_at
+                  type: timestamptz
+                  remarks: "실행 시작 시각"
+                  defaultValueComputed: now()
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: finished_at
+                  type: timestamptz
+                  remarks: "실행 종료 시각"
+
+              - column:
+                  name: duration_ms
+                  type: bigint
+                  remarks: "실행 시간 (ms)"
+
+              - column:
+                  name: error_message
+                  type: text
+                  remarks: "에러 메시지 (실패 시)"
+
+        # -------- INDEX: job_name + started_at DESC --------
+        - createIndex:
+            tableName: batch_history
+            indexName: idx_batch_history_job_started
+            columns:
+              - column:
+                  name: job_name
+              - column:
+                  name: started_at
