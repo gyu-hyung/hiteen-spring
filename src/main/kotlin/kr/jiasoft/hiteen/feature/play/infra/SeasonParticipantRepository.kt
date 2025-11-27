@@ -17,11 +17,12 @@ interface SeasonParticipantRepository : CoroutineCrudRepository<SeasonParticipan
         FROM season_participants sp
         JOIN seasons s ON sp.season_id = s.id
         WHERE sp.user_id = :userId
+          AND s.id = :seasonId
           AND s.status = 'ACTIVE'
         ORDER BY s.start_date DESC, s.id DESC
         LIMIT 1
         """
     )
-    suspend fun findActiveParticipant(userId: Long): SeasonParticipantEntity?
+    suspend fun findActiveParticipant(userId: Long, seasonId: Long): SeasonParticipantEntity?
 
 }

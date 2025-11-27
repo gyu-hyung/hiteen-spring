@@ -1,0 +1,86 @@
+databaseChangeLog:
+
+  # ----------------------------------
+  # GAME HISTORY TABLE
+  # ----------------------------------
+  - changeSet:
+      id: create-game-history
+      author: system
+      changes:
+        - createTable:
+            tableName: game_history
+            remarks: "게임 플레이 이력 테이블"
+            columns:
+              - column:
+                  name: id
+                  type: bigserial
+                  remarks: "게임 이력 ID"
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: uid
+                  type: uuid
+                  remarks: "uid"
+                  defaultValueComputed: gen_random_uuid()
+                  constraints:
+                    nullable: false
+                    unique: true
+
+              - column:
+                  name: season_id
+                  type: bigint
+                  remarks: "시즌 ID"
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: participant_id
+                  type: bigint
+                  remarks: "시즌 참여자 정보 ID"
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: game_id
+                  type: bigint
+                  remarks: "게임 ID"
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: score
+                  type: double precision
+                  remarks: "최종 점수 (게임 종료 시 기록)"
+
+              - column:
+                  name: status
+                  type: varchar(20)
+                  remarks: "진행 상태 (PLAYING, DONE)"
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: created_at
+                  type: timestamptz
+                  defaultValueComputed: now()
+                  remarks: "생성 일시"
+                  constraints:
+                    nullable: false
+
+        # -------- INDEX --------
+        - createIndex:
+            tableName: game_history
+            indexName: idx_game_history_user
+            columns:
+              - column:
+                  name: participant_id
+
+        - createIndex:
+            tableName: game_history
+            indexName: idx_game_history_uid
+            unique: true
+            columns:
+              - column:
+                  name: uid
