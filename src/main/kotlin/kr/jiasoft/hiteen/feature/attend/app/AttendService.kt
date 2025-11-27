@@ -20,14 +20,22 @@ class AttendService(
 ) {
 
     /** 출석 현황 조회 */
-    suspend fun view(user: UserEntity): List<AttendEntity> {
-        return attendRepository.findAllByUserId(user.id).toList()
+    suspend fun consecutiveAttendDays(user: UserEntity): List<ConsecutiveAttendDay> {
+        val days = attendRepository.findConsecutiveAttendDays(user.id).toList()
+
+        if (days.isEmpty()) return emptyList()
+
+        val today = LocalDate.now()
+        val lastAttendDate = days.maxOf { it.attendDate }
+
+        // 📌 어제, 오늘이 아니면 끊긴 것으로 간주 → streak reset
+        if (!lastAttendDate.isEqual(today.minusDays(1)) && !lastAttendDate.isEqual(today)) {
+            return emptyList()
+        }
+
+        return days
     }
 
-    /** 연속 출석일수 조회 */
-    suspend fun consecutiveAttendDays(user: UserEntity): List<ConsecutiveAttendDay> {
-        return attendRepository.findConsecutiveAttendDays(user.id).toList()
-    }
 
 
 
@@ -44,8 +52,9 @@ class AttendService(
         }
 
         // 연속 출석일수 조회
-        val consecutiveDays = attendRepository.countConsecutiveAttendDays(user.id)
-        val sumDay = (consecutiveDays + 1).toShort()
+//        val consecutiveDays = attendRepository.countConsecutiveAttendDays(user.id)
+        val result = consecutiveAttendDays(user)
+        val sumDay = (result.size % 7 + 1).toShort()
 
         // 오늘 적용할 포인트 정책 결정 (1~7일 주기)
         val dayIndex = ((sumDay - 1) % 7 + 1)  // 1~7

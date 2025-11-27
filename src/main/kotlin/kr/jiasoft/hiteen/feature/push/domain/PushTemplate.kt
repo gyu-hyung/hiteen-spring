@@ -1,21 +1,5 @@
 package kr.jiasoft.hiteen.feature.push.domain
 
-/**
- * 푸시 템플릿 메시지에 변수를 동적으로 치환해주는 함수
- */
-fun PushTemplate.buildPushData(vararg pairs: Pair<String, Any?>): Map<String, Any> {
-    val params = pairs.toMap()
-    var formattedMessage = message
-    params.forEach { (key, value) ->
-        formattedMessage = formattedMessage.replace("{$key}", value.toString())
-    }
-    return mapOf(
-        "code" to code,
-        "title" to title,
-        "message" to formattedMessage,
-        "silent" to false
-    )
-}
 
 
 /**
@@ -123,6 +107,24 @@ enum class PushTemplate(
 
 
     ;
+
+    /**
+     * 푸시 템플릿 메시지에 변수를 동적으로 치환해주는 함수
+     */
+    fun buildPushData(vararg pairs: Pair<String, Any?>): Map<String, Any> {
+        val params = pairs.toMap()
+        var formattedMessage = message
+        params.forEach { (key, value) ->
+            formattedMessage = formattedMessage.replace("{$key}", value.toString())
+        }
+        return mapOf(
+            "code" to code,
+            "title" to title,
+            "message" to formattedMessage,
+            "silent" to false
+        )
+    }
+
 }
 
 
