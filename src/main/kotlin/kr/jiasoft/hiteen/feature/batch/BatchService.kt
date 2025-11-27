@@ -26,7 +26,7 @@ class BatchService(
     /**
      * 매일 새벽 6시에 급식 정보를 가져와 갱신한다.
      */
-    @Scheduled(cron = "0 0 6 * * *", zone = "Asia/Seoul")
+    @Scheduled(cron = "0 0 2 * * *", zone = "Asia/Seoul")
     fun runDailyImport() = runBlocking {
         if (!active) {
             logger.info("===== SchoolFood Batch SKIPPED (inactive) =====")
@@ -45,9 +45,9 @@ class BatchService(
 
 
     /**
-     * 매월 1일 새벽 3시에 학교 정보를 싱크한다.
+     * 매월 1일 새벽 1시에 학교 정보를 싱크한다.
      */
-    @Scheduled(cron = "0 0 3 1 * *", zone = "Asia/Seoul")
+    @Scheduled(cron = "0 0 1 1 * *", zone = "Asia/Seoul")
     fun syncSchoolData() = runBlocking {
         if (!active) {
             logger.info("===== School Import Batch SKIPPED (inactive) =====")

@@ -11,3 +11,5 @@ databaseChangeLog:
       file: db/changelog/05-create-goods_giftishow.yaml
   - include:
       file: db/changelog/06-create-giftishow_logs.yaml
+  - include:
+      file: db/changelog/07-create-mbti.yaml

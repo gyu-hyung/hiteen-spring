@@ -1,9 +1,11 @@
 package kr.jiasoft.hiteen.feature.play.app
 
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.flow.toSet
+import kotlinx.coroutines.launch
 import kr.jiasoft.hiteen.feature.play.domain.GameRankingEntity
 import kr.jiasoft.hiteen.feature.study.domain.QuestionItemsEntity
 import kr.jiasoft.hiteen.feature.play.domain.SeasonEntity
@@ -47,10 +49,14 @@ class GameManageService(
         val endedSeasons = seasonRepository.findAllByEndDate(target)
         // 상태 먼저 CLOSED
         endedSeasons.collect { season ->
-            seasonRepository.close(season.id)
-        }
-        endedSeasons.collect { season ->
-            saveSeasonRankings(season.id)  // 랭킹 저장
+            coroutineScope {
+                launch {
+                    seasonRepository.close(season.id)
+                }
+                launch {
+                    saveSeasonRankings(season.id)  // 랭킹 저장
+                }
+            }
         }
     }
 

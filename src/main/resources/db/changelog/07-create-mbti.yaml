@@ -1,0 +1,75 @@
+databaseChangeLog:
+
+  # ----------------------------------
+  # MBTI RESULT TABLE
+  # ----------------------------------
+  - changeSet:
+      id: create-mbti
+      author: system
+      changes:
+        - createTable:
+            tableName: mbti
+            remarks: "사용자 MBTI 결과 저장"
+            columns:
+              - column:
+                  name: id
+                  type: bigserial
+                  remarks: "고유번호"
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: user_id
+                  type: bigint
+                  remarks: "유저 ID"
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: rates
+                  type: text
+                  remarks: "MBTI 비율 데이터 (JSON Array)"
+
+              - column:
+                  name: mbti
+                  type: varchar(10)
+                  remarks: "최종 MBTI (예: ENTP-T)"
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: created_at
+                  type: timestamptz
+                  remarks: "등록일시"
+                  defaultValueComputed: now()
+
+              - column:
+                  name: updated_at
+                  type: timestamptz
+                  remarks: "수정일시"
+
+        # -------- FK: user_id -> users.id --------
+        - addForeignKeyConstraint:
+            baseTableName: mbti
+            baseColumnNames: user_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_mbti_user
+
+        # -------- UNIQUE OR INDEX --------
+        - createIndex:
+            tableName: mbti
+            indexName: uk_mbti_user
+            unique: false
+            columns:
+              - column:
+                  name: user_id
+
+        # -------- INDEX: mbti 검색 --------
+        - createIndex:
+            tableName: mbti
+            indexName: idx_mbti_code
+            columns:
+              - column:
+                  name: mbti

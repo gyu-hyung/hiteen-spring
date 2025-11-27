@@ -11,7 +11,6 @@ import kr.jiasoft.hiteen.feature.location.domain.LocationHistory
 import kr.jiasoft.hiteen.feature.location.infra.cache.LocationCacheRedisService
 import kr.jiasoft.hiteen.feature.push.app.PushService
 import kr.jiasoft.hiteen.feature.push.domain.PushTemplate
-import kr.jiasoft.hiteen.feature.push.domain.buildPushData
 import kr.jiasoft.hiteen.feature.relationship.domain.FollowEntity
 import kr.jiasoft.hiteen.feature.relationship.domain.FollowStatus
 import kr.jiasoft.hiteen.feature.relationship.domain.FriendEntity
