@@ -19,7 +19,6 @@ import kr.jiasoft.hiteen.feature.pin.infra.PinRepository
 import kr.jiasoft.hiteen.feature.pin.infra.PinUsersRepository
 import kr.jiasoft.hiteen.feature.push.app.PushService
 import kr.jiasoft.hiteen.feature.push.domain.PushTemplate
-import kr.jiasoft.hiteen.feature.push.domain.buildPushData
 import kr.jiasoft.hiteen.feature.relationship.infra.FriendRepository
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import kr.jiasoft.hiteen.feature.user.infra.UserRepository

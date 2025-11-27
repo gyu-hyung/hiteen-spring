@@ -1,17 +1,55 @@
 package kr.jiasoft.hiteen.feature.mbti.app
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import kr.jiasoft.hiteen.feature.mbti.config.MbtiConfig
 import kr.jiasoft.hiteen.feature.mbti.domain.MbtiAnswer
+import kr.jiasoft.hiteen.feature.mbti.domain.MbtiResultEntity
+import kr.jiasoft.hiteen.feature.mbti.infra.MbtiRepository
 import kr.jiasoft.hiteen.feature.user.infra.UserRepository
 import org.springframework.stereotype.Service
 
 @Service
 class MbtiService(
     private val config: MbtiConfig,
+    private val objectMapper: ObjectMapper,
+    private val mbtiRepository: MbtiRepository,
+    private val userRepositoty: UserRepository,
 ) {
 
     fun getQuestions() = config.questions
 
+    /** ✨ 결과 계산 후 DB에 저장하는 함수 */
+    suspend fun calculateAndSave(userId: Long, answers: List<MbtiAnswer>): Map<String, Any> {
+        val result = calculateResult(answers)
+
+        val mbti = result["result"] as String
+        val ratesJson = objectMapper.writeValueAsString(result["rates"])
+
+        // 기존 기록 있으면 업데이트 (최신꺼 반영)
+        val existing = mbtiRepository.findByUserId(userId)
+
+        if (existing != null) {
+            mbtiRepository.save(
+                existing.copy(
+                    mbti = mbti,
+                    rates = ratesJson
+                )
+            )
+        } else {
+            mbtiRepository.save(
+                MbtiResultEntity(
+                    userId = userId,
+                    mbti = mbti,
+                    rates = ratesJson
+                )
+            )
+        }
+
+        return result
+    }
+
+
+    /** 기존 결과 계산 로직 (순수 계산) */
     fun calculateResult(answers: List<MbtiAnswer>): Map<String, Any> {
         val questions = config.questions.associateBy { it.index }
         val code = listOf(listOf("E","I"), listOf("N","S"), listOf("F","T"), listOf("P","J"), listOf("A","T"))
@@ -43,8 +81,6 @@ class MbtiService(
 
         val result = config.results[frontMbti]
 
-        // TODO: 포인트 차감/적립 로직 추가 (예: DB에 포인트 기록 저장)
-
         return mapOf(
             "result" to longMbti,
             "rates" to rates,
@@ -56,14 +92,37 @@ class MbtiService(
 
 
 
-    fun viewResult(mbti: String): Map<String, Any> {
+    suspend fun viewResult(userUid: String): Map<String, Any> {
+        val user = userRepositoty.findByUid(userUid)?: throw IllegalArgumentException("존재하지않는 사용자")
+
+        val saved = mbtiRepository.findByUserId(user.id)
+            ?: return mapOf(
+                "result" to "",
+                "rates" to emptyList<String>(),
+                "title" to "",
+                "description" to ""
+            )
+
+        val mbti = saved.mbti
         val short = mbti.take(4)
-        val result = config.results[short]
+
+        // config 결과 정보 매칭 (MBTI 설명)
+        val resultInfo = config.results[short]
+
+        // 저장한 text JSON → Kotlin Map List로 변환
+        val rates: List<Map<String, Any>> =
+            try {
+                objectMapper.readValue(saved.rates, List::class.java) as List<Map<String, Any>>
+            } catch (e: Exception) {
+                emptyList()
+            }
+
         return mapOf(
             "result" to mbti,
-            "rates" to emptyList<String>(),
-            "title" to (result?.title ?: ""),
-            "description" to (result?.description ?: "")
+            "rates" to rates,
+            "title" to (resultInfo?.title ?: ""),
+            "description" to (resultInfo?.description ?: "")
         )
     }
+
 }
