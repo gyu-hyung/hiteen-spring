@@ -97,5 +97,22 @@ class GlobalExceptionHandler {
             .body(ApiResult.failure(errors))
     }
 
+//    @ExceptionHandler(NotEnoughPointException::class)
+//    fun handleNotEnoughPointException(e: NotEnoughPointException): ResponseEntity<ApiResult<>> {
+//        return ResponseEntity
+//            .status(HttpStatus.BAD_REQUEST)
+//            .body(ApiErrorResponse("NOT_ENOUGH_POINT", e.message ?: "포인트 부족"))
+//    }
+
+    // 포인트 부족 오류
+    @ExceptionHandler(NotEnoughPointException::class)
+    fun handleEnoughPointException(e: NotEnoughPointException): ResponseEntity<ApiResult<Nothing>> {
+        val errors = mapOf("code" to "POINT")
+        return ResponseEntity
+            .badRequest()
+            .body(ApiResult.failure(errors))
+    }
+
+
 
 }
