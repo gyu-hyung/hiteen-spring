@@ -5,8 +5,11 @@ import kotlinx.coroutines.flow.toList
 import kr.jiasoft.hiteen.feature.level.app.ExpService
 import kr.jiasoft.hiteen.feature.push.app.PushService
 import kr.jiasoft.hiteen.feature.push.domain.PushTemplate
+import kr.jiasoft.hiteen.feature.relationship.RelationHistoryService
 import kr.jiasoft.hiteen.feature.relationship.domain.FollowEntity
 import kr.jiasoft.hiteen.feature.relationship.domain.FollowStatus
+import kr.jiasoft.hiteen.feature.relationship.domain.RelationAction
+import kr.jiasoft.hiteen.feature.relationship.domain.RelationType
 import kr.jiasoft.hiteen.feature.relationship.dto.RelationshipSummary
 import kr.jiasoft.hiteen.feature.relationship.infra.FollowRepository
 import kr.jiasoft.hiteen.feature.user.app.UserService
@@ -22,6 +25,9 @@ import java.time.ZoneOffset
 @Service
 class FollowService(
     private val followRepository: FollowRepository,
+
+    private val relationHistoryService: RelationHistoryService,
+
     private val userRepository: UserRepository,
     private val userService: UserService,
     private val expService: ExpService,
@@ -63,7 +69,7 @@ class FollowService(
     suspend fun listFollowers(me: UserEntity): List<RelationshipSummary> {
         return followRepository.findAllByFollowIdAndStatus(me.id, FollowStatus.ACCEPTED.name)
             .map { e ->
-                val other = userService.findUserResponse(e.followId, me.id)
+                val other = userService.findUserResponse(e.userId, me.id)
                 toFollowSummary(e, other)
             }.toList()
     }
@@ -108,6 +114,7 @@ class FollowService(
                     listOf(otherId),
                     PushTemplate.FOLLOW_REQUEST.buildPushData("nickname" to me.nickname)
                 )
+                relationHistoryService.log(meId, otherId, RelationType.FOLLOW.name, RelationAction.REQUEST.name)
             }
             existing.status == FollowStatus.PENDING.name ->
                 throw ResponseStatusException(HttpStatus.CONFLICT, "already requested")
@@ -139,6 +146,7 @@ class FollowService(
             listOf(otherId),
             PushTemplate.FOLLOW_ACCEPT.buildPushData("nickname" to me.nickname)
         )
+        relationHistoryService.log(meId, otherId, RelationType.FOLLOW.name, RelationAction.ACCEPT.name)
     }
 
     /** 받은 팔로우 요청 거절 (삭제) */
@@ -151,6 +159,7 @@ class FollowService(
         }
 
         followRepository.delete(rel)
+        relationHistoryService.log(meId, otherId, RelationType.FOLLOW.name, RelationAction.DENIED.name)
     }
 
     /** 내가 보낸 팔로우 요청 취소 */
@@ -163,6 +172,7 @@ class FollowService(
         }
 
         followRepository.delete(rel)
+        relationHistoryService.log(meId, otherId, RelationType.FOLLOW.name, RelationAction.CANCEL.name)
     }
 
     /** 언팔로우 (이미 승인된 상태 끊기) */
@@ -175,6 +185,7 @@ class FollowService(
         }
 
         followRepository.delete(rel)
+        relationHistoryService.log(meId, otherId, RelationType.FOLLOW.name, RelationAction.REMOVE.name)
     }
 
     /** 나를 팔로우하는 사람 강제 제거 (내 follower 끊기) */
@@ -191,6 +202,7 @@ class FollowService(
         }
 
         followRepository.delete(rel)
+        relationHistoryService.log(meId, otherId, RelationType.FOLLOW.name, RelationAction.FOLLOWER_REMOVE.name)
     }
 
 

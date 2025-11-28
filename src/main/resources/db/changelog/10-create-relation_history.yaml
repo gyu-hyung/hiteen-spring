@@ -1,0 +1,91 @@
+databaseChangeLog:
+
+  # ----------------------------------
+  # RELATION HISTORY TABLE
+  # ----------------------------------
+  - changeSet:
+      id: create-relation-history
+      author: system
+      changes:
+        - createTable:
+            tableName: relation_history
+            remarks: "사용자 간 친구/팔로우 관계 이력"
+            columns:
+              - column:
+                  name: id
+                  type: bigserial
+                  remarks: "이력 ID"
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: user_id
+                  type: bigint
+                  remarks: "행동을 수행한 사용자 ID"
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: target_id
+                  type: bigint
+                  remarks: "행동 대상 사용자 ID"
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: relation_type
+                  type: varchar(20)
+                  remarks: "관계 유형 (FRIEND, FOLLOW)"
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: action
+                  type: varchar(20)
+                  remarks: "행동 (REQUEST, ACCEPT, DECLINE, CANCEL, REMOVE)"
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: created_at
+                  type: timestamptz
+                  remarks: "기록 생성 일시"
+                  defaultValueComputed: now()
+                  constraints:
+                    nullable: false
+
+        # -------- INDEX --------
+        - createIndex:
+            tableName: relation_history
+            indexName: idx_relation_history_user
+            columns:
+              - column:
+                  name: user_id
+
+        - createIndex:
+            tableName: relation_history
+            indexName: idx_relation_history_target
+            columns:
+              - column:
+                  name: target_id
+
+        - createIndex:
+            tableName: relation_history
+            indexName: idx_relation_history_pair
+            columns:
+              - column:
+                  name: user_id
+              - column:
+                  name: target_id
+
+        - createIndex:
+            tableName: relation_history
+            indexName: idx_relation_history_pair_action
+            columns:
+              - column:
+                  name: user_id
+              - column:
+                  name: target_id
+              - column:
+                  name: action
