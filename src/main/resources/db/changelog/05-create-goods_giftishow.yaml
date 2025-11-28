@@ -243,6 +243,26 @@ databaseChangeLog:
                   remarks: "판매일시 설정 코드"
 
               - column:
+                  name: sale_discount_price
+                  type: varchar(50)
+                  remarks: "판매일시 설정 코드"
+
+              - column:
+                  name: sale_discount_rate
+                  type: varchar(50)
+                  remarks: "판매일시 설정 코드"
+
+              - column:
+                  name: sell_dis_cnt_cost
+                  type: varchar(50)
+                  remarks: "판매일시 설정 코드"
+
+              - column:
+                  name: sell_dis_rate
+                  type: varchar(50)
+                  remarks: "판매일시 설정 코드"
+
+              - column:
                   name: sale_date_flag
                   type: varchar(10)
                   remarks: "판매일시 설정 여부"
