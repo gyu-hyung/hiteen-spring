@@ -106,6 +106,7 @@ class GiftSendOrchestratorService(
                 giftId = gift.id,
                 userId = receiverUserId,
                 status = 0,
+                receiveDate = OffsetDateTime.now(),
                 requestDate = OffsetDateTime.now(),
                 goodsCode = goodsCode,
                 gameId = gameId,
