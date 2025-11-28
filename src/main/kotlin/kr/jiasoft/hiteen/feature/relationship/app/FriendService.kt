@@ -11,11 +11,14 @@ import kr.jiasoft.hiteen.feature.location.domain.LocationHistory
 import kr.jiasoft.hiteen.feature.location.infra.cache.LocationCacheRedisService
 import kr.jiasoft.hiteen.feature.push.app.PushService
 import kr.jiasoft.hiteen.feature.push.domain.PushTemplate
+import kr.jiasoft.hiteen.feature.relationship.RelationHistoryService
 import kr.jiasoft.hiteen.feature.relationship.domain.FollowEntity
 import kr.jiasoft.hiteen.feature.relationship.domain.FollowStatus
 import kr.jiasoft.hiteen.feature.relationship.domain.FriendEntity
 import kr.jiasoft.hiteen.feature.relationship.domain.FriendStatus
 import kr.jiasoft.hiteen.feature.relationship.domain.LocationMode
+import kr.jiasoft.hiteen.feature.relationship.domain.RelationAction
+import kr.jiasoft.hiteen.feature.relationship.domain.RelationType
 import kr.jiasoft.hiteen.feature.relationship.dto.ContactResponse
 import kr.jiasoft.hiteen.feature.relationship.dto.RelationshipSummary
 import kr.jiasoft.hiteen.feature.relationship.dto.RelationshipSearchItem
@@ -35,6 +38,8 @@ import java.time.ZoneOffset
 class FriendService(
     private val friendRepository: FriendRepository,
     private val followRepository: FollowRepository,
+    private val relationHistoryService: RelationHistoryService,
+
     private val userRepository: UserRepository,
     private val userContactRepository: UserContactRepository,
 
@@ -164,6 +169,7 @@ class FriendService(
                     listOf(targetId),
                     PushTemplate.FRIEND_REQUEST.buildPushData("nickname" to me.nickname)
                 )
+                relationHistoryService.log(meId, targetId, RelationType.FRIEND.name, RelationAction.REQUEST.name)
             }
             existing.status == FriendStatus.PENDING.name -> {
                 // 상대가 me 에게 이미 보낸 요청이라면, 이 요청은 '수락'으로 전환
@@ -196,6 +202,7 @@ class FriendService(
                         listOf(targetId),
                         PushTemplate.FRIEND_ACCEPT.buildPushData("nickname" to me.nickname)
                     )
+                    relationHistoryService.log(meId, targetId, RelationType.FRIEND.name, RelationAction.ACCEPT.name)
                 } else {
                     // 내가 이미 보낸 상태면 중복요청
                     throw ResponseStatusException(HttpStatus.CONFLICT, "already requested")
@@ -263,6 +270,7 @@ class FriendService(
             listOf(requesterId),
             PushTemplate.FRIEND_ACCEPT.buildPushData("nickname" to me.nickname)
         )
+        relationHistoryService.log(meId, requesterId, RelationType.FRIEND.name, RelationAction.ACCEPT.name)
     }
 
     /**
@@ -280,6 +288,7 @@ class FriendService(
             throw ResponseStatusException(HttpStatus.CONFLICT, "not a pending incoming request")
         }
         friendRepository.delete(rel)
+        relationHistoryService.log(meId, requesterId, RelationType.FRIEND.name, RelationAction.DENIED.name)
     }
 
     /**
@@ -295,6 +304,7 @@ class FriendService(
             throw ResponseStatusException(HttpStatus.CONFLICT, "not a pending outgoing request")
         }
         friendRepository.delete(rel)
+        relationHistoryService.log(meId, requesterId, RelationType.FRIEND.name, RelationAction.CANCEL.name)
     }
 
     /**
@@ -313,6 +323,7 @@ class FriendService(
         // === 팔로우 관계도 제거 (양방향) ===
         followRepository.findBetween(meId, otherId)?.let { followRepository.delete(it) }
         followRepository.findBetween(otherId, meId)?.let { followRepository.delete(it) }
+        relationHistoryService.log(meId, otherId, RelationType.FRIEND.name, RelationAction.REMOVE.name)
     }
 
     /**
