@@ -1,6 +1,7 @@
 package kr.jiasoft.hiteen.feature.point.app
 
 import kotlinx.coroutines.reactor.awaitSingle
+import kr.jiasoft.hiteen.common.exception.NotEnoughPointException
 import kr.jiasoft.hiteen.feature.point.domain.PointEntity
 import kr.jiasoft.hiteen.feature.point.domain.PointPolicy
 import kr.jiasoft.hiteen.feature.point.infra.PointRepository
@@ -69,7 +70,7 @@ class PointService(
         if (pointAmount < 0) {
             val totalPoints = getUserTotalPoints(userId)
             if (totalPoints < -pointAmount) {
-                throw IllegalStateException("포인트가 부족합니다. (보유=${totalPoints}, 필요=${-pointAmount})")
+                throw NotEnoughPointException("포인트가 부족합니다. (보유=${totalPoints}, 필요=${-pointAmount})")
             }
         }
 
