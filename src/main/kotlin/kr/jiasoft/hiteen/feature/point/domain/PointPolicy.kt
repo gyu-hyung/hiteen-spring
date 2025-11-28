@@ -49,5 +49,8 @@ enum class PointPolicy(
     ADMIN("ADMIN", 0, null, "관리자 포인트 지급"),
 
     // --- 기타 ---
-    ETC("ETC", 0, null, "기타")
+    ETC("ETC", 0, null, "기타"),
+
+    // --- 기타 ---
+    TEST("TEST", 100, null, "기타")
 }

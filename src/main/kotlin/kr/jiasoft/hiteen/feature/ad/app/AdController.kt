@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import kr.jiasoft.hiteen.common.dto.ApiResult
+import kr.jiasoft.hiteen.feature.point.app.PointService
+import kr.jiasoft.hiteen.feature.point.domain.PointPolicy
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
@@ -20,6 +22,8 @@ class AdController(
     private val adService: AdService,
     private val objectMapper: ObjectMapper,
     private val admobVerifier: AdmobVerifier,
+
+    private val pointService: PointService,
 ) {
 
     @Operation(summary = "남은 광고 보기 수")
@@ -28,6 +32,17 @@ class AdController(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ): ResponseEntity<ApiResult<Int>> {
         return ResponseEntity.ok(ApiResult.success(adService.getRemainingCount(user.id)))
+    }
+
+    @Operation(summary = "테스트용")
+    @GetMapping("/earn")
+    suspend fun earn(
+        @AuthenticationPrincipal(expression = "user") user: UserEntity,
+    ): ResponseEntity<ApiResult<String>> {
+
+        pointService.applyPolicy(user.id, PointPolicy.TEST)
+
+        return ResponseEntity.ok(ApiResult.success("통과"))
     }
 
     @Operation(summary = "AdMob 서버 리워드 콜백 (SSV)")
