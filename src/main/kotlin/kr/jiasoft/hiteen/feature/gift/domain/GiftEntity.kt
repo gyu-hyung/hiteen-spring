@@ -25,7 +25,7 @@ data class GiftEntity (
     @field:Schema(description = "선물 구분 (Point, Voucher, Delivery, Etc)")
     val type: GiftType,
 
-    @field:Schema(description = "카테고리(친구, 챌린지, 관리자 등)")
+    @field:Schema(description = "카테고리(Join, Challenge, Admin, Event)")
     val category: GiftCategory,
 
     @field:Schema(description = "회원 번호")
