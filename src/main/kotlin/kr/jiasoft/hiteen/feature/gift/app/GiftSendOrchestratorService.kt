@@ -19,6 +19,7 @@ import kr.jiasoft.hiteen.feature.push.domain.PushTemplate
 import kr.jiasoft.hiteen.feature.user.infra.UserRepository
 import org.springframework.stereotype.Service
 import java.lang.IllegalArgumentException
+import java.time.LocalDate
 import java.time.OffsetDateTime
 
 @Service
@@ -107,7 +108,8 @@ class GiftSendOrchestratorService(
                 userId = receiverUserId,
                 status = 0,
                 receiveDate = OffsetDateTime.now(),
-                requestDate = OffsetDateTime.now(),
+                pubExpiredDate = LocalDate.now().plusMonths(1),// 한달 안에 발급받아야함
+//                requestDate = OffsetDateTime.now(),
                 goodsCode = goodsCode,
                 gameId = gameId,
                 seasonId = seasonId,

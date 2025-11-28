@@ -23,12 +23,12 @@ data class GiftUsersEntity(
     @Column("user_id")
     val userId: Long,
 
-    @field:Schema(description = "수신 상태 (0: 대기, 1: 발송, 2: 사용, 3: 만료 등)")
+    @field:Schema(description = "수신 상태 (0: 대기, 1: 발송, 2: 사용, 3: 만료, 4: 배송요청, 5: 배송완료 등)")
     val status: Int = 0,
 
     @field:Schema(description = "받은 날짜")
     @Column("receive_date")
-    val receiveDate: OffsetDateTime? = null,
+    val receiveDate: OffsetDateTime = OffsetDateTime.now(),
 
     @field:Schema(description = "쿠폰 번호")
     @Column("coupon_no")
@@ -52,7 +52,7 @@ data class GiftUsersEntity(
 
     @field:Schema(description = "상품 발급 만료일")
     @Column("pub_expired_date")
-    val pubExpiredDate: LocalDate? = null,
+    val pubExpiredDate: LocalDate,
 
     @field:Schema(description = "상품 사용 만료일")
     @Column("use_expired_date")
