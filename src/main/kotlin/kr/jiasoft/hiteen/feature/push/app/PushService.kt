@@ -27,7 +27,8 @@ class PushService(
      */
     suspend fun sendAndSavePush(
         userIds: List<Long>,
-        data: Map<String, Any>
+        data: Map<String, Any>,
+        userId: Long? = null,
     ): SendResult {
         if (userIds.isEmpty()) return SendResult(0, 0, 0)
 
@@ -38,7 +39,8 @@ class PushService(
                 code = data["code"]?.toString(),
                 title = data["title"]?.toString(),
                 message = data["message"]?.toString(),
-                total = userIds.size.toLong()
+                total = userIds.size.toLong(),
+                createdId = userId,
             )
         )
 
