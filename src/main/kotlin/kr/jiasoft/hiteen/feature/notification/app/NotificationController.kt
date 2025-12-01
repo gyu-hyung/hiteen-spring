@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.RequestParam
 
 @RestController
@@ -45,6 +46,16 @@ class NotificationController(
         return ResponseEntity.ok(ApiResult.success(result))
     }
 
+    @DeleteMapping
+    suspend fun deletePushNotification(
+        @AuthenticationPrincipal(expression = "user") user: UserEntity, @RequestParam id: Long, @RequestParam all: Boolean
+    ): ResponseEntity<ApiResult<String>> {
+        notificationService.delete(user.id, id, all)
+        return ResponseEntity.ok(ApiResult.success("성공"))
+    }
+
 
 
 }
+
+

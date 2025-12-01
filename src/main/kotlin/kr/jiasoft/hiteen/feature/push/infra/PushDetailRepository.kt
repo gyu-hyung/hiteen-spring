@@ -10,12 +10,17 @@ import org.springframework.stereotype.Repository
 @Repository
 interface PushDetailRepository : CoroutineCrudRepository<PushDetailEntity, Long> {
 
+    suspend fun deleteByUserId(userId: Long)
+
+    suspend fun deleteByPushIdAndUserId(pushId: Long, userId: Long)
+
 
     @Query("""
         SELECT d.id, d.push_id, p.code, p.title, p.message, d.success, d.created_at
         FROM push_detail d
         JOIN push p ON p.id = d.push_id
-        WHERE d.user_id = :userId
+        WHERE d.deleted_at IS NULL 
+        AND d.user_id = :userId
         AND (:cursor IS NULL OR d.id < :cursor)
         AND (:code IS NULL OR p.code = :code)        
         ORDER BY d.id DESC
