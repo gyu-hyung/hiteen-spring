@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import java.time.Duration
+import java.time.LocalDate
 import java.time.OffsetDateTime
 
 @Component
@@ -118,8 +119,13 @@ class BatchService(
      */
     @Scheduled(cron = "0 0 0 * * *", zone = "Asia/Seoul")
     fun gameSeasonClose() = runBlocking {
+        val today = LocalDate.now()
+        val yesterday = today.minusDays(1)
         runBatch("GameSeasonClose") {
-            gameManageService.autoManageSeasons()
+            gameManageService.closeSeasons(yesterday)   // 1. 시즌 종료 및 랭킹 저장
+        }
+        runBatch("GameSeasonCreate") {
+            gameManageService.createNewSeasons(today)   // 2. 새로운 시즌 생성
         }
     }
 
