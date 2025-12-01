@@ -16,7 +16,18 @@ interface PushDetailRepository : CoroutineCrudRepository<PushDetailEntity, Long>
 
 
     @Query("""
-        SELECT d.id, d.push_id, p.code, p.title, p.message, d.success, d.created_at
+        SELECT 
+            d.id, 
+            d.push_id, 
+            p.code, 
+            p.title, 
+            p.message, 
+            d.success,
+            d.nickname,
+            d.asset_uid,
+            (select u.nickname from users u where u.id = p.created_id) nickname,
+            (select u.asset_uid from users u where u.id = p.created_id) asset_uid,
+            d.created_at 
         FROM push_detail d
         JOIN push p ON p.id = d.push_id
         WHERE d.deleted_at IS NULL 
