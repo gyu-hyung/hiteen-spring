@@ -31,7 +31,7 @@ class GameManageService(
      * - 시즌 종료 처리
      * - 시즌 생성
      */
-    suspend fun autoManageSeasons() {
+    suspend fun autoManageSeasons() = run {
         val today = LocalDate.now()
         val yesterday = today.minusDays(1)
 

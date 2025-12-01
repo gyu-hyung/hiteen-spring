@@ -1,5 +1,6 @@
 package kr.jiasoft.hiteen.feature.gift_v2.app
 
+import kotlinx.coroutines.flow.toList
 import kr.jiasoft.hiteen.feature.gift.domain.GiftCategory
 import kr.jiasoft.hiteen.feature.gift.domain.GiftEntity
 import kr.jiasoft.hiteen.feature.gift.domain.GiftMessageFormatter
@@ -10,7 +11,12 @@ import kr.jiasoft.hiteen.feature.gift.infra.GiftRepository
 import kr.jiasoft.hiteen.feature.gift.infra.GiftUserRepository
 import kr.jiasoft.hiteen.feature.gift_v2.dto.GiftCreateRequest
 import kr.jiasoft.hiteen.feature.gift_v2.dto.GiftIssueRequest
+import kr.jiasoft.hiteen.feature.gift_v2.dto.GiftResponse
+import kr.jiasoft.hiteen.feature.gift_v2.dto.GiftStatus
+import kr.jiasoft.hiteen.feature.gift_v2.dto.GiftUseRequest
 import kr.jiasoft.hiteen.feature.gift_v2.dto.client.voucher.GiftishowVoucherSendRequest
+import kr.jiasoft.hiteen.feature.gift_v2.dto.toResponse
+import kr.jiasoft.hiteen.feature.giftishow.domain.GoodsGiftishowEntity
 import kr.jiasoft.hiteen.feature.giftishow.infra.GiftishowGoodsRepository
 import kr.jiasoft.hiteen.feature.play.infra.GameRepository
 import kr.jiasoft.hiteen.feature.play.infra.SeasonRepository
@@ -18,6 +24,7 @@ import kr.jiasoft.hiteen.feature.point.app.PointService
 import kr.jiasoft.hiteen.feature.point.domain.PointPolicy
 import kr.jiasoft.hiteen.feature.push.app.PushService
 import kr.jiasoft.hiteen.feature.push.domain.PushTemplate
+import kr.jiasoft.hiteen.feature.user.app.UserService
 import kr.jiasoft.hiteen.feature.user.infra.UserRepository
 import org.springframework.stereotype.Service
 import java.lang.IllegalArgumentException
@@ -30,6 +37,8 @@ import java.util.UUID
 class GiftAppServiceImpl (
     private val giftishowClient: GiftshowClient,
 
+    private val userService: UserService,
+
     private val userRepository: UserRepository,
     private val gameRepository: GameRepository,
     private val seasonRepository: SeasonRepository,
@@ -41,14 +50,22 @@ class GiftAppServiceImpl (
     private val pointService: PointService,
     private val pushService: PushService,
 
-    ): GiftAppService {
+): GiftAppService {
+
+
+    private suspend fun findGift(receiverUserId: Long, giftUserId: Long) : GiftResponse{
+        val userSummary = userService.findUserSummary(receiverUserId)
+        val response = giftUserRepository.findWithGiftUserByUserId(receiverUserId, giftUserId)
+        return response.toResponse(userSummary)
+    }
+
 
     /**
      * 관리자가 사용자에게 선물을 지급합니다.(gift, giftUser 등록)
      * Type: Point, Voucher, Delivery, Etc
      * Category: Join, Challenge, Admin, Event
      * */
-    override suspend fun createGift(userId: Long, req: GiftCreateRequest) {
+    override suspend fun createGift(userId: Long, req: GiftCreateRequest) : GiftResponse {
         val receiverUser = userRepository.findByUid(req.receiveUserUid.toString())
             ?: throw IllegalArgumentException("존재하지 않는 수신자")
 
@@ -83,9 +100,9 @@ class GiftAppServiceImpl (
             GiftUsersEntity(
                 giftId = gift.id,
                 userId = receiverUser.id,
-                status = 0,
+                status = GiftStatus.WAIT.code,
                 receiveDate = OffsetDateTime.now(),
-                pubExpiredDate = LocalDate.now().plusMonths(1),// 한달 안에 발급받아야함
+                pubExpiredDate = OffsetDateTime.now().plusMonths(1),// 한달 안에 발급받아야함
                 goodsCode = req.goodsCode,
                 gameId = req.gameId,
                 seasonId = req.seasonId,
@@ -105,6 +122,7 @@ class GiftAppServiceImpl (
             "message" to memo
         ))
 
+        return findGift(receiverUser.id, giftUser.id)
     }
 
     /**
@@ -113,7 +131,7 @@ class GiftAppServiceImpl (
      * type = Delivery 일때 주소 받았는지?
      * 발송 후 이력 저장
      * */
-    override suspend fun issueGift(userId: Long, req: GiftIssueRequest) {
+    override suspend fun issueGift(userId: Long, req: GiftIssueRequest) : GiftResponse {
         val gift = giftRepository.findByUid(req.giftUid)?:
             throw IllegalArgumentException("존재하지 않는 선물")
         val template = gift.category.toTemplate()
@@ -124,17 +142,17 @@ class GiftAppServiceImpl (
 
             GiftType.Point -> {
                 pointService.applyPolicy(giftUser.userId, PointPolicy.ADMIN, gift.id, giftUser.point)
-                giftUser.copy(
-                    status = 2,
+                giftUserRepository.save(giftUser.copy(
+                    status = GiftStatus.USED.code,
                     requestDate = OffsetDateTime.now(),
                     pubDate = OffsetDateTime.now(),
                     useDate = OffsetDateTime.now(),
-                )
+                ))
             }
 
             GiftType.Voucher -> {
                 // pubExpiredDate 발급만료일자 이전인가?
-                if(giftUser.pubExpiredDate.isBefore(LocalDate.now()))
+                if(giftUser.pubExpiredDate.isBefore(OffsetDateTime.now()))
                     throw IllegalArgumentException("발급만료일자가 지난 선물입니다.")
 
                 val goodsEntity = giftUser.goodsCode?.let {
@@ -142,13 +160,13 @@ class GiftAppServiceImpl (
                     throw IllegalArgumentException("상품 정보가 존재하지않습니다. 관리자에게 문의하세요.")
                 }?: throw IllegalArgumentException("상품 정보가 존재하지않습니다. 관리자에게 문의하세요")
 
-                val goodsName = if (req.giftCategory == GiftCategory.Challenge) {
+                val goodsName = if (gift.category == GiftCategory.Challenge) {
                     GiftMessageFormatter.challengeGoodsName(goodsEntity.goodsName)
                 } else {
                     template.defaultGoodsName!!
                 }
 
-                val mmsMsg = if (req.giftCategory == GiftCategory.Challenge) {
+                val mmsMsg = if (gift.category == GiftCategory.Challenge) {
                     GiftMessageFormatter.challengeMmsMsg(goodsName)
                 } else {
                     template.defaultMmsMsg!!
@@ -173,16 +191,19 @@ class GiftAppServiceImpl (
                 val couponDetail = giftishowClient.detailVoucher(trId)
 
                 giftUserRepository.save(giftUser.copy(
+                    status = GiftStatus.SENT.code,
                     requestDate = OffsetDateTime.now(),
                     couponNo = coupon.result?.pinNo,
                     couponImg = coupon.result?.couponImgUrl,
-                    useExpiredDate = LocalDate.parse(couponDetail.result?.validPrdEndDt!!, DateTimeFormatter.ofPattern("yyyyMMddHHmmss"))
+                    pubDate = OffsetDateTime.now(),
+                    useExpiredDate = OffsetDateTime.parse(couponDetail.result?.validPrdEndDt!!, DateTimeFormatter.ofPattern("yyyyMMddHHmmss"))
                 ))
             }
 
             GiftType.Delivery -> {
                 giftUserRepository.save(giftUser.copy(
-                    status = 4,//`배송요청` 상태 TODO 배송완료 시 어캐 상태변경함? 배치?
+//                    status = 4,//`배송요청` 상태 TODO 배송완료 시 어캐 상태변경함? 배치?
+                    status = GiftStatus.DELIVERY_REQUESTED.code,
                     requestDate = OffsetDateTime.now(),
                     deliveryName = req.deliveryName,
                     deliveryPhone = req.deliveryPhone,
@@ -193,19 +214,31 @@ class GiftAppServiceImpl (
             }
         }
 
+        return findGift(userId, giftUser.id)
     }
 
-    // 사용처리
-    override suspend fun useGift() {
-        TODO("Not yet implemented")
+    // 사용 완료 처리
+    override suspend fun useGift(userId: Long, req: GiftUseRequest) : GiftResponse {
+        val gift = giftRepository.findByUid(req.giftUid)
+            ?: throw IllegalArgumentException("존재하지 않는 정보")
+        val giftUser = giftUserRepository.findByGiftIdAndUserId(gift.id, userId)
+        giftUserRepository.save(giftUser.copy(
+            status = GiftStatus.USED.code,
+            useDate = OffsetDateTime.now(),
+        ))
+        return findGift(userId, giftUser.id)
     }
 
-    override suspend fun listGift() {
-        TODO("Not yet implemented")
+    override suspend fun listGift(userId: Long): List<GiftResponse> {
+        val receiver = userService.findUserSummary(userId)
+
+        val records = giftUserRepository.findAllWithGiftUserByUserId(userId).toList()
+
+        return records.map { it.toResponse(receiver) }
     }
 
-    override suspend fun listGoods() {
-        TODO("Not yet implemented")
+    override suspend fun listGoods() : List<GoodsGiftishowEntity> {
+        return giftishowGoodsRepository.findAll().toList()
     }
 
 
