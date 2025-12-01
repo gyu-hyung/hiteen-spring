@@ -41,4 +41,12 @@ class NotificationService(
     }
 
 
+     suspend fun delete(userId: Long, pushId: Long, all: Boolean) {
+        if(all) {
+            pushDetailRepository.deleteByUserId(userId)
+        } else {
+            pushDetailRepository.deleteByPushIdAndUserId(pushId, userId)
+        }
+    }
+
 }
