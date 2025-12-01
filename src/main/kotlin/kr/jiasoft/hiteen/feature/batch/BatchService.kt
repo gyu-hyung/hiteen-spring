@@ -98,7 +98,7 @@ class BatchService(
      * 매일 새벽 2시에 급식 정보를 가져와 갱신한다.
      */
     @Scheduled(cron = "0 0 2 * * *", zone = "Asia/Seoul")
-    fun runDailyImport() = runBlocking {
+    fun schoolFoodImport() = runBlocking {
         runBatch("SchoolFoodImport") {
             schoolFoodImportService.import()
         }
@@ -108,7 +108,7 @@ class BatchService(
      * 매월 1일 새벽 1시에 학교 정보를 싱크한다.
      */
     @Scheduled(cron = "0 0 1 1 * *", zone = "Asia/Seoul")
-    fun syncSchoolData() = runBlocking {
+    fun schoolImport() = runBlocking {
         runBatch("SchoolImport") {
             schoolImportService.import()
         }
@@ -118,7 +118,7 @@ class BatchService(
      * 매일 0시에 게임 시즌 종료 처리
      */
     @Scheduled(cron = "0 0 0 * * *", zone = "Asia/Seoul")
-    fun gameSeasonClose() = runBlocking {
+    fun autoManageSeasons() = runBlocking {
         val today = LocalDate.now()
         val yesterday = today.minusDays(1)
         runBatch("GameSeasonClose") {
