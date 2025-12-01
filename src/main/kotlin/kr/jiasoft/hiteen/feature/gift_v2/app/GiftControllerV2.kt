@@ -9,6 +9,7 @@ import kr.jiasoft.hiteen.feature.gift_v2.dto.GiftUseRequest
 import kr.jiasoft.hiteen.feature.giftishow.domain.GoodsGiftishowEntity
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import org.springframework.http.ResponseEntity
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
@@ -28,6 +29,7 @@ class GiftControllerV2 (
 
     /** 관리자 -> 사용자 선물 지급 */
     @PostMapping("/admin/create")
+    @PreAuthorize("hasRole('ADMIN')")
     suspend fun createGift(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
         request: GiftCreateRequest

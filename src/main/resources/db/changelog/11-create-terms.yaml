@@ -1,0 +1,149 @@
+databaseChangeLog:
+
+  # ----------------------------------
+  # TERMS TABLE
+  # ----------------------------------
+  - changeSet:
+      id: create-terms
+      author: system
+      changes:
+
+        # -------- TABLE --------
+        - createTable:
+            tableName: terms
+            remarks: "약관 관리 테이블"
+            columns:
+              - column:
+                  name: id
+                  type: bigserial
+                  remarks: "약관번호 PK"
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: uid
+                  type: uuid
+                  remarks: "약관 UID"
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: category
+                  type: varchar(20)
+                  remarks: "카테고리"
+
+              - column:
+                  name: code
+                  type: varchar(50)
+                  remarks: "약관 코드"
+
+              - column:
+                  name: version
+                  type: varchar(50)
+                  remarks: "버전 정보"
+
+              - column:
+                  name: title
+                  type: varchar(300)
+                  remarks: "약관 제목"
+
+              - column:
+                  name: content
+                  type: text
+                  remarks: "약관 내용"
+
+              - column:
+                  name: sort
+                  type: smallint
+                  remarks: "정렬 순서"
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: is_required
+                  type: smallint
+                  remarks: "필수 여부 (0/1)"
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: status
+                  type: smallint
+                  remarks: "상태 (0=비활성, 1=활성)"
+                  defaultValueNumeric: 1
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: created_id
+                  type: bigint
+                  remarks: "등록자 ID"
+
+              - column:
+                  name: updated_id
+                  type: bigint
+                  remarks: "수정자 ID"
+
+              - column:
+                  name: deleted_id
+                  type: bigint
+                  remarks: "삭제자 ID"
+
+              - column:
+                  name: created_at
+                  type: timestamptz
+                  remarks: "생성일시"
+                  defaultValueComputed: now()
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: updated_at
+                  type: timestamptz
+                  remarks: "수정일시"
+
+              - column:
+                  name: deleted_at
+                  type: timestamptz
+                  remarks: "삭제일시"
+
+
+        # -------- INDEX --------
+        - createIndex:
+            tableName: terms
+            indexName: idx_terms_uid
+            unique: true
+            columns:
+              - column:
+                  name: uid
+
+        - createIndex:
+            tableName: terms
+            indexName: idx_terms_category
+            columns:
+              - column:
+                  name: category
+
+        - createIndex:
+            tableName: terms
+            indexName: idx_terms_status
+            columns:
+              - column:
+                  name: status
+
+        - createIndex:
+            tableName: terms
+            indexName: idx_terms_sort
+            columns:
+              - column:
+                  name: sort
+
+        - createIndex:
+            tableName: terms
+            indexName: idx_terms_created
+            columns:
+              - column:
+                  name: created_at
