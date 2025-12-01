@@ -108,7 +108,7 @@ class GiftSendOrchestratorService(
                 userId = receiverUserId,
                 status = 0,
                 receiveDate = OffsetDateTime.now(),
-                pubExpiredDate = LocalDate.now().plusMonths(1),// 한달 안에 발급받아야함
+                pubExpiredDate = OffsetDateTime.now().plusMonths(1),// 한달 안에 발급받아야함
 //                requestDate = OffsetDateTime.now(),
                 goodsCode = goodsCode,
                 gameId = gameId,

@@ -5,5 +5,5 @@ import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 import java.util.UUID
 
 interface GiftRepository : CoroutineCrudRepository<GiftEntity, Long> {
-    fun findByUid(uid: UUID): GiftEntity?
+    suspend fun findByUid(uid: UUID): GiftEntity?
 }

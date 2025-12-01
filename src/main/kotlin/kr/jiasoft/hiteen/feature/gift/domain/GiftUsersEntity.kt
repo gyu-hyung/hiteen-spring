@@ -52,11 +52,11 @@ data class GiftUsersEntity(
 
     @field:Schema(description = "상품 발급 만료일")
     @Column("pub_expired_date")
-    val pubExpiredDate: LocalDate,
+    val pubExpiredDate: OffsetDateTime,
 
     @field:Schema(description = "상품 사용 만료일")
     @Column("use_expired_date")
-    val useExpiredDate: LocalDate? = null,
+    val useExpiredDate: OffsetDateTime? = null,
 
     @field:Schema(description = "상품 코드")
     @Column("goods_code")
@@ -72,11 +72,11 @@ data class GiftUsersEntity(
 
     @field:Schema(description = "챌린지 랭킹 -- GiftCategory.Challenge 일 경우")
     @Column("season_rank")
-    val seasonRank: Int? = 0,
+    val seasonRank: Int? = null,
 
     @field:Schema(description = "선물 받은 포인트 -- GiftType.Point 일 경우")
     @Column("point")
-    val point: Int? = 0,
+    val point: Int? = null,
 
     @field:Schema(description = "수령자 이름 -- GiftType.Delivery 일 경우")
     @Column("delivery_name")

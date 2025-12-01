@@ -47,7 +47,7 @@ class GiftService(
                     else -> "UNKNOWN"
                 },
                 issuedAt = giftUser.receiveDate ?: giftUser.requestDate ?: OffsetDateTime.now(),
-                expireAt = giftUser.useExpiredDate?.atStartOfDay()?.atOffset(OffsetDateTime.now().offset),
+//                expireAt = giftUser.useExpiredDate?.atStartOfDay()?.atOffset(OffsetDateTime.now().offset),
                 user = userService.findUserSummary(giftUser.userId),
                 goods = giftUser.goodsCode?.let { giftishowService.getGoods(giftUser.goodsCode) }
             )

@@ -71,12 +71,12 @@ databaseChangeLog:
 
               - column:
                   name: pub_expired_date
-                  type: date
+                  type: timestamptz
                   remarks: "상품 발급 만료일"
 
               - column:
                   name: use_expired_date
-                  type: date
+                  type: timestamptz
                   remarks: "상품 교환(수령) 만료일"
 
               - column:

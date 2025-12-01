@@ -21,7 +21,7 @@ databaseChangeLog:
 
               - column:
                   name: uid
-                  type: varchar(100)
+                  type: uuid
                   remarks: "선물 UID"
 
               - column:
