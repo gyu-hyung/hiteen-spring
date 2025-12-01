@@ -23,8 +23,6 @@ interface PushDetailRepository : CoroutineCrudRepository<PushDetailEntity, Long>
             p.title, 
             p.message, 
             d.success,
-            d.nickname,
-            d.asset_uid,
             (select u.nickname from users u where u.id = p.created_id) nickname,
             (select u.asset_uid from users u where u.id = p.created_id) asset_uid,
             d.created_at 
