@@ -17,6 +17,7 @@ import kr.jiasoft.hiteen.feature.user.dto.UserResponse
 import kr.jiasoft.hiteen.feature.user.dto.UserResponseWithTokens
 import kr.jiasoft.hiteen.feature.user.dto.UserSummary
 import kr.jiasoft.hiteen.feature.user.dto.UserUpdateForm
+import org.springframework.http.HttpRequest
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.http.codec.multipart.FilePart
@@ -32,6 +33,79 @@ import java.util.*
 class UserController(
     private val userService: UserService,
 ) {
+
+    data class Users(
+        val id: Long,
+        val name: String,
+        val email: String,
+        val createdAt: String,
+    )
+
+    @GetMapping("/users")
+    suspend fun getUsers(): ResponseEntity<ApiResult<List<Users>>> {
+        return ResponseEntity.ok(ApiResult.success(listOf(
+            Users(1, "홍길동", "hong@naver.com", "2025-12-02"),
+            Users(2, "홍이동", "hong@naver.com", "2025-12-02"),
+            Users(3, "홍삼동", "hong@naver.com", "2025-12-02"),
+            Users(4, "홍사동", "hong@naver.com", "2025-12-02"),
+            Users(5, "홍오동", "hong@naver.com", "2025-12-02"),
+            Users(1, "홍길동", "hong@naver.com", "2025-12-02"),
+            Users(2, "홍이동", "hong@naver.com", "2025-12-02"),
+            Users(3, "홍삼동", "hong@naver.com", "2025-12-02"),
+            Users(4, "홍사동", "hong@naver.com", "2025-12-02"),
+            Users(5, "홍오동", "hong@naver.com", "2025-12-02"),
+            Users(1, "홍길동", "hong@naver.com", "2025-12-02"),
+            Users(2, "홍이동", "hong@naver.com", "2025-12-02"),
+            Users(3, "홍삼동", "hong@naver.com", "2025-12-02"),
+            Users(4, "홍사동", "hong@naver.com", "2025-12-02"),
+            Users(5, "홍오동", "hong@naver.com", "2025-12-02"),
+            Users(1, "홍길동", "hong@naver.com", "2025-12-02"),
+            Users(2, "홍이동", "hong@naver.com", "2025-12-02"),
+            Users(3, "홍삼동", "hong@naver.com", "2025-12-02"),
+            Users(4, "홍사동", "hong@naver.com", "2025-12-02"),
+            Users(5, "홍오동", "hong@naver.com", "2025-12-02"),
+            Users(1, "홍길동", "hong@naver.com", "2025-12-02"),
+            Users(2, "홍이동", "hong@naver.com", "2025-12-02"),
+            Users(3, "홍삼동", "hong@naver.com", "2025-12-02"),
+            Users(4, "홍사동", "hong@naver.com", "2025-12-02"),
+            Users(5, "홍오동", "hong@naver.com", "2025-12-02"),
+            Users(1, "홍길동", "hong@naver.com", "2025-12-02"),
+            Users(2, "홍이동", "hong@naver.com", "2025-12-02"),
+            Users(3, "홍삼동", "hong@naver.com", "2025-12-02"),
+            Users(4, "홍사동", "hong@naver.com", "2025-12-02"),
+            Users(5, "홍오동", "hong@naver.com", "2025-12-02"),
+            Users(1, "홍길동", "hong@naver.com", "2025-12-02"),
+            Users(2, "홍이동", "hong@naver.com", "2025-12-02"),
+            Users(3, "홍삼동", "hong@naver.com", "2025-12-02"),
+            Users(4, "홍사동", "hong@naver.com", "2025-12-02"),
+            Users(5, "홍오동", "hong@naver.com", "2025-12-02"),
+            Users(1, "홍길동", "hong@naver.com", "2025-12-02"),
+            Users(2, "홍이동", "hong@naver.com", "2025-12-02"),
+            Users(3, "홍삼동", "hong@naver.com", "2025-12-02"),
+            Users(4, "홍사동", "hong@naver.com", "2025-12-02"),
+            Users(5, "홍오동", "hong@naver.com", "2025-12-02"),
+            Users(1, "홍길동", "hong@naver.com", "2025-12-02"),
+            Users(2, "홍이동", "hong@naver.com", "2025-12-02"),
+            Users(3, "홍삼동", "hong@naver.com", "2025-12-02"),
+            Users(4, "홍사동", "hong@naver.com", "2025-12-02"),
+            Users(5, "홍오동", "hong@naver.com", "2025-12-02"),
+            Users(1, "홍길동", "hong@naver.com", "2025-12-02"),
+            Users(2, "홍이동", "hong@naver.com", "2025-12-02"),
+            Users(3, "홍삼동", "hong@naver.com", "2025-12-02"),
+            Users(4, "홍사동", "hong@naver.com", "2025-12-02"),
+            Users(5, "홍오동", "hong@naver.com", "2025-12-02"),
+            Users(1, "홍길동", "hong@naver.com", "2025-12-02"),
+            Users(2, "홍이동", "hong@naver.com", "2025-12-02"),
+            Users(3, "홍삼동", "hong@naver.com", "2025-12-02"),
+            Users(4, "홍사동", "hong@naver.com", "2025-12-02"),
+            Users(5, "홍오동", "hong@naver.com", "2025-12-02"),
+            Users(1, "홍길동", "hong@naver.com", "2025-12-02"),
+            Users(2, "홍이동", "hong@naver.com", "2025-12-02"),
+            Users(3, "홍삼동", "hong@naver.com", "2025-12-02"),
+            Users(4, "홍사동", "hong@naver.com", "2025-12-02"),
+            Users(5, "홍오동", "hong@naver.com", "2025-12-02"),
+        )))
+    }
 
     @Operation(
         summary = "닉네임 중복 조회",
