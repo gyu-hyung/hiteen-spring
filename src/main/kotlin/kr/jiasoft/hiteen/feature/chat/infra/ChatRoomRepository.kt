@@ -11,6 +11,9 @@ interface ChatRoomRepository : CoroutineCrudRepository<ChatRoomEntity, Long> {
     suspend fun findByUid(uid: UUID): ChatRoomEntity?
     suspend fun findByUidAndDeletedAtIsNull(uid: UUID): ChatRoomEntity?
 
+    @Query(" UPDATE chat_rooms SET deleted_at = now() WHERE id = :id ")
+    suspend fun softDeleteById(id: Long)
+
     /** 두 유저로 구성된 1:1 방이 이미 있는지 검색 */
     @Query("""
         SELECT r.* FROM chat_rooms r
