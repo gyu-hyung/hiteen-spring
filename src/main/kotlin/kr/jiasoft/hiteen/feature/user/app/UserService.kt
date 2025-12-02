@@ -20,6 +20,7 @@ import kr.jiasoft.hiteen.feature.point.domain.PointPolicy
 import kr.jiasoft.hiteen.feature.poll.infra.PollCommentRepository
 import kr.jiasoft.hiteen.feature.poll.infra.PollUserRepository
 import kr.jiasoft.hiteen.feature.relationship.domain.FollowStatus
+import kr.jiasoft.hiteen.feature.relationship.domain.FriendStatus
 import kr.jiasoft.hiteen.feature.relationship.dto.RelationshipCounts
 import kr.jiasoft.hiteen.feature.relationship.infra.FollowRepository
 import kr.jiasoft.hiteen.feature.relationship.infra.FriendRepository
@@ -109,10 +110,27 @@ class UserService (
         )
         val photos = getPhotosById(targetUser.id)
 
-        val isFollowed = currentUserId?.let { followRepository.existsFollow(it, targetUser.id) > 0 }  ?: false
-        val isFriend = currentUserId?.let { friendRepository.existsFriend(it, targetUser.id) > 0 } ?: false
+        val friendStatus = currentUserId?.let { friendRepository.findStatusFriend(it, targetUser.id) } ?: false
+        val followStatus = currentUserId?.let { followRepository.findStatusFollow(it, targetUser.id) }  ?: false
 
-        return UserResponse.from(targetUser, school, tier, interests, relationshipCounts, photos, isFollowed, isFriend)
+        val isFriend = friendStatus == FriendStatus.ACCEPTED.name
+        val isFriendRequested = friendStatus == FriendStatus.PENDING.name
+
+        val isFollowed = followStatus == FollowStatus.ACCEPTED.name
+        val isFollowedRequested = followStatus == FollowStatus.PENDING.name
+
+        return UserResponse.from(
+            targetUser,
+            school,
+            tier,
+            interests,
+            relationshipCounts,
+            photos,
+            isFriend,
+            isFollowed,
+            isFriendRequested,
+            isFollowedRequested
+        )
     }
 
     suspend fun findUserResponse(username: String): UserResponse {
