@@ -100,7 +100,7 @@ interface GiftUserRepository: CoroutineCrudRepository<GiftUsersEntity, Long> {
             gu.pub_expired_date,
             gu.use_expired_date,
             gu.goods_code,
-            (SELECT gg.goods_name FROM goods_giftishow gg WHERE gg.goods_code = gu.goods_code) good_name,
+            (SELECT gg.goods_name FROM goods_giftishow gg WHERE gg.goods_code = gu.goods_code) goods_name,
             gu.game_id,
             gu.season_id,
             gu.season_rank,
