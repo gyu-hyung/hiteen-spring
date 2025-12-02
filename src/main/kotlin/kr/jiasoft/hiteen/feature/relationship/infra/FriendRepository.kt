@@ -34,6 +34,14 @@ interface FriendRepository : CoroutineCrudRepository<FriendEntity, Long> {
     """)
     suspend fun existsFriend(userId: Long, targetId: Long): Long
 
+    @Query("""
+        SELECT status 
+        FROM friends 
+        WHERE (user_id = :userId AND friend_id = :targetId) 
+           OR (user_id = :targetId AND friend_id = :userId)
+    """)
+    suspend fun findStatusFriend(userId: Long, targetId: Long): Long
+
     // 두 사용자 사이의 관계 한 건(단일행 정책)
     @Query("""
         SELECT * FROM friends 

@@ -19,10 +19,6 @@ import java.time.LocalDateTime
 @Table("users")
 data class UserResponse(
 
-    // redis cache 문제로 임시 추가
-    val friend: Boolean = false,
-    val followed: Boolean = false,
-
     @Id
     @JsonIgnore
     @param:Schema(description = "사용자 내부 식별자 (DB PK)", example = "1", hidden = true)
@@ -92,6 +88,12 @@ data class UserResponse(
     @param:Schema(description = "친구 여부", example = "true")
     val isFriend: Boolean = false,
 
+    @param:Schema(description = "친구 요청 여부", example = "true")
+    val isFriendRequested: Boolean = false,
+
+    @param:Schema(description = "팔로우 요청 여부", example = "false")
+    val isFollowedRequested: Boolean = false,
+
     @param:Schema(description = "생성 일시", example = "2025.09.18 10:15")
     @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm")
     val createdAt: LocalDateTime,
@@ -127,8 +129,10 @@ data class UserResponse(
                 interests: List<InterestUserResponse>? = null,
                 relationshipCounts: RelationshipCounts? = null,
                 photos: List<UserPhotosEntity>? = null,
-                isFollowed: Boolean = false,
                 isFriend: Boolean = false,
+                isFollowed: Boolean = false,
+                isFriendRequested: Boolean = false,
+                isFollowedRequested: Boolean = false,
             ): UserResponse =
                 UserResponse(
                     id = entity.id,
@@ -151,8 +155,10 @@ data class UserResponse(
                     profileDecorationCode = entity.profileDecorationCode,
                     inviteCode = entity.inviteCode,
                     inviteJoins = entity.inviteJoins,
-                    isFollowed = isFollowed,
                     isFriend = isFriend,
+                    isFollowed = isFollowed,
+                    isFriendRequested = isFriendRequested,
+                    isFollowedRequested = isFollowedRequested,
                     createdAt = entity.createdAt.toLocalDateTime(),
                     updatedAt = entity.updatedAt?.toLocalDateTime(),
                     deletedAt = entity.deletedAt?.toLocalDateTime(),
@@ -186,6 +192,8 @@ data class UserResponse(
             inviteJoins = 0L,
             isFollowed = false,
             isFriend = false,
+            isFriendRequested = false,
+            isFollowedRequested = false,
             createdAt = LocalDateTime.now(),
             updatedAt = null,
             deletedAt = null,
