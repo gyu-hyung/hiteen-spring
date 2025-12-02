@@ -20,6 +20,7 @@ import kr.jiasoft.hiteen.feature.push.app.PushService
 import kr.jiasoft.hiteen.feature.push.domain.PushTemplate
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import kr.jiasoft.hiteen.feature.user.infra.UserRepository
+import org.springframework.data.r2dbc.repository.Query
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
 import java.time.OffsetDateTime
@@ -242,11 +243,13 @@ class ChatService(
     }
 
 
-    /** 방 탈퇴 */
+    /** 방 나가기 */
     suspend fun leaveRoom(roomUid: UUID, currentUserId: Long) {
         val room = rooms.findByUid(roomUid) ?: error("room not found")
         val me = chatUsers.findActive(room.id, currentUserId) ?: error("not a member")
         chatUsers.save(me.copy(leavingAt = OffsetDateTime.now(), deletedAt = OffsetDateTime.now()))
+        //20251202 1:1 채팅방이면 채팅방 삭제
+        if(chatUsers.countActiveByRoomId(room.id) <= 1) rooms.deleteById(room.id)
     }
 
 
