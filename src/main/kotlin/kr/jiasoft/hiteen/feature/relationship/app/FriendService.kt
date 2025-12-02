@@ -182,20 +182,20 @@ class FriendService(
                     friendRepository.save(accepted)
 
                     // === 팔로우 등록 (양방향) ===
-                    followRepository.save(
-                        FollowEntity(
-                            userId = meId, followId = targetId,
-                            status = FollowStatus.ACCEPTED.name,
-                            statusAt = now, createdAt = now
-                        )
-                    )
-                    followRepository.save(
-                        FollowEntity(
-                            userId = targetId, followId = meId,
-                            status = FollowStatus.ACCEPTED.name,
-                            statusAt = now, createdAt = now
-                        )
-                    )
+//                    followRepository.save(
+//                        FollowEntity(
+//                            userId = meId, followId = targetId,
+//                            status = FollowStatus.ACCEPTED.name,
+//                            statusAt = now, createdAt = now
+//                        )
+//                    )
+//                    followRepository.save(
+//                        FollowEntity(
+//                            userId = targetId, followId = meId,
+//                            status = FollowStatus.ACCEPTED.name,
+//                            statusAt = now, createdAt = now
+//                        )
+//                    )
                     expService.grantExp(meId, "FRIEND_ADD", targetId)
                     expService.grantExp(targetId, "FRIEND_ADD", meId)
                     pushService.sendAndSavePush(
@@ -321,8 +321,8 @@ class FriendService(
         friendRepository.delete(rel)
 
         // === 팔로우 관계도 제거 (양방향) ===
-        followRepository.findBetween(meId, otherId)?.let { followRepository.delete(it) }
-        followRepository.findBetween(otherId, meId)?.let { followRepository.delete(it) }
+//        followRepository.findBetween(meId, otherId)?.let { followRepository.delete(it) }
+//        followRepository.findBetween(otherId, meId)?.let { followRepository.delete(it) }
         relationHistoryService.log(meId, otherId, RelationType.FRIEND.name, RelationAction.REMOVE.name)
     }
 
