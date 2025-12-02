@@ -249,7 +249,9 @@ class ChatService(
         val me = chatUsers.findActive(room.id, currentUserId) ?: error("not a member")
         chatUsers.save(me.copy(leavingAt = OffsetDateTime.now(), deletedAt = OffsetDateTime.now()))
         //20251202 1:1 채팅방이면 채팅방 삭제
-        if(chatUsers.countActiveByRoomId(room.id) <= 1) rooms.deleteById(room.id)
+        if(chatUsers.countActiveByRoomId(room.id) <= 1) {
+            rooms.softDeleteById(room.id)
+        }
     }
 
 
