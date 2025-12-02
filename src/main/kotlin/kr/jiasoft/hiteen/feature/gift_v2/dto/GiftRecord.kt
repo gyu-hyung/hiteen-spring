@@ -2,6 +2,7 @@ package kr.jiasoft.hiteen.feature.gift_v2.dto
 
 import kr.jiasoft.hiteen.feature.gift.domain.GiftCategory
 import kr.jiasoft.hiteen.feature.gift.domain.GiftType
+import kr.jiasoft.hiteen.feature.giftishow.domain.GoodsGiftishowEntity
 import kr.jiasoft.hiteen.feature.user.dto.UserSummary
 import java.time.OffsetDateTime
 
@@ -44,7 +45,8 @@ data class GiftRecord (
 
     )
     fun GiftRecord.toResponse(
-        receiver: UserSummary
+        receiver: UserSummary,
+        goods: GoodsGiftishowEntity? = null,
     ): GiftResponse {
         return GiftResponse(
             giftId = this.giftId,
@@ -80,7 +82,8 @@ data class GiftRecord (
             deliveryAddress1 = this.deliveryAddress1,
             deliveryAddress2 = this.deliveryAddress2,
 
-            receiver = receiver
+            receiver = receiver,
+            goods = goods,
         )
     }
 

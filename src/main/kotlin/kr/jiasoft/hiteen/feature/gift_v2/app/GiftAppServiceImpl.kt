@@ -56,7 +56,10 @@ class GiftAppServiceImpl (
     private suspend fun findGift(receiverUserId: Long, giftUserId: Long) : GiftResponse{
         val userSummary = userService.findUserSummary(receiverUserId)
         val response = giftUserRepository.findWithGiftUserByUserId(receiverUserId, giftUserId)
-        return response.toResponse(userSummary)
+        val goods = response.goodsCode?.let {
+            giftishowGoodsRepository.findByGoodsCode(it)
+        }
+        return response.toResponse(userSummary, goods)
     }
 
 

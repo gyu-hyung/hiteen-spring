@@ -2,6 +2,7 @@ package kr.jiasoft.hiteen.feature.gift_v2.dto
 
 import kr.jiasoft.hiteen.feature.gift.domain.GiftCategory
 import kr.jiasoft.hiteen.feature.gift.domain.GiftType
+import kr.jiasoft.hiteen.feature.giftishow.domain.GoodsGiftishowEntity
 import kr.jiasoft.hiteen.feature.user.dto.UserSummary
 import java.time.OffsetDateTime
 
@@ -43,4 +44,5 @@ data class GiftResponse (
     val deliveryAddress2: String? = null,
 
     val receiver: UserSummary,
+    val goods: GoodsGiftishowEntity? = null,
 )
