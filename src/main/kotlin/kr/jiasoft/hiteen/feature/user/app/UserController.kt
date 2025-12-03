@@ -49,9 +49,16 @@ class UserController(
     suspend fun getUsers(
         @RequestParam("page", defaultValue = "1") pageParam: Int,
         @RequestParam("size", defaultValue = "0") sizeParam: Int,
+        @RequestParam("nickname", defaultValue = "0") nickname: String? = null,
+        @RequestParam("email", defaultValue = "0") email: String? = null,
+        @RequestParam("phone", defaultValue = "0") phone: String? = null,
+        @RequestParam("status", defaultValue = "0") status: String? = null,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ): ResponseEntity<ApiResult<ApiPage<Users>>> {
-
+        println("nickname = ${nickname}")
+        println("email = ${email}")
+        println("phone = ${phone}")
+        println("status = ${status}")
 
         val allUsers = listOf(
             Users(1, "홍길동", "https://biz.giftishow.com/Resource/brand/BR_20140528_171011_3.jpg","ACTIVE", "hong@naver.com", "2025-12-02"),
