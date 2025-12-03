@@ -28,8 +28,41 @@ services:
     networks:
       - hiteen-net
 
+  mongo:
+    image: mongo:7
+    container_name: hiteen-mongo
+    restart: always
+    environment:
+      MONGO_INITDB_DATABASE: hiteen
+      MONGO_INITDB_ROOT_USERNAME: hiteen
+      MONGO_INITDB_ROOT_PASSWORD: 1234
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - hiteen-net
+
+  redis:
+    image: redis:7-alpine
+    container_name: hiteen-redis
+    restart: always
+    ports:
+      - "6379:6379"
+    environment:
+      REDIS_PASSWORD: "hiteen1234"
+    command: >
+      sh -c "redis-server --appendonly yes --requirepass hiteen1234"
+    volumes:
+      - redis_data:/data
+    networks:
+      - hiteen-net
+
+
 networks:
   hiteen-net:
 
 volumes:
   postgres_data:
+  mongo_data:
+  redis_data:
