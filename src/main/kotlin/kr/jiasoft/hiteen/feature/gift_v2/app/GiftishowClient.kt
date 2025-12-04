@@ -6,8 +6,10 @@ import kr.jiasoft.hiteen.feature.gift_v2.dto.client.brand.GiftishowBrandDetailRe
 import kr.jiasoft.hiteen.feature.gift_v2.dto.client.brand.GiftishowBrandListResult
 import kr.jiasoft.hiteen.feature.gift_v2.dto.client.goods.GiftishowGoodsDetailResult
 import kr.jiasoft.hiteen.feature.gift_v2.dto.client.goods.GiftishowGoodsListResult
+import kr.jiasoft.hiteen.feature.gift_v2.dto.client.voucher.GiftishowInnerResponse
 import kr.jiasoft.hiteen.feature.gift_v2.dto.client.voucher.GiftishowVoucherDetailDto
 import kr.jiasoft.hiteen.feature.gift_v2.dto.client.voucher.GiftishowVoucherDetailResult
+import kr.jiasoft.hiteen.feature.gift_v2.dto.client.voucher.GiftishowVoucherDetailWrapperDto
 import kr.jiasoft.hiteen.feature.gift_v2.dto.client.voucher.GiftishowVoucherSendRequest
 import kr.jiasoft.hiteen.feature.gift_v2.dto.client.voucher.GiftishowVoucherSendResponseDto
 
@@ -16,7 +18,8 @@ interface GiftshowClient {
     suspend fun detailGoods(goodsCode: String): GiftishowApiResponse<GiftishowGoodsDetailResult>
     suspend fun listBrand(): GiftishowApiResponse<GiftishowBrandListResult>
     suspend fun detailBrand(brandCode: String): GiftishowApiResponse<GiftishowBrandDetailResult>
-    suspend fun detailVoucher(trId: String): GiftishowApiResponse<GiftishowVoucherDetailDto>
-    suspend fun issueVoucher(req: GiftishowVoucherSendRequest): GiftishowApiResponse<GiftishowVoucherSendResponseDto>
+//    suspend fun detailVoucher(trId: String): GiftishowApiResponse<List<GiftishowVoucherDetailWrapperDto>>
+    suspend fun detailVoucher(trId: String): Map<String, Any?>
+    suspend fun issueVoucher(req: GiftishowVoucherSendRequest): GiftishowApiResponse<GiftishowInnerResponse<GiftishowVoucherSendResponseDto>>
     suspend fun bizMoney(): GiftishowApiResponse<GiftishowBizMoneyResult>
 }

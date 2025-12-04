@@ -8,7 +8,7 @@ import kr.jiasoft.hiteen.feature.gift_v2.dto.client.brand.GiftishowBrandDetailRe
 import kr.jiasoft.hiteen.feature.gift_v2.dto.client.brand.GiftishowBrandListResult
 import kr.jiasoft.hiteen.feature.gift_v2.dto.client.goods.GiftishowGoodsDetailResult
 import kr.jiasoft.hiteen.feature.gift_v2.dto.client.goods.GiftishowGoodsListResult
-import kr.jiasoft.hiteen.feature.gift_v2.dto.client.voucher.GiftishowVoucherDetailDto
+import kr.jiasoft.hiteen.feature.gift_v2.dto.client.voucher.GiftishowInnerResponse
 import kr.jiasoft.hiteen.feature.gift_v2.dto.client.voucher.GiftishowVoucherSendRequest
 import kr.jiasoft.hiteen.feature.gift_v2.dto.client.voucher.GiftishowVoucherSendResponseDto
 import org.springframework.beans.factory.annotation.Value
@@ -70,18 +70,23 @@ class GiftshowClientImpl(
     }
 
 
-    override suspend fun detailVoucher(trId: String): GiftishowApiResponse<GiftishowVoucherDetailDto> {
+    override suspend fun detailVoucher(trId: String): Map<String, Any?> {
+
         val form = baseForm("0201").apply {
-            put("trId", trId)
+            put("tr_id", trId)
         }
-        return request("/coupons", form)
+
+        return requestVoucherDetail("/coupons", form)
     }
+
+
+
 
 
     suspend fun cancelVoucher(trId: String): GiftishowApiResponse<String> {
         val form = baseForm("0202").apply {
-            put("trId", trId)
-            put("userId", userId)
+            put("tr_Id", trId)
+            put("user_Id", userId)
         }
         return request("/cancel", form)
     }
@@ -89,15 +94,15 @@ class GiftshowClientImpl(
 
     suspend fun retryVoucher(trId: String, smsFlag: String): GiftishowApiResponse<String> {
         val form = baseForm("0203").apply {
-            put("trId", trId)
-            put("smsFlag", smsFlag)
-            put("userId", userId)
+            put("tr_Id", trId)
+            put("sms_flag", smsFlag)
+            put("user_id", userId)
         }
         return request("/resend", form)
     }
 
 
-    override suspend fun issueVoucher(req: GiftishowVoucherSendRequest): GiftishowApiResponse<GiftishowVoucherSendResponseDto> {
+    override suspend fun issueVoucher(req: GiftishowVoucherSendRequest): GiftishowApiResponse<GiftishowInnerResponse<GiftishowVoucherSendResponseDto>> {
         val form = baseForm("0204").apply {
             put("userId", userId)
             putIfNotEmpty("goods_code", req.goodsCode)
@@ -116,7 +121,10 @@ class GiftshowClientImpl(
             putIfNotEmpty("gubun", req.gubun)
 
         }
-        return request("/send", form)
+
+
+        return requestIssue("/send", form)
+//        return requestMock("""{"code":"0000","message":null,"result":{"code":"0000","message":null,"result":{"orderNo":"20251204606145","pinNo":"911259415286","couponImgUrl":"https://imgs.giftishow.co.kr/Resource2/mms/20251204/21/mms_7237e6b12b0e1d367caf2d08fa32ab13_01.jpg"}}}""".trimIndent())
     }
 
 
@@ -169,8 +177,50 @@ class GiftshowClientImpl(
 
     private suspend inline fun <reified T> request(path: String, form: Map<String, String>): GiftishowApiResponse<T> {
         val json = call(path, form)
+        println("json = ${json}")
         return objectMapper.readValue(json, objectMapper.typeFactory.constructParametricType(GiftishowApiResponse::class.java, T::class.java))
     }
+
+    private suspend inline fun <reified T> requestMock(json: String)
+            : GiftishowApiResponse<GiftishowInnerResponse<T>> {
+
+        val outerType = objectMapper.typeFactory.constructParametricType(
+            GiftishowApiResponse::class.java,
+            objectMapper.typeFactory.constructParametricType(
+                GiftishowInnerResponse::class.java,
+                T::class.java
+            )
+        )
+
+        return objectMapper.readValue(json, outerType)
+    }
+
+    private suspend inline fun <reified T> requestIssue(path: String, form: Map<String, String>)
+            : GiftishowApiResponse<GiftishowInnerResponse<T>> {
+
+        val json = call(path, form)
+
+        val outerType = objectMapper.typeFactory.constructParametricType(
+            GiftishowApiResponse::class.java,
+            objectMapper.typeFactory.constructParametricType(
+                GiftishowInnerResponse::class.java,
+                T::class.java
+            )
+        )
+
+        return objectMapper.readValue(json, outerType)
+    }
+
+    private suspend fun requestVoucherDetail(
+        path: String,
+        form: Map<String, String>
+    ): Map<String, Any?> {
+
+        val json = call(path, form)
+
+        return objectMapper.readValue(json, Map::class.java) as Map<String, Any?>
+    }
+
 
 
 }
