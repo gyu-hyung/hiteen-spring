@@ -19,9 +19,10 @@ spring:
       max-create-connection-time: 10s
 
   liquibase:
-    url: jdbc:postgresql://10.8.3.89:5432/hiteen
-    user: hiteen
-    password: hiteen@2025
+    enabled: true
+#    url: jdbc:postgresql://10.8.3.89:5432/hiteen
+#    user: hiteen
+#    password: hiteen@2025
     change-log: classpath:db/changelog/db.changelog-master.yaml
 
   data:
