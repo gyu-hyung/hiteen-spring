@@ -16,8 +16,10 @@ import kr.jiasoft.hiteen.feature.gift_v2.dto.GiftStatus
 import kr.jiasoft.hiteen.feature.gift_v2.dto.GiftUseRequest
 import kr.jiasoft.hiteen.feature.gift_v2.dto.client.voucher.GiftishowVoucherSendRequest
 import kr.jiasoft.hiteen.feature.gift_v2.dto.toResponse
+import kr.jiasoft.hiteen.feature.giftishow.domain.GiftishowLogsEntity
 import kr.jiasoft.hiteen.feature.giftishow.domain.GoodsGiftishowEntity
 import kr.jiasoft.hiteen.feature.giftishow.infra.GiftishowGoodsRepository
+import kr.jiasoft.hiteen.feature.giftishow.infra.GiftishowLogsRepository
 import kr.jiasoft.hiteen.feature.play.infra.GameRepository
 import kr.jiasoft.hiteen.feature.play.infra.SeasonRepository
 import kr.jiasoft.hiteen.feature.point.app.PointService
@@ -26,9 +28,9 @@ import kr.jiasoft.hiteen.feature.push.app.PushService
 import kr.jiasoft.hiteen.feature.push.domain.PushTemplate
 import kr.jiasoft.hiteen.feature.user.app.UserService
 import kr.jiasoft.hiteen.feature.user.infra.UserRepository
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import java.lang.IllegalArgumentException
-import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 import java.util.UUID
@@ -49,8 +51,19 @@ class GiftAppServiceImpl (
 
     private val pointService: PointService,
     private val pushService: PushService,
+    private val giftishowLogsRepository: GiftishowLogsRepository,
 
 ): GiftAppService {
+
+
+    @Value("\${giftishow.template-id}")
+    private lateinit var templateId: String
+
+    @Value("\${giftishow.banner-id}")
+    private lateinit var bannerId: String
+
+    @Value("\${giftishow.callback}")
+    private lateinit var callbackNo: String
 
 
     private suspend fun findGift(receiverUserId: Long, giftUserId: Long) : GiftResponse{
@@ -155,13 +168,13 @@ class GiftAppServiceImpl (
 
             GiftType.Voucher -> {
                 // pubExpiredDate 발급만료일자 이전인가?
-                if(giftUser.pubExpiredDate.isBefore(OffsetDateTime.now()))
+                if (giftUser.pubExpiredDate.isBefore(OffsetDateTime.now()))
                     throw IllegalArgumentException("발급만료일자가 지난 선물입니다.")
 
                 val goodsEntity = giftUser.goodsCode?.let {
-                    giftishowGoodsRepository.findByGoodsCode(it)?:
-                    throw IllegalArgumentException("상품 정보가 존재하지않습니다. 관리자에게 문의하세요.")
-                }?: throw IllegalArgumentException("상품 정보가 존재하지않습니다. 관리자에게 문의하세요")
+                    giftishowGoodsRepository.findByGoodsCode(it)
+                        ?: throw IllegalArgumentException("상품 정보가 존재하지않습니다. 관리자에게 문의하세요.")
+                } ?: throw IllegalArgumentException("상품 정보가 존재하지않습니다. 관리자에게 문의하세요.")
 
                 val goodsName = if (gift.category == GiftCategory.Challenge) {
                     GiftMessageFormatter.challengeGoodsName(goodsEntity.goodsName)
@@ -175,33 +188,94 @@ class GiftAppServiceImpl (
                     template.defaultMmsMsg!!
                 }
 
-
                 val trId = UUID.randomUUID().toString().replace("-", "").take(16)
+//                val trId = "4763632a21e04e91"
 
-                val coupon = giftishowClient.issueVoucher(GiftishowVoucherSendRequest(
+                // 🔹 1) 발송 요청
+                val sendReq = GiftishowVoucherSendRequest(
                     goodsEntity.goodsCode,
                     "",
                     template.defaultMmsTitle,
                     mmsMsg,
-                    req.phone?: receiverUser!!.phone,
+                    req.phone ?: receiverUser!!.phone,
                     trId,
                     req.revInfoYn,
                     req.revInfoDate,
                     req.revInfoTime,
                     req.gubun,
-                ))
+                )
 
-                val couponDetail = giftishowClient.detailVoucher(trId)
+                // ▣ 1) 발행 요청
+                val issued = giftishowClient.issueVoucher(sendReq)
 
-                giftUserRepository.save(giftUser.copy(
+                val d = issued.result?.result?.pinNo
+                val dd = issued.result?.result?.couponImgUrl
+
+                // ▣ 2) 상세 조회 (Map 기반)
+                val res = giftishowClient.detailVoucher(trId)
+
+                // result: List<Map<String, Any?>>
+                val resultList = res["result"] as? List<Map<String, Any?>>
+                val wrapper = resultList?.firstOrNull()                        // 첫 번째 wrapper
+
+                val couponInfoList = wrapper?.get("couponInfoList") as? List<Map<String, Any?>>
+                val detail = couponInfoList?.firstOrNull()                     // 첫 번째 쿠폰
+
+
+                // ▣ 3) 유효기간 파싱
+                val expireStr = detail?.get("validPrdEndDt") as? String
+                require(!expireStr.isNullOrBlank()) { "Giftishow 응답에 validPrdEndDt 없음" }
+
+                val expireAt = OffsetDateTime.parse(
+                    expireStr + "+0900",
+                    DateTimeFormatter.ofPattern("yyyyMMddHHmmssZ")
+                )
+
+
+
+                // 🔹 3) GiftUser 업데이트
+                giftUserRepository.save(
+                    giftUser.copy(
+                        status = GiftStatus.SENT.code,
+                        requestDate = OffsetDateTime.now(),
+                        couponNo = d,
+                        couponImg = dd,
+                        pubDate = OffsetDateTime.now(),
+                        useExpiredDate = expireAt
+                    )
+                )
+
+                // 🔹 4) 기프티쇼 로그 저장
+                val log = GiftishowLogsEntity(
+                    giftUserId = giftUser.id,
+                    goodsCode = goodsEntity.goodsCode,
+                    goodsName = goodsName,
+                    orderNo = issued.result?.result?.orderNo,
+                    mmsMsg = mmsMsg,
+                    mmsTitle = template.defaultMmsTitle,
+                    callbackNo = callbackNo,
+                    phoneNo = req.phone ?: receiverUser!!.phone,
+                    trId = trId,
+                    reserveYn = req.revInfoYn,
+                    reserveDate = req.revInfoDate,
+                    reserveTime = req.revInfoTime,
+                    templateId = templateId,
+                    bannerId = bannerId,
+                    userId = receiverUser!!.uid.toString(),
+                    gubun = req.gubun,
+                    response = issued.toString(),
+                    code = issued.code,
+                    message = issued.message,
+                    pinNo = issued.result?.result?.pinNo,
+                    couponImgUrl = issued.result?.result?.couponImgUrl,
+                    memo = "",
                     status = GiftStatus.SENT.code,
-                    requestDate = OffsetDateTime.now(),
-                    couponNo = coupon.result?.pinNo,
-                    couponImg = coupon.result?.couponImgUrl,
-                    pubDate = OffsetDateTime.now(),
-                    useExpiredDate = OffsetDateTime.parse(couponDetail.result?.validPrdEndDt!!, DateTimeFormatter.ofPattern("yyyyMMddHHmmss"))
-                ))
+                    createdAt = OffsetDateTime.now()
+                )
+
+                giftishowLogsRepository.save(log)
             }
+
 
             GiftType.Delivery -> {
                 giftUserRepository.save(giftUser.copy(
