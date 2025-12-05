@@ -309,10 +309,27 @@ class GiftAppServiceImpl (
     override suspend fun listGift(userId: Long): List<GiftResponse> {
         val receiver = userService.findUserSummary(userId)
 
+        // GiftRecord 리스트
         val records = giftUserRepository.findAllWithGiftUserByUserId(userId).toList()
 
-        return records.map { it.toResponse(receiver) }
+        // goodsCode 리스트 (null 제거)
+        val goodsCodes = records.mapNotNull { it.goodsCode }
+
+        // goods 엔티티 조회
+        val goodsList = giftishowGoodsRepository.findAllByGoodsCodeIn(goodsCodes).toList()
+
+        // 빠르게 매핑하기 위한 Map<goodsCode, GoodsGiftishowEntity>
+        val goodsMap: Map<String, GoodsGiftishowEntity> =
+            goodsList.associateBy { it.goodsCode }
+
+        // 각 record 에 해당하는 goods 를 넣어서 Response 생성
+        return records.map { record ->
+            val goods = record.goodsCode?.let { goodsMap[it] }
+            record.toResponse(receiver, goods)
+        }
     }
+
+
 
     override suspend fun listGoods() : List<GoodsGiftishowEntity> {
         return giftishowGoodsRepository.findAll().toList()
