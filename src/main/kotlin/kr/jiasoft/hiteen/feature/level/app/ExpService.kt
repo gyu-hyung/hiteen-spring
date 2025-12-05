@@ -1,5 +1,7 @@
 package kr.jiasoft.hiteen.feature.level.app
 
+import kotlinx.coroutines.reactor.awaitSingleOrNull
+import kr.jiasoft.hiteen.common.context.DeltaContextHelper.addDeltaExp
 import kr.jiasoft.hiteen.feature.level.domain.ExpProperties
 import kr.jiasoft.hiteen.feature.level.domain.UserExpHistoryEntity
 import kr.jiasoft.hiteen.feature.level.infra.TierRepository
@@ -59,6 +61,9 @@ class ExpService(
                 reason = if (points > 0) action.description else "[감점] ${action.description}"
             )
         )
+
+        addDeltaExp(points).awaitSingleOrNull()
+
     }
 
 
