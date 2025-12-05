@@ -27,14 +27,23 @@ interface GameScoreRepository : CoroutineCrudRepository<GameScoreEntity, Long> {
         FROM game_scores gs
         JOIN season_participants sp ON gs.participant_id = sp.id
         JOIN users u ON sp.user_id = u.id
-        JOIN seasons s ON gs.season_id = s.id
         WHERE gs.season_id = :seasonId
           AND gs.game_id   = :gameId
           AND sp.league    = :league
+          AND (
+                :participantIds IS NULL 
+                OR sp.id = ANY(:participantIds)
+              )
         ORDER BY gs.score ASC, gs.created_at ASC
         LIMIT :limit
     """)
-    fun findSeasonRanking(seasonId: Long, gameId: Long, league: String, limit: Int = 100): Flow<RankingView>
+    fun findSeasonRankingFiltered(
+        seasonId: Long,
+        gameId: Long,
+        league: String,
+        participantIds: Array<Long>?,
+        limit: Int = 100
+    ): Flow<RankingView>
 
 
     /**

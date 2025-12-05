@@ -2,6 +2,7 @@ package kr.jiasoft.hiteen.feature.play.app
 
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.flow.toSet
 import kr.jiasoft.hiteen.feature.ad.app.AdService
 import kr.jiasoft.hiteen.feature.level.app.ExpService
 import kr.jiasoft.hiteen.feature.level.infra.TierRepository
@@ -310,7 +311,7 @@ class GameService(
 
     /**
      * 실시간 랭킹 조회 (game_scores + league 기준)
-     * @param friendOnly true → 내 친구들 랭킹만
+     * @param friendOnly true → 내 친구들 + 나만 랭킹 조회
      */
     suspend fun getRealtimeRanking(
         seasonId: Long,
@@ -320,10 +321,31 @@ class GameService(
         friendOnly: Boolean = false
     ): SeasonRankingResponse {
 
-        // 1️⃣ Top 100 랭킹 조회
-        val all = rankingViewRepository.findSeasonRanking(seasonId, gameId, league, 100).toList()
+        // 1️⃣ friendOnly = true → season_participants.id 목록 조회
+        val participantIds: Array<Long>? = if (friendOnly) {
+            val friendIds = friendRepository.findAllAccepted(currentUserId)
+                .map { if (it.userId == currentUserId) it.friendId else it.userId }
+                .toSet()
 
-        // 2️⃣ DTO 변환
+            val targetIds = (friendIds + currentUserId) // 친구 + 나
+
+            seasonParticipantRepository
+                .findByUserIds(seasonId, gameId, league, targetIds)
+                .map { it.id }
+                .toList()
+                .toTypedArray()
+        } else null
+
+        // 2️⃣ DB에서 friendOnly 반영해서 가져옴
+        val all = rankingViewRepository.findSeasonRankingFiltered(
+            seasonId = seasonId,
+            gameId = gameId,
+            league = league,
+            participantIds = participantIds,
+            limit = 100
+        ).toList()
+
+        // 3️⃣ DTO 변환
         val dtoList = all.map {
             RankingResponse(
                 rank = it.rank,
@@ -338,23 +360,10 @@ class GameService(
             )
         }
 
-        // 3️⃣ 친구 목록
-        val friendIds = if (friendOnly) {
-            friendRepository.findAllAccepted(currentUserId)
-                .map { if (it.userId == currentUserId) it.friendId else it.userId }
-                .toList()
-        } else emptyList()
-
-        // 4️⃣ 친구만 보기 필터링
-        val filtered = if (friendOnly) {
-            val onlyFriends = dtoList.filter { it.userId in friendIds || it.isMe }
-            onlyFriends.mapIndexed { index, r -> r.copy(rank = index + 1) }
-        } else {
-            dtoList
-        }
+        // 4️⃣ 기존 친구 필터링 로직은 필요 없어짐 (DB에서 이미 걸러짐)
 
         // 5️⃣ 내 랭킹이 Top 100에 없을 경우 → 별도 쿼리
-        var myRanking = filtered.find { it.isMe }
+        var myRanking = dtoList.find { it.isMe }
         if (myRanking == null) {
             val myRankEntity = rankingViewRepository.findMyRanking(seasonId, gameId, league, currentUserId)
             if (myRankEntity != null) {
@@ -373,10 +382,11 @@ class GameService(
         }
 
         return SeasonRankingResponse(
-            rankings = filtered,
+            rankings = dtoList,
             myRanking = myRanking
         )
     }
+
 
 
 

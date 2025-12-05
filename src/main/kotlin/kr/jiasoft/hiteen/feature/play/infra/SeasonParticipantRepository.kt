@@ -1,5 +1,6 @@
 package kr.jiasoft.hiteen.feature.play.infra
 
+import kotlinx.coroutines.flow.Flow
 import kr.jiasoft.hiteen.feature.play.domain.SeasonParticipantEntity
 import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
@@ -24,5 +25,22 @@ interface SeasonParticipantRepository : CoroutineCrudRepository<SeasonParticipan
         """
     )
     suspend fun findActiveParticipant(userId: Long, seasonId: Long): SeasonParticipantEntity?
+
+
+    @Query("""
+       SELECT sp.*
+       FROM season_participants sp
+       WHERE sp.season_id = :seasonId
+         AND sp.game_id = :gameId
+         AND sp.league = :league
+         AND sp.user_id = ANY(:userIds)
+    """)
+    fun findByUserIds(
+        seasonId: Long,
+        gameId: Long,
+        league: String,
+        userIds: Set<Long>
+    ): Flow<SeasonParticipantEntity>
+
 
 }
