@@ -16,4 +16,12 @@ interface PointSummaryRepository : CoroutineCrudRepository<PointSummaryEntity, L
                       updated_at = now()
     """)
     suspend fun upsertAddPoint(userId: Long, delta: Int)
+
+
+    @Query("""
+        SELECT * FROM user_points_summary
+        WHERE user_id = :userId
+        LIMIT 1
+    """)
+    suspend fun findSummaryByUserId(userId: Long) : PointSummaryEntity?
 }

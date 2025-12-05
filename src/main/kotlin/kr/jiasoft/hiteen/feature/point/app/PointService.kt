@@ -1,6 +1,8 @@
 package kr.jiasoft.hiteen.feature.point.app
 
 import kotlinx.coroutines.reactor.awaitSingle
+import kotlinx.coroutines.reactor.awaitSingleOrNull
+import kr.jiasoft.hiteen.common.context.DeltaContextHelper.addDeltaPoint
 import kr.jiasoft.hiteen.common.exception.NotEnoughPointException
 import kr.jiasoft.hiteen.feature.point.domain.PointEntity
 import kr.jiasoft.hiteen.feature.point.domain.PointPolicy
@@ -84,6 +86,9 @@ class PointService(
             memo = policy.memoTemplate
         )
         pointSummaryRepository.upsertAddPoint(userId, pointAmount)
+
+        addDeltaPoint(pointAmount).awaitSingleOrNull()
+
         return pointRepository.save(point)
     }
 
