@@ -8,16 +8,16 @@ object DeltaContextHelper {
     fun addDeltaExp(amount: Int): Mono<Unit> =
         Mono.deferContextual { ctx ->
             val exchange = ctx.get<ServerWebExchange>("SERVER_EXCHANGE")
-            val prev = exchange.attributes["deltaExp"] as? Int ?: 0
-            exchange.attributes["deltaExp"] = prev + amount
+            val prev = exchange.attributes[MetaDeltaKeys.DELTA_EXP] as? Int ?: 0
+            exchange.attributes[MetaDeltaKeys.DELTA_EXP] = prev + amount
             Mono.empty()
         }
 
     fun addDeltaPoint(amount: Int): Mono<Unit> =
         Mono.deferContextual { ctx ->
             val exchange = ctx.get<ServerWebExchange>("SERVER_EXCHANGE")
-            val prev = exchange.attributes["deltaPoints"] as? Int ?: 0
-            exchange.attributes["deltaPoints"] = prev + amount
+            val prev = exchange.attributes[MetaDeltaKeys.DELTA_POINT] as? Int ?: 0
+            exchange.attributes[MetaDeltaKeys.DELTA_POINT] = prev + amount
             Mono.empty()
         }
 }
