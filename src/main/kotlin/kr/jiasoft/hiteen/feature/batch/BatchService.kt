@@ -7,6 +7,7 @@ import kr.jiasoft.hiteen.feature.giftishow.app.GiftishowSyncService
 import kr.jiasoft.hiteen.feature.play.app.GameManageService
 import kr.jiasoft.hiteen.feature.school.app.SchoolFoodImportService
 import kr.jiasoft.hiteen.feature.school.app.SchoolImportService
+import kr.jiasoft.hiteen.feature.timetable.app.TimeTableImportService
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.scheduling.annotation.Scheduled
@@ -21,6 +22,8 @@ class BatchService(
     private val schoolFoodImportService: SchoolFoodImportService,
     private val gameManageService: GameManageService,
     private val giftishowSyncService: GiftishowSyncService,
+    private val timeTableImportService: TimeTableImportService,
+
     private val batchHistoryRepository: BatchHistoryRepository,
     @param:Value("\${batch.enabled:false}") // 배치 활성화 여부
     private val active: Boolean
@@ -94,6 +97,18 @@ class BatchService(
         logger.info("===== $jobName Batch END =====")
     }
 
+
+    /**
+     * 매월 1일 새벽 1시에 학교, 학급 정보를 싱크한다.
+     */
+    @Scheduled(cron = "0 0 1  * *", zone = "Asia/Seoul")
+    fun schoolImport() = runBlocking {
+        runBatch("SchoolImport") {
+            schoolImportService.import()
+        }
+    }
+
+
     /**
      * 매일 새벽 2시에 급식 정보를 가져와 갱신한다.
      */
@@ -105,12 +120,12 @@ class BatchService(
     }
 
     /**
-     * 매월 1일 새벽 1시에 학교 정보를 싱크한다.
+     * 매일 새벽 3시에 시간표 정보를 가져옵니다.
      */
-    @Scheduled(cron = "0 0 1 1 * *", zone = "Asia/Seoul")
-    fun schoolImport() = runBlocking {
-        runBatch("SchoolImport") {
-            schoolImportService.import()
+    @Scheduled(cron = "0 0 3 * * *", zone = "Asia/Seoul")
+    fun timeTableImport() = runBlocking {
+        runBatch("timeTableImport") {
+            timeTableImportService.import()
         }
     }
 
@@ -132,7 +147,7 @@ class BatchService(
     /**
      * 매일 4시에 기프트쇼 정보 싱크
      */
-//    @Scheduled(cron = "0 0 4 * * *", zone = "Asia/Seoul")
+    @Scheduled(cron = "0 0 4 * * *", zone = "Asia/Seoul")
     fun syncGiftishowData() = runBlocking {
         runBatch("GiftishowSync") {
             giftishowSyncService.syncGoods()

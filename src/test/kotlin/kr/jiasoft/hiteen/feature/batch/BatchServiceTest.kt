@@ -11,8 +11,23 @@ class BatchServiceTest {
     private lateinit var batchService: BatchService
 
     @Test
+    fun `학교 정보 import` (){
+        batchService.schoolImport()
+    }
+
+    @Test
+    fun `학교 급식 정보 import` (){
+        batchService.schoolFoodImport()
+    }
+
+    @Test
+    fun `시간표 정보 import` (){
+        batchService.timeTableImport()
+    }
+
+
+    @Test
     fun `게임 시즌 생성` (){
         batchService.autoManageSeasons()
     }
-
 }

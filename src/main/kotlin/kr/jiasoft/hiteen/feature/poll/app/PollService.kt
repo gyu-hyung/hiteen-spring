@@ -182,8 +182,8 @@ class PollService(
         userId: Long,
         fileFlux: Flux<FilePart>?
     ) {
-        val regexSelect = Regex("select_([1-9]\\d*)_([1-9]\\d*)")
         val regexPoll = Regex("poll_([1-9]\\d*)")
+        val regexSelect = Regex("select_([1-9]\\d*)_([1-9]\\d*)")
 
         val files = fileFlux?.collectList()?.awaitSingle().orEmpty()
         for (file in files) {

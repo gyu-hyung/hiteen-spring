@@ -45,7 +45,7 @@ class SchoolImportService(
             ReactorClientHttpConnector(
                 HttpClient.create()
                     .option(io.netty.channel.ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000)
-                    .responseTimeout(Duration.ofSeconds(15))
+                    .responseTimeout(Duration.ofSeconds(30))
             )
         )
         .build()
@@ -139,8 +139,8 @@ class SchoolImportService(
             foundDate = parseDate(row["FOND_YMD"]?.asText()),
         )
 
-//        val saved = schoolRepository.findByCode(entity.code)?.copy(
-        schoolRepository.findByCode(entity.code)?.copy(
+        val saved = schoolRepository.findByCode(entity.code)?.copy(
+//        schoolRepository.findByCode(entity.code)?.copy(
             sido = entity.sido ?: "",
             sidoName = entity.sidoName ?: "",
             name = entity.name.ifBlank { entity.name },
@@ -157,10 +157,10 @@ class SchoolImportService(
             ?: schoolRepository.save(entity.copy(updatedId = 0))
 
         //반 정보 import
-//        val classes = fetchClasses(entity.sido ?: "", entity.code, entity.name)
-//        if (classes.isNotEmpty()) {
-//            saveClassesForSchool(saved, classes)
-//        }
+        val classes = fetchClasses(entity.sido ?: "", entity.code, entity.name)
+        if (classes.isNotEmpty()) {
+            saveClassesForSchool(saved, classes)
+        }
     }
 
     private suspend fun fetchClasses(sido: String, schoolCode: String, schoolName: String): List<Map<String, String>> {
@@ -188,21 +188,31 @@ class SchoolImportService(
 
         return rows.map { row ->
             mapOf(
-                "AY" to row["AY"]?.asText().orEmpty(),
+                "AY" to row["AY"]?.asText().orEmpty(), //
                 "GRADE" to row["GRADE"]?.asText().orEmpty(),
-                "CLASS_NM" to row["CLASS_NM"]?.asText().orEmpty(),
-                "DDDEP_NM" to row["DDDEP_NM"]?.asText().orEmpty(),
-                "SCHUL_CRSE_SC_NM" to row["SCHUL_CRSE_SC_NM"]?.asText().orEmpty()
+                "CLASS_NM" to row["CLASS_NM"]?.asText().orEmpty(),//학급명 ex) 1
+                "DDDEP_NM" to row["DDDEP_NM"]?.asText().orEmpty(),//학과명
+                "SCHUL_CRSE_SC_NM" to row["SCHUL_CRSE_SC_NM"]?.asText().orEmpty()//학교과정명 ex) 중학교
             )
         }
     }
 
-    suspend fun saveClassesForSchool(school: SchoolEntity, classRows: List<Map<String, String>>) {
-        val entities = classRows.mapNotNull { row ->
-            val year = row["AY"] ?: return@mapNotNull null
-            val grade = row["GRADE"] ?: return@mapNotNull null
-            val classNum = row["CLASS_NM"] ?: return@mapNotNull null
-            val major = row["DDDEP_NM"] ?: ""
+    suspend fun saveClassesForSchool(
+        school: SchoolEntity,
+        classRows: List<Map<String, String>>
+    ) {
+        val now = LocalDateTime.now()
+
+        classRows.forEach { row ->
+            val year = row["AY"] ?: return@forEach
+            val grade = row["GRADE"] ?: return@forEach
+            val classNum = row["CLASS_NM"] ?: return@forEach
+
+            val major =
+                if (row["DDDEP_NM"].isNullOrBlank() || row["DDDEP_NM"] == "null")
+                    ""
+                else row["DDDEP_NM"]!!
+
             val schoolTypeName = row["SCHUL_CRSE_SC_NM"] ?: ""
 
             val className = when {
@@ -213,7 +223,7 @@ class SchoolImportService(
                 else -> "$grade 학년 $classNum 반"
             }
 
-            SchoolClassesEntity(
+            schoolClassesRepository.upsert(
                 code = UUID.randomUUID().toString(),
                 year = year.toInt(),
                 schoolId = school.id,
@@ -223,18 +233,15 @@ class SchoolImportService(
                 major = if (major == "일반과" || major == "일반학과") "" else major,
                 grade = grade,
                 classNo = classNum,
-                createdAt = LocalDateTime.now(),
-                updatedId = 0,
+                createdAt = now,
+                updatedAt = now,
+                updatedId = 0L,
             )
         }
 
-        // 100개 단위로 잘라서 저장
-        entities.chunked(100).forEach { chunk ->
-            schoolClassesRepository.saveAll(chunk.asFlow()).collect()
-        }
-
-        logger.debug("${school.code} :: ${school.name} :: ${entities.size} 학급 저장")
+        logger.debug("${school.code} :: ${school.name} :: ${classRows.size} 학급 UPSERT 완료")
     }
+
 
 
     private suspend fun fetchTotalCount(): Int {
