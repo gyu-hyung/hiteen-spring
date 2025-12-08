@@ -2,8 +2,8 @@ package kr.jiasoft.hiteen.feature.timetable.app
 
 import com.fasterxml.jackson.databind.JsonNode
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.reactor.awaitSingle
+import kr.jiasoft.hiteen.feature.school.domain.SchoolClassesEntity
 import kr.jiasoft.hiteen.feature.school.infra.SchoolClassesRepository
 import kr.jiasoft.hiteen.feature.school.infra.SchoolRepository
 import kr.jiasoft.hiteen.feature.timetable.domain.TimeTableEntity
@@ -43,69 +43,101 @@ class TimeTableImportService(
         val from = today.format(dateFmt)
         val to = today.plusDays(7).format(dateFmt)
 
-        // ✅ 학교 단위로 스트리밍 처리
         classRepository.findDistinctSchoolIds(currentYear).collect { schoolId ->
+
             val school = schoolRepository.findById(schoolId) ?: return@collect
 
-            // 학급 스트리밍 (toList 제거!)
-            classRepository.findBySchoolIdAndYear(schoolId, currentYear).collect { clazz ->
-                val type = when (clazz.schoolType) {
-                    9 -> "spsTimetable"
+            // ✅ grade → (classNo → classEntity)
+            val gradeClassMap = mutableMapOf<String, MutableMap<String, SchoolClassesEntity>>()
+
+            classRepository
+                .findBySchoolIdAndYear(schoolId, currentYear)
+                .collect { clazz ->
+                    gradeClassMap
+                        .getOrPut(clazz.grade) { mutableMapOf() }[clazz.classNo] = clazz
+                }
+
+            for ((grade, classMap) in gradeClassMap) {
+
+                val type = when (school.type) {
+                    1 -> "elsTimetable"
                     2 -> "misTimetable"
-                    else -> "hisTimetable"
+                    3 -> "hisTimetable"
+                    9 -> "spsTimetable"
+                    else -> continue
                 }
 
-                try {
-                    val json = client.get()
-                        .uri { builder ->
-                            builder.path("/$type")
-                                .queryParam("KEY", apiKey)
-                                .queryParam("Type", "json")
-                                .queryParam("pIndex", 1)
-                                .queryParam("pSize", 1000)
-                                .queryParam("ATPT_OFCDC_SC_CODE", school.sido)
-                                .queryParam("SD_SCHUL_CODE", school.code)
-                                .queryParam("GRADE", clazz.grade)
-                                .queryParam("CLASS_NM", clazz.classNo)
-                                .queryParam("TI_FROM_YMD", from)
-                                .queryParam("TI_TO_YMD", to)
-                                .build()
+                var page = 1
+                val pageSize = 1000
+
+                while (true) {
+                    try {
+                        val json = client.get()
+                            .uri { builder ->
+                                builder.path("/$type")
+                                    .queryParam("KEY", apiKey)
+                                    .queryParam("Type", "json")
+                                    .queryParam("pIndex", page)          // ✅ 페이지 적용
+                                    .queryParam("pSize", pageSize)
+                                    .queryParam("ATPT_OFCDC_SC_CODE", school.sido)
+                                    .queryParam("SD_SCHUL_CODE", school.code)
+                                    .queryParam("GRADE", grade)
+                                    .queryParam("TI_FROM_YMD", from)
+                                    .queryParam("TI_TO_YMD", to)
+                                    .build()
+                            }
+                            .retrieve()
+                            .bodyToMono(JsonNode::class.java)
+                            .awaitSingle()
+
+                        val rows = json[type]?.get(1)?.get("row")
+                        if (rows == null || !rows.isArray || rows.isEmpty) {
+                            break // ✅ 더 이상 데이터 없음 → 페이지 루프 종료
                         }
-                        .retrieve()
-                        .bodyToMono(JsonNode::class.java)
-                        .awaitSingle()
 
-                    val rows = json[type]?.get(1)?.get("row")
-                    if (rows == null || !rows.isArray || rows.isEmpty) {
-                        logger.debug("${school.name} ${clazz.grade}-${clazz.classNo} :: timetable 없음")
-                        return@collect
+                        rows.forEach { row ->
+                            val classNo = row["CLASS_NM"]?.asText() ?: return@forEach
+                            val clazz = classMap[classNo] ?: return@forEach
+
+                            val subject =
+                                if (row["ITRT_CNTNT"]?.asText().isNullOrBlank() ||
+                                    row["ITRT_CNTNT"]?.asText() == "null"
+                                ) ""
+                                else row["ITRT_CNTNT"]?.asText()!!
+
+                            timeTableRepository.upsert(
+                                classId = clazz.id,
+                                year = row["AY"].asInt(),
+                                semester = row["SEM"].asInt(),
+                                timeDate = LocalDate.parse(row["ALL_TI_YMD"].asText(), dateFmt),
+                                period = row["PERIO"].asInt(),
+                                subject = subject,
+                            )
+                        }
+
+                        // ✅ 마지막 페이지 판단
+                        if (rows.size() < pageSize) break
+
+                        page++  // ✅ 다음 페이지
+
+                    } catch (e: Exception) {
+                        logger.error("${school.name} ${grade}학년 page=$page error :: ${e.message}", e)
+                        break
                     }
-
-                    // ✅ DTO 변환 후 바로 버리기 (JsonNode 오래 안 들고 있음)
-                    val entities = rows.map { row ->
-                        TimeTableEntity(
-                            classId = clazz.id,
-                            year = row["AY"].asInt(),
-                            semester = row["SEM"].asInt(),
-                            timeDate = LocalDate.parse(row["ALL_TI_YMD"].asText(), dateFmt),
-                            period = row["PERIO"].asInt(),
-                            subject = row["ITRT_CNTNT"].asText()
-                        )
-                    }
-
-                    // ✅ 배치 업서트 (row 단위 INSERT 지양)
-                    upsertAll(entities.asFlow())
-
-                    logger.info("${clazz.schoolName} ${clazz.grade}-${clazz.classNo}반 :: ${entities.size} rows 저장/업데이트")
-
-                } catch (e: Exception) {
-                    logger.error("${school.name} ${clazz.grade}-${clazz.classNo} error :: ${e.message}", e)
                 }
+
+                logger.info("${school.name} ${grade}학년 :: 전체 페이지 처리 완료")
             }
+
+            // ✅ 한 학교 처리 끝나면 메모리 정리
+            gradeClassMap.clear()
         }
 
         logger.info("TimeTable :: Import END =====================")
     }
+
+
+
 
     /**
      * ✅ R2DBC는 기본 upsertAll을 지원 안 하므로, saveAll로 대체하거나

@@ -20,9 +20,9 @@ data class SchoolClassesEntity(
     @Column("class_name")
     val className: String,
     val major: String?,
-    val grade: String?,
-    @Column("classNo")
-    val classNo: String?,    // 컬럼명 명시!
+    val grade: String,
+    @Column("class_no")
+    val classNo: String,
     val createdAt: LocalDateTime? = LocalDateTime.now(),
     val updatedId: Long? = null,
     val updatedAt: LocalDateTime? = null,

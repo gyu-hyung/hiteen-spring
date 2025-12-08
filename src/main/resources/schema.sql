@@ -386,7 +386,7 @@ CREATE TABLE school_classes (
   class_name   varchar(50),
   major        varchar(50),
   grade        varchar(10),
-  classNo      varchar(100),
+  class_no      varchar(100),
   created_id   bigint ,
   created_at   timestamptz DEFAULT now(),
   updated_id   bigint ,
@@ -394,6 +394,9 @@ CREATE TABLE school_classes (
   deleted_id   bigint ,
   deleted_at   timestamptz
 );
+
+CREATE UNIQUE INDEX uk_school_classes
+ON school_classes (school_id, year, grade, class_no);
 
 
 -- ========================

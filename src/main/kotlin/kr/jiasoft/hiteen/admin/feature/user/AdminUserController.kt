@@ -3,6 +3,7 @@ package kr.jiasoft.hiteen.admin.feature.user
 import kr.jiasoft.hiteen.common.dto.ApiPage
 import kr.jiasoft.hiteen.common.dto.ApiResult
 import kr.jiasoft.hiteen.common.dto.PageUtil
+import kr.jiasoft.hiteen.feature.poll.dto.PollSelectResponse
 import kr.jiasoft.hiteen.feature.relationship.domain.FollowStatus
 import kr.jiasoft.hiteen.feature.relationship.domain.LocationMode
 import kr.jiasoft.hiteen.feature.user.app.UserService
@@ -14,6 +15,8 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import java.time.LocalDate
+import java.time.OffsetDateTime
 import java.util.UUID
 import kotlin.math.min
 
@@ -192,6 +195,141 @@ class AdminUserController (
             FollowAdminResponse(3, "홍길동", "ENFP", "남", "고2", "#운동, #축구, #독서", FollowStatus.ACCEPTED),
             FollowAdminResponse(4, "홍길동", "ENFP", "남", "고2", "#운동, #축구, #독서", FollowStatus.PENDING),
             FollowAdminResponse(5, "홍길동", "ENFP", "남", "고2", "#운동, #축구, #독서", FollowStatus.ACCEPTED),
+        )
+
+        //페이징
+        val pageData = PageUtil.of(
+            items = res,
+            total = res.size,
+            page = pageParam,
+            size = sizeParam
+        )
+
+        return ResponseEntity.ok(ApiResult.success(pageData))
+
+    }
+
+
+
+    data class BoardAdminResponse (
+        val no: Int,
+        val uid: String,
+        val category: String,
+        val subject: String,
+        val content: String,
+        val link: String,
+        val ip: String,
+        val hits: Int,
+        val assetUid: UUID,
+        val startDate: LocalDate,
+        val endDate: LocalDate,
+        val reportCount: Int,
+        val status: String,
+        val address: String? = null,
+        val detailAddress: String? = null,
+        val lat: Double? = null,
+        val lng: Double? = null,
+        val createdId: Long,
+        val createdAt: OffsetDateTime,
+        val updatedId: Long? = null,
+        val updatedAt: OffsetDateTime? = null,
+        val deletedId: Long? = null,
+        val deletedAt: OffsetDateTime? = null,
+    )
+
+    @GetMapping("/boards/{uid}")
+    suspend fun getBoards(
+        @PathVariable("uid") uid: String,
+        @RequestParam("page", defaultValue = "1") pageParam: Int,
+        @RequestParam("size", defaultValue = "10") sizeParam: Int,
+        @RequestParam("nickname", defaultValue = "0") nickname: String? = null,
+        @RequestParam("email", defaultValue = "0") email: String? = null,
+        @RequestParam("phone", defaultValue = "0") phone: String? = null,
+        @RequestParam("status", defaultValue = "0") status: String? = null,
+        @AuthenticationPrincipal(expression = "user") user: UserEntity,
+    ) : ResponseEntity<ApiResult<ApiPage<BoardAdminResponse>>> {
+
+        val res = listOf(
+            BoardAdminResponse(
+                1, "550e8400-e29b-41d4-a716-446655440000", "NOTICE", "제목", "내용내용내용",
+                "", "", 1, UUID.fromString("550e8400-e29b-41d4-a716-446655440000"),
+                LocalDate.now(), LocalDate.now(), 1, "ACTIVE", "주소", "상세주소",
+                37.668942,	126.746276, 1, OffsetDateTime.now()
+            ),
+            BoardAdminResponse(
+                2, "550e8400-e29b-41d4-a716-446655440000", "NOTICE", "제목", "내용내용내용",
+                "", "", 1, UUID.fromString("550e8400-e29b-41d4-a716-446655440000"),
+                LocalDate.now(), LocalDate.now(), 1, "ACTIVE", "주소", "상세주소",
+                37.668942,	126.746276, 1, OffsetDateTime.now()
+            ),
+            BoardAdminResponse(
+                3, "550e8400-e29b-41d4-a716-446655440000", "NOTICE", "제목", "내용내용내용",
+                "", "", 1, UUID.fromString("550e8400-e29b-41d4-a716-446655440000"),
+                LocalDate.now(), LocalDate.now(), 1, "ACTIVE", "주소", "상세주소",
+                37.668942,	126.746276, 1, OffsetDateTime.now()
+            ),
+            BoardAdminResponse(
+                4, "550e8400-e29b-41d4-a716-446655440000", "NOTICE", "제목", "내용내용내용",
+                "", "", 1, UUID.fromString("550e8400-e29b-41d4-a716-446655440000"),
+                LocalDate.now(), LocalDate.now(), 1, "ACTIVE", "주소", "상세주소",
+                37.668942,	126.746276, 1, OffsetDateTime.now()
+            ),
+        )
+
+        //페이징
+        val pageData = PageUtil.of(
+            items = res,
+            total = res.size,
+            page = pageParam,
+            size = sizeParam
+        )
+
+        return ResponseEntity.ok(ApiResult.success(pageData))
+
+    }
+
+
+
+    data class PollAdminResponse (
+        val no: Long,
+        val id: Long,
+        val question: String,
+        val photos: List<String>? = emptyList(),
+        val selects: List<PollSelectResponse> = emptyList(),
+        val colorStart: String?,
+        val colorEnd: String?,
+        val voteCount: Int = 0,
+        val commentCount: Int = 0,
+        val reportCount: Int = 0,
+        val likeCount: Int = 0,
+        val allowComment: Int,
+        val createdAt: OffsetDateTime,
+    )
+
+    @GetMapping("/polls/{uid}")
+    suspend fun getPolls(
+        @PathVariable("uid") uid: String,
+        @RequestParam("page", defaultValue = "1") pageParam: Int,
+        @RequestParam("size", defaultValue = "10") sizeParam: Int,
+        @RequestParam("nickname", defaultValue = "0") nickname: String? = null,
+        @RequestParam("email", defaultValue = "0") email: String? = null,
+        @RequestParam("phone", defaultValue = "0") phone: String? = null,
+        @RequestParam("status", defaultValue = "0") status: String? = null,
+        @AuthenticationPrincipal(expression = "user") user: UserEntity,
+    ) : ResponseEntity<ApiResult<ApiPage<PollAdminResponse>>> {
+
+        val photos = listOf("550e8400-e29b-41d4-a716-446655440000", "550e8400-e29b-41d4-a716-446655440000")
+        val selects = listOf(
+            PollSelectResponse(1, 1, "김밥", 10, listOf("550e8400-e29b-41d4-a716-446655440000")),
+            PollSelectResponse(2, 2, "피자", 10, listOf("550e8400-e29b-41d4-a716-446655440000")),
+            PollSelectResponse(3, 3, "탕수육", 10, listOf("550e8400-e29b-41d4-a716-446655440000")),
+        )
+
+        val res = listOf(
+            PollAdminResponse(1, 1, "저메추", photos, selects, "#FFFFFF", "#000000", 10, 11, 12, 13, 1, OffsetDateTime.now()),
+            PollAdminResponse(2, 1, "저메추", photos, selects, "#FFFFFF", "#000000", 10, 11, 12, 13, 1, OffsetDateTime.now()),
+            PollAdminResponse(3, 1, "저메추", photos, selects, "#FFFFFF", "#000000", 10, 11, 12, 13, 1, OffsetDateTime.now()),
+            PollAdminResponse(4, 1, "저메추", photos, selects, "#FFFFFF", "#000000", 10, 11, 12, 13, 1, OffsetDateTime.now()),
         )
 
         //페이징
