@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 import kr.jiasoft.hiteen.feature.interest.dto.InterestUserResponse
 import kr.jiasoft.hiteen.feature.level.domain.TierEntity
 import kr.jiasoft.hiteen.feature.relationship.dto.RelationshipCounts
+import kr.jiasoft.hiteen.feature.school.domain.SchoolClassesEntity
 import kr.jiasoft.hiteen.feature.school.domain.SchoolEntity
 import kr.jiasoft.hiteen.feature.school.dto.SchoolDto
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
@@ -109,6 +110,9 @@ data class UserResponse(
     @param:Schema(description = "학교 정보")
     val school: SchoolDto?,
 
+    @param:Schema(description = "학교 정보")
+    val schoolClass: SchoolClassesEntity?,
+
     @param:Schema(description = "티어 정보")
     val tier: TierEntity?,
 
@@ -125,6 +129,7 @@ data class UserResponse(
         fun from(
                 entity: UserEntity,
                 school: SchoolEntity? = null,
+                classes: SchoolClassesEntity? = null,
                 tier: TierEntity? = null,
                 interests: List<InterestUserResponse>? = null,
                 relationshipCounts: RelationshipCounts? = null,
@@ -163,6 +168,7 @@ data class UserResponse(
                     updatedAt = entity.updatedAt?.toLocalDateTime(),
                     deletedAt = entity.deletedAt?.toLocalDateTime(),
                     school = school?.let { SchoolDto.from(it) },
+                    schoolClass = classes,
                     tier = tier,
                     relationshipCounts = relationshipCounts,
                     interests = interests,
@@ -198,6 +204,7 @@ data class UserResponse(
             updatedAt = null,
             deletedAt = null,
             school = null,
+            schoolClass = null,
             tier = null,
             relationshipCounts = null,
             interests = emptyList(),

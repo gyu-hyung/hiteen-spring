@@ -63,6 +63,9 @@ data class UserEntity (
     /* 학교 id */
     val schoolId: Long? = null,
 
+    /* 학급 id */
+    val classId: Long? = null,
+
     /* 학년 */
     val grade: String? = null,
 

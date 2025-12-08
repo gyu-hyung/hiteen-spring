@@ -66,6 +66,28 @@ interface SchoolClassesRepository : CoroutineCrudRepository<SchoolClassesEntity,
     )
 
 
+    @Query("""
+        SELECT DISTINCT grade
+        FROM school_classes
+        WHERE school_id = :schoolId
+          AND deleted_at IS NULL
+        ORDER BY grade
+    """)
+    fun findGradesBySchoolId(schoolId: Long): Flow<String>
+
+    // ✅ 특정 학교 + 학년의 학급 목록 조회
+    @Query("""
+        SELECT *
+        FROM school_classes
+        WHERE school_id = :schoolId
+          AND grade = :grade
+          AND deleted_at IS NULL
+        ORDER BY class_no
+    """)
+    fun findBySchoolIdAndGrade(
+        schoolId: Long,
+        grade: String
+    ): Flow<SchoolClassesEntity>
 
 
 }

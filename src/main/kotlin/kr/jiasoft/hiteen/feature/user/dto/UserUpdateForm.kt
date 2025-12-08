@@ -51,6 +51,9 @@ data class UserUpdateForm(
     @param:Schema(description = "학교 ID (schools.id)", example = "1")
     val schoolId: Long? = null,
 
+    @param:Schema(description = "학급 ID (school_classes.id)", example = "1")
+    val classId: Long? = null,
+
     @param:Schema(description = "학년", example = "2학년", maxLength = 30)
     val grade: String? = null,
 

@@ -24,6 +24,7 @@ import kr.jiasoft.hiteen.feature.relationship.domain.FriendStatus
 import kr.jiasoft.hiteen.feature.relationship.dto.RelationshipCounts
 import kr.jiasoft.hiteen.feature.relationship.infra.FollowRepository
 import kr.jiasoft.hiteen.feature.relationship.infra.FriendRepository
+import kr.jiasoft.hiteen.feature.school.infra.SchoolClassesRepository
 import kr.jiasoft.hiteen.feature.school.infra.SchoolRepository
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import kr.jiasoft.hiteen.feature.user.domain.UserPhotosEntity
@@ -55,6 +56,7 @@ class UserService (
     private val userRepository: UserRepository,
     private val userPhotosRepository: UserPhotosRepository,
     private val schoolRepository: SchoolRepository,
+    private val schoolClassesRepository: SchoolClassesRepository,
     private val interestUserRepository: InterestUserRepository,
     private val boardRepository: BoardRepository,
     private val pollUserRepository: PollUserRepository,
@@ -97,6 +99,7 @@ class UserService (
 
     private suspend fun toUserResponse(targetUser: UserEntity, currentUserId: Long? = null): UserResponse {
         val school = targetUser.schoolId?.let { id -> schoolRepository.findById(id) }
+        val classes = targetUser.classId?.let { id -> schoolClassesRepository.findById(id) }
         val tier = tierRepository.findById(targetUser.tierId)
         val interests = interestUserRepository.getInterestResponseById(null, targetUser.id).toList()
         val relationshipCounts = RelationshipCounts(
@@ -122,6 +125,7 @@ class UserService (
         return UserResponse.from(
             targetUser,
             school,
+            classes,
             tier,
             interests,
             relationshipCounts,
@@ -321,7 +325,7 @@ class UserService (
             pointService.applyPolicy(updated.id, PointPolicy.SIGNUP)
 
             val responseUser = userRepository.findById(updated.id)?.let {
-                UserResponse.from(it, school, tier)
+                UserResponse.from(it, school, null, tier)
             } ?: UserResponse.empty()
 
             UserResponseWithTokens(
@@ -364,6 +368,7 @@ class UserService (
         val newMood        = param.mood ?: existing.mood
         val newMoodEmoji   = param.moodEmoji ?: existing.moodEmoji
         val newSchoolId    = param.schoolId ?: existing.schoolId
+        val newClassId    = param.classId ?: existing.classId
         val newGrade       = param.grade ?: existing.grade
         val newGender      = param.gender ?: existing.gender
         val newBirthday    = param.birthday ?: existing.birthday
@@ -399,6 +404,7 @@ class UserService (
             moodEmoji     = newMoodEmoji,
             assetUid      = newAssetUid,
             schoolId      = newSchoolId,
+            classId       = newClassId,
             grade         = newGrade,
             gender        = newGender,
             birthday      = newBirthday,
