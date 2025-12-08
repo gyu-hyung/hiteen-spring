@@ -345,4 +345,101 @@ class AdminUserController (
     }
 
 
+
+
+    data class CommentAdminResponse (
+        val no: Long,
+        val id: Long,
+        val uid: UUID,
+        val question: String,
+        val photos: List<String>? = emptyList(),
+        val selects: List<PollSelectResponse> = emptyList(),
+        val colorStart: String?,
+        val colorEnd: String?,
+        val voteCount: Int = 0,
+        val commentCount: Int = 0,
+        val reportCount: Int = 0,
+        val likeCount: Int = 0,
+        val allowComment: Int,
+        val createdAt: OffsetDateTime,
+    )
+
+    @GetMapping("/comments/post/{uid}")
+    suspend fun getCommentPosts(
+        @PathVariable("uid") uid: String,
+        @RequestParam("page", defaultValue = "1") pageParam: Int,
+        @RequestParam("size", defaultValue = "10") sizeParam: Int,
+        @RequestParam("nickname", defaultValue = "0") nickname: String? = null,
+        @RequestParam("email", defaultValue = "0") email: String? = null,
+        @RequestParam("phone", defaultValue = "0") phone: String? = null,
+        @RequestParam("status", defaultValue = "0") status: String? = null,
+        @AuthenticationPrincipal(expression = "user") user: UserEntity,
+    ) : ResponseEntity<ApiResult<ApiPage<CommentAdminResponse>>> {
+
+        val photos = listOf("550e8400-e29b-41d4-a716-446655440000", "550e8400-e29b-41d4-a716-446655440000")
+        val selects = listOf(
+            PollSelectResponse(1, 1, "김밥", 10, listOf("550e8400-e29b-41d4-a716-446655440000")),
+            PollSelectResponse(2, 2, "피자", 10, listOf("550e8400-e29b-41d4-a716-446655440000")),
+            PollSelectResponse(3, 3, "탕수육", 10, listOf("550e8400-e29b-41d4-a716-446655440000")),
+        )
+
+        val res = listOf(
+            CommentAdminResponse(1, 1, UUID.fromString("550e8400-e29b-41d4-a716-446655440000"), "저메추", photos, selects, "#FFFFFF", "#000000", 10, 11, 12, 13, 1, OffsetDateTime.now()),
+            CommentAdminResponse(2, 1, UUID.fromString("550e8400-e29b-41d4-a716-446655440000"),"저메추", photos, selects, "#FFFFFF", "#000000", 10, 11, 12, 13, 1, OffsetDateTime.now()),
+            CommentAdminResponse(3, 1, UUID.fromString("550e8400-e29b-41d4-a716-446655440000"),"저메추", photos, selects, "#FFFFFF", "#000000", 10, 11, 12, 13, 1, OffsetDateTime.now()),
+            CommentAdminResponse(4, 1, UUID.fromString("550e8400-e29b-41d4-a716-446655440000"),"저메추", photos, selects, "#FFFFFF", "#000000", 10, 11, 12, 13, 1, OffsetDateTime.now()),
+        )
+
+        //페이징
+        val pageData = PageUtil.of(
+            items = res,
+            total = res.size,
+            page = pageParam,
+            size = sizeParam
+        )
+
+        return ResponseEntity.ok(ApiResult.success(pageData))
+
+    }
+
+    @GetMapping("/comments/vote/{uid}")
+    suspend fun getCommentVote(
+        @PathVariable("uid") uid: String,
+        @RequestParam("page", defaultValue = "1") pageParam: Int,
+        @RequestParam("size", defaultValue = "10") sizeParam: Int,
+        @RequestParam("nickname", defaultValue = "0") nickname: String? = null,
+        @RequestParam("email", defaultValue = "0") email: String? = null,
+        @RequestParam("phone", defaultValue = "0") phone: String? = null,
+        @RequestParam("status", defaultValue = "0") status: String? = null,
+        @AuthenticationPrincipal(expression = "user") user: UserEntity,
+    ) : ResponseEntity<ApiResult<ApiPage<CommentAdminResponse>>> {
+
+        val photos = listOf("550e8400-e29b-41d4-a716-446655440000", "550e8400-e29b-41d4-a716-446655440000")
+        val selects = listOf(
+            PollSelectResponse(1, 1, "김밥", 10, listOf("550e8400-e29b-41d4-a716-446655440000")),
+            PollSelectResponse(2, 2, "피자", 10, listOf("550e8400-e29b-41d4-a716-446655440000")),
+            PollSelectResponse(3, 3, "탕수육", 10, listOf("550e8400-e29b-41d4-a716-446655440000")),
+        )
+
+        val res = listOf(
+            CommentAdminResponse(1, 1, UUID.fromString("550e8400-e29b-41d4-a716-446655440000"), "저메추", photos, selects, "#FFFFFF", "#000000", 10, 11, 12, 13, 1, OffsetDateTime.now()),
+            CommentAdminResponse(2, 1, UUID.fromString("550e8400-e29b-41d4-a716-446655440000"),"저메추", photos, selects, "#FFFFFF", "#000000", 10, 11, 12, 13, 1, OffsetDateTime.now()),
+            CommentAdminResponse(3, 1, UUID.fromString("550e8400-e29b-41d4-a716-446655440000"),"저메추", photos, selects, "#FFFFFF", "#000000", 10, 11, 12, 13, 1, OffsetDateTime.now()),
+            CommentAdminResponse(4, 1, UUID.fromString("550e8400-e29b-41d4-a716-446655440000"),"저메추", photos, selects, "#FFFFFF", "#000000", 10, 11, 12, 13, 1, OffsetDateTime.now()),
+        )
+
+        //페이징
+        val pageData = PageUtil.of(
+            items = res,
+            total = res.size,
+            page = pageParam,
+            size = sizeParam
+        )
+
+        return ResponseEntity.ok(ApiResult.success(pageData))
+
+    }
+
+
+
 }
