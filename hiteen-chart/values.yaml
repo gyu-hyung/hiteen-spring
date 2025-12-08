@@ -153,6 +153,11 @@ ingress:
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: "/"
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
+
+    # ✅ 업로드 용량 제한 해결 (필수)
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    nginx.ingress.kubernetes.io/client-max-body-size: "50m"
+
     nginx.ingress.kubernetes.io/proxy-buffering: "on"
     nginx.ingress.kubernetes.io/proxy-cache: "assets-cache"
     nginx.ingress.kubernetes.io/proxy-cache-key: "$request_uri"
