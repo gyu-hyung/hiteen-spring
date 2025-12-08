@@ -1,0 +1,37 @@
+databaseChangeLog:
+
+  # ----------------------------------
+  # USERS TABLE - ADD CLASS_ID
+  # ----------------------------------
+  - changeSet:
+      id: add-users-class-id
+      author: system
+      changes:
+
+        # -------- COLUMN --------
+        - addColumn:
+            tableName: users
+            columns:
+              - column:
+                  name: class_id
+                  type: bigint
+                  remarks: "학급 ID (school_classes.id)"
+                  constraints:
+                    nullable: true
+
+        # -------- FK --------
+        - addForeignKeyConstraint:
+            baseTableName: users
+            baseColumnNames: class_id
+            referencedTableName: school_classes
+            referencedColumnNames: id
+            constraintName: fk_users_class_id
+            onDelete: SET NULL
+
+        # -------- INDEX --------
+        - createIndex:
+            tableName: users
+            indexName: idx_users_class_id
+            columns:
+              - column:
+                  name: class_id
