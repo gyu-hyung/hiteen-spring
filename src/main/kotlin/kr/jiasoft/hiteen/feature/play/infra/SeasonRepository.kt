@@ -11,7 +11,7 @@ import java.time.LocalDate
 @Repository
 interface SeasonRepository : CoroutineCrudRepository<SeasonEntity, Long> {
 
-    fun findAllByEndDate(endDate: LocalDate): Flow<SeasonEntity>
+    fun findAllByEndDateOrderById(endDate: LocalDate): Flow<SeasonEntity>
 
     //close
     @Query("UPDATE seasons SET status = 'CLOSED' WHERE id = :seasonId")

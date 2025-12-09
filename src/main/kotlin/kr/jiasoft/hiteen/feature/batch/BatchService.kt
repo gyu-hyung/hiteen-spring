@@ -99,6 +99,22 @@ class BatchService(
 
 
     /**
+     * 매일 0시에 게임 시즌 종료 처리
+     */
+    @Scheduled(cron = "0 0 0 * * *", zone = "Asia/Seoul")
+    fun autoManageSeasons() = runBlocking {
+        val today = LocalDate.now()
+        val yesterday = today.minusDays(1)
+        runBatch("GameSeasonClose") {
+            gameManageService.closeSeasons(yesterday)   // 1. 시즌 종료 및 랭킹 저장
+        }
+        runBatch("GameSeasonCreate") {
+            gameManageService.createNewSeasons(today)   // 2. 새로운 시즌 생성
+        }
+    }
+
+
+    /**
      * 매일 새벽 1시에 학교, 학급 정보를 싱크한다.
      */
     @Scheduled(cron = "0 0 1 * * *", zone = "Asia/Seoul")
@@ -126,21 +142,6 @@ class BatchService(
     fun timeTableImport() = runBlocking {
         runBatch("timeTableImport") {
             timeTableImportService.import()
-        }
-    }
-
-    /**
-     * 매일 0시에 게임 시즌 종료 처리
-     */
-    @Scheduled(cron = "0 0 0 * * *", zone = "Asia/Seoul")
-    fun autoManageSeasons() = runBlocking {
-        val today = LocalDate.now()
-        val yesterday = today.minusDays(1)
-        runBatch("GameSeasonClose") {
-            gameManageService.closeSeasons(yesterday)   // 1. 시즌 종료 및 랭킹 저장
-        }
-        runBatch("GameSeasonCreate") {
-            gameManageService.createNewSeasons(today)   // 2. 새로운 시즌 생성
         }
     }
 

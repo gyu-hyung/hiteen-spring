@@ -46,7 +46,7 @@ class GameManageService(
         val target = endDate ?: LocalDate.now()
 
         //TODO Flow -> Mono
-        val endedSeasons = seasonRepository.findAllByEndDate(target)
+        val endedSeasons = seasonRepository.findAllByEndDateOrderById(target)
         // 상태 먼저 CLOSED
         endedSeasons.collect { season ->
             coroutineScope {
@@ -178,7 +178,7 @@ class GameManageService(
         seasonRepository.findById(seasonId)
             ?: throw IllegalStateException("시즌 정보를 찾을 수 없습니다. (seasonId=$seasonId)")
 
-        val games = gameRepository.findAllByDeletedAtIsNull().toList()
+        val games = gameRepository.findAllByDeletedAtIsNullOrderById().toList()
 
         for (game in games) {
             // 전체 점수 + 참가자 + 사용자 한 번에 조회

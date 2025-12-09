@@ -77,7 +77,7 @@ class TimeTableImportService(
                                 builder.path("/$type")
                                     .queryParam("KEY", apiKey)
                                     .queryParam("Type", "json")
-                                    .queryParam("pIndex", page)          // ✅ 페이지 적용
+                                    .queryParam("pIndex", page)
                                     .queryParam("pSize", pageSize)
                                     .queryParam("ATPT_OFCDC_SC_CODE", school.sido)
                                     .queryParam("SD_SCHUL_CODE", school.code)
@@ -102,7 +102,7 @@ class TimeTableImportService(
                             val subject =
                                 if (row["ITRT_CNTNT"]?.asText().isNullOrBlank() ||
                                     row["ITRT_CNTNT"]?.asText() == "null"
-                                ) ""
+                                ) "-"
                                 else row["ITRT_CNTNT"]?.asText()!!
 
                             timeTableRepository.upsert(
