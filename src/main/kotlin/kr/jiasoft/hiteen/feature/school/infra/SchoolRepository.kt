@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository
 @Repository
 interface SchoolRepository : CoroutineCrudRepository<SchoolEntity, Long> {
     suspend fun findByCode(code: String): SchoolEntity?
-    fun findAllOrderById(): Flow<SchoolEntity>
+    fun findAllByOrderByIdAsc(): Flow<SchoolEntity>
 
     @Query("""
         SELECT 
