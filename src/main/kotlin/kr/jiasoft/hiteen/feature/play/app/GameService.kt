@@ -58,7 +58,7 @@ class GameService(
      * 게임 목록 조회
      * */
     suspend fun getAllGames () : List<GameEntity> {
-        return gameRepository.findAllByDeletedAtIsNull().toList()
+        return gameRepository.findAllByDeletedAtIsNullOrderById().toList()
     }
 
     /**

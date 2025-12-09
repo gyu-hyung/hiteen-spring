@@ -9,5 +9,5 @@ import org.springframework.stereotype.Repository
 interface GameRepository : CoroutineCrudRepository<GameEntity, Long> {
     suspend fun findByCode(code: String): GameEntity?
     suspend fun existsByIdAndDeletedAtIsNull(id: Long): Boolean
-    suspend fun findAllByDeletedAtIsNull(): Flow<GameEntity>
+    suspend fun findAllByDeletedAtIsNullOrderById(): Flow<GameEntity>
 }

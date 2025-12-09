@@ -23,10 +23,10 @@ interface SchoolClassesRepository : CoroutineCrudRepository<SchoolClassesEntity,
     @Query("SELECT * FROM school_classes WHERE year = :year")
     fun findByYear(year: Int): Flow<SchoolClassesEntity>
 
-    @Query("SELECT * FROM school_classes WHERE year = :year AND school_id = :schoolId")
+    @Query("SELECT * FROM school_classes WHERE year = :year AND school_id = :schoolId ORDER BY id, grade, class_no")
     fun findBySchoolIdAndYear(schoolId: Long, year: Int): Flow<SchoolClassesEntity>
 
-    @Query("SELECT DISTINCT school_id FROM school_classes WHERE year = :year")
+    @Query("SELECT DISTINCT school_id FROM school_classes WHERE year = :year ORDER BY id ORDER BY school_id")
     fun findDistinctSchoolIds(year: Int): Flow<Long>
 
 
