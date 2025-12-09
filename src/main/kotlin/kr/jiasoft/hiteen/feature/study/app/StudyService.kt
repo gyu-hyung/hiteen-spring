@@ -6,17 +6,14 @@ import kotlinx.coroutines.flow.toList
 import kr.jiasoft.hiteen.feature.level.app.ExpService
 import kr.jiasoft.hiteen.feature.study.domain.StudyEntity
 import kr.jiasoft.hiteen.feature.study.domain.StudyStatus
-import kr.jiasoft.hiteen.feature.study.dto.StudyItems
-import kr.jiasoft.hiteen.feature.study.dto.StudyQuestionResponse
-import kr.jiasoft.hiteen.feature.study.dto.StudyResponse
-import kr.jiasoft.hiteen.feature.study.dto.StudyStartRequest
-import kr.jiasoft.hiteen.feature.study.dto.StudyStartResponse
+import kr.jiasoft.hiteen.feature.study.dto.*
 import kr.jiasoft.hiteen.feature.study.infra.QuestionItemsRepository
 import kr.jiasoft.hiteen.feature.study.infra.QuestionRepository
 import kr.jiasoft.hiteen.feature.study.infra.StudyRepository
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
-import org.springframework.core.io.ClassPathResource
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
+import java.nio.file.Paths
 import java.time.OffsetDateTime
 
 @Service
@@ -24,12 +21,13 @@ class StudyService(
     private val studyRepository: StudyRepository,
     private val questionItemsRepository: QuestionItemsRepository,
     private val questionRepository: QuestionRepository,
-
     private val expService: ExpService,
-
     private val mapper: ObjectMapper,
-) {
 
+    // ✅ NFS 루트 경로 주입 (/app/assets)
+    @Value("\${app.asset.storage-root}")
+    private val assetStorageRoot: String,
+) {
 
     /**
      * 영어 단어 학습 시작
@@ -60,6 +58,7 @@ class StudyService(
                     questionId = q.id,
                     question = q.question,
                     symbol = q.symbol,
+                    answer = q.answer,
                     sound = resolveSoundAsset(q.question),
                     options = options,
                     image = resolveImageAsset(q.question)
@@ -82,13 +81,18 @@ class StudyService(
 
         val questions = items.mapNotNull { item ->
             val q = questionMap[item.questionId] ?: return@mapNotNull null
-            val cleanedJson = item.answers.replace("\n", "\\n").replace("\r", "").trim()
+            val cleanedJson = item.answers
+                .replace("\n", "\\n")
+                .replace("\r", "")
+                .trim()
+
             val options: List<String> = mapper.readValue(cleanedJson)
 
             StudyQuestionResponse(
                 questionId = q.id,
                 question = q.question,
                 symbol = q.symbol,
+                answer = q.answer,
                 sound = resolveSoundAsset(q.question),
                 options = options,
                 image = resolveImageAsset(q.question)
@@ -115,8 +119,6 @@ class StudyService(
         )
     }
 
-
-
     /**
      * 학습 완료 처리
      */
@@ -133,6 +135,7 @@ class StudyService(
         val saved = studyRepository.save(updated)
         val items = mapper.readValue(saved.studyItems, StudyItems::class.java)
 
+        // 🔹 경험치 지급
         expService.grantExp(userId, "ENGLISH_STUDY", saved.id)
 
         return StudyResponse(
@@ -147,17 +150,29 @@ class StudyService(
         )
     }
 
+    // ================================
+    //  NFS 기반 Asset Resolver
+    // ================================
 
-    // 🔹 mp3 파일 경로 확인
-    private fun resolveSoundAsset(word: String): String? {
-        val path = "assets/sound/${word.lowercase()}.mp3"
-        return if (ClassPathResource(path).exists()) "/$path" else null
+    // 🔹 mp3 파일 경로 확인 (NFS: /app/assets/sound)
+    private fun resolveSoundAsset(word: String?): String? {
+        if (word.isNullOrBlank()) return null
+
+        val safeName = word.trim().lowercase()
+        val filePath = Paths.get(assetStorageRoot, "sound", "$safeName.mp3").toFile()
+
+        // 예: /assets/sound/blossom.mp3
+        return if (filePath.exists()) "/assets/sound/$safeName.mp3" else null
     }
 
-    // 🔹 webp 파일 경로 확인
-    private fun resolveImageAsset(word: String): String? {
-        val path = "assets/word_img/${word.lowercase()}.webp"
-        return if (ClassPathResource(path).exists()) "/$path" else null
-    }
+    // 🔹 webp 파일 경로 확인 (NFS: /app/assets/word_img)
+    private fun resolveImageAsset(word: String?): String? {
+        if (word.isNullOrBlank()) return null
 
+        val safeName = word.trim().lowercase()
+        val filePath = Paths.get(assetStorageRoot, "word_img", "$safeName.webp").toFile()
+
+        // 예: /assets/word_img/blossom.webp
+        return if (filePath.exists()) "/assets/word_img/$safeName.webp" else null
+    }
 }

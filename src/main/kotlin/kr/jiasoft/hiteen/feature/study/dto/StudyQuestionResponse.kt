@@ -10,6 +10,8 @@ data class StudyQuestionResponse(
     val question: String?,
     @field:Schema(description = "발음기호", example = "[ˈkʌrɪdʒ]")
     val symbol: String?,
+    @field:Schema(description = "정답", example = "용기")
+    val answer: String?,
     @field:Schema(description = "음성 파일 경로", example = "https://cdn.site/sound/courage.mp3")
     val sound: String?,
     @field:Schema(description = "보기 목록", example = "[\"용기\", \"의학\", \"차량\", \"가방\"]")

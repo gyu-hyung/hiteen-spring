@@ -71,7 +71,6 @@ server:
 # --------------------
 app:
   asset:
-    # 실제 파일 저장 위치 (MinIO를 사용할 경우 S3 URL로 매핑됨)
     storage-root: /app/assets
     static-locations: file:/app/assets/
     allowed-exts: jpg,jpeg,png,gif,webp,bmp,svg,mp4,mov,avi,mkv,pdf,txt,csv,zip,rar,gz
