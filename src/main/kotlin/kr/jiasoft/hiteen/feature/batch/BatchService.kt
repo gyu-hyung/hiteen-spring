@@ -99,7 +99,7 @@ class BatchService(
 
 
     /**
-     * 매월 1일 새벽 1시에 학교, 학급 정보를 싱크한다.
+     * 매일 새벽 1시에 학교, 학급 정보를 싱크한다.
      */
     @Scheduled(cron = "0 0 1 * * *", zone = "Asia/Seoul")
     fun schoolImport() = runBlocking {

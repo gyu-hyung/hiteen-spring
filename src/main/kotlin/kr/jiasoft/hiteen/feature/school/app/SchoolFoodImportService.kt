@@ -56,7 +56,7 @@ class SchoolFoodImportService(
         val from = today.format(dateFmt)
         val to = today.plusDays(7).format(dateFmt)
 
-        schoolRepository.findAll().collect { school ->
+        schoolRepository.findAllOrderById().collect { school ->
 
             val totalTime = measureTime {
 
@@ -120,7 +120,7 @@ class SchoolFoodImportService(
                 }
             }
 
-            logger.info("⏳ Total Processing Time for ${school.name}: ${totalTime.inWholeMilliseconds}ms\n")
+            logger.info("⏳ Total Processing Time for ${school.id}  ${school.name}: ${totalTime.inWholeMilliseconds}ms\n")
         }
 
         logger.info("SchoolFood :: Import END =====================")
