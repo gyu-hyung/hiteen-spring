@@ -13,6 +13,12 @@ interface SchoolRepository : CoroutineCrudRepository<SchoolEntity, Long> {
     suspend fun findByCode(code: String): SchoolEntity?
     fun findAllByOrderByIdAsc(): Flow<SchoolEntity>
 
+    
+    @Query("""
+        select * from schools where "name" not like '%학교'
+    """)
+    fun findAllTest(): Flow<SchoolEntity>
+
     @Query("""
         SELECT 
             s.*,
