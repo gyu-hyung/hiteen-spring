@@ -14,4 +14,19 @@ interface QuestionRepository : CoroutineCrudRepository<QuestionEntity, Long> {
     @Query("SELECT * FROM question WHERE type = :type AND status = 1")
     fun findByType(type: Int): Flow<QuestionEntity>
 
+    fun findByQuestionAndDeletedAtIsNull(question: String): Flow<QuestionEntity?>
+
+    @Query("""
+        SELECT *
+        FROM question_1
+        WHERE LOWER(question) = LOWER(:question)
+          AND deleted_at IS NULL
+          AND type = :type
+    """)
+    fun findByLowCaseQuestionAndDeletedAtIsNull(question: String, type: Int): Flow<QuestionEntity>
+
+
+    @Query("select * from question_2 where sound is null")
+    fun findBySoundIsNull(): Flow<QuestionEntity>
+
 }
