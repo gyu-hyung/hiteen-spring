@@ -154,6 +154,9 @@ interface BoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
             b.asset_uid      AS asset_uid,
             b.lat,
             b.lng,
+            u.grade,
+            (SELECT "type" FROM schools WHERE id = u.school_id LIMIT 1) AS type,
+            (SELECT "name" FROM schools WHERE id = u.school_id LIMIT 1) AS school_name,
             b.created_at     AS created_at,
             b.created_id     AS created_id,
             (SELECT COUNT(*)::bigint FROM board_likes bl WHERE bl.board_id = b.id) AS like_count,
@@ -163,6 +166,7 @@ interface BoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
                 SELECT array_agg(ba.uid) FROM board_assets ba WHERE ba.board_id = b.id
             ), ARRAY[]::uuid[]) AS attachments
         FROM boards b
+        LEFT JOIN users u ON b.created_id = u.id
         WHERE b.deleted_at IS NULL
           AND (
                 (:category IS NULL AND b.category != 'NOTICE')
