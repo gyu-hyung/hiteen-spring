@@ -152,6 +152,8 @@ interface BoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
             b.start_date,
             b.end_date,
             b.asset_uid      AS asset_uid,
+            b.lat,
+            b.lng,
             b.created_at     AS created_at,
             b.created_id     AS created_id,
             (SELECT COUNT(*)::bigint FROM board_likes bl WHERE bl.board_id = b.id) AS like_count,
