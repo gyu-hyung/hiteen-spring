@@ -59,6 +59,12 @@ data class BoardResponse(
     @param:Schema(description = "상세 주소", example = "빌딩 5층")
     val detailAddress: String?,
 
+    @param:Schema(description = "위도", example = "")
+    val lat: Double? = null,
+
+    @param:Schema(description = "경도", example = "")
+    val lng: Double? = null,
+
     @param:Schema(description = "작성 일시", example = "2025.09.18 10:15")
     @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm")
     val createdAt: OffsetDateTime,
