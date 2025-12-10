@@ -58,6 +58,9 @@ data class RoomSummaryResponse(
     @param:Schema(description = "읽지 않은 메시지 수", example = "2")
     val unreadCount: Int,
 
+    @param:Schema(description = "프로필 이미지 UID", example = "f580e8e8-adee-4285-b181-3fed545e7be0")
+    val assetUid: String?,
+
     @param:Schema(description = "마지막 업데이트 시각", example = "2025.09.18 10:15")
     @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm")
     val updatedAt: OffsetDateTime?,
