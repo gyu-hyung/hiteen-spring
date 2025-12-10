@@ -20,7 +20,6 @@ import kr.jiasoft.hiteen.feature.push.app.PushService
 import kr.jiasoft.hiteen.feature.push.domain.PushTemplate
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import kr.jiasoft.hiteen.feature.user.infra.UserRepository
-import org.springframework.data.r2dbc.repository.Query
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
 import java.time.OffsetDateTime
@@ -328,6 +327,7 @@ class ChatService(
                 roomTitle = r.roomTitle,
                 memberCount = memberCount.toInt(),
                 unreadCount = unreadCount,
+                assetUid = sender?.assetUid,
                 updatedAt = r.updatedAt ?: r.createdAt,
                 lastMessage = if (last != null) {
                     MessageSummary(
