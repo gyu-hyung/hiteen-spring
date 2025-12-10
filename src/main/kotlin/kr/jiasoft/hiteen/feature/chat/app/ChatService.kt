@@ -1,5 +1,6 @@
 package kr.jiasoft.hiteen.feature.chat.app
 
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kr.jiasoft.hiteen.common.exception.BusinessValidationException
@@ -305,11 +306,14 @@ class ChatService(
         val cursor = messages.findCurrentCursorByUserId(currentUserId)
 
         val roomsList = rooms.listRooms(currentUserId, limit, offset).map { r ->
-            val memberCount = chatUsers.countActiveByRoomId(r.id)
+            val members = chatUsers.listActiveUserIds(r.id)
 
             // 마지막 메시지 + 작성자 조회
             val last = messages.findLastMessage(r.id)
             val sender = last?.userId?.let { uid -> users.findSummaryInfoById(uid) }
+            //상대방 assetUid
+            val otherMemberId = members.firstOrNull { it != currentUserId }
+            val otherMember = otherMemberId?.let { users.findSummaryInfoById(it) }
 
             // 마지막 메시지 asset
             val lastAssets = last?.id?.let { msgAssets.listByMessage(it).map { a ->
@@ -325,9 +329,9 @@ class ChatService(
             RoomSummaryResponse(
                 roomUid = r.uid,
                 roomTitle = r.roomTitle,
-                memberCount = memberCount.toInt(),
+                memberCount = members.toList().count(),
                 unreadCount = unreadCount,
-                assetUid = sender?.assetUid,
+                assetUid = otherMember?.assetUid,
                 updatedAt = r.updatedAt ?: r.createdAt,
                 lastMessage = if (last != null) {
                     MessageSummary(
