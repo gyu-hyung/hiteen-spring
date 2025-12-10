@@ -6,6 +6,10 @@ import java.time.OffsetDateTime
 
 @Schema(description = "랭킹 정보 view DTO")
 data class RankingView(
+
+    @field:Schema(description = "ID", example = "1")
+    val id: Int,
+
     @field:Schema(description = "랭킹 순위", example = "1")
     val rank: Int,
 
@@ -15,6 +19,18 @@ data class RankingView(
     @field:Schema(description = "닉네임", example = "nickname")
     val nickname: String,
 
+    @field:Schema(description = "학년", example = "3")
+    val grade: String,
+
+    @field:Schema(description = "학교 type", example = "3")
+    val type: String,
+
+    @field:Schema(description = "학교 이름", example = "홍성여자중학교부설방송통신중학교")
+    val schoolName: String,
+
+//    @field:Schema(description = "잘린 학교 이름", example = "홍성여자중학교부설방송통신중학교")
+//    val modifiedSchoolName: String? = null,
+
     @field:Schema(description = "프로필 이미지 URL", example = "https://example.com/profile.jpg")
     val assetUid: String?,
 
@@ -22,7 +38,7 @@ data class RankingView(
     val score: Double,
 
     @field:Schema(description = "시도 횟수", example = "2")
-    val tryCount: Long,
+    val tryCount: Long? = null,
 
     @param:Schema(description = "랭킹 생성 시간", example = "2025.09.18 10:15")
     @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm")
@@ -31,4 +47,17 @@ data class RankingView(
     @param:Schema(description = "랭킹 생성 시간", example = "2025.09.18 10:15")
     @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm")
     val updatedAt: OffsetDateTime? = null,
+
+    @field:Schema(description = "시즌 ID", example = "1")
+    val seasonId: Long? = null,
+
+    @field:Schema(description = "리그", example = "BRONZE")
+    val league: String? = null,
+
+    @field:Schema(description = "게임 ID", example = "1")
+    val gameId: Long? = null,
+
+    @field:Schema(description = "참가자 ID", example = "1")
+    val participantId: Long? = null,
+
 )
