@@ -4,16 +4,17 @@ import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Table
 import java.time.LocalDateTime
 
-@Table("question")
+@Table("question_2")
 data class QuestionEntity(
     @Id
-    val id: Long,
+    val id: Long = 0,
     val type: Int,
     val category: String?,
     val question: String,
     val symbol: String?,
-    val sound: String?,
     val answer: String?,
+    val sound: String?,
+    val image: String?,
     val content: String?,
     val status: Int,
     val createdAt: LocalDateTime?,
