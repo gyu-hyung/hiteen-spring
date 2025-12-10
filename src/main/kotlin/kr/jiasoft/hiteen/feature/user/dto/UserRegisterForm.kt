@@ -28,8 +28,12 @@ data class UserRegisterForm(
     val nickname: String,
 
     @field:NotBlank(message = "비밀번호는 필수입니다.")
-    @field:ValidPassword
+//    @field:ValidPassword
     @param:Schema(description = "비밀번호", example = "P@ssw0rd!")
+    @field:Pattern(
+        regexp = "^(?=.*[A-Za-z])(?=.*\\d).{6,}$",
+        message = "비밀번호는 영문과 숫자를 포함한 6자 이상이어야 합니다."
+    )
     val password: String? = null,
 
     @param:Schema(description = "주소", example = "서울특별시 강남구")

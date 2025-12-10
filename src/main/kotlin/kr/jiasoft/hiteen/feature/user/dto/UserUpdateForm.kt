@@ -3,6 +3,7 @@ package kr.jiasoft.hiteen.feature.user.dto
 import com.fasterxml.jackson.annotation.JsonFormat
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.constraints.Email
+import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Size
 import kr.jiasoft.hiteen.validation.ValidPassword
 import java.time.LocalDate
@@ -22,7 +23,11 @@ data class UserUpdateForm(
     val nickname: String? = null,
 
     // 값이 존재하지 않을 시 기존 데이터 유지
-    @field:ValidPassword
+//    @field:ValidPassword
+    @field:Pattern(
+        regexp = "^(?=.*[A-Za-z])(?=.*\\d).{6,}$",
+        message = "비밀번호는 영문과 숫자를 포함한 6자 이상이어야 합니다."
+    )
     val password: String? = null,
 
     @param:Schema(description = "주소", example = "서울특별시 강남구 테헤란로 123", maxLength = 255)
