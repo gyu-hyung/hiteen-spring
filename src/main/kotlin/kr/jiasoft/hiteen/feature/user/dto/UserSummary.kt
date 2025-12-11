@@ -50,6 +50,9 @@ data class UserSummary(
     @param:Schema(description = "프로필 이미지 UID", example = "f580e8e8-adee-4285-b181-3fed545e7be0")
     val assetUid: String?,
 
+    @param:Schema(description = "성별", example = "M")
+    val gender: String? = null,
+
     @param:Schema(description = "친구 여부", example = "true")
     val isFriend: Boolean? = false,
 
@@ -73,6 +76,7 @@ data class UserSummary(
                 tierId = tierId,
                 tierName = tierName,
                 assetUid = user.assetUid?.toString(),
+                gender = user.gender,
                 isFriend = isFriend,
                 isFriendRequest = isFriendRequest
             )
