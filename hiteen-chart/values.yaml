@@ -155,11 +155,8 @@ ingress:
     nginx.ingress.kubernetes.io/client-max-body-size: "50m"
     nginx.ingress.kubernetes.io/websocket-services: "hiteen-test"
 
-
-
-
   hosts:
-    - host: api.hiteen.co.kr     # ⭐ 여기 추가!
+    - host:
       paths:
         - path: /
           pathType: Prefix
@@ -167,14 +164,10 @@ ingress:
             serviceName: hiteen-test
             servicePort: 8080
 
-        - path: /grafana
+    - host: api.hiteen.co.kr
+      paths:
+        - path: /
           pathType: Prefix
           backend:
-            serviceName: prometheus-grafana
-            servicePort: 80
-
-        - path: /prometheus
-          pathType: Prefix
-          backend:
-            serviceName: prometheus-kube-prometheus-prometheus
-            servicePort: 9090
+            serviceName: hiteen-test
+            servicePort: 8080
