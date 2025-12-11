@@ -359,20 +359,21 @@ class UserService (
 
         // 2) 변경값 준비 (null이면 기존값 유지)
 //        val newUsername    = param.username?.trim()?.takeIf { it.isNotEmpty() } ?: existing.username
-        val newEmail       = param.email?.trim()?.takeIf { it.isNotEmpty() } ?: existing.email
-        val newNickname    = param.nickname ?: existing.nickname
-        val newPassword    = param.password?.let { encoder.encode(it) } ?: existing.password
-        val newAddress     = param.address ?: existing.address
-        val newDetailAddr  = param.detailAddress ?: existing.detailAddress
+        val newEmail        = param.email?.trim()?.takeIf { it.isNotEmpty() } ?: existing.email
+        val newNickname     = param.nickname ?: existing.nickname
+        val newPassword     = param.password?.let { encoder.encode(it) } ?: existing.password
+        val newAddress      = param.address ?: existing.address
+        val newDetailAddr   = param.detailAddress ?: existing.detailAddress
 //        val newPhone       = param.phone ?: existing.phone
-        val newMood        = param.mood ?: existing.mood
-        val newMoodEmoji   = param.moodEmoji ?: existing.moodEmoji
-        val newSchoolId    = param.schoolId ?: existing.schoolId
-        val newClassId    = param.classId ?: existing.classId
-        val newGrade       = param.grade ?: existing.grade
-        val newGender      = param.gender ?: existing.gender
-        val newBirthday    = param.birthday ?: existing.birthday
+        val newMood         = param.mood ?: existing.mood
+        val newMoodEmoji    = param.moodEmoji ?: existing.moodEmoji
+        val newSchoolId     = param.schoolId ?: existing.schoolId
+        val newClassId      = param.classId ?: existing.classId
+        val newGrade        = param.grade ?: existing.grade
+        val newGender       = param.gender ?: existing.gender
+        val newBirthday     = param.birthday ?: existing.birthday
         val newProfileDecorationCode = param.profileDecorationCode ?: existing.profileDecorationCode
+        val newLocationMode = param.locationMode ?: existing.locationMode
 
         // 중복 검사
         if (newEmail != null && !newEmail.equals(existing.email, ignoreCase = true)) {
@@ -409,6 +410,7 @@ class UserService (
             gender        = newGender,
             birthday      = newBirthday,
             profileDecorationCode = newProfileDecorationCode,
+            locationMode  = newLocationMode,
             updatedId     = current.id,
             updatedAt     = OffsetDateTime.now(),
         )

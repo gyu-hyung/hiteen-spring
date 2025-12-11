@@ -71,4 +71,7 @@ data class UserUpdateForm(
 
     @param:Schema(description = "프로필 데코레이션 코드", example = "P_001")
     val profileDecorationCode: String? = null,
+
+    @param:Schema(description = "위치모드 활성화 여부", example = "true")
+    val locationMode: Boolean? = null,
 )
