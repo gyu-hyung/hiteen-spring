@@ -163,11 +163,3 @@ ingress:
           backend:
             serviceName: hiteen-test
             servicePort: 8080
-
-    - host: api.hiteen.co.kr
-      paths:
-        - path: /
-          pathType: Prefix
-          backend:
-            serviceName: hiteen-test
-            servicePort: 8080
