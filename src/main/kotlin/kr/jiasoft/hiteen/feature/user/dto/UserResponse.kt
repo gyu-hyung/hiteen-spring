@@ -83,6 +83,9 @@ data class UserResponse(
     @param:Schema(description = "초대 후 가입자수", example = "10")
     val inviteJoins: Long? = null,
 
+    @param:Schema(description = "위치 모드 활성화 여부", example = "true")
+    val locationMode: Boolean,
+
     @param:Schema(description = "팔로우 여부", example = "false")
     val isFollowed: Boolean = false,
 
@@ -164,6 +167,7 @@ data class UserResponse(
                     isFollowed = isFollowed,
                     isFriendRequested = isFriendRequested,
                     isFollowedRequested = isFollowedRequested,
+                    locationMode = entity.locationMode,
                     createdAt = entity.createdAt.toLocalDateTime(),
                     updatedAt = entity.updatedAt?.toLocalDateTime(),
                     deletedAt = entity.deletedAt?.toLocalDateTime(),
@@ -200,6 +204,7 @@ data class UserResponse(
             isFriend = false,
             isFriendRequested = false,
             isFollowedRequested = false,
+            locationMode = false,
             createdAt = LocalDateTime.now(),
             updatedAt = null,
             deletedAt = null,

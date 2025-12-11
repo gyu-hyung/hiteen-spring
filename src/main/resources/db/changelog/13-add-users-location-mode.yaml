@@ -1,0 +1,30 @@
+databaseChangeLog:
+
+  # ----------------------------------
+  # USERS TABLE - ADD LOCATION_MODE
+  # ----------------------------------
+  - changeSet:
+      id: add-users-location-mode
+      author: system
+      changes:
+
+        # -------- COLUMN --------
+        - addColumn:
+            tableName: users
+            columns:
+              - column:
+                  name: location_mode
+                  type: boolean
+                  remarks: "위치 정보 공개 여부 (true: 공개, false: 비공개)"
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+
+        # -------- INDEX (옵션, 필요 시) --------
+        # 위치 필터링 빈도가 잦으면 인덱스가 유리함
+        - createIndex:
+            tableName: users
+            indexName: idx_users_location_mode
+            columns:
+              - column:
+                  name: location_mode

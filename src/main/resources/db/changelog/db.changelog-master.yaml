@@ -23,3 +23,5 @@ databaseChangeLog:
       file: db/changelog/11-create-terms.yaml
   - include:
       file: db/changelog/12-add-users-class-id.yaml
+  - include:
+      file: db/changelog/13-add-users-location-mode.yaml
