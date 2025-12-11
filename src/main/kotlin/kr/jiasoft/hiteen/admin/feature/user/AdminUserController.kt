@@ -127,9 +127,9 @@ class AdminUserController (
         val locationMode: LocationMode,
     )
 
-    @GetMapping("/friends/{uid}")
+    @GetMapping("/friends")
     suspend fun getFriends(
-        @PathVariable("uid") uid: String,
+        @RequestParam uid: String? = null,
         @RequestParam("page", defaultValue = "1") pageParam: Int,
         @RequestParam("size", defaultValue = "10") sizeParam: Int,
         @RequestParam("nickname", defaultValue = "0") nickname: String? = null,
@@ -177,9 +177,9 @@ class AdminUserController (
         val status: FollowStatus,
     )
 
-    @GetMapping("/follows/{uid}")
+    @GetMapping("/follows")
     suspend fun getFollows(
-        @PathVariable("uid") uid: String,
+        @RequestParam uid: String? = null,
         @RequestParam("page", defaultValue = "1") pageParam: Int,
         @RequestParam("size", defaultValue = "10") sizeParam: Int,
         @RequestParam("nickname", defaultValue = "0") nickname: String? = null,
@@ -237,9 +237,9 @@ class AdminUserController (
         val deletedAt: OffsetDateTime? = null,
     )
 
-    @GetMapping("/boards/{uid}")
+    @GetMapping("/boards")
     suspend fun getBoards(
-        @PathVariable("uid") uid: String,
+        @RequestParam uid: String? = null,
         @RequestParam("page", defaultValue = "1") pageParam: Int,
         @RequestParam("size", defaultValue = "10") sizeParam: Int,
         @RequestParam("nickname", defaultValue = "0") nickname: String? = null,
@@ -306,9 +306,9 @@ class AdminUserController (
         val createdAt: OffsetDateTime,
     )
 
-    @GetMapping("/polls/{uid}")
+    @GetMapping("/polls")
     suspend fun getPolls(
-        @PathVariable("uid") uid: String,
+        @RequestParam uid: String? = null,
         @RequestParam("page", defaultValue = "1") pageParam: Int,
         @RequestParam("size", defaultValue = "10") sizeParam: Int,
         @RequestParam("nickname", defaultValue = "0") nickname: String? = null,
@@ -364,9 +364,9 @@ class AdminUserController (
         val createdAt: OffsetDateTime,
     )
 
-    @GetMapping("/comments/post/{uid}")
+    @GetMapping("/comments/post")
     suspend fun getCommentPosts(
-        @PathVariable("uid") uid: String,
+        @RequestParam uid: String? = null,
         @RequestParam("page", defaultValue = "1") pageParam: Int,
         @RequestParam("size", defaultValue = "10") sizeParam: Int,
         @RequestParam("nickname", defaultValue = "0") nickname: String? = null,
@@ -402,9 +402,9 @@ class AdminUserController (
 
     }
 
-    @GetMapping("/comments/vote/{uid}")
+    @GetMapping("/comments/vote")
     suspend fun getCommentVote(
-        @PathVariable("uid") uid: String,
+        @RequestParam uid: String? = null,
         @RequestParam("page", defaultValue = "1") pageParam: Int,
         @RequestParam("size", defaultValue = "10") sizeParam: Int,
         @RequestParam("nickname", defaultValue = "0") nickname: String? = null,
