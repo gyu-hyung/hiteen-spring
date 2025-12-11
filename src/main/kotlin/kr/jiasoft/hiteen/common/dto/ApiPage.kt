@@ -5,10 +5,10 @@ package kr.jiasoft.hiteen.common.dto
  */
 data class ApiPage<T>(
     val total: Int,
+    val currentPage: Int,
+    val perPage: Int,
     val lastPage: Int,
     val items: List<T>,
-    val perPage: Int,
-    val currentPage: Int,
 )
 
 /**
@@ -19,8 +19,8 @@ object PageUtil {
     fun <T> of(
         items: List<T>,
         total: Int,
-        page: Int,
-        size: Int
+        page: Int = 1,
+        size: Int = 10,
     ): ApiPage<T> {
 
         val currentPage = if (page <= 0) 1 else page
