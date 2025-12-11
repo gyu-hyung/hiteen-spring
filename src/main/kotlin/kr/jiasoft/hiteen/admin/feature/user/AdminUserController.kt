@@ -1,13 +1,19 @@
 package kr.jiasoft.hiteen.admin.feature.user
 
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.toList
 import kr.jiasoft.hiteen.common.dto.ApiPage
 import kr.jiasoft.hiteen.common.dto.ApiResult
 import kr.jiasoft.hiteen.common.dto.PageUtil
+import kr.jiasoft.hiteen.feature.play.domain.GameEntity
+import kr.jiasoft.hiteen.feature.play.infra.GameRepository
 import kr.jiasoft.hiteen.feature.poll.dto.PollSelectResponse
 import kr.jiasoft.hiteen.feature.relationship.domain.FollowStatus
 import kr.jiasoft.hiteen.feature.relationship.domain.LocationMode
 import kr.jiasoft.hiteen.feature.user.app.UserService
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
+import org.springframework.data.annotation.Id
+import org.springframework.data.domain.Pageable
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.GetMapping
@@ -24,6 +30,12 @@ import kotlin.math.min
 @RequestMapping("/api/admin/user")
 class AdminUserController (
     private val userService: UserService,
+
+
+
+
+    //게임목록
+    private val gameRepository: GameRepository,
 ) {
 
     data class AdminUserResponse(
@@ -96,7 +108,12 @@ class AdminUserController (
             allUsers.subList(startIndex, endIndex)
         }
 
-        val result = ApiPage(total, lastPage, items, perPage, page)
+        val result = PageUtil.of(
+            items = items,
+            total = total,
+            page = page,
+            size = perPage,
+        )
 
         return ResponseEntity.ok(ApiResult.success(result))
     }
@@ -277,12 +294,7 @@ class AdminUserController (
         )
 
         //페이징
-        val pageData = PageUtil.of(
-            items = res,
-            total = res.size,
-            page = pageParam,
-            size = sizeParam
-        )
+        val pageData = PageUtil.of(res, res.size)
 
         return ResponseEntity.ok(ApiResult.success(pageData))
 
@@ -441,5 +453,56 @@ class AdminUserController (
     }
 
 
+    data class GameAdminResponse (
+        val no: Long,
+        val id: Long,
+        val title: String,
+        val description: String,
+        val assetUid: UUID,
+        val link: String,
+        val hits: Int,
+        val likeCount: Int,
+        val createdAt: OffsetDateTime,
+    )
+
+    @GetMapping("/games")
+    suspend fun getGames(
+        @RequestParam uid: String? = null,
+        @RequestParam("page", defaultValue = "1") pageParam: Int,
+        @RequestParam("size", defaultValue = "10") sizeParam: Int,
+        @RequestParam("nickname", defaultValue = "0") nickname: String? = null,
+        @RequestParam("email", defaultValue = "0") email: String? = null,
+        @RequestParam("phone", defaultValue = "0") phone: String? = null,
+        @RequestParam("status", defaultValue = "0") status: String? = null,
+        @AuthenticationPrincipal(expression = "user") user: UserEntity,
+    ) : ResponseEntity<ApiResult<ApiPage<GameEntity>>> {
+
+        val res = listOf(
+            GameEntity(1, "REACTION", "반사 신경 게임", "반사 신경을 테스트하는 게임입니다.", "ACTIVE", OffsetDateTime.now()),
+            GameEntity(2, "REACTION", "반사 신경 게임", "반사 신경을 테스트하는 게임입니다.", "ACTIVE", OffsetDateTime.now()),
+            GameEntity(3, "REACTION", "반사 신경 게임", "반사 신경을 테스트하는 게임입니다.", "ACTIVE", OffsetDateTime.now()),
+            GameEntity(4, "REACTION", "반사 신경 게임", "반사 신경을 테스트하는 게임입니다.", "ACTIVE", OffsetDateTime.now()),
+            GameEntity(5, "REACTION", "반사 신경 게임", "반사 신경을 테스트하는 게임입니다.", "ACTIVE", OffsetDateTime.now()),
+            GameEntity(6, "REACTION", "반사 신경 게임", "반사 신경을 테스트하는 게임입니다.", "ACTIVE", OffsetDateTime.now()),
+            GameEntity(7, "REACTION", "반사 신경 게임", "반사 신경을 테스트하는 게임입니다.", "ACTIVE", OffsetDateTime.now()),
+            GameEntity(8, "REACTION", "반사 신경 게임", "반사 신경을 테스트하는 게임입니다.", "ACTIVE", OffsetDateTime.now()),
+            GameEntity(9, "REACTION", "반사 신경 게임", "반사 신경을 테스트하는 게임입니다.", "ACTIVE", OffsetDateTime.now()),
+            GameEntity(10, "REACTION", "반사 신경 게임", "반사 신경을 테스트하는 게임입니다.", "ACTIVE", OffsetDateTime.now()),
+//            GameEntity(11, "REACTION", "반사 신경 게임", "반사 신경을 테스트하는 게임입니다.", "ACTIVE", OffsetDateTime.now()),
+//            GameEntity(12, "REACTION", "반사 신경 게임", "반사 신경을 테스트하는 게임입니다.", "ACTIVE", OffsetDateTime.now()),
+//            GameEntity(13, "REACTION", "반사 신경 게임", "반사 신경을 테스트하는 게임입니다.", "ACTIVE", OffsetDateTime.now()),
+//            GameEntity(14, "REACTION", "반사 신경 게임", "반사 신경을 테스트하는 게임입니다.", "ACTIVE", OffsetDateTime.now()),
+//            GameEntity(15, "REACTION", "반사 신경 게임", "반사 신경을 테스트하는 게임입니다.", "ACTIVE", OffsetDateTime.now()),
+//            GameEntity(16, "REACTION", "반사 신경 게임", "반사 신경을 테스트하는 게임입니다.", "ACTIVE", OffsetDateTime.now()),
+//            GameEntity(17, "REACTION", "반사 신경 게임", "반사 신경을 테스트하는 게임입니다.", "ACTIVE", OffsetDateTime.now()),
+//            GameEntity(18, "REACTION", "반사 신경 게임", "반사 신경을 테스트하는 게임입니다.", "ACTIVE", OffsetDateTime.now()),
+//            GameEntity(19, "REACTION", "반사 신경 게임", "반사 신경을 테스트하는 게임입니다.", "ACTIVE", OffsetDateTime.now()),
+//            GameEntity(20, "REACTION", "반사 신경 게임", "반사 신경을 테스트하는 게임입니다.", "ACTIVE", OffsetDateTime.now()),
+//            GameEntity(21, "REACTION", "반사 신경 게임", "반사 신경을 테스트하는 게임입니다.", "ACTIVE", OffsetDateTime.now()),
+        )
+
+//        val res = gameRepository.findAll().toList()
+        return ResponseEntity.ok(ApiResult.success(PageUtil.of(res, 21, pageParam, sizeParam)))
+    }
 
 }

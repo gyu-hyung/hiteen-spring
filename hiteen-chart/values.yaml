@@ -183,7 +183,7 @@ ingress:
 
 
   hosts:
-    - host:
+    - host: api.hiteen.co.kr     # ⭐ 여기 추가!
       paths:
         - path: /
           pathType: Prefix
