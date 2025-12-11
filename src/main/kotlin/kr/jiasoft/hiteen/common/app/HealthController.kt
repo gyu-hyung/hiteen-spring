@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.time.Instant
 
-@Tag(name = "Health", description = "서비스 헬스체크 API")
+@Tag(name = "Health", description = "서비스 헬스체크 API ")
 @RestController
 @RequestMapping("/api/health")
 class HealthController(
