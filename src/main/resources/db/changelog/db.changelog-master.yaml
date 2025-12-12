@@ -25,3 +25,5 @@ databaseChangeLog:
       file: db/changelog/12-add-users-class-id.yaml
   - include:
       file: db/changelog/13-add-users-location-mode.yaml
+  - include:
+      file: db/changelog/14-add-game-scores-total-try-count.yaml

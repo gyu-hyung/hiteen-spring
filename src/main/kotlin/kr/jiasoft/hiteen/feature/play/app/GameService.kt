@@ -101,8 +101,8 @@ class GameService(
             if (existing != null) {
                 val lastPlayedDate = existing.updatedAt?.toLocalDate() ?: existing.createdAt.toLocalDate()
 
-                //오늘 게임한 적이 있다면
-                if (lastPlayedDate.isEqual(LocalDate.now())) {
+                //오늘 게임한 적이 있다면 && 시도 횟수가 3회를 초과했다면 재도전 처리
+                if (lastPlayedDate.isEqual(LocalDate.now()) && existing.tryCount > 3) {
                     handleRetry(gameId, userId, retryType, transactionId)
                 }
             }
@@ -146,23 +146,20 @@ class GameService(
         //게임 이력
         val existing = gameScoreRepository.findBySeasonIdAndParticipantIdAndGameId(participant.seasonId, participant.id, gameId)
         return if (existing != null) {
+            // 시도 횟수별 가산점 (0.01초 * n), 최대 0.1 초 까지
+            val advantage = 0.01 * (existing.totalTryCount).coerceAtMost(10)
+
+            val adjustedScore = (score - advantage).coerceAtLeast(0.0)
+            saveHistory(gameHistoryUid,  participant.seasonId, participant.id, gameId, adjustedScore)
             val lastPlayedDate = existing.updatedAt?.toLocalDate() ?: existing.createdAt.toLocalDate()
             if (lastPlayedDate.isEqual(LocalDate.now())) {
-                // 시도 횟수별 가산점 (0.08초 * n)
-                val nextTryCount = existing.tryCount + 1
-                val advantage = 0.08 * (nextTryCount - 1)
-
-                val adjustedScore = (score - advantage).coerceAtLeast(0.0)
-                saveHistory(gameHistoryUid,  participant.seasonId, participant.id, gameId, adjustedScore)
-                saveOrUpdateScore(existing, adjustedScore, nextTryCount)
+                updateScore(existing, adjustedScore)
             } else {
-                saveHistory(gameHistoryUid,  participant.seasonId, participant.id, gameId, score)
-                saveOrUpdateScore(existing, score, 1)
+                updateScore(existing, adjustedScore, 1)
             }
-
         } else {
             saveHistory(gameHistoryUid,  participant.seasonId, participant.id, gameId, score)
-            createNewScore(participant.seasonId, participant.id, gameId, score)
+            createScore(participant.seasonId, participant.id, gameId, score)
         }
     }
 
@@ -279,23 +276,25 @@ class GameService(
         }
     }
 
-    private suspend fun saveOrUpdateScore(existing: GameScoreEntity, score: Double, tryCount: Int): GameScoreEntity {
+    private suspend fun updateScore(existing: GameScoreEntity, score: Double, tryCount: Int? = null): GameScoreEntity {
         val finalScore = minOf(existing.score, score)
         val updated = existing.copy(
             score = finalScore,
-            tryCount = tryCount,
+            tryCount = tryCount ?: (existing.tryCount + 1),
+            totalTryCount = existing.totalTryCount + 1,
             updatedAt = OffsetDateTime.now()
         )
         return gameScoreRepository.save(updated)
     }
 
-    private suspend fun createNewScore(seasonId: Long, participantId: Long, gameId: Long, score: Double): GameScoreEntity {
+    private suspend fun createScore(seasonId: Long, participantId: Long, gameId: Long, score: Double): GameScoreEntity {
         val newScore = GameScoreEntity(
             seasonId = seasonId,
             participantId = participantId,
             gameId = gameId,
             score = score,
-            tryCount = 1
+            tryCount = 1,
+            totalTryCount = 1
         )
         return gameScoreRepository.save(newScore)
     }

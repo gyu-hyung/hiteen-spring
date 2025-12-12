@@ -1,0 +1,20 @@
+databaseChangeLog:
+
+  # ----------------------------------
+  # GAME_SCORES TABLE - ADD TOTAL_TRY_COUNT
+  # ----------------------------------
+  - changeSet:
+      id: add-game-scores-total-try-count
+      author: system
+      changes:
+
+        # -------- COLUMN --------
+        - addColumn:
+            tableName: game_scores
+            columns:
+              - column:
+                  name: total_try_count
+                  type: integer
+                  remarks: "총 시도 횟수"
+                  defaultValueNumeric: 0
+
