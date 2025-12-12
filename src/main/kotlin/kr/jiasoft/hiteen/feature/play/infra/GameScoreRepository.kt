@@ -16,6 +16,7 @@ interface GameScoreRepository : CoroutineCrudRepository<GameScoreEntity, Long> {
 
     @Query("""
         SELECT
+            gs.id,
             ROW_NUMBER() OVER (ORDER BY gs.score ASC, gs.created_at ASC) AS rank,
             u.id AS user_id,
             u.nickname,
