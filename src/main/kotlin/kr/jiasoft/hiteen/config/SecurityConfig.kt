@@ -54,7 +54,7 @@ class SecurityConfig(
                 it.pathMatchers(
                     HttpMethod.GET,
                     "/api/auth/**",
-                    "/api/school",
+                    "/api/school/**",
                     "/api/assets/{uid}/download",
                     "/api/assets/{uid}/view",
                     "/api/user/nickname/{nickname}",
