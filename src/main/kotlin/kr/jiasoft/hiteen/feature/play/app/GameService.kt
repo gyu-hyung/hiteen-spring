@@ -146,8 +146,8 @@ class GameService(
         //게임 이력
         val existing = gameScoreRepository.findBySeasonIdAndParticipantIdAndGameId(participant.seasonId, participant.id, gameId)
         return if (existing != null) {
-            // 시도 횟수별 가산점 (0.01초 * n), 최대 0.1 초 까지
-            val advantage = 0.01 * (existing.totalTryCount).coerceAtMost(10)
+            // 시도 횟수별 가산점 (0.01초 * n), 최대 1 초 까지
+            val advantage = 0.01 * (existing.totalTryCount).coerceAtMost(100)
 
             val adjustedScore = (score - advantage).coerceAtLeast(0.0)
             saveHistory(gameHistoryUid,  participant.seasonId, participant.id, gameId, adjustedScore)
