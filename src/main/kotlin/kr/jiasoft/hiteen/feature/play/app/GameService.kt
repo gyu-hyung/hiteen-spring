@@ -151,12 +151,14 @@ class GameService(
 
             val adjustedScore = (score - advantage).coerceAtLeast(0.0)
             saveHistory(gameHistoryUid,  participant.seasonId, participant.id, gameId, adjustedScore)
+
             val lastPlayedDate = existing.updatedAt?.toLocalDate() ?: existing.createdAt.toLocalDate()
             if (lastPlayedDate.isEqual(LocalDate.now())) {
                 updateScore(existing, adjustedScore)
             } else {
                 updateScore(existing, adjustedScore, 1)
             }
+
         } else {
             saveHistory(gameHistoryUid,  participant.seasonId, participant.id, gameId, score)
             createScore(participant.seasonId, participant.id, gameId, score)
