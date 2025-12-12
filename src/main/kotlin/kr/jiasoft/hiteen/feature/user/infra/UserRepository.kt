@@ -3,7 +3,6 @@ package kr.jiasoft.hiteen.feature.user.infra
 import kotlinx.coroutines.flow.Flow
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import kr.jiasoft.hiteen.feature.user.dto.UserSummary
-import org.springframework.cache.annotation.Cacheable
 import org.springframework.data.r2dbc.repository.Modifying
 import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository

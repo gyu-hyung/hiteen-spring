@@ -78,7 +78,7 @@ class GiftAppServiceImpl (
 
     /**
      * 관리자가 사용자에게 선물을 지급합니다.(gift, giftUser 등록)
-     * Type: Point, Voucher, Delivery, Etc
+     * Type: Point, Voucher, Delivery, GiftCard
      * Category: Join, Challenge, Admin, Event
      * */
     override suspend fun createGift(userId: Long, req: GiftCreateRequest) : GiftResponse {
@@ -103,7 +103,6 @@ class GiftAppServiceImpl (
         // 1️⃣ Gift 생성
         val gift = giftRepository.save(
             GiftEntity(
-                type = req.giftType,
                 category = req.giftCategory,
                 userId = userId,
                 memo = memo,
@@ -142,7 +141,7 @@ class GiftAppServiceImpl (
     }
 
     /**
-     * 받은 giftUser 정보로 ( 기프티쇼 API 쿠폰발송 | 포인트 지급 | 배송요청 )
+     * 받은 giftUser 정보로 ( 기프티쇼 API 쿠폰발송 | 포인트 지급 | 배송요청 | 지급요청 )
      * pubExpiredDate 발급만료일자 이전인가?
      * type = Delivery 일때 주소 받았는지?
      * 발송 후 이력 저장
@@ -154,7 +153,7 @@ class GiftAppServiceImpl (
         val giftUser = giftUserRepository.findByGiftIdAndUserId(gift.id, userId)
         val receiverUser = userRepository.findById(giftUser.userId)
 
-        when (gift.type) {
+        when (req.giftType) {
 
             GiftType.Point -> {
                 pointService.applyPolicy(giftUser.userId, PointPolicy.ADMIN, gift.id, giftUser.point)
@@ -231,8 +230,6 @@ class GiftAppServiceImpl (
                     DateTimeFormatter.ofPattern("yyyyMMddHHmmssZ")
                 )
 
-
-
                 // 🔹 3) GiftUser 업데이트
                 giftUserRepository.save(
                     giftUser.copy(
@@ -289,6 +286,16 @@ class GiftAppServiceImpl (
                 ))
                 //TODO 푸시? 누구에게?
             }
+
+
+            GiftType.GiftCard -> {
+                // GiftUser 상태 변경 (지급요청)
+                giftUserRepository.save(giftUser.copy(
+                    status = GiftStatus.GRANT_REQUESTED.code,
+                    requestDate = OffsetDateTime.now(),
+                ))
+                // TODO 관리자에게 지급 요청 알림
+            }
         }
 
         return findGift(userId, giftUser.id)
@@ -306,6 +313,7 @@ class GiftAppServiceImpl (
         return findGift(userId, giftUser.id)
     }
 
+    // TODO 선택 가능한 선물 목록 조회 관리자가 지정해놓은걸로(리그별)
     override suspend fun listGift(userId: Long): List<GiftResponse> {
         val receiver = userService.findUserSummary(userId)
 

@@ -69,6 +69,8 @@ class SecurityConfig(
                     "/api/user/profile/ss/{id}",
                 ).permitAll()
 
+                it.pathMatchers("/api/admin/**").hasRole("ADMIN")
+
                 it.pathMatchers("/ws/**").permitAll()
 
                 it.anyExchange().authenticated()
