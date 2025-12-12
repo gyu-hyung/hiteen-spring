@@ -12,7 +12,8 @@ data class GameScoreEntity(
     val participantId: Long,
     val gameId: Long,
     val score: Double,
-    val tryCount: Int = 1,
+    val tryCount: Int = 0,
+    val totalTryCount: Int = 0,
     val createdAt: OffsetDateTime = OffsetDateTime.now(),
     val updatedAt: OffsetDateTime? = null,
     val deletedAt: OffsetDateTime? = null
