@@ -30,10 +30,11 @@ interface SeasonParticipantRepository : CoroutineCrudRepository<SeasonParticipan
     @Query("""
        SELECT sp.*
        FROM season_participants sp
+       JOIN game_scores gs ON gs.season_id = sp.season_id AND sp.id = gs.participant_id
        WHERE sp.season_id = :seasonId
-         AND sp.game_id = :gameId
+         AND gs.game_id = :gameId
          AND sp.league = :league
-         AND sp.user_id = ANY(:userIds)
+         AND sp.user_id IN (:userIds)
     """)
     fun findByUserIds(
         seasonId: Long,
