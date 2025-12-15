@@ -18,7 +18,7 @@ class AuthService(
 
     suspend fun login(username: String, rawPassword: String): UserResponseWithTokens {
         val userEntity = userRepository.findActiveByUsername(username)
-            ?: throw IllegalArgumentException("유효하지 않은 사용자야~")
+            ?: throw IllegalArgumentException("가입되어 있지 않은 사용자야~")
         if (!encoder.matches(rawPassword, userEntity.password)) {
 //            throw IllegalArgumentException("Invalid credentials")
             throw IllegalArgumentException("유효하지 않은 사용자야~")
