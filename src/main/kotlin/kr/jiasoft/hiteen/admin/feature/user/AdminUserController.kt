@@ -39,14 +39,31 @@ class AdminUserController (
         @RequestParam page: Int = 1,
         @RequestParam size: Int = 10,
         @RequestParam order: String = "DESC",
+        @RequestParam search: String? = null,
+        @RequestParam searchType: String = "ALL",
         @RequestParam id: Long? = null,
         @RequestParam uid: String? = null,
         @RequestParam status: String? = null,
+        @RequestParam role: String? = null,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ): ResponseEntity<ApiResult<ApiPage<AdminUserResponse>>> {
 
-        val res = adminUserRepository.listByPage(page, size, order).toList()
-        val totalCount = adminUserRepository.totalCount(null)
+        val res = adminUserRepository.listByPage(
+            page = page,
+            size = size,
+            order = order,
+            search = search,
+            searchType = searchType,
+            status = status,
+            role = role
+        ).toList()
+
+        val totalCount = adminUserRepository.totalCount(
+            search = search,
+            searchType = searchType,
+            status = status,
+            role = role
+        )
 
         return ResponseEntity.ok(ApiResult.success(PageUtil.of(res, totalCount, page, size)))
     }
@@ -133,13 +150,15 @@ class AdminUserController (
 
     @GetMapping("/follows")
     suspend fun getFollows(
+        @RequestParam page: Int = 1,
+        @RequestParam size: Int = 10,
+        @RequestParam order: String = "DESC",
+        @RequestParam search: String? = null,
+        @RequestParam searchType: String = "ALL",
+        @RequestParam id: Long? = null,
         @RequestParam uid: String? = null,
-        @RequestParam page: Int,
-        @RequestParam size: Int,
-        @RequestParam nickname: String? = null,
-        @RequestParam email: String? = null,
-        @RequestParam phone: String? = null,
         @RequestParam status: String? = null,
+        @RequestParam role: String? = null,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ) : ResponseEntity<ApiResult<ApiPage<FollowAdminResponse>>> {
 
@@ -193,12 +212,13 @@ class AdminUserController (
 
     @GetMapping("/boards")
     suspend fun getBoards(
+        @RequestParam page: Int = 1,
+        @RequestParam size: Int = 10,
+        @RequestParam order: String = "DESC",
+        @RequestParam search: String? = null,
+        @RequestParam searchType: String = "ALL",
+        @RequestParam id: Long? = null,
         @RequestParam uid: String? = null,
-        @RequestParam page: Int,
-        @RequestParam size: Int,
-        @RequestParam nickname: String? = null,
-        @RequestParam email: String? = null,
-        @RequestParam phone: String? = null,
         @RequestParam status: String? = null,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ) : ResponseEntity<ApiResult<ApiPage<BoardAdminResponse>>> {
@@ -257,12 +277,13 @@ class AdminUserController (
 
     @GetMapping("/polls")
     suspend fun getPolls(
+        @RequestParam page: Int = 1,
+        @RequestParam size: Int = 10,
+        @RequestParam order: String = "DESC",
+        @RequestParam search: String? = null,
+        @RequestParam searchType: String = "ALL",
+        @RequestParam id: Long? = null,
         @RequestParam uid: String? = null,
-        @RequestParam page: Int,
-        @RequestParam size: Int,
-        @RequestParam nickname: String? = null,
-        @RequestParam email: String? = null,
-        @RequestParam phone: String? = null,
         @RequestParam status: String? = null,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ) : ResponseEntity<ApiResult<ApiPage<PollAdminResponse>>> {
@@ -315,12 +336,13 @@ class AdminUserController (
 
     @GetMapping("/comments/post")
     suspend fun getCommentPosts(
+        @RequestParam page: Int = 1,
+        @RequestParam size: Int = 10,
+        @RequestParam order: String = "DESC",
+        @RequestParam search: String? = null,
+        @RequestParam searchType: String = "ALL",
+        @RequestParam id: Long? = null,
         @RequestParam uid: String? = null,
-        @RequestParam page: Int,
-        @RequestParam size: Int,
-        @RequestParam nickname: String? = null,
-        @RequestParam email: String? = null,
-        @RequestParam phone: String? = null,
         @RequestParam status: String? = null,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ) : ResponseEntity<ApiResult<ApiPage<CommentAdminResponse>>> {
@@ -347,12 +369,13 @@ class AdminUserController (
 
     @GetMapping("/comments/vote")
     suspend fun getCommentVote(
+        @RequestParam page: Int = 1,
+        @RequestParam size: Int = 10,
+        @RequestParam order: String = "DESC",
+        @RequestParam search: String? = null,
+        @RequestParam searchType: String = "ALL",
+        @RequestParam id: Long? = null,
         @RequestParam uid: String? = null,
-        @RequestParam page: Int,
-        @RequestParam size: Int,
-        @RequestParam nickname: String? = null,
-        @RequestParam email: String? = null,
-        @RequestParam phone: String? = null,
         @RequestParam status: String? = null,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ) : ResponseEntity<ApiResult<ApiPage<CommentAdminResponse>>> {
@@ -398,8 +421,11 @@ class AdminUserController (
 
     @GetMapping("/games")
     suspend fun getGames(
-        @RequestParam page: Int = 0,
+        @RequestParam page: Int = 1,
         @RequestParam size: Int = 10,
+        @RequestParam order: String = "DESC",
+        @RequestParam search: String? = null,
+        @RequestParam searchType: String = "ALL",
         @RequestParam id: Long? = null,
         @RequestParam uid: String? = null,
         @RequestParam status: String? = null,
