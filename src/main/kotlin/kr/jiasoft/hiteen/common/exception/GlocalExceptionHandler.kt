@@ -114,5 +114,15 @@ class GlobalExceptionHandler {
     }
 
 
+    // 이미 회원가입 된 사용자가 다시 회원가입 시도할 때
+    @ExceptionHandler(AlreadyRegisteredException::class)
+    fun handleAlreadyRegisteredException(e: AlreadyRegisteredException): ResponseEntity<ApiResult<Nothing>> {
+        val errors = mapOf("code" to "ALREADY_REGISTERED")
+        return ResponseEntity
+            .badRequest()
+            .body(ApiResult.failure(errors))
+    }
+
+
 
 }

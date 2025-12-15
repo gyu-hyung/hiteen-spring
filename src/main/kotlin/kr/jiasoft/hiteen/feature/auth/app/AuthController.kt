@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import kr.jiasoft.hiteen.common.dto.ApiResult
+import kr.jiasoft.hiteen.common.exception.AlreadyRegisteredException
 import kr.jiasoft.hiteen.feature.auth.dto.AuthCodeRequest
 import kr.jiasoft.hiteen.feature.auth.dto.ChangePhoneRequest
 import kr.jiasoft.hiteen.feature.auth.dto.JwtResponse
@@ -84,7 +85,7 @@ class AuthController(
         val phone = req.phone.filter { it.isDigit() }
 
         userRepository.findActiveByUsername(phone)?.let {
-            throw IllegalArgumentException("이전에 가입한 회원이 있어~")
+            throw AlreadyRegisteredException("이미 가입된 번호야~")
         }
 
         val code = (100000..999999).random().toString()
