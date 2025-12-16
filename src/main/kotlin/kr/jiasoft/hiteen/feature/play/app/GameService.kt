@@ -7,6 +7,7 @@ import kr.jiasoft.hiteen.feature.ad.app.AdService
 import kr.jiasoft.hiteen.feature.level.app.ExpService
 import kr.jiasoft.hiteen.feature.level.infra.TierRepository
 import kr.jiasoft.hiteen.feature.play.domain.*
+import kr.jiasoft.hiteen.feature.play.dto.GameStatus
 import kr.jiasoft.hiteen.feature.play.dto.RankingResponse
 import kr.jiasoft.hiteen.feature.play.dto.SeasonRankingResponse
 import kr.jiasoft.hiteen.feature.play.dto.SeasonRoundResponse
@@ -66,6 +67,25 @@ class GameService(
      * */
     suspend fun getSeasonRounds(year: Int, status: SeasonStatusType? = null): List<SeasonRoundResponse> {
         return seasonRepository.findSeasonsByYearAndStatus(year, status?.name).toList()
+    }
+
+
+    /**
+     * 게임상태
+     * */
+    suspend fun gameStatus(userId: Long, gameId: Long) : GameStatus {
+        val maxTryCount = 3
+        val season = seasonRepository.findActiveSeason() ?: throw NoSuchElementException("현재 진행 중인 시즌이 없습니다. 관리자 문의")
+        val participant = seasonParticipantRepository.findActiveParticipant(userId, season.id)
+            ?: return GameStatus(0, maxTryCount)
+
+        val todayTryCount = gameHistoryRepository.listToday(
+            gameId = gameId,
+            participantId = participant.id,
+            seasonId = season.id
+        ).toList().size
+
+        return GameStatus(todayTryCount, maxTryCount)
     }
 
 
@@ -253,7 +273,6 @@ class GameService(
                     userId = userId,
                     tierId = tierId,
                     league = league,
-//                    league = tier.tierCode.split("_")[0],
                     joinedType = "AUTO_JOIN"
                 )
             )

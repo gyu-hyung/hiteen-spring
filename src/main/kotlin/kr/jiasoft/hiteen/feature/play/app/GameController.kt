@@ -10,6 +10,7 @@ import kr.jiasoft.hiteen.common.dto.ApiResult
 import kr.jiasoft.hiteen.feature.play.domain.GameEntity
 import kr.jiasoft.hiteen.feature.play.domain.GameScoreEntity
 import kr.jiasoft.hiteen.feature.play.dto.GameStartRequest
+import kr.jiasoft.hiteen.feature.play.dto.GameStatus
 import kr.jiasoft.hiteen.feature.play.dto.ScoreRequest
 import kr.jiasoft.hiteen.feature.play.dto.SeasonRankingResponse
 import kr.jiasoft.hiteen.feature.play.dto.SeasonRoundResponse
@@ -43,6 +44,18 @@ class GameController(
         @Parameter(description = "ACTIVE / CLOSED / PLANNED (없으면 전체)") @PathVariable(required = false) status: SeasonStatusType?
     ): ResponseEntity<ApiResult<List<SeasonRoundResponse>>>
         = ResponseEntity.ok(ApiResult.success(gameService.getSeasonRounds(year, status)))
+
+
+    @Operation(summary = "게임상태")
+    @GetMapping("/status")
+    suspend fun gameStatus(
+        @Parameter(description = "점수 등록 요청 DTO") gameId: Long,
+        @AuthenticationPrincipal(expression = "user") user: UserEntity
+    ): ResponseEntity<ApiResult<GameStatus>> =
+        ResponseEntity.ok(ApiResult.success(gameService.gameStatus(
+            user.id,
+            gameId
+        )))
 
 
     @Operation(summary = "게임시작")
