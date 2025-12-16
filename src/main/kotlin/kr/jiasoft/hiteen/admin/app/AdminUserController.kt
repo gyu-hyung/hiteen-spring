@@ -4,10 +4,12 @@ import kotlinx.coroutines.flow.toList
 import kr.jiasoft.hiteen.admin.dto.AdminFriendResponse
 import kr.jiasoft.hiteen.admin.dto.AdminUserResponse
 import kr.jiasoft.hiteen.admin.infra.AdminFriendRepository
+import kr.jiasoft.hiteen.admin.infra.AdminGoodsRepository
 import kr.jiasoft.hiteen.admin.infra.AdminUserRepository
 import kr.jiasoft.hiteen.common.dto.ApiPage
 import kr.jiasoft.hiteen.common.dto.ApiResult
 import kr.jiasoft.hiteen.common.dto.PageUtil
+import kr.jiasoft.hiteen.feature.giftishow.domain.GoodsGiftishowEntity
 import kr.jiasoft.hiteen.feature.play.domain.GameEntity
 import kr.jiasoft.hiteen.feature.play.infra.GameRepository
 import kr.jiasoft.hiteen.feature.poll.dto.PollSelectResponse
@@ -31,6 +33,7 @@ class AdminUserController (
     private val userService: UserService,
     private val adminUserRepository: AdminUserRepository,
     private val adminFriendRepository: AdminFriendRepository,
+    private val adminGoodsRepository: AdminGoodsRepository,
 
     //게임목록
     private val gameRepository: GameRepository,
@@ -44,9 +47,9 @@ class AdminUserController (
         @RequestParam order: String = "DESC",
         @RequestParam search: String? = null,
         @RequestParam searchType: String = "ALL",
+        @RequestParam status: String? = null,
         @RequestParam id: Long? = null,
         @RequestParam uid: String? = null,
-        @RequestParam status: String? = null,
         @RequestParam role: String? = null,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ): ResponseEntity<ApiResult<ApiPage<AdminUserResponse>>> {
@@ -99,9 +102,9 @@ class AdminUserController (
         @RequestParam order: String = "DESC",
         @RequestParam search: String? = null,
         @RequestParam searchType: String = "ALL",
+        @RequestParam status: String? = null,
         @RequestParam id: Long? = null,
         @RequestParam uid: String? = null,
-        @RequestParam status: String? = null,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ): ResponseEntity<ApiResult<ApiPage<AdminFriendResponse>>> {
 
@@ -128,14 +131,41 @@ class AdminUserController (
     }
 
 
+    @GetMapping("/goods")
+    suspend fun getGoods(
+        @RequestParam page: Int = 1,
+        @RequestParam size: Int = 10,
+        @RequestParam order: String = "DESC",
+        @RequestParam search: String? = null,
+        @RequestParam searchType: String = "ALL",
+        @RequestParam status: String? = null,
+        @RequestParam id: Long? = null,
+        @RequestParam uid: String? = null,
+        @AuthenticationPrincipal(expression = "user") user: UserEntity,
+    ): ResponseEntity<ApiResult<ApiPage<GoodsGiftishowEntity>>> {
 
-    //    no: z.number(),
-//    nickname: z.string(),
-//    mbti: z.string(),
-//    gender: z.string(),
-//    grade: z.string(),
-//    interests: z.string(),
-//    status: z.string(),
+        // 1) 목록 조회
+        val list = adminGoodsRepository.listByPage(
+            page = page,
+            size = size,
+            order = order,
+            search = search,
+            searchType = searchType,
+            status = status,
+        ).toList()
+
+        // 2) 전체 개수 조회
+        val totalCount = adminGoodsRepository.totalCount(
+            search = search,
+            searchType = searchType,
+            status = status,
+        )
+
+        return ResponseEntity.ok(ApiResult.success(PageUtil.of(list, totalCount, page, size)))
+    }
+
+
+
     data class FollowAdminResponse (
     val no: Int,
     val nickname: String,
