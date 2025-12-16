@@ -3,10 +3,10 @@ package kr.jiasoft.hiteen.feature.gift_v2.app
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
-import kr.jiasoft.hiteen.feature.gift_v2.domain.GiftCategory
-import kr.jiasoft.hiteen.feature.gift_v2.domain.GiftType
-import kr.jiasoft.hiteen.feature.gift_v2.infra.GiftUserRepository
-import kr.jiasoft.hiteen.feature.gift_v2.dto.GiftCreateRequest
+import kr.jiasoft.hiteen.feature.gift.app.GiftAppService
+import kr.jiasoft.hiteen.feature.gift.domain.GiftCategory
+import kr.jiasoft.hiteen.feature.gift.dto.GiftCreateRequest
+import kr.jiasoft.hiteen.feature.gift.infra.GiftUserRepository
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -35,7 +35,7 @@ class GiftAppServiceImplTest {
             giftAppService.createGift(
                 1,
                 GiftCreateRequest(
-                    giftType = GiftType.Point,
+//                    giftType = GiftType.Point,
                     giftCategory = GiftCategory.Admin,
                     receiveUserUid = UUID.fromString("6e330bdc-3062-4a14-80f2-a46e04278c5c"),
                     point = 400,

@@ -165,7 +165,6 @@ class GiftAppServiceImpl (
                 ))
             }
 
-
             GiftType.Cash -> {
 
             }
