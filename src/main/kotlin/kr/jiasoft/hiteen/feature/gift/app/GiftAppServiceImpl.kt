@@ -165,6 +165,11 @@ class GiftAppServiceImpl (
                 ))
             }
 
+
+            GiftType.Cash -> {
+
+            }
+
             GiftType.Voucher -> {
                 // pubExpiredDate 발급만료일자 이전인가?
                 if (giftUser.pubExpiredDate.isBefore(OffsetDateTime.now()))
