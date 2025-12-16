@@ -15,13 +15,12 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import java.util.UUID
 
 
 @RestController
 @RequestMapping("/api/v2/gift")
 @Tag(name = "Gift API", description = "선물 생성 및 조회 API")
-class GiftControllerV2 (
+class GiftController (
     private val giftAppService: GiftAppService
 ){
 
