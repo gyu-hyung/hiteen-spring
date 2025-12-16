@@ -27,7 +27,9 @@ class GiftControllerV2 (
 
 
 
-    /** 관리자 -> 사용자 선물 지급 */
+    /**
+     * 관리자 -> 사용자 선물 지급
+     * */
     @PostMapping("/admin/create")
     @PreAuthorize("hasRole('ADMIN')")
     suspend fun createGift(
@@ -38,7 +40,9 @@ class GiftControllerV2 (
     }
 
 
-    /** 사용자 -> 선물 발급 */
+    /**
+     * 사용자 -> 선물 발급
+     * */
     @PostMapping("/issue")
     suspend fun issueGift(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
@@ -47,7 +51,9 @@ class GiftControllerV2 (
         return ResponseEntity.ok(ApiResult.success(giftAppService.issueGift(user.id, request)))
     }
 
-    /** 사용자 -> 선물 사용 */
+    /**
+     * 사용자 -> 선물 사용
+     * */
     @PostMapping("/use")
     suspend fun useGift(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
@@ -57,7 +63,9 @@ class GiftControllerV2 (
     }
 
 
-    /** 선물함 목록조회 */
+    /**
+     * 선물함 목록조회
+     * */
     @GetMapping("/myGiftList")
     suspend fun myGiftList(
         @AuthenticationPrincipal(expression = "user") user: UserEntity
@@ -65,7 +73,9 @@ class GiftControllerV2 (
         return ResponseEntity.ok(ApiResult.success(giftAppService.listGift(user.id)))
     }
 
-    /** 기프트쇼 상품 목록조회 */
+    /**
+     * 기프트쇼 상품 목록조회
+     * */
     @GetMapping("/goods")
     suspend fun getGifts(): ResponseEntity<ApiResult<List<GoodsGiftishowEntity>>> =
         ResponseEntity.ok(ApiResult.success(giftAppService.listGoods()))
