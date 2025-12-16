@@ -2,7 +2,7 @@ package kr.jiasoft.hiteen.feature.gift.infra
 
 import kotlinx.coroutines.flow.Flow
 import kr.jiasoft.hiteen.feature.gift.domain.GiftUsersEntity
-import kr.jiasoft.hiteen.feature.gift_v2.dto.GiftRecord
+import kr.jiasoft.hiteen.feature.gift.dto.GiftRecord
 import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 

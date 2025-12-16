@@ -5,7 +5,6 @@ import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
 import java.time.OffsetDateTime
-import java.time.LocalDate
 
 @Table("gift_users")
 @Schema(description = "선물 > 받은 회원 목록 엔티티")

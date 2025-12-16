@@ -3,9 +3,9 @@ package kr.jiasoft.hiteen.feature.gift_v2.app
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
-import kr.jiasoft.hiteen.feature.gift.domain.GiftCategory
-import kr.jiasoft.hiteen.feature.gift.domain.GiftType
-import kr.jiasoft.hiteen.feature.gift.infra.GiftUserRepository
+import kr.jiasoft.hiteen.feature.gift_v2.domain.GiftCategory
+import kr.jiasoft.hiteen.feature.gift_v2.domain.GiftType
+import kr.jiasoft.hiteen.feature.gift_v2.infra.GiftUserRepository
 import kr.jiasoft.hiteen.feature.gift_v2.dto.GiftCreateRequest
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
