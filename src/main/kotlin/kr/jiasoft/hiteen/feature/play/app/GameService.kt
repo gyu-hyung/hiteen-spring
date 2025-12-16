@@ -7,6 +7,7 @@ import kr.jiasoft.hiteen.feature.ad.app.AdService
 import kr.jiasoft.hiteen.feature.level.app.ExpService
 import kr.jiasoft.hiteen.feature.level.infra.TierRepository
 import kr.jiasoft.hiteen.feature.play.domain.*
+import kr.jiasoft.hiteen.feature.play.dto.GameScoreResponse
 import kr.jiasoft.hiteen.feature.play.dto.GameStatus
 import kr.jiasoft.hiteen.feature.play.dto.RankingResponse
 import kr.jiasoft.hiteen.feature.play.dto.SeasonRankingResponse
@@ -150,7 +151,7 @@ class GameService(
         score: Double,
         userId: Long,
         tierId: Long,
-    ): GameScoreEntity {
+    ): GameScoreResponse {
 
         val wordChallengeGameId = getWordChallenge()
 
@@ -169,19 +170,22 @@ class GameService(
             // 시도 횟수별 가산점 (0.01초 * n), 최대 1 초 까지
             val advantage = 0.01 * (existing.totalTryCount).coerceAtMost(100)
 
-            val adjustedScore = (score - advantage).coerceAtLeast(0.0)
-            saveHistory(gameHistoryUid,  participant.seasonId, participant.id, gameId, adjustedScore)
+            val finalScore = (score - advantage).coerceAtLeast(0.0)
+            saveHistory(gameHistoryUid,  participant.seasonId, participant.id, gameId, finalScore)
 
             val lastPlayedDate = existing.updatedAt?.toLocalDate() ?: existing.createdAt.toLocalDate()
             if (lastPlayedDate.isEqual(LocalDate.now())) {
-                updateScore(existing, adjustedScore)
+                val scoreEntity = updateScore(existing, finalScore)
+                GameScoreResponse.fromEntity(scoreEntity, score)
             } else {
-                updateScore(existing, adjustedScore, 1)
+                val scoreEntity = updateScore(existing, finalScore)
+                GameScoreResponse.fromEntity(scoreEntity, score)
             }
 
         } else {
             saveHistory(gameHistoryUid,  participant.seasonId, participant.id, gameId, score)
-            createScore(participant.seasonId, participant.id, gameId, score)
+            val scoreEntity = createScore(participant.seasonId, participant.id, gameId, score)
+            GameScoreResponse.fromEntity(scoreEntity, score)
         }
     }
 
