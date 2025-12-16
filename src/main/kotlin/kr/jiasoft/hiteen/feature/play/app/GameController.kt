@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.toList
 import kr.jiasoft.hiteen.common.dto.ApiResult
 import kr.jiasoft.hiteen.feature.play.domain.GameEntity
 import kr.jiasoft.hiteen.feature.play.domain.GameScoreEntity
+import kr.jiasoft.hiteen.feature.play.dto.GameScoreResponse
 import kr.jiasoft.hiteen.feature.play.dto.GameStartRequest
 import kr.jiasoft.hiteen.feature.play.dto.GameStatus
 import kr.jiasoft.hiteen.feature.play.dto.ScoreRequest
@@ -78,7 +79,7 @@ class GameController(
     suspend fun recordScore(
         @Valid @Parameter(description = "점수 등록 요청 DTO") req: ScoreRequest,
         @AuthenticationPrincipal(expression = "user") user: UserEntity
-    ): ResponseEntity<ApiResult<GameScoreEntity>> =
+    ): ResponseEntity<ApiResult<GameScoreResponse>> =
         ResponseEntity.ok(ApiResult.success(gameService.recordScore(
             gameHistoryUid = req.gameHistoryUid,
             gameId = req.gameId,
