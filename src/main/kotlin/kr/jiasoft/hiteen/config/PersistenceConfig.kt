@@ -9,7 +9,7 @@ import org.springframework.data.redis.repository.configuration.EnableRedisReposi
 @EnableR2dbcRepositories(
     basePackages = [
         "kr.jiasoft.hiteen.feature.*",
-        "kr.jiasoft.hiteen.admin.feature.*"
+        "kr.jiasoft.hiteen.admin.*"
     ]
 )
 @EnableReactiveMongoRepositories(
