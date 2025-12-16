@@ -1,4 +1,4 @@
-package kr.jiasoft.hiteen.admin.feature.user.dto
+package kr.jiasoft.hiteen.admin.dto
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import io.swagger.v3.oas.annotations.media.Schema

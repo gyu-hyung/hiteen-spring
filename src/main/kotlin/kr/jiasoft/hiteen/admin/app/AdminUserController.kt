@@ -1,7 +1,10 @@
-package kr.jiasoft.hiteen.admin.feature.user
+package kr.jiasoft.hiteen.admin.app
 
 import kotlinx.coroutines.flow.toList
-import kr.jiasoft.hiteen.admin.feature.user.dto.AdminUserResponse
+import kr.jiasoft.hiteen.admin.dto.AdminFriendResponse
+import kr.jiasoft.hiteen.admin.dto.AdminUserResponse
+import kr.jiasoft.hiteen.admin.infra.AdminFriendRepository
+import kr.jiasoft.hiteen.admin.infra.AdminUserRepository
 import kr.jiasoft.hiteen.common.dto.ApiPage
 import kr.jiasoft.hiteen.common.dto.ApiResult
 import kr.jiasoft.hiteen.common.dto.PageUtil
@@ -9,7 +12,6 @@ import kr.jiasoft.hiteen.feature.play.domain.GameEntity
 import kr.jiasoft.hiteen.feature.play.infra.GameRepository
 import kr.jiasoft.hiteen.feature.poll.dto.PollSelectResponse
 import kr.jiasoft.hiteen.feature.relationship.domain.FollowStatus
-import kr.jiasoft.hiteen.feature.relationship.domain.LocationMode
 import kr.jiasoft.hiteen.feature.user.app.UserService
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import org.springframework.http.ResponseEntity
@@ -28,6 +30,7 @@ import java.util.UUID
 class AdminUserController (
     private val userService: UserService,
     private val adminUserRepository: AdminUserRepository,
+    private val adminFriendRepository: AdminFriendRepository,
 
     //게임목록
     private val gameRepository: GameRepository,
@@ -65,7 +68,7 @@ class AdminUserController (
             role = role
         )
 
-        return ResponseEntity.ok(ApiResult.success(PageUtil.of(res, totalCount, page, size)))
+        return ResponseEntity.ok(ApiResult.Companion.success(PageUtil.of(res, totalCount, page, size)))
     }
 
 
@@ -89,49 +92,44 @@ class AdminUserController (
 
 
 
-    data class FriendAdminResponse (
-        val no: Int,
-        val nickname: String,
-        val phone: String,
-        val gender: String,
-        val birthday: String,
-        val schoolName: String,
-        val locationMode: LocationMode,
-    )
-
     @GetMapping("/friends")
     suspend fun getFriends(
         @RequestParam page: Int = 1,
         @RequestParam size: Int = 10,
         @RequestParam order: String = "DESC",
+        @RequestParam search: String? = null,
+        @RequestParam searchType: String = "ALL",
         @RequestParam id: Long? = null,
         @RequestParam uid: String? = null,
         @RequestParam status: String? = null,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
-    ) : ResponseEntity<ApiResult<ApiPage<FriendAdminResponse>>> {
+    ): ResponseEntity<ApiResult<ApiPage<AdminFriendResponse>>> {
 
-        val res = listOf(
-            FriendAdminResponse(1, "hong1234", "010-9539-3637", "남", "1999.01.01", "학력인정부산예원고등학교병설예원여자중학교(2년제)", LocationMode.PUBLIC),
-            FriendAdminResponse(2, "hong1234", "010-9539-3637", "남", "1999.01.01", "학력인정부산예원고등학교병설예원여자중학교(2년제)", LocationMode.HIDDEN),
-            FriendAdminResponse(3, "hong1234", "010-9539-3637", "남", "1999.01.01", "학력인정부산예원고등학교병설예원여자중학교(2년제)", LocationMode.RANDOM),
-            FriendAdminResponse(4, "hong1234", "010-9539-3637", "남", "1999.01.01", "학력인정부산예원고등학교병설예원여자중학교(2년제)", LocationMode.HIDDEN),
-            FriendAdminResponse(5, "hong1234", "010-9539-3637", "남", "1999.01.01", "학력인정부산예원고등학교병설예원여자중학교(2년제)", LocationMode.PUBLIC),
-        )
-
-        //페이징
-        val pageData = PageUtil.of(
-            items = res,
-            total = res.size,
+        // 1) 목록 조회
+        val list = adminFriendRepository.listByPage(
             page = page,
-            size = size
+            size = size,
+            order = order,
+            search = search,
+            searchType = searchType,
+            status = status,
+            uid = UUID.fromString(uid),
+        ).toList()
+
+        // 2) 전체 개수 조회
+        val totalCount = adminFriendRepository.totalCount(
+            search = search,
+            searchType = searchType,
+            status = status,
+            uid = UUID.fromString(uid),
         )
 
-        return ResponseEntity.ok(ApiResult.success(pageData))
-
+        return ResponseEntity.ok(ApiResult.success(PageUtil.of(list, totalCount, page, size)))
     }
 
 
-//    no: z.number(),
+
+    //    no: z.number(),
 //    nickname: z.string(),
 //    mbti: z.string(),
 //    gender: z.string(),
@@ -139,13 +137,13 @@ class AdminUserController (
 //    interests: z.string(),
 //    status: z.string(),
     data class FollowAdminResponse (
-        val no: Int,
-        val nickname: String,
-        val mbti: String,
-        val gender: String,
-        val grade: String,
-        val interests: String,
-        val status: FollowStatus,
+    val no: Int,
+    val nickname: String,
+    val mbti: String,
+    val gender: String,
+    val grade: String,
+    val interests: String,
+    val status: FollowStatus,
     )
 
     @GetMapping("/follows")
@@ -178,7 +176,7 @@ class AdminUserController (
             size = size
         )
 
-        return ResponseEntity.ok(ApiResult.success(pageData))
+        return ResponseEntity.ok(ApiResult.Companion.success(pageData))
 
     }
 
@@ -253,7 +251,7 @@ class AdminUserController (
         //페이징
         val pageData = PageUtil.of(res, res.size)
 
-        return ResponseEntity.ok(ApiResult.success(pageData))
+        return ResponseEntity.ok(ApiResult.Companion.success(pageData))
 
     }
 
@@ -310,7 +308,7 @@ class AdminUserController (
             size = size
         )
 
-        return ResponseEntity.ok(ApiResult.success(pageData))
+        return ResponseEntity.ok(ApiResult.Companion.success(pageData))
 
     }
 
@@ -364,7 +362,7 @@ class AdminUserController (
         //페이징
         val pageData = PageUtil.of(res, res.size, page, size)
 
-        return ResponseEntity.ok(ApiResult.success(pageData))
+        return ResponseEntity.ok(ApiResult.Companion.success(pageData))
     }
 
     @GetMapping("/comments/vote")
@@ -402,7 +400,7 @@ class AdminUserController (
             size = size
         )
 
-        return ResponseEntity.ok(ApiResult.success(pageData))
+        return ResponseEntity.ok(ApiResult.Companion.success(pageData))
 
     }
 
@@ -457,7 +455,7 @@ class AdminUserController (
         )
 
 //        val res = gameRepository.findAll().toList()
-        return ResponseEntity.ok(ApiResult.success(PageUtil.of(res, 21, page, size)))
+        return ResponseEntity.ok(ApiResult.Companion.success(PageUtil.of(res, 21, page, size)))
     }
 
 }
