@@ -8,6 +8,6 @@ import java.time.OffsetDateTime
 data class CashSummaryEntity(
     @Id
     val userId: Long,
-    val totalPoint: Int,
+    val totalCash: Int,
     val updatedAt: OffsetDateTime? = null
 )

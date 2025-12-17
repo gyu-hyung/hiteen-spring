@@ -1,7 +1,6 @@
 package kr.jiasoft.hiteen.feature.cash.infra
 
 import kr.jiasoft.hiteen.feature.cash.domain.CashEntity
-import kr.jiasoft.hiteen.feature.point.domain.PointEntity
 import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 import java.time.LocalDate
@@ -11,7 +10,7 @@ interface CashRepository : CoroutineCrudRepository<CashEntity, Long> {
     suspend fun findAllByUserId(userId: Long): List<CashEntity>
 
     @Query("SELECT SUM(c.amount) FROM cash c WHERE c.user_id = :userId AND c.deleted_at IS NULL")
-    suspend fun sumPointsByUserId(userId: Long): Int?
+    suspend fun sumCashByUserId(userId: Long): Int?
 
 
     @Query("""

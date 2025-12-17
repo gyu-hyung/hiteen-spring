@@ -6,6 +6,9 @@ enum class CashPolicy(
     val dailyLimit: Int? = null,
     val memoTemplate: String   // 기본 메모
 ) {
+
+    BUY("BUY", 0, null, "상품 구매"),
+
     // --- 회원가입 ---
     SIGNUP("SIGNUP", 500, null, "회원가입 보상"),
 
