@@ -1,15 +1,18 @@
 package kr.jiasoft.hiteen.feature.gift.app
 
 import kotlinx.coroutines.flow.toList
+import kr.jiasoft.hiteen.feature.cash.app.CashService
+import kr.jiasoft.hiteen.feature.cash.domain.CashPolicy
 import kr.jiasoft.hiteen.feature.gift.domain.GiftCategory
 import kr.jiasoft.hiteen.feature.gift.domain.GiftEntity
 import kr.jiasoft.hiteen.feature.gift.domain.GiftMessageFormatter
 import kr.jiasoft.hiteen.feature.gift.domain.GiftType
 import kr.jiasoft.hiteen.feature.gift.domain.GiftUsersEntity
 import kr.jiasoft.hiteen.feature.gift.domain.toTemplate
+import kr.jiasoft.hiteen.feature.gift.dto.GiftBuyRequest
 import kr.jiasoft.hiteen.feature.gift.infra.GiftRepository
 import kr.jiasoft.hiteen.feature.gift.infra.GiftUserRepository
-import kr.jiasoft.hiteen.feature.gift.dto.GiftCreateRequest
+import kr.jiasoft.hiteen.feature.gift.dto.GiftProvideRequest
 import kr.jiasoft.hiteen.feature.gift.dto.GiftIssueRequest
 import kr.jiasoft.hiteen.feature.gift.dto.GiftResponse
 import kr.jiasoft.hiteen.feature.gift.dto.GiftStatus
@@ -30,6 +33,8 @@ import kr.jiasoft.hiteen.feature.user.app.UserService
 import kr.jiasoft.hiteen.feature.user.infra.UserRepository
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
+import org.springframework.transaction.reactive.TransactionalOperator
+import org.springframework.transaction.reactive.executeAndAwait
 import java.lang.IllegalArgumentException
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
@@ -50,9 +55,11 @@ class GiftAppServiceImpl (
     private val giftUserRepository: GiftUserRepository,
 
     private val pointService: PointService,
+    private val cashService: CashService,
     private val pushService: PushService,
     private val giftishowLogsRepository: GiftishowLogsRepository,
 
+    private val txOperator: TransactionalOperator,
 ): GiftAppService {
 
 
@@ -66,9 +73,9 @@ class GiftAppServiceImpl (
     private lateinit var callbackNo: String
 
 
-    private suspend fun findGift(receiverUserId: Long, giftUserId: Long) : GiftResponse{
+    override suspend fun findGift(receiverUserId: Long, giftUserId: Long) : GiftResponse{
         val userSummary = userService.findUserSummary(receiverUserId)
-        val response = giftUserRepository.findWithGiftUserByUserId(receiverUserId, giftUserId)
+        val response = giftRepository.findWithGiftUserByUserId(receiverUserId, giftUserId)
         val goods = response.goodsCode?.let {
             giftishowGoodsRepository.findByGoodsCode(it)
         }
@@ -77,14 +84,45 @@ class GiftAppServiceImpl (
 
 
     /**
-     * 관리자가 사용자에게 선물을 지급합니다.(gift, giftUser 등록)
-     * Type: Point, Voucher, Delivery, GiftCard
-     * Category: Join, Challenge, Admin, Event
+     * 상품 구매
+     * 캐시 소진하여 기프티쇼 | 기프트 카드 구매
+     */
+    override suspend fun buyGift(
+        userId: Long,
+        userUid: UUID,
+        req: GiftBuyRequest,
+    ): GiftResponse {
+        return txOperator.executeAndAwait {
+
+            val res = createGift(
+                userId,
+                GiftProvideRequest(
+                    giftType = if (req.goodsCode.startsWith("G")) GiftType.Voucher else GiftType.GiftCard,
+                    giftCategory = GiftCategory.Shop,
+                    receiveUserUid = req.receiveUserUid ?: userUid,
+                    goodsCode = req.goodsCode,
+                    memo = req.memo,
+                )
+            )
+
+            //캐시 차감
+            res.goods?.realPrice?.let {
+                if (it > 0) cashService.applyPolicy(userId, CashPolicy.BUY, res.giftUserId, -it)
+            }
+
+            res
+        }
+    }
+
+
+    /**
+     * 선물을 지급합니다.(gift, giftUser 등록)
+     * Type: Voucher, Delivery, GiftCard --Point, Cash 는 적립으로 처리
+     * Category: Join, Challenge, Admin, Event, Shop
      * */
-    override suspend fun createGift(userId: Long, req: GiftCreateRequest) : GiftResponse {
+    override suspend fun createGift(userId: Long, req: GiftProvideRequest) : GiftResponse {
         val receiverUser = userRepository.findByUid(req.receiveUserUid.toString())
             ?: throw IllegalArgumentException("존재하지 않는 수신자")
-
 
         val memo = if (req.giftCategory == GiftCategory.Challenge) {
             GiftMessageFormatter.challengeMemo(
@@ -103,6 +141,7 @@ class GiftAppServiceImpl (
         // 1️⃣ Gift 생성
         val gift = giftRepository.save(
             GiftEntity(
+                type = req.giftType,
                 category = req.giftCategory,
                 userId = userId,
                 memo = memo,
@@ -142,7 +181,7 @@ class GiftAppServiceImpl (
 
     /**
      * 받은 giftUser 정보로 ( 기프티쇼 API 쿠폰발송 | 포인트 지급 | 배송요청 | 지급요청 )
-     * pubExpiredDate 발급만료일자 이전인가?
+     * pubExpiredDate 발급만료일자 지났는지?
      * type = Delivery 일때 주소 받았는지?
      * 발송 후 이력 저장
      * */
@@ -153,7 +192,7 @@ class GiftAppServiceImpl (
         val giftUser = giftUserRepository.findByGiftIdAndUserId(gift.id, userId)
         val receiverUser = userRepository.findById(giftUser.userId)
 
-        when (req.giftType) {
+        when (gift.type) {
 
             GiftType.Point -> {
                 pointService.applyPolicy(giftUser.userId, PointPolicy.ADMIN, gift.id, giftUser.point)
@@ -166,11 +205,17 @@ class GiftAppServiceImpl (
             }
 
             GiftType.Cash -> {
-
+                cashService.applyPolicy(giftUser.userId, CashPolicy.ADMIN, gift.id, giftUser.point)
+                giftUserRepository.save(giftUser.copy(
+                    status = GiftStatus.USED.code,
+                    requestDate = OffsetDateTime.now(),
+                    pubDate = OffsetDateTime.now(),
+                    useDate = OffsetDateTime.now(),
+                ))
             }
 
             GiftType.Voucher -> {
-                // pubExpiredDate 발급만료일자 이전인가?
+                // pubExpiredDate 발급만료일자 지났는지?
                 if (giftUser.pubExpiredDate.isBefore(OffsetDateTime.now()))
                     throw IllegalArgumentException("발급만료일자가 지난 선물입니다.")
 
@@ -211,8 +256,8 @@ class GiftAppServiceImpl (
                 // ▣ 1) 발행 요청
                 val issued = giftishowClient.issueVoucher(sendReq)
 
-                val d = issued.result?.result?.pinNo
-                val dd = issued.result?.result?.couponImgUrl
+                val pinNo = issued.result?.result?.pinNo
+                val couponImgUrl = issued.result?.result?.couponImgUrl
 
                 // ▣ 2) 상세 조회 (Map 기반)
                 val res = giftishowClient.detailVoucher(trId)
@@ -239,8 +284,8 @@ class GiftAppServiceImpl (
                     giftUser.copy(
                         status = GiftStatus.SENT.code,
                         requestDate = OffsetDateTime.now(),
-                        couponNo = d,
-                        couponImg = dd,
+                        couponNo = pinNo,
+                        couponImg = couponImgUrl,
                         pubDate = OffsetDateTime.now(),
                         useExpiredDate = expireAt
                     )
@@ -322,7 +367,7 @@ class GiftAppServiceImpl (
         val receiver = userService.findUserSummary(userId)
 
         // GiftRecord 리스트
-        val records = giftUserRepository.findAllWithGiftUserByUserId(userId).toList()
+        val records = giftRepository.findAllWithGiftUserByUserId(userId).toList()
 
         // goodsCode 리스트 (null 제거)
         val goodsCodes = records.mapNotNull { it.goodsCode }

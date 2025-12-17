@@ -14,9 +14,9 @@ import java.time.LocalDate
 @Service
 class CashService(
 //    private val webClient: WebClient,
-    private val pointRepository: CashRepository,
-    private val pointSummaryRepository: CashSummaryRepository,
-    private val pointRuleRepository: CashRuleRepository
+    private val cashRepository: CashRepository,
+    private val cashSummaryRepository: CashSummaryRepository,
+    private val cashRuleRepository: CashRuleRepository
 ) {
 
     /**
@@ -24,8 +24,8 @@ class CashService(
      * */
     suspend fun getUserTotalPoints(userId: Long): Int {
         // summary 테이블 우선 조회, 없으면 fallback
-        return pointSummaryRepository.findById(userId)?.totalPoint
-            ?: pointRepository.sumPointsByUserId(userId) ?: 0
+        return cashSummaryRepository.findById(userId)?.totalCash
+            ?: cashRepository.sumCashByUserId(userId) ?: 0
     }
 
 
@@ -40,9 +40,9 @@ class CashService(
         endDate: LocalDate? = null
     ): List<CashEntity> {
         return if (startDate != null && endDate != null) {
-            pointRepository.findAllByUserIdAndDateRange(userId, startDate, endDate)
+            cashRepository.findAllByUserIdAndDateRange(userId, startDate, endDate)
         } else {
-            pointRepository.findAllByUserId(userId)
+            cashRepository.findAllByUserId(userId)
         }
     }
 
@@ -59,7 +59,7 @@ class CashService(
     ): CashEntity {
         // 1. 일일 제한 체크
         policy.dailyLimit?.let { limit ->
-            val todayCount = pointRepository.countByUserAndPolicyAndDate(userId, policy.code, LocalDate.now())
+            val todayCount = cashRepository.countByUserAndPolicyAndDate(userId, policy.code, LocalDate.now())
             if (todayCount >= limit) {
 //                throw IllegalStateException("오늘은 더 이상 '${policy.memoTemplate}' 포인트를 받을 수 없습니다. (일일 제한: $limit)")
                 println("오늘은 더 이상 '${policy.memoTemplate}' 포인트를 받을 수 없습니다. (일일 제한: $limit)")
@@ -83,11 +83,11 @@ class CashService(
             cashableId = refId,
             memo = policy.memoTemplate
         )
-        pointSummaryRepository.upsertAddPoint(userId, pointAmount)
+        cashSummaryRepository.upsertAddPoint(userId, pointAmount)
 
         addDeltaPoint(pointAmount).awaitSingleOrNull()
 
-        return pointRepository.save(point)
+        return cashRepository.save(point)
     }
 
 
@@ -96,31 +96,31 @@ class CashService(
      */
     suspend fun applyPolicy(
         userId: Long,
-        pointPolicy: CashPolicy,
+        cashPolicy: CashPolicy,
         refId: Long? = null,
-        dynamicPoint: Int? = null
+        dynamicCash: Int? = null
     ): CashEntity {
 
         // 1. 정책 조회
-        val rule = pointRuleRepository.findActiveByActionCode(pointPolicy.code)
-            ?: throw IllegalStateException("포인트 정책이 존재하지 않습니다. ($pointPolicy)")
+        val rule = cashRuleRepository.findActiveByActionCode(cashPolicy.code)
+            ?: throw IllegalStateException("포인트 정책이 존재하지 않습니다. ($cashPolicy)")
 
 
-        val pointAmount = dynamicPoint ?: rule.point
+        val cashAmount = dynamicCash ?: rule.amount
 
         // 2. 일일 제한
         rule.dailyCap?.let { cap ->
             val todayCount =
-                pointRepository.countByUserAndPolicyAndDate(userId, pointPolicy.code, LocalDate.now())
+                cashRepository.countByUserAndPolicyAndDate(userId, cashPolicy.code, LocalDate.now())
             if (todayCount >= cap)
                 println("오늘은 더 이상 '${rule.actionCode}' 포인트를 받을 수 없습니다. (일일 제한: $cap)")
 //                throw IllegalStateException("일일 포인트 제한 초과 ($pointPolicy)")
         }
 
         // 3. 차감이면 잔액 확인
-        if (pointAmount < 0) {
+        if (cashAmount < 0) {
             val total = getUserTotalPoints(userId)
-            if (total < -pointAmount) {
+            if (total < -cashAmount) {
                 throw NotEnoughPointException("포인트 부족")
             }
         }
@@ -128,17 +128,17 @@ class CashService(
         // 4. 포인트 기록
         val entity = CashEntity(
             userId = userId,
-            amount = pointAmount,
-            type = if (pointAmount > 0) "CREDIT" else "DEBIT",
-            cashableType = pointPolicy.code,
+            amount = cashAmount,
+            type = if (cashAmount > 0) "CREDIT" else "DEBIT",
+            cashableType = cashPolicy.code,
             cashableId = refId,
             memo = rule.description
         )
 
-        pointSummaryRepository.upsertAddPoint(userId, pointAmount)
-        addDeltaPoint(pointAmount).awaitSingleOrNull()
+        cashSummaryRepository.upsertAddPoint(userId, cashAmount)
+        addDeltaPoint(cashAmount).awaitSingleOrNull()
 
-        return pointRepository.save(entity)
+        return cashRepository.save(entity)
     }
 
 

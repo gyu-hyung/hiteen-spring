@@ -110,7 +110,7 @@ class GiftishowSyncService(
                     category1Name = detail?.categoryName1,
 
                     goodsTypeCode = detail?.goodsTypeCd,
-                    goodsTypeName = dto.goodsTypeNm,
+                    goodsTypeName = dto.goodsTypeNm?.trim(),
                     goodsTypeDetailName = dto.goodsTypeDtlNm,
 
                     goodsImgS = dto.goodsImgS,

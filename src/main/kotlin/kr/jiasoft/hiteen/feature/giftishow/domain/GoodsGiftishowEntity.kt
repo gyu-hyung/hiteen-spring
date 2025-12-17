@@ -19,7 +19,7 @@ data class GoodsGiftishowEntity(
     @Column("goods_no")
     val goodsNo: Int,
 
-    @field:Schema(description = "상품 코드 (Unique)")
+    @field:Schema(description = "상품 코드 (Unique) G포함 12자리 = Voucher, H포함 12자리 = GiftCard")
     @Column("goods_code")
     val goodsCode: String,
 
