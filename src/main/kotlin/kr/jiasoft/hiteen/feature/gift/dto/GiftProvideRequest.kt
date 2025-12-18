@@ -2,13 +2,14 @@ package kr.jiasoft.hiteen.feature.gift.dto
 
 import io.swagger.v3.oas.annotations.media.Schema
 import kr.jiasoft.hiteen.feature.gift.domain.GiftCategory
+import kr.jiasoft.hiteen.feature.gift.domain.GiftType
 import java.util.UUID
 
 @Schema(description = "선물 생성 요청")
-data class GiftCreateRequest (
-//    @field:Schema(description = "구분 (Point, Voucher, Delivery, GiftCard)")
-//    val giftType: GiftType,
-    @field:Schema(description = "카테고리 (Join, Challenge, Admin, Event)")
+data class GiftProvideRequest (
+    @field:Schema(description = "구분 (Point, Voucher, Delivery, GiftCard)")
+    val giftType: GiftType,
+    @field:Schema(description = "카테고리 (Join, Challenge, Admin, Event, Shop)")
     val giftCategory: GiftCategory,
     @field:Schema(description = "수신자 uid")
     val receiveUserUid: UUID,
@@ -35,13 +36,4 @@ data class GiftCreateRequest (
     val deliveryAddress1: String? = null,
     @field:Schema(description = "배송 수신자 주소2 - Delivery")
     val deliveryAddress2: String? = null,
-) {
-//    fun toGiftEntity(): GiftEntity {
-//        return GiftEntity(
-//            type = giftType,
-//            category = giftCategory,
-//            userId = receiveUserId,
-//            memo = memo,
-//        )
-//    }
-}
+)

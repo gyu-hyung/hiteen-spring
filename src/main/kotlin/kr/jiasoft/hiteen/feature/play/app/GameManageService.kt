@@ -6,9 +6,18 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.flow.toSet
 import kotlinx.coroutines.launch
+import kr.jiasoft.hiteen.challengeRewardPolicy.domain.ChallengeRewardPolicyEntity
+import kr.jiasoft.hiteen.challengeRewardPolicy.infra.ChallengeRewardPolicyRepository
+import kr.jiasoft.hiteen.feature.cash.app.CashService
+import kr.jiasoft.hiteen.feature.cash.domain.CashPolicy
+import kr.jiasoft.hiteen.feature.gift.app.GiftAppService
+import kr.jiasoft.hiteen.feature.gift.domain.GiftCategory
+import kr.jiasoft.hiteen.feature.gift.domain.GiftType
+import kr.jiasoft.hiteen.feature.gift.dto.GiftProvideRequest
 import kr.jiasoft.hiteen.feature.play.domain.GameRankingEntity
 import kr.jiasoft.hiteen.feature.study.domain.QuestionItemsEntity
 import kr.jiasoft.hiteen.feature.play.domain.SeasonEntity
+import kr.jiasoft.hiteen.feature.play.dto.RankingView
 import kr.jiasoft.hiteen.feature.play.infra.*
 import kr.jiasoft.hiteen.feature.study.infra.QuestionItemsRepository
 import kr.jiasoft.hiteen.feature.study.infra.QuestionRepository
@@ -23,8 +32,14 @@ class GameManageService(
     private val gameRankingRepository: GameRankingRepository,
 
     private val questionRepository: QuestionRepository,
-    private val questionItemsRepository: QuestionItemsRepository
-) {
+    private val questionItemsRepository: QuestionItemsRepository,
+
+    //랭킹 보상
+    private val giftAppService: GiftAppService,
+    private val challengeRewardPolicyRepository: ChallengeRewardPolicyRepository,
+    private val cashService: CashService,
+
+    ) {
 
     /**
      * 매일 자정 실행
@@ -55,6 +70,9 @@ class GameManageService(
                 }
                 launch {
                     saveSeasonRankings(season.id)  // 랭킹 저장
+                }
+                launch {
+                    awards(season.id) // 랭킹 보상
                 }
             }
         }
@@ -120,6 +138,9 @@ class GameManageService(
         for (type in types) {
             // 1️⃣ 해당 type의 문제 전체 조회
             val allQuestions = questionRepository.findByType(type).toList()
+                //sound, image 값 있는것만 filter
+                .filter { !it.sound.isNullOrBlank() && !it.image.isNullOrBlank()}
+
             if (allQuestions.isEmpty()) continue
 
             // 2️⃣ 이미 사용된 question_id 목록 조회 (중복 방지용)
@@ -213,6 +234,96 @@ class GameManageService(
             }
         }
     }
+
+
+
+    suspend fun awards(seasonId: Long) = coroutineScope {
+        // 1️⃣ 시즌 랭킹 전체 조회
+        val rankings = gameRankingRepository
+            .findBySeasonId(seasonId)
+            .toList()
+
+        if (rankings.isEmpty()) return@coroutineScope
+
+        // 2️⃣ 정책 전체 조회 (ACTIVE)
+        val policies = challengeRewardPolicyRepository
+            .findAll()
+            .filter { it.status.toInt() == 1 && it.deletedAt == null }
+            .toList()
+
+        // 3️⃣ 랭킹 기준 반복
+        rankings.forEach { ranking ->
+            val matchedPolicies = policies.filter { policy ->
+                policy.league == ranking.league &&
+                policy.rank == ranking.rank &&
+                (policy.gameId == null || policy.gameId == ranking.gameId)
+            }
+
+            matchedPolicies.forEach { policy ->
+                launch {
+                    giveReward(
+                        policy = policy,
+                        ranking = ranking,
+                        seasonId = seasonId
+                    )
+                }
+            }
+        }
+    }
+
+
+
+
+
+    private suspend fun giveReward(
+        policy: ChallengeRewardPolicyEntity,
+        ranking: RankingView,
+        seasonId: Long
+    ) {
+        when (policy.type) {
+
+            "CASH" -> {
+                cashService.applyPolicy(
+                    userId = ranking.userId,
+                    cashPolicy = CashPolicy.CHALLENGE_REWARD,
+                    refId = seasonId,
+                    dynamicCash = policy.amount
+                )
+            }
+
+            "GIFTISHOW", "GIFT_CARD" -> {
+                val goodsCodes = policy.goodsCodes
+                    ?.split(",")
+                    ?.map { it.trim() }
+                    ?.filter { it.isNotBlank() }
+                    ?: return
+
+                goodsCodes.forEach { goodsCode ->
+                    giftAppService.createGift(
+                        ranking.userId,
+                        GiftProvideRequest(
+                            giftType =
+                                if (goodsCode.startsWith("G"))
+                                    GiftType.Voucher
+                                else
+                                    GiftType.GiftCard,
+
+                            giftCategory = GiftCategory.Challenge,
+                            receiveUserUid = ranking.userUid!!,
+                            memo = policy.message,
+
+                            goodsCode = goodsCode,
+                            gameId = ranking.gameId,
+                            seasonId = seasonId,
+                            seasonRank = ranking.rank
+                        )
+                    )
+                }
+            }
+
+        }
+    }
+
 
 
 

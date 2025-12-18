@@ -20,7 +20,7 @@ data class GiftEntity (
     val uid: UUID = UUID.randomUUID(),
 
     @field:Schema(description = "선물 구분 (Point, Voucher, Delivery, GiftCard)")
-    val type: GiftType? = null,
+    val type: GiftType,
 
     @field:Schema(description = "카테고리(Join, Challenge, Admin, Event)")
     val category: GiftCategory,

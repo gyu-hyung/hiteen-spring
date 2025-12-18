@@ -1,10 +1,10 @@
 package kr.jiasoft.hiteen.feature.cash.infra
 
-import kr.jiasoft.hiteen.feature.point.domain.PointRuleEntity
+import kr.jiasoft.hiteen.feature.cash.domain.CashRuleEntity
 import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 
-interface CashRuleRepository : CoroutineCrudRepository<PointRuleEntity, Long> {
+interface CashRuleRepository : CoroutineCrudRepository<CashRuleEntity, Long> {
 
     @Query("""
         SELECT *
@@ -13,5 +13,5 @@ interface CashRuleRepository : CoroutineCrudRepository<PointRuleEntity, Long> {
           AND deleted_at IS NULL
         LIMIT 1
     """)
-    suspend fun findActiveByActionCode(actionCode: String): PointRuleEntity?
+    suspend fun findActiveByActionCode(actionCode: String): CashRuleEntity?
 }
