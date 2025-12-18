@@ -1,7 +1,7 @@
 package kr.jiasoft.hiteen.challengeRewardPolicy.app
 
-import kr.jiasoft.hiteen.challengeRewardPolicy.domain.ChallengeRewardPolicyEntity
 import kr.jiasoft.hiteen.challengeRewardPolicy.dto.ChallengeRewardPolicyDeleteRequest
+import kr.jiasoft.hiteen.challengeRewardPolicy.dto.ChallengeRewardPolicyRow
 import kr.jiasoft.hiteen.challengeRewardPolicy.dto.ChallengeRewardPolicySaveRequest
 import kr.jiasoft.hiteen.common.dto.ApiPage
 import kr.jiasoft.hiteen.common.dto.ApiResult
@@ -29,7 +29,7 @@ class ChallengeRewardPolicyController(
         @RequestParam id: Long? = null,
         @RequestParam uid: String? = null,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
-    ): ResponseEntity<ApiResult<ApiPage<ChallengeRewardPolicyEntity>>?> {
+    ): ResponseEntity<ApiResult<ApiPage<ChallengeRewardPolicyRow>>?> {
         val list = service.listByPage(
             page = page,
             size = size,

@@ -2,6 +2,7 @@ package kr.jiasoft.hiteen.challengeRewardPolicy.infra
 
 import kotlinx.coroutines.flow.Flow
 import kr.jiasoft.hiteen.challengeRewardPolicy.domain.ChallengeRewardPolicyEntity
+import kr.jiasoft.hiteen.challengeRewardPolicy.dto.ChallengeRewardPolicyRow
 import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 
@@ -50,7 +51,9 @@ interface ChallengeRewardPolicyRepository
      * 🔹 페이징 목록 조회
      */
     @Query("""
-        SELECT crp.*
+        SELECT 
+            crp.*,
+            (SELECT name FROM games WHERE id = crp.game_id) AS game_display_name 
         FROM challenge_reward_policy crp
         WHERE
             crp.deleted_at IS NULL
@@ -78,6 +81,7 @@ interface ChallengeRewardPolicyRepository
             )
 
         ORDER BY
+            (select min(level) from tiers where tier_code LIKE CONCAT('%', league, '%')),
             crp.order_no ASC,
             crp.rank ASC,
             crp.id ASC
@@ -91,5 +95,5 @@ interface ChallengeRewardPolicyRepository
         search: String?,
         searchType: String,
         status: String?,
-    ): Flow<ChallengeRewardPolicyEntity>
+    ): Flow<ChallengeRewardPolicyRow>
 }
