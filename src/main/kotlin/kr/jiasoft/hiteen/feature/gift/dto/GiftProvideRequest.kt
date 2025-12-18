@@ -36,13 +36,4 @@ data class GiftProvideRequest (
     val deliveryAddress1: String? = null,
     @field:Schema(description = "배송 수신자 주소2 - Delivery")
     val deliveryAddress2: String? = null,
-) {
-//    fun toGiftEntity(): GiftEntity {
-//        return GiftEntity(
-//            type = giftType,
-//            category = giftCategory,
-//            userId = receiveUserId,
-//            memo = memo,
-//        )
-//    }
-}
+)

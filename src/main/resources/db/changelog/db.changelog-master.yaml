@@ -28,4 +28,4 @@ databaseChangeLog:
   - include:
       file: db/changelog/14-add-game-scores-total-try-count.yaml
   - include:
-      file: db/changelog/15-create-challenge-reward.yaml
+      file: db/changelog/15-create-challenge-reward-policy.yaml
