@@ -66,9 +66,7 @@ class ChallengeRewardPolicyService(
                 createdId = adminId,
                 createdAt = OffsetDateTime.now(),
                 updatedId = adminId,
-                updatedAt = OffsetDateTime.now(),
-                deletedId = null,
-                deletedAt = null
+                updatedAt = if(item.id != null) OffsetDateTime.now() else null,
             )
             repository.save(entity)
         }
