@@ -1,15 +1,11 @@
-package kr.jiasoft.hiteen.challengeRewardPolicy.domain
+package kr.jiasoft.hiteen.challengeRewardPolicy.dto
 
 import com.fasterxml.jackson.annotation.JsonFormat
-import org.springframework.data.annotation.Id
-import org.springframework.data.relational.core.mapping.Table
 import java.time.OffsetDateTime
 import java.util.UUID
 
-@Table("challenge_reward_policy")
-data class ChallengeRewardPolicyEntity(
+data class ChallengeRewardPolicyRow(
 
-    @Id
     val id: Long = 0,
 
     /** 리워드 타입 (CASH, GIFTISHOW, GIFT_CARD 등) */
@@ -20,6 +16,9 @@ data class ChallengeRewardPolicyEntity(
 
     /** 게임 ID */
     val gameId: Long?,
+
+    /** 게임명 */
+    val gameDisplayName: String?,
 
     /** 지급 수량 / 지급 캐시 */
     val amount: Int?,

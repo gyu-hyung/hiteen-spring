@@ -4,6 +4,7 @@ import kr.jiasoft.hiteen.challengeRewardPolicy.domain.ChallengeRewardPolicyEntit
 import kr.jiasoft.hiteen.challengeRewardPolicy.infra.ChallengeRewardPolicyRepository
 import kotlinx.coroutines.flow.toList
 import kr.jiasoft.hiteen.challengeRewardPolicy.dto.ChallengeRewardPolicyDeleteRequest
+import kr.jiasoft.hiteen.challengeRewardPolicy.dto.ChallengeRewardPolicyRow
 import kr.jiasoft.hiteen.challengeRewardPolicy.dto.ChallengeRewardPolicySaveRequest
 import org.springframework.stereotype.Service
 import java.time.OffsetDateTime
@@ -21,7 +22,7 @@ class ChallengeRewardPolicyService(
         search: String?,
         searchType: String,
         status: String?,
-    ): List<ChallengeRewardPolicyEntity> =
+    ): List<ChallengeRewardPolicyRow> =
         repository.listByPage(
             page = page,
             size = size,
