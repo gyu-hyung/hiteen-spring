@@ -33,15 +33,15 @@ class GiftAppServiceImplTest {
     fun `선물 주기`(){
         runBlocking {
             //포인트 선물
-            giftAppService.createGift(
-                1,
-                GiftProvideRequest(
-                    giftType = GiftType.Point,
-                    giftCategory = GiftCategory.Admin,
-                    receiveUserUid = UUID.fromString("6e330bdc-3062-4a14-80f2-a46e04278c5c"),
-                    point = 400,
-                )
-            )
+//            giftAppService.createGift(
+//                1,
+//                GiftProvideRequest(
+//                    giftType = GiftType.Point,
+//                    giftCategory = GiftCategory.Admin,
+//                    receiveUserUid = UUID.fromString("6e330bdc-3062-4a14-80f2-a46e04278c5c"),
+//                    point = 400,
+//                )
+//            )
 
             //기프티쇼 선물
 //            giftAppService.createGift(

@@ -8,6 +8,7 @@ enum class CashPolicy(
 ) {
 
     BUY("BUY", 0, null, "상품 구매"),
+    CHALLENGE_REWARD("CHALLENGE_REWARD", 0, null, "챌린지 보상"),
 
     // --- 회원가입 ---
     SIGNUP("SIGNUP", 500, null, "회원가입 보상"),

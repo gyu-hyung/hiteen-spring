@@ -26,7 +26,6 @@ import kr.jiasoft.hiteen.feature.giftishow.infra.GiftishowLogsRepository
 import kr.jiasoft.hiteen.feature.play.infra.GameRepository
 import kr.jiasoft.hiteen.feature.play.infra.SeasonRepository
 import kr.jiasoft.hiteen.feature.point.app.PointService
-import kr.jiasoft.hiteen.feature.point.domain.PointPolicy
 import kr.jiasoft.hiteen.feature.push.app.PushService
 import kr.jiasoft.hiteen.feature.push.domain.PushTemplate
 import kr.jiasoft.hiteen.feature.user.app.UserService
@@ -194,25 +193,25 @@ class GiftAppServiceImpl (
 
         when (gift.type) {
 
-            GiftType.Point -> {
-                pointService.applyPolicy(giftUser.userId, PointPolicy.ADMIN, gift.id, giftUser.point)
-                giftUserRepository.save(giftUser.copy(
-                    status = GiftStatus.USED.code,
-                    requestDate = OffsetDateTime.now(),
-                    pubDate = OffsetDateTime.now(),
-                    useDate = OffsetDateTime.now(),
-                ))
-            }
-
-            GiftType.Cash -> {
-                cashService.applyPolicy(giftUser.userId, CashPolicy.ADMIN, gift.id, giftUser.point)
-                giftUserRepository.save(giftUser.copy(
-                    status = GiftStatus.USED.code,
-                    requestDate = OffsetDateTime.now(),
-                    pubDate = OffsetDateTime.now(),
-                    useDate = OffsetDateTime.now(),
-                ))
-            }
+//            GiftType.Point -> {
+//                pointService.applyPolicy(giftUser.userId, PointPolicy.ADMIN, gift.id, giftUser.point)
+//                giftUserRepository.save(giftUser.copy(
+//                    status = GiftStatus.USED.code,
+//                    requestDate = OffsetDateTime.now(),
+//                    pubDate = OffsetDateTime.now(),
+//                    useDate = OffsetDateTime.now(),
+//                ))
+//            }
+//
+//            GiftType.Cash -> {
+//                cashService.applyPolicy(giftUser.userId, CashPolicy.ADMIN, gift.id, giftUser.point)
+//                giftUserRepository.save(giftUser.copy(
+//                    status = GiftStatus.USED.code,
+//                    requestDate = OffsetDateTime.now(),
+//                    pubDate = OffsetDateTime.now(),
+//                    useDate = OffsetDateTime.now(),
+//                ))
+//            }
 
             GiftType.Voucher -> {
                 // pubExpiredDate 발급만료일자 지났는지?
