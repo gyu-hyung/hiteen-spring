@@ -1,0 +1,149 @@
+databaseChangeLog:
+
+  # ----------------------------------
+  # CHALLENGE REWARD TABLE
+  # ----------------------------------
+  - changeSet:
+      id: create-challenge-reward
+      author: system
+      changes:
+
+        # -------- TABLE --------
+        - createTable:
+            tableName: challenge_reward_policy
+            remarks: "챌린지 리워드 상품 지정 테이블"
+            columns:
+              - column:
+                  name: id
+                  type: bigserial
+                  remarks: "리워드 PK"
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: type
+                  type: varchar(30)
+                  remarks: "리워드 타입 (CASH, GIFTISHOW, GIFT_CARD 등)"
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: league
+                  type: varchar(20)
+                  remarks: "챌린지/게임 ID"
+
+              - column:
+                  name: game_id
+                  type: bigint
+                  remarks: "챌린지/게임 ID"
+
+              - column:
+                  name: amount
+                  type: int
+                  remarks: "지급 수량 / 지급 캐시"
+
+              - column:
+                  name: goods_codes
+                  type: text
+                  remarks: "상품 UID 목록 (JSON or CSV)"
+
+              - column:
+                  name: rank
+                  type: int
+                  remarks: "지급 순위 (1,2,3...)"
+
+              - column:
+                  name: message
+                  type: varchar(300)
+                  remarks: "리워드 메시지"
+
+              - column:
+                  name: memo
+                  type: varchar(500)
+                  remarks: "관리자 메모"
+
+              - column:
+                  name: status
+                  type: smallint
+                  remarks: "상태 (0=비활성, 1=활성)"
+                  defaultValueNumeric: 1
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: order_no
+                  type: int
+                  remarks: "정렬 순서"
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: asset_uid
+                  type: uuid
+                  remarks: "대표 이미지/에셋 UID"
+
+              - column:
+                  name: created_id
+                  type: bigint
+                  remarks: "등록자 ID"
+
+              - column:
+                  name: created_at
+                  type: timestamptz
+                  remarks: "생성일시"
+                  defaultValueComputed: now()
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: updated_id
+                  type: bigint
+                  remarks: "수정자 ID"
+
+              - column:
+                  name: updated_at
+                  type: timestamptz
+                  remarks: "수정일시"
+
+              - column:
+                  name: deleted_id
+                  type: bigint
+                  remarks: "삭제자 ID"
+
+              - column:
+                  name: deleted_at
+                  type: timestamptz
+                  remarks: "삭제일시"
+
+
+        # -------- INDEX --------
+
+        - createIndex:
+            tableName: challenge_reward_policy
+            indexName: idx_challenge_reward_policy_game
+            columns:
+              - column:
+                  name: game_id
+
+        - createIndex:
+            tableName: challenge_reward_policy
+            indexName: idx_challenge_reward_policy_rank
+            columns:
+              - column:
+                  name: rank
+
+        - createIndex:
+            tableName: challenge_reward_policy
+            indexName: idx_challenge_reward_policy_status
+            columns:
+              - column:
+                  name: status
+
+        - createIndex:
+            tableName: challenge_reward_policy
+            indexName: idx_challenge_reward_policy_created
+            columns:
+              - column:
+                  name: created_at

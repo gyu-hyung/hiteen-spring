@@ -1,17 +1,16 @@
 package kr.jiasoft.hiteen.feature.gift.dto
 
 import io.swagger.v3.oas.annotations.media.Schema
-import kr.jiasoft.hiteen.feature.gift.domain.GiftType
 import java.util.UUID
 
 @Schema(description = "선물 발급 요청")
 data class GiftIssueRequest (
-    @field:Schema(description = "구분 (Point, Voucher, Delivery, GiftCard)")
-    val giftType: GiftType,
+//    @field:Schema(description = "구분 (Voucher, Delivery, GiftCard)")
+//    val giftType: GiftType,
 //    val giftCategory: GiftCategory,
     @field:Schema(description = "선물 uid")
     val giftUid: UUID,
-    @field:Schema(description = "기프티쇼 수신 연락처 - Voucher")
+    @field:Schema(description = "기프티쇼 수신 연락처 - Voucher, GiftCard")
     val phone: String? = null,
     @field:Schema(description = "예약 여부 - Voucher")
     val revInfoYn: String = "N",

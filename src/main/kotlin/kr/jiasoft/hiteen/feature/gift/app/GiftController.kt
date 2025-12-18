@@ -2,7 +2,8 @@ package kr.jiasoft.hiteen.feature.gift.app
 
 import io.swagger.v3.oas.annotations.tags.Tag
 import kr.jiasoft.hiteen.common.dto.ApiResult
-import kr.jiasoft.hiteen.feature.gift.dto.GiftCreateRequest
+import kr.jiasoft.hiteen.feature.gift.dto.GiftBuyRequest
+import kr.jiasoft.hiteen.feature.gift.dto.GiftProvideRequest
 import kr.jiasoft.hiteen.feature.gift.dto.GiftIssueRequest
 import kr.jiasoft.hiteen.feature.gift.dto.GiftResponse
 import kr.jiasoft.hiteen.feature.gift.dto.GiftUseRequest
@@ -18,12 +19,31 @@ import org.springframework.web.bind.annotation.RestController
 
 
 @RestController
-@RequestMapping("/api/v2/gift")
+@RequestMapping("/api/gift")
 @Tag(name = "Gift API", description = "선물 생성 및 조회 API")
 class GiftController (
     private val giftAppService: GiftAppService
 ){
 
+
+    @GetMapping()
+    suspend fun findGift(
+        giftUserId: Long,
+        @AuthenticationPrincipal(expression = "user") user: UserEntity
+    ): ResponseEntity<ApiResult<GiftResponse>> {
+        return ResponseEntity.ok(ApiResult.success(giftAppService.findGift(user.id, giftUserId)))
+    }
+
+    /**
+     * 사용자 -> 상품 구매
+     * */
+    @PostMapping("/buy")
+    suspend fun buyGift(
+        @AuthenticationPrincipal(expression = "user") user: UserEntity,
+        request: GiftBuyRequest
+    ): ResponseEntity<ApiResult<GiftResponse>> {
+        return ResponseEntity.ok(ApiResult.success(giftAppService.buyGift(user.id, user.uid, request)))
+    }
 
 
     /**
@@ -33,7 +53,7 @@ class GiftController (
     @PreAuthorize("hasRole('ADMIN')")
     suspend fun createGift(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
-        request: GiftCreateRequest
+        request: GiftProvideRequest
     ): ResponseEntity<ApiResult<GiftResponse>> {
         return ResponseEntity.ok(ApiResult.success(giftAppService.createGift(user.id, request)))
     }
