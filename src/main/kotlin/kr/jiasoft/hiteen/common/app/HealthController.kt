@@ -6,6 +6,7 @@ import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kr.jiasoft.hiteen.common.dto.ApiResult
 import kr.jiasoft.hiteen.feature.location.infra.cache.LocationCacheRedisService
 import kr.jiasoft.hiteen.feature.soketi.app.SoketiBroadcaster
+import org.springframework.data.r2dbc.core.R2dbcEntityTemplate
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -19,6 +20,7 @@ import java.time.Instant
 class HealthController(
     private val locationCacheRedisService: LocationCacheRedisService,
     private val soketiBroadcaster: SoketiBroadcaster,
+    private val r2dbcEntityTemplate: R2dbcEntityTemplate, // PostgreSQL R2DBC
     private val mongoTemplate: ReactiveMongoTemplate,
 ) {
 
@@ -35,6 +37,15 @@ class HealthController(
 
         val soketi = runCatching { soketiBroadcaster.testConnection() }.getOrNull()
         sb.appendLine("Soketi  : ${if (soketi == true) "✅ UP" else "❌ DOWN"}")
+
+        // PostgreSQL (R2DBC Ping)
+        val postgresOk = runCatching {
+            r2dbcEntityTemplate.databaseClient.sql("SELECT 1")
+                .fetch()
+                .first()
+                .awaitFirstOrNull()
+        }.isSuccess
+        sb.appendLine("PostgreSQL: ${if (postgresOk) "✅ UPS" else "❌ DOWN"}")
 
         val mongoOk = runCatching {
             mongoTemplate.executeCommand("""{ ping: 1 }""").awaitFirstOrNull()
