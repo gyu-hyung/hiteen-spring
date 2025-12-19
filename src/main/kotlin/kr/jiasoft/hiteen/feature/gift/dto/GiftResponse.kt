@@ -1,43 +1,48 @@
 package kr.jiasoft.hiteen.feature.gift.dto
 
-import io.swagger.v3.oas.annotations.media.Schema
 import kr.jiasoft.hiteen.feature.gift.domain.GiftCategory
 import kr.jiasoft.hiteen.feature.gift.domain.GiftType
-import kr.jiasoft.hiteen.feature.giftishow.dto.GiftishowGoodsResponse
+import kr.jiasoft.hiteen.feature.giftishow.domain.GoodsGiftishowEntity
+import kr.jiasoft.hiteen.feature.user.dto.UserSummary
 import java.time.OffsetDateTime
-import java.util.UUID
 
-@Schema(description = "선물 응답 DTO")
-data class GiftResponse(
-
-    @field:Schema(description = "선물 고유 ID")
-    val id: Long,
-
-    @field:Schema(description = "선물 UUID")
-    val uid: UUID,
-
-    @field:Schema(description = "타입")
-    val type: GiftType,
-
-    @field:Schema(description = "카테고리")
-    val category: GiftCategory,
-
-    @field:Schema(description = "회원 ID")
+data class GiftResponse (
+    val giftId: Long,
+    val giftUid: String,
+    val giftUserId: Long,
+    val giftType: GiftType,
+    val giftCategory: GiftCategory,
+    val status: GiftStatus,
     val userId: Long,
 
-//    @field:Schema(description = "결제 ID")
-//    val payId: Long?,
+    val memo: String,
 
-    @field:Schema(description = "메모")
-    val memo: String?,
+    val couponNo: String? = null,
+    val couponImg: String? = null,
+    val receiveDate: OffsetDateTime? = null,//선물수신일자
+    val requestDate: OffsetDateTime? = null,//발송요청일자
+    val pubDate: OffsetDateTime? = null,//발송일자
+    val useDate: OffsetDateTime? = null,//사용일자
+    val pubExpiredDate: OffsetDateTime? = null,//발송만료일자
+    val useExpiredDate: OffsetDateTime? = null,//사용만료일자
 
-    @field:Schema(description = "받는 회원 목록")
-    val users: List<Long>,
+    val goodsCode: String? = null,
 
-    @field:Schema(description = "생성일시")
-    val createdAt: OffsetDateTime?,
+    /* 추가 */
+    val goodsName: String? = null,
 
-    @field:Schema(description = "기프티쇼 정보")
-    val giftishowGoods: GiftishowGoodsResponse?
+    val gameId: Long? = null,
 
+    val seasonId: Long? = null,
+    val seasonRank: Int? = null,
+
+    val point: Int? = null,
+
+    val deliveryName: String? = null,
+    val deliveryPhone: String? = null,
+    val deliveryAddress1: String? = null,
+    val deliveryAddress2: String? = null,
+
+    val receiver: UserSummary,
+    val goods: GoodsGiftishowEntity? = null,
 )

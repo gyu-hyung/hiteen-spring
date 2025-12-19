@@ -3,6 +3,7 @@ package kr.jiasoft.hiteen.feature.play.dto
 import com.fasterxml.jackson.annotation.JsonFormat
 import io.swagger.v3.oas.annotations.media.Schema
 import java.time.OffsetDateTime
+import java.util.UUID
 
 @Schema(description = "랭킹 정보 view DTO")
 data class RankingView(
@@ -15,6 +16,9 @@ data class RankingView(
 
     @field:Schema(description = "유저 ID", example = "1")
     val userId: Long,
+
+    @field:Schema(description = "유저 uid", example = "1")
+    val userUid: UUID? = null,
 
     @field:Schema(description = "닉네임", example = "nickname")
     val nickname: String,

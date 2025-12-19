@@ -2,8 +2,8 @@ package kr.jiasoft.hiteen.feature.giftishow.app
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import kotlinx.coroutines.coroutineScope
-import kr.jiasoft.hiteen.feature.gift_v2.app.GiftshowClient
-import kr.jiasoft.hiteen.feature.gift_v2.dto.client.brand.GiftishowBrandDto
+import kr.jiasoft.hiteen.feature.gift.app.GiftshowClient
+import kr.jiasoft.hiteen.feature.gift.dto.client.brand.GiftishowBrandDto
 import kr.jiasoft.hiteen.feature.giftishow.domain.GoodsBrandEntity
 import kr.jiasoft.hiteen.feature.giftishow.infra.GiftishowGoodsRepository
 import kr.jiasoft.hiteen.feature.giftishow.infra.GoodsBrandRepository
@@ -110,7 +110,7 @@ class GiftishowSyncService(
                     category1Name = detail?.categoryName1,
 
                     goodsTypeCode = detail?.goodsTypeCd,
-                    goodsTypeName = dto.goodsTypeNm,
+                    goodsTypeName = dto.goodsTypeNm?.trim(),
                     goodsTypeDetailName = dto.goodsTypeDtlNm,
 
                     goodsImgS = dto.goodsImgS,

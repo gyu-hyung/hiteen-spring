@@ -7,6 +7,8 @@ import kr.jiasoft.hiteen.feature.ad.app.AdService
 import kr.jiasoft.hiteen.feature.level.app.ExpService
 import kr.jiasoft.hiteen.feature.level.infra.TierRepository
 import kr.jiasoft.hiteen.feature.play.domain.*
+import kr.jiasoft.hiteen.feature.play.dto.GameScoreResponse
+import kr.jiasoft.hiteen.feature.play.dto.GameStatus
 import kr.jiasoft.hiteen.feature.play.dto.RankingResponse
 import kr.jiasoft.hiteen.feature.play.dto.SeasonRankingResponse
 import kr.jiasoft.hiteen.feature.play.dto.SeasonRoundResponse
@@ -66,6 +68,25 @@ class GameService(
      * */
     suspend fun getSeasonRounds(year: Int, status: SeasonStatusType? = null): List<SeasonRoundResponse> {
         return seasonRepository.findSeasonsByYearAndStatus(year, status?.name).toList()
+    }
+
+
+    /**
+     * 게임상태
+     * */
+    suspend fun gameStatus(userId: Long, gameId: Long) : GameStatus {
+        val maxTryCount = 3
+        val season = seasonRepository.findActiveSeason() ?: throw NoSuchElementException("현재 진행 중인 시즌이 없습니다. 관리자 문의")
+        val participant = seasonParticipantRepository.findActiveParticipant(userId, season.id)
+            ?: return GameStatus(0, maxTryCount)
+
+        val todayTryCount = gameHistoryRepository.listToday(
+            gameId = gameId,
+            participantId = participant.id,
+            seasonId = season.id
+        ).toList().size
+
+        return GameStatus(todayTryCount, maxTryCount)
     }
 
 
@@ -130,7 +151,7 @@ class GameService(
         score: Double,
         userId: Long,
         tierId: Long,
-    ): GameScoreEntity {
+    ): GameScoreResponse {
 
         val wordChallengeGameId = getWordChallenge()
 
@@ -149,19 +170,22 @@ class GameService(
             // 시도 횟수별 가산점 (0.01초 * n), 최대 1 초 까지
             val advantage = 0.01 * (existing.totalTryCount).coerceAtMost(100)
 
-            val adjustedScore = (score - advantage).coerceAtLeast(0.0)
-            saveHistory(gameHistoryUid,  participant.seasonId, participant.id, gameId, adjustedScore)
+            val finalScore = (score - advantage).coerceAtLeast(0.0)
+            saveHistory(gameHistoryUid,  participant.seasonId, participant.id, gameId, finalScore)
 
             val lastPlayedDate = existing.updatedAt?.toLocalDate() ?: existing.createdAt.toLocalDate()
             if (lastPlayedDate.isEqual(LocalDate.now())) {
-                updateScore(existing, adjustedScore)
+                val scoreEntity = updateScore(existing, finalScore)
+                GameScoreResponse.fromEntity(scoreEntity, score)
             } else {
-                updateScore(existing, adjustedScore, 1)
+                val scoreEntity = updateScore(existing, finalScore)
+                GameScoreResponse.fromEntity(scoreEntity, score)
             }
 
         } else {
             saveHistory(gameHistoryUid,  participant.seasonId, participant.id, gameId, score)
-            createScore(participant.seasonId, participant.id, gameId, score)
+            val scoreEntity = createScore(participant.seasonId, participant.id, gameId, score)
+            GameScoreResponse.fromEntity(scoreEntity, score)
         }
     }
 
@@ -253,7 +277,6 @@ class GameService(
                     userId = userId,
                     tierId = tierId,
                     league = league,
-//                    league = tier.tierCode.split("_")[0],
                     joinedType = "AUTO_JOIN"
                 )
             )

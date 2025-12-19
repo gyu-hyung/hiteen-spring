@@ -1,10 +1,5 @@
 package kr.jiasoft.hiteen.feature.gift.app
 
-import kotlinx.coroutines.runBlocking
-import kr.jiasoft.hiteen.feature.gift.domain.GiftCategory
-import kr.jiasoft.hiteen.feature.gift.domain.GiftType
-import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 
 @SpringBootTest

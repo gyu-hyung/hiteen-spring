@@ -311,6 +311,68 @@ CREATE TABLE point_histories (
 
 
 -- ========================
+-- 캐시 적립/사용 내역
+-- ========================
+CREATE TABLE cash (
+  id              BIGSERIAL PRIMARY KEY,
+  user_id         BIGINT NOT NULL REFERENCES users(id),
+
+  cashable_type   VARCHAR(100),   -- 이벤트 코드 (PAYMENT, REFUND, ADMIN 등)
+  cashable_id     BIGINT,          -- 결제ID, 환불ID, 관리자 지급 ID 등
+
+  type            VARCHAR(50) NOT NULL, -- 'CREDIT' | 'DEBIT'
+  amount          INT NOT NULL,         -- +적립 / -차감
+  memo            VARCHAR(300),
+
+  created_at      TIMESTAMPTZ DEFAULT now(),
+  deleted_at      TIMESTAMPTZ
+);
+
+-- 조회 최적화 인덱스
+CREATE INDEX idx_cash_user_id ON cash(user_id);
+CREATE INDEX idx_cash_cashable ON cash(cashable_type, cashable_id);
+
+
+-- ========================
+-- 캐시 요약정보
+-- ========================
+CREATE TABLE user_cash_summary (
+  user_id     BIGINT PRIMARY KEY REFERENCES users(id),
+  total_cash  INT NOT NULL DEFAULT 0,
+  updated_at  TIMESTAMPTZ DEFAULT now()
+);
+
+
+-- ========================
+-- 캐시 정책
+-- ========================
+CREATE TABLE cash_rules (
+  id            BIGSERIAL PRIMARY KEY,
+
+  action_code   VARCHAR(50) NOT NULL,   -- PAYMENT_1000, REFUND, ADMIN_CASH 등
+  amount        INT NOT NULL,            -- 지급/차감 캐시
+
+  daily_cap     INT,
+  cooldown_sec  INT,
+
+  description   VARCHAR(200),
+
+  created_id    BIGINT,
+  created_at    TIMESTAMPTZ DEFAULT now(),
+  updated_id    BIGINT,
+  updated_at    TIMESTAMPTZ,
+  deleted_id    BIGINT,
+  deleted_at    TIMESTAMPTZ,
+
+  UNIQUE (action_code)
+);
+
+
+
+
+
+
+-- ========================
 -- 학교
 -- ========================
 CREATE TABLE schools (
