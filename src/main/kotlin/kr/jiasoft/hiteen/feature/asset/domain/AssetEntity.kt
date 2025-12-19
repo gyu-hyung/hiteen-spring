@@ -20,7 +20,7 @@ data class AssetEntity(
     val originId: Long? = null,
     val ext: String?,        // 확장자(소문자)
     val downloadCount: Int = 0,
-    val createdId: Long,
+    val createdId: Long? = null,
     val createdAt: OffsetDateTime,
     val updatedId: Long? = null,
     val updatedAt: OffsetDateTime? = null,
