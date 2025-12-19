@@ -1,8 +1,8 @@
-package kr.jiasoft.hiteen.admin.feature.services
+package kr.jiasoft.hiteen.admin.services
 
 import kotlinx.coroutines.flow.toList
-import kr.jiasoft.hiteen.admin.feature.dto.AdminSchoolResponse
-import kr.jiasoft.hiteen.admin.feature.repository.AdminSchoolRepository
+import kr.jiasoft.hiteen.admin.dto.AdminSchoolResponse
+import kr.jiasoft.hiteen.admin.infra.AdminSchoolRepository
 import kr.jiasoft.hiteen.common.dto.ApiPage
 import kr.jiasoft.hiteen.common.dto.PageUtil
 import org.springframework.stereotype.Component

@@ -1,7 +1,7 @@
-package kr.jiasoft.hiteen.admin.feature.repository
+package kr.jiasoft.hiteen.admin.infra
 
 import kotlinx.coroutines.flow.Flow
-import kr.jiasoft.hiteen.admin.feature.dto.AdminSchoolResponse
+import kr.jiasoft.hiteen.admin.dto.AdminSchoolResponse
 import kr.jiasoft.hiteen.feature.school.domain.SchoolEntity
 import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository

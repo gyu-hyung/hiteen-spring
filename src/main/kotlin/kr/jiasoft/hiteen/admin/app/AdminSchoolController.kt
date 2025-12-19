@@ -1,8 +1,8 @@
-package kr.jiasoft.hiteen.admin.feature.app
+package kr.jiasoft.hiteen.admin.app
 
 import io.swagger.v3.oas.annotations.Operation
-import kr.jiasoft.hiteen.admin.feature.dto.AdminSchoolResponse
-import kr.jiasoft.hiteen.admin.feature.services.AdminSchoolService
+import kr.jiasoft.hiteen.admin.dto.AdminSchoolResponse
+import kr.jiasoft.hiteen.admin.services.AdminSchoolService
 import kr.jiasoft.hiteen.common.dto.ApiPage
 import kr.jiasoft.hiteen.common.dto.ApiResult
 import org.springframework.http.ResponseEntity
