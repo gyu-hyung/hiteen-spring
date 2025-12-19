@@ -57,6 +57,7 @@ class SecurityConfig(
                     "/api/school/**",
                     "/api/assets/{uid}/download",
                     "/api/assets/{uid}/view",
+                    "/api/assets/{uid}/view/**",
                     "/api/user/nickname/{nickname}",
                     "/api/admob/callback",
                     "/api-docs/**",

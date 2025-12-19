@@ -130,7 +130,7 @@ class AssetService(
         uid: UUID,
         width: Int,
         height: Int,
-        currentUserId: Long
+        currentUserId: Long? = null
     ): AssetEntity {
 
         val original = findByUid(uid) ?: throw IllegalArgumentException("존재하지 않는 파일")

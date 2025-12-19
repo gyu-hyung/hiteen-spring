@@ -176,7 +176,7 @@ class AssetController(
         val (width, height) = match.destructured.toList().map { it.toInt() }
 
         // Thumbnail 생성 또는 가져오기
-        val asset = assetService.getOrCreateThumbnail(uid, width, height, user.id)
+        val asset = assetService.getOrCreateThumbnail(uid, width, height, null)
 
         val path = assetService.resolveFilePath(asset.filePath + asset.storeFileName)
         if (!assetService.existsFile(path)) return ResponseEntity.notFound().build()
