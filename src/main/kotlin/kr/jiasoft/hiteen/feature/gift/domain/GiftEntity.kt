@@ -1,6 +1,5 @@
 package kr.jiasoft.hiteen.feature.gift.domain
 
-
 import io.r2dbc.postgresql.codec.Json
 import io.swagger.v3.oas.annotations.media.Schema
 import org.springframework.data.annotation.Id
@@ -8,8 +7,6 @@ import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
 import java.time.OffsetDateTime
 import java.util.UUID
-
-
 
 @Table("gift")
 @Schema(description = "선물 내역 엔티티")
@@ -23,7 +20,7 @@ data class GiftEntity (
     val uid: UUID = UUID.randomUUID(),
 
     @field:Schema(description = "선물 구분 (Point, Voucher, Delivery, GiftCard)")
-    val type: GiftType? = null,
+    val type: GiftType,
 
     @field:Schema(description = "카테고리(Join, Challenge, Admin, Event)")
     val category: GiftCategory,

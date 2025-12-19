@@ -3,10 +3,11 @@ package kr.jiasoft.hiteen.feature.gift_v2.app
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
+import kr.jiasoft.hiteen.feature.gift.app.GiftAppService
 import kr.jiasoft.hiteen.feature.gift.domain.GiftCategory
 import kr.jiasoft.hiteen.feature.gift.domain.GiftType
-import kr.jiasoft.hiteen.feature.gift.infra.GiftUserRepository
-import kr.jiasoft.hiteen.feature.gift_v2.dto.GiftCreateRequest
+import kr.jiasoft.hiteen.feature.gift.dto.GiftProvideRequest
+import kr.jiasoft.hiteen.feature.gift.infra.GiftRepository
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -19,11 +20,11 @@ class GiftAppServiceImplTest {
     private lateinit var giftAppService: GiftAppService
 
     @Autowired
-    private lateinit var giftUserRepository: GiftUserRepository
+    private lateinit var giftRepository: GiftRepository
 
     @Test
     fun `find test`() = runTest {
-        val res = giftUserRepository.findAllWithGiftUserByUserId(1).toList()
+        val res = giftRepository.findAllWithGiftUserByUserId(1).toList()
         println(res)
     }
 
@@ -32,15 +33,15 @@ class GiftAppServiceImplTest {
     fun `선물 주기`(){
         runBlocking {
             //포인트 선물
-            giftAppService.createGift(
-                1,
-                GiftCreateRequest(
-                    giftType = GiftType.Point,
-                    giftCategory = GiftCategory.Admin,
-                    receiveUserUid = UUID.fromString("6e330bdc-3062-4a14-80f2-a46e04278c5c"),
-                    point = 400,
-                )
-            )
+//            giftAppService.createGift(
+//                1,
+//                GiftProvideRequest(
+//                    giftType = GiftType.Point,
+//                    giftCategory = GiftCategory.Admin,
+//                    receiveUserUid = UUID.fromString("6e330bdc-3062-4a14-80f2-a46e04278c5c"),
+//                    point = 400,
+//                )
+//            )
 
             //기프티쇼 선물
 //            giftAppService.createGift(

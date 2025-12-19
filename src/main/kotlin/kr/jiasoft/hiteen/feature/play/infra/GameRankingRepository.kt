@@ -60,4 +60,13 @@ interface GameRankingRepository : CoroutineCrudRepository<GameRankingEntity, Lon
         league: String
     ): Flow<RankingView>
 
+
+
+    @Query("""
+        SELECT gr.*, (SELECT uid FROM users u WHERE u.id = gr.user_id)
+        FROM game_rankings gr
+        WHERE gr.season_id = :seasonId
+    """)
+    fun findBySeasonId(seasonId: Long): Flow<RankingView>
+
 }

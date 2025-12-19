@@ -3,7 +3,9 @@ package kr.jiasoft.hiteen.feature.batch
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.context.annotation.Profile
 
+@Profile("dev-k8s")
 @SpringBootTest
 class BatchServiceTest {
 

@@ -1,5 +1,6 @@
 package kr.jiasoft.hiteen.feature.giftishow.domain
 
+import com.fasterxml.jackson.annotation.JsonFormat
 import io.swagger.v3.oas.annotations.media.Schema
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
@@ -18,7 +19,7 @@ data class GoodsGiftishowEntity(
     @Column("goods_no")
     val goodsNo: Int,
 
-    @field:Schema(description = "상품 코드 (Unique)")
+    @field:Schema(description = "상품 코드 (Unique) G포함 12자리 = Voucher, H포함 12자리 = GiftCard")
     @Column("goods_code")
     val goodsCode: String,
 
@@ -191,6 +192,7 @@ data class GoodsGiftishowEntity(
     val status: Int = 0,
 
     @Column("created_at")
+    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm")
     val createdAt: OffsetDateTime = OffsetDateTime.now(),
 
     @Column("updated_at")

@@ -25,4 +25,4 @@ data class CodeEntity(
     val deletedId: Long? = null,
     val deletedAt: OffsetDateTime? = null,
 
-    )
+)
