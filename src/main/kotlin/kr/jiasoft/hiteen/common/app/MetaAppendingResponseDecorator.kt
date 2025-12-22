@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotlinx.coroutines.reactor.mono
 import kr.jiasoft.hiteen.common.context.MetaDeltaKeys
+import kr.jiasoft.hiteen.feature.cash.infra.CashSummaryRepository
 import kr.jiasoft.hiteen.feature.level.infra.TierRepository
 import kr.jiasoft.hiteen.feature.point.infra.PointSummaryRepository
 import kr.jiasoft.hiteen.feature.user.dto.CustomUserDetails
@@ -24,6 +25,7 @@ class MetaAppendingResponseDecorator(
     private val userRepository: UserRepository,
     private val tierRepository: TierRepository,
     private val pointSummaryRepository: PointSummaryRepository,
+    private val cashSummaryRepository: CashSummaryRepository,
 ) : ServerHttpResponseDecorator(delegate) {
 
     private val mapper = jacksonObjectMapper()
@@ -66,18 +68,21 @@ class MetaAppendingResponseDecorator(
 
                             val deltaExp   = exchange.attributes[MetaDeltaKeys.DELTA_EXP] as? Int ?: 0
                             val deltaPoint = exchange.attributes[MetaDeltaKeys.DELTA_POINT] as? Int ?: 0
+                            val deltaCash = exchange.attributes[MetaDeltaKeys.DELTA_CASH] as? Int ?: 0
 
-                            if (deltaExp == 0 && deltaPoint == 0) {
+                            if (deltaExp == 0 && deltaPoint == 0 && deltaCash == 0) {
                                 return@map bytes
                             }
 
                             val metaNode = mapper.createObjectNode()
                             metaNode.put("totalExp", (baseMeta["totalExp"] ?: 0).toString().toInt())
                             metaNode.put("totalPoints", (baseMeta["totalPoints"] ?: 0).toString().toInt())
+                            metaNode.put("totalCash", (baseMeta["totalCash"] ?: 0).toString().toInt())
                             metaNode.put("tier", (baseMeta["tier"] ?: 0).toString().toInt())
 
                             if (deltaExp != 0) metaNode.put("deltaExp", deltaExp)
                             if (deltaPoint != 0) metaNode.put("deltaPoint", deltaPoint)
+                            if (deltaCash != 0) metaNode.put("deltaCash", deltaCash)
 
                             obj.set<ObjectNode>("meta", metaNode)
 
@@ -101,12 +106,14 @@ class MetaAppendingResponseDecorator(
     private fun buildMeta(userId: Long): Mono<Map<String, Any>> {
         return mono {
             val user = userRepository.findById(userId) ?: return@mono emptyMap()
-            val summary = pointSummaryRepository.findSummaryByUserId(userId)
+            val pointSummary = pointSummaryRepository.findSummaryByUserId(userId)
+            val cashSummary = cashSummaryRepository.findSummaryByUserId(userId)
             val tier = tierRepository.findById(user.tierId)
 
             mapOf(
                 "totalExp" to (user.expPoints),
-                "totalPoints" to (summary?.totalPoint ?: 0),
+                "totalPoints" to (pointSummary?.totalPoint ?: 0),
+                "totalCash" to (cashSummary?.totalCash ?: 0),
                 "tier" to (tier?.rankOrder ?: 0)
             )
         }
