@@ -268,7 +268,7 @@ class GameManageService(
             val participantCount = groupRankings.size
 
             // 🚫 인원 수 부족 → 전체 스킵
-            if (participantCount < 5) {
+            if (participantCount < 10) {
                 log.info(
                     "Reward SKIPPED - season=$seasonId league=$league game=$gameId (count=$participantCount)"
                 )
