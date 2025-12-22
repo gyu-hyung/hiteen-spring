@@ -25,6 +25,9 @@ interface UserRepository : CoroutineCrudRepository<UserEntity, Long> {
     @Query("""SELECT * FROM users WHERE username = :username AND deleted_at IS NULL ORDER BY id DESC LIMIT 1""")
     suspend fun findActiveByUsername(username: String): UserEntity?
 
+    @Query("""SELECT * FROM users WHERE deleted_at IS NULL AND username = :username AND nickname = :nickname ORDER BY id DESC LIMIT 1""")
+    suspend fun findActiveByUsername(username: String, nickname: String): UserEntity?
+
     // ✅ 활성(미삭제) 사용자 - username(=phone)로 조회
     @Query("""
         SELECT * FROM users 
