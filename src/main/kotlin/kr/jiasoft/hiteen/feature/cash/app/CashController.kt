@@ -22,23 +22,7 @@ import java.time.LocalDate
 @RequestMapping("/api/cash")
 class CashController(
     private val cashService: CashService,
-    private val  pointService: PointService,
-//    private val expService: ExpService,
 ) {
-
-
-    @GetMapping("/cashSummary")
-    suspend fun c(): ResponseEntity<ApiResult<Map<String, Any>>> {
-        cashService.applyPolicy(1, CashPolicy.CHALLENGE_REWARD, null, 11, "리워드 test1")
-        return ResponseEntity.ok(ApiResult.success(mapOf("ss" to "통과")))
-    }
-
-    @GetMapping("/pointSummary")
-    suspend fun cs(): ResponseEntity<ApiResult<Map<String, Any>>> {
-        pointService.applyPolicy(1, PointPolicy.ADMIN, null, 11)
-
-        return ResponseEntity.ok(ApiResult.success(mapOf("ss" to "통과")))
-    }
 
 
     @Operation(summary = "내 포인트 이력 조회 (날짜 선택 가능)")
