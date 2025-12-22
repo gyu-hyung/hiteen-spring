@@ -1,7 +1,7 @@
 package kr.jiasoft.hiteen.feature.giftishow.app
 
 import kotlinx.coroutines.runBlocking
-import kr.jiasoft.hiteen.feature.gift_v2.app.GiftshowClient
+import kr.jiasoft.hiteen.feature.gift.app.GiftshowClient
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import kotlin.test.Test
