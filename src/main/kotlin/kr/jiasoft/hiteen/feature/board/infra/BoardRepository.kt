@@ -104,14 +104,17 @@ interface BoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
           )
           AND (
               :followOnly = false OR EXISTS (
-                  SELECT 1 FROM follows f WHERE f.user_id = :userId AND f.follow_id = b.created_id
+                  SELECT 1 FROM follows f WHERE f.user_id = :userId AND f.follow_id = b.created_id AND f.status = 'ACCEPTED'
               )
           )
           AND (
               :friendOnly = false OR EXISTS (
                   SELECT 1 FROM friends f 
-                  WHERE (f.user_id = :userId AND f.friend_id = b.created_id)
+                  WHERE status = 'ACCEPTED'
+                  AND (
+                    (f.user_id = :userId AND f.friend_id = b.created_id)
                      OR (f.friend_id = :userId AND f.user_id = b.created_id)
+                  )
               )
           )
           AND (
