@@ -313,7 +313,8 @@ class GameManageService(
                     userId = ranking.userId,
                     cashPolicy = CashPolicy.CHALLENGE_REWARD,
                     refId = seasonId,
-                    dynamicCash = policy.amount
+                    dynamicCash = policy.amount,
+                    description = "[하이틴] 챌린지 ${ranking.rank}등 보상 도착!"
                 )
             }
 

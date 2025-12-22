@@ -10,10 +10,10 @@ import org.springframework.stereotype.Repository
 interface CashSummaryRepository : CoroutineCrudRepository<CashSummaryEntity, Long> {
 
     @Query("""
-        INSERT INTO user_cash_summary (user_id, total_point, updated_at)
+        INSERT INTO user_cash_summary (user_id, total_cash, updated_at)
         VALUES (:userId, :delta, now())
         ON CONFLICT (user_id)
-        DO UPDATE SET total_point = user_cash_summary.total_point + EXCLUDED.total_point,
+        DO UPDATE SET total_cash = user_cash_summary.total_cash + EXCLUDED.total_cash,
                       updated_at = now()
     """)
     suspend fun upsertAddPoint(userId: Long, delta: Int)
