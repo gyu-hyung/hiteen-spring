@@ -17,7 +17,8 @@ class GameManageServiceTest  {
         runBlocking {
 //            gameManageService.autoManageSeasons()
 //            gameManageService.saveSeasonRankings(4)
-            gameManageService.awards(4)
+//            gameManageService.awards(4)
+            gameManageService.generateQuestionItems(5)
         }
     }
 
