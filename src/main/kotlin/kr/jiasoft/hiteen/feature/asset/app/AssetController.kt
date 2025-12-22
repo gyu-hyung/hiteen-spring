@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactor.awaitSingle
 import kr.jiasoft.hiteen.common.dto.ApiResult
+import kr.jiasoft.hiteen.feature.asset.domain.ThumbnailMode
 import kr.jiasoft.hiteen.feature.asset.dto.AssetResponse
 import kr.jiasoft.hiteen.feature.asset.dto.toResponse
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
@@ -23,6 +24,7 @@ import java.lang.IllegalArgumentException
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 @Tag(name = "Asset", description = "파일 업로드/다운로드/조회 API")
 @RestController
@@ -166,34 +168,82 @@ class AssetController(
     suspend fun getThumbnail(
         @PathVariable uid: UUID,
         @PathVariable size: String,
-        @AuthenticationPrincipal(expression = "user") user: UserEntity
+        @RequestParam(defaultValue = "cover") mode: String,
     ): ResponseEntity<FileSystemResource> {
 
-        val regex = Regex("""(\d+)x(\d+)""")
-        val match = regex.matchEntire(size)
-            ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "크기는 {width}x{height} 형태여야 합니다. 예: 300x300")
+        // 1️⃣ size 파싱 + 검증
+        val (width, height) = parseSize(size)
 
-        val (width, height) = match.destructured.toList().map { it.toInt() }
+        // 2️⃣ mode 파싱
+        val thumbMode = parseMode(mode)
 
-        // Thumbnail 생성 또는 가져오기
-        val asset = assetService.getOrCreateThumbnail(uid, width, height, null)
+        // 3️⃣ 썸네일 생성 또는 조회
+        val asset = assetService.getOrCreateThumbnail(
+            uid = uid,
+            width = width,
+            height = height,
+            currentUserId = null,
+            mode = thumbMode
+        )
 
         val path = assetService.resolveFilePath(asset.filePath + asset.storeFileName)
-        if (!assetService.existsFile(path)) return ResponseEntity.notFound().build()
+        if (!assetService.existsFile(path)) {
+            return ResponseEntity.notFound().build()
+        }
 
         val resource = FileSystemResource(path)
-        val mime = asset.type ?: MediaType.APPLICATION_OCTET_STREAM_VALUE
+        val contentType = asset.type
+            ?.let { MediaType.parseMediaType(it) }
+            ?: MediaType.APPLICATION_OCTET_STREAM
 
+        // 4️⃣ 캐시 친화적 헤더
         val headers = HttpHeaders().apply {
-            contentType = MediaType.parseMediaType(mime)
-            contentLength = resource.contentLength()
-            add(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"${asset.originFileName}\"")
+            this.contentType = contentType
+            this.contentLength = resource.contentLength()
+            this.cacheControl = CacheControl.maxAge(365, TimeUnit.DAYS).cachePublic().toString()
+            this.eTag = "\"${asset.id}-${asset.size}\""
+            add(
+                HttpHeaders.CONTENT_DISPOSITION,
+                "inline; filename=\"${asset.originFileName}\""
+            )
         }
 
         return ResponseEntity.ok()
             .headers(headers)
             .body(resource)
     }
+
+
+
+    private fun parseSize(size: String): Pair<Int, Int> {
+        val match = Regex("""(\d+)x(\d+)""").matchEntire(size)
+            ?: throw ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "size는 {width}x{height} 형식이어야 합니다. 예: 300x300"
+            )
+
+        val (w, h) = match.destructured.toList().map { it.toInt() }
+
+        if (w !in 1..2000 || h !in 1..2000) {
+            throw ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "썸네일 크기는 1~2000px 범위여야 합니다."
+            )
+        }
+
+        return w to h
+    }
+
+    private fun parseMode(mode: String): ThumbnailMode =
+        when (mode.lowercase()) {
+            "cover" -> ThumbnailMode.COVER
+            "contain", "fit" -> ThumbnailMode.CONTAIN
+            else -> throw ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "mode는 cover 또는 contain 이어야 합니다."
+            )
+        }
+
 
 
     @Operation(summary = "파일 삭제", description = "특정 파일을 소프트 삭제(메타데이터만 변경)합니다.")

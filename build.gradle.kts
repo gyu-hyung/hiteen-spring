@@ -124,6 +124,10 @@ dependencies {
     //poi
     implementation("org.apache.poi:poi-ooxml:5.2.5")
 
+    //asset
+    implementation("net.coobird:thumbnailator:0.4.20")
+    implementation("com.drewnoakes:metadata-extractor:2.19.0") // (선택) exif 관련 보조
+
 }
 
 
