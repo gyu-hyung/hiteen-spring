@@ -81,8 +81,9 @@ dependencies {
     implementation("com.github.ben-manes.caffeine:caffeine:3.1.8")
 
     // Mongo DB
-	implementation("org.springframework.data:spring-data-mongodb:4.3.0")
-	implementation("org.springframework.boot:spring-boot-starter-data-mongodb-reactive")
+//	implementation("org.springframework.data:spring-data-mongodb:4.3.0")
+    implementation("org.jetbrains.kotlin:kotlin-reflect")
+    implementation("org.springframework.boot:spring-boot-starter-data-mongodb-reactive")
 
 	// JSON
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
