@@ -4,7 +4,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kotlinx.coroutines.withContext
 import kr.jiasoft.hiteen.feature.asset.domain.AssetCategory
+import kr.jiasoft.hiteen.feature.asset.domain.ThumbnailMode
 import kr.jiasoft.hiteen.feature.asset.dto.StoredFile
+import net.coobird.thumbnailator.Thumbnails
+import net.coobird.thumbnailator.geometry.Positions
 import org.springframework.http.codec.multipart.FilePart
 import java.awt.image.BufferedImage
 import java.nio.file.Files
@@ -82,31 +85,53 @@ class AssetStorage(
         sourcePath: Path,
         ext: String,
         width: Int,
-        height: Int
+        height: Int,
+        mode: ThumbnailMode = ThumbnailMode.COVER,
     ): StoredFile = withContext(Dispatchers.IO) {
 
-        val image = ImageIO.read(sourcePath.toFile())
-            ?: throw IllegalArgumentException("이미지 파일이 아닙니다")
+        val safeExt = ext.lowercase()
+        if (safeExt == "gif" || safeExt == "svg") {
+            throw IllegalArgumentException("GIF, SVG는 리사이즈 불가")
+        }
 
-        val resized = BufferedImage(width, height, image.type.takeIf { it != 0 } ?: BufferedImage.TYPE_INT_RGB)
-        val graphics = resized.createGraphics()
-        graphics.drawImage(image, 0, 0, width, height, null)
-        graphics.dispose()
-
-        // 저장 경로: thumb/{width}x{height}/YYYY/MM/DD/
         val today = LocalDate.now()
         val dir = root.resolve(
-            "thumb/${width}x${height}/${today.year}/${"%02d".format(today.monthValue)}/${"%02d".format(today.dayOfMonth)}"
+            "thumb/${mode.name.lowercase()}/${width}x${height}/${today.year}/${"%02d".format(today.monthValue)}/${"%02d".format(today.dayOfMonth)}"
         )
         Files.createDirectories(dir)
 
-        val newName = "${UUID.randomUUID()}.$ext"
+        val newName = "${UUID.randomUUID()}.$safeExt"
         val dest = dir.resolve(newName)
 
-        ImageIO.write(resized, ext, dest.toFile())
+        val builder = Thumbnails.of(sourcePath.toFile())
+            .useExifOrientation(true)    // ✅ 회전 문제 해결(핵심)
+            .outputFormat(safeExt)
+            .outputQuality(0.9)          // 필요하면 조절
 
-        val mime = Files.probeContentType(dest)
+        when (mode) {
+            ThumbnailMode.COVER -> {
+                // ✅ 비율 유지 + 중앙 크롭 → 결과는 정확히 width x height
+                builder
+                    .crop(Positions.CENTER)
+                    .size(width, height)
+            }
+            ThumbnailMode.CONTAIN -> {
+                // ✅ 비율 유지 + 전체가 보이게 → 한 변이 덜 찰 수 있음(여백은 프론트에서 object-fit: contain)
+                builder
+                    .size(width, height)
+                    .keepAspectRatio(true)
+            }
+        }
+
+        builder.toFile(dest.toFile())
+
+        val mime = try { Files.probeContentType(dest) } catch (_: Throwable) { null }
         val size = Files.size(dest)
+
+        // 실제 생성된 크기 다시 읽기(정확도)
+        val (outW, outH) = try {
+            javax.imageio.ImageIO.read(dest.toFile())?.let { it.width to it.height } ?: (width to height)
+        } catch (_: Throwable) { width to height }
 
         val relDir = root.relativize(dir).toString().replace('\\', '/') + "/"
 
@@ -114,13 +139,14 @@ class AssetStorage(
             relativePath = relDir,
             absolutePath = dest,
             originFileName = newName,
-            ext = ext,
+            ext = safeExt,
             size = size,
-            width = width,
-            height = height,
+            width = outW,
+            height = outH,
             mimeTypeGuess = mime
         )
     }
+
 
 
 

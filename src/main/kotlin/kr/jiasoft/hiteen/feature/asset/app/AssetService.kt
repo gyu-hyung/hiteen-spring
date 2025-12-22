@@ -6,6 +6,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kr.jiasoft.hiteen.feature.asset.domain.AssetCategory
 import kr.jiasoft.hiteen.feature.asset.domain.AssetEntity
+import kr.jiasoft.hiteen.feature.asset.domain.ThumbnailMode
 import kr.jiasoft.hiteen.feature.asset.dto.AssetResponse
 import kr.jiasoft.hiteen.feature.asset.dto.StoredFile
 import kr.jiasoft.hiteen.feature.asset.dto.toResponse
@@ -130,15 +131,12 @@ class AssetService(
         uid: UUID,
         width: Int,
         height: Int,
-        currentUserId: Long? = null
+        currentUserId: Long? = null,
+        mode: ThumbnailMode = ThumbnailMode.COVER,
     ): AssetEntity {
-
         val original = findByUid(uid) ?: throw IllegalArgumentException("존재하지 않는 파일")
 
-        // 이미 동일한 크기 썸네일이 존재하면 재사용
-        val existing =
-            assetRepository.findByOriginAndSize(original.id, width, height)
-
+        val existing = assetRepository.findByOriginAndSize(original.id, width, height)
         if (existing != null) return existing
 
         val originalPath = resolveFilePath(original.filePath + original.storeFileName)
@@ -147,7 +145,13 @@ class AssetService(
         if (original.ext?.lowercase() in listOf("gif", "svg"))
             throw IllegalArgumentException("GIF, SVG는 리사이즈 불가")
 
-        val resizedStored = storage.createThumbnail(originalPath, original.ext!!, width, height)
+        val resizedStored = storage.createThumbnail(
+            sourcePath = originalPath,
+            ext = original.ext!!,
+            width = width,
+            height = height,
+            mode = mode,
+        )
 
         val entity = AssetEntity(
             originFileName = "${original.originFileName.removeSuffix(".${original.ext}")}_${width}x${height}.${original.ext}",
@@ -162,9 +166,9 @@ class AssetService(
             createdId = currentUserId,
             createdAt = OffsetDateTime.now(),
         )
-
         return assetRepository.save(entity)
     }
+
 
 
     suspend fun findByUid(uid: UUID): AssetEntity? = assetRepository.findByUid(uid)
