@@ -1,6 +1,8 @@
 package kr.jiasoft.hiteen.feature.giftishow.infra
 
 import kotlinx.coroutines.flow.Flow
+import kr.jiasoft.hiteen.admin.dto.GoodsCategoryDto
+import kr.jiasoft.hiteen.admin.dto.GoodsTypeDto
 import kr.jiasoft.hiteen.feature.giftishow.domain.GoodsGiftishowEntity
 import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
@@ -11,10 +13,144 @@ interface GiftishowGoodsRepository : CoroutineCrudRepository<GoodsGiftishowEntit
 
     fun findAllByGoodsCodeIn(goodsCodes: List<String>): Flow<GoodsGiftishowEntity>
 
-    @Query("UPDATE goods_giftishow SET del_yn = 1")
+    @Query("UPDATE goods_giftishow SET del_yn = 1 WHERE gg.goods_code LIKE 'G%'")
     suspend fun markAllDeleted()
 
     suspend fun findAllByOrderByCreatedAtDesc(): List<GoodsGiftishowEntity>
+
+
+
+
+
+
+    @Query("""
+        SELECT category1_seq AS category_seq,
+               MAX(category1_name) AS category_name
+        FROM goods_giftishow
+        GROUP BY category1_seq
+        ORDER BY category1_seq
+    """)
+    fun findCategories(): Flow<GoodsCategoryDto>
+
+
+    @Query("""
+        SELECT DISTINCT
+            goods_type_cd AS goods_type_cd,
+            goods_type_nm AS goods_type_name
+        FROM goods_giftishow
+        ORDER BY goods_type_cd
+    """)
+    fun findGoodsTypes(): Flow<GoodsTypeDto>
+
+
+
+
+    /**
+     * 🔹 전체 개수 조회
+     */
+    @Query("""
+        SELECT COUNT(*)
+        FROM goods_giftishow g
+        WHERE
+        
+            (
+                :search IS NULL
+                OR (
+                    :searchType = 'ALL' AND (
+                        g.goods_name ILIKE CONCAT('%', :search, '%')
+                        OR g.brand_name ILIKE CONCAT('%', :search, '%')
+                        OR g.category1_name ILIKE CONCAT('%', :search, '%')
+                        OR g.goods_type_nm ILIKE CONCAT('%', :search, '%')
+                        OR g.goods_type_dtl_nm ILIKE CONCAT('%', :search, '%')
+                        OR g.srch_keyword ILIKE CONCAT('%', :search, '%')
+                    )
+                )
+                OR (:searchType = 'goodsName' AND g.goods_name ILIKE CONCAT('%', :search, '%'))
+                OR (:searchType = 'brandName' AND g.brand_name ILIKE CONCAT('%', :search, '%'))
+                OR (:searchType = 'category1Name' AND g.category1_name ILIKE CONCAT('%', :search, '%'))
+                OR (:searchType = 'goodsTypeName' AND (
+                      g.goods_type_nm ILIKE CONCAT('%', :search, '%')
+                      OR g.goods_type_dtl_nm ILIKE CONCAT('%', :search, '%')
+                ))
+            )
+            
+            AND (
+                :status IS NULL OR :status = 'ALL'
+                OR (:status = 'ACTIVE' AND g.del_yn = 0)
+                OR (:status = 'DELETED' AND g.del_yn = 1)
+            )
+            
+            AND (:categorySeq IS NULL OR g.category1_seq = :categorySeq)
+            AND (:goodsTypeCd IS NULL OR g.goods_type_cd = :goodsTypeCd)
+            
+    """)
+    suspend fun totalCount(
+        search: String?,
+        searchType: String,
+        status: String?,
+        categorySeq: Int?,
+        goodsTypeCd: String?,
+    ): Int
+
+
+
+    /**
+     * 🔹 페이징 조회 (AdminFriendResponse)
+     */
+    @Query("""
+        SELECT g.*
+        FROM goods_giftishow g
+        WHERE
+        
+            (
+                :search IS NULL
+                OR (
+                    :searchType = 'ALL' AND (
+                        g.goods_name ILIKE CONCAT('%', :search, '%')
+                        OR g.brand_name ILIKE CONCAT('%', :search, '%')
+                        OR g.category1_name ILIKE CONCAT('%', :search, '%')
+                        OR g.goods_type_nm ILIKE CONCAT('%', :search, '%')
+                        OR g.goods_type_dtl_nm ILIKE CONCAT('%', :search, '%')
+                        OR g.srch_keyword ILIKE CONCAT('%', :search, '%')
+                    )
+                )
+                OR (:searchType = 'goodsName' AND g.goods_name ILIKE CONCAT('%', :search, '%'))
+                OR (:searchType = 'brandName' AND g.brand_name ILIKE CONCAT('%', :search, '%'))
+                OR (:searchType = 'category1Name' AND g.category1_name ILIKE CONCAT('%', :search, '%'))
+                OR (:searchType = 'goodsTypeName' AND (
+                      g.goods_type_nm ILIKE CONCAT('%', :search, '%')
+                      OR g.goods_type_dtl_nm ILIKE CONCAT('%', :search, '%')
+                ))
+            )
+            
+            AND (
+                :status IS NULL OR :status = 'ALL'
+                OR (:status = 'ACTIVE' AND g.del_yn = 0)
+                OR (:status = 'DELETED' AND g.del_yn = 1)
+            )
+            
+            AND (:categorySeq IS NULL OR g.category1_seq = :categorySeq)
+            AND (:goodsTypeCd IS NULL OR g.goods_type_cd = :goodsTypeCd)
+
+        ORDER BY
+            CASE WHEN :order = 'DESC' THEN g.created_at END DESC,
+            CASE WHEN :order = 'ASC' THEN g.created_at END ASC
+            
+        LIMIT :size OFFSET (:page - 1) * :size
+    """)
+    fun listByPage(
+        page: Int,
+        size: Int,
+        order: String,
+        search: String?,
+        searchType: String,
+        status: String?,
+        categorySeq: Int?,
+        goodsTypeCd: String?,
+    ): Flow<GoodsGiftishowEntity>
+
+
+
 
 
 }
