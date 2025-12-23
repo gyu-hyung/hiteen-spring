@@ -1,8 +1,10 @@
 package kr.jiasoft.hiteen.admin.app
 
 import kotlinx.coroutines.flow.toList
+import kr.jiasoft.hiteen.admin.dto.AdminFollowResponse
 import kr.jiasoft.hiteen.admin.dto.AdminFriendResponse
 import kr.jiasoft.hiteen.admin.dto.AdminUserResponse
+import kr.jiasoft.hiteen.admin.infra.AdminFollowRepository
 import kr.jiasoft.hiteen.admin.infra.AdminFriendRepository
 import kr.jiasoft.hiteen.admin.infra.AdminGoodsRepository
 import kr.jiasoft.hiteen.admin.infra.AdminUserRepository
@@ -13,7 +15,6 @@ import kr.jiasoft.hiteen.feature.giftishow.domain.GoodsGiftishowEntity
 import kr.jiasoft.hiteen.feature.play.domain.GameEntity
 import kr.jiasoft.hiteen.feature.play.infra.GameRepository
 import kr.jiasoft.hiteen.feature.poll.dto.PollSelectResponse
-import kr.jiasoft.hiteen.feature.relationship.domain.FollowStatus
 import kr.jiasoft.hiteen.feature.user.app.UserService
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import org.springframework.http.ResponseEntity
@@ -33,6 +34,7 @@ class AdminUserController (
     private val userService: UserService,
     private val adminUserRepository: AdminUserRepository,
     private val adminFriendRepository: AdminFriendRepository,
+    private val adminFollowRepository: AdminFollowRepository,
     private val adminGoodsRepository: AdminGoodsRepository,
 
     //게임목록
@@ -131,6 +133,51 @@ class AdminUserController (
     }
 
 
+
+    @GetMapping("/follows")
+    suspend fun getFollows(
+        @RequestParam page: Int = 1,
+        @RequestParam size: Int = 10,
+        @RequestParam order: String = "DESC",
+        @RequestParam search: String? = null,
+        @RequestParam searchType: String = "ALL",
+        @RequestParam status: String? = null,
+        @RequestParam uid: String? = null,
+
+        @RequestParam followType: String = "FOLLOWING",
+
+        @AuthenticationPrincipal(expression = "user") user: UserEntity,
+    ): ResponseEntity<ApiResult<ApiPage<AdminFollowResponse>>> {
+
+        val uuid = uid?.let { UUID.fromString(it) }
+
+        val list = adminFollowRepository.listByPage(
+            page = page,
+            size = size,
+            order = order,
+            search = search,
+            searchType = searchType,
+            status = status,
+            uid = uuid,
+            followType = followType,
+        ).toList()
+
+        val totalCount = adminFollowRepository.totalCount(
+            search = search,
+            searchType = searchType,
+            status = status,
+            uid = uuid,
+            followType = followType,
+        )
+
+        return ResponseEntity.ok(
+            ApiResult.success(PageUtil.of(list, totalCount, page, size))
+        )
+    }
+
+
+
+
     @GetMapping("/goods")
     suspend fun getGoods(
         @RequestParam page: Int = 1,
@@ -162,52 +209,6 @@ class AdminUserController (
         )
 
         return ResponseEntity.ok(ApiResult.success(PageUtil.of(list, totalCount, page, size)))
-    }
-
-
-
-    data class FollowAdminResponse (
-    val no: Int,
-    val nickname: String,
-    val mbti: String,
-    val gender: String,
-    val grade: String,
-    val interests: String,
-    val status: FollowStatus,
-    )
-
-    @GetMapping("/follows")
-    suspend fun getFollows(
-        @RequestParam page: Int = 1,
-        @RequestParam size: Int = 10,
-        @RequestParam order: String = "DESC",
-        @RequestParam search: String? = null,
-        @RequestParam searchType: String = "ALL",
-        @RequestParam id: Long? = null,
-        @RequestParam uid: String? = null,
-        @RequestParam status: String? = null,
-        @RequestParam role: String? = null,
-        @AuthenticationPrincipal(expression = "user") user: UserEntity,
-    ) : ResponseEntity<ApiResult<ApiPage<FollowAdminResponse>>> {
-
-        val res = listOf(
-            FollowAdminResponse(1, "홍길동", "ENFP", "남", "고2", "#운동, #축구, #독서", FollowStatus.ACCEPTED),
-            FollowAdminResponse(2, "홍길동", "ENFP", "남", "고2", "#운동, #축구, #독서", FollowStatus.PENDING),
-            FollowAdminResponse(3, "홍길동", "ENFP", "남", "고2", "#운동, #축구, #독서", FollowStatus.ACCEPTED),
-            FollowAdminResponse(4, "홍길동", "ENFP", "남", "고2", "#운동, #축구, #독서", FollowStatus.PENDING),
-            FollowAdminResponse(5, "홍길동", "ENFP", "남", "고2", "#운동, #축구, #독서", FollowStatus.ACCEPTED),
-        )
-
-        //페이징
-        val pageData = PageUtil.of(
-            items = res,
-            total = res.size,
-            page = page,
-            size = size
-        )
-
-        return ResponseEntity.ok(ApiResult.Companion.success(pageData))
-
     }
 
 

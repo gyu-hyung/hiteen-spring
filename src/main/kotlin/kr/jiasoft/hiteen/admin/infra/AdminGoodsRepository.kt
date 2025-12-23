@@ -42,7 +42,6 @@ interface AdminGoodsRepository : CoroutineCrudRepository<GoodsGiftishowEntity, L
                 OR (:status = 'DELETED' AND g.del_yn = 1)
             )
             
-            AND g.del_yn = 0
     """)
     suspend fun totalCount(
         search: String?,
