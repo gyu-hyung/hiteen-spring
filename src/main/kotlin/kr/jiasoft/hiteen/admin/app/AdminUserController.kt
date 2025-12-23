@@ -4,6 +4,8 @@ import kotlinx.coroutines.flow.toList
 import kr.jiasoft.hiteen.admin.dto.AdminFollowResponse
 import kr.jiasoft.hiteen.admin.dto.AdminFriendResponse
 import kr.jiasoft.hiteen.admin.dto.AdminUserResponse
+import kr.jiasoft.hiteen.admin.dto.GoodsCategoryDto
+import kr.jiasoft.hiteen.admin.dto.GoodsTypeDto
 import kr.jiasoft.hiteen.admin.infra.AdminFollowRepository
 import kr.jiasoft.hiteen.admin.infra.AdminFriendRepository
 import kr.jiasoft.hiteen.admin.infra.AdminGoodsRepository
@@ -106,7 +108,7 @@ class AdminUserController (
         @RequestParam searchType: String = "ALL",
         @RequestParam status: String? = null,
         @RequestParam id: Long? = null,
-        @RequestParam uid: String? = null,
+        @RequestParam uid: UUID? = null,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ): ResponseEntity<ApiResult<ApiPage<AdminFriendResponse>>> {
 
@@ -118,7 +120,7 @@ class AdminUserController (
             search = search,
             searchType = searchType,
             status = status,
-            uid = UUID.fromString(uid),
+            uid = uid,
         ).toList()
 
         // 2) 전체 개수 조회
@@ -126,7 +128,7 @@ class AdminUserController (
             search = search,
             searchType = searchType,
             status = status,
-            uid = UUID.fromString(uid),
+            uid = uid,
         )
 
         return ResponseEntity.ok(ApiResult.success(PageUtil.of(list, totalCount, page, size)))
@@ -188,6 +190,12 @@ class AdminUserController (
         @RequestParam status: String? = null,
         @RequestParam id: Long? = null,
         @RequestParam uid: String? = null,
+
+        // ⭐ 추가
+        @RequestParam categorySeq: Int? = null,
+        @RequestParam goodsTypeCd: String? = null,
+
+
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ): ResponseEntity<ApiResult<ApiPage<GoodsGiftishowEntity>>> {
 
@@ -199,6 +207,8 @@ class AdminUserController (
             search = search,
             searchType = searchType,
             status = status,
+            categorySeq = categorySeq,
+            goodsTypeCd = goodsTypeCd,
         ).toList()
 
         // 2) 전체 개수 조회
@@ -206,9 +216,27 @@ class AdminUserController (
             search = search,
             searchType = searchType,
             status = status,
+
+            categorySeq = categorySeq,
+            goodsTypeCd = goodsTypeCd,
         )
 
         return ResponseEntity.ok(ApiResult.success(PageUtil.of(list, totalCount, page, size)))
+    }
+
+
+    @GetMapping("/goods/categories")
+    suspend fun getGoodsCategories(): ResponseEntity<ApiResult<List<GoodsCategoryDto>>> {
+        val list = adminGoodsRepository.findCategories().toList()
+        return ResponseEntity.ok(ApiResult.success(list))
+    }
+
+
+
+    @GetMapping("/goods/types")
+    suspend fun getGoodsTypes(): ResponseEntity<ApiResult<List<GoodsTypeDto>>> {
+        val list = adminGoodsRepository.findGoodsTypes().toList()
+        return ResponseEntity.ok(ApiResult.success(list))
     }
 
 
