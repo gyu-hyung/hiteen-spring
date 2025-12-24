@@ -4,9 +4,8 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import kotlinx.coroutines.flow.toList
 import kr.jiasoft.hiteen.admin.dto.GoodsCategoryDto
 import kr.jiasoft.hiteen.admin.dto.GoodsTypeDto
-import kr.jiasoft.hiteen.common.dto.ApiPage
+import kr.jiasoft.hiteen.common.dto.ApiPageCursor
 import kr.jiasoft.hiteen.common.dto.ApiResult
-import kr.jiasoft.hiteen.common.dto.PageUtil
 import kr.jiasoft.hiteen.feature.gift.dto.GiftBuyRequest
 import kr.jiasoft.hiteen.feature.gift.dto.GiftProvideRequest
 import kr.jiasoft.hiteen.feature.gift.dto.GiftIssueRequest
@@ -38,7 +37,7 @@ class GiftController (
     suspend fun findGift(
         giftUserId: Long,
         @AuthenticationPrincipal(expression = "user") user: UserEntity
-    ): ResponseEntity<ApiResult<GiftResponse>> {
+    ): ResponseEntity<ApiResult<GiftResponse?>> {
         return ResponseEntity.ok(ApiResult.success(giftAppService.findGift(user.id, giftUserId)))
     }
 
@@ -133,46 +132,40 @@ class GiftController (
      * */
     @GetMapping("/goods")
     suspend fun getGoods(
-        @RequestParam page: Int = 1,
         @RequestParam size: Int = 10,
-        @RequestParam order: String = "DESC",
+        @RequestParam(required = false) lastId: Long?,   // ⭐ id 커서
         @RequestParam search: String? = null,
         @RequestParam searchType: String = "ALL",
-//        @RequestParam status: String? = null,
-        @RequestParam id: Long? = null,
-        @RequestParam uid: String? = null,
-
-        // ⭐ 추가
         @RequestParam categorySeq: Int? = null,
         @RequestParam goodsTypeCd: String? = null,
-
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
-    ): ResponseEntity<ApiResult<ApiPage<GoodsGiftishowEntity>>> {
+    ): ResponseEntity<ApiResult<ApiPageCursor<GoodsGiftishowEntity>>> {
 
-
-        // 1) 목록 조회
-        val list = giftishowGoodsRepository.listByPage(
-            page = page,
+        val list = giftishowGoodsRepository.listByCursorId(
             size = size,
-            order = order,
+            lastId = lastId,
             search = search,
             searchType = searchType,
-            status = "ACTIVE",
+//            status = "ACTIVE",
             categorySeq = categorySeq,
             goodsTypeCd = goodsTypeCd,
         ).toList()
 
-        // 2) 전체 개수 조회
-        val totalCount = giftishowGoodsRepository.totalCount(
-            search = search,
-            searchType = searchType,
-            status = "ACTIVE",
-            categorySeq = categorySeq,
-            goodsTypeCd = goodsTypeCd,
-        )
+        // 다음 커서 (마지막 id)
+        val nextCursor = list.lastOrNull()?.id?.toString()
 
-        return ResponseEntity.ok(ApiResult.success(PageUtil.of(list, totalCount, page, size)))
+        return ResponseEntity.ok(
+            ApiResult.success(
+                ApiPageCursor(
+                    items = list,
+                    nextCursor = nextCursor,
+                    perPage = size
+                )
+            )
+        )
     }
+
+
 
 
 }

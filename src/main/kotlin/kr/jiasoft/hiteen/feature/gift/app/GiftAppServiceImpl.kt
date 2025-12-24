@@ -72,9 +72,10 @@ class GiftAppServiceImpl (
     private lateinit var callbackNo: String
 
 
-    override suspend fun findGift(receiverUserId: Long, giftUserId: Long) : GiftResponse{
+    override suspend fun findGift(receiverUserId: Long, giftUserId: Long) : GiftResponse {
         val userSummary = userService.findUserSummary(receiverUserId)
         val response = giftRepository.findWithGiftUserByUserId(receiverUserId, giftUserId)
+            ?: throw IllegalArgumentException("No gift user found for $receiverUserId")
         val goods = response.goodsCode?.let {
             giftishowGoodsRepository.findByGoodsCode(it)
         }

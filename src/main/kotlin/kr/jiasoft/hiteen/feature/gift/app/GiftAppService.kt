@@ -11,7 +11,7 @@ import java.util.UUID
 interface GiftAppService {
 
     /** 선물 조회 */
-    suspend fun findGift(receiverUserId: Long, giftUserId: Long) : GiftResponse
+    suspend fun findGift(receiverUserId: Long, giftUserId: Long) : GiftResponse?
 
     /** 사용자 -> 선물 구매 */
     suspend fun buyGift(userId: Long, userUid: UUID, req: GiftBuyRequest) : GiftResponse
