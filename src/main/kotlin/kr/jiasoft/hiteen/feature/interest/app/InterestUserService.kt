@@ -2,7 +2,9 @@ package kr.jiasoft.hiteen.feature.interest.app
 
 import kotlinx.coroutines.flow.count
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.flow.toSet
 import kr.jiasoft.hiteen.common.exception.BusinessValidationException
 import kr.jiasoft.hiteen.feature.contact.infra.UserContactRepository
 import kr.jiasoft.hiteen.feature.interest.domain.InterestMatchHistoryEntity
@@ -84,10 +86,14 @@ class InterestUserService(
             return interestUserRepository.getInterestResponseById(exist.id, null).firstOrNull()
         }
 
-        // 관심사 5개 이상 등록 불가 ('추천방식', '추천옵션', '추천제외' 제외)
-        interestUserRepository.findByUserIdAndNotInSystemCategory(user.id).count()
-            .takeIf { it >= 5 }
-            ?.let { throw BusinessValidationException(mapOf("message" to "관심사가 5개를 초과했습니다.")) }
+        val systemIds = interestRepository.findAllSystemCategory().map { it.id }.toSet()
+
+        if(!systemIds.contains(interestId)){
+            // 관심사 5개 이상 등록 불가 ('추천방식', '추천옵션', '추천제외' 제외)
+            interestUserRepository.findByUserIdAndNotInSystemCategory(user.id).count()
+                .takeIf { it >= 5 }
+                ?.let { throw BusinessValidationException(mapOf("message" to "관심사가 5개를 초과했습니다.")) }
+        }
 
         val entity = InterestUserEntity(
             interestId = interestId,
