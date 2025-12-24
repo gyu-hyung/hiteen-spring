@@ -45,7 +45,8 @@ interface GiftRepository : CoroutineCrudRepository<GiftEntity, Long> {
     suspend fun findAllWithGiftUserByUserId(userId: Long) : Flow<GiftRecord>
 
 
-    @Query("""
+    @Query(
+        """
         SELECT 
             g.id as gift_id,
             g.uid as gift_uid,
@@ -78,8 +79,9 @@ interface GiftRepository : CoroutineCrudRepository<GiftEntity, Long> {
         left join gift_users gu on g.id = gu.gift_id
         where gu.user_id = :userId
         and gu.id = :giftUserId
-    """)
-    suspend fun findWithGiftUserByUserId(userId: Long, giftUserId: Long) : GiftRecord
+    """
+    )
+    suspend fun findWithGiftUserByUserId(userId: Long, giftUserId: Long): GiftRecord?
 
 
 }

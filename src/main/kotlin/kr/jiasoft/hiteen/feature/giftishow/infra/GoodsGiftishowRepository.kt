@@ -150,6 +150,46 @@ interface GiftishowGoodsRepository : CoroutineCrudRepository<GoodsGiftishowEntit
     ): Flow<GoodsGiftishowEntity>
 
 
+    @Query("""
+        SELECT g.*
+        FROM goods_giftishow g
+        WHERE
+            (
+                :search IS NULL
+                OR (
+                    :searchType = 'ALL' AND (
+                        g.goods_name ILIKE CONCAT('%', :search, '%')
+                        OR g.brand_name ILIKE CONCAT('%', :search, '%')
+                        OR g.category1_name ILIKE CONCAT('%', :search, '%')
+                        OR g.goods_type_nm ILIKE CONCAT('%', :search, '%')
+                        OR g.goods_type_dtl_nm ILIKE CONCAT('%', :search, '%')
+                        OR g.srch_keyword ILIKE CONCAT('%', :search, '%')
+                    )
+                )
+                OR (:searchType = 'goodsName' AND g.goods_name ILIKE CONCAT('%', :search, '%'))
+                OR (:searchType = 'brandName' AND g.brand_name ILIKE CONCAT('%', :search, '%'))
+                OR (:searchType = 'category1Name' AND g.category1_name ILIKE CONCAT('%', :search, '%'))
+                OR (:searchType = 'goodsTypeName' AND (
+                      g.goods_type_nm ILIKE CONCAT('%', :search, '%')
+                      OR g.goods_type_dtl_nm ILIKE CONCAT('%', :search, '%')
+                ))
+            )
+            AND (g.del_yn = 0 OR g.del_yn IS NULL)
+            AND (:categorySeq IS NULL OR g.category1_seq = :categorySeq)
+            AND (:goodsTypeCd IS NULL OR g.goods_type_cd = :goodsTypeCd)
+            AND (:lastId IS NULL OR g.id < :lastId)
+        ORDER BY g.id DESC
+        LIMIT :size
+    """)
+    fun listByCursorId(
+        size: Int,
+        lastId: Long?,
+        search: String?,
+        searchType: String,
+        categorySeq: Int?,
+        goodsTypeCd: String?,
+    ): Flow<GoodsGiftishowEntity>
+
 
 
 
