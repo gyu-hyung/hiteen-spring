@@ -59,28 +59,65 @@ class GameManageService(
         createNewSeasons(today)   // 2. 새로운 시즌 생성
     }
 
+
+    private fun calculateSeasonRange(today: LocalDate): Pair<LocalDate, LocalDate> {
+        val lastDayOfMonth = today.withDayOfMonth(today.lengthOfMonth())
+
+        val startDay = when {
+            today.dayOfMonth <= 10 -> 1
+            today.dayOfMonth <= 20 -> 11
+            else -> 21
+        }
+
+        val startDate = today.withDayOfMonth(startDay)
+        val endDate = if (startDay == 21) lastDayOfMonth else startDate.plusDays(9)
+
+        return startDate to endDate
+    }
+
+
+
     /**
      * 1. 종료된 시즌 처리 및 랭킹 이력 저장 TODO : Reward
      */
-    suspend fun closeSeasons(endDate: LocalDate? = null) {
+    suspend fun closeSeasons(today: LocalDate = LocalDate.now()) {
 
-        //TODO Flow -> Mono
-        val endedSeasons = seasonRepository.findAllByStatusOrderById("ACTIVE")
-        // 상태 먼저 CLOSED
-        endedSeasons.collect { season ->
+        // 1️⃣ 오늘이 속한 시즌 구간 계산
+        val (startDate, endDate) = calculateSeasonRange(today)
+
+        // 2️⃣ 오늘이 시즌 종료일이 아니면 아무 것도 하지 않음
+        if (today != endDate) {
+            log.info("ℹ️ 오늘($today)은 시즌 종료일($endDate)이 아닙니다. 종료 처리 스킵")
+            return
+        }
+
+        // 3️⃣ 해당 시즌 + ACTIVE 인 시즌만 조회
+        val seasonsToClose = seasonRepository
+            .findByStartDateAndStatus(startDate, "ACTIVE")
+
+        if (seasonsToClose.isEmpty()) {
+            log.info("ℹ️ 종료할 ACTIVE 시즌이 없습니다. ($startDate ~ $endDate)")
+            return
+        }
+
+        // 4️⃣ 시즌 종료 처리
+        seasonsToClose.forEach { season ->
             coroutineScope {
                 launch {
                     seasonRepository.close(season.id)
                 }
                 launch {
-                    saveSeasonRankings(season.id)  // 랭킹 저장
+                    saveSeasonRankings(season.id)
                 }
                 launch {
-                    awards(season.id) // 랭킹 보상
+                    awards(season.id)
                 }
             }
+
+            println("🏁 시즌 종료 처리 완료: ${season.seasonNo} (${season.startDate} ~ ${season.endDate})")
         }
     }
+
 
     /**
      * 2. 새로운 시즌 생성 (10일 단위, 마지막주는 말일까지)
