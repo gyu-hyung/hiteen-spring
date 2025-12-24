@@ -40,7 +40,7 @@ class AdController(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ): ResponseEntity<ApiResult<String>> {
 
-        pointService.applyPolicy(user.id, PointPolicy.TEST)
+        pointService.applyPolicy(user.id, PointPolicy.EARN)
 
         return ResponseEntity.ok(ApiResult.success("통과"))
     }
