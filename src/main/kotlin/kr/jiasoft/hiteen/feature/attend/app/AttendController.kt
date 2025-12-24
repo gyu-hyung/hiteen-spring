@@ -34,7 +34,7 @@ class AttendController(
     suspend fun consecutiveAttendDays(
         @AuthenticationPrincipal(expression = "user") user: UserEntity
     ): ResponseEntity<ApiResult<List<ConsecutiveAttendDay>>> {
-        val data = attendService.consecutiveAttendDays(user)
+        val data = attendService.consecutiveAttendDays(user.id)
         return ResponseEntity.ok(ApiResult.success(data))
     }
 
@@ -44,7 +44,7 @@ class AttendController(
     suspend fun save(
         @AuthenticationPrincipal(expression = "user") user: UserEntity
     ): ResponseEntity<ApiResult<Map<String, Any>>> {
-        val result = attendService.attend(user)
+        val result = attendService.attend(user.id)
         return result.fold(
             onSuccess = {
                 val data = mapOf(

@@ -194,7 +194,7 @@ class ChatService(
         }
 
         // 푸시 전송
-        val pushUserIds = activeMembers.map { it.userId }
+        val pushUserIds = activeMembers.filter { it.userId != sender.id  }.map { it.userId }
         pushService.sendAndSavePush(pushUserIds, PushTemplate.CHAT_MESSAGE.buildPushData("nickname" to sendUser.nickname))
 
         return MessageSummary.from(
