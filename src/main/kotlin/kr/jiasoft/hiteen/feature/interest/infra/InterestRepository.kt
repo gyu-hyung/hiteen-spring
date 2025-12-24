@@ -13,6 +13,8 @@ interface InterestRepository : CoroutineCrudRepository<InterestEntity, Long> {
     @Query("SELECT * FROM interests ORDER BY category, id")
     fun findAllOrderByCategoryAndId(): Flow<InterestEntity>
 
+    @Query("SELECT * FROM interests WHERE category IN ('추천방식', '추천옵션', '추천제외')")
+    fun findAllSystemCategory(): Flow<InterestEntity>
 
     suspend fun findByCategoryAndTopicIn(category: String, topic: List<String>): Flow<InterestEntity>
 
