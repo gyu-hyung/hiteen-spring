@@ -28,6 +28,8 @@ interface GiftAppService {
     /** 선물함 목록조회 */
     suspend fun listGift(userId: Long) : List<GiftResponse>
 
+    suspend fun listGiftByCursor(userId: Long, size: Int, lastId: Long?) : List<GiftResponse>
+
     /** 기프트쇼 상품 목록조회 */
     suspend fun listGoods() : List<GoodsGiftishowEntity>
 

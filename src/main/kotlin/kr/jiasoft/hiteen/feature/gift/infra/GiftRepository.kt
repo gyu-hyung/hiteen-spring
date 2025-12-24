@@ -84,4 +84,48 @@ interface GiftRepository : CoroutineCrudRepository<GiftEntity, Long> {
     suspend fun findWithGiftUserByUserId(userId: Long, giftUserId: Long): GiftRecord?
 
 
+    @Query("""
+        SELECT 
+            g.id as gift_id,
+            g.uid as gift_uid,
+            g."type" as gift_type,
+            g.category as gift_category,
+            gu.id as gift_user_id,
+            gu.status,
+            gu.user_id,
+            g.memo,
+            gu.receive_date,
+            gu.coupon_no,
+            gu.coupon_img,
+            gu.request_date,
+            gu.pub_date,
+            gu.use_date,
+            gu.pub_expired_date,
+            gu.use_expired_date,
+            gu.goods_code,
+            (SELECT gg.goods_name 
+               FROM goods_giftishow gg 
+              WHERE gg.goods_code = gu.goods_code) good_name,
+            gu.game_id,
+            gu.season_id,
+            gu.season_rank,
+            gu.point,
+            gu.delivery_name,
+            gu.delivery_phone,
+            gu.delivery_address1,
+            gu.delivery_address2
+        FROM gift g
+        JOIN gift_users gu ON g.id = gu.gift_id
+        WHERE gu.user_id = :userId
+          AND (:lastId IS NULL OR gu.id < :lastId)
+        ORDER BY gu.id DESC
+        LIMIT :size
+    """)
+    fun findAllWithGiftUserByUserIdCursor(
+        userId: Long,
+        lastId: Long?,
+        size: Int
+    ): Flow<GiftRecord>
+
+
 }

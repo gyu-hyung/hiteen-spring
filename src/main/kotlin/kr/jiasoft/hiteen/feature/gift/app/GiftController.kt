@@ -90,14 +90,36 @@ class GiftController (
 
 
     /**
-     * 선물함 목록조회
-     * */
+     * 선물함 목록조회 (커서 기반)
+     */
     @GetMapping("/myGiftList")
     suspend fun myGiftList(
+        @RequestParam size: Int = 10,
+        @RequestParam(required = false) lastId: Long?,   // ⭐ 커서
+        @RequestParam search: String? = null,
+        @RequestParam searchType: String = "ALL",
         @AuthenticationPrincipal(expression = "user") user: UserEntity
-    ) : ResponseEntity<ApiResult<List<GiftResponse>>> {
-        return ResponseEntity.ok(ApiResult.success(giftAppService.listGift(user.id)))
+    ): ResponseEntity<ApiResult<ApiPageCursor<GiftResponse>>> {
+
+        val list = giftAppService.listGiftByCursor(
+            userId = user.id,
+            size = size,
+            lastId = lastId,
+        )
+
+        val nextCursor = list.lastOrNull()?.giftUserId?.toString()
+
+        return ResponseEntity.ok(
+            ApiResult.success(
+                ApiPageCursor(
+                    items = list,
+                    nextCursor = nextCursor,
+                    perPage = size
+                )
+            )
+        )
     }
+
 
 //    /**
 //     * 기프트쇼 상품 목록조회
