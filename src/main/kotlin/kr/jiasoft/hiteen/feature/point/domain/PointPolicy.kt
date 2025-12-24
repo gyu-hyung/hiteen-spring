@@ -52,5 +52,5 @@ enum class PointPolicy(
     ETC("ETC", 0, null, "기타"),
 
     // --- 기타 ---
-    TEST("TEST", 100, null, "기타")
+    EARN("TEST", 100, null, "광고 시청 보상")
 }
