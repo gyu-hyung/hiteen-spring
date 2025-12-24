@@ -75,7 +75,7 @@ class InterestUserController(
     @Operation(summary = "추천 친구 패스", description = "추천된 친구를 패스합니다.")
     @PostMapping("/pass")
     suspend fun pass(
+        @Parameter(description = "패스할 대상 사용자 ID") @RequestParam userUid: String,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
-        @Parameter(description = "패스할 대상 사용자 ID") @RequestParam targetUserId: Long
-    ) = ResponseEntity.ok(ApiResult.success(service.passFriend(user, targetUserId)))
+    ) = ResponseEntity.ok(ApiResult.success(service.passFriend(user, userUid)))
 }
