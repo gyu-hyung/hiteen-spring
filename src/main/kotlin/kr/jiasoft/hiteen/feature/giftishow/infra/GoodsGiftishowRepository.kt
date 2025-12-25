@@ -13,7 +13,7 @@ interface GiftishowGoodsRepository : CoroutineCrudRepository<GoodsGiftishowEntit
 
     fun findAllByGoodsCodeIn(goodsCodes: List<String>): Flow<GoodsGiftishowEntity>
 
-    @Query("UPDATE goods_giftishow SET del_yn = 1 WHERE gg.goods_code LIKE 'G%'")
+    @Query("UPDATE goods_giftishow gg SET del_yn = 1 WHERE gg.goods_code LIKE 'G%'")
     suspend fun markAllDeleted()
 
     suspend fun findAllByOrderByCreatedAtDesc(): List<GoodsGiftishowEntity>
