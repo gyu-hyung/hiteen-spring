@@ -221,6 +221,7 @@ class AdminUserController (
             goodsTypeCd = goodsTypeCd,
         )
 
+        println("list = ${list}")
         return ResponseEntity.ok(ApiResult.success(PageUtil.of(list, totalCount, page, size)))
     }
 
