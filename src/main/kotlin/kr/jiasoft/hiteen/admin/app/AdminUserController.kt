@@ -237,6 +237,7 @@ class AdminUserController (
     @GetMapping("/goods/types")
     suspend fun getGoodsTypes(): ResponseEntity<ApiResult<List<GoodsTypeDto>>> {
         val list = adminGoodsRepository.findGoodsTypes().toList()
+        println("list = ${list}")
         return ResponseEntity.ok(ApiResult.success(list))
     }
 
