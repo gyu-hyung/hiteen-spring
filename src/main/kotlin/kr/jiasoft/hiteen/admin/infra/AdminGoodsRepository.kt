@@ -66,8 +66,8 @@ interface AdminGoodsRepository : CoroutineCrudRepository<GoodsGiftishowEntity, L
             
             AND (
                 :status IS NULL OR :status = 'ALL'
-                OR (:status = 'ACTIVE' AND g.del_yn = 0)
-                OR (:status = 'DELETED' AND g.del_yn = 1)
+                OR (:status = 'ACTIVE' AND g.status = 1)
+                OR (:status = 'DELETED' AND g.status = 0)
             )
             
             AND (:categorySeq IS NULL OR g.category1_seq = :categorySeq)
@@ -115,14 +115,14 @@ interface AdminGoodsRepository : CoroutineCrudRepository<GoodsGiftishowEntity, L
             
             AND (
                 :status IS NULL OR :status = 'ALL'
-                OR (:status = 'ACTIVE' AND g.del_yn = 0)
-                OR (:status = 'DELETED' AND g.del_yn = 1)
+                OR (:status = 'ACTIVE' AND g.status = 1)
+                OR (:status = 'DELETED' AND g.status = 0)
             )
             
             AND (:categorySeq IS NULL OR g.category1_seq = :categorySeq)
             AND (:goodsTypeCd IS NULL OR g.goods_type_cd = :goodsTypeCd)
 
-        ORDER BY
+        ORDER BY g.status DESC, 
             CASE WHEN :order = 'DESC' THEN g.created_at END DESC,
             CASE WHEN :order = 'ASC' THEN g.created_at END ASC
             
