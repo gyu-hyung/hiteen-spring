@@ -42,6 +42,7 @@ spec:
       volumes:
         - name: config
           configMap:
+            
             name: redis-config
   volumeClaimTemplates:
     - metadata:
