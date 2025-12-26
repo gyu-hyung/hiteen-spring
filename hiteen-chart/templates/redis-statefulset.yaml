@@ -32,6 +32,11 @@ spec:
                 secretKeyRef:
                   name: redis-secret
                   key: redis-password
+            - name: HOSTNAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+
           resources:
             {{- toYaml .Values.redis.resources | nindent 12 }}
           volumeMounts:
