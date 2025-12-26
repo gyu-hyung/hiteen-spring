@@ -76,8 +76,10 @@ spec:
             - /usr/local/etc/redis/redis.conf
 
           ports:
-            - containerPort: {{ .Values.redis.service.port | default 6379 }}
-            - containerPort: {{ .Values.redis.service.clusterPort | default 16379 }}
+            - name: redis
+              containerPort: 6379
+            - name: cluster-bus
+              containerPort: 16379
 
           env:
             - name: POD_NAME
