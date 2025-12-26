@@ -67,8 +67,7 @@ spec:
 
       containers:
         - name: redis
-          image: "{{ .Values.redis.image.repository }}:{{ .Values.
-          redis.image.tag }}"
+          image: "{{ .Values.redis.image.repository }}:{{ .Values.redis.image.tag }}"
           imagePullPolicy: {{ .Values.redis.image.pullPolicy | default "IfNotPresent" }}
 
           # 🔥 envsubst 로 redis.conf 렌더링
