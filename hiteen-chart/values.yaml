@@ -3,8 +3,10 @@
 # ============================================
 namespace: hiteen
 
+{{- if .Values.nodeSelector }}
 nodeSelector:
-  node-type: private
+  {{- toYaml .Values.nodeSelector | nindent 8 }}
+{{- end }}
 
 imagePullSecrets:
   - name: ghcr-secret
