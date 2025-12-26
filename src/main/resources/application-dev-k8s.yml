@@ -42,9 +42,9 @@ spring:
           - redis-0.redis:6379
           - redis-1.redis:6379
           - redis-2.redis:6379
-          - redis-3.redis:6379
-          - redis-4.redis:6379
-          - redis-5.redis:6379
+#          - redis-3.redis:6379
+#          - redis-4.redis:6379
+#          - redis-5.redis:6379
 
       lettuce:
         pool:
