@@ -3,7 +3,8 @@
 # ============================================
 namespace: hiteen
 
-nodeSelector: {}
+nodeSelector:
+  node-type: private
 
 imagePullSecrets:
   - name: ghcr-secret
