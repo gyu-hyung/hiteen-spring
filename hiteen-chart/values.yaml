@@ -110,7 +110,7 @@ soketi:
 # Redis Cluster
 # ============================================
 redis:
-  replicas: 6
+  replicas: 3
   clusterReplicas: 1
   password: "hiteen1234"
 
