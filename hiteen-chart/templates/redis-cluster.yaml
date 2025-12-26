@@ -10,22 +10,18 @@ data:
   redis.conf: |
     port 6379
     bind 0.0.0.0
-
+    
     cluster-enabled yes
     cluster-config-file nodes.conf
     cluster-node-timeout 5000
-
+    
     appendonly yes
     dir /data
     protected-mode no
+    
+    requirepass hiteen1234
+    masterauth hiteen1234
 
-    cluster-announce-hostname ${POD_NAME}.redis.{{ .Values.namespace }}.svc.cluster.local
-    cluster-announce-port 6379
-    cluster-announce-bus-port 16379
-
-
-    requirepass {{ .Values.redis.password }}
-    masterauth {{ .Values.redis.password }}
 
 ---
 # ==============================
@@ -71,16 +67,14 @@ spec:
 
       containers:
         - name: redis
-          image: "{{ .Values.redis.image.repository }}:{{ .Values.redis.image.tag }}"
+          image: "{{ .Values.redis.image.repository }}:{{ .Values.
+          redis.image.tag }}"
           imagePullPolicy: {{ .Values.redis.image.pullPolicy | default "IfNotPresent" }}
 
           # 🔥 envsubst 로 redis.conf 렌더링
           command:
-            - sh
-            - -c
-            - |
-              envsubst < /usr/local/etc/redis/redis.conf > /tmp/redis.conf
-              exec redis-server /tmp/redis.conf
+            - redis-server
+            - /usr/local/etc/redis/redis.conf
 
           ports:
             - containerPort: {{ .Values.redis.service.port | default 6379 }}
