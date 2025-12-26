@@ -63,7 +63,7 @@ backupNfs:
 # Redis Cluster
 # ============================================
 redis:
-  replicas: 3
+  replicas: 6
   clusterReplicas: 1
   password: "hiteen1234"
 
