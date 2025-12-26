@@ -200,7 +200,6 @@ class AdminUserController (
     ): ResponseEntity<ApiResult<ApiPage<GoodsGiftishowEntity>>> {
 
         // 1) 목록 조회
-        println("page = ${page}")
         val list = adminGoodsRepository.listByPage(
             page = page,
             size = size,
