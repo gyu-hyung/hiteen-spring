@@ -19,10 +19,10 @@ data:
     dir /data
     protected-mode no
 
-    # 🔥 K8s 필수 설정 (핵심)
-    cluster-announce-ip ${POD_IP}
+    cluster-announce-hostname ${POD_NAME}.redis.{{ .Values.namespace }}.svc.cluster.local
     cluster-announce-port 6379
     cluster-announce-bus-port 16379
+
 
     requirepass {{ .Values.redis.password }}
     masterauth {{ .Values.redis.password }}
@@ -87,10 +87,10 @@ spec:
             - containerPort: {{ .Values.redis.service.clusterPort | default 16379 }}
 
           env:
-            - name: POD_IP
+            - name: POD_NAME
               valueFrom:
                 fieldRef:
-                  fieldPath: status.podIP
+                  fieldPath: metadata.name
             - name: REDIS_PASSWORD
               valueFrom:
                 secretKeyRef:
