@@ -2,8 +2,7 @@ package kr.jiasoft.hiteen.feature.relationship.domain
 
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Table
-import org.threeten.bp.OffsetDateTime
-
+import java.time.OffsetDateTime
 @Table("relation_history")
 data class RelationEntity(
 

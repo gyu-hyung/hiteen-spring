@@ -178,7 +178,7 @@ class GameService(
                 val scoreEntity = updateScore(existing, finalScore)
                 GameScoreResponse.fromEntity(scoreEntity, score)
             } else {
-                val scoreEntity = updateScore(existing, finalScore)
+                val scoreEntity = updateScore(existing, finalScore, 1)
                 GameScoreResponse.fromEntity(scoreEntity, score)
             }
 

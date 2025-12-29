@@ -81,8 +81,9 @@ dependencies {
     implementation("com.github.ben-manes.caffeine:caffeine:3.1.8")
 
     // Mongo DB
-	implementation("org.springframework.data:spring-data-mongodb:4.3.0")
-	implementation("org.springframework.boot:spring-boot-starter-data-mongodb-reactive")
+//	implementation("org.springframework.data:spring-data-mongodb:4.3.0")
+    implementation("org.jetbrains.kotlin:kotlin-reflect")
+    implementation("org.springframework.boot:spring-boot-starter-data-mongodb-reactive")
 
 	// JSON
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
@@ -123,6 +124,10 @@ dependencies {
 
     //poi
     implementation("org.apache.poi:poi-ooxml:5.2.5")
+
+    //asset
+    implementation("net.coobird:thumbnailator:0.4.20")
+    implementation("com.drewnoakes:metadata-extractor:2.19.0") // (선택) exif 관련 보조
 
 }
 

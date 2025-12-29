@@ -7,6 +7,8 @@ enum class CashPolicy(
     val memoTemplate: String   // 기본 메모
 ) {
 
+
+    POINT_EXCHANGE("POINT_EXCHANGE", 0, null, "포인트 전환"),
     BUY("BUY", 0, null, "상품 구매"),
     CHALLENGE_REWARD("CHALLENGE_REWARD", 0, null, "챌린지 보상"),
 

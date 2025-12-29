@@ -20,8 +20,8 @@ class AttendService(
 ) {
 
     /** 출석 현황 조회 */
-    suspend fun consecutiveAttendDays(user: UserEntity): List<ConsecutiveAttendDay> {
-        val days = attendRepository.findConsecutiveAttendDays(user.id).toList()
+    suspend fun consecutiveAttendDays(userId: Long): List<ConsecutiveAttendDay> {
+        val days = attendRepository.findConsecutiveAttendDays(userId).toList()
 
         if (days.isEmpty()) return emptyList()
 
@@ -42,18 +42,18 @@ class AttendService(
     /**
      * 출석하기
      */
-    suspend fun attend(user: UserEntity): Result<AttendEntity> {
-        val today = LocalDate.now()
+    suspend fun attend(userId: Long, date: LocalDate? = null): Result<AttendEntity> {
+        val today = date ?: LocalDate.now()
 
         // 오늘 이미 출석했는지 확인
-        val existing = attendRepository.findByUserIdAndAttendDate(user.id, today)
+        val existing = attendRepository.findByUserIdAndAttendDate(userId, today)
         if (existing != null) {
             return Result.failure(IllegalStateException("오늘은 이미 출석했어~"))
         }
 
         // 연속 출석일수 조회
 //        val consecutiveDays = attendRepository.countConsecutiveAttendDays(user.id)
-        val result = consecutiveAttendDays(user)
+        val result = consecutiveAttendDays(userId)
         val sumDay = (result.size % 7 + 1).toShort()
 
         // 오늘 적용할 포인트 정책 결정 (1~7일 주기)
@@ -71,7 +71,7 @@ class AttendService(
 
         // 출석 기록 저장
         val attend = AttendEntity(
-            userId = user.id,
+            userId = userId,
             attendDate = today,
             sumDay = sumDay,
             point = policy.amount,
@@ -85,12 +85,12 @@ class AttendService(
         val saved = attendRepository.save(attend)
 
         // 포인트 지급
-        pointService.applyPolicy(user.id, policy, refId = saved.id)
+        pointService.applyPolicy(userId, policy, refId = saved.id)
 
         // 경험치 지급
         when (dayIndex) {
-            7 -> expService.grantExp(user.id, "ATTENDANCE", saved.id, 20)// 7일차 보너스
-            else -> expService.grantExp(user.id, "ATTENDANCE", saved.id, 3)
+            7 -> expService.grantExp(userId, "ATTENDANCE", saved.id, 20)// 7일차 보너스
+            else -> expService.grantExp(userId, "ATTENDANCE", saved.id, 3)
         }
 
         return Result.success(saved)

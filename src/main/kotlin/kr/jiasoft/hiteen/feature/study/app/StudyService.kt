@@ -33,8 +33,7 @@ class StudyService(
      * 영어 단어 학습 시작
      */
     suspend fun startStudy(user: UserEntity, request: StudyStartRequest): StudyStartResponse {
-
-        // 🔹 이미 진행 중인 학습이 있는지 검사
+                // 🔹 이미 진행 중인 학습이 있는지 검사
         val ongoing = studyRepository.findOngoingStudy(user.id, request.seasonId)
 
         if (ongoing != null) {

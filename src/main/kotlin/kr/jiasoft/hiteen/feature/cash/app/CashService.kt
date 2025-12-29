@@ -1,6 +1,7 @@
 package kr.jiasoft.hiteen.feature.cash.app
 
 import kotlinx.coroutines.reactor.awaitSingleOrNull
+import kr.jiasoft.hiteen.common.context.DeltaContextHelper.addDeltaCash
 import kr.jiasoft.hiteen.common.context.DeltaContextHelper.addDeltaPoint
 import kr.jiasoft.hiteen.common.exception.NotEnoughPointException
 import kr.jiasoft.hiteen.feature.cash.domain.CashEntity
@@ -98,7 +99,8 @@ class CashService(
         userId: Long,
         cashPolicy: CashPolicy,
         refId: Long? = null,
-        dynamicCash: Int? = null
+        dynamicCash: Int? = null,
+        description: String? = null,
     ): CashEntity {
 
         // 1. 정책 조회
@@ -132,11 +134,11 @@ class CashService(
             type = if (cashAmount > 0) "CREDIT" else "DEBIT",
             cashableType = cashPolicy.code,
             cashableId = refId,
-            memo = rule.description
+            memo = description?: rule.description
         )
 
         cashSummaryRepository.upsertAddPoint(userId, cashAmount)
-        addDeltaPoint(cashAmount).awaitSingleOrNull()
+        addDeltaCash(cashAmount).awaitSingleOrNull()
 
         return cashRepository.save(entity)
     }

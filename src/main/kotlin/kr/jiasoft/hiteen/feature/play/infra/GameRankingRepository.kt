@@ -2,6 +2,7 @@ package kr.jiasoft.hiteen.feature.play.infra
 
 import kotlinx.coroutines.flow.Flow
 import kr.jiasoft.hiteen.feature.play.domain.GameRankingEntity
+import kr.jiasoft.hiteen.feature.play.dto.RankingRow
 import kr.jiasoft.hiteen.feature.play.dto.RankingView
 import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
@@ -63,10 +64,10 @@ interface GameRankingRepository : CoroutineCrudRepository<GameRankingEntity, Lon
 
 
     @Query("""
-        SELECT gr.*, (SELECT uid FROM users u WHERE u.id = gr.user_id)
+        SELECT gr.*, (SELECT uid FROM users u WHERE u.id = gr.user_id) user_uid
         FROM game_rankings gr
         WHERE gr.season_id = :seasonId
     """)
-    fun findBySeasonId(seasonId: Long): Flow<RankingView>
+    fun findBySeasonId(seasonId: Long): Flow<RankingRow>
 
 }

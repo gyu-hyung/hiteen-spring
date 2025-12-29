@@ -1,15 +1,14 @@
 package kr.jiasoft.hiteen.feature.giftishow.app
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import kotlinx.coroutines.coroutineScope
 import kr.jiasoft.hiteen.feature.gift.app.GiftshowClient
 import kr.jiasoft.hiteen.feature.gift.dto.client.brand.GiftishowBrandDto
 import kr.jiasoft.hiteen.feature.giftishow.domain.GoodsBrandEntity
-import kr.jiasoft.hiteen.feature.giftishow.infra.GiftishowGoodsRepository
 import kr.jiasoft.hiteen.feature.giftishow.infra.GoodsBrandRepository
 import kr.jiasoft.hiteen.feature.giftishow.infra.GoodsCategoryRepository
 import kr.jiasoft.hiteen.feature.giftishow.domain.GoodsCategoryEntity
 import kr.jiasoft.hiteen.feature.giftishow.domain.GoodsGiftishowEntity
+import kr.jiasoft.hiteen.feature.giftishow.infra.GiftishowGoodsRepository
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.OffsetDateTime
@@ -60,7 +59,7 @@ class GiftishowSyncService(
             }
 
             // ------------------------------
-            // 2) 첫 페이지에서만 기존 데이터 soft delete
+            // 2) 첫 페이지에서만 기존 데이터 soft delete `G` 포함 기프트쇼 상품들만
             // ------------------------------
             if (isFirstPage) {
                 repo.markAllDeleted()
@@ -149,7 +148,7 @@ class GiftishowSyncService(
                     vipDiscountRate = detail?.vipDiscountRate,
                     platinumDiscountRate = detail?.platinumDiscountRate,
 
-                    delYn = 0
+                    deletedAt = null,
                 )
 
                 repo.save(entity)
