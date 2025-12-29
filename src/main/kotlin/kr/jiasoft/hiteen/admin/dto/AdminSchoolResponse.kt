@@ -42,5 +42,11 @@ data class AdminSchoolResponse(
     val classCount: Long = 0,
 
     @get:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd")
-    val updatedDate: String? = updatedAt?.format(DateTimeFormatter.ofPattern("yyyy.MM.dd"))
+    val createdDate: String? = createdAt?.format(DateTimeFormatter.ofPattern("yyyy.MM.dd")),
+
+    @get:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd")
+    val updatedDate: String? = updatedAt?.format(DateTimeFormatter.ofPattern("yyyy.MM.dd")),
+
+    @get:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd")
+    val deletedDate: String? = deletedAt?.format(DateTimeFormatter.ofPattern("yyyy.MM.dd"))
 )
