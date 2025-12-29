@@ -137,24 +137,26 @@ class BatchService(
         }
     }
 
-    /**
-     * 매일 새벽 3시에 시간표 정보를 가져옵니다.
-     */
-    @Scheduled(cron = "0 0 3 * * *", zone = "Asia/Seoul")
-    fun timeTableImport() = runBlocking {
-        runBatch("timeTableImport") {
-            timeTableImportService.import()
-        }
-    }
 
     /**
-     * 매일 4시에 기프트쇼 정보 싱크
+     * 매일 3시에 기프트쇼 정보 싱크
      */
-    @Scheduled(cron = "0 0 4 * * *", zone = "Asia/Seoul")
+    @Scheduled(cron = "0 0 3 * * *", zone = "Asia/Seoul")
     fun syncGiftishowData() = runBlocking {
         runBatch("GiftishowSync") {
             giftishowSyncService.syncGoods()
             giftishowSyncService.syncBrandsAndCategories()
         }
     }
+
+    /**
+     * 매일 새벽 4시에 시간표 정보를 가져옵니다.
+     */
+    @Scheduled(cron = "0 0 4 * * *", zone = "Asia/Seoul")
+    fun timeTableImport() = runBlocking {
+        runBatch("timeTableImport") {
+            timeTableImportService.import()
+        }
+    }
+
 }

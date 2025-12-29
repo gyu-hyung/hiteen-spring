@@ -104,14 +104,17 @@ interface BoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
           )
           AND (
               :followOnly = false OR EXISTS (
-                  SELECT 1 FROM follows f WHERE f.user_id = :userId AND f.follow_id = b.created_id
+                  SELECT 1 FROM follows f WHERE f.user_id = :userId AND f.follow_id = b.created_id AND f.status = 'ACCEPTED'
               )
           )
           AND (
               :friendOnly = false OR EXISTS (
                   SELECT 1 FROM friends f 
-                  WHERE (f.user_id = :userId AND f.friend_id = b.created_id)
+                  WHERE status = 'ACCEPTED'
+                  AND (
+                    (f.user_id = :userId AND f.friend_id = b.created_id)
                      OR (f.friend_id = :userId AND f.user_id = b.created_id)
+                  )
               )
           )
           AND (
@@ -226,6 +229,11 @@ interface BoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
             b.status,
             b.address,
             b.detail_address,
+            b.lat, 
+            b.lng,
+            u.grade,
+            (SELECT "type" FROM schools WHERE id = u.school_id LIMIT 1) AS type,
+            (SELECT "name" FROM schools WHERE id = u.school_id LIMIT 1) AS school_name,
             b.created_at     AS created_at,
             b.created_id     AS created_id,
             b.updated_at     AS updated_at,
@@ -236,6 +244,7 @@ interface BoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
                 SELECT array_agg(ba.uid) FROM board_assets ba WHERE ba.board_id = b.id
             ), ARRAY[]::uuid[]) AS attachments
         FROM boards b
+        LEFT JOIN users u ON b.created_id = u.id
         WHERE b.uid = :uid
           AND b.deleted_at IS NULL
     """)

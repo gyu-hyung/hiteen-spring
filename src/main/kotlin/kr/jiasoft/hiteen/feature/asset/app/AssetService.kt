@@ -6,6 +6,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kr.jiasoft.hiteen.feature.asset.domain.AssetCategory
 import kr.jiasoft.hiteen.feature.asset.domain.AssetEntity
+import kr.jiasoft.hiteen.feature.asset.domain.ThumbnailMode
 import kr.jiasoft.hiteen.feature.asset.dto.AssetResponse
 import kr.jiasoft.hiteen.feature.asset.dto.StoredFile
 import kr.jiasoft.hiteen.feature.asset.dto.toResponse
@@ -125,32 +126,65 @@ class AssetService(
         }
     }
 
-
     suspend fun getOrCreateThumbnail(
         uid: UUID,
         width: Int,
         height: Int,
-        currentUserId: Long? = null
+        currentUserId: Long? = null,
+        mode: ThumbnailMode = ThumbnailMode.COVER,
     ): AssetEntity {
 
-        val original = findByUid(uid) ?: throw IllegalArgumentException("존재하지 않는 파일")
+        // 1️⃣ 원본 조회 (DB → non-blocking OK)
+        val original = findByUid(uid)
+            ?: throw IllegalArgumentException("존재하지 않는 파일 (uid=$uid)")
 
-        // 이미 동일한 크기 썸네일이 존재하면 재사용
-        val existing =
-            assetRepository.findByOriginAndSize(original.id, width, height)
-
+        // 2️⃣ 기존 썸네일 재사용
+        val existing = assetRepository.findByOriginAndSize(original.id, width, height)
         if (existing != null) return existing
 
+        // 3️⃣ 원본 파일 검증
         val originalPath = resolveFilePath(original.filePath + original.storeFileName)
-        if (!existsFile(originalPath)) throw IllegalArgumentException("원본 파일 없음")
+        if (!existsFile(originalPath)) {
+            throw IllegalArgumentException("원본 파일 없음 (assetId=${original.id})")
+        }
 
-        if (original.ext?.lowercase() in listOf("gif", "svg"))
-            throw IllegalArgumentException("GIF, SVG는 리사이즈 불가")
+        // 4️⃣ 확장자 검증 (NPE 방지)
+        val ext = original.ext?.lowercase()
+            ?: throw IllegalArgumentException(
+                "확장자가 없는 파일은 썸네일 생성 불가 (assetId=${original.id})"
+            )
 
-        val resizedStored = storage.createThumbnail(originalPath, original.ext!!, width, height)
+        if (ext in listOf("gif", "svg")) {
+            throw IllegalArgumentException("GIF, SVG는 리사이즈 불가 (ext=$ext)")
+        }
 
+        // 5️⃣ 🔥 썸네일 생성만 IO 디스패처로 격리
+//        val resizedStored = withContext(Dispatchers.IO) {
+//            storage.createThumbnail(
+//                sourcePath = originalPath,
+//                ext = ext,
+//                width = width,
+//                height = height,
+//                mode = mode,
+//            )
+//        }
+
+        val resizedStored = storage.createThumbnail(
+            sourcePath = originalPath,
+            ext = ext,
+            width = width,
+            height = height,
+            mode = mode,
+        )
+
+        // 6️⃣ 파일명 안전 생성
+        val baseName = original.originFileName
+            ?.substringBeforeLast('.', original.originFileName)
+            ?: "asset_${original.id}"
+
+        // 7️⃣ 엔티티 생성
         val entity = AssetEntity(
-            originFileName = "${original.originFileName.removeSuffix(".${original.ext}")}_${width}x${height}.${original.ext}",
+            originFileName = "${baseName}_${width}x${height}.$ext",
             storeFileName = resizedStored.absolutePath.fileName.toString(),
             filePath = resizedStored.relativePath,
             type = resizedStored.mimeTypeGuess,
@@ -163,8 +197,16 @@ class AssetService(
             createdAt = OffsetDateTime.now(),
         )
 
-        return assetRepository.save(entity)
+        // 8️⃣ 저장 (동시 생성 대비)
+        return try {
+            assetRepository.save(entity)
+        } catch (e: Exception) {
+            assetRepository.findByOriginAndSize(original.id, width, height)
+                ?: throw e
+        }
     }
+
+
 
 
     suspend fun findByUid(uid: UUID): AssetEntity? = assetRepository.findByUid(uid)

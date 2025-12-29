@@ -26,6 +26,7 @@ import kr.jiasoft.hiteen.feature.giftishow.infra.GiftishowLogsRepository
 import kr.jiasoft.hiteen.feature.play.infra.GameRepository
 import kr.jiasoft.hiteen.feature.play.infra.SeasonRepository
 import kr.jiasoft.hiteen.feature.point.app.PointService
+import kr.jiasoft.hiteen.feature.point.domain.PointPolicy
 import kr.jiasoft.hiteen.feature.push.app.PushService
 import kr.jiasoft.hiteen.feature.push.domain.PushTemplate
 import kr.jiasoft.hiteen.feature.user.app.UserService
@@ -72,9 +73,10 @@ class GiftAppServiceImpl (
     private lateinit var callbackNo: String
 
 
-    override suspend fun findGift(receiverUserId: Long, giftUserId: Long) : GiftResponse{
+    override suspend fun findGift(receiverUserId: Long, giftUserId: Long) : GiftResponse {
         val userSummary = userService.findUserSummary(receiverUserId)
         val response = giftRepository.findWithGiftUserByUserId(receiverUserId, giftUserId)
+            ?: throw IllegalArgumentException("No gift user found for $receiverUserId")
         val goods = response.goodsCode?.let {
             giftishowGoodsRepository.findByGoodsCode(it)
         }
@@ -193,25 +195,25 @@ class GiftAppServiceImpl (
 
         when (gift.type) {
 
-//            GiftType.Point -> {
-//                pointService.applyPolicy(giftUser.userId, PointPolicy.ADMIN, gift.id, giftUser.point)
-//                giftUserRepository.save(giftUser.copy(
-//                    status = GiftStatus.USED.code,
-//                    requestDate = OffsetDateTime.now(),
-//                    pubDate = OffsetDateTime.now(),
-//                    useDate = OffsetDateTime.now(),
-//                ))
-//            }
-//
-//            GiftType.Cash -> {
-//                cashService.applyPolicy(giftUser.userId, CashPolicy.ADMIN, gift.id, giftUser.point)
-//                giftUserRepository.save(giftUser.copy(
-//                    status = GiftStatus.USED.code,
-//                    requestDate = OffsetDateTime.now(),
-//                    pubDate = OffsetDateTime.now(),
-//                    useDate = OffsetDateTime.now(),
-//                ))
-//            }
+            GiftType.Point -> {
+                pointService.applyPolicy(giftUser.userId, PointPolicy.ADMIN, gift.id, giftUser.point)
+                giftUserRepository.save(giftUser.copy(
+                    status = GiftStatus.USED.code,
+                    requestDate = OffsetDateTime.now(),
+                    pubDate = OffsetDateTime.now(),
+                    useDate = OffsetDateTime.now(),
+                ))
+            }
+
+            GiftType.Cash -> {
+                cashService.applyPolicy(giftUser.userId, CashPolicy.ADMIN, gift.id, giftUser.point)
+                giftUserRepository.save(giftUser.copy(
+                    status = GiftStatus.USED.code,
+                    requestDate = OffsetDateTime.now(),
+                    pubDate = OffsetDateTime.now(),
+                    useDate = OffsetDateTime.now(),
+                ))
+            }
 
             GiftType.Voucher -> {
                 // pubExpiredDate 발급만료일자 지났는지?
@@ -385,6 +387,42 @@ class GiftAppServiceImpl (
         }
     }
 
+
+    /** 선물함 목록조회 (커서 기반) */
+    override suspend fun listGiftByCursor(
+        userId: Long,
+        size: Int,
+        lastId: Long?
+    ): List<GiftResponse> {
+
+        val receiver = userService.findUserSummary(userId)
+
+        // 1️⃣ gift + gift_users 커서 조회
+        val records = giftRepository
+            .findAllWithGiftUserByUserIdCursor(
+                userId = userId,
+                lastId = lastId,
+                size = size
+            )
+            .toList()
+
+        if (records.isEmpty()) return emptyList()
+
+        // 2️⃣ goodsCode 추출
+        val goodsCodes = records.mapNotNull { it.goodsCode }.distinct()
+
+        // 3️⃣ goods 조회
+        val goodsMap = giftishowGoodsRepository
+            .findAllByGoodsCodeIn(goodsCodes)
+            .toList()
+            .associateBy { it.goodsCode }
+
+        // 4️⃣ Response 매핑
+        return records.map { record ->
+            val goods = record.goodsCode?.let { goodsMap[it] }
+            record.toResponse(receiver, goods)
+        }
+    }
 
 
     override suspend fun listGoods() : List<GoodsGiftishowEntity> {

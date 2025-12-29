@@ -17,10 +17,11 @@ import kr.jiasoft.hiteen.feature.gift.dto.GiftProvideRequest
 import kr.jiasoft.hiteen.feature.play.domain.GameRankingEntity
 import kr.jiasoft.hiteen.feature.study.domain.QuestionItemsEntity
 import kr.jiasoft.hiteen.feature.play.domain.SeasonEntity
-import kr.jiasoft.hiteen.feature.play.dto.RankingView
+import kr.jiasoft.hiteen.feature.play.dto.RankingRow
 import kr.jiasoft.hiteen.feature.play.infra.*
 import kr.jiasoft.hiteen.feature.study.infra.QuestionItemsRepository
 import kr.jiasoft.hiteen.feature.study.infra.QuestionRepository
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 
@@ -41,6 +42,10 @@ class GameManageService(
 
     ) {
 
+
+    private val log = LoggerFactory.getLogger(GameManageService::class.java)
+
+
     /**
      * 매일 자정 실행
      * - 시즌 종료 처리
@@ -54,29 +59,65 @@ class GameManageService(
         createNewSeasons(today)   // 2. 새로운 시즌 생성
     }
 
+
+    private fun calculateSeasonRange(today: LocalDate): Pair<LocalDate, LocalDate> {
+        val lastDayOfMonth = today.withDayOfMonth(today.lengthOfMonth())
+
+        val startDay = when {
+            today.dayOfMonth <= 10 -> 1
+            today.dayOfMonth <= 20 -> 11
+            else -> 21
+        }
+
+        val startDate = today.withDayOfMonth(startDay)
+        val endDate = if (startDay == 21) lastDayOfMonth else startDate.plusDays(9)
+
+        return startDate to endDate
+    }
+
+
+
     /**
      * 1. 종료된 시즌 처리 및 랭킹 이력 저장 TODO : Reward
      */
-    suspend fun closeSeasons(endDate: LocalDate? = null) {
-        val target = endDate ?: LocalDate.now()
+    suspend fun closeSeasons(today: LocalDate = LocalDate.now()) {
 
-        //TODO Flow -> Mono
-        val endedSeasons = seasonRepository.findAllByEndDateOrderById(target)
-        // 상태 먼저 CLOSED
-        endedSeasons.collect { season ->
+        // 1️⃣ 오늘이 속한 시즌 구간 계산
+        val (startDate, endDate) = calculateSeasonRange(today)
+
+        // 2️⃣ 오늘이 시즌 종료일이 아니면 아무 것도 하지 않음
+        if (today != endDate) {
+            log.info("ℹ️ 오늘($today)은 시즌 종료일($endDate)이 아닙니다. 종료 처리 스킵")
+            return
+        }
+
+        // 3️⃣ 해당 시즌 + ACTIVE 인 시즌만 조회
+        val seasonsToClose = seasonRepository
+            .findByStartDateAndStatus(startDate, "ACTIVE")
+
+        if (seasonsToClose.isEmpty()) {
+            log.info("ℹ️ 종료할 ACTIVE 시즌이 없습니다. ($startDate ~ $endDate)")
+            return
+        }
+
+        // 4️⃣ 시즌 종료 처리
+        seasonsToClose.forEach { season ->
             coroutineScope {
                 launch {
                     seasonRepository.close(season.id)
                 }
                 launch {
-                    saveSeasonRankings(season.id)  // 랭킹 저장
+                    saveSeasonRankings(season.id)
                 }
                 launch {
-                    awards(season.id) // 랭킹 보상
+                    awards(season.id)
                 }
             }
+
+            println("🏁 시즌 종료 처리 완료: ${season.seasonNo} (${season.startDate} ~ ${season.endDate})")
         }
     }
+
 
     /**
      * 2. 새로운 시즌 생성 (10일 단위, 마지막주는 말일까지)
@@ -238,6 +279,7 @@ class GameManageService(
 
 
     suspend fun awards(seasonId: Long) = coroutineScope {
+
         // 1️⃣ 시즌 랭킹 전체 조회
         val rankings = gameRankingRepository
             .findBySeasonId(seasonId)
@@ -251,21 +293,41 @@ class GameManageService(
             .filter { it.status.toInt() == 1 && it.deletedAt == null }
             .toList()
 
-        // 3️⃣ 랭킹 기준 반복
-        rankings.forEach { ranking ->
-            val matchedPolicies = policies.filter { policy ->
-                policy.league == ranking.league &&
-                policy.rank == ranking.rank &&
-                (policy.gameId == null || policy.gameId == ranking.gameId)
+        // 3️⃣ (리그 + 게임) 기준으로 그룹화
+        val groupedByLeagueGame = rankings.groupBy {
+            it.league to it.gameId
+        }
+
+        // 4️⃣ 그룹 단위로 처리
+        groupedByLeagueGame.forEach { (key, groupRankings) ->
+            val (league, gameId) = key
+
+            val participantCount = groupRankings.size
+
+            // 🚫 인원 수 부족 → 전체 스킵
+            if (participantCount < 10) {
+                log.info(
+                    "Reward SKIPPED - season=$seasonId league=$league game=$gameId (count=$participantCount)"
+                )
+                return@forEach
             }
 
-            matchedPolicies.forEach { policy ->
-                launch {
-                    giveReward(
-                        policy = policy,
-                        ranking = ranking,
-                        seasonId = seasonId
-                    )
+            // 5️⃣ 랭킹 단위 정책 매칭
+            groupRankings.forEach { ranking ->
+                val matchedPolicies = policies.filter { policy ->
+                    policy.league == league &&
+                            policy.rank == ranking.rank &&
+                            (policy.gameId == null || policy.gameId == gameId)
+                }
+
+                matchedPolicies.forEach { policy ->
+                    launch {
+                        giveReward(
+                            policy = policy,
+                            ranking = ranking,
+                            seasonId = seasonId
+                        )
+                    }
                 }
             }
         }
@@ -275,9 +337,10 @@ class GameManageService(
 
 
 
+
     private suspend fun giveReward(
         policy: ChallengeRewardPolicyEntity,
-        ranking: RankingView,
+        ranking: RankingRow,
         seasonId: Long
     ) {
         when (policy.type) {
@@ -287,7 +350,8 @@ class GameManageService(
                     userId = ranking.userId,
                     cashPolicy = CashPolicy.CHALLENGE_REWARD,
                     refId = seasonId,
-                    dynamicCash = policy.amount
+                    dynamicCash = policy.amount,
+                    description = "[하이틴] 챌린지 ${ranking.rank}등 보상 도착!"
                 )
             }
 

@@ -58,53 +58,6 @@ backupNfs:
   path: "/srv/nfs/assets"
   storage: "50Gi"
 
-# ============================================
-# Soketi
-# ============================================
-soketi:
-  name: soketi
-  replicaCount: 1
-  image:
-    repository: quay.io/soketi/soketi
-    tag: 1.4-16-debian
-    pullPolicy: Always
-
-  service:
-    name: soketi-svc
-    type: ClusterIP
-    port: 6001
-
-  env:
-    - name: DEFAULT_APP_ID
-      value: "hiteen-app"
-    - name: DEFAULT_APP_KEY
-      value: "hiteen-key"
-    - name: DEFAULT_APP_SECRET
-      value: "hiteen-secret"
-    - name: HOST
-      value: "0.0.0.0"
-    - name: PORT
-      value: "6001"
-    - name: DEBUG
-      value: "1"
-
-    # Redis Cluster adapter
-    - name: ADAPTER_DRIVER
-      value: "redis"
-    - name: REDIS_HOST
-      value: "redis-0.redis.hiteen.svc.cluster.local"
-    - name: REDIS_PORT
-      value: "6379"
-    - name: REDIS_PASSWORD
-      valueFrom:
-        secretKeyRef:
-          name: redis-secret
-          key: redis-password
-
-    - name: CORS_ALLOW_ORIGIN
-      value: "*"
-    - name: CLIENT_MESSAGES_ENABLED
-      value: "true"
 
 # ============================================
 # Redis Cluster

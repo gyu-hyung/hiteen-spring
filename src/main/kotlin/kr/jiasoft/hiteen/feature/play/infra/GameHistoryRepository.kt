@@ -20,6 +20,7 @@ interface GameHistoryRepository : CoroutineCrudRepository<GameHistoryEntity, Lon
         AND participant_id = :participantId
         AND season_id = :seasonId
         AND game_id = :gameId
+        AND status = 'DONE'
     """)
     fun listToday(gameId: Long, participantId: Long, seasonId: Long): Flow<GameHistoryEntity>
 

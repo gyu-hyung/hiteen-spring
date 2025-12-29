@@ -15,7 +15,8 @@ import org.springframework.data.redis.repository.configuration.EnableRedisReposi
 )
 @EnableReactiveMongoRepositories(
     basePackages = [
-        "kr.jiasoft.hiteen.feature.location.infra.db"
+//        "kr.jiasoft.hiteen.feature.location.infra.db"
+        "kr.jiasoft.hiteen"
     ]
 )
 @EnableRedisRepositories(

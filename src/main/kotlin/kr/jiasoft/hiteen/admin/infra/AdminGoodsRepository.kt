@@ -1,11 +1,39 @@
 package kr.jiasoft.hiteen.admin.infra
 
 import kotlinx.coroutines.flow.Flow
+import kr.jiasoft.hiteen.admin.dto.GoodsCategoryDto
+import kr.jiasoft.hiteen.admin.dto.GoodsTypeDto
 import kr.jiasoft.hiteen.feature.giftishow.domain.GoodsGiftishowEntity
 import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 
 interface AdminGoodsRepository : CoroutineCrudRepository<GoodsGiftishowEntity, Long> {
+
+
+//    SELECT DISTINCT
+//    category1_seq AS category_seq,
+//    category1_name AS category_name
+//    FROM goods_giftishow
+//    ORDER BY category1_seq
+    @Query("""
+        SELECT category1_seq AS category_seq,
+               MAX(category1_name) AS category_name
+        FROM goods_giftishow
+        GROUP BY category1_seq
+        ORDER BY category1_seq
+    """)
+    fun findCategories(): Flow<GoodsCategoryDto>
+
+
+    @Query("""
+        SELECT DISTINCT
+            goods_type_cd AS goods_type_cd,
+            goods_type_nm AS goods_type_name
+        FROM goods_giftishow
+        ORDER BY goods_type_cd
+    """)
+    fun findGoodsTypes(): Flow<GoodsTypeDto>
+
 
     /**
      * 🔹 전체 개수 조회
@@ -38,17 +66,21 @@ interface AdminGoodsRepository : CoroutineCrudRepository<GoodsGiftishowEntity, L
             
             AND (
                 :status IS NULL OR :status = 'ALL'
-                OR (:status = 'ACTIVE' AND g.del_yn = 0)
-                OR (:status = 'DELETED' AND g.del_yn = 1)
+                OR (:status = 'ACTIVE' AND g.status = 1)
+                OR (:status = 'DELETED' AND g.status = 0)
             )
             
-            AND g.del_yn = 0
+            AND (:categorySeq IS NULL OR g.category1_seq = :categorySeq)
+            AND (:goodsTypeCd IS NULL OR g.goods_type_cd = :goodsTypeCd)
+            
     """)
     suspend fun totalCount(
         search: String?,
         searchType: String,
         status: String?,
-    ): Int
+        categorySeq: Int?,
+        goodsTypeCd: String?,
+        ): Int
 
 
 
@@ -83,11 +115,14 @@ interface AdminGoodsRepository : CoroutineCrudRepository<GoodsGiftishowEntity, L
             
             AND (
                 :status IS NULL OR :status = 'ALL'
-                OR (:status = 'ACTIVE' AND g.del_yn = 0)
-                OR (:status = 'DELETED' AND g.del_yn = 1)
+                OR (:status = 'ACTIVE' AND g.status = 1)
+                OR (:status = 'DELETED' AND g.status = 0)
             )
             
-        ORDER BY
+            AND (:categorySeq IS NULL OR g.category1_seq = :categorySeq)
+            AND (:goodsTypeCd IS NULL OR g.goods_type_cd = :goodsTypeCd)
+
+        ORDER BY g.status DESC, 
             CASE WHEN :order = 'DESC' THEN g.created_at END DESC,
             CASE WHEN :order = 'ASC' THEN g.created_at END ASC
             
@@ -100,6 +135,8 @@ interface AdminGoodsRepository : CoroutineCrudRepository<GoodsGiftishowEntity, L
         search: String?,
         searchType: String,
         status: String?,
-    ): Flow<GoodsGiftishowEntity>
+        categorySeq: Int?,
+        goodsTypeCd: String?,
+        ): Flow<GoodsGiftishowEntity>
 
 }

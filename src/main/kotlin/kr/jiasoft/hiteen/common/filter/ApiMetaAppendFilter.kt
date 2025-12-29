@@ -1,6 +1,7 @@
 package kr.jiasoft.hiteen.common.filter
 
 import kr.jiasoft.hiteen.common.app.MetaAppendingResponseDecorator
+import kr.jiasoft.hiteen.feature.cash.infra.CashSummaryRepository
 import kr.jiasoft.hiteen.feature.level.infra.TierRepository
 import kr.jiasoft.hiteen.feature.point.infra.PointSummaryRepository
 import kr.jiasoft.hiteen.feature.user.infra.UserRepository
@@ -16,6 +17,7 @@ class ApiMetaAppendFilter(
     private val userRepository: UserRepository,
     private val tierRepository: TierRepository,
     private val pointSummaryRepository: PointSummaryRepository,
+    private val cashSummaryRepository: CashSummaryRepository,
 ) : WebFilter {
 
     override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
@@ -30,7 +32,8 @@ class ApiMetaAppendFilter(
                     principalMono,
                     userRepository,
                     tierRepository,
-                    pointSummaryRepository
+                    pointSummaryRepository,
+                    cashSummaryRepository,
                 )
             ).build()
         )

@@ -16,6 +16,10 @@ class GameManageServiceTest  {
     fun `trigger`() {
         runBlocking {
 //            gameManageService.autoManageSeasons()
+//            gameManageService.saveSeasonRankings(4)
+            gameManageService.awards(4)
+//            gameManageService.generateQuestionItems(5)
+//            gameManageService.closeSeasons()
         }
     }
 

@@ -13,6 +13,11 @@ interface SeasonRepository : CoroutineCrudRepository<SeasonEntity, Long> {
 
     fun findAllByEndDateOrderById(endDate: LocalDate): Flow<SeasonEntity>
 
+    fun findAllByStatusOrderById(status: String): Flow<SeasonEntity>
+
+
+    fun findByStartDateAndStatus(startDate: LocalDate, status: String): List<SeasonEntity>
+
     //close
     @Query("UPDATE seasons SET status = 'CLOSED' WHERE id = :seasonId")
     suspend fun close(seasonId: Long)
