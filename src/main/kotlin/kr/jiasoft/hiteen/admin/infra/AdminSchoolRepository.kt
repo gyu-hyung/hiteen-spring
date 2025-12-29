@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository
 @Repository
 interface AdminSchoolRepository : CoroutineCrudRepository<SchoolEntity, Long> {
     @Query("""
-        SELECT COUNT(*)::int
+        SELECT COUNT(*)
         FROM schools s
         WHERE s.deleted_at IS NULL
             AND (:sido IS NULL OR s.sido = :sido)
