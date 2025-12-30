@@ -1,0 +1,14 @@
+{{- if .Values.admin.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: hiteen-admin
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    app: hiteen-admin
+  ports:
+    - port: 80
+      targetPort: 80
+  type: ClusterIP
+  {{- end }}
