@@ -124,8 +124,16 @@ ingress:
   hosts:
     - host:
       paths:
-        - path: /
+        - path: /api
           pathType: Prefix
           backend:
             serviceName: hiteen-test
             servicePort: 8080
+
+    - host: cms.hiteen.co.kr
+      paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            serviceName: hiteen-admin
+            servicePort: 80
