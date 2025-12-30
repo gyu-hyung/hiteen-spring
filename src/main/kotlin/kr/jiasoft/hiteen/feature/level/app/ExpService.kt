@@ -2,6 +2,7 @@ package kr.jiasoft.hiteen.feature.level.app
 
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kr.jiasoft.hiteen.common.context.DeltaContextHelper.addDeltaExp
+import kr.jiasoft.hiteen.common.context.DeltaContextHelper.addDeltaTier
 import kr.jiasoft.hiteen.feature.level.domain.ExpProperties
 import kr.jiasoft.hiteen.feature.level.domain.UserExpHistoryEntity
 import kr.jiasoft.hiteen.feature.level.infra.TierRepository
@@ -40,6 +41,9 @@ class ExpService(
         // EXP 최소 0 이하로 떨어지지 않게 보정
         if (newExp < 0) newExp = 0
 
+        // 기존 tier
+        val prevTier = user.tierId
+
         // 티어 갱신 (감점일 경우도 고려)
         val newTier = tierRepository.findByPoints(newExp)
 
@@ -61,6 +65,14 @@ class ExpService(
                 reason = if (points > 0) action.description else "[감점] ${action.description}"
             )
         )
+
+        // tier delta 기록
+        if (newTier != null && newTier.id != prevTier) {
+            addDeltaTier(
+                prevTier = tierRepository.findById(prevTier)?.rankOrder ?: 0,
+                newTier = newTier.rankOrder
+            ).awaitSingleOrNull()
+        }
 
         addDeltaExp(points).awaitSingleOrNull()
 
