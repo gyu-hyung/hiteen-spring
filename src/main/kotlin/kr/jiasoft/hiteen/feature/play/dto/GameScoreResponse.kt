@@ -17,7 +17,7 @@ data class GameScoreResponse (
     val nowScore: Double = 0.0,
 ) {
     companion object {
-        fun fromEntity(entity: GameScoreEntity, nowScore: Double) = GameScoreResponse(
+        fun fromEntity(entity: GameScoreEntity, nowScore: Double, advantage: Double? = null) = GameScoreResponse(
             id = entity.id,
             seasonId = entity.seasonId,
             participantId = entity.participantId,
@@ -28,7 +28,7 @@ data class GameScoreResponse (
             createdAt = entity.createdAt,
             updatedAt = entity.updatedAt,
             deletedAt = entity.deletedAt,
-            nowScore = nowScore
+            nowScore = nowScore - (advantage ?: 0.0),
         )
     }
 }

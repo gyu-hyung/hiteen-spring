@@ -11,6 +11,7 @@ import jakarta.validation.Valid
 import kr.jiasoft.hiteen.common.dto.ApiResult
 import kr.jiasoft.hiteen.common.exception.AlreadyRegisteredException
 import kr.jiasoft.hiteen.feature.auth.dto.AuthCodeRequest
+import kr.jiasoft.hiteen.feature.auth.dto.AuthPasswordCodeRequest
 import kr.jiasoft.hiteen.feature.auth.dto.ChangePhoneRequest
 import kr.jiasoft.hiteen.feature.auth.dto.JwtResponse
 import kr.jiasoft.hiteen.feature.auth.dto.LoginForm
@@ -151,7 +152,7 @@ class AuthController(
     @Operation(summary = "비밀번호 재설정 코드 발송", description = "비밀번호를 잊은 사용자가 휴대폰으로 인증코드를 받습니다.")
     @PostMapping("/password/code")
     suspend fun sendResetPasswordCode(
-        @Parameter(description = "비밀번호 재설정 코드 발송 요청 DTO") @Valid req: AuthCodeRequest
+        @Parameter(description = "비밀번호 재설정 코드 발송 요청 DTO") @Valid req: AuthPasswordCodeRequest
     ): ResponseEntity<ApiResult<Any>> {
         val phone = req.phone.filter { it.isDigit() }
 
