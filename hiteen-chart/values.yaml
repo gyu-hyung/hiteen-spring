@@ -45,6 +45,19 @@ app:
       cpu: 1
       memory: 1Gi
 
+
+# ============================================
+# admin
+# ============================================
+admin:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: ghcr.io/gyu-hyung/hiteen-admin
+    tag: manual-20251229-1515
+    pullPolicy: IfNotPresent
+
+
 # ============================================
 # NFS (Assets)
 # ============================================
@@ -111,8 +124,16 @@ ingress:
   hosts:
     - host:
       paths:
-        - path: /
+        - path: /api
           pathType: Prefix
           backend:
             serviceName: hiteen-test
             servicePort: 8080
+
+    - host: cms.hiteen.co.kr
+      paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            serviceName: hiteen-admin
+            servicePort: 80
