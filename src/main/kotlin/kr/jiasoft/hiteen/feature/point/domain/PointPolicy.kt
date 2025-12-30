@@ -31,8 +31,8 @@ enum class PointPolicy(
     ATTEND_DAY1("ATTEND_DAY1", 100, 1, "1일차 출석"),
     ATTEND_DAY2("ATTEND_DAY2", 100, 1, "2일차 출석"),
     ATTEND_DAY3("ATTEND_DAY3", 200, 1, "3일차 출석"),
-    ATTEND_DAY4("ATTEND_DAY4", 200, 1, "4일차 출석"),
-    ATTEND_DAY5("ATTEND_DAY5", 300, 1, "5일차 출석"),
+    ATTEND_DAY4("ATTEND_DAY4", 100, 1, "4일차 출석"),
+    ATTEND_DAY5("ATTEND_DAY5", 100, 1, "5일차 출석"),
     ATTEND_DAY6("ATTEND_DAY6", 300, 1, "6일차 출석"),
     ATTEND_DAY7("ATTEND_DAY7", 500, 1, "7일차 출석"),
 

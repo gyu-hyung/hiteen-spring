@@ -5,6 +5,7 @@ import kr.jiasoft.hiteen.admin.dto.AdminFollowResponse
 import kr.jiasoft.hiteen.admin.dto.AdminFriendResponse
 import kr.jiasoft.hiteen.admin.dto.AdminUserResponse
 import kr.jiasoft.hiteen.admin.dto.GoodsCategoryDto
+import kr.jiasoft.hiteen.admin.dto.GoodsGiftishowCreateRequest
 import kr.jiasoft.hiteen.admin.dto.GoodsTypeDto
 import kr.jiasoft.hiteen.admin.infra.AdminFollowRepository
 import kr.jiasoft.hiteen.admin.infra.AdminFriendRepository
@@ -22,6 +23,8 @@ import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
@@ -175,6 +178,94 @@ class AdminUserController (
         return ResponseEntity.ok(
             ApiResult.success(PageUtil.of(list, totalCount, page, size))
         )
+    }
+
+
+
+
+    @PostMapping("/goods")
+    suspend fun saveGoods(
+        @RequestBody req: GoodsGiftishowCreateRequest,
+        @AuthenticationPrincipal(expression = "user") user: UserEntity,
+    ): ResponseEntity<ApiResult<GoodsGiftishowEntity>?>? {
+
+        val res =  if (req.id == null) {
+            // ✅ 등록
+            val entity = GoodsGiftishowEntity(
+                goodsNo = req.goodsNo,
+                goodsCode = req.goodsCode,
+                goodsName = req.goodsName,
+                brandCode = req.brandCode,
+                brandName = req.brandName,
+                content = req.content,
+                contentAddDesc = req.contentAddDesc,
+                searchKeyword = req.searchKeyword,
+                mdCode = req.mdCode,
+                category1Seq = req.category1Seq,
+                category1Name = req.category1Name,
+                goodsTypeCode = req.goodsTypeCode,
+                goodsTypeName = req.goodsTypeName,
+                goodsTypeDetailName = req.goodsTypeDetailName,
+                goodsImgS = req.goodsImgS,
+                goodsImgB = req.goodsImgB,
+                goodsDescImgWeb = req.goodsDescImgWeb,
+                brandIconImg = req.brandIconImg,
+                mmsGoodsImg = req.mmsGoodsImg,
+                salePrice = req.salePrice,
+                realPrice = req.realPrice,
+                discountRate = req.discountRate,
+                discountPrice = req.discountPrice,
+                goodsComId = req.goodsComId,
+                goodsComName = req.goodsComName,
+                validPeriodType = req.validPeriodType,
+                limitDay = req.limitDay,
+                validPeriodDay = req.validPeriodDay,
+                goodsStateCode = req.goodsStateCode,
+                status = req.status,
+            )
+
+            adminGoodsRepository.save(entity)
+        } else {
+            // ✅ 수정
+            val origin = adminGoodsRepository.findById(req.id)
+                ?: throw IllegalArgumentException("존재하지 않는 상품입니다. id=${req.id}")
+
+            val updated = origin.copy(
+                goodsName = req.goodsName,
+                brandCode = req.brandCode,
+                brandName = req.brandName,
+                content = req.content,
+                contentAddDesc = req.contentAddDesc,
+                searchKeyword = req.searchKeyword,
+                mdCode = req.mdCode,
+                category1Seq = req.category1Seq,
+                category1Name = req.category1Name,
+                goodsTypeCode = req.goodsTypeCode,
+                goodsTypeName = req.goodsTypeName,
+                goodsTypeDetailName = req.goodsTypeDetailName,
+                goodsImgS = req.goodsImgS,
+                goodsImgB = req.goodsImgB,
+                goodsDescImgWeb = req.goodsDescImgWeb,
+                brandIconImg = req.brandIconImg,
+                mmsGoodsImg = req.mmsGoodsImg,
+                salePrice = req.salePrice,
+                realPrice = req.realPrice,
+                discountRate = req.discountRate,
+                discountPrice = req.discountPrice,
+                goodsComId = req.goodsComId,
+                goodsComName = req.goodsComName,
+                validPeriodType = req.validPeriodType,
+                limitDay = req.limitDay,
+                validPeriodDay = req.validPeriodDay,
+                goodsStateCode = req.goodsStateCode,
+                status = req.status,
+                updatedAt = OffsetDateTime.now(),
+            )
+
+            adminGoodsRepository.save(updated)
+        }
+
+        return ResponseEntity.ok(ApiResult.success(res))
     }
 
 

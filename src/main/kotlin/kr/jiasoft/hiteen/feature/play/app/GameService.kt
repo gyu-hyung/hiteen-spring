@@ -176,10 +176,10 @@ class GameService(
             val lastPlayedDate = existing.updatedAt?.toLocalDate() ?: existing.createdAt.toLocalDate()
             if (lastPlayedDate.isEqual(LocalDate.now())) {
                 val scoreEntity = updateScore(existing, finalScore)
-                GameScoreResponse.fromEntity(scoreEntity, score)
+                GameScoreResponse.fromEntity(scoreEntity, score, advantage)
             } else {
                 val scoreEntity = updateScore(existing, finalScore, 1)
-                GameScoreResponse.fromEntity(scoreEntity, score)
+                GameScoreResponse.fromEntity(scoreEntity, score, advantage)
             }
 
         } else {
