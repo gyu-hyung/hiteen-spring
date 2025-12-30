@@ -73,11 +73,18 @@ spec:
         - name: redis
           image: "{{ .Values.redis.image.repository }}:{{ .Values.redis.image.tag }}"
           command:
-            - sh
-            - -c
-            - |
-              envsubst < /usr/local/etc/redis/redis.conf > /tmp/redis.conf
-              exec redis-server /tmp/redis.conf
+            - redis-server
+          args:
+            - /usr/local/etc/redis/redis.conf
+            - --cluster-enabled
+            - "yes"
+            - --cluster-announce-hostname
+            - "$(POD_NAME).redis.{{ .Values.namespace }}.svc.cluster.local"
+            - --cluster-announce-port
+            - "6379"
+            - --cluster-announce-bus-port
+            - "16379"
+
 
           ports:
             - name: redis
