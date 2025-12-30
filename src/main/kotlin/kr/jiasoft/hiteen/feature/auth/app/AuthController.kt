@@ -133,7 +133,7 @@ class AuthController(
         @Parameter(description = "Refresh Token") @RequestParam refreshToken: String,
 //        @CookieValue(name = "refreshToken", required = true) refreshToken: String?,
     ): ResponseEntity<ApiResult<Map<String, String>>> {
-        requireNotNull(refreshToken) { "RefreshToken cookie not found" }
+        requireNotNull(refreshToken) { "RefreshToken cookie not found." }
 
         val (access, refresh) = jwtProvider.refreshTokens(BearerToken(refreshToken))
 
