@@ -1,5 +1,6 @@
 package kr.jiasoft.hiteen.admin.app
 
+import io.swagger.v3.oas.annotations.Parameter
 import kotlinx.coroutines.flow.toList
 import kr.jiasoft.hiteen.admin.dto.AdminFollowResponse
 import kr.jiasoft.hiteen.admin.dto.AdminFriendResponse
@@ -14,19 +15,24 @@ import kr.jiasoft.hiteen.admin.infra.AdminUserRepository
 import kr.jiasoft.hiteen.common.dto.ApiPage
 import kr.jiasoft.hiteen.common.dto.ApiResult
 import kr.jiasoft.hiteen.common.dto.PageUtil
+import kr.jiasoft.hiteen.feature.asset.app.AssetService
+import kr.jiasoft.hiteen.feature.asset.domain.AssetCategory
 import kr.jiasoft.hiteen.feature.giftishow.domain.GoodsGiftishowEntity
 import kr.jiasoft.hiteen.feature.play.domain.GameEntity
 import kr.jiasoft.hiteen.feature.play.infra.GameRepository
 import kr.jiasoft.hiteen.feature.poll.dto.PollSelectResponse
 import kr.jiasoft.hiteen.feature.user.app.UserService
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
+import org.springframework.http.codec.multipart.FilePart
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.RequestPart
 import org.springframework.web.bind.annotation.RestController
 import java.lang.IllegalArgumentException
 import java.time.LocalDate
@@ -41,6 +47,8 @@ class AdminUserController (
     private val adminFriendRepository: AdminFriendRepository,
     private val adminFollowRepository: AdminFollowRepository,
     private val adminGoodsRepository: AdminGoodsRepository,
+
+    private val assetService: AssetService,
 
     //게임목록
     private val gameRepository: GameRepository,
@@ -182,18 +190,37 @@ class AdminUserController (
 
 
 
+    private suspend fun generateNextGoodsCode(): String {
+        val maxCode = adminGoodsRepository.findMaxHGoodsCode()
 
-    @PostMapping("/goods")
+        val nextNumber = maxCode
+            ?.substring(1)            // "00000000001"
+            ?.toLongOrNull()
+            ?.plus(1)
+            ?: 1L                     // 최초 생성 시
+
+        return "H" + nextNumber.toString().padStart(11, '0')
+    }
+
+
+    @PostMapping("/goods", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     suspend fun saveGoods(
-        @RequestBody req: GoodsGiftishowCreateRequest,
+        @RequestPart("req") req: GoodsGiftishowCreateRequest,
+        @Parameter(description = "첨부 파일 small") @RequestPart(name = "fileS", required = false) fileS: FilePart?,
+        @Parameter(description = "첨부 파일 large") @RequestPart(name = "fileB", required = false) fileB: FilePart?,
+        @Parameter(description = "첨부 파일 brand") @RequestPart(name = "fileBrand", required = false) fileBrand: FilePart?,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
-    ): ResponseEntity<ApiResult<GoodsGiftishowEntity>?>? {
+    ): ResponseEntity<ApiResult<Any>?>? {
+
+        val sAsset =  fileS?.let { assetService.uploadImage(it, user.id, AssetCategory.GOODS) }
+        val bAsset =  fileB?.let { assetService.uploadImage(it, user.id, AssetCategory.GOODS) }
+        val brandAsset =  fileBrand?.let { assetService.uploadImage(it, user.id, AssetCategory.GOODS) }
 
         val res =  if (req.id == null) {
-            // ✅ 등록
+
             val entity = GoodsGiftishowEntity(
                 goodsNo = req.goodsNo,
-                goodsCode = req.goodsCode,
+                goodsCode = generateNextGoodsCode(),
                 goodsName = req.goodsName,
                 brandCode = req.brandCode,
                 brandName = req.brandName,
@@ -206,10 +233,10 @@ class AdminUserController (
                 goodsTypeCode = req.goodsTypeCode,
                 goodsTypeName = req.goodsTypeName,
                 goodsTypeDetailName = req.goodsTypeDetailName,
-                goodsImgS = req.goodsImgS,
-                goodsImgB = req.goodsImgB,
+                goodsImgS = sAsset?.uid?.toString(),
+                goodsImgB = bAsset?.uid?.toString(),
                 goodsDescImgWeb = req.goodsDescImgWeb,
-                brandIconImg = req.brandIconImg,
+                brandIconImg = brandAsset?.uid?.toString(),
                 mmsGoodsImg = req.mmsGoodsImg,
                 salePrice = req.salePrice,
                 realPrice = req.realPrice,
@@ -243,10 +270,10 @@ class AdminUserController (
                 goodsTypeCode = req.goodsTypeCode,
                 goodsTypeName = req.goodsTypeName,
                 goodsTypeDetailName = req.goodsTypeDetailName,
-                goodsImgS = req.goodsImgS,
-                goodsImgB = req.goodsImgB,
+                goodsImgS = sAsset?.uid?.toString() ?: origin.goodsImgS,
+                goodsImgB = bAsset?.uid?.toString() ?: origin.goodsImgB,
                 goodsDescImgWeb = req.goodsDescImgWeb,
-                brandIconImg = req.brandIconImg,
+                brandIconImg = brandAsset?.uid?.toString() ?: origin.brandIconImg,
                 mmsGoodsImg = req.mmsGoodsImg,
                 salePrice = req.salePrice,
                 realPrice = req.realPrice,

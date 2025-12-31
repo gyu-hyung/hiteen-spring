@@ -52,7 +52,11 @@ services:
     environment:
       REDIS_PASSWORD: "hiteen1234"
     command: >
-      sh -c "redis-server --appendonly yes --requirepass hiteen1234"
+      sh -c "redis-server
+      --appendonly yes
+      --requirepass hiteen1234
+      --bind 0.0.0.0 ::"
+
     volumes:
       - redis_data:/data
     networks:
