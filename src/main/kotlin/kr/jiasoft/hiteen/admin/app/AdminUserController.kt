@@ -27,9 +27,9 @@ import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.security.core.annotation.AuthenticationPrincipal
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RequestPart
@@ -210,7 +210,7 @@ class AdminUserController (
         @Parameter(description = "첨부 파일 large") @RequestPart(name = "fileB", required = false) fileB: FilePart?,
         @Parameter(description = "첨부 파일 brand") @RequestPart(name = "fileBrand", required = false) fileBrand: FilePart?,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
-    ): ResponseEntity<ApiResult<Any>?>? {
+    ): ResponseEntity<ApiResult<GoodsGiftishowEntity>?>? {
 
         val sAsset =  fileS?.let { assetService.uploadImage(it, user.id, AssetCategory.GOODS) }
         val bAsset =  fileB?.let { assetService.uploadImage(it, user.id, AssetCategory.GOODS) }
@@ -296,6 +296,23 @@ class AdminUserController (
     }
 
 
+    @DeleteMapping("/goods", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+    suspend fun deleteGoods(
+        @RequestParam id: Long,
+        @AuthenticationPrincipal(expression = "user") user: UserEntity,
+    ): ResponseEntity<ApiResult<Any>?>? {
+
+        val origin = adminGoodsRepository.findById(id)
+            ?: throw IllegalArgumentException("존재하지 않는 상품입니다. id=${id}")
+
+        val updated = origin.copy(
+            deletedAt = OffsetDateTime.now(),
+        )
+
+        adminGoodsRepository.save(updated)
+
+        return ResponseEntity.ok(ApiResult.success(origin))
+    }
 
 
     @GetMapping("/goods")
