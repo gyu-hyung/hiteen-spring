@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
 import kr.jiasoft.hiteen.common.dto.ApiResult
 import kr.jiasoft.hiteen.feature.interest.domain.InterestMatchHistoryEntity
+import kr.jiasoft.hiteen.feature.interest.dto.FriendRecommendationResponse
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
@@ -70,6 +71,18 @@ class InterestUserController(
     suspend fun recommend(
         @AuthenticationPrincipal(expression = "user") user: UserEntity
     ) = ResponseEntity.ok(ApiResult.success(service.recommendFriend(user)))
+
+
+    @Operation(summary = "오늘 뽑은 친구 조회 (최근 24시간 내 추천)")
+    @GetMapping("/recommend/today")
+    suspend fun getTodayRecommendedFriend(
+        @AuthenticationPrincipal(expression = "user") user: UserEntity,
+    ): ResponseEntity<ApiResult<FriendRecommendationResponse?>> {
+
+        val res = service.getTodayRecommendedFriend(user)
+        return ResponseEntity.ok(ApiResult.success(res))
+    }
+
 
 
     @Operation(summary = "추천 친구 패스", description = "추천된 친구를 패스합니다.")
