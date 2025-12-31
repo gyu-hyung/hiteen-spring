@@ -93,7 +93,7 @@ class GameManageService(
 
         // 3️⃣ 해당 시즌 + ACTIVE 인 시즌만 조회
         val seasonsToClose = seasonRepository
-            .findByStartDateAndStatus(startDate, "ACTIVE")
+            .findByStartDateAndStatus(startDate, "ACTIVE").toList()
 
         if (seasonsToClose.isEmpty()) {
             log.info("ℹ️ 종료할 ACTIVE 시즌이 없습니다. ($startDate ~ $endDate)")
