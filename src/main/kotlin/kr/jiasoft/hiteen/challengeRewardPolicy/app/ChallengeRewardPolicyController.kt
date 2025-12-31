@@ -3,6 +3,7 @@ package kr.jiasoft.hiteen.challengeRewardPolicy.app
 import kr.jiasoft.hiteen.challengeRewardPolicy.dto.ChallengeRewardPolicyDeleteRequest
 import kr.jiasoft.hiteen.challengeRewardPolicy.dto.ChallengeRewardPolicyRow
 import kr.jiasoft.hiteen.challengeRewardPolicy.dto.ChallengeRewardPolicySaveRequest
+import kr.jiasoft.hiteen.challengeRewardPolicy.dto.ChallengeRewardPolicySingleSaveRequest
 import kr.jiasoft.hiteen.common.dto.ApiPage
 import kr.jiasoft.hiteen.common.dto.ApiResult
 import kr.jiasoft.hiteen.common.dto.PageUtil
@@ -48,6 +49,17 @@ class ChallengeRewardPolicyController(
         return ResponseEntity.ok().body(ApiResult.success(PageUtil.of(list, totalCount, page, size)))
     }
 
+    /** 단일 저장 (모달용) */
+    @PostMapping
+    suspend fun saveOne(
+        @RequestBody req: ChallengeRewardPolicySingleSaveRequest,
+        @AuthenticationPrincipal(expression = "user") user: UserEntity,
+    ): ResponseEntity<ApiResult<Long>> {
+
+        val id = service.saveOne(req, user.id)
+
+        return ResponseEntity.ok(ApiResult.success(id))
+    }
 
 
     /** 저장 (등록/수정/순서) */

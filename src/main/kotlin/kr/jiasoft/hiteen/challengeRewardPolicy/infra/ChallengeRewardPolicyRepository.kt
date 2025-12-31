@@ -84,7 +84,7 @@ interface ChallengeRewardPolicyRepository
             (select min(level) from tiers where tier_code LIKE CONCAT('%', league, '%')),
             crp.order_no ASC,
             crp.rank ASC,
-            crp.id ASC
+            crp.id DESC
 
         LIMIT :size OFFSET (:page - 1) * :size
     """)
