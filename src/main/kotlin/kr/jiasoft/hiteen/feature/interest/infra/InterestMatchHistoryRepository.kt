@@ -39,5 +39,17 @@ interface InterestMatchHistoryRepository : CoroutineCrudRepository<InterestMatch
     """)
     suspend fun findLastRecommendations(userId: Long): InterestMatchHistoryEntity?
 
+    @Query("""
+        SELECT *
+        FROM interest_match_history
+        WHERE user_id = :userId
+          AND status = 'RECOMMENDED'
+          AND created_at >= (NOW() - INTERVAL '24 hours')
+        ORDER BY created_at DESC
+        LIMIT 1
+    """)
+    suspend fun findLatestRecommendationLast24Hours(userId: Long): InterestMatchHistoryEntity?
+
+
 
 }
