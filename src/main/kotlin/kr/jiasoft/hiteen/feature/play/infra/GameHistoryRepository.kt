@@ -13,6 +13,7 @@ interface GameHistoryRepository : CoroutineCrudRepository<GameHistoryEntity, Lon
     suspend fun findByUid(uid: UUID): GameHistoryEntity?
 
     //오늘 실행한 게임 목록 조회
+    //AND status = 'DONE'
     @Query("""
         SELECT * 
         FROM game_history 
@@ -20,7 +21,7 @@ interface GameHistoryRepository : CoroutineCrudRepository<GameHistoryEntity, Lon
         AND participant_id = :participantId
         AND season_id = :seasonId
         AND game_id = :gameId
-        AND status = 'DONE'
+        
     """)
     fun listToday(gameId: Long, participantId: Long, seasonId: Long): Flow<GameHistoryEntity>
 
