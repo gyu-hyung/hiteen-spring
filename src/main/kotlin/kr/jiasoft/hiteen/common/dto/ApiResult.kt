@@ -17,11 +17,30 @@ data class ApiResult<T>(
         fun <T> failure(message: String? = null, errors: Map<String, *>? = null): ApiResult<T> =
             ApiResult(success = false, data = null, message = message, errors = errors)
 
-        fun <T> failure(extras: Map<String, *>? = null): ApiResult<T> =
-            ApiResult(success = false, data = null, message = "개발중 err message. extras=$extras", extras = extras)
+        fun <T> failure(extras: Map<String, *>? = null): ApiResult<T> {
+            val message = extras
+                ?.entries
+                ?.firstOrNull()
+                ?.value
+                ?.let { value ->
+                    when (value) {
+                        is List<*> -> value.firstOrNull()?.toString()
+                        else -> value.toString()
+                    }
+                }
+                ?: "개발중 err message"
+
+            return ApiResult(
+                success = false,
+                data = null,
+                message = message,
+                extras = extras
+            )
+        }
+
 
         fun <T> failure(error: String): ApiResult<T> =
-            ApiResult(success = false, data = null, message = "개발중 err message: ${error}", errors = mapOf("code" to listOf(error)))
+            ApiResult(success = false, data = null, message = error, errors = mapOf("code" to listOf(error)))
 
     }
 }
