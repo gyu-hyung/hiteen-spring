@@ -69,6 +69,8 @@ class MetaAppendingResponseDecorator(
                             val deltaExp   = exchange.attributes[MetaDeltaKeys.DELTA_EXP] as? Int ?: 0
                             val deltaPoint = exchange.attributes[MetaDeltaKeys.DELTA_POINT] as? Int ?: 0
                             val deltaCash = exchange.attributes[MetaDeltaKeys.DELTA_CASH] as? Int ?: 0
+                            val deltaTier = exchange.attributes[MetaDeltaKeys.DELTA_TIER] as? Map<*, *>
+
 
                             if (deltaExp == 0 && deltaPoint == 0 && deltaCash == 0) {
                                 return@map bytes
@@ -83,6 +85,14 @@ class MetaAppendingResponseDecorator(
                             if (deltaExp != 0) metaNode.put("deltaExp", deltaExp)
                             if (deltaPoint != 0) metaNode.put("deltaPoint", deltaPoint)
                             if (deltaCash != 0) metaNode.put("deltaCash", deltaCash)
+                            if (deltaTier != null) {
+                                val tierNode = mapper.createObjectNode()
+                                tierNode.put("from", deltaTier["from"] as Int)
+                                tierNode.put("to", deltaTier["to"] as Int)
+
+                                metaNode.set<ObjectNode>("deltaTier", tierNode)
+                            }
+
 
                             obj.set<ObjectNode>("meta", metaNode)
 

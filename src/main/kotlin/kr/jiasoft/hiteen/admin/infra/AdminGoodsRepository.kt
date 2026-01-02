@@ -35,6 +35,16 @@ interface AdminGoodsRepository : CoroutineCrudRepository<GoodsGiftishowEntity, L
     fun findGoodsTypes(): Flow<GoodsTypeDto>
 
 
+    @Query("""
+        SELECT goods_code
+        FROM goods_giftishow
+        WHERE goods_code LIKE 'H%'
+        ORDER BY goods_code DESC
+        LIMIT 1
+    """)
+    suspend fun findMaxHGoodsCode(): String?
+
+
     /**
      * 🔹 전체 개수 조회
      */

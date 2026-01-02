@@ -18,7 +18,8 @@ enum class AssetCategory(
     POLL_SELECT("poll", "select"),
     POLL_COMMENT("poll", "comment"),
 
-    CHAT_MESSAGE("chat", "message")
+    CHAT_MESSAGE("chat", "message"),
+    GOODS("goods"),
     ;
 
     fun fullPath(): String =

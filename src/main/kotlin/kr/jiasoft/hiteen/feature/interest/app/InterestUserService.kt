@@ -129,6 +129,28 @@ class InterestUserService(
         = interestMatchHistoryRepository.findLastRecommendations(userId)
 
 
+    /* 오늘 뽑은 친구 조회 */
+    suspend fun getTodayRecommendedFriend(user: UserEntity): FriendRecommendationResponse? {
+        // 1) 마지막 24시간 내 추천 기록 1건 조회
+        val history = interestMatchHistoryRepository
+            .findLatestRecommendationLast24Hours(user.id)
+            ?: return null
+
+        val targetUserId = history.targetId
+
+        // 2) 응답 구성 (recommendFriend에서 쓰던 로직 그대로)
+        val targetUserResponse = userService.findUserResponse(targetUserId, user.id)
+        val interests = interestUserRepository.getInterestResponseById(null, targetUserId).toList()
+        val photos = userPhotosRepository.findByUserId(targetUserId)?.toList() ?: emptyList()
+
+        return FriendRecommendationResponse(
+            user = targetUserResponse,
+            interests = interests,
+            photos = photos
+        )
+    }
+
+
     /** 오늘의 추천 친구 1명 뽑기 */
     suspend fun recommendFriend(user: UserEntity, dailyLimit: Int = 1): FriendRecommendationResponse? {
 

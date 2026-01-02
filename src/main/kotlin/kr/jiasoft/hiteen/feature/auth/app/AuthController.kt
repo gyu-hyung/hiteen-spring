@@ -8,6 +8,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
+import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.Pattern
 import kr.jiasoft.hiteen.common.dto.ApiResult
 import kr.jiasoft.hiteen.common.exception.AlreadyRegisteredException
 import kr.jiasoft.hiteen.feature.auth.dto.AuthCodeRequest
@@ -17,6 +19,7 @@ import kr.jiasoft.hiteen.feature.auth.dto.JwtResponse
 import kr.jiasoft.hiteen.feature.auth.dto.LoginForm
 import kr.jiasoft.hiteen.feature.auth.dto.PassWordChangeRequest
 import kr.jiasoft.hiteen.feature.auth.dto.PasswordCheckRequest
+import kr.jiasoft.hiteen.feature.auth.dto.ResetPasswordValidRequest
 import kr.jiasoft.hiteen.feature.auth.dto.VerifyRequest
 import kr.jiasoft.hiteen.feature.auth.infra.BearerToken
 import kr.jiasoft.hiteen.feature.auth.infra.JwtProvider
@@ -133,7 +136,7 @@ class AuthController(
         @Parameter(description = "Refresh Token") @RequestParam refreshToken: String,
 //        @CookieValue(name = "refreshToken", required = true) refreshToken: String?,
     ): ResponseEntity<ApiResult<Map<String, String>>> {
-        requireNotNull(refreshToken) { "RefreshToken cookie not found" }
+        requireNotNull(refreshToken) { "RefreshToken cookie not found." }
 
         val (access, refresh) = jwtProvider.refreshTokens(BearerToken(refreshToken))
 
@@ -157,7 +160,7 @@ class AuthController(
         val phone = req.phone.filter { it.isDigit() }
 
         // 가입 여부 확인
-        userRepository.findActiveByUsername(phone, req.nickName)
+        userRepository.findActiveByUsername(phone, req.nickname)
             ?: throw IllegalStateException("가입되지 않은 번호야~")
 
         // 인증번호 발송
@@ -184,7 +187,7 @@ class AuthController(
     @Operation(summary = "비밀번호 재설정", description = "휴대폰 인증번호를 검증하고, 새 비밀번호로 변경합니다.(인증번호만 보내면 검증)")
     @PostMapping("/password/reset/valid")
     suspend fun resetPasswordValid(
-        @Parameter(description = "비밀번호 재설정 요청 DTO") @Valid req: ResetPasswordRequest
+        @Parameter(description = "비밀번호 재설정 요청 DTO") @Valid req: ResetPasswordValidRequest
     ): ResponseEntity<ApiResult<Any>> {
         val phone = req.phone.filter { it.isDigit() }
 

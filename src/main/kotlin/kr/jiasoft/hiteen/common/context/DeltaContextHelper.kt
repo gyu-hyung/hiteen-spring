@@ -39,4 +39,24 @@ object DeltaContextHelper {
             Mono.empty()
         }
 
+
+    fun addDeltaTier(prevTier: Int, newTier: Int): Mono<Unit> =
+        Mono.deferContextual { ctx ->
+            val exchange = ctx.getOrEmpty<ServerWebExchange>("SERVER_EXCHANGE")
+                .orElse(null)
+                ?: return@deferContextual Mono.empty()
+
+            // 변화 없으면 기록 안 함
+            if (prevTier == newTier) return@deferContextual Mono.empty()
+
+            exchange.attributes[MetaDeltaKeys.DELTA_TIER] =
+                mapOf(
+                    "from" to prevTier,
+                    "to" to newTier
+                )
+
+            Mono.empty()
+        }
+
+
 }
