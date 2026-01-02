@@ -160,7 +160,7 @@ class AuthController(
 
         // 가입 여부 확인
         userRepository.findActiveByUsername(phone, req.nickname)
-            ?: throw IllegalStateException("가입되지 않은 번호야~")
+            ?: throw IllegalStateException("가입되지 않은 회원 정보야~")
 
         // 인증번호 발송
         val code = (100000..999999).random().toString()
