@@ -14,16 +14,31 @@ class GlobalExceptionHandler {
     // Bean Validation (@Valid) 에러
     @ExceptionHandler(WebExchangeBindException::class)
     fun handleWebExchangeBindException(ex: WebExchangeBindException): ResponseEntity<ApiResult<Nothing>> {
-        val errors: Map<String, List<String>> =
-            ex.bindingResult.fieldErrors
-                .groupBy({ it.field }, { it.defaultMessage ?: "잘못된 값이에요." })
+
+        val errors = mutableMapOf<String, List<String>>()
+
+        ex.bindingResult.fieldErrors.forEach {
+            errors[it.field] = listOf(it.defaultMessage ?: "잘못된 값이에요.")
+        }
+
+        ex.bindingResult.globalErrors.forEach {
+            val msg =
+                if (it.defaultMessage?.contains("non-null") == true)
+                    "필수 값이 누락되었어"
+                else
+                    it.defaultMessage ?: "요청 값이 올바르지 않아"
+
+            errors["_global"] = listOf(msg)
+        }
 
         return ResponseEntity
             .badRequest()
-            .body(ApiResult.failure(errors))
+            .body(ApiResult.failure(errors.firstNotNullOf { it.value[0] },errors))
     }
 
-    // 서비스단 비즈니스 검증 (중복 체크 등)
+
+
+    // 서비스단 비즈니스 검증 (중복 체크 등)body = {ProblemDetail@24447} "ProblemDetail[type='about:blank', title='Bad Request', status=400, detail='Invalid request content.', instance='null', properties='null']"
     @ExceptionHandler(BusinessValidationException::class)
     fun handleBusiness(ex: BusinessValidationException): ResponseEntity<ApiResult<Nothing>> {
         val errors: Map<String, List<String>> = ex.errors.mapValues { listOf(it.value) }
@@ -52,7 +67,7 @@ class GlobalExceptionHandler {
     // 잘못된 값
     @ExceptionHandler(IllegalArgumentException::class)
     fun handleIllegalArgument(ex: IllegalArgumentException): ResponseEntity<ApiResult<Nothing>> {
-        val errors = mapOf("state" to listOf(ex.message ?: "잘못된 요청입니다."))
+        val errors = mapOf("messages" to listOf(ex.message ?: "잘못된 요청입니다."))
         return ResponseEntity
             .badRequest()
             .body(ApiResult.failure(errors))
@@ -61,7 +76,7 @@ class GlobalExceptionHandler {
     // 잘못된 상태 예외
     @ExceptionHandler(IllegalStateException::class)
     fun handleIllegalState(e: IllegalStateException): ResponseEntity<ApiResult<Nothing>> {
-        val errors = mapOf("state" to listOf(e.message ?: "잘못된 상태입니다."))
+        val errors = mapOf("messages" to listOf(e.message ?: "잘못된 상태입니다."))
         return ResponseEntity
             .badRequest()
             .body(ApiResult.failure(errors))
@@ -89,7 +104,7 @@ class GlobalExceptionHandler {
     // 최상위 에러 (404 등 잡히지 않은 나머지 모든 예외 처리)
     @ExceptionHandler(Exception::class)
     fun handleException(e: Exception): ResponseEntity<ApiResult<Nothing>> {
-        val errors = mapOf("error" to listOf("서버 내부 오류가 발생했습니다. 관리자에게 문의하세요."))
+        val errors = mapOf("error" to listOf("서버 내부 오류가 발생했습니다. 관리자에게 문의하세요. ${e.printStackTrace()}"))
         e.printStackTrace()
         return ResponseEntity
             .internalServerError()
