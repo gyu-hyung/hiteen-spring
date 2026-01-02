@@ -3,6 +3,7 @@ package kr.jiasoft.hiteen.feature.play.dto
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.constraints.DecimalMax
 import jakarta.validation.constraints.DecimalMin
+import java.math.BigDecimal
 import java.util.UUID
 
 @Schema(description = "점수 등록 요청 DTO")
@@ -17,7 +18,7 @@ data class ScoreRequest(
     @param:Schema(description = "점수", example = "1")
     @field:DecimalMin("0.0", message = "점수는 0 이상이어야 합니다.")
     @field:DecimalMax("5999.99", message = "점수는 99:99:99 (999999.99) 이하이어야 합니다.")
-    val score: Double,
+    val score: BigDecimal,
 
 //    @param:Schema(description = "광고 리워드 트랜잭션 ID", example = "1")
 //    val transactionId: String? = null,

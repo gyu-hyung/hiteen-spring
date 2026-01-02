@@ -1,6 +1,7 @@
 package kr.jiasoft.hiteen.feature.play.dto
 
 import kr.jiasoft.hiteen.feature.play.domain.GameScoreEntity
+import java.math.BigDecimal
 import java.time.OffsetDateTime
 
 data class GameScoreResponse (
@@ -8,16 +9,16 @@ data class GameScoreResponse (
     val seasonId: Long,
     val participantId: Long,
     val gameId: Long,
-    val score: Double,
+    val score: BigDecimal,
     val tryCount: Int = 0,
     val totalTryCount: Int = 0,
     val createdAt: OffsetDateTime = OffsetDateTime.now(),
     val updatedAt: OffsetDateTime? = null,
     val deletedAt: OffsetDateTime? = null,
-    val nowScore: Double = 0.0,
+    val nowScore: BigDecimal,
 ) {
     companion object {
-        fun fromEntity(entity: GameScoreEntity, nowScore: Double, advantage: Double? = null) = GameScoreResponse(
+        fun fromEntity(entity: GameScoreEntity, nowScore: BigDecimal, advantage: BigDecimal = BigDecimal.ZERO) = GameScoreResponse(
             id = entity.id,
             seasonId = entity.seasonId,
             participantId = entity.participantId,
@@ -28,7 +29,9 @@ data class GameScoreResponse (
             createdAt = entity.createdAt,
             updatedAt = entity.updatedAt,
             deletedAt = entity.deletedAt,
-            nowScore = nowScore - (advantage ?: 0.0),
-        )
+            nowScore = nowScore
+                .subtract(advantage)
+//                .setScale(2, RoundingMode.DOWN),
+            )
     }
 }
