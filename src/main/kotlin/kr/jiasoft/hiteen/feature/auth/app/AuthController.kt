@@ -156,15 +156,22 @@ class AuthController(
     suspend fun sendResetPasswordCode(
         @Parameter(description = "비밀번호 재설정 코드 발송 요청 DTO") @Valid req: AuthPasswordCodeRequest
     ): ResponseEntity<ApiResult<Any>> {
-        val phone = req.phone.filter { it.isDigit() }
+        val phone = req.phone!!.filter { it.isDigit() }
 
         // 가입 여부 확인
-        userRepository.findActiveByUsername(phone, req.nickname)
-            ?: throw IllegalStateException("가입되지 않은 회원 정보야~")
+        val user = userRepository.findActiveByUsername(phone)
+            ?: throw IllegalStateException("가입되지 않은 사용자야~".trimIndent())
+
+        if(user.nickname != req.nickname) {
+            throw IllegalArgumentException("""
+                가입되지 않은 사용자야~
+                힌트: ${user.nickname.get(0)}****
+            """.trimIndent())
+        }
 
         // 인증번호 발송
         val code = (100000..999999).random().toString()
-        val message = "[${System.getenv("APP_NAME") ?: "서비스"}] 비밀번호 재설정 인증번호는 [$code] 입니다."
+        val message = "[하이틴] 비밀번호 재설정 인증번호는 [$code] 입니다."
 
         val success = smsService.sendPhone(phone, message, code)
         if (success) {
