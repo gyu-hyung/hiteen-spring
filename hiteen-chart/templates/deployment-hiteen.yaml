@@ -5,6 +5,7 @@ metadata:
   namespace: {{ .Values.namespace }}
   labels:
     app: {{ .Values.app.name }}
+
 spec:
   replicas: {{ .Values.app.replicaCount }}
 
@@ -14,7 +15,6 @@ spec:
       maxSurge: 1
 
   minReadySeconds: 5
-  terminationGracePeriodSeconds: 30
 
   selector:
     matchLabels:
@@ -24,9 +24,13 @@ spec:
     metadata:
       labels:
         app: {{ .Values.app.name }}
+
     spec:
+      terminationGracePeriodSeconds: 30
+
       nodeSelector:
         {{- toYaml .Values.nodeSelector | nindent 8 }}
+
       imagePullSecrets:
         {{- toYaml .Values.imagePullSecrets | nindent 8 }}
 
@@ -51,23 +55,34 @@ spec:
           resources:
             {{- toYaml .Values.app.resources | nindent 12 }}
 
-          # ✅ readinessProbe container-level
-          readinessProbe:
+          # 🚀 startupProbe (기동 보호용)
+          startupProbe:
             httpGet:
               path: /actuator/health
               port: {{ .Values.app.service.port }}
-            initialDelaySeconds: 8
+            failureThreshold: 30     # 최대 150초
             periodSeconds: 5
 
-          # 🩺 livenessProbe
+          # ✅ readinessProbe (트래픽 수신 여부)
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: {{ .Values.app.service.port }}
+            initialDelaySeconds: 30
+            timeoutSeconds: 3
+            periodSeconds: 5
+            failureThreshold: 3
+
+          # 🩺 livenessProbe (진짜 죽었을 때만)
           livenessProbe:
             httpGet:
-              path: /actuator/health
+              path: /actuator/health/liveness
               port: {{ .Values.app.service.port }}
-            initialDelaySeconds: 20
+            initialDelaySeconds: 60
+            timeoutSeconds: 3
             periodSeconds: 10
+            failureThreshold: 3
 
-          # 🚦 graceful shutdown
           lifecycle:
             preStop:
               exec:

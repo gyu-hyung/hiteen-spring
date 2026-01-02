@@ -16,16 +16,20 @@ app:
   fullnameOverride: hiteen-test
   name: hiteen-test
   replicaCount: 1
+
   image:
     repository: ghcr.io/gyu-hyung/hiteen-api
     tag: latest
     pullPolicy: Always
+
   service:
     type: ClusterIP
     port: 8080
+
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: dev-k8s
+
     - name: REDIS_HOST
       value: redis-0.redis.hiteen.svc.cluster.local
     - name: REDIS_PORT
@@ -35,15 +39,51 @@ app:
         secretKeyRef:
           name: redis-secret
           key: redis-password
+
     - name: FIREBASE_CREDENTIAL_PATH
       value: /app/firebase/firebase-key.json
+
+    # 🔥 JVM 메모리 명시 (중요)
+    - name: JAVA_TOOL_OPTIONS
+      value: "-Xms512m -Xmx1536m -XX:+UseG1GC"
+
+  # 🔥 리소스 상향 (OOM 방지)
   resources:
     requests:
       cpu: 300m
-      memory: 512Mi
+      memory: 1Gi
     limits:
       cpu: 1
-      memory: 1Gi
+      memory: 2Gi
+
+  # ============================================
+  # Health Probes (안정화 핵심)
+  # ============================================
+  startupProbe:
+    httpGet:
+      path: /actuator/health
+      port: 8080
+    failureThreshold: 30   # 최대 150초 대기
+    periodSeconds: 5
+
+  livenessProbe:
+    httpGet:
+      path: /actuator/health/liveness
+      port: 8080
+    initialDelaySeconds: 60
+    timeoutSeconds: 3
+    periodSeconds: 10
+    failureThreshold: 3
+
+  readinessProbe:
+    httpGet:
+      path: /actuator/health/readiness
+      port: 8080
+    initialDelaySeconds: 30
+    timeoutSeconds: 3
+    periodSeconds: 5
+    failureThreshold: 3
+
 
 
 # ============================================
