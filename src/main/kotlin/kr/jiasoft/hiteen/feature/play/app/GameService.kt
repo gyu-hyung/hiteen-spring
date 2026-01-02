@@ -123,8 +123,8 @@ class GameService(
             if (existing != null) {
                 val lastPlayedDate = existing.updatedAt?.toLocalDate() ?: existing.createdAt.toLocalDate()
 
-                //오늘 게임한 적이 있다면 && 시도 횟수가 3회를 초과했다면 재도전 처리
-                if (lastPlayedDate.isEqual(LocalDate.now()) && existing.tryCount > 3) {
+                //오늘 게임한 적이 있다면 && 시도 횟수가 3회 이상이면 재도전 처리
+                if (lastPlayedDate.isEqual(LocalDate.now()) && existing.tryCount > 2) {
                     handleRetry(gameId, userId, retryType, transactionId)
                 }
             }
