@@ -8,8 +8,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
-import jakarta.validation.constraints.NotBlank
-import jakarta.validation.constraints.Pattern
 import kr.jiasoft.hiteen.common.dto.ApiResult
 import kr.jiasoft.hiteen.common.exception.AlreadyRegisteredException
 import kr.jiasoft.hiteen.feature.auth.dto.AuthCodeRequest
@@ -93,13 +91,14 @@ class AuthController(
         }
 
         val code = (100000..999999).random().toString()
-        val message = "[${System.getenv("APP_NAME") ?: "서비스"}] 회원가입 인증번호는 [$code] 입니다."
+        val message = "[하이틴] 회원가입 인증번호는 [$code] 입니다."
 
         val success = smsService.sendPhone(phone, message, code)
         if (success) {
             return ResponseEntity.ok(ApiResult.success(true, "인증번호를 발송했어~"))
+        } else {
+            throw IllegalStateException("인증번호 발송 실패")
         }
-        return ResponseEntity.internalServerError().body(ApiResult.failure("인증번호 발송 실패"))
     }
 
 
