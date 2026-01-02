@@ -18,10 +18,10 @@ data class ApiResult<T>(
             ApiResult(success = false, data = null, message = message, errors = errors)
 
         fun <T> failure(extras: Map<String, *>? = null): ApiResult<T> =
-            ApiResult(success = false, data = null, message = "실패", extras = extras)
+            ApiResult(success = false, data = null, message = "개발중 err message. extras=$extras", extras = extras)
 
         fun <T> failure(error: String): ApiResult<T> =
-            ApiResult(success = false, data = null, message = "실패", errors = mapOf("code" to listOf(error)))
+            ApiResult(success = false, data = null, message = "개발중 err message: ${error}", errors = mapOf("code" to listOf(error)))
 
     }
 }

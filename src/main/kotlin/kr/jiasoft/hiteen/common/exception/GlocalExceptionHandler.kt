@@ -6,7 +6,6 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.bind.support.WebExchangeBindException
-import org.springframework.web.client.HttpClientErrorException
 
 
 @RestControllerAdvice
@@ -107,7 +106,7 @@ class GlobalExceptionHandler {
     // 포인트 부족 오류
     @ExceptionHandler(NotEnoughPointException::class)
     fun handleEnoughPointException(e: NotEnoughPointException): ResponseEntity<ApiResult<Nothing>> {
-        val errors = mapOf("code" to "POINT")
+        val errors = mapOf("code" to listOf("POINT"))
         return ResponseEntity
             .badRequest()
             .body(ApiResult.failure(errors))
@@ -117,7 +116,7 @@ class GlobalExceptionHandler {
     // 이미 회원가입 된 사용자가 다시 회원가입 시도할 때
     @ExceptionHandler(AlreadyRegisteredException::class)
     fun handleAlreadyRegisteredException(e: AlreadyRegisteredException): ResponseEntity<ApiResult<Nothing>> {
-        val errors = mapOf("code" to "ALREADY_REGISTERED")
+        val errors = mapOf("code" to listOf("ALREADY_REGISTERED"))
         return ResponseEntity
             .badRequest()
             .body(ApiResult.failure(errors))
