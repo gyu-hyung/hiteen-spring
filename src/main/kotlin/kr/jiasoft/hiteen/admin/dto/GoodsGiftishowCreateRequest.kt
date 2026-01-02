@@ -9,7 +9,7 @@ data class GoodsGiftishowCreateRequest(
     val id: Long? = null,
 
     val goodsNo: Int,
-    val goodsCode: String,
+    val goodsCode: String? = null,
 
     val goodsName: String? = null,
     val brandCode: String? = null,

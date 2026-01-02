@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.toList
 import kr.jiasoft.hiteen.challengeRewardPolicy.dto.ChallengeRewardPolicyDeleteRequest
 import kr.jiasoft.hiteen.challengeRewardPolicy.dto.ChallengeRewardPolicyRow
 import kr.jiasoft.hiteen.challengeRewardPolicy.dto.ChallengeRewardPolicySaveRequest
+import kr.jiasoft.hiteen.challengeRewardPolicy.dto.ChallengeRewardPolicySingleSaveRequest
 import org.springframework.stereotype.Service
 import java.time.OffsetDateTime
 
@@ -43,6 +44,37 @@ class ChallengeRewardPolicyService(
             searchType = searchType,
             status = status,
         )
+
+
+    /** 단일 저장 (등록 / 수정) */
+    suspend fun saveOne(
+        req: ChallengeRewardPolicySingleSaveRequest,
+        adminId: Long,
+    ): Long {
+        val now = OffsetDateTime.now()
+
+        val entity = ChallengeRewardPolicyEntity(
+            id = req.id ?: 0,
+            type = req.type,
+            league = req.league,
+            gameId = req.gameId,
+            amount = req.amount,
+            goodsCodes = req.goodsCodes,
+            rank = req.rank,
+            message = req.message,
+            memo = req.memo,
+            status = req.status,
+            orderNo = req.orderNo,
+            assetUid = req.assetUid,
+            createdId = adminId,
+            createdAt = now,
+            updatedId = if (req.id != null) adminId else null,
+            updatedAt = if (req.id != null) now else null,
+        )
+
+        return repository.save(entity).id
+    }
+
 
     /** 등록/수정/순서 저장 (벌크) */
     suspend fun saveAll(

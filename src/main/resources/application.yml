@@ -7,11 +7,11 @@ spring:
     name: hiteen
 
   r2dbc:
-#    url: r2dbc:postgresql://127.0.0.1:5432/hiteen
-    url: r2dbc:postgresql://49.247.175.76:5432/hiteen
+    url: r2dbc:postgresql://127.0.0.1:5432/hiteen
+#    url: r2dbc:postgresql://49.247.175.76:5432/hiteen
     username: hiteen
-#    password: 1234
-    password: xxxxxxxx
+    password: 1234
+#    password: xxxxxxxx
     pool:
       enabled: true
       initial-size: 2         # 서버 시작 시 커넥션 미리 확보
@@ -23,11 +23,11 @@ spring:
       max-create-connection-time: 10s
 
   liquibase:
-#    url: jdbc:postgresql://127.0.0.1:5432/hiteen
-    url: jdbc:postgresql://49.247.175.76:5432/hiteen
+    url: jdbc:postgresql://127.0.0.1:5432/hiteen
+#    url: jdbc:postgresql://49.247.175.76:5432/hiteen
     user: hiteen
-#    password: 1234
-    password: xxxxxxxx
+    password: 1234
+#    password: xxxxxxxx
     change-log: classpath:db/changelog/db.changelog-master.yaml
 
   data:

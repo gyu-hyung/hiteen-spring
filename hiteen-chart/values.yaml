@@ -122,7 +122,7 @@ ingress:
     nginx.ingress.kubernetes.io/websocket-services: "hiteen-test"
 
   hosts:
-    - host:
+    - host: dev.hiteen.co.kr
       paths:
         - path: /
           pathType: Prefix
