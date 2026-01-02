@@ -3,6 +3,7 @@ package kr.jiasoft.hiteen.feature.play.domain
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
+import java.math.BigDecimal
 import java.time.OffsetDateTime
 import java.util.UUID
 
@@ -23,7 +24,7 @@ data class GameHistoryEntity(
     @Column("game_id")
     val gameId: Long,
 
-    val score: Double? = null,
+    val score: BigDecimal? = null,
 
     val status: String, // PLAYING, DONE
 
