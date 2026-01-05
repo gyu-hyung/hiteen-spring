@@ -25,6 +25,7 @@ import kr.jiasoft.hiteen.feature.user.domain.SeasonStatusType
 import org.springframework.stereotype.Service
 import org.springframework.transaction.reactive.TransactionalOperator
 import org.springframework.transaction.reactive.executeAndAwait
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.util.UUID
@@ -122,8 +123,8 @@ class GameService(
             if (existing != null) {
                 val lastPlayedDate = existing.updatedAt?.toLocalDate() ?: existing.createdAt.toLocalDate()
 
-                //오늘 게임한 적이 있다면 && 시도 횟수가 3회를 초과했다면 재도전 처리
-                if (lastPlayedDate.isEqual(LocalDate.now()) && existing.tryCount > 3) {
+                //오늘 게임한 적이 있다면 && 시도 횟수가 3회 이상이면 재도전 처리
+                if (lastPlayedDate.isEqual(LocalDate.now()) && existing.tryCount > 2) {
                     handleRetry(gameId, userId, retryType, transactionId)
                 }
             }
@@ -148,7 +149,7 @@ class GameService(
     suspend fun recordScore(
         gameHistoryUid: UUID,
         gameId: Long,
-        score: Double,
+        score: BigDecimal,
         userId: Long,
         tierId: Long,
     ): GameScoreResponse {
@@ -166,27 +167,24 @@ class GameService(
 
         //게임 이력
         val existing = gameScoreRepository.findBySeasonIdAndParticipantIdAndGameId(participant.seasonId, participant.id, gameId)
-        return if (existing != null) {
-            // 시도 횟수별 가산점 (0.01초 * n), 최대 1 초 까지
-            val advantage = 0.01 * (existing.totalTryCount).coerceAtMost(100)
+        // 시도 횟수별 가산점 (0.01초 * n), 최대 1 초 까지
+        val tryCount = (existing?.totalTryCount?.plus(1)) ?: 1
+        val advantage = BigDecimal("0.01").multiply(BigDecimal(tryCount))
+        val finalScore = score
+            .subtract(advantage)
+            .coerceAtLeast(BigDecimal.ZERO)
+//            .setScale(2, RoundingMode.DOWN)
+        saveHistory(gameHistoryUid,  participant.seasonId, participant.id, gameId, finalScore)
 
-            val finalScore = (score - advantage).coerceAtLeast(0.0)
-            saveHistory(gameHistoryUid,  participant.seasonId, participant.id, gameId, finalScore)
-
-            val lastPlayedDate = existing.updatedAt?.toLocalDate() ?: existing.createdAt.toLocalDate()
-            if (lastPlayedDate.isEqual(LocalDate.now())) {
-                val scoreEntity = updateScore(existing, finalScore)
-                GameScoreResponse.fromEntity(scoreEntity, score, advantage)
-            } else {
-                val scoreEntity = updateScore(existing, finalScore, 1)
-                GameScoreResponse.fromEntity(scoreEntity, score, advantage)
-            }
-
+        val scoreEntity =  if (existing != null) {
+            val isToday = existing.updatedAt?.toLocalDate()?.isEqual(LocalDate.now()) ?: existing.createdAt.toLocalDate().isEqual(LocalDate.now())
+            updateScore(existing, finalScore, if (isToday) existing.tryCount + 1 else 1)
         } else {
-            saveHistory(gameHistoryUid,  participant.seasonId, participant.id, gameId, score)
-            val scoreEntity = createScore(participant.seasonId, participant.id, gameId, score)
-            GameScoreResponse.fromEntity(scoreEntity, score)
+            createScore(participant.seasonId, participant.id, gameId, finalScore)
         }
+
+
+        return GameScoreResponse.fromEntity(scoreEntity, score, advantage)
     }
 
 
@@ -244,7 +242,7 @@ class GameService(
 
     private suspend fun grantExp(userId: Long, gameId: Long, wordChallengeGameId: Long?) {
         if (gameId == wordChallengeGameId) {
-            expService.grantExp(userId, "GAME_PLAY", gameId, 15)
+            expService.grantExp(userId, "ENGLISH_CHALLENGE", gameId)
         } else {
             expService.grantExp(userId, "GAME_PLAY", gameId)
         }
@@ -301,7 +299,7 @@ class GameService(
         }
     }
 
-    private suspend fun updateScore(existing: GameScoreEntity, score: Double, tryCount: Int? = null): GameScoreEntity {
+    private suspend fun updateScore(existing: GameScoreEntity, score: BigDecimal, tryCount: Int? = null): GameScoreEntity {
         val finalScore = minOf(existing.score, score)
         val updated = existing.copy(
             score = finalScore,
@@ -312,7 +310,7 @@ class GameService(
         return gameScoreRepository.save(updated)
     }
 
-    private suspend fun createScore(seasonId: Long, participantId: Long, gameId: Long, score: Double): GameScoreEntity {
+    private suspend fun createScore(seasonId: Long, participantId: Long, gameId: Long, score: BigDecimal): GameScoreEntity {
         val newScore = GameScoreEntity(
             seasonId = seasonId,
             participantId = participantId,
@@ -324,7 +322,7 @@ class GameService(
         return gameScoreRepository.save(newScore)
     }
 
-    private suspend fun saveHistory(gameHistoryUid: UUID, seasonId: Long, participantId: Long, gameId: Long, score: Double){
+    private suspend fun saveHistory(gameHistoryUid: UUID, seasonId: Long, participantId: Long, gameId: Long, score: BigDecimal){
         val history = gameHistoryRepository.findByUidAndSeasonIdAndParticipantIdAndGameId(gameHistoryUid, seasonId, participantId, gameId)
             ?: throw IllegalArgumentException("유효하지 않은 게임 이력 ID 입니다. (gameHistoryUid=$gameHistoryUid)")
         gameHistoryRepository.save(
