@@ -185,13 +185,13 @@ class ChatService(
 
         // 경험치 부여
         val activeMembers = chatUsers.listActiveUserUids(room.id).toList()
-        activeMembers.forEach { member ->
-            if (req.kind == 0) {
-                expService.grantExp(sendUser.id, "CHAT", member.userId)
-            } else if (req.kind == 1) {
-                expService.grantExp(sendUser.id, "CHAT_QUICK_EMOJI", member.userId)
-            }
-        }
+//        activeMembers.forEach { member ->
+//            if (req.kind == 0) {
+//                expService.grantExp(sendUser.id, "CHAT", member.userId)
+//            } else if (req.kind == 1) {
+//                expService.grantExp(sendUser.id, "CHAT_QUICK_EMOJI", member.userId)
+//            }
+//        }
 
         // 푸시 전송
         val pushUserIds = activeMembers.filter { it.userId != sender.id  }.map { it.userId }

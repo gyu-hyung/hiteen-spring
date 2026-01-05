@@ -2,6 +2,7 @@ package kr.jiasoft.hiteen.feature.play.domain
 
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Table
+import java.math.BigDecimal
 import java.time.OffsetDateTime
 
 @Table("game_rankings")
@@ -13,7 +14,7 @@ data class GameRankingEntity(
     val league: String,
     val gameId: Long,
     val rank: Int,
-    val score: Double,
+    val score: BigDecimal,
 
     val participantId: Long,
     val userId: Long,

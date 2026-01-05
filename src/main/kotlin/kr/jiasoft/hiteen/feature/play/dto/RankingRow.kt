@@ -2,6 +2,7 @@ package kr.jiasoft.hiteen.feature.play.dto
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import io.swagger.v3.oas.annotations.media.Schema
+import java.math.BigDecimal
 import java.time.OffsetDateTime
 import java.util.UUID
 
@@ -23,7 +24,7 @@ data class RankingRow (
     val rank: Int,
 
     @field:Schema(description = "점수", example = "63.12 -> 01:03:12")
-    val score: Double,
+    val score: BigDecimal,
 
     @field:Schema(description = "참가자 ID", example = "1")
     val participantId: Long? = null,

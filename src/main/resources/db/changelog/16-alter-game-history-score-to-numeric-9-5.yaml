@@ -1,0 +1,10 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: alter-game-history-score-to-numeric-9-5
+      author: system
+      changes:
+        - modifyDataType:
+            tableName: game_history
+            columnName: score
+            newDataType: numeric(9,5)

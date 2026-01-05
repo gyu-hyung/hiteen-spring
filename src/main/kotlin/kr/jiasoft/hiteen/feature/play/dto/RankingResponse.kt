@@ -3,6 +3,8 @@ package kr.jiasoft.hiteen.feature.play.dto
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonIgnore
 import io.swagger.v3.oas.annotations.media.Schema
+import java.math.BigDecimal
+import java.math.RoundingMode
 import java.time.OffsetDateTime
 
 @Schema(description = "랭킹 응답 DTO")
@@ -33,7 +35,7 @@ data class RankingResponse(
     val profileImageUrl: String?,
 
     @field:Schema(description = "점수(raw)", example = "1013")
-    val score: Double,
+    val score: BigDecimal,
 
     @field:Schema(description = "표출 시간 (포맷된)", example = "00:10:13")
     val displayTime: String = formatScore(score),
@@ -53,13 +55,20 @@ data class RankingResponse(
     val isMe: Boolean = false
 ) {
     companion object {
-        private fun formatScore(score: Double): String {
-            val totalMillis = (score * 1000).toLong()
-            val minutes = (totalMillis / 60000) % 100
-            val seconds = (totalMillis / 1000) % 60
-            val millis = (totalMillis / 10) % 100
-            return String.format("%02d:%02d:%02d", minutes, seconds, millis)
+        private fun formatScore(score: BigDecimal): String {
+            // 초 → 밀리초 (버림)
+            val totalMillis = score
+                .multiply(BigDecimal("1000"))
+                .setScale(0, RoundingMode.DOWN)
+                .toLong()
+
+            val minutes = totalMillis / 60_000
+            val seconds = (totalMillis % 60_000) / 1_000
+            val centiseconds = (totalMillis % 1_000) / 10   // 1/100초
+
+            return String.format("%02d:%02d:%02d", minutes, seconds, centiseconds)
         }
+
 
         private fun normalizeSchoolName(raw: String?): String? {
             if (raw.isNullOrBlank()) return ""

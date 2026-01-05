@@ -29,3 +29,5 @@ databaseChangeLog:
       file: db/changelog/14-add-game-scores-total-try-count.yaml
   - include:
       file: db/changelog/15-create-challenge-reward-policy.yaml
+  - include:
+      file: db/changelog/16-alter-game-history-score-to-numeric-9-5.yaml

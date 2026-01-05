@@ -2,6 +2,7 @@ package kr.jiasoft.hiteen.feature.play.domain
 
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Table
+import java.math.BigDecimal
 import java.time.OffsetDateTime
 
 @Table("game_scores")
@@ -11,7 +12,7 @@ data class GameScoreEntity(
     val seasonId: Long,
     val participantId: Long,
     val gameId: Long,
-    val score: Double,
+    val score: BigDecimal,
     val tryCount: Int = 0,
     val totalTryCount: Int = 0,
     val createdAt: OffsetDateTime = OffsetDateTime.now(),
