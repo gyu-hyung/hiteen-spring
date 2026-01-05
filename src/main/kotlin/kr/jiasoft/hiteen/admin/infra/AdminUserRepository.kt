@@ -48,7 +48,8 @@ interface AdminUserRepository : CoroutineCrudRepository<UserEntity, Long> {
             (SELECT tier_name_kr FROM tiers t WHERE t.id = u.tier_id) AS tier_name_kr,
             (SELECT uid FROM tiers t WHERE t.id = u.tier_id) AS tier_asset_uid,
             (SELECT level FROM tiers t WHERE t.id = u.tier_id) AS level,
-            (select total_point from user_points_summary ups where ups.user_id = u.id) point
+            (select total_point from user_points_summary ups where ups.user_id = u.id) point,
+            (select total_cash from user_cash_summary ups where ups.user_id = u.id) cash
         FROM users u
         WHERE
             (
@@ -90,7 +91,8 @@ interface AdminUserRepository : CoroutineCrudRepository<UserEntity, Long> {
             (SELECT tier_name_kr FROM tiers t WHERE t.id = u.tier_id) AS tier_name_kr,
             (SELECT uid FROM tiers t WHERE t.id = u.tier_id) AS tier_asset_uid,
             (SELECT level FROM tiers t WHERE t.id = u.tier_id) AS level,
-            (select total_point from user_points_summary ups where ups.user_id = u.id) point
+            (select total_point from user_points_summary ups where ups.user_id = u.id) point,
+            (select total_cash from user_cash_summary ups where ups.user_id = u.id) cash
         FROM users u
         WHERE u.uid = :uid
     """)

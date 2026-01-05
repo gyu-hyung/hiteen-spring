@@ -208,8 +208,8 @@ class AuthController(
                 .body(ApiResult.failure("인증번호가 일치하지 않아~"))
         }
 
-        userRepository.findByPhone(phone)
-            ?: throw java.lang.IllegalArgumentException("가입되지 않은 번호야~")
+        userRepository.findByUsername(phone)
+            ?: throw IllegalArgumentException("가입되지 않은 번호야~")
 
         return ResponseEntity.ok(ApiResult.success("인증번호가 확인되었습니다."))
     }

@@ -26,9 +26,11 @@ data class AdminUserResponse(
     val tierAssetUid: String? = null,
     val locationMode: String,
     val point: Int = 0,
+    val cash: Int = 0,
     val role: String,
     val level: Int,
     val mbti: String? = null,
+    val expPoints: Int = 0,
     val mood: String? = null,
 
     @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm")
