@@ -344,8 +344,8 @@ class UserService (
             ?: throw UsernameNotFoundException("User not found: ${current.username}")
 
         // 1) 파일 업로드 처리
-        var newAssetUid: UUID? = param.assetUid ?: existing.assetUid
-        var oldAssetUidToDelete: UUID? = null
+        var newAssetUid: UUID? = existing.assetUid
+        var oldAssetUidToDelete: UUID? = param.assetUid
 
         if (part != null) {
             val uploaded = assetService.uploadImage(
