@@ -67,6 +67,34 @@ class AssetService(
         return uploadStored(stored, originFileName, currentUserId)
     }
 
+    suspend fun uploadWordAsset(
+        file: FilePart,
+        word: String,
+        currentUserId: Long,
+        category: AssetCategory, // WORD_IMG or SOUND
+        isImage: Boolean,
+    ): AssetResponse {
+
+        val stored = storage.saveWordAsset(
+            filePart = file,
+            word = word,
+            allowedExts = if (isImage) allowedImageExts else allowedExts,
+            maxSizeBytes = maxSizeBytes,
+            category = category
+        )
+
+        if (isImage) {
+            ensureImageOrDelete(stored)
+        }
+
+        return uploadStored(
+            stored = stored,
+            originFileName = file.filename(),
+            currentUserId = currentUserId
+        )
+    }
+
+
     /** 여러 파일 업로드 (일반 파일) */
     suspend fun uploadAll(
         files: List<FilePart>,

@@ -148,6 +148,91 @@ class AssetStorage(
     }
 
 
+    suspend fun saveWordAsset(
+        filePart: FilePart,
+        word: String,
+        allowedExts: List<String>,
+        maxSizeBytes: Long,
+        category: AssetCategory
+    ): StoredFile {
+
+        val orig = filePart.filename()
+        val ext = orig.substringAfterLast('.', "").lowercase()
+        if (ext.isBlank()) throw IllegalArgumentException("확장자가 없는 파일")
+
+        if (allowedExts.isNotEmpty() && !allowedExts.contains(ext)) {
+            throw IllegalArgumentException("허용되지 않은 확장자: .$ext")
+        }
+
+        // ✅ 파일명: 단어명 sanitize
+        val safeWord = word
+            .lowercase()
+            .replace(Regex("[^a-z0-9_-]"), "")
+
+        /** -------------------------
+         * 물리 저장 경로
+         * /srv/nfs/assets/word_img
+         * ------------------------- */
+        val physicalDir = root.resolve(category.fullPath())
+        Files.createDirectories(physicalDir)
+
+        val storedName = "$safeWord.$ext"
+        val dest = physicalDir.resolve(storedName)
+
+        val tmp = Files.createTempFile("upload-", ".$ext")
+
+        try {
+            filePart.transferTo(tmp).awaitSingleOrNull()
+
+            val size = Files.size(tmp)
+            if (size > maxSizeBytes) {
+                throw IllegalArgumentException("파일 용량 초과: ${size}bytes")
+            }
+
+            withContext(Dispatchers.IO) {
+                Files.move(
+                    tmp,
+                    dest,
+                    java.nio.file.StandardCopyOption.REPLACE_EXISTING
+                )
+            }
+
+            val (w, h) = try {
+                ImageIO.read(dest.toFile())?.let { it.width to it.height }
+                    ?: (null to null)
+            } catch (_: Throwable) {
+                null to null
+            }
+
+            val mime = try {
+                Files.probeContentType(dest)
+            } catch (_: Throwable) {
+                null
+            }
+
+            /** -------------------------
+             * ⭐ 핵심: URL 기준 상대경로
+             * /assets/word_img/honest.webp
+             * ------------------------- */
+            val relativePath = "/assets/${category.fullPath()}/"
+
+            return StoredFile(
+                relativePath = relativePath,
+                absolutePath = dest,
+                originFileName = orig,
+                ext = ext,
+                size = size,
+                width = w,
+                height = h,
+                mimeTypeGuess = mime
+            )
+        } catch (e: Throwable) {
+            try { Files.deleteIfExists(tmp) } catch (_: Throwable) {}
+            throw e
+        }
+    }
+
+
 
 
     fun resolve(relativePath: String): Path = root.resolve(relativePath)
