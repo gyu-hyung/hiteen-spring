@@ -78,10 +78,10 @@ interface AdminPointRepository : CoroutineCrudRepository<PointEntity, Long> {
                         OR u.phone LIKE CONCAT('%', :search, '%')
                         OR p.memo LIKE CONCAT('%', :search, '%')
                     )
+                    OR (:searchType = 'nickname' AND u.nickname LIKE CONCAT('%', :search, '%'))
+                    OR (:searchType = 'phone' AND u.phone LIKE CONCAT('%', :search, '%'))
+                    OR (:searchType = 'memo' AND p.memo LIKE CONCAT('%', :search, '%'))
                 )
-                OR (:searchType = 'nickname' AND u.nickname LIKE CONCAT('%', :search, '%'))
-                OR (:searchType = 'phone' AND u.phone LIKE CONCAT('%', :search, '%'))
-                OR (:searchType = 'memo' AND p.memo LIKE CONCAT('%', :search, '%'))
             )
         ORDER BY id DESC
         LIMIT :limit OFFSET :offset
