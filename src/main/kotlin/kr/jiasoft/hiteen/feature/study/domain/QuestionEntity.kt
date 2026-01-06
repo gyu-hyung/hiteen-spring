@@ -2,7 +2,7 @@ package kr.jiasoft.hiteen.feature.study.domain
 
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Table
-import java.time.LocalDateTime
+import java.time.OffsetDateTime
 
 @Table("question_2")
 data class QuestionEntity(
@@ -17,7 +17,7 @@ data class QuestionEntity(
     val image: String?,
     val content: String?,
     val status: Int,
-    val createdAt: LocalDateTime?,
-    val updatedAt: LocalDateTime?,
-    val deletedAt: LocalDateTime?
+    val createdAt: OffsetDateTime?,
+    val updatedAt: OffsetDateTime?,
+    val deletedAt: OffsetDateTime?
 )

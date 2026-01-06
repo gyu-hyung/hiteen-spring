@@ -11,12 +11,12 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToMono
+import java.time.OffsetDateTime
 import reactor.core.publisher.Mono
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.nio.file.StandardOpenOption
-import java.time.LocalDateTime
 
 @Service
 class WordDictionaryImportService(
@@ -106,7 +106,7 @@ class WordDictionaryImportService(
         val soundPath = downloadAndResolveSound(word, audioUrl)
         val imagePath = resolveImagePath(word)
 
-        val now = LocalDateTime.now()
+        val now = OffsetDateTime.now()
 
         val existingList = questionRepository
             .findByLowCaseQuestionAndDeletedAtIsNull(word, type)

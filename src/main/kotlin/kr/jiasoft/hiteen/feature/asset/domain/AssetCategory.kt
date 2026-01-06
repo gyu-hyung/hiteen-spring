@@ -20,6 +20,8 @@ enum class AssetCategory(
 
     CHAT_MESSAGE("chat", "message"),
     GOODS("goods"),
+    WORD("word_img"),
+    SOUND("sound"),
     ;
 
     fun fullPath(): String =
