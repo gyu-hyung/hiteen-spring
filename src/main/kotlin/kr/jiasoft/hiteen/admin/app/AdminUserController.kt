@@ -138,7 +138,7 @@ class AdminUserController (
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ) {
         val existing = adminUserRepository.findById(id)
-            ?: throw UsernameNotFoundException("User not found: ${id}" )
+            ?: throw UsernameNotFoundException("User not found: ${id}")
 
         val now = OffsetDateTime.now()
 
