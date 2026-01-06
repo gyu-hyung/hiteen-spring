@@ -171,7 +171,7 @@ class SchoolImportService(
                     .queryParam("Type", "json")
                     .queryParam("ATPT_OFCDC_SC_CODE", sido)
                     .queryParam("SD_SCHUL_CODE", schoolCode)
-                    .queryParam("AY", LocalDate.now().year)
+                    .queryParam("AY", "2025")
                     .queryParam("pIndex", 1)
                     .queryParam("pSize", 1000)
                     .build()
