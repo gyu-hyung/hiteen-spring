@@ -133,9 +133,12 @@ class AdminUserController (
 
 
     @PostMapping("/withdraw")
-    suspend fun withdraw(user: UserEntity) {
-        val existing = adminUserRepository.findById(user.id)
-            ?: throw UsernameNotFoundException("User not found: ${user.username}")
+    suspend fun withdraw(
+        @RequestParam id: Long,
+        @AuthenticationPrincipal(expression = "user") user: UserEntity,
+    ) {
+        val existing = adminUserRepository.findById(id)
+            ?: throw UsernameNotFoundException("User not found: ${id}")
 
         val now = OffsetDateTime.now()
 
