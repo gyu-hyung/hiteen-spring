@@ -1,7 +1,5 @@
 name: 🏗️ Build & Push Docker Image
 
-#on:
-#  workflow_dispatch
 on:
   push:
     branches: [ main ]
@@ -14,11 +12,18 @@ jobs:
       packages: write
 
     steps:
-      # ✅ 1. Checkout
+      # 1️⃣ Checkout
       - name: 🧩 Checkout source
         uses: actions/checkout@v4
 
-      # ✅ 2. Cache Gradle dependencies
+      # 2️⃣ JDK 설정 (🔥 중요)
+      - name: ☕ Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      # 3️⃣ Gradle 캐시
       - name: ⚡ Cache Gradle dependencies
         uses: actions/cache@v4
         with:
@@ -29,11 +34,17 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      # ✅ 3. Set up Docker Buildx
+      # 4️⃣ ✅ Gradle Build (🔥 핵심)
+      - name: 🧪 Build with Gradle
+        run: |
+          chmod +x ./gradlew
+          ./gradlew clean build -x test -Dspring.profiles.active=dev-k8s
+
+      # 5️⃣ Buildx
       - name: 🧱 Set up Buildx
         uses: docker/setup-buildx-action@v3
 
-      # ✅ 4. Cache Docker Buildx layers
+      # 6️⃣ Docker layer cache
       - name: 🗂️ Cache Docker layers
         uses: actions/cache@v4
         with:
@@ -42,33 +53,32 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-buildx-
 
-      # ✅ 5. Log in to GitHub Container Registry
+      # 7️⃣ GHCR Login
       - name: 🔐 Log in to GHCR
         run: echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
 
-      # ✅ 6. Build & Push (AMD64 only)
+      # 8️⃣ Docker Build & Push
       - name: 🏗️ Build & Push Docker image
         env:
           DOCKER_BUILDKIT: 1
         run: |
           IMAGE=ghcr.io/${{ github.repository_owner }}/hiteen-api
           TAG=${{ github.sha }}
-          echo "🚀 Building fast image: $IMAGE:$TAG"
 
           docker buildx build \
             --platform linux/amd64 \
-            -t $IMAGE:$TAG -t $IMAGE:latest \
+            -t $IMAGE:$TAG \
+            -t $IMAGE:latest \
             --push \
             --cache-from type=local,src=/tmp/.buildx-cache \
             --cache-to type=local,dest=/tmp/.buildx-cache-new,mode=max .
 
-      # ✅ 7. Persist new Docker cache
+      # 9️⃣ Cache persist
       - name: 💾 Move updated Docker cache
         run: |
           rm -rf /tmp/.buildx-cache
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
-      # ✅ 8. Confirm success
+      # 🔟 Done
       - name: ✅ Build complete
-        if: success()
-        run: echo "✅ Fast AMD64 Docker image built & pushed successfully 🎉"
+        run: echo "✅ Docker image built & pushed successfully 🎉"
