@@ -1,12 +1,18 @@
 package kr.jiasoft.hiteen.admin.services
 
 import kotlinx.coroutines.flow.toList
+import kr.jiasoft.hiteen.admin.dto.AdminPointGiveRequest
 import kr.jiasoft.hiteen.admin.dto.AdminPointResponse
 import kr.jiasoft.hiteen.admin.infra.AdminPointRepository
 import kr.jiasoft.hiteen.common.dto.ApiPage
 import kr.jiasoft.hiteen.common.dto.PageUtil
+import kr.jiasoft.hiteen.feature.interest.domain.InterestEntity
+import kr.jiasoft.hiteen.feature.interest.dto.InterestRegisterRequest
+import kr.jiasoft.hiteen.feature.point.domain.PointEntity
+import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
+import java.time.OffsetDateTime
 
 @Component
 class AdminPointService(
@@ -37,5 +43,21 @@ class AdminPointService(
         )
 
         return data
+    }
+
+    suspend fun givePoint(
+        request: AdminPointGiveRequest
+    ): PointEntity {
+        return points.save(
+            PointEntity(
+                type = request.type,
+                point = request.point,
+                memo = request.memo,
+                createdAt = OffsetDateTime.now(),
+                userId = 0,
+                pointableType = null,
+                pointableId = null,
+            )
+        )
     }
 }

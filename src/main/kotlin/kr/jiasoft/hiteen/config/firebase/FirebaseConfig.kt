@@ -19,10 +19,10 @@ class FirebaseConfig {
             envPath != null && File(envPath).exists() -> {
                 FileInputStream(envPath)
             }
-//            javaClass.getResourceAsStream("/firebase/gyuhyungfcm-firebase-adminsdk-fbsvc-783efd0df8.json") != null -> {
-//                javaClass.getResourceAsStream("/firebase/gyuhyungfcm-firebase-adminsdk-fbsvc-783efd0df8.json")
-            javaClass.getResourceAsStream("/firebase/hi-teen-6fa22-firebase-adminsdk-pw83b-f9b51c779f.json") != null -> {
-                javaClass.getResourceAsStream("/firebase/hi-teen-6fa22-firebase-adminsdk-pw83b-f9b51c779f.json")
+            javaClass.getResourceAsStream("/firebase/gyuhyungfcm-firebase-adminsdk-fbsvc-783efd0df8.json") != null -> {
+                javaClass.getResourceAsStream("/firebase/gyuhyungfcm-firebase-adminsdk-fbsvc-783efd0df8.json")
+//            javaClass.getResourceAsStream("/firebase/hi-teen-6fa22-firebase-adminsdk-pw83b-f9b51c779f.json") != null -> {
+//                javaClass.getResourceAsStream("/firebase/hi-teen-6fa22-firebase-adminsdk-pw83b-f9b51c779f.json")
 
             }
             else -> {

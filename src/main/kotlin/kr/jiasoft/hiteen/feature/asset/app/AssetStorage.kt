@@ -130,7 +130,7 @@ class AssetStorage(
 
         // 실제 생성된 크기 다시 읽기(정확도)
         val (outW, outH) = try {
-            javax.imageio.ImageIO.read(dest.toFile())?.let { it.width to it.height } ?: (width to height)
+            ImageIO.read(dest.toFile())?.let { it.width to it.height } ?: (width to height)
         } catch (_: Throwable) { width to height }
 
         val relDir = root.relativize(dir).toString().replace('\\', '/') + "/"

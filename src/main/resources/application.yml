@@ -7,11 +7,11 @@ spring:
     name: hiteen
 
   r2dbc:
-    url: r2dbc:postgresql://127.0.0.1:5432/hiteen
-#    url: r2dbc:postgresql://49.247.175.76:5432/hiteen
+#    url: r2dbc:postgresql://127.0.0.1:5432/hiteen
+    url: r2dbc:postgresql://49.247.175.76:5432/hiteen
     username: hiteen
-    password: 1234
-#    password: xxxxxxxx
+#    password: 1234
+    password: xxxxxxxx
     pool:
       enabled: true
       initial-size: 2         # 서버 시작 시 커넥션 미리 확보
@@ -23,24 +23,24 @@ spring:
       max-create-connection-time: 10s
 
   liquibase:
-    url: jdbc:postgresql://127.0.0.1:5432/hiteen
-#    url: jdbc:postgresql://49.247.175.76:5432/hiteen
+#    url: jdbc:postgresql://127.0.0.1:5432/hiteen
+    url: jdbc:postgresql://49.247.175.76:5432/hiteen
     user: hiteen
-    password: 1234
-#    password: xxxxxxxx
+#    password: 1234
+    password: xxxxxxxx
     change-log: classpath:db/changelog/db.changelog-master.yaml
 
   data:
     mongodb:
-      uri: mongodb://hiteen:1234@127.0.0.1:27017/hiteen?authSource=admin
-#      uri: mongodb://hiteen:hiteen%402025@49.247.170.182:27017/hiteen?authSource=admin
+#      uri: mongodb://hiteen:1234@127.0.0.1:27017/hiteen?authSource=admin
+      uri: mongodb://hiteen:hiteen%402025@49.247.170.182:27017/hiteen?authSource=admin
     redis:
       repositories:
         enabled: false
       host: 127.0.0.1
       port: 6379
-      password: xxxxxxxx
-#      password:
+#      password: xxxxxxxx
+      password:
       timeout: 5s
       client-type: lettuce
 
@@ -73,15 +73,13 @@ management:
     tags:
       application: hiteen   # 앱 이름(식별용)
 
-
-
 server:
   port: 8080
 
 app:
   asset:
-    storage-root: ${HOME}/assets
-#    storage-root: D:/Project/Hiteen2/assets
+#    storage-root: ${HOME}/assets
+    storage-root: D:/Project/Hiteen2/assets
     static-locations: classpath:/assets/
     allowed-exts: jpg,jpeg,png,gif,webp,bmp,svg,mp4,mov,avi,mkv,pdf,txt,csv,zip,rar,gz
     max-size-bytes: 5242880 # 50MB

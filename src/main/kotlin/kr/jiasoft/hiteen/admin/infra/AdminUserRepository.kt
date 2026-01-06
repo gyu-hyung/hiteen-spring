@@ -2,6 +2,7 @@ package kr.jiasoft.hiteen.admin.infra
 
 import kotlinx.coroutines.flow.Flow
 import kr.jiasoft.hiteen.admin.dto.AdminUserResponse
+import kr.jiasoft.hiteen.admin.dto.AdminUserSearchResponse
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
@@ -84,8 +85,6 @@ interface AdminUserRepository : CoroutineCrudRepository<UserEntity, Long> {
         status: String?,
     ): Flow<AdminUserResponse>
 
-
-
     @Query("""
         SELECT 
             u.*,
@@ -99,11 +98,22 @@ interface AdminUserRepository : CoroutineCrudRepository<UserEntity, Long> {
     """)
     suspend fun findByUid(uid: UUID): AdminUserResponse?
 
+    // 총회원수
+    suspend fun countByRoleAndDeletedAtIsNull(role: String) : Long
 
-
-
-
-
-
-
+    @Query("""
+        SELECT u.*
+        FROM users u
+        WHERE u.deleted_at IS NULL
+            AND (
+                :keyword IS NULL
+                OR (
+                        u.nickname LIKE CONCAT('%', :keyword, '%')
+                        OR u.phone LIKE CONCAT('%', :keyword, '%')
+                )
+            )
+    """)
+    suspend fun listSearchUsers(
+        keyword: String?
+    ): Flow<AdminUserSearchResponse>
 }
