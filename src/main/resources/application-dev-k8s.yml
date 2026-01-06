@@ -94,8 +94,7 @@ management:
 app:
   asset:
     storage-root: /app/assets
-    static-locations: file:/app/assets/
-    allowed-exts: jpg,jpeg,png,gif,webp,bmp,svg,mp4,mov,avi,mkv,pdf,txt,csv,zip,rar,gz
+    allowed-exts: jpg,jpeg,png,gif,webp,bmp,svg,mp4,mov,avi,mkv,pdf,txt,csv,zip,rar,gz,mp3
     max-size-bytes: 52428800  # 50MB
   join:
     rejoin-days: 30
