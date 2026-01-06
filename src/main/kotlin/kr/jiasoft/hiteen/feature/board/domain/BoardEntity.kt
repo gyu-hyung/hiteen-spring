@@ -1,6 +1,5 @@
 package kr.jiasoft.hiteen.feature.board.domain
 
-import io.swagger.v3.oas.annotations.media.Schema
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Table
 import java.time.LocalDate
