@@ -7,12 +7,10 @@ import kr.jiasoft.hiteen.admin.dto.AdminPointResponse
 import kr.jiasoft.hiteen.admin.dto.AdminUserSearchResponse
 import kr.jiasoft.hiteen.admin.infra.AdminUserRepository
 import kr.jiasoft.hiteen.admin.services.AdminPointService
+import kr.jiasoft.hiteen.common.extensions.failure
+import kr.jiasoft.hiteen.common.extensions.success
 import kr.jiasoft.hiteen.common.dto.ApiPage
 import kr.jiasoft.hiteen.common.dto.ApiResult
-import kr.jiasoft.hiteen.feature.interest.domain.InterestEntity
-import kr.jiasoft.hiteen.feature.interest.dto.InterestRegisterRequest
-import kr.jiasoft.hiteen.feature.point.domain.PointEntity
-import kr.jiasoft.hiteen.feature.point.dto.PointChargeRequest
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
@@ -23,11 +21,13 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import java.time.LocalDate
 
+enum class PointType { CREDIT, DEBIT }
+
 @RestController
 @RequestMapping("/api/admin/point")
 class AdminPointController(
     private val pointService: AdminPointService,
-    private val adminUserRepository: AdminUserRepository,
+    private val userRepository: AdminUserRepository,
 ) {
     // 포인트 목록
     @GetMapping("/points")
@@ -39,7 +39,7 @@ class AdminPointController(
         @RequestParam search: String? = null,
         @RequestParam page: Int = 1,
         @RequestParam size: Int = 10,
-    ): ResponseEntity<ApiResult<ApiPage<AdminPointResponse>>?> {
+    ): ResponseEntity<ApiResult<ApiPage<AdminPointResponse>>> {
         val startDate = startDate?.atStartOfDay() // 2025-12-01 00:00:00
         val endDate = endDate?.plusDays(1)?.atStartOfDay() // 2025-12-30 00:00:00 (exclusive)
 
@@ -47,18 +47,16 @@ class AdminPointController(
             type, startDate, endDate, searchType, search, page, size
         )
 
-        return ResponseEntity.ok(ApiResult.success(data))
+        return success(data)
     }
 
     // 전체회원수
     @GetMapping("/users/total")
-    suspend fun getUsersTotal(): ResponseEntity<ApiResult<Map<String, Long>>?> {
-        val count = adminUserRepository.countByRoleAndDeletedAtIsNull("USER")
-        return ResponseEntity.ok(
-            ApiResult.success(
-                mapOf("userCount" to count)
-            )
-        )
+    suspend fun getUsersTotal(): ResponseEntity<ApiResult<Map<String, Long>>> {
+        val count = userRepository.countByRoleAndDeletedAtIsNull("USER")
+        val data = mapOf("userCount" to count)
+
+        return success(data)
     }
 
     // 회원 검색
@@ -66,18 +64,82 @@ class AdminPointController(
     suspend fun getUsersSearch(
         @RequestParam keyword: String? = null,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
-    ): ResponseEntity<ApiResult<List<AdminUserSearchResponse>>?>? {
-        val data = adminUserRepository.listSearchUsers(keyword).toList()
-        return ResponseEntity.ok(ApiResult.success(data))
+    ): ResponseEntity<ApiResult<List<AdminUserSearchResponse>>> {
+        val data = userRepository.listSearchUsers("USER", keyword).toList()
+
+        return success(data)
     }
 
     // 포인트 지급/차감 처리
     @PostMapping("/give")
-    suspend fun givePoint(
+    suspend fun give(
         @Parameter request: AdminPointGiveRequest,
-        @AuthenticationPrincipal(expression = "user") user: UserEntity,
-    ) : ResponseEntity<ApiResult<PointEntity>?>? {
-        val saved = pointService.givePoint(request)
-        return ResponseEntity.ok(ApiResult.success(saved))
+    ) : ResponseEntity<ApiResult<Any>> {
+        val type: PointType = request.type?.uppercase()?.let(PointType::valueOf) ?: PointType.CREDIT
+        var point = request.point ?: 0
+        var memo = request.memo ?: ""
+        val receivers = request.receivers ?: emptyList()
+        var targetType: String? = null
+
+        if (point == 0) {
+            return failure("포인트를 입력해 주세요.")
+        }
+        if (receivers.isEmpty()) {
+            return failure("회원을 한 명 이상 선택해 주세요.")
+        }
+
+        when (type) {
+            PointType.DEBIT -> {
+                if (point > 0) point *= -1
+                if (memo.isBlank()) memo = "운영자 차감"
+            }
+            PointType.CREDIT -> {
+                if (point < 0) point *= -1
+                if (memo.isBlank()) memo = "운영자 지급"
+            }
+        }
+
+        for (phone in receivers) {
+            if (phone == "all") {
+                targetType = phone
+                break
+            }
+        }
+
+        val users: List<UserEntity> = when (targetType) {
+            "all" -> userRepository.findByRole("USER")
+            else -> {
+                userRepository.findUsersByPhones(
+                    role = "USER",
+                    phones = receivers
+                )
+            }
+        }
+
+        val total = users.size
+        if (total < 1) {
+            return failure("회원을 한 명 이상 선택해 주세요.")
+        }
+
+        users.forEach { user ->
+            pointService.givePoint(
+                user.id,
+                "ADMIN",
+                null,
+                type.name,
+                point,
+                memo
+            )
+        }
+
+        val message = if (type == PointType.DEBIT) {
+            "${total}명 회원의 포인트를 차감했습니다."
+        } else {
+            "${total}명 회원에게 포인트를 지급했습니다."
+        }
+
+        val data = mapOf("receivers" to total)
+
+        return success(data, message)
     }
 }
