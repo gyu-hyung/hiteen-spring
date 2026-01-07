@@ -43,7 +43,7 @@ class UserDetailController(
     @PostMapping
     suspend fun upsertMyDetail(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
-        @Parameter(description = "수정할 사용자 상세정보") req: UserDetailRequest
+        @Parameter(description = "수정할 사용자 상세정보") @RequestBody req: UserDetailRequest
     ): ResponseEntity<ApiResult<UserDetailResponse>> {
         return ResponseEntity.ok(ApiResult.success(service.upsertUserDetail(user.uid, req)))
     }
