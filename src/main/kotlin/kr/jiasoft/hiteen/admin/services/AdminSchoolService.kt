@@ -5,9 +5,9 @@ import kr.jiasoft.hiteen.admin.dto.AdminSchoolResponse
 import kr.jiasoft.hiteen.admin.infra.AdminSchoolRepository
 import kr.jiasoft.hiteen.common.dto.ApiPage
 import kr.jiasoft.hiteen.common.dto.PageUtil
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.Service
 
-@Component
+@Service
 class AdminSchoolService(
     private val schools: AdminSchoolRepository,
 ) {

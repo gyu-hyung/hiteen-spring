@@ -12,7 +12,6 @@ import java.util.UUID
 @Repository
 interface AdminUserRepository : CoroutineCrudRepository<UserEntity, Long> {
 
-
     @Query("""
         SELECT COUNT(*)
         FROM users u
@@ -41,7 +40,6 @@ interface AdminUserRepository : CoroutineCrudRepository<UserEntity, Long> {
         role: String?,
         status: String?,
     ): Int
-
 
     @Query("""
         SELECT 
@@ -98,13 +96,16 @@ interface AdminUserRepository : CoroutineCrudRepository<UserEntity, Long> {
     """)
     suspend fun findByUid(uid: UUID): AdminUserResponse?
 
+    // 포인트 지급, 푸시 전송 등에서 호출
     // 총회원수
-    suspend fun countByRoleAndDeletedAtIsNull(role: String) : Long
+    suspend fun countByRoleAndDeletedAtIsNull(role: String? = "USER") : Long
 
+    // 회원 검색
     @Query("""
         SELECT u.*
         FROM users u
         WHERE u.deleted_at IS NULL
+            AND u.role = :role
             AND (
                 :keyword IS NULL
                 OR (
@@ -114,6 +115,23 @@ interface AdminUserRepository : CoroutineCrudRepository<UserEntity, Long> {
             )
     """)
     suspend fun listSearchUsers(
+        role: String? = "USER",
         keyword: String?
     ): Flow<AdminUserSearchResponse>
+
+    // 그룹별 회원 전체 목록
+    suspend fun findByRole(role: String? = "USER"): List<UserEntity>
+
+    // 휴대폰번호 기준 회원 목록
+    @Query("""
+        SELECT *
+        FROM users u
+        WHERE u.role = :role
+          AND u.phone IS NOT NULL
+          AND u.phone IN (:phones)
+    """)
+    suspend fun findUsersByPhones(
+        role: String? = "USER",
+        phones: List<String>
+    ): List<UserEntity>
 }

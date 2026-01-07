@@ -86,7 +86,7 @@ interface AdminPointRepository : CoroutineCrudRepository<PointEntity, Long> {
         ORDER BY id DESC
         LIMIT :limit OFFSET :offset
     """)
-    fun listSearchResults(
+    suspend fun listSearchResults(
         type: String?,
         startDate: LocalDateTime?,
         endDate: LocalDateTime?,

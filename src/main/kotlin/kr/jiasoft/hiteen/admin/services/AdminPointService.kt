@@ -1,22 +1,20 @@
 package kr.jiasoft.hiteen.admin.services
 
 import kotlinx.coroutines.flow.toList
-import kr.jiasoft.hiteen.admin.dto.AdminPointGiveRequest
 import kr.jiasoft.hiteen.admin.dto.AdminPointResponse
 import kr.jiasoft.hiteen.admin.infra.AdminPointRepository
+import kr.jiasoft.hiteen.feature.point.infra.PointSummaryRepository
 import kr.jiasoft.hiteen.common.dto.ApiPage
 import kr.jiasoft.hiteen.common.dto.PageUtil
-import kr.jiasoft.hiteen.feature.interest.domain.InterestEntity
-import kr.jiasoft.hiteen.feature.interest.dto.InterestRegisterRequest
 import kr.jiasoft.hiteen.feature.point.domain.PointEntity
-import kr.jiasoft.hiteen.feature.user.domain.UserEntity
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
-import java.time.OffsetDateTime
 
-@Component
+@Service
 class AdminPointService(
-    private val points: AdminPointRepository,
+    private val adminPointRepository: AdminPointRepository,
+    private val pointSummaryRepository: PointSummaryRepository,
 ) {
     suspend fun listPoints(
         type: String?,
@@ -32,8 +30,8 @@ class AdminPointService(
         val offset = (page - 1) * perPage
 
         // 총 레코드수
-        val total = points.countSearchResults(type, startDate, endDate, searchType, search)
-        val rows = points.listSearchResults(type, startDate, endDate, searchType, search, perPage, offset).toList()
+        val total = adminPointRepository.countSearchResults(type, startDate, endDate, searchType, search)
+        val rows = adminPointRepository.listSearchResults(type, startDate, endDate, searchType, search, perPage, offset).toList()
 
         val data = PageUtil.of(
             items = rows,
@@ -45,19 +43,30 @@ class AdminPointService(
         return data
     }
 
+    @Transactional
     suspend fun givePoint(
-        request: AdminPointGiveRequest
+        userId: Long,
+        pointableType: String? = null,
+        pointableId: Long? = null,
+        type: String = "CREDIT",
+        point: Int = 0,
+        memo: String? = "-"
     ): PointEntity {
-        return points.save(
-            PointEntity(
-                type = request.type,
-                point = request.point,
-                memo = request.memo,
-                createdAt = OffsetDateTime.now(),
-                userId = 0,
-                pointableType = null,
-                pointableId = null,
-            )
+        val entity = PointEntity(
+            userId = userId,
+            pointableType = pointableType,
+            pointableId = pointableId,
+            type = type,
+            point = point,
+            memo = memo
         )
+
+        // 포인트 내역 저장
+        val saved = adminPointRepository.save(entity)
+
+        // 회원 총 포인트 저장
+        pointSummaryRepository.upsertAddPoint(userId, point)
+
+        return saved
     }
 }
