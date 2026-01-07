@@ -54,7 +54,7 @@ class LocationAppService(
 //                payload
 //            )
 
-            locationCacheRedisService.cacheLatest(saved)
+            locationCacheRedisService.cacheLatest(entity)
         }
 
         return saved

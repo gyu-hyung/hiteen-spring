@@ -12,6 +12,8 @@ import java.util.UUID
 @Repository
 interface AdminUserRepository : CoroutineCrudRepository<UserEntity, Long> {
 
+    suspend fun findByUid(uid: UUID): UserEntity?
+
     @Query("""
         SELECT COUNT(*)
         FROM users u
@@ -96,7 +98,7 @@ interface AdminUserRepository : CoroutineCrudRepository<UserEntity, Long> {
         FROM users u
         WHERE u.uid = :uid
     """)
-    suspend fun findByUid(uid: UUID): AdminUserResponse?
+    suspend fun findResponseByUid(uid: UUID): AdminUserResponse?
 
     // 포인트 지급, 푸시 전송 등에서 호출
     // 총회원수

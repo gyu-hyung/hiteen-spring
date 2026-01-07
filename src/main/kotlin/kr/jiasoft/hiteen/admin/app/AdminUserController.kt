@@ -14,11 +14,15 @@ import kr.jiasoft.hiteen.feature.user.app.UserService
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
+import org.springframework.security.core.userdetails.UsernameNotFoundException
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import java.lang.IllegalArgumentException
+import java.time.OffsetDateTime
 import java.util.UUID
 
 @RestController
@@ -28,6 +32,7 @@ class AdminUserController (
     private val adminUserRepository: AdminUserRepository,
     private val adminFriendRepository: AdminFriendRepository,
     private val adminFollowRepository: AdminFollowRepository,
+    private val encoder: PasswordEncoder,
 ) {
 
 
@@ -73,7 +78,7 @@ class AdminUserController (
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ): ResponseEntity<ApiResult<AdminUserResponse>> {
 
-        val data = adminUserRepository.findByUid(uid)
+        val data = adminUserRepository.findResponseByUid(uid)
             ?: throw IllegalArgumentException("존재하지 않는 사용자입니다.")
 
         val userResponse = userService.findUserResponse(data.id)
@@ -84,6 +89,63 @@ class AdminUserController (
     }
 
 
+    @PostMapping("/password/change")
+    suspend fun passwordChange(
+        @RequestParam("uid") id: Long,
+        @RequestParam("newPassword") newPassword: String,
+        @AuthenticationPrincipal(expression = "user") user: UserEntity,
+    ) {
+        val existing = adminUserRepository.findById(id)
+            ?: throw UsernameNotFoundException("User not found: ${user.username}")
+
+        val now = OffsetDateTime.now()
+
+        // soft delete 처리
+        val deleted = existing.copy(
+            password = encoder.encode(newPassword),
+            updatedAt = now,
+            updatedId = user.id
+        )
+        adminUserRepository.save(deleted)
+    }
+
+
+    @PostMapping
+    suspend fun update(
+        @RequestParam req: UserEntity,
+        @RequestParam newPassword: String,
+        @AuthenticationPrincipal(expression = "user") user: UserEntity,
+    ) {
+        val existing = adminUserRepository.findById(user.id)
+            ?: throw UsernameNotFoundException("User not found: ${user.username}")
+
+        val now = OffsetDateTime.now()
+
+        // soft delete 처리
+        val deleted = existing.copy(
+            password = encoder.encode(newPassword),
+            updatedAt = now,
+            updatedId = user.id
+        )
+        adminUserRepository.save(deleted)
+    }
+
+
+
+    @PostMapping("/withdraw")
+    suspend fun withdraw(user: UserEntity) {
+        val existing = adminUserRepository.findById(user.id)
+            ?: throw UsernameNotFoundException("User not found: ${user.username}")
+
+        val now = OffsetDateTime.now()
+
+        // soft delete 처리
+        val deleted = existing.copy(
+            deletedAt = now,
+            deletedId = user.id
+        )
+        adminUserRepository.save(deleted)
+    }
 
 
     @GetMapping("/friends")
