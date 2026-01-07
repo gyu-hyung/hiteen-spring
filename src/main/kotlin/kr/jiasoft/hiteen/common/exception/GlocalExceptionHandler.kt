@@ -104,7 +104,7 @@ class GlobalExceptionHandler {
     // 최상위 에러 (404 등 잡히지 않은 나머지 모든 예외 처리)
     @ExceptionHandler(Exception::class)
     fun handleException(e: Exception): ResponseEntity<ApiResult<Nothing>> {
-        val errors = mapOf("error" to listOf("서버 내부 오류가 발생했습니다. 관리자에게 문의하세요. ${e.printStackTrace()}"))
+        val errors = mapOf("error" to listOf("서버 내부 오류가 발생했습니다. 관리자에게 문의하세요."))
         e.printStackTrace()
         return ResponseEntity
             .internalServerError()

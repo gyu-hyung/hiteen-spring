@@ -42,6 +42,7 @@ import org.springframework.http.codec.multipart.FilePart
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.util.UUID
 
@@ -506,6 +507,26 @@ class UserService (
                 user = user,
                 referredAt = referredAtMap[user.id]!!
             )
+        }
+    }
+
+
+    fun getSchoolYear(date: LocalDateTime? = null): Int {
+        val now = date ?: LocalDateTime.now()
+
+        // 기준일: 올해 3월 1일 00:00:00 - 1초
+        val baseDate = LocalDateTime.now()
+            .withMonth(3)
+            .withDayOfMonth(1)
+            .withHour(0)
+            .withMinute(0)
+            .withSecond(0)
+            .minusSeconds(1)
+
+        return if (now.isAfter(baseDate)) {
+            baseDate.year
+        } else {
+            baseDate.year - 1
         }
     }
 
