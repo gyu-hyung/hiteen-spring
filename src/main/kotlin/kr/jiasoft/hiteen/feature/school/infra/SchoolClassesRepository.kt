@@ -12,12 +12,12 @@ import java.time.LocalDateTime
 interface SchoolClassesRepository : CoroutineCrudRepository<SchoolClassesEntity, Long> {
 
     @Modifying
-    @Query("UPDATE school_classes SET updated_id = -1")
-    suspend fun markAllForDeletion(): Int
+    @Query("UPDATE school_classes SET updated_id = -1 WHERE (:year is NULL OR year = :year)")
+    suspend fun markAllForDeletionByYear(year: Int?): Int
 
     @Modifying
-    @Query("DELETE FROM school_classes WHERE updated_id = -1")
-    suspend fun deleteMarkedForDeletion(): Int
+    @Query("DELETE FROM school_classes WHERE updated_id = -1 AND (:year is NULL OR year = :year)")
+    suspend fun deleteMarkedForDeletionByYear(year: Int?): Int
 
     // ✅ 특정 학년도만 조회
     @Query("SELECT * FROM school_classes WHERE year = :year")
@@ -65,7 +65,7 @@ interface SchoolClassesRepository : CoroutineCrudRepository<SchoolClassesEntity,
         updatedId: Long,
     )
 
-
+    //AND year = EXTRACT(YEAR FROM CURRENT_DATE)
     @Query("""
         SELECT DISTINCT grade
         FROM school_classes

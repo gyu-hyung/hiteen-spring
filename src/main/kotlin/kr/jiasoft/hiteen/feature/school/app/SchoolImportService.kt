@@ -1,14 +1,12 @@
 package kr.jiasoft.hiteen.feature.school.app
 
 import com.fasterxml.jackson.databind.JsonNode
-import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kr.jiasoft.hiteen.feature.school.domain.KakaoProperties
 import kr.jiasoft.hiteen.feature.school.domain.NeisProperties
-import kr.jiasoft.hiteen.feature.school.domain.SchoolClassesEntity
 import kr.jiasoft.hiteen.feature.school.domain.SchoolEntity
 import kr.jiasoft.hiteen.feature.school.infra.SchoolClassesRepository
 import kr.jiasoft.hiteen.feature.school.infra.SchoolRepository
@@ -72,7 +70,7 @@ class SchoolImportService(
         logger.info("학교 + 학급 정보 가져오기 시작")
 
         schoolRepository.markAllForDeletion()
-        schoolClassesRepository.markAllForDeletion()
+        schoolClassesRepository.markAllForDeletionByYear(LocalDate.now().year)
 
         val totalCount = fetchTotalCount()
         if (totalCount <= 0) {
@@ -112,7 +110,7 @@ class SchoolImportService(
         }
 
         schoolRepository.deleteMarkedForDeletion()
-        schoolClassesRepository.deleteMarkedForDeletion()
+        schoolClassesRepository.deleteMarkedForDeletionByYear(LocalDate.now().year)
 
         logger.info("학교 + 학급 정보 가져오기 완료")
     }
@@ -171,7 +169,7 @@ class SchoolImportService(
                     .queryParam("Type", "json")
                     .queryParam("ATPT_OFCDC_SC_CODE", sido)
                     .queryParam("SD_SCHUL_CODE", schoolCode)
-                    .queryParam("AY", "2025")
+                    .queryParam("AY", LocalDate.now().year)
                     .queryParam("pIndex", 1)
                     .queryParam("pSize", 1000)
                     .build()

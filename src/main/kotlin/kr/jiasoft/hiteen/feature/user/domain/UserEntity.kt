@@ -87,6 +87,9 @@ data class UserEntity (
     /* 위치 모드 활성화 여부 */
     val locationMode: Boolean = false,
 
+    /* 학년도 */
+    val year: Int? = null,
+
     /* 생성자 사용자 ID(감사용) */
     val createdId: Long? = null,
 
