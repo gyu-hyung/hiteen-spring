@@ -1,7 +1,7 @@
 package kr.jiasoft.hiteen.feature.relationship.domain
 
 enum class LocationMode {
-    PUBLIC, HIDDEN, RANDOM;
+    PUBLIC, HIDDEN, RANDOM, NEARBY;
 
     companion object {
         fun from(value: String): LocationMode =

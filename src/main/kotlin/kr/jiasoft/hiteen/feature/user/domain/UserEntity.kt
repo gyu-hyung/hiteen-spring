@@ -85,7 +85,7 @@ data class UserEntity (
     val inviteJoins: Long = 0,
     
     /* 위치 모드 활성화 여부 */
-    val locationMode: Boolean = false,
+    val locationMode: Boolean = true,
 
     /* 학년도 */
     val year: Int? = null,
