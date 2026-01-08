@@ -22,7 +22,6 @@ import kr.jiasoft.hiteen.feature.user.infra.UserPhotosRepository
 import kr.jiasoft.hiteen.feature.user.infra.UserRepository
 import org.springframework.stereotype.Service
 import java.time.OffsetDateTime
-import java.util.UUID
 
 @Service
 class InterestUserService(
@@ -286,14 +285,15 @@ class InterestUserService(
     suspend fun passFriend(user: UserEntity, userUid: String) {
         val target = userRepository.findByUid(userUid)
             ?: throw IllegalArgumentException("존재하지않는 정보")
-        interestMatchHistoryRepository.save(
-            InterestMatchHistoryEntity(
-                userId = user.id,
-                targetId = target.id,
-                status = "PASSED",
-                createdAt = OffsetDateTime.now()
+        val history = interestMatchHistoryRepository.findByUserIdAndTargetId(user.id, target.id)
+        history?.let {
+            interestMatchHistoryRepository.save(
+                history.copy(
+                    status = "PASSED",
+                )
             )
-        )
+        }
     }
+
 }
 

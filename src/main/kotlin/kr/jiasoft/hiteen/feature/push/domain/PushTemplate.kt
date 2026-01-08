@@ -1,5 +1,6 @@
 package kr.jiasoft.hiteen.feature.push.domain
 
+import kr.jiasoft.hiteen.feature.user.domain.PushItemType
 import kr.jiasoft.hiteen.util.KoreanPostPosition
 
 
@@ -10,7 +11,8 @@ import kr.jiasoft.hiteen.util.KoreanPostPosition
 enum class PushTemplate(
     val code: String,
     val title: String,
-    val message: String
+    val message: String,
+    val itemType: PushItemType? = null,
 ) {
     /**
      * 친구 요청
@@ -18,7 +20,8 @@ enum class PushTemplate(
     FRIEND_REQUEST(
         code = "FRIEND_REQUEST",
         title = "친구 요청 💌",
-        message = "{nickname_iga} 너랑 친구가 되고 싶어해 😊"
+        message = "{nickname_iga} 너랑 친구가 되고 싶어해 😊",
+        itemType = PushItemType.FRIEND,
     ),
 
     /**
@@ -27,7 +30,8 @@ enum class PushTemplate(
     FRIEND_ACCEPT(
         code = "FRIEND_ACCEPT",
         title = "친구 요청 승인 💌",
-        message = "{nickname_iga} 친구 요청을 수락했어 🤭"
+        message = "{nickname_iga} 친구 요청을 수락했어 🤭",
+        itemType = PushItemType.FRIEND,
     ),
 
 
@@ -37,7 +41,8 @@ enum class PushTemplate(
     FOLLOW_REQUEST(
         code = "FOLLOW_REQUEST",
         title = "새로운 팔로우 👀",
-        message = "{nickname_iga} 나를 팔로우하려고 해 😚"
+        message = "{nickname_iga} 나를 팔로우하려고 해 😚",
+        itemType = PushItemType.FOLLOW,
     ),
 
     /**
@@ -46,7 +51,8 @@ enum class PushTemplate(
     FOLLOW_ACCEPT(
         code = "FOLLOW_ACCEPT",
         title = "팔로우 수락 🥰",
-        message = "{nickname_iga} 내 팔로우를 수락했어 🥰"
+        message = "{nickname_iga} 내 팔로우를 수락했어 🥰",
+        itemType = PushItemType.FOLLOW,
     ),
 
 
@@ -57,7 +63,8 @@ enum class PushTemplate(
     NEW_POST(
         code = "NEW_POST",
         title = "새 글 등록 알림 🔔",
-        message = "방금 새로운 글이 올라왔어~ 🔔"
+        message = "방금 새로운 글이 올라왔어~ 🔔",
+        itemType = PushItemType.NEW_POST
     ),
 
     /**
@@ -66,7 +73,8 @@ enum class PushTemplate(
     PIN_REGISTER(
         code = "PIN_REGISTER",
         title = "핀 등록 알림 📍",
-        message = "{nickname_iga} 지금 핀을 등록했어 📍"
+        message = "{nickname_iga} 지금 핀을 등록했어 📍",
+        PushItemType.PIN_ALERT,
     ),
 
 
@@ -76,7 +84,8 @@ enum class PushTemplate(
     BOARD_COMMENT(
         code = "BOARD_COMMENT",
         title = "틴스토리 댓글 👀",
-        message = "내 게시글에 댓글이 달렸어 👀"
+        message = "내 게시글에 댓글이 달렸어 👀",
+        itemType = PushItemType.COMMENT_ALERT
     ),
 
 
@@ -87,7 +96,8 @@ enum class PushTemplate(
         code = "VOTE_COMMENT",
         title = "틴투표 댓글 알림 💬",
 //        message = "{nickname_iga} 새로운 댓글을 남겼어~"
-        message = "내 투표에 댓글이 달렸어 👀"
+        message = "내 투표에 댓글이 달렸어 👀",
+        itemType = PushItemType.COMMENT_ALERT
     ),
 
 
@@ -99,7 +109,8 @@ enum class PushTemplate(
         code = "CHAT_MESSAGE",
         title = "새로운 채팅 💬",
 //        message = "{nickname_iga} 새로운 메시지를 보냈어~"
-        message = "{chat_message}"
+        message = "{chat_message}",
+        itemType = PushItemType.CHAT_MESSAGE,
     ),
 
 

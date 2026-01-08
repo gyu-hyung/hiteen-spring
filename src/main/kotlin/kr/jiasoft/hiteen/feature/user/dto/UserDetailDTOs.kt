@@ -57,7 +57,7 @@ data class UserDetailRequest(
     @field:Schema(description = "푸시 수신 항목", example = """
         ["ALL","FRIEND_REQUEST","FRIEND_ACCEPT","FOLLOW","NEW_POST","PIN_ALERT","COMMENT_ALERT","CHAT_MESSAGE"]
     """)
-    val pushItems: List<PushItemType> = listOf(PushItemType.ALL),
+    val pushItems: List<PushItemType>? = null,
 
     @field:Schema(description = "관리자 메모", example = "VIP 고객, 빠른 응대 필요")
     val memo: String? = null
