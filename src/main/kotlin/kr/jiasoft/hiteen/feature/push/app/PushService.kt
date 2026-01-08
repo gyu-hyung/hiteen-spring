@@ -7,8 +7,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kr.jiasoft.hiteen.feature.push.domain.PushDetailEntity
 import kr.jiasoft.hiteen.feature.push.domain.PushEntity
+import kr.jiasoft.hiteen.feature.push.domain.PushTemplate
 import kr.jiasoft.hiteen.feature.push.infra.PushDetailRepository
 import kr.jiasoft.hiteen.feature.push.infra.PushRepository
+import kr.jiasoft.hiteen.feature.user.domain.PushItemType
 import kr.jiasoft.hiteen.feature.user.infra.UserDetailRepository
 import org.springframework.stereotype.Service
 import java.time.OffsetDateTime
@@ -78,11 +80,17 @@ class PushService(
             .filter { !it.deviceToken.isNullOrBlank() }
             .filter { it.pushService == "Y" }
 
+        val template = PushTemplate.entries.firstOrNull { it.code == code }
         // ② pushItems 허용 여부 확인
         val eligibleUsers = userDetails.filter { detail ->
             try {
-                val pushList: List<String> = objectMapper.readValue(detail.pushItems ?: "[]", object : TypeReference<List<String>>() {})
-                pushList.contains(code) || pushList.contains("ALL")
+                // pushItems 없는 경우 → 모두 허용
+                if (template?.itemType == null) return@filter true
+
+                val pushList: List<String> =
+                    objectMapper.readValue(detail.pushItems ?: "[]", object : TypeReference<List<String>>() {})
+
+                pushList.contains(PushItemType.ALL.name) || pushList.contains(template.itemType.name)
             } catch (e: Exception) {
                 println("⚠️ pushItems 파싱 실패 (userId=${detail.userId}): ${e.message}")
                 false

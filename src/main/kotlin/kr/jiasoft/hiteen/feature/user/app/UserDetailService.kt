@@ -30,8 +30,8 @@ class UserDetailService(
 
         // 1️⃣ pushItems 안전 변환
         val validPushItems = req.pushItems
-            .distinct()                 // 중복 제거
-            .takeIf { it.isNotEmpty() } // 비어있지 않으면 유지
+            ?.distinct()                 // 중복 제거
+            .takeIf { it?.isNotEmpty() == true} // 비어있지 않으면 유지
             ?: emptyList()               // null 또는 빈 경우 기본값
 
         // 2️⃣ JSON 안전 직렬화

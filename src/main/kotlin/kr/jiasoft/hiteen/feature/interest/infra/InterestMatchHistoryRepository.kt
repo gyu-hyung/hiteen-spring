@@ -10,6 +10,8 @@ import org.springframework.stereotype.Repository
 interface InterestMatchHistoryRepository : CoroutineCrudRepository<InterestMatchHistoryEntity, Long> {
     suspend fun findByUserId(userId: Long): List<InterestMatchHistoryEntity>
 
+    suspend fun findByUserIdAndTargetId(userId: Long, targetId: Long): InterestMatchHistoryEntity?
+
     @Query("SELECT target_id FROM interest_match_history WHERE user_id = :userId")
     suspend fun findTargetIdsByUserId(userId: Long): Flow<Long>
 
