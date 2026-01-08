@@ -439,15 +439,21 @@ class PollService(
             )
         )
         polls.increaseCommentCount(req.pollId)
-        if (parent != null) comments.increaseReplyCount(parent.id)
+        parent?.let { comments.increaseReplyCount(it.id) }
 
         expService.grantExp(user.id, "CREATE_VOTE_COMMENT", saved.id)
         pointService.applyPolicy(user.id, PointPolicy.VOTE_COMMENT, saved.id)
+
+        val extraData = mutableMapOf(
+            "pollId" to p.id.toString()
+        )
+
+        parent?.let { extraData["parentUid"] = it.uid.toString() }
         pushService.sendAndSavePush(
             listOf(p.createdId),
             user.id,
             PushTemplate.VOTE_COMMENT.buildPushData("nickname" to user.nickname),
-            mapOf("pollId" to p.id.toString())
+            extraData
         )
         return getComment(req.pollId, saved.uid, user.id)
     }

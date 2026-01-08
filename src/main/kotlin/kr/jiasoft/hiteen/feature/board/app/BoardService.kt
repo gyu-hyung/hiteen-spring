@@ -378,15 +378,21 @@ class BoardService(
                 createdAt = OffsetDateTime.now(),
             )
         )
-        if (parent != null) comments.increaseReplyCount(parent.id)
+        parent?.let { comments.increaseReplyCount(it.id) }
 
         expService.grantExp(user.id, "CREATE_BOARD_COMMENT", saved.id)
         pointService.applyPolicy(user.id, PointPolicy.STORY_COMMENT, saved.id)
+
+        val extraData = mutableMapOf(
+            "boardUid" to b.uid.toString()
+        )
+
+        parent?.let { extraData["parentUid"] = it.uid.toString() }
         pushService.sendAndSavePush(
             listOf(b.createdId),
             user.id,
             PushTemplate.BOARD_COMMENT.buildPushData("nickname" to user.nickname),
-            mapOf("boardUid" to b.uid.toString())
+            extraData
         )
         return getComment(b.uid, saved.uid, user.id)
     }
