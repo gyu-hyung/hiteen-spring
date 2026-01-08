@@ -1,6 +1,7 @@
 package kr.jiasoft.hiteen.admin.infra
 
 import kotlinx.coroutines.flow.Flow
+import kr.jiasoft.hiteen.admin.dto.SeasonFilterDto
 import kr.jiasoft.hiteen.feature.study.domain.QuestionEntity
 import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
@@ -8,6 +9,24 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface AdminQuestionRepository : CoroutineCrudRepository<QuestionEntity, Long> {
+
+    @Query("""
+        SELECT
+            id AS key,
+            CONCAT(
+                RIGHT(CAST(year AS VARCHAR), 2), '-',
+                LPAD(month::text, 2, '0'), '-',
+                round,
+                ' 회차'
+            ) AS value
+        FROM seasons
+        ORDER BY
+            year DESC,
+            month DESC,
+            round DESC
+    """)
+    fun findSeasonFilters(): Flow<SeasonFilterDto>
+
 
     /**
      * 🔹 전체 개수 조회
@@ -38,12 +57,16 @@ interface AdminQuestionRepository : CoroutineCrudRepository<QuestionEntity, Long
                 OR (:type = '2' AND q.type = 2)
                 OR (:type = '3' AND q.type = 3)
             )
+            AND (
+                :seasonId IS NULL OR (exists (select 1 from question_items qi where q.id = qi.question_id and season_id = :seasonId))
+            )
     """)
     suspend fun totalCount(
         search: String?,
         searchType: String,
         status: String?,
         type: String?,
+        seasonId: Long?,
     ): Int
 
 
@@ -78,6 +101,9 @@ interface AdminQuestionRepository : CoroutineCrudRepository<QuestionEntity, Long
                 OR (:type = '2' AND q.type = 2)
                 OR (:type = '3' AND q.type = 3)
             )
+            AND (
+                :seasonId IS NULL OR (exists (select 1 from question_items qi where q.id = qi.question_id and season_id = :seasonId))
+            )
         ORDER BY
             q.status DESC,
             CASE WHEN :order = 'DESC' THEN q.created_at END DESC,
@@ -92,6 +118,7 @@ interface AdminQuestionRepository : CoroutineCrudRepository<QuestionEntity, Long
         searchType: String,
         status: String?,
         type: String?,
+        seasonId: Long?,
     ): Flow<QuestionEntity>
 
 

@@ -1,6 +1,7 @@
 package kr.jiasoft.hiteen.admin.app
 
 import kotlinx.coroutines.flow.toList
+import kr.jiasoft.hiteen.admin.dto.SeasonFilterDto
 import kr.jiasoft.hiteen.admin.infra.AdminQuestionRepository
 import kr.jiasoft.hiteen.common.dto.ApiPage
 import kr.jiasoft.hiteen.common.dto.ApiResult
@@ -167,18 +168,19 @@ class AdminQuestionController (
 
 
     @GetMapping
-    suspend fun getGoods(
+    suspend fun list(
         @RequestParam page: Int = 1,
         @RequestParam size: Int = 10,
         @RequestParam order: String = "DESC",
         @RequestParam search: String? = null,
         @RequestParam searchType: String = "ALL",
         @RequestParam status: String? = null,
-        @RequestParam id: Long? = null,
-        @RequestParam uid: String? = null,
+//        @RequestParam id: Long? = null,
+//        @RequestParam uid: String? = null,
 
         // ⭐ 추가
         @RequestParam type: String? = null,
+        @RequestParam seasonId: Long? = null,
 
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ): ResponseEntity<ApiResult<ApiPage<QuestionEntity?>>> {
@@ -193,6 +195,7 @@ class AdminQuestionController (
             status = status,
 
             type = type,
+            seasonId = seasonId,
 
         ).toList()
 
@@ -203,8 +206,20 @@ class AdminQuestionController (
             status = status,
 
             type = type,
+            seasonId = seasonId,
         )
 
         return ResponseEntity.ok(ApiResult.success(PageUtil.of(list, totalCount, page, size)))
     }
+
+
+    @GetMapping("/seasonFilters")
+    suspend fun seasonList(
+        @AuthenticationPrincipal(expression = "user") user: UserEntity,
+    ): ResponseEntity<ApiResult<List<SeasonFilterDto?>>> {
+        return ResponseEntity.ok(ApiResult.success(adminQuestionRepository.findSeasonFilters().toList()))
+    }
+
+
+
 }
