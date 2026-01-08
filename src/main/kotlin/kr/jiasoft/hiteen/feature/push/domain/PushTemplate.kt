@@ -52,6 +52,7 @@ enum class PushTemplate(
 
     /**
      * 새 글 등록 알림
+     * boardUid
      */
     NEW_POST(
         code = "NEW_POST",
@@ -67,6 +68,7 @@ enum class PushTemplate(
         title = "핀 등록 알림 📍",
         message = "{nickname_iga} 지금 핀을 등록했어 📍"
     ),
+
 
     /**
      * 게시글 댓글 알림
@@ -88,23 +90,80 @@ enum class PushTemplate(
         message = "내 투표에 댓글이 달렸어 👀"
     ),
 
+
     /**
      * 채팅 알림
+     * roomUid
      */
     CHAT_MESSAGE(
         code = "CHAT_MESSAGE",
         title = "새로운 채팅 💬",
-        message = "{nickname_iga} 새로운 메시지를 보냈어~"
+//        message = "{nickname_iga} 새로운 메시지를 보냈어~"
+        message = "{chat_message}"
     ),
+
 
     /**
      * 선물 알림
+     * giftUid
      */
     GIFT_MESSAGE(
         code = "GIFT_MESSAGE",
         title = "새로운 선물 도착! 🎁",
         message = "새로운 선물 도착! 🎁"
     ),
+
+
+    /**
+     * 시즌 생성 알림
+     * */
+    SEASON_CREATE(
+        code = "SEASON_CREATE",
+        title = "새로운 시즌이 시작되었어요! 🌟",
+        message = "새로운 시즌이 시작되었어요! 지난 시즌 결과를 확인해보세요! 🌟"
+    ),
+
+
+    /**
+     * 랭킹 다운 알림
+     * 친구에게만
+     * */
+    RANKING_DOWN(
+        code = "RANKING_DOWN",
+        title = "랭킹이 하락했어요! 📉",
+        message = "누군가 당신의 랭킹을 추월했어요! 신기록에 도전해보세요!📉"
+    ),
+
+
+    /**
+     * 랭킹 보상 도착
+     * */
+    RANKING_REWARD(
+        code = "RANKING_REWARD",
+        title = "랭킹 보상이 도착했어요! 🎉",
+        message = "이번 시즌 랭킹 보상이 도착했어요! 확인해보세요! 🎉"
+    ),
+
+
+    /**
+     * 이벤트 알림
+     * boardUid
+     * */
+    EVENT_NOTIFICATION(
+        code = "EVENT_NOTIFICATION",
+        title = "새로운 이벤트 소식! 🎊",
+        message = "{event_name} 이벤트가 시작되었어요! 놓치지 마세요! 🎊"
+    ),
+
+
+    /**
+     * 오늘의 친구 추천 시간 알림
+     * */
+    DAILY_FRIEND_SUGGESTION(
+        code = "DAILY_FRIEND_SUGGESTION",
+        title = "오늘의 친구 추천 시간이 왔어요! 🤝",
+        message = "새로운 친구를 만나보세요! 오늘의 친구 추천 시간이 시작되었어요! 🤝"
+    )
 
 
     ;

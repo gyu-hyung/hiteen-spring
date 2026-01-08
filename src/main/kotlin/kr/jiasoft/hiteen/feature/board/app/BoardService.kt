@@ -223,7 +223,12 @@ class BoardService(
             pointService.applyPolicy(user.id, PointPolicy.STORY_POST, saved.id)
             //포스팅 알림
             val followerIds = followRepository.findAllFollowerIds(user.id).toList()
-            pushService.sendAndSavePush(followerIds, PushTemplate.NEW_POST.buildPushData("nickname" to user))
+            pushService.sendAndSavePush(
+                followerIds,
+                user.id,
+                PushTemplate.NEW_POST.buildPushData("nickname" to user),
+                mapOf("boardUid" to saved.uid.toString())
+            )
 
             saved.uid
         }
@@ -377,7 +382,12 @@ class BoardService(
 
         expService.grantExp(user.id, "CREATE_BOARD_COMMENT", saved.id)
         pointService.applyPolicy(user.id, PointPolicy.STORY_COMMENT, saved.id)
-        pushService.sendAndSavePush(listOf(b.createdId), PushTemplate.BOARD_COMMENT.buildPushData("nickname" to user.nickname))
+        pushService.sendAndSavePush(
+            listOf(b.createdId),
+            user.id,
+            PushTemplate.BOARD_COMMENT.buildPushData("nickname" to user.nickname),
+            mapOf("boardUid" to b.uid.toString())
+        )
         return getComment(b.uid, saved.uid, user.id)
     }
 

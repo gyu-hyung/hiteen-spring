@@ -74,7 +74,7 @@ class PollController(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
         @Parameter(description = "첨부 파일") @RequestPart("files", required = false) files: Flux<FilePart>?,
     ): ResponseEntity<ApiResult<Long>> {
-        val id = service.create(pollCreateRequest, user.id, files)
+        val id = service.create(pollCreateRequest, user, files)
         return ResponseEntity.ok(ApiResult.success(id))
     }
 

@@ -112,6 +112,7 @@ class FollowService(
                 expService.grantExp(meId, "FOLLOW_REQUEST", otherId)
                 pushService.sendAndSavePush(
                     listOf(otherId),
+                    me.id,
                     PushTemplate.FOLLOW_REQUEST.buildPushData("nickname" to me.nickname)
                 )
                 relationHistoryService.log(meId, otherId, RelationType.FOLLOW.name, RelationAction.REQUEST.name)
@@ -144,6 +145,7 @@ class FollowService(
         expService.grantExp(meId, "FOLLOW_ACCEPT", otherId)
         pushService.sendAndSavePush(
             listOf(otherId),
+            me.id,
             PushTemplate.FOLLOW_ACCEPT.buildPushData("nickname" to me.nickname)
         )
         relationHistoryService.log(meId, otherId, RelationType.FOLLOW.name, RelationAction.ACCEPT.name)

@@ -188,10 +188,11 @@ class PinService(
                         }
 
                     if (friendIds.isNotEmpty()) {
-                        val data = PushTemplate.PIN_REGISTER.buildPushData(
-                            "nickname" to user.nickname
+                        pushService.sendAndSavePush(
+                            friendIds,
+                            user.id,
+                            PushTemplate.PIN_REGISTER.buildPushData("nickname" to user.nickname)
                         )
-                        pushService.sendAndSavePush(friendIds, data)
                         println("📢 ${friendIds.size}명에게 PIN_ALERT 푸시 전송 완료")
                     } else {
                         println("⚠️ 푸시 전송 대상 없음 — visibility=${dto.visibility}")

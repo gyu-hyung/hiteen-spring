@@ -1,6 +1,7 @@
 package kr.jiasoft.hiteen.feature.code.app
 
 import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.reactive.asFlow
 import kr.jiasoft.hiteen.feature.asset.app.AssetService
 import kr.jiasoft.hiteen.feature.asset.domain.AssetCategory
 import kr.jiasoft.hiteen.feature.code.domain.CodeEntity
@@ -74,7 +75,7 @@ class CodeService(
      * 코드 그룹 단위 조회 (첨부파일 URL 포함)
      */
     suspend fun listCodesByGroup(group: String?): List<CodeWithAssetResponse> {
-        return codeRepository.findByGroup(group?.uppercase()).toList()
+        return codeRepository.findByGroup(group?.uppercase()).asFlow().toList()
     }
 
 

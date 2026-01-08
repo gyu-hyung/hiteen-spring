@@ -14,6 +14,7 @@ import kr.jiasoft.hiteen.feature.poll.dto.*
 import kr.jiasoft.hiteen.feature.poll.infra.*
 import kr.jiasoft.hiteen.feature.push.app.PushService
 import kr.jiasoft.hiteen.feature.push.domain.PushTemplate
+import kr.jiasoft.hiteen.feature.relationship.infra.FriendRepository
 import kr.jiasoft.hiteen.feature.user.app.UserService
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import org.springframework.dao.DuplicateKeyException
@@ -35,6 +36,7 @@ class PollService(
     private val pollLikes: PollLikeRepository,
     private val pollSelects: PollSelectRepository,
     private val pollSelectPhotos: PollSelectPhotoRepository,
+    private val friendRepository: FriendRepository,
 
     private val userService: UserService,
     private val assetService: AssetService,
@@ -242,21 +244,29 @@ class PollService(
     }
 
 
-    suspend fun create(req: PollCreateRequest, userId: Long, fileFlux: Flux<FilePart>?): Long {
+    suspend fun create(req: PollCreateRequest, user: UserEntity, fileFlux: Flux<FilePart>?): Long {
         val pollEntity = PollEntity(
             question = req.question,
             colorStart = req.colorStart,
             colorEnd = req.colorEnd,
             allowComment = req.allowComment,
             status = PollStatus.ACTIVE.name,
-            createdId = userId,
+            createdId = user.id,
             createdAt = OffsetDateTime.now()
         )
 
-        val id = saveOrUpdatePoll(pollEntity, req.answers, userId, fileFlux)
+        val id = saveOrUpdatePoll(pollEntity, req.answers, user.id, fileFlux)
 
-        expService.grantExp(userId, "CREATE_VOTE", id)
-        pointService.applyPolicy(userId, PointPolicy.VOTE_QUESTION, id)
+        expService.grantExp(user.id, "CREATE_VOTE", id)
+        pointService.applyPolicy(user.id, PointPolicy.VOTE_QUESTION, id)
+        //포스팅 알림
+        val friendIds = friendRepository.findAllFriendship(user.id).toList()
+        pushService.sendAndSavePush(
+            friendIds,
+            user.id,
+            PushTemplate.NEW_POST.buildPushData("nickname" to user.nickname),
+            mapOf("pollId" to pollEntity.id.toString())
+        )
 
         return id
     }
@@ -433,7 +443,12 @@ class PollService(
 
         expService.grantExp(user.id, "CREATE_VOTE_COMMENT", saved.id)
         pointService.applyPolicy(user.id, PointPolicy.VOTE_COMMENT, saved.id)
-        pushService.sendAndSavePush(listOf(p.createdId), PushTemplate.VOTE_COMMENT.buildPushData("nickname" to user.nickname))
+        pushService.sendAndSavePush(
+            listOf(p.createdId),
+            user.id,
+            PushTemplate.VOTE_COMMENT.buildPushData("nickname" to user.nickname),
+            mapOf("pollId" to p.id.toString())
+        )
         return getComment(req.pollId, saved.uid, user.id)
     }
 
