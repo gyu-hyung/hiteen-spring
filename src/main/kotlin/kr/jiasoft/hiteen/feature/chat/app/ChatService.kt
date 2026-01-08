@@ -3,6 +3,7 @@ package kr.jiasoft.hiteen.feature.chat.app
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.reactive.asFlow
 import kr.jiasoft.hiteen.common.exception.BusinessValidationException
 import kr.jiasoft.hiteen.feature.asset.app.AssetService
 import kr.jiasoft.hiteen.feature.asset.domain.AssetCategory
@@ -16,6 +17,7 @@ import kr.jiasoft.hiteen.feature.chat.infra.ChatMessageAssetRepository
 import kr.jiasoft.hiteen.feature.chat.infra.ChatMessageRepository
 import kr.jiasoft.hiteen.feature.chat.infra.ChatRoomRepository
 import kr.jiasoft.hiteen.feature.chat.infra.ChatUserRepository
+import kr.jiasoft.hiteen.feature.code.infra.CodeRepository
 import kr.jiasoft.hiteen.feature.level.app.ExpService
 import kr.jiasoft.hiteen.feature.push.app.PushService
 import kr.jiasoft.hiteen.feature.push.domain.PushTemplate
@@ -33,6 +35,7 @@ class ChatService(
     private val messages: ChatMessageRepository,
     private val msgAssets: ChatMessageAssetRepository,
     private val users: UserRepository,
+    private val codeRepository: CodeRepository,
 //    private val soketiBroadcaster: SoketiBroadcaster,
 
     private val expService: ExpService,
@@ -195,7 +198,27 @@ class ChatService(
 
         // 푸시 전송
         val pushUserIds = activeMembers.filter { it.userId != sender.id  }.map { it.userId }
-        pushService.sendAndSavePush(pushUserIds, PushTemplate.CHAT_MESSAGE.buildPushData("nickname" to sendUser.nickname))
+        val pushMessage = when (req.kind) {
+            0 -> "${sendUser.nickname}: ${req.content}"
+            1 -> {
+                val emoji = emojiReplace(req.emojiCode!!)
+                if (req.emojiCount == null) "${sendUser.nickname}: $emoji"
+                else "${sendUser.nickname}: $emoji x${req.emojiCount}"
+            }
+            2 -> "${sendUser.nickname} sent an image"
+
+            else -> "${sendUser.nickname}: ${req.content}"
+        }
+
+        pushService.sendAndSavePush(
+            pushUserIds,
+            sendUser.id,
+            PushTemplate.CHAT_MESSAGE.buildPushData(
+                "nickname" to sendUser.nickname,
+                        "chat_message" to pushMessage,
+            ),
+            mapOf("roomUid" to room.uid.toString())
+        )
 
         return MessageSummary.from(
             entity = savedMsg,
@@ -205,6 +228,15 @@ class ChatService(
         )
     }
 
+    private suspend fun emojiReplace(code: String): String {
+        // 코드 테이블에서 이모지 코드에 해당하는 값의 col2를 찾아서 반환
+        codeRepository.findByGroup("EMOJI").asFlow()
+            .firstOrNull { it.code == code }
+            ?.let {
+                return it.col2 ?: ""
+            }
+        return ""
+    }
 
 
     /** 메세지 페이징 조회 */

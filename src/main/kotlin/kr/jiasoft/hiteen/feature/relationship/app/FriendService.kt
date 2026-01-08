@@ -167,6 +167,7 @@ class FriendService(
                 )
                 pushService.sendAndSavePush(
                     listOf(targetId),
+                    me.id,
                     PushTemplate.FRIEND_REQUEST.buildPushData("nickname" to me.nickname)
                 )
                 relationHistoryService.log(meId, targetId, RelationType.FRIEND.name, RelationAction.REQUEST.name)
@@ -200,6 +201,7 @@ class FriendService(
                     expService.grantExp(targetId, "FRIEND_ADD", meId)
                     pushService.sendAndSavePush(
                         listOf(targetId),
+                        me.id,
                         PushTemplate.FRIEND_ACCEPT.buildPushData("nickname" to me.nickname)
                     )
                     relationHistoryService.log(meId, targetId, RelationType.FRIEND.name, RelationAction.ACCEPT.name)
@@ -268,6 +270,7 @@ class FriendService(
         expService.grantExp(requesterId, "FRIEND_ADD", meId)
         pushService.sendAndSavePush(
             listOf(requesterId),
+            me.id,
             PushTemplate.FRIEND_ACCEPT.buildPushData("nickname" to me.nickname)
         )
         relationHistoryService.log(meId, requesterId, RelationType.FRIEND.name, RelationAction.ACCEPT.name)

@@ -27,25 +27,28 @@ class PushService(
      */
     suspend fun sendAndSavePush(
         userIds: List<Long>,
-        data: Map<String, Any>,
         userId: Long? = null,
+        templateData: Map<String, Any>,
+        extraData: Map<String, Any> = emptyMap(),
     ): SendResult {
         if (userIds.isEmpty()) return SendResult(0, 0, 0)
+
+        val finalData = templateData + extraData
 
         // ① push 요약 저장
         val push = pushRepository.save(
             PushEntity(
-                type = if (data["silent"] == true) "silent" else "notification",
-                code = data["code"]?.toString(),
-                title = data["title"]?.toString(),
-                message = data["message"]?.toString(),
+                type = if (finalData["silent"] == true) "silent" else "notification",
+                code = finalData["code"]?.toString(),
+                title = finalData["title"]?.toString(),
+                message = finalData["message"]?.toString(),
                 total = userIds.size.toLong(),
                 createdId = userId,
             )
         )
 
         // ② 실제 FCM 전송
-        val result = sendPush(push.id, userIds, data)
+        val result = sendPush(push.id, userIds, finalData)
 
         // ③ 요약 업데이트
         pushRepository.save(
@@ -79,7 +82,7 @@ class PushService(
         val eligibleUsers = userDetails.filter { detail ->
             try {
                 val pushList: List<String> = objectMapper.readValue(detail.pushItems ?: "[]", object : TypeReference<List<String>>() {})
-                pushList.contains(code) || pushList.contains("all")
+                pushList.contains(code) || pushList.contains("ALL")
             } catch (e: Exception) {
                 println("⚠️ pushItems 파싱 실패 (userId=${detail.userId}): ${e.message}")
                 false

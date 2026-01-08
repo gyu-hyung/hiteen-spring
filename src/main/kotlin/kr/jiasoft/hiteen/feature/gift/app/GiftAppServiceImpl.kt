@@ -171,7 +171,7 @@ class GiftAppServiceImpl (
         )
 
         // 푸시 전송
-        pushService.sendAndSavePush(listOf(receiverUser.id), mapOf(
+        pushService.sendAndSavePush(listOf(receiverUser.id), null, mapOf(
             "code" to PushTemplate.GIFT_MESSAGE.code,
             "title" to PushTemplate.GIFT_MESSAGE.title,
             "message" to memo
