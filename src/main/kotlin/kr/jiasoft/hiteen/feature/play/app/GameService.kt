@@ -301,11 +301,14 @@ class GameService(
 
     private suspend fun updateScore(existing: GameScoreEntity, score: BigDecimal, tryCount: Int? = null): GameScoreEntity {
         val finalScore = minOf(existing.score, score)
+        // 기존 점수가 더 좋을 경우 updatedAt 유지
+        val finalUpdatedAt = if(existing.score > score) OffsetDateTime.now() else existing.updatedAt
+
         val updated = existing.copy(
             score = finalScore,
             tryCount = tryCount ?: (existing.tryCount + 1),
             totalTryCount = existing.totalTryCount + 1,
-            updatedAt = OffsetDateTime.now()
+            updatedAt = finalUpdatedAt
         )
         return gameScoreRepository.save(updated)
     }
