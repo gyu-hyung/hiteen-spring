@@ -28,6 +28,20 @@ interface AdminQuestionRepository : CoroutineCrudRepository<QuestionEntity, Long
     fun findSeasonFilters(): Flow<SeasonFilterDto>
 
 
+    @Query("""
+        SELECT
+            id AS key,
+            name AS value
+        FROM games
+        WHERE
+            deleted_at IS NULL
+        ORDER BY
+            created_at DESC,
+            id DESC;
+    """)
+    fun findGameFilters(): Flow<SeasonFilterDto>
+
+
     /**
      * 🔹 전체 개수 조회
      */

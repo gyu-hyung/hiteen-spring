@@ -1,65 +1,67 @@
 package kr.jiasoft.hiteen.admin.infra
 
 import kotlinx.coroutines.flow.Flow
-import kr.jiasoft.hiteen.admin.dto.AdminPinResponse
-import kr.jiasoft.hiteen.admin.dto.AdminPollResponse
-import kr.jiasoft.hiteen.feature.pin.domain.PinEntity
-import kr.jiasoft.hiteen.feature.poll.domain.PollEntity
+import kr.jiasoft.hiteen.admin.dto.AdminPlayResponse
+import kr.jiasoft.hiteen.feature.play.domain.GameHistoryEntity
 import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 import java.util.UUID
 
-interface AdminPlayRepository : CoroutineCrudRepository<PollEntity, Long> {
+interface AdminPlayRepository : CoroutineCrudRepository<GameHistoryEntity, Long> {
 
 
 
     @Query("""
-        SELECT
-            p.id,
-            p.question,
-            p.photo,
-    
-            p.vote_count,
-            p.comment_count,
-            (SELECT COUNT(*) FROM poll_likes pl WHERE pl.poll_id = p.id) AS like_count,
-            p.report_count,
-            p.allow_comment,
-    
-            p.status AS status,
-    
-            u.uid      AS user_uid,
-            u.nickname AS nickname,
-    
-            p.created_at
-    
-        FROM polls p
-        LEFT JOIN users u ON u.id = p.created_id
+        SELECT 
+            gh.*,
+            (SELECT nickname FROM users u WHERE u.id = sp.user_id) AS nickname,
+            (SELECT (year % 100)::text || '-' || month::text || '-' || round::text FROM seasons s WHERE s.id = gh.season_id) AS season_no,
+            (SELECT name FROM games g WHERE g.id = gh.game_id) AS game_name
+        FROM game_history gh
+        LEFT JOIN season_participants sp ON sp.id = gh.participant_id 
         WHERE
             (
                 :search IS NULL
                 OR (
                     :searchType = 'ALL' AND (
-                        p.question ILIKE CONCAT('%', :search, '%')
-                        OR u.nickname ILIKE CONCAT('%', :search, '%')
-                    )
+                        SELECT u.nickname
+                        FROM users u
+                        WHERE u.id = sp.user_id
+                    ) ILIKE CONCAT('%', :search, '%')
                 )
-                OR (:searchType = 'question' AND p.question ILIKE CONCAT('%', :search, '%'))
-                OR (:searchType = 'nickname' AND u.nickname ILIKE CONCAT('%', :search, '%'))
+                OR (
+                    :searchType = 'nickname'
+                    AND (
+                        SELECT u.nickname
+                        FROM users u
+                        WHERE u.id = sp.user_id
+                    ) ILIKE CONCAT('%', :search, '%')
+                )
             )
     
             AND (
                 :status IS NULL OR :status = 'ALL'
-                OR p.status = :status
+                OR (:status = 'PLAYING' AND gh.status = 'PLAYING')
+                OR (:status = 'DONE' AND gh.status = 'DONE')
             )
     
             AND (
                 :uid IS NULL
-                OR ( SELECT u.uid FROM users u WHERE u.id = p.created_id ) = :uid
+                OR (select u.uid FROM users u WHERE u.id = sp.user_id) = :uid
             )
+            
+            AND (
+                :seasonId IS NULL OR gh.season_id = :seasonId
+            )
+            
+            AND (
+                :gameId IS NULL OR gh.game_id = :gameId
+            )
+
     
         ORDER BY
-            CASE WHEN :order = 'DESC' THEN p.created_at END DESC,
-            CASE WHEN :order = 'ASC'  THEN p.created_at END ASC
+            CASE WHEN :order = 'DESC' THEN gh.created_at END DESC,
+            CASE WHEN :order = 'ASC' THEN gh.created_at END ASC
     
         LIMIT :size OFFSET (:page - 1) * :size
     """)
@@ -69,40 +71,56 @@ interface AdminPlayRepository : CoroutineCrudRepository<PollEntity, Long> {
         order: String,
         search: String?,
         searchType: String,
-        status: String?,        // polls.status
+        status: String?,
         uid: UUID?,
-    ): Flow<AdminPollResponse>
-
-
+        seasonId: Long?,
+        gameId: Long?,
+    ): Flow<AdminPlayResponse>
 
 
 
 
     @Query("""
         SELECT COUNT(*)
-        FROM polls p
-        LEFT JOIN users u ON u.id = p.created_id
+        FROM game_history gh
+        LEFT JOIN season_participants sp ON sp.id = gh.participant_id 
         WHERE
             (
                 :search IS NULL
                 OR (
                     :searchType = 'ALL' AND (
-                        p.question ILIKE CONCAT('%', :search, '%')
-                        OR u.nickname ILIKE CONCAT('%', :search, '%')
-                    )
+                        SELECT u.nickname
+                        FROM users u
+                        WHERE u.id = sp.user_id
+                    ) ILIKE CONCAT('%', :search, '%')
                 )
-                OR (:searchType = 'question' AND p.question ILIKE CONCAT('%', :search, '%'))
-                OR (:searchType = 'nickname' AND u.nickname ILIKE CONCAT('%', :search, '%'))
+                OR (
+                    :searchType = 'nickname'
+                    AND (
+                        SELECT u.nickname
+                        FROM users u
+                        WHERE u.id = sp.user_id
+                    ) ILIKE CONCAT('%', :search, '%')
+                )
             )
     
             AND (
                 :status IS NULL OR :status = 'ALL'
-                OR p.status = :status
+                OR (:status = 'PLAYING' AND gh.status = 'PLAYING')
+                OR (:status = 'DONE' AND gh.status = 'DONE')
             )
     
             AND (
                 :uid IS NULL
-                OR ( SELECT u.uid FROM users u WHERE u.id = p.created_id ) = :uid
+                OR (select u.uid FROM users u WHERE u.id = sp.user_id) = :uid
+            )
+            
+            AND (
+                :seasonId IS NULL OR gh.season_id = :seasonId
+            )
+            
+            AND (
+                :gameId IS NULL OR gh.game_id = :gameId
             )
     """)
     suspend fun totalCount(
@@ -110,9 +128,8 @@ interface AdminPlayRepository : CoroutineCrudRepository<PollEntity, Long> {
         searchType: String,
         status: String?,
         uid: UUID?,
+        seasonId: Long?,
+        gameId: Long?,
     ): Int
 
-
-
 }
-

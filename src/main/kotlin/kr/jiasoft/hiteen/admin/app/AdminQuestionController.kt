@@ -220,6 +220,13 @@ class AdminQuestionController (
         return ResponseEntity.ok(ApiResult.success(adminQuestionRepository.findSeasonFilters().toList()))
     }
 
+    @GetMapping("/gameFilters")
+    suspend fun gameList(
+        @AuthenticationPrincipal(expression = "user") user: UserEntity,
+    ): ResponseEntity<ApiResult<List<SeasonFilterDto?>>> {
+        return ResponseEntity.ok(ApiResult.success(adminQuestionRepository.findGameFilters().toList()))
+    }
+
 
 
 }

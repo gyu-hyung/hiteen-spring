@@ -1,12 +1,16 @@
 package kr.jiasoft.hiteen.admin.app
 
 import kotlinx.coroutines.flow.toList
+import kr.jiasoft.hiteen.admin.dto.AdminGiftResponse
 import kr.jiasoft.hiteen.admin.dto.AdminPlayResponse
+import kr.jiasoft.hiteen.admin.infra.AdminGiftRepository
 import kr.jiasoft.hiteen.admin.infra.AdminPlayRepository
 import kr.jiasoft.hiteen.common.dto.ApiResult
 import kr.jiasoft.hiteen.common.dto.ApiPage
 import kr.jiasoft.hiteen.common.dto.PageUtil
 import kr.jiasoft.hiteen.feature.asset.app.AssetService
+import kr.jiasoft.hiteen.feature.gift.domain.GiftCategory
+import kr.jiasoft.hiteen.feature.gift.domain.GiftType
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
@@ -14,9 +18,9 @@ import org.springframework.web.bind.annotation.*
 import java.util.UUID
 
 @RestController
-@RequestMapping("/api/admin/play")
-class AdminPlayController(
-    private val repository: AdminPlayRepository,
+@RequestMapping("/api/admin/gift")
+class AdminGiftController(
+    private val repository: AdminGiftRepository,
     private val assetService: AssetService,
 ) {
 
@@ -111,7 +115,7 @@ class AdminPlayController(
      * 목록 조회
      */
     @GetMapping
-    suspend fun getBoards(
+    suspend fun list(
         @RequestParam page: Int = 1,
         @RequestParam size: Int = 10,
         @RequestParam order: String = "DESC",
@@ -120,11 +124,12 @@ class AdminPlayController(
         @RequestParam status: String? = null,
 
         @RequestParam uid: UUID? = null,
-        @RequestParam seasonId: Long? = null,
-        @RequestParam gameId: Long? = null,
+
+        @RequestParam category: GiftCategory? = null,
+        @RequestParam type: GiftType? = null,
 
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
-    ): ResponseEntity<ApiResult<ApiPage<AdminPlayResponse>>> {
+    ): ResponseEntity<ApiResult<ApiPage<AdminGiftResponse>>> {
 
         val list = repository.listByPage(
             page = page,
@@ -134,8 +139,8 @@ class AdminPlayController(
             searchType = searchType,
             status = status,
             uid = uid,
-            seasonId = seasonId,
-            gameId = gameId,
+            category = category,
+            type = type,
         ).toList()
 
         val totalCount = repository.totalCount(
@@ -143,8 +148,8 @@ class AdminPlayController(
             searchType = searchType,
             status = status,
             uid = uid,
-            seasonId = seasonId,
-            gameId = gameId,
+            category = category,
+            type = type,
         )
 
         return ResponseEntity.ok(
