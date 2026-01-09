@@ -83,6 +83,74 @@ class UserDetailService(
     }
 
 
+
+
+//    suspend fun upsertUserDetail(userUid: UUID, req: UserDetailRequest): UserDetailResponse {
+//        userRepository.findIdByUid(userUid)?.let {
+//            req.userId = it
+//        }
+//
+//        // 1️⃣ pushItems 안전 변환
+//        val validPushItems = req.pushItems
+//            ?.distinct()                 // 중복 제거
+//            .takeIf { it?.isNotEmpty() == true}
+//
+//        // 2️⃣ JSON 안전 직렬화
+//        val pushItemsJson = try {
+//            objectMapper.writeValueAsString(validPushItems)
+//        } catch (e: Exception) {
+//            "[]" // 실패 시 안전한 기본값
+//        }
+//
+//        val existing = userDetails.findByUid(userUid)
+//        if( existing == null) {
+//            UserDetailEntity(
+//                userId = req.userId!!,
+//                deviceId = req.deviceId,
+//                deviceOs = req.deviceOs,
+//                deviceVersion = req.deviceVersion,
+//                deviceDetail = req.deviceDetail,
+//                deviceToken = req.deviceToken,
+//                locationToken = req.locationToken,
+//                aqnsToken = req.aqnsToken,
+//                apiToken = req.apiToken,
+//                agreeService = req.agreeService,
+//                agreePrivacy = req.agreePrivacy,
+//                agreeFinance = req.agreeFinance,
+//                agreeMarketing = req.agreeMarketing,
+//                pushService = req.pushService,
+//                pushMarketing = req.pushMarketing,
+//                pushItems = pushItemsJson,
+//                memo = req.memo,
+//            ).let {
+//                return userDetails.save(it).toResponse()
+//            }
+//        } else {
+//            val updated = existing.copy(
+//                deviceId = req.deviceId ?: existing.deviceId,
+//                deviceOs = req.deviceOs ?: existing.deviceOs,
+//                deviceVersion = req.deviceVersion ?: existing.deviceVersion,
+//                deviceDetail = req.deviceDetail ?: existing.deviceDetail,
+//                deviceToken = req.deviceToken ?: existing.deviceToken,
+//                locationToken = req.locationToken ?: existing.locationToken,
+//                aqnsToken = req.aqnsToken ?: existing.aqnsToken,
+//                apiToken = req.apiToken ?: existing.apiToken,
+//                agreeService = req.agreeService ?: existing.agreeService,
+//                agreePrivacy = req.agreePrivacy ?: existing.agreePrivacy,
+//                agreeFinance = req.agreeFinance ?: existing.agreeFinance,
+//                agreeMarketing = req.agreeMarketing ?: existing.agreeMarketing,
+//                pushService = req.pushService ?: existing.pushService,
+//                pushMarketing = req.pushMarketing ?: existing.pushMarketing,
+//                pushItems = pushItemsJson,
+//                memo = req.memo,
+//            )
+//            return userDetails.save(updated).toResponse()
+//        }
+//    }
+
+
+
+
     suspend fun deleteUserDetail(userUid: UUID) {
         userDetails.deleteByUid(userUid)
     }

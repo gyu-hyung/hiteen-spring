@@ -45,14 +45,16 @@ class SchoolController(
     // ✅ 2. schoolId + grade → 학급 목록 조회
     // ============================================================
     @Operation(summary = "학교 학급 목록 조회")
-    @GetMapping("/{schoolId}/grades/{grade}/classes")
+    @GetMapping(value = ["/{schoolId}/grades/{grade}/classes", "/{schoolId}/grades/{grade}/classes/{year}"])
     suspend fun getClasses(
         @PathVariable schoolId: Long,
-        @PathVariable grade: String
+        @PathVariable grade: String,
+        @PathVariable year: Int? = null
     ): ResponseEntity<ApiResult<List<SchoolClassResponse>>> {
 
+        val schoolYear = year ?: getSchoolYear()
         val classes = schoolClassesRepository
-            .findBySchoolIdAndGrade(schoolId, grade)
+            .findBySchoolIdAndGrade(schoolId, grade, schoolYear)
             .map {
                 SchoolClassResponse(
                     id = it.id,
@@ -63,5 +65,24 @@ class SchoolController(
             .toList()
 
         return ResponseEntity.ok(ApiResult.success(classes))
+    }
+
+    fun getSchoolYear(date: LocalDateTime? = null): Int {
+        val now = date ?: LocalDateTime.now()
+
+        // 기준일: 올해 3월 1일 00:00:00 - 1초
+        val baseDate = LocalDateTime.now()
+            .withMonth(3)
+            .withDayOfMonth(1)
+            .withHour(0)
+            .withMinute(0)
+            .withSecond(0)
+            .minusSeconds(1)
+
+        return if (now.isAfter(baseDate)) {
+            baseDate.year
+        } else {
+            baseDate.year - 1
+        }
     }
 }
