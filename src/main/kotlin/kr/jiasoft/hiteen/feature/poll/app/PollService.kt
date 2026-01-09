@@ -449,12 +449,26 @@ class PollService(
         )
 
         parent?.let { extraData["parentUid"] = it.uid.toString() }
-        pushService.sendAndSavePush(
-            listOf(p.createdId),
-            user.id,
-            PushTemplate.VOTE_COMMENT.buildPushData("nickname" to user.nickname),
-            extraData
-        )
+        if(p.createdId != user.id) {//남의 글에만 알림
+            pushService.sendAndSavePush(
+                listOf(p.createdId),
+                user.id,
+                PushTemplate.VOTE_COMMENT.buildPushData("nickname" to user.nickname),
+                extraData
+            )
+        }
+
+        //부모 댓글 작성자에게 답글 알림
+        parent?.let {
+            if( it.createdId == user.id ) return@let//본인글이면 패스
+            pushService.sendAndSavePush(
+                listOf(it.createdId),
+                user.id,
+                PushTemplate.VOTE_REPLY.buildPushData("nickname" to user.nickname),
+                extraData
+            )
+        }
+
         return getComment(req.pollId, saved.uid, user.id)
     }
 

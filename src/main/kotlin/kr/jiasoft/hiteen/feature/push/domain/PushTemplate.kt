@@ -84,10 +84,21 @@ enum class PushTemplate(
     BOARD_COMMENT(
         code = "BOARD_COMMENT",
         title = "틴스토리 댓글 👀",
-        message = "내 게시글에 댓글이 달렸어 👀",
+        message = "{nickname_iga} 내 게시글에 새로운 댓글을 남겼어 👀",
+//        message = "내 게시글에 댓글이 달렸어 👀",
         itemType = PushItemType.COMMENT_ALERT
     ),
 
+    /**
+     * 게시글 대댓글 알림
+     */
+    BOARD_REPLY(
+        code = "BOARD_REPLY",
+        title = "틴스토리 대댓글 👀",
+        message = "{nickname_iga} 내 댓글에 새로운 댓글을 남겼어 👀",
+//        message = "내 댓글에 답글이 달렸어 👀",
+        itemType = PushItemType.COMMENT_ALERT
+    ),
 
     /**
      * 투표 댓글 알림
@@ -95,8 +106,19 @@ enum class PushTemplate(
     VOTE_COMMENT(
         code = "VOTE_COMMENT",
         title = "틴투표 댓글 알림 💬",
-//        message = "{nickname_iga} 새로운 댓글을 남겼어~"
-        message = "내 투표에 댓글이 달렸어 👀",
+        message = "{nickname_iga} 내 투표에 새로운 댓글을 남겼어 👀",
+//        message = "내 투표에 댓글이 달렸어 👀",
+        itemType = PushItemType.COMMENT_ALERT
+    ),
+
+    /**
+     * 투표 답글 알림
+     */
+    VOTE_REPLY(
+        code = "VOTE_REPLY",
+        title = "틴투표 답글 알림 💬",
+        message = "{nickname_iga} 내 댓글에 새로운 댓글을 남겼어 👀",
+//        message = "내 댓글에 답글이 달렸어 👀",
         itemType = PushItemType.COMMENT_ALERT
     ),
 
