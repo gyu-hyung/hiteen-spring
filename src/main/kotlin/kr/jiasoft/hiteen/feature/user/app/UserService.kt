@@ -511,24 +511,7 @@ class UserService (
     }
 
 
-    fun getSchoolYear(date: LocalDateTime? = null): Int {
-        val now = date ?: LocalDateTime.now()
 
-        // 기준일: 올해 3월 1일 00:00:00 - 1초
-        val baseDate = LocalDateTime.now()
-            .withMonth(3)
-            .withDayOfMonth(1)
-            .withHour(0)
-            .withMinute(0)
-            .withSecond(0)
-            .minusSeconds(1)
-
-        return if (now.isAfter(baseDate)) {
-            baseDate.year
-        } else {
-            baseDate.year - 1
-        }
-    }
 
 
 

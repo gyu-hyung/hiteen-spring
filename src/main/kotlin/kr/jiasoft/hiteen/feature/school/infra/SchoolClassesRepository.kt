@@ -82,11 +82,13 @@ interface SchoolClassesRepository : CoroutineCrudRepository<SchoolClassesEntity,
         WHERE school_id = :schoolId
           AND grade = :grade
           AND deleted_at IS NULL
+          AND year = :year
         ORDER BY class_no
     """)
     fun findBySchoolIdAndGrade(
         schoolId: Long,
-        grade: String
+        grade: String,
+        year: Int,
     ): Flow<SchoolClassesEntity>
 
 
