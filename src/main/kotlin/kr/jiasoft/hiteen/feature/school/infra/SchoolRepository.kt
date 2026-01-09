@@ -26,6 +26,7 @@ interface SchoolRepository : CoroutineCrudRepository<SchoolEntity, Long> {
         FROM schools s
         WHERE (:keyword IS NULL OR name ILIKE '%' || :keyword || '%')
           AND (:cursor IS NULL OR id > :cursor)
+          AND exists (select 1 from school_classes sc where sc.school_id = s.id)
         ORDER BY id ASC
         LIMIT :limit
     """)
