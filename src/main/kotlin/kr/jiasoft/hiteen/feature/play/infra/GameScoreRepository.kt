@@ -17,7 +17,7 @@ interface GameScoreRepository : CoroutineCrudRepository<GameScoreEntity, Long> {
     @Query("""
         SELECT
             gs.id,
-            ROW_NUMBER() OVER (ORDER BY gs.score ASC, gs.created_at ASC) AS rank,
+            ROW_NUMBER() OVER (ORDER BY gs.score ASC, CASE WHEN gs.updated_at IS NOT NULL THEN gs.updated_at ELSE gs.created_at END ASC) AS rank,
             u.id AS user_id,
             u.nickname,
             u.grade,
@@ -38,7 +38,7 @@ interface GameScoreRepository : CoroutineCrudRepository<GameScoreEntity, Long> {
                 :participantIds IS NULL 
                 OR sp.id = ANY(:participantIds)
               )
-        ORDER BY gs.score ASC, gs.created_at ASC
+        ORDER BY gs.score ASC, CASE WHEN gs.updated_at IS NOT NULL THEN gs.updated_at ELSE gs.created_at END ASC
         LIMIT :limit
     """)
     fun findSeasonRankingFiltered(
@@ -98,6 +98,7 @@ interface GameScoreRepository : CoroutineCrudRepository<GameScoreEntity, Long> {
             gs.score          AS score,
             gs.try_count      AS try_count,
             gs.created_at     AS created_at,
+            gs.updated_at     AS updated_at,
             u.nickname        AS user_nickname,
             u.asset_uid       AS user_asset_uid
         FROM game_scores gs
@@ -105,7 +106,7 @@ interface GameScoreRepository : CoroutineCrudRepository<GameScoreEntity, Long> {
         JOIN users u ON u.id = sp.user_id
         WHERE gs.season_id = :seasonId
           AND gs.game_id   = :gameId
-        ORDER BY sp.league ASC, gs.score ASC, gs.created_at ASC
+        ORDER BY sp.league ASC, gs.score ASC, CASE WHEN gs.updated_at IS NOT NULL THEN gs.updated_at ELSE gs.created_at END ASC
     """)
     fun findScoresWithParticipantsBySeasonAndGame(
         seasonId: Long,
