@@ -22,6 +22,7 @@ import kr.jiasoft.hiteen.feature.point.app.PointService
 import kr.jiasoft.hiteen.feature.point.domain.PointPolicy
 import kr.jiasoft.hiteen.feature.relationship.infra.FriendRepository
 import kr.jiasoft.hiteen.feature.user.domain.SeasonStatusType
+import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import org.springframework.stereotype.Service
 import org.springframework.transaction.reactive.TransactionalOperator
 import org.springframework.transaction.reactive.executeAndAwait
@@ -63,6 +64,22 @@ class GameService(
     suspend fun getAllGames () : List<GameEntity> {
         return gameRepository.findAllByDeletedAtIsNullAndStatusOrderById("ACTIVE").toList()
     }
+
+
+    /**
+     * 게임 목록 조회
+     * */
+    suspend fun getLeague (
+        user: UserEntity,
+    ) : String {
+        val season = seasonRepository.findActiveSeason() ?: throw NoSuchElementException("현재 진행 중인 시즌이 없습니다. 관리자 문의")
+        return seasonParticipantRepository.findBySeasonIdAndUserId(season.id, user.id)?.league
+            //없으면 현재 티어 기준으로 리그 반환
+            ?: tierRepository.findById(user.tierId) ?.let {
+                getLeague(it.level)
+            } ?: "BRONZE"
+    }
+
 
     /**
      * 회차 목록 조회
@@ -257,24 +274,12 @@ class GameService(
             val tier = tierRepository.findById(tierId)
                 ?: throw IllegalStateException("유저의 리그를 확인할 수 없습니다.")
 
-            val league: String = when (tier.level) {
-                1 -> "BRONZE"
-                2 -> "BRONZE"
-                3 -> "BRONZE"
-                4 -> "PLATINUM"
-                5 -> "PLATINUM"
-                6 -> "PLATINUM"
-                7 -> "CHALLENGER"
-                8 -> "CHALLENGER"
-                else -> "BRONZE"
-            }
-
             seasonParticipantRepository.save(
                 SeasonParticipantEntity(
                     seasonId = season.id,
                     userId = userId,
                     tierId = tierId,
-                    league = league,
+                    league = getLeague(tier.level),
                     joinedType = "AUTO_JOIN"
                 )
             )
@@ -494,6 +499,19 @@ class GameService(
     }
 
 
+    private suspend fun getLeague(tierLevel: Int): String {
+        return when (tierLevel) {
+            1 -> "BRONZE"
+            2 -> "BRONZE"
+            3 -> "BRONZE"
+            4 -> "PLATINUM"
+            5 -> "PLATINUM"
+            6 -> "PLATINUM"
+            7 -> "CHALLENGER"
+            8 -> "CHALLENGER"
+            else -> "BRONZE"
+        }
+    }
 
 
 }

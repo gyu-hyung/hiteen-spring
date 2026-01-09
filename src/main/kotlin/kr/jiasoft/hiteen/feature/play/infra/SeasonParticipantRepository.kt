@@ -12,6 +12,8 @@ import org.springframework.stereotype.Repository
 @Repository
 interface SeasonParticipantRepository : CoroutineCrudRepository<SeasonParticipantEntity, Long> {
 
+    suspend fun findBySeasonIdAndUserId(seasonId: Long, userId: Long): SeasonParticipantEntity?
+
     @Query(
         """
         SELECT sp.*
