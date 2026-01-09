@@ -81,7 +81,7 @@ interface BoardCommentRepository : CoroutineCrudRepository<BoardCommentEntity, L
              OR (:parentUid IS NOT NULL AND p.uid = :parentUid)
           )
           AND (:cursor IS NULL OR c.id <= (SELECT id FROM board_comments WHERE uid = :cursor))
-        ORDER BY c.id DESC
+        ORDER BY c.id ASC
         LIMIT :perPage
     """)
     fun findComments(
