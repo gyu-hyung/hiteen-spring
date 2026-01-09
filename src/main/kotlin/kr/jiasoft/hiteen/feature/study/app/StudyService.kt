@@ -44,7 +44,10 @@ class StudyService(
             val questionIds = stored["question"].map { it.asLong() }
 
             // 2️⃣ 문제 아이템 및 본문 로드
-            val items = questionItemsRepository.findAllBySeasonIdAndType(request.seasonId, request.type).toList()
+
+            // type이 9인 경우 초등 문제로 대체
+            val type = if (request.type == 9) 1 else request.type
+            val items = questionItemsRepository.findAllBySeasonIdAndType(request.seasonId, type).toList()
             val questionMap = questionRepository.findAllById(questionIds).toList().associateBy { it.id }
 
             // 3️⃣ 기존 학습 문제 응답 DTO 구성
