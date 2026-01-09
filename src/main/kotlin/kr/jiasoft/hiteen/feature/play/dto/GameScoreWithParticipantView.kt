@@ -12,6 +12,7 @@ data class GameScoreWithParticipantView(
     val score: BigDecimal,
     val tryCount: Int?,
     val createdAt: OffsetDateTime,
+    val updatedAt: OffsetDateTime? = null,
     val userNickname: String,
     val userAssetUid: UUID?
 )

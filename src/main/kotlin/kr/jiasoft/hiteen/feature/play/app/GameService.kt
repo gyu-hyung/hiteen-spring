@@ -337,6 +337,10 @@ class GameService(
     /**
      * 실시간 랭킹 조회 (game_scores + league 기준)
      * @param friendOnly true → 내 친구들 + 나만 랭킹 조회
+     * 랭킹 기준 변경 시
+     * GameScoreRepository.findScoresWithParticipantsBySeasonAndGame
+     * GameScoreRepository.findSeasonRankingFiltered
+     *
      */
     suspend fun getRealtimeRanking(
         seasonId: Long,

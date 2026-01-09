@@ -252,8 +252,14 @@ class GameManageService(
             val groupedByLeague = scores.groupBy { it.league }
 
             for ((league, leagueScores) in groupedByLeague) {
-                // 낮은 점수가 1등
-                val sorted = leagueScores.sortedWith(compareBy({ it.score }, { it.createdAt }))
+                // 낮은 점수가 1등 updatedAt가 있으면 더 이전 시간 순으로 정렬
+                val sorted = leagueScores.sortedWith(
+                    compareBy(
+                        { it.score },
+                        { it.updatedAt ?: it.createdAt }
+                    )
+                )
+
 
                 // 순위 계산 및 저장
                 sorted.forEachIndexed { index, s ->
