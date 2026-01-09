@@ -37,6 +37,14 @@ class GameController(
     }
 
 
+    @Operation(summary = "현재 참여 리그 확인")
+    @GetMapping("/league")
+    suspend fun getAllGames(
+        @AuthenticationPrincipal(expression = "user") user: UserEntity
+    ): ResponseEntity<ApiResult<String>> {
+        return ResponseEntity.ok(ApiResult.success(gameService.getLeague(user)))
+    }
+
     @Operation(summary = "시즌 회차 목록 조회 (연도 + 리그 + 상태)")
     @GetMapping(value = ["/seasons/{year}", "/seasons/{year}/{status}"])
     suspend fun getSeasonsByYearAndLeague(
