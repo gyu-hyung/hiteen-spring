@@ -53,13 +53,15 @@ class PushService(
         val result = sendPush(push.id, userIds, finalData)
 
         // ③ 요약 업데이트
-        pushRepository.save(
-            push.copy(
-                success = result.success.toLong(),
-                failure = result.failure.toLong(),
-                updatedAt = OffsetDateTime.now()
+        if(result.success + result.failure > 0) {
+            pushRepository.save(
+                push.copy(
+                    success = result.success.toLong(),
+                    failure = result.failure.toLong(),
+                    updatedAt = OffsetDateTime.now()
+                )
             )
-        )
+        }
 
         println("✅ [PushService] pushId=${push.id}, success=${result.success}, failure=${result.failure}")
         return result

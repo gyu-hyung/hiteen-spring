@@ -388,12 +388,27 @@ class BoardService(
         )
 
         parent?.let { extraData["parentUid"] = it.uid.toString() }
-        pushService.sendAndSavePush(
-            listOf(b.createdId),
-            user.id,
-            PushTemplate.BOARD_COMMENT.buildPushData("nickname" to user.nickname),
-            extraData
-        )
+
+        //본인 글 아닐때만 알림
+        if( b.createdId != user.id ) {
+            pushService.sendAndSavePush(
+                listOf(b.createdId),
+                user.id,
+                PushTemplate.BOARD_COMMENT.buildPushData("nickname" to user.nickname),
+                extraData
+            )
+        }
+        //부모 댓글 작성자에게 답글 알림
+        parent?.let {
+            if( it.createdId == user.id ) return@let//본인글이면 패스
+            pushService.sendAndSavePush(
+                listOf(it.createdId),
+                user.id,
+                PushTemplate.BOARD_REPLY.buildPushData("nickname" to user.nickname),
+                extraData
+            )
+        }
+
         return getComment(b.uid, saved.uid, user.id)
     }
 
