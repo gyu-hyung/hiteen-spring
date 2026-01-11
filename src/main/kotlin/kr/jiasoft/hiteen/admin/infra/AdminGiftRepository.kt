@@ -2,11 +2,9 @@ package kr.jiasoft.hiteen.admin.infra
 
 import kotlinx.coroutines.flow.Flow
 import kr.jiasoft.hiteen.admin.dto.AdminGiftResponse
-import kr.jiasoft.hiteen.admin.dto.AdminPlayResponse
 import kr.jiasoft.hiteen.feature.gift.domain.GiftCategory
 import kr.jiasoft.hiteen.feature.gift.domain.GiftEntity
 import kr.jiasoft.hiteen.feature.gift.domain.GiftType
-import kr.jiasoft.hiteen.feature.play.domain.GameHistoryEntity
 import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 import java.util.UUID
@@ -85,11 +83,18 @@ interface AdminGiftRepository : CoroutineCrudRepository<GiftEntity, Long> {
           )
           AND (
               :status IS NULL OR :status = 'ALL'
-              OR (gu.status = :status::int)
+              OR (:status = 'WAIT' AND gu.status = 0)
+              OR (:status = 'SENT' AND gu.status = 1)
+              OR (:status = 'USED' AND gu.status = 2)
+              OR (:status = 'EXPIRED' AND gu.status = 3)
+              OR (:status = 'DELIVERY_REQUESTED' AND gu.status = 4)
+              OR (:status = 'DELIVERY_DONE' AND gu.status = 5)
+              OR (:status = 'GRANT_REQUESTED' AND gu.status = 6)
+              OR (:status = 'GRANTED' AND gu.status = 7)
           )
           AND (
                 :uid IS NULL
-                OR ( SELECT u.uid FROM users u WHERE u.id = receiver.id ) = :uid
+                OR ( receiver.uid = :uid )
           )
         ORDER BY
             CASE WHEN :order = 'DESC' THEN g.created_at END DESC,
@@ -145,11 +150,18 @@ interface AdminGiftRepository : CoroutineCrudRepository<GiftEntity, Long> {
           )
           AND (
               :status IS NULL OR :status = 'ALL'
-              OR (gu.status = :status::int)
+              OR (:status = 'WAIT' AND gu.status = 0)
+              OR (:status = 'SENT' AND gu.status = 1)
+              OR (:status = 'USED' AND gu.status = 2)
+              OR (:status = 'EXPIRED' AND gu.status = 3)
+              OR (:status = 'DELIVERY_REQUESTED' AND gu.status = 4)
+              OR (:status = 'DELIVERY_DONE' AND gu.status = 5)
+              OR (:status = 'GRANT_REQUESTED' AND gu.status = 6)
+              OR (:status = 'GRANTED' AND gu.status = 7)
           )
           AND (
                 :uid IS NULL
-                OR ( SELECT u.uid FROM users u WHERE u.id = receiver.id ) = :uid
+                OR ( receiver.uid = :uid ) 
           )
     """)
     suspend fun totalCount(
