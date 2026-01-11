@@ -19,6 +19,7 @@ interface AdminPlayRepository : CoroutineCrudRepository<GameHistoryEntity, Long>
             (SELECT name FROM games g WHERE g.id = gh.game_id) AS game_name
         FROM game_history gh
         LEFT JOIN season_participants sp ON sp.id = gh.participant_id 
+        LEFT JOIN users u ON sp.user_id = u.id
         WHERE
             (
                 :search IS NULL
@@ -47,7 +48,7 @@ interface AdminPlayRepository : CoroutineCrudRepository<GameHistoryEntity, Long>
     
             AND (
                 :uid IS NULL
-                OR (select u.uid FROM users u WHERE u.id = sp.user_id) = :uid
+                OR u.uid = :uid
             )
             
             AND (
@@ -84,6 +85,7 @@ interface AdminPlayRepository : CoroutineCrudRepository<GameHistoryEntity, Long>
         SELECT COUNT(*)
         FROM game_history gh
         LEFT JOIN season_participants sp ON sp.id = gh.participant_id 
+        LEFT JOIN users u ON sp.user_id = u.id
         WHERE
             (
                 :search IS NULL
@@ -112,7 +114,7 @@ interface AdminPlayRepository : CoroutineCrudRepository<GameHistoryEntity, Long>
     
             AND (
                 :uid IS NULL
-                OR (select u.uid FROM users u WHERE u.id = sp.user_id) = :uid
+                OR u.uid = :uid
             )
             
             AND (
