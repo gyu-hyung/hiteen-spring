@@ -215,9 +215,10 @@ class AdminQuestionController (
 
     @GetMapping("/seasonFilters")
     suspend fun seasonList(
+        @RequestParam status: String? = null,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ): ResponseEntity<ApiResult<List<SeasonFilterDto?>>> {
-        return ResponseEntity.ok(ApiResult.success(adminQuestionRepository.findSeasonFilters().toList()))
+        return ResponseEntity.ok(ApiResult.success(adminQuestionRepository.findSeasonFilters(status).toList()))
     }
 
     @GetMapping("/gameFilters")

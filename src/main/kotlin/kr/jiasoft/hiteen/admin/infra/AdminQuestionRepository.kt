@@ -20,14 +20,29 @@ interface AdminQuestionRepository : CoroutineCrudRepository<QuestionEntity, Long
                 ' 회차'
             ) AS value
         FROM seasons
+        WHERE
+            (:status IS NULL OR :status = 'ALL')
+            OR (:status = 'ACTIVE' AND status = 'ACTIVE')
+            OR (:status = 'CLOSED' AND status = 'CLOSED')
         ORDER BY
             year DESC,
             month DESC,
             round DESC
     """)
-    fun findSeasonFilters(): Flow<SeasonFilterDto>
+    fun findSeasonFilters(status: String?): Flow<SeasonFilterDto>
 
 
+//    @Query("""
+//        SELECT
+//            id AS key,
+//            name AS value
+//        FROM games
+//        WHERE
+//            deleted_at IS NULL
+//        ORDER BY
+//            created_at DESC,
+//            id DESC;
+//    """)
     @Query("""
         SELECT
             id AS key,
@@ -35,9 +50,7 @@ interface AdminQuestionRepository : CoroutineCrudRepository<QuestionEntity, Long
         FROM games
         WHERE
             deleted_at IS NULL
-        ORDER BY
-            created_at DESC,
-            id DESC;
+        ORDER BY id ASC;
     """)
     fun findGameFilters(): Flow<SeasonFilterDto>
 
