@@ -7,6 +7,7 @@ import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 import org.springframework.stereotype.Repository
 import java.time.LocalDateTime
+import java.util.UUID
 
 @Repository
 interface AdminPointRepository : CoroutineCrudRepository<PointEntity, Long> {
@@ -40,13 +41,18 @@ interface AdminPointRepository : CoroutineCrudRepository<PointEntity, Long> {
                 OR (:searchType = 'phone' AND u.phone LIKE CONCAT('%', :search, '%'))
                 OR (:searchType = 'memo' AND p.memo LIKE CONCAT('%', :search, '%'))
             )
+            AND (
+                :uid IS NULL
+                OR u.uid = :uid
+            )
     """)
     suspend fun countSearchResults(
         type: String?,
         startDate: LocalDateTime?,
         endDate: LocalDateTime?,
         searchType: String?,
-        search: String?
+        search: String?,
+        uid: UUID?,
     ): Int
 
     @Query("""
@@ -83,6 +89,10 @@ interface AdminPointRepository : CoroutineCrudRepository<PointEntity, Long> {
                     OR (:searchType = 'memo' AND p.memo LIKE CONCAT('%', :search, '%'))
                 )
             )
+            AND (
+                :uid IS NULL
+                OR u.uid = :uid
+            )
         ORDER BY id DESC
         LIMIT :limit OFFSET :offset
     """)
@@ -92,6 +102,7 @@ interface AdminPointRepository : CoroutineCrudRepository<PointEntity, Long> {
         endDate: LocalDateTime?,
         searchType: String?,
         search: String?,
+        uid: UUID?,
         limit: Int,
         offset: Int,
     ): Flow<AdminPointResponse>

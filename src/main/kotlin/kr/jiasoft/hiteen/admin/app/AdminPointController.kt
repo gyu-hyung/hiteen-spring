@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import java.time.LocalDate
+import java.util.UUID
 
 enum class PointType { CREDIT, DEBIT }
 
@@ -39,12 +40,13 @@ class AdminPointController(
         @RequestParam search: String? = null,
         @RequestParam page: Int = 1,
         @RequestParam size: Int = 10,
+        @RequestParam uid: UUID? = null,
     ): ResponseEntity<ApiResult<ApiPage<AdminPointResponse>>> {
         val startDate = startDate?.atStartOfDay() // 2025-12-01 00:00:00
         val endDate = endDate?.plusDays(1)?.atStartOfDay() // 2025-12-30 00:00:00 (exclusive)
 
         val data = pointService.listPoints(
-            type, startDate, endDate, searchType, search, page, size
+            type, startDate, endDate, searchType, search, page, size, uid
         )
 
         return success(data)

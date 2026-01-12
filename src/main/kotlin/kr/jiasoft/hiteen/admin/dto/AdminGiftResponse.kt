@@ -1,5 +1,6 @@
 package kr.jiasoft.hiteen.admin.dto
 
+import com.fasterxml.jackson.annotation.JsonFormat
 import kr.jiasoft.hiteen.feature.gift.domain.GiftCategory
 import kr.jiasoft.hiteen.feature.gift.domain.GiftType
 import java.time.OffsetDateTime
@@ -17,14 +18,21 @@ data class AdminGiftResponse (
     val receiverNickname: String,
     val receiverUserId: Long,
     val status: String,
+    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm:ss")
     val receiveDate: OffsetDateTime,
+    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm:ss")
     val createdAt: OffsetDateTime,
     val couponNo: String? = null,
     val couponImg: String? = null,
+    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm:ss")
     val requestDate: OffsetDateTime? = null,
+    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm:ss")
     val pubDate: OffsetDateTime? = null,
+    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm:ss")
     val useDate: OffsetDateTime? = null,
+    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm:ss")
     val pubExpiredDate: OffsetDateTime? = null,
+    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm:ss")
     val useExpiredDate: OffsetDateTime? = null,
     val goodsCode: String? = null,
     val goodsName: String? = null,

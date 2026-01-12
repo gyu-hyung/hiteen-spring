@@ -1,13 +1,13 @@
 package kr.jiasoft.hiteen.feature.attend.app
 
 import kotlinx.coroutines.flow.toList
+import kr.jiasoft.hiteen.common.dto.ApiPageCursor
 import kr.jiasoft.hiteen.feature.attend.domain.AttendEntity
 import kr.jiasoft.hiteen.feature.attend.infra.AttendRepository
 import kr.jiasoft.hiteen.feature.level.app.ExpService
 import kr.jiasoft.hiteen.feature.point.app.PointService
 import kr.jiasoft.hiteen.feature.point.domain.PointPolicy
 import kr.jiasoft.hiteen.feature.session.dto.ConsecutiveAttendDay
-import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.OffsetDateTime
@@ -37,6 +37,43 @@ class AttendService(
     }
 
 
+    /** 로그 */
+    suspend fun logByCursor(
+        userId: Long,
+        cursor: String?,
+        perPage: Int
+    ): ApiPageCursor<AttendEntity> {
+
+        val (cursorDate, cursorId) = parseCursor(cursor)
+
+        val rows = attendRepository
+            .findByCursor(userId, cursorDate, cursorId, perPage + 1)
+            .toList()
+
+        val hasNext = rows.size > perPage
+        val items = if (hasNext) rows.dropLast(1) else rows
+
+        val nextCursor = if (hasNext) {
+            val last = items.last()
+            "${last.attendDate}_${last.id}"
+        } else {
+            null
+        }
+
+        return ApiPageCursor(
+            nextCursor = nextCursor,
+            items = items,
+            perPage = perPage
+        )
+    }
+
+    private fun parseCursor(cursor: String?): Pair<LocalDate?, Long?> {
+        if (cursor.isNullOrBlank()) return null to null
+
+        val parts = cursor.split("_")
+        return LocalDate.parse(parts[0]) to parts[1].toLong()
+    }
+
 
 
     /**
@@ -48,7 +85,7 @@ class AttendService(
         // 오늘 이미 출석했는지 확인
         val existing = attendRepository.findByUserIdAndAttendDate(userId, today)
         if (existing != null) {
-            return Result.failure(IllegalStateException("오늘은 이미 출석했어~"))
+            return Result.success(existing)
         }
 
         // 연속 출석일수 조회

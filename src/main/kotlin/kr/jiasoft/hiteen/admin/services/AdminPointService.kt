@@ -10,6 +10,7 @@ import kr.jiasoft.hiteen.feature.point.domain.PointEntity
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
+import java.util.UUID
 
 @Service
 class AdminPointService(
@@ -23,15 +24,16 @@ class AdminPointService(
         searchType: String?,
         search: String?,
         currentPage: Int,
-        perPage: Int
+        perPage: Int,
+        uid: UUID?,
     ): ApiPage<AdminPointResponse> {
         val page = currentPage.coerceAtLeast(1)
         val perPage = perPage.coerceIn(1, 100)
         val offset = (page - 1) * perPage
 
         // 총 레코드수
-        val total = adminPointRepository.countSearchResults(type, startDate, endDate, searchType, search)
-        val rows = adminPointRepository.listSearchResults(type, startDate, endDate, searchType, search, perPage, offset).toList()
+        val total = adminPointRepository.countSearchResults(type, startDate, endDate, searchType, search, uid)
+        val rows = adminPointRepository.listSearchResults(type, startDate, endDate, searchType, search, uid, perPage, offset).toList()
 
         val data = PageUtil.of(
             items = rows,
