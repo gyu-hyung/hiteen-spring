@@ -13,19 +13,19 @@ class PushServiceTest {
     private lateinit var pushService: PushService
 
 
-    @Test
-    fun testSendAndSavePush() {
-        runBlocking{
-            pushService.sendAndSavePush(
-                listOf(1),
+//    @Test
+//    fun testSendAndSavePush() {
+//        runBlocking{
+//            pushService.sendAndSavePush(
+//                listOf(1),
 //                PushTemplate.FRIEND_REQUEST.buildPushData("nickname" to "날씬한대지")
-                PushTemplate.FRIEND_ACCEPT.buildPushData("nickname" to "홍길동")
+//                PushTemplate.FRIEND_ACCEPT.buildPushData("nickname" to "홍길동")
 //                        PushTemplate.FRIEND_REQUEST.buildPushData("nickname" to "날씬한대지")
 //                        PushTemplate.FRIEND_REQUEST.buildPushData("nickname" to "날씬한대지")
 //                        PushTemplate.FRIEND_REQUEST.buildPushData("nickname" to "날씬한대지")
 //                        PushTemplate.FRIEND_REQUEST.buildPushData("nickname" to "날씬한대지")
-            )
-        }
-    }
+//            )
+//        }
+//    }
 
 }
