@@ -76,5 +76,29 @@ interface AttendRepository : CoroutineCrudRepository<AttendEntity, Long> {
     fun findConsecutiveAttendDays(userId: Long): Flow<ConsecutiveAttendDay>
 
 
+    fun findAllByUserIdOrderByIdDesc(userId: Long): Flow<AttendEntity>
+
+
+    @Query("""
+        SELECT *
+        FROM attends
+        WHERE user_id = :userId
+          AND (
+                :cursorDate IS NULL
+                OR (
+                    attend_date < :cursorDate
+                    OR (attend_date = :cursorDate AND id < :cursorId)
+                )
+          )
+        ORDER BY attend_date DESC, id DESC
+        LIMIT :limit
+    """)
+    fun findByCursor(
+        userId: Long,
+        cursorDate: LocalDate?,
+        cursorId: Long?,
+        limit: Int
+    ): Flow<AttendEntity>
+
 
 }

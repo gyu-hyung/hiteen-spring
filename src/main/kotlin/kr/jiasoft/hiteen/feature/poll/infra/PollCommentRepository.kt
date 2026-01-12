@@ -20,7 +20,7 @@ interface PollCommentRepository : CoroutineCrudRepository<PollCommentEntity, Lon
 
 
     @Query("UPDATE poll_comments SET reply_count = reply_count + 1 WHERE id = :parentId")
-    suspend fun increaseReplyCount(parentId: Long): Int
+    suspend fun increaseReplyCount(parentId: Long): Int?
 
     @Query("UPDATE poll_comments SET reply_count = GREATEST(reply_count - 1, 0) WHERE id = :parentId")
     suspend fun decreaseReplyCount(parentId: Long): Int?
@@ -71,7 +71,7 @@ interface PollCommentRepository : CoroutineCrudRepository<PollCommentEntity, Lon
              OR (:parentUid IS NOT NULL AND p.uid = :parentUid)
             )
             AND (:cursor IS NULL OR c.id <= (SELECT id FROM board_comments WHERE uid = :cursor))
-        ORDER BY c.id DESC
+        ORDER BY c.id ASC
         LIMIT :perPage
     """)
     fun findComments(
