@@ -25,6 +25,14 @@ data class UserResponseIncludes(
         )
 
         /** 기존 동작과 동일(전부 조회) */
-        fun full() = UserResponseIncludes()
+        fun full() = UserResponseIncludes(
+            school = true,
+            schoolClass = true,
+            tier = true,
+            interests = true,
+            relationshipCounts = true,
+            relationshipFlags = true,
+            photos = true,
+        )
     }
 }
