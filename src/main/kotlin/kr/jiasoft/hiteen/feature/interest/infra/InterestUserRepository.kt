@@ -18,6 +18,9 @@ interface InterestUserRepository : CoroutineCrudRepository<InterestUserEntity, L
 
     suspend fun deleteByUserIdAndInterestId(userId: Long, interestId: Long): Long
 
+    // Admin 사용자 편집용
+    suspend fun deleteByUserId(userId: Long): Long
+
 
     @Query("""
         SELECT * FROM interest_user
@@ -90,7 +93,7 @@ interface InterestUserRepository : CoroutineCrudRepository<InterestUserEntity, L
           AND iu.user_id NOT IN (
               SELECT follow_id 
               FROM follows 
-              WHERE status = 'ACCEPTED' 
+              WHERE status IN ('ACCEPTED', 'PENDING') 
                 AND user_id = :currentUserId
           )
           AND iu.user_id NOT IN (
