@@ -37,7 +37,7 @@ enum class PointPolicy(
     ATTEND_DAY7("ATTEND_DAY7", 500, 1, "7일차 출석"),
 
     // --- 광고 ---
-    AD_REWARD("AD_REWARD", 100, 5, "광고 시청 보상"),
+    AD_REWARD("AD_REWARD", 300, 5, "광고 시청 보상"),
 
     // --- 결제 충전 ---
     PAYMENT_1000("PAYMENT_1000", 1100, null, "포인트 충전 (1,000원)"),

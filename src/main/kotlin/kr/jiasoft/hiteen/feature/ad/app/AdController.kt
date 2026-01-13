@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import kr.jiasoft.hiteen.common.dto.ApiResult
+import kr.jiasoft.hiteen.feature.level.app.ExpService
 import kr.jiasoft.hiteen.feature.point.app.PointService
 import kr.jiasoft.hiteen.feature.point.domain.PointPolicy
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
@@ -24,6 +25,7 @@ class AdController(
     private val admobVerifier: AdmobVerifier,
 
     private val pointService: PointService,
+    private val expService: ExpService,
 ) {
 
     @Operation(summary = "남은 광고 보기 수")
@@ -41,6 +43,7 @@ class AdController(
     ): ResponseEntity<ApiResult<String>> {
 
         pointService.applyPolicy(user.id, PointPolicy.EARN)
+        expService.grantExp(user.id, "WATCH_AD")
 
         return ResponseEntity.ok(ApiResult.success("통과"))
     }

@@ -6,6 +6,7 @@ exp:
     PIN_REGISTER:
       description: "핀 등록"
       points: 3
+      dailyLimit: 3
 
 
     FRIEND_ADD:
