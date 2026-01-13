@@ -48,9 +48,9 @@ class FollowService(
             ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "no follow request in $direction direction")
     }
 
-    private fun toFollowSummary(e: FollowEntity, other: UserResponse?): RelationshipSummary =
+    private fun toFollowSummary(e: FollowEntity, other: UserResponse): RelationshipSummary =
         RelationshipSummary(
-            userResponse = other ?: UserResponse.empty(),
+            userResponse = other,
             status = e.status,
             statusAt = e.statusAt
         )

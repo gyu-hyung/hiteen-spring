@@ -357,9 +357,9 @@ class UserService (
             // 포인트 지급
             pointService.applyPolicy(updated.id, PointPolicy.SIGNUP)
 
-            val responseUser = userRepository.findById(updated.id)?.let {
+            val responseUser = userRepository.findById(updated.id)!!.let {
                 UserResponse.from(it, school, null, tier)
-            } ?: UserResponse.empty()
+            }
 
             UserResponseWithTokens(
                 tokens = JwtResponse(access.value, refresh.value),
