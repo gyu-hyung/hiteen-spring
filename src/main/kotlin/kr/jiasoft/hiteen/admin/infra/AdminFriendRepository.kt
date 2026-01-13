@@ -34,8 +34,7 @@ interface AdminFriendRepository : CoroutineCrudRepository<FriendEntity, Long> {
             )
             AND (
                 :status IS NULL OR :status = 'ALL'
-                OR (:status = 'ACTIVE' AND f.deleted_at IS NULL)
-                OR (:status = 'DELETED' AND f.deleted_at IS NOT NULL)
+                OR (f.status = :status)
             )
     """)
     suspend fun totalCount(
@@ -91,8 +90,7 @@ interface AdminFriendRepository : CoroutineCrudRepository<FriendEntity, Long> {
             )
             AND (
                 :status IS NULL OR :status = 'ALL'
-                OR (:status = 'ACTIVE' AND f.deleted_at IS NULL)
-                OR (:status = 'DELETED' AND f.deleted_at IS NOT NULL)
+                OR (f.status = :status)
             )
         
         ORDER BY 
