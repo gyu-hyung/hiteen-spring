@@ -31,6 +31,7 @@ import kr.jiasoft.hiteen.feature.user.domain.UserPhotosEntity
 import kr.jiasoft.hiteen.feature.user.dto.ReferralSummary
 import kr.jiasoft.hiteen.feature.user.dto.UserRegisterForm
 import kr.jiasoft.hiteen.feature.user.dto.UserResponse
+import kr.jiasoft.hiteen.feature.user.dto.UserResponseIncludes
 import kr.jiasoft.hiteen.feature.user.dto.UserResponseWithTokens
 import kr.jiasoft.hiteen.feature.user.dto.UserSummary
 import kr.jiasoft.hiteen.feature.user.dto.UserUpdateForm
@@ -42,7 +43,6 @@ import org.springframework.http.codec.multipart.FilePart
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
-import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.util.UUID
 
@@ -98,24 +98,47 @@ class UserService (
     }
 
 
-    private suspend fun toUserResponse(targetUser: UserEntity, currentUserId: Long? = null): UserResponse {
-        val school = targetUser.schoolId?.let { id -> schoolRepository.findById(id) }
-        val classes = targetUser.classId?.let { id -> schoolClassesRepository.findById(id) }
-        val tier = tierRepository.findById(targetUser.tierId)
-        val interests = interestUserRepository.getInterestResponseById(null, targetUser.id).toList()
-        val relationshipCounts = RelationshipCounts(
-            postCount = boardRepository.countByCreatedIdAndDeletedAtIsNull(targetUser.id),
-            voteCount = pollUserRepository.countByUserIdAndDeletedAtIsNull(targetUser.id),
-            boardCommentCount = boardCommentRepository.countByCreatedIdAndDeletedAtIsNull(targetUser.id),
-            pollCommentCount = pollCommentRepository.countByCreatedIdAndDeletedAtIsNull(targetUser.id),
-            friendCount = friendRepository.countFriendship(targetUser.id),
-            followerCount = followRepository.countByFollowIdAndStatus(targetUser.id, FollowStatus.ACCEPTED.name),
-            followingCount = followRepository.countByUserIdAndStatus(targetUser.id, FollowStatus.ACCEPTED.name),
-        )
-        val photos = getPhotosById(targetUser.id)
+    private suspend fun toUserResponse(
+        targetUser: UserEntity,
+        currentUserId: Long? = null,
+        includes: UserResponseIncludes = UserResponseIncludes.full(),
+    ): UserResponse {
+        val school = if (includes.school) {
+            targetUser.schoolId?.let { id -> schoolRepository.findById(id) }
+        } else null
 
-        val friendStatus = currentUserId?.let { friendRepository.findStatusFriend(it, targetUser.id) } ?: false
-        val followStatus = currentUserId?.let { followRepository.findStatusFollow(it, targetUser.id) }  ?: false
+        val classes = if (includes.schoolClass) {
+            targetUser.classId?.let { id -> schoolClassesRepository.findById(id) }
+        } else null
+
+        val tier = if (includes.tier) {
+            tierRepository.findById(targetUser.tierId)
+        } else null
+
+        val interests = if (includes.interests) {
+            interestUserRepository.getInterestResponseById(null, targetUser.id).toList()
+        } else null
+
+        val relationshipCounts = if (includes.relationshipCounts) {
+            RelationshipCounts(
+                postCount = boardRepository.countByCreatedIdAndDeletedAtIsNull(targetUser.id),
+                voteCount = pollUserRepository.countByUserIdAndDeletedAtIsNull(targetUser.id),
+                boardCommentCount = boardCommentRepository.countByCreatedIdAndDeletedAtIsNull(targetUser.id),
+                pollCommentCount = pollCommentRepository.countByCreatedIdAndDeletedAtIsNull(targetUser.id),
+                friendCount = friendRepository.countFriendship(targetUser.id),
+                followerCount = followRepository.countByFollowIdAndStatus(targetUser.id, FollowStatus.ACCEPTED.name),
+                followingCount = followRepository.countByUserIdAndStatus(targetUser.id, FollowStatus.ACCEPTED.name),
+            )
+        } else null
+
+        val photos = if (includes.photos) getPhotosById(targetUser.id) else null
+
+        val friendStatus =
+            if (includes.relationshipFlags && currentUserId != null) friendRepository.findStatusFriend(currentUserId, targetUser.id)
+            else false
+        val followStatus =
+            if (includes.relationshipFlags && currentUserId != null) followRepository.findStatusFollow(currentUserId, targetUser.id)
+            else false
 
         val isFriend = friendStatus == FriendStatus.ACCEPTED.name
         val isFriendRequested = friendStatus == FriendStatus.PENDING.name
@@ -124,17 +147,17 @@ class UserService (
         val isFollowedRequested = followStatus == FollowStatus.PENDING.name
 
         return UserResponse.from(
-            targetUser,
-            school,
-            classes,
-            tier,
-            interests,
-            relationshipCounts,
-            photos,
-            isFriend,
-            isFollowed,
-            isFriendRequested,
-            isFollowedRequested
+            entity = targetUser,
+            school = school,
+            classes = classes,
+            tier = tier,
+            interests = interests,
+            relationshipCounts = relationshipCounts,
+            photos = photos,
+            isFriend = isFriend,
+            isFollowed = isFollowed,
+            isFriendRequested = isFriendRequested,
+            isFollowedRequested = isFollowedRequested,
         )
     }
 
@@ -145,23 +168,32 @@ class UserService (
         return toUserResponse(targetUser)
     }
 
-
-    //    @Cacheable(cacheNames = ["userResponse"], key = "#targetId")
     suspend fun findUserResponse(targetId: Long, currentUserId: Long? = null): UserResponse {
-
         val targetUser = userRepository.findById(targetId)
             ?: throw UsernameNotFoundException("User not found: $targetId")
 
         return toUserResponse(targetUser, currentUserId)
     }
 
-
-//    @Cacheable(cacheNames = ["userResponse"], key = "#targetUid")
     suspend fun findUserResponse(targetUid: UUID, currentUserId: Long? = null): UserResponse {
         val targetUser = userRepository.findByUid(targetUid.toString())
             ?: throw UsernameNotFoundException("User not found: $targetUid")
 
         return toUserResponse(targetUser, currentUserId)
+    }
+
+    /**
+     * 선택적으로 연관 도메인을 포함한 UserResponse 조회
+     */
+    suspend fun findUserResponse(
+        targetId: Long,
+        currentUserId: Long? = null,
+        includes: UserResponseIncludes,
+    ): UserResponse {
+        val targetUser = userRepository.findById(targetId)
+            ?: throw UsernameNotFoundException("User not found: $targetId")
+
+        return toUserResponse(targetUser, currentUserId, includes)
     }
 
 //    @Cacheable(cacheNames = ["userSummary"], key = "#userId")
@@ -508,10 +540,10 @@ class UserService (
         val referrals = inviteService.findMyReferralList(userId)
         if (referrals.isEmpty()) return emptyList()
 
-        val (ids, dates) = referrals.unzip()
+        val (ids, _) = referrals.unzip()
         val users = userRepository.findSummaryByIds(ids)
 
-        // id -> referredAt 맵핑
+        // id -> referredAt 매핑
         val referredAtMap = referrals.toMap()
 
         return users.map { user ->
@@ -522,9 +554,8 @@ class UserService (
         }
     }
 
-
-
-
-
-
 }
+
+
+
+

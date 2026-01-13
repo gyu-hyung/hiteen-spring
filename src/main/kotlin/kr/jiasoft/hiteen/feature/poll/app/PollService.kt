@@ -17,6 +17,7 @@ import kr.jiasoft.hiteen.feature.push.domain.PushTemplate
 import kr.jiasoft.hiteen.feature.relationship.infra.FriendRepository
 import kr.jiasoft.hiteen.feature.user.app.UserService
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
+import kr.jiasoft.hiteen.feature.user.dto.UserResponseIncludes
 import org.springframework.dao.DuplicateKeyException
 import org.springframework.http.HttpStatus
 import org.springframework.http.codec.multipart.FilePart
@@ -60,30 +61,32 @@ class PollService(
     ): List<PollResponse> =
         polls.findSummariesByCursor(cursor, size, currentUserId, type, author)
             .map { row ->
-                val user = userService.findUserResponse(row.createdId)
+                val user = userService.findUserResponse(row.createdId, includes = UserResponseIncludes(school = true, tier = true))
 
                 val photos = pollPhotos.findAllByPollId(row.id)
                     .toList()
                     .sortedBy { it.seq }
                     .map { it.assetUid.toString() }
 
-                val selects = pollSelects.findAllByPollId(row.id)
+                val selects = pollSelects.findSelectResponsesByPollId(row.id)
                     .toList()
-                    .sortedBy { it.seq }
-                    .map { select ->
-                        val selectPhotos = pollSelectPhotos.findAllBySelectId(select.id)
-                            .toList()
-                            .sortedBy { it.seq }
-                            .mapNotNull { it.assetUid?.toString() }
-
-                        PollSelectResponse(
-                            id = select.id,
-                            seq = select.seq,
-                            content = select.content,
-                            voteCount = select.voteCount,
-                            photos = selectPhotos
-                        )
-                    }
+//                val selects = pollSelects.findAllByPollId(row.id)
+//                    .toList()
+//                    .sortedBy { it.seq }
+//                    .map { select ->
+//                        val selectPhotos = pollSelectPhotos.findAllBySelectId(select.id)
+//                            .toList()
+//                            .sortedBy { it.seq }
+//                            .mapNotNull { it.assetUid?.toString() }
+//
+//                        PollSelectResponse(
+//                            id = select.id,
+//                            seq = select.seq,
+//                            content = select.content,
+//                            voteCount = select.voteCount,
+//                            photos = selectPhotos
+//                        )
+//                    }
 
                 val totalVotes = selects.sumOf { it.voteCount }
 
@@ -111,7 +114,7 @@ class PollService(
     suspend fun getPoll(id: Long, currentUserId: Long): PollResponse {
         // ① 기본 요약 데이터 조회
         val poll = polls.findSummaryById(id, currentUserId) ?: throw notFound("poll")
-        val user = userService.findUserResponse(poll.createdId)
+        val user = userService.findUserResponse(poll.createdId, includes = UserResponseIncludes(school = true, tier = true))
 
         // ② 본문 이미지 (pollPhotos)
         val photos = pollPhotos.findAllByPollId(id)
