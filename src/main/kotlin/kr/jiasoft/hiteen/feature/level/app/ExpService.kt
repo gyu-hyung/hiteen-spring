@@ -22,7 +22,7 @@ class ExpService(
     suspend fun grantExp(
         userId: Long,
         actionCode: String,
-        targetId: Long,
+        targetId: Long? = null,
         dynamicPoints: Int? = null
     ) {
         val action = props.actions[actionCode]
@@ -140,10 +140,10 @@ class ExpService(
             "TINFRIEND_REQUEST" -> existTargetId(userId, actionCode, targetId!!, dailyLimit)
             "FOLLOW_REQUEST" -> existTargetId(userId, actionCode, targetId!!, dailyLimit)
             "FOLLOW_ACCEPT" -> existTargetId(userId, actionCode, targetId!!, dailyLimit)
-            "LIKE_BOARD" -> existTargetId(userId, actionCode, targetId!!, dailyLimit)
-            "LIKE_VOTE" -> existTargetId(userId, actionCode, targetId!!, dailyLimit)
-            "LIKE_BOARD_COMMENT" -> existTargetId(userId, actionCode, targetId!!, dailyLimit)
-            "LIKE_VOTE_COMMENT" -> existTargetId(userId, actionCode, targetId!!, dailyLimit)
+            "LIKE_BOARD" -> countTargetIdAndToDay(userId, actionCode, targetId!!, dailyLimit)
+            "LIKE_VOTE" -> countTargetIdAndToDay(userId, actionCode, targetId!!, dailyLimit)
+            "LIKE_BOARD_COMMENT" -> countTargetIdAndToDay(userId, actionCode, targetId!!, dailyLimit)
+            "LIKE_VOTE_COMMENT" -> countTargetIdAndToDay(userId, actionCode, targetId!!, dailyLimit)
             "FRIEND_INVITE" -> existTargetId(userId, actionCode, targetId!!, dailyLimit)
             "NOTICE_READ" -> existTargetId(userId, actionCode, targetId!!, dailyLimit)
             else -> validateCommon(userId, actionCode, dailyLimit)
@@ -192,6 +192,21 @@ class ExpService(
 
         val alreadyGiven = userExpHistoryRepository.existsTargetIdAndToday(userId, actionCode, targetId, LocalDate.now())
         return !alreadyGiven
+    }
+
+
+    private suspend fun countTargetIdAndToDay(
+        userId: Long,
+        actionCode: String,
+        targetId: Long,
+        dailyLimit: Int?
+    ): Boolean {
+        val exists = userExpHistoryRepository.existsTargetId(userId, actionCode, targetId)
+        if(exists) return false
+
+        // 총 횟수 제한
+        val count = userExpHistoryRepository.countToday(userId, actionCode, LocalDate.now())
+        return !(dailyLimit != null && count >= dailyLimit)
     }
 
 

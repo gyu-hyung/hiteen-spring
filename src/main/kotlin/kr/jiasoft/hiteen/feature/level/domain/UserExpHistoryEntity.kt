@@ -17,7 +17,7 @@ data class UserExpHistoryEntity(
     val userId: Long,
 
     @field:Schema(description = "타겟 ID (친구ID, 게시글ID, 댓글ID 등)", example = "123")
-    val targetId: Long,
+    val targetId: Long? = null,
 
     @field:Schema(description = "액션 코드", example = "POST_CREATE")
     val actionCode: String,
