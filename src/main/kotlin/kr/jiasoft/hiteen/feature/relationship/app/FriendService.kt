@@ -58,14 +58,14 @@ class FriendService(
     private fun toRelationshipSummary(
             e: FriendEntity,
             myId: Long,
-            other: UserResponse?,
+            other: UserResponse,
             latestLocation: LocationHistory?
     ): RelationshipSummary {
         val myMode = if (e.userId == myId) e.userLocationMode else e.friendLocationMode
         val theirMode = if (e.userId == myId) e.friendLocationMode else e.userLocationMode
 
         return RelationshipSummary(
-            userResponse = other ?: UserResponse.empty(),
+            userResponse = other,
             status = e.status,
             statusAt = e.statusAt,
             lat = latestLocation?.lat,
