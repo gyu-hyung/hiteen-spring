@@ -24,6 +24,8 @@ data class AdminUserResponse(
     val schoolName: String? = null,
     val tierNameKr: String? = null,
     val tierAssetUid: String? = null,
+    val inviteCode: String? = null,
+    val inviteJoins: Long = 0,
     val locationMode: String,
     val point: Int = 0,
     val cash: Int = 0,
