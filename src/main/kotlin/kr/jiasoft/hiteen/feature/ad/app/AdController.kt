@@ -42,7 +42,7 @@ class AdController(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ): ResponseEntity<ApiResult<String>> {
 
-        pointService.applyPolicy(user.id, PointPolicy.EARN)
+        pointService.applyPolicy(user.id, PointPolicy.AD_REWARD)
         expService.grantExp(user.id, "WATCH_AD")
 
         return ResponseEntity.ok(ApiResult.success("통과"))

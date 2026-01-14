@@ -273,7 +273,10 @@ class AuthController(
     ): ResponseEntity<ApiResult<Any>> {
 
         if (!encoder.matches(req.password, user.password)) {
-            throw IllegalArgumentException("비밀번호가 일치하지 않습니다.")
+            throw IllegalArgumentException("""
+                비밀번호가 맞지 않아.
+                다시 한번 확인 해줘
+            """)
         }
 
         return ResponseEntity.ok(ApiResult.success(req.password, "통과"))
@@ -292,13 +295,16 @@ class AuthController(
     ): ResponseEntity<ApiResult<Any>> {
 
         if (!encoder.matches(req.oldPassword, user.password)) {
-            throw IllegalArgumentException("현재 비밀번호가 일치하지 않아~")
+            throw IllegalArgumentException("""
+                비밀번호가 맞지 않아.
+                다시 한번 확인 해줘
+            """)
         }
 
         val updated = user.copy(password = encoder.encode(req.newPassword))
         userRepository.save(updated)
 
-        return ResponseEntity.ok(ApiResult.success("비밀번호가 변경되었어~"))
+        return ResponseEntity.ok(ApiResult.success("비밀번호가 변경됐어"))
     }
 
 
@@ -320,7 +326,7 @@ class AuthController(
 
         // 사용중인 번호인지 체크
         userRepository.findActiveByUsernameOrDeletedAtBeforeDays(phone, 30)
-            ?.let { throw IllegalStateException("이미 사용중인 휴대폰 번호야~") }
+            ?.let { throw IllegalStateException("이미 사용중인 휴대폰 번호야") }
 
         // 인증번호 검증 (5분 유효)
         val minute = 5

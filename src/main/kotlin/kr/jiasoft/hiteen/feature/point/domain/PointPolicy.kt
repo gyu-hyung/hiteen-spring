@@ -52,7 +52,7 @@ enum class PointPolicy(
     ETC("ETC", 0, null, "기타"),
 
     // --- 기타 ---
-    EARN("TEST", 100, null, "광고 시청 보상"),
+    EARN("TEST", 300, null, "광고 시청 보상"),
 
     POINT_EXCHANGE("POINT_EXCHANGE", 0, null, "포인트 전환"),
 }
