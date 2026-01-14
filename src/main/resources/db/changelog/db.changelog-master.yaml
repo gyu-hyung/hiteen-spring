@@ -31,3 +31,5 @@ databaseChangeLog:
       file: db/changelog/15-create-challenge-reward-policy.yaml
   - include:
       file: db/changelog/16-alter-game-history-score-to-numeric-9-5.yaml
+  - include:
+      file: db/changelog/17-add-chat-rooms-columns.yaml

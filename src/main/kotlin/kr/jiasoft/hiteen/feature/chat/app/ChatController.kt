@@ -10,6 +10,7 @@ import kr.jiasoft.hiteen.common.dto.ApiResult
 import kr.jiasoft.hiteen.feature.chat.dto.*
 import kr.jiasoft.hiteen.feature.chat.infra.ChatUserRepository
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.security.core.annotation.AuthenticationPrincipal
@@ -48,19 +49,43 @@ class ChatController(
     ) = ResponseEntity.ok(ApiResult.success(service.createDirectRoom(user.id, peerUid)))
 
 
-    @Operation(summary = "그룹 채팅방 생성", description = "여러 명을 지정하여 단체 채팅방을 생성합니다.")
+    @Operation(summary = "그룹 채팅방 생성(JSON, 하위호환)", description = "기존 JSON 기반 생성 API(파일 미지원).")
     @PostMapping("/rooms")
     suspend fun createRoom(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
-        @Parameter(description = "그룹 채팅방 생성 요청 DTO") req: CreateRoomRequest
-    ) = ResponseEntity.ok(ApiResult.success(service.createRoom(user.id, req.peerUids, req.reuseExactMembers)))
+        @RequestBody req: CreateRoomRequest,
+    ) : ResponseEntity<ApiResult<Any>> {
+        val roomUid = service.createRoom(user.id, req)
+        return ResponseEntity.ok(ApiResult.success(roomUid))
+    }
 
 
-    @Operation(summary = "채팅방 상세 조회", description = "특정 채팅방 정보를 UID로 조회합니다.")
+    @Operation(summary = "그룹 채팅방 생성", description = "여러 명을 지정하여 단체 채팅방을 생성합니다. (썸네일 파일 업로드 지원, 1개만 가능)")
+    @PostMapping("/rooms-with-file", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+    suspend fun createRoomJson(
+        @AuthenticationPrincipal(expression = "user") user: UserEntity,
+        @Parameter(description = "그룹 채팅방 생성 요청 DTO") req: CreateRoomRequest,
+        @Parameter(description = "첨부 파일(대표 썸네일, 1개)") @RequestPart(name = "file", required = false) file: FilePart?,
+    ) : ResponseEntity<ApiResult<Any>> {
+        val roomUid = service.createRoom(user.id, req, file)
+        return ResponseEntity.ok(ApiResult.success(roomUid))
+    }
+
+
+    @Operation(summary = "채팅방 상세 조회", description = "특정 채팅방 정보를 UID로 조회합니다. (방 정보 + 참여 멤버)")
     @GetMapping("/{roomUid}")
     suspend fun getRoom(
         @Parameter(description = "채팅방 UID") @PathVariable roomUid: UUID
     ) = ResponseEntity.ok(ApiResult.success(service.getRoomByUid(roomUid)))
+
+
+    @Operation(summary = "채팅방 멤버 초대", description = "채팅방에 멤버를 초대합니다. invite_mode=OWNER이면 방장만, ALL_MEMBERS이면 참여 멤버 누구나 초대 가능")
+    @PostMapping("/{roomUid}/invite")
+    suspend fun inviteMembers(
+        @Parameter(description = "채팅방 UID") @PathVariable roomUid: UUID,
+        @AuthenticationPrincipal(expression = "user") user: UserEntity,
+        @Parameter(description = "초대 요청 DTO") @RequestBody req: ChatRoomInviteRequest,
+    ) = ResponseEntity.ok(ApiResult.success(service.inviteMembers(roomUid, user.id, req.peerUids)))
 
 
     //TODO : 호출 시 읽음처리
@@ -132,4 +157,18 @@ class ChatController(
         @Parameter(description = "채팅방 UID") @PathVariable roomUid: UUID,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ) = ResponseEntity.ok(ApiResult.success(service.leaveRoom(roomUid, user.id)))
+
+
+    @Operation(summary = "채팅방 수정", description = "채팅방 이름/초대권한/썸네일을 수정합니다. 썸네일 파일은 1개만 업로드 가능합니다.")
+    @PostMapping("/{roomUid}", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+    suspend fun updateRoom(
+        @Parameter(description = "채팅방 UID") @PathVariable roomUid: UUID,
+        @AuthenticationPrincipal(expression = "user") user: UserEntity,
+        @Parameter(description = "채팅방 수정 요청 DTO") req: UpdateRoomRequest,
+        @Parameter(description = "첨부 파일(대표 썸네일, 1개)") @RequestPart(name = "file", required = false) file: FilePart?,
+    ) : ResponseEntity<ApiResult<Unit>> {
+        service.updateRoom(roomUid, user.id, req, file)
+        return ResponseEntity.ok(ApiResult.success(Unit))
+    }
+
 }

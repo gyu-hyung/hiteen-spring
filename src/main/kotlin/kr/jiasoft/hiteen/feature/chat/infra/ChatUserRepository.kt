@@ -85,7 +85,27 @@ interface ChatUserRepository : CoroutineCrudRepository<ChatUserEntity, Long> {
         userId: Long
     ): Boolean
 
-
-
+    /**
+     * 초대/재입장 처리: (chat_room_id, user_id) 유니크를 활용해 upsert.
+     * - 신규면 insert
+     * - 기존 row가 있으면 deleted_at/leaving_at을 NULL로 되돌리고 joining_at 갱신
+     */
+    @Query("""
+        INSERT INTO chat_users (chat_room_id, user_id, push, push_at, joining_at, leaving_at, deleted_at)
+        VALUES (:chatRoomId, :userId, true, :pushAt, :joiningAt, NULL, NULL)
+        ON CONFLICT (chat_room_id, user_id)
+        DO UPDATE SET
+            push = EXCLUDED.push,
+            push_at = EXCLUDED.push_at,
+            joining_at = EXCLUDED.joining_at,
+            leaving_at = NULL,
+            deleted_at = NULL
+    """)
+    suspend fun upsertRejoin(
+        chatRoomId: Long,
+        userId: Long,
+        joiningAt: OffsetDateTime,
+        pushAt: OffsetDateTime,
+    ): Int
 
 }

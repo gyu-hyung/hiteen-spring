@@ -2,6 +2,7 @@ package kr.jiasoft.hiteen.feature.chat.infra
 
 import kotlinx.coroutines.flow.Flow
 import kr.jiasoft.hiteen.feature.chat.domain.ChatRoomEntity
+import kr.jiasoft.hiteen.feature.chat.dto.ChatRoomMemberResponse
 import kr.jiasoft.hiteen.feature.chat.dto.ChatRoomResponse
 import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
@@ -67,5 +68,23 @@ interface ChatRoomRepository : CoroutineCrudRepository<ChatRoomEntity, Long> {
         LIMIT 1
     """)
     suspend fun findRoomByExactActiveMembers(memberIds: List<Long>, size: Int): ChatRoomEntity?
-}
 
+    /** 방 참여중인 멤버 목록(나간사람 제외) - user_id, user_uid, chat_user_id, asset_uid, nickname */
+    @Query("""
+        SELECT 
+            cu.user_id AS user_id,
+            u.uid      AS user_uid,
+            cu.id      AS chat_user_id,
+            u.asset_uid AS asset_uid,
+            u.nickname AS nickname
+        FROM chat_users cu
+        JOIN chat_rooms r ON r.id = cu.chat_room_id
+        JOIN users u ON u.id = cu.user_id
+        WHERE r.uid = :roomUid
+          AND r.deleted_at IS NULL
+          AND cu.deleted_at IS NULL
+          AND u.deleted_at IS NULL
+        ORDER BY cu.id ASC
+    """)
+    fun listActiveMembersByRoomUid(roomUid: UUID): Flow<ChatRoomMemberResponse>
+}

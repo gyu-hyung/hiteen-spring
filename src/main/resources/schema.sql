@@ -1113,7 +1113,10 @@ CREATE TABLE chat_rooms (
   updated_id   bigint ,
   updated_at   timestamptz,
   deleted_id   bigint ,
-  deleted_at   timestamptz
+  deleted_at   timestamptz,
+  room_name    varchar(100),
+  invite_mode  varchar(20) DEFAULT 'ALL_MEMBERS',
+  asset_uid    uuid REFERENCES assets(uid)
 );
 
 
