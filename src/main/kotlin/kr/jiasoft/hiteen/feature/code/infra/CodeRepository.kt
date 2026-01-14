@@ -1,6 +1,5 @@
 package kr.jiasoft.hiteen.feature.code.infra
 
-import kotlinx.coroutines.flow.Flow
 import kr.jiasoft.hiteen.feature.code.domain.CodeEntity
 import kr.jiasoft.hiteen.feature.code.dto.CodeWithAssetResponse
 import org.springframework.cache.annotation.Cacheable
@@ -23,5 +22,80 @@ interface CodeRepository : CoroutineCrudRepository<CodeEntity, Long> {
 
     @Query("SELECT code FROM codes WHERE code_group = :group ORDER BY code DESC LIMIT 1")
     suspend fun findLastCodeByGroup(group: String): String?
+
+    // ---- paging/list ----
+
+    @Query("""
+        SELECT c.*, ca.uid
+        FROM codes c
+        left join code_assets ca on c.id = ca.code_id
+        WHERE c.deleted_at IS NULL
+          AND (:group IS NULL OR c.code_group = :group)
+          AND (:status IS NULL OR c.status = :status)
+          AND (
+              :search IS NULL
+              OR :search = ''
+              OR (
+                  (:searchType = 'CODE' AND c.code ILIKE CONCAT('%', :search, '%'))
+                  OR (:searchType = 'NAME' AND c.code_name ILIKE CONCAT('%', :search, '%'))
+                  OR (:searchType = 'GROUP' AND c.code_group ILIKE CONCAT('%', :search, '%'))
+                  OR (:searchType = 'ALL' AND (
+                      c.code ILIKE CONCAT('%', :search, '%')
+                      OR c.code_name ILIKE CONCAT('%', :search, '%')
+                      OR c.code_group ILIKE CONCAT('%', :search, '%')
+                  ))
+              )
+          )
+        ORDER BY
+          CASE WHEN :order = 'ASC' THEN c.id END ASC,
+          CASE WHEN :order = 'DESC' THEN c.id END DESC
+        LIMIT :size OFFSET :offset
+    """)
+    fun listByPage(
+        group: String?,
+        status: String?,
+        search: String?,
+        searchType: String,
+        order: String,
+        size: Int,
+        offset: Long,
+    ): Flux<CodeWithAssetResponse>
+
+    @Query("""
+        SELECT COUNT(1)
+        FROM codes c
+        WHERE c.deleted_at IS NULL
+          AND (:group IS NULL OR c.code_group = :group)
+          AND (:status IS NULL OR c.status = :status)
+          AND (
+              :search IS NULL
+              OR :search = ''
+              OR (
+                  (:searchType = 'CODE' AND c.code ILIKE CONCAT('%', :search, '%'))
+                  OR (:searchType = 'NAME' AND c.code_name ILIKE CONCAT('%', :search, '%'))
+                  OR (:searchType = 'GROUP' AND c.code_group ILIKE CONCAT('%', :search, '%'))
+                  OR (:searchType = 'ALL' AND (
+                      c.code ILIKE CONCAT('%', :search, '%')
+                      OR c.code_name ILIKE CONCAT('%', :search, '%')
+                      OR c.code_group ILIKE CONCAT('%', :search, '%')
+                  ))
+              )
+          )
+    """)
+    suspend fun totalCount(
+        group: String?,
+        status: String?,
+        search: String?,
+        searchType: String,
+    ): Int
+
+    @Query("""
+        SELECT c.code_group
+        FROM codes c
+        WHERE c.deleted_at IS NULL
+        GROUP BY c.code_group
+        ORDER BY c.code_group
+    """)
+    fun findGroups(): Flux<String>
 
 }

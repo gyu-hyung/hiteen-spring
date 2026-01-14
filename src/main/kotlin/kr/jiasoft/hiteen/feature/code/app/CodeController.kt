@@ -5,7 +5,11 @@ import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
 import kotlinx.coroutines.reactive.awaitSingle
+import kr.jiasoft.hiteen.common.dto.ApiPage
 import kr.jiasoft.hiteen.common.dto.ApiResult
+import kr.jiasoft.hiteen.common.dto.PageUtil
+import kr.jiasoft.hiteen.feature.code.domain.CodeEntity
+import kr.jiasoft.hiteen.feature.code.domain.CodeStatus
 import kr.jiasoft.hiteen.feature.code.dto.CodeRequest
 import kr.jiasoft.hiteen.feature.code.dto.CodeWithAssetResponse
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
@@ -69,14 +73,10 @@ class CodeController(
         @Parameter(description = "임시컬럼1") @RequestPart(name = "col3", required = false) col3: String? = null,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
         @Parameter(description = "첨부할 파일들") @RequestPart(name = "files", required = false) filesFlux: Flux<FilePart>?,
-    ): ResponseEntity<ApiResult<List<Map<String, Any>>>> {
+    ): ResponseEntity<ApiResult<List<CodeEntity>>> {
         val files: List<FilePart> = filesFlux?.collectList()?.awaitSingle().orEmpty()
         val saved = codeService.createCodesWithFiles(group, user.id, files, "", col1, col2, col3)
-        return ResponseEntity.ok(
-            ApiResult.success(
-                saved.map { mapOf("id" to it.id, "code" to it.code) }
-            )
-        )
+        return ResponseEntity.ok(ApiResult.success(saved))
     }
 
 
@@ -86,5 +86,48 @@ class CodeController(
         @Parameter(description = "조회할 코드 그룹명") @RequestParam group: String?
     ): ResponseEntity<ApiResult<List<CodeWithAssetResponse>>> {
         return ResponseEntity.ok(ApiResult.success(codeService.listCodesByGroup(group)))
+    }
+
+    @Operation(
+        summary = "코드 페이징 조회",
+        description = "상품 조회 방식처럼 page/size/order/search 조건으로 코드 목록을 페이징 조회합니다. (group/status 필터 지원)"
+    )
+    @GetMapping("/page")
+    suspend fun listCodesByPage(
+        @RequestParam page: Int = 1,
+        @RequestParam size: Int = 10,
+        @RequestParam order: String = "ASC",
+        @RequestParam group: String? = null,
+        @RequestParam status: String? = null,
+        @RequestParam search: String? = null,
+        @RequestParam searchType: String = "ALL",
+    ): ResponseEntity<ApiResult<ApiPage<CodeWithAssetResponse>>> {
+
+        val statusEnum = status?.let { CodeStatus.from(it) }
+
+        val list = codeService.listCodesByPage(
+            page = page,
+            size = size,
+            order = order,
+            group = group,
+            status = statusEnum,
+            search = search,
+            searchType = searchType,
+        )
+
+        val totalCount = codeService.totalCount(
+            group = group,
+            status = statusEnum,
+            search = search,
+            searchType = searchType,
+        )
+
+        return ResponseEntity.ok(ApiResult.success(PageUtil.of(list, totalCount, page, size)))
+    }
+
+    @Operation(summary = "코드 그룹 종류 조회", description = "현재 DB에 존재하는 코드 그룹(code_group) 종류 목록을 조회합니다.")
+    @GetMapping("/groups")
+    suspend fun getCodeGroups(): ResponseEntity<ApiResult<List<String>>> {
+        return ResponseEntity.ok(ApiResult.success(codeService.listGroups()))
     }
 }
