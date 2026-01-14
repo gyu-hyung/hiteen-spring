@@ -33,6 +33,8 @@ class StudyService(
      * 영어 단어 학습 시작
      */
     suspend fun startStudy(user: UserEntity, request: StudyStartRequest): StudyStartResponse {
+        val type = if (request.type == 9) 1 else request.type
+
                 // 🔹 이미 진행 중인 학습이 있는지 검사
         val ongoing = studyRepository.findOngoingStudy(user.id, request.seasonId)
 
@@ -46,7 +48,7 @@ class StudyService(
             // 2️⃣ 문제 아이템 및 본문 로드
 
             // type이 9인 경우 초등 문제로 대체
-            val type = if (request.type == 9) 1 else request.type
+
             val items = questionItemsRepository.findAllBySeasonIdAndType(request.seasonId, type).toList()
             val questionMap = questionRepository.findAllById(questionIds).toList().associateBy { it.id }
 
@@ -75,7 +77,7 @@ class StudyService(
         }
 
         // 🔹 새 학습 세션 생성
-        val items = questionItemsRepository.findAllBySeasonIdAndType(request.seasonId, request.type).toList()
+        val items = questionItemsRepository.findAllBySeasonIdAndType(request.seasonId, type).toList()
         if (items.isEmpty()) throw IllegalStateException("해당 시즌(${request.seasonId})에 학습 가능한 문제가 없습니다.")
 
         val questionIds = items.map { it.questionId }
