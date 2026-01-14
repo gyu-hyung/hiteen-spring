@@ -141,4 +141,53 @@ class CodeService(
     }
 
 
+    /**
+     * 코드 목록 페이징/조건 조회
+     * - group/status: 완전일치 필터
+     * - search/searchType: LIKE 검색 (ALL|CODE|NAME|GROUP)
+     * - order: id 기반 ASC/DESC
+     */
+    suspend fun listCodesByPage(
+        page: Int = 1,
+        size: Int = 10,
+        order: String = "DESC",
+        group: String? = null,
+        status: CodeStatus? = null,
+        search: String? = null,
+        searchType: String = "ALL",
+    ): List<CodeWithAssetResponse> {
+        val safePage = if (page <= 0) 1 else page
+        val safeSize = if (size <= 0) 10 else size
+        val offset = ((safePage - 1) * safeSize).toLong()
+
+        return codeRepository.listByPage(
+            group = group?.uppercase(),
+            status = status?.name,
+            search = search,
+            searchType = searchType.uppercase(),
+            order = order.uppercase(),
+            size = safeSize,
+            offset = offset,
+        ).asFlow().toList()
+    }
+
+    suspend fun totalCount(
+        group: String? = null,
+        status: CodeStatus? = null,
+        search: String? = null,
+        searchType: String = "ALL",
+    ): Int {
+        return codeRepository.totalCount(
+            group = group?.uppercase(),
+            status = status?.name,
+            search = search,
+            searchType = searchType.uppercase(),
+        )
+    }
+
+    /** 현재 DB에 존재하는 코드 그룹(code_group) 종류 목록 */
+    suspend fun listGroups(): List<String> {
+        return codeRepository.findGroups().asFlow().toList()
+    }
+
 }

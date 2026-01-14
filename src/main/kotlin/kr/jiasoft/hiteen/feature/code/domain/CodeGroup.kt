@@ -5,7 +5,8 @@ enum class CodeGroup {
     PIN_DESCRIPTION;
 
     companion object {
-        fun from(value: String): CodeStatus =
-            CodeStatus.entries.find { it.name.equals(value, ignoreCase = true) } ?: throw IllegalArgumentException("Invalid CodeGroup: $value")
+        fun from(value: String): CodeGroup =
+            CodeGroup.entries.find { it.name.equals(value, ignoreCase = true) }
+                ?: throw IllegalArgumentException("Invalid CodeGroup: $value")
     }
 }
