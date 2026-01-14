@@ -30,10 +30,10 @@ class AttendService(
         val today = LocalDate.now()
 
         // 0) 오늘 출석이 없으면 자동 출석 처리
-//        if (attendRepository.findByUserIdAndAttendDate(userId, today) == null) {
-            // 이미 출석이면 내부에서 그대로 성공 반환됨
-//            attend(userId, today)
-//        }
+        if (attendRepository.findByUserIdAndAttendDate(userId, today) == null) {
+//             이미 출석이면 내부에서 그대로 성공 반환됨
+            attend(userId, today)
+        }
 
         val attendedDates = attendRepository.findAttendDatesLast7Days(userId).toList().toSet()
         if (attendedDates.isEmpty()) return emptyList()
