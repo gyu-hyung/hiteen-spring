@@ -19,21 +19,47 @@ class AttendService(
     private val pointService: PointService,
 ) {
 
-    /** 출석 현황 조회 */
+    /**
+     * 출석 현황 조회 (7일 스탬프 사이클)
+     * - 연속 출석이 7일을 넘으면 7일 단위로 사이클이 돌아야 한다.
+     *   예) 9일 연속이면 UI에는 최근 2일만 1~2로 보이도록 반환
+     * - 하루라도 빠지면 초기화(빈 목록)
+     * - ✅ 추가 요구사항: 호출 시 오늘 출석을 안 했다면 자동으로 출석 처리
+     */
     suspend fun consecutiveAttendDays(userId: Long): List<ConsecutiveAttendDay> {
-        val days = attendRepository.findConsecutiveAttendDays(userId).toList()
-
-        if (days.isEmpty()) return emptyList()
-
         val today = LocalDate.now()
-        val lastAttendDate = days.maxOf { it.attendDate }
 
-        // 📌 어제, 오늘이 아니면 끊긴 것으로 간주 → streak reset
-        if (!lastAttendDate.isEqual(today.minusDays(1)) && !lastAttendDate.isEqual(today)) {
-            return emptyList()
+        // 0) 오늘 출석이 없으면 자동 출석 처리
+        if (attendRepository.findByUserIdAndAttendDate(userId, today) == null) {
+            // 이미 출석이면 내부에서 그대로 성공 반환됨
+            attend(userId, today)
         }
 
-        return days
+        val attendedDates = attendRepository.findAttendDatesLast7Days(userId).toList().toSet()
+        if (attendedDates.isEmpty()) return emptyList()
+
+        // 1) 오늘 포함 최근 7일 내에서 '연속' 체크
+        val continuousCountInWindow = (0..6)
+            .takeWhile { offset ->
+                attendedDates.contains(today.minusDays(offset.toLong()))
+            }
+            .size
+
+        if (continuousCountInWindow == 0) return emptyList()
+
+        // 2) 7일 스탬프 사이클 계산은 오늘 attend.sumDay(1~7)를 신뢰
+        val todayAttend = attendRepository.findByUserIdAndAttendDate(userId, today)
+            ?: return emptyList()
+
+        val cycleDay = todayAttend.sumDay.toInt().coerceIn(1, 7)
+        val start = today.minusDays((cycleDay - 1).toLong())
+
+        return (0 until cycleDay).map { idx ->
+            ConsecutiveAttendDay(
+                attendDate = start.plusDays(idx.toLong()),
+                rn = idx + 1,
+            )
+        }
     }
 
 
@@ -88,13 +114,16 @@ class AttendService(
             return Result.success(existing)
         }
 
-        // 연속 출석일수 조회
-//        val consecutiveDays = attendRepository.countConsecutiveAttendDays(user.id)
-        val result = consecutiveAttendDays(userId)
-        val sumDay = (result.size % 7 + 1).toShort()
+        // sumDay는 "어제 출석의 sumDay"를 기반으로 계산(7일 사이클)
+        val yesterday = today.minusDays(1)
+        val yesterdayAttend = attendRepository.findByUserIdAndAttendDate(userId, yesterday)
+        val sumDay = if (yesterdayAttend == null) {
+            1
+        } else {
+            (yesterdayAttend.sumDay.toInt() % 7) + 1
+        }.toShort()
 
-        // 오늘 적용할 포인트 정책 결정 (1~7일 주기)
-        val dayIndex = ((sumDay - 1) % 7 + 1)  // 1~7
+        val dayIndex = sumDay.toInt().coerceIn(1, 7)
         val policy = when (dayIndex) {
             1 -> PointPolicy.ATTEND_DAY1
             2 -> PointPolicy.ATTEND_DAY2
@@ -106,14 +135,13 @@ class AttendService(
             else -> PointPolicy.ETC
         }
 
-        // 출석 기록 저장
         val attend = AttendEntity(
             userId = userId,
             attendDate = today,
             sumDay = sumDay,
             point = policy.amount,
             addPoint = when (policy) {
-                PointPolicy.ATTEND_DAY7 -> 20  // 7일차 보너스
+                PointPolicy.ATTEND_DAY7 -> 20
                 else -> 3
             },
             createdAt = OffsetDateTime.now()
@@ -121,22 +149,13 @@ class AttendService(
 
         val saved = attendRepository.save(attend)
 
-        // 포인트 지급
         pointService.applyPolicy(userId, policy, refId = saved.id)
 
-        // 경험치 지급
         when (dayIndex) {
-            7 -> expService.grantExp(userId, "ATTENDANCE", saved.id, 20)// 7일차 보너스
+            7 -> expService.grantExp(userId, "ATTENDANCE", saved.id, 20)
             else -> expService.grantExp(userId, "ATTENDANCE", saved.id, 3)
         }
 
         return Result.success(saved)
     }
-
-
-
-
-
-
-
 }
