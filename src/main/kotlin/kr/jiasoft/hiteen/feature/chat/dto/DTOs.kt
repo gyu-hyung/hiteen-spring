@@ -3,6 +3,7 @@ package kr.jiasoft.hiteen.feature.chat.dto
 import com.fasterxml.jackson.annotation.JsonFormat
 import io.swagger.v3.oas.annotations.media.Schema
 import kr.jiasoft.hiteen.feature.chat.domain.ChatMessageEntity
+import kr.jiasoft.hiteen.feature.chat.domain.ChatRoomInviteMode
 import kr.jiasoft.hiteen.feature.user.dto.UserSummary
 import org.springframework.data.relational.core.mapping.Column
 import java.time.OffsetDateTime
@@ -16,6 +17,15 @@ data class CreateRoomRequest(
 
     @param:Schema(description = "같은 멤버 채팅방 재사용 여부", example = "false")
     val reuseExactMembers: Boolean = false,
+
+    @param:Schema(description = "채팅방 이름(room_name)", example = "우리반 단톡")
+    val roomName: String? = null,
+
+    @param:Schema(description = "채팅방 친구 초대 권한(invite_mode)", example = "ALL_MEMBERS")
+    val inviteMode: ChatRoomInviteMode = ChatRoomInviteMode.OWNER,
+
+//    @param:Schema(description = "채팅방 썸네일 asset uid(asset_uid)", example = "f580e8e8-adee-4285-b181-3fed545e7be0")
+//    val assetUid: UUID? = null,
 )
 
 
@@ -181,7 +191,6 @@ data class ChatRoomResponse(
     @param:Schema(description = "수정자 ID", example = "1002")
     val updatedId: Long? = null,
 
-
     @param:Schema(description = "채팅방 수정 일시", example = "2025.09.18 10:15")
     @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm")
     val updatedAt: OffsetDateTime? = null,
@@ -193,6 +202,55 @@ data class ChatRoomResponse(
     @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm")
     val deletedAt: OffsetDateTime? = null,
 
-    val roomTitle: String,
+    @param:Schema(description = "채팅방 이름", example = "우리반 단톡")
+    val roomName: String,
+
+    @param:Schema(description = "채팅방 썸네일 asset uid", example = "f580e8e8-adee-4285-b181-3fed545e7be0")
+    val assetUid: UUID? = null,
+
+    @param:Schema(description = "채팅방 친구 초대 권한", example = "OWNER | ALL_MEMBERS")
+    val inviteMode: ChatRoomInviteMode = ChatRoomInviteMode.ALL_MEMBERS,
+)
+
+
+@Schema(description = "채팅방 참여 유저 정보(상세조회)")
+data class ChatRoomMemberResponse(
+
+//    @param:Schema(description = "user_id", example = "1001")
+//    @Column("user_id")
+//    val userId: Long,
+
+    @param:Schema(description = "user_uid", example = "550e8400-e29b-41d4-a716-446655440000")
+    @Column("user_uid")
+    val userUid: UUID,
+
+    @param:Schema(description = "chat_user_id", example = "123")
+    @Column("chat_user_id")
+    val chatUserId: Long,
+
+    @param:Schema(description = "프로필 이미지 asset uid", example = "f580e8e8-adee-4285-b181-3fed545e7be0")
+    @Column("asset_uid")
+    val assetUid: UUID? = null,
+
+    @param:Schema(description = "닉네임", example = "홍길동")
+    @Column("nickname")
+    val nickname: String? = null,
+)
+
+
+@Schema(description = "채팅방 상세 조회 응답")
+data class ChatRoomDetailResponse(
+    @param:Schema(description = "채팅방 정보")
+    val room: ChatRoomResponse,
+
+    @param:Schema(description = "참여중인 유저 목록")
+    val members: List<ChatRoomMemberResponse>,
+)
+
+
+@Schema(description = "채팅방 초대 요청")
+data class ChatRoomInviteRequest(
+    @param:Schema(description = "초대할 사용자 UID 목록", example = "[\"550e8400-e29b-41d4-a716-446655440000\"]")
+    val peerUids: List<UUID>
 )
 

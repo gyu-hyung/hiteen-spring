@@ -1,0 +1,45 @@
+databaseChangeLog:
+
+  # ----------------------------------
+  # CHAT_ROOMS TABLE - ADD room_name / invite_mode / asset_uid
+  # ----------------------------------
+  - changeSet:
+      id: add-chat-rooms-columns
+      author: system
+      changes:
+
+        - addColumn:
+            tableName: chat_rooms
+            columns:
+              - column:
+                  name: room_name
+                  type: varchar(100)
+                  remarks: "채팅방 이름"
+                  constraints:
+                    nullable: true
+
+              - column:
+                  name: invite_mode
+                  type: varchar(20)
+                  remarks: "채팅방 친구 초대 권한(OWNER/ALL_MEMBERS)"
+                  defaultValue: ALL_MEMBERS
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: asset_uid
+                  type: uuid
+                  remarks: "채팅방 썸네일(assets.uid)"
+                  constraints:
+                    nullable: true
+
+        # FK: chat_rooms.asset_uid -> assets.uid
+        - addForeignKeyConstraint:
+            baseTableName: chat_rooms
+            baseColumnNames: asset_uid
+            referencedTableName: assets
+            referencedColumnNames: uid
+            constraintName: fk_chat_rooms_asset_uid
+            onDelete: SET NULL
+            validate: true
+

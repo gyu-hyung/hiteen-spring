@@ -453,6 +453,9 @@ COMMENT ON COLUMN chat_rooms.updated_id IS '수정자 사용자 ID';
 COMMENT ON COLUMN chat_rooms.updated_at IS '수정 일시';
 COMMENT ON COLUMN chat_rooms.deleted_id IS '삭제자 사용자 ID';
 COMMENT ON COLUMN chat_rooms.deleted_at IS '삭제 일시';
+COMMENT ON COLUMN chat_rooms.room_name IS '채팅방 이름';
+COMMENT ON COLUMN chat_rooms.invite_mode IS '채팅방 친구 초대 권한(OWNER/ALL_MEMBERS)';
+COMMENT ON COLUMN chat_rooms.asset_uid IS '채팅방 썸네일(assets.uid)';
 
 -- ========================
 -- chat_users
@@ -549,5 +552,4 @@ COMMENT ON COLUMN user_photos.uid IS '사진 Asset UUID(매핑용)';
 -- COMMENT ON COLUMN mqtt_credentials.password IS 'MQTT 비밀번호/해시';
 -- COMMENT ON COLUMN mqtt_credentials.issued_at IS '발급 시각';
 -- COMMENT ON COLUMN mqtt_credentials.expires_at IS '만료 시각';
-
 

@@ -8,6 +8,11 @@ import org.springframework.data.relational.core.mapping.Table
 import java.time.OffsetDateTime
 import java.util.UUID
 
+enum class ChatRoomInviteMode {
+    OWNER,
+    ALL_MEMBERS,
+}
+
 @Schema(description = "채팅방 엔티티")
 @Table("chat_rooms")
 data class ChatRoomEntity(
@@ -54,4 +59,16 @@ data class ChatRoomEntity(
     @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm")
     @Column("deleted_at")
     val deletedAt: OffsetDateTime? = null,
+
+    @param:Schema(description = "채팅방 이름", example = "우리반 단톡")
+    @Column("room_name")
+    val roomName: String? = null,
+
+    @param:Schema(description = "채팅방 썸네일 asset uid", example = "f580e8e8-adee-4285-b181-3fed545e7be0")
+    @Column("asset_uid")
+    val assetUid: UUID? = null,
+
+    @param:Schema(description = "채팅방 친구 초대 권한", example = "OWNER | ALL_MEMBERS")
+    @Column("invite_mode")
+    val inviteMode: ChatRoomInviteMode = ChatRoomInviteMode.ALL_MEMBERS,
 )
