@@ -35,10 +35,13 @@ class UserDetailService(
             ?: emptyList()               // null 또는 빈 경우 기본값
 
         // 2️⃣ JSON 안전 직렬화
-        val pushItemsJson = try {
-            objectMapper.writeValueAsString(validPushItems)
-        } catch (e: Exception) {
-            "[]" // 실패 시 안전한 기본값
+        val pushItemsJson: String? = req.pushItems?.let { items ->
+            val validItems = items.distinct()
+            try {
+                objectMapper.writeValueAsString(validItems)
+            } catch (e: Exception) {
+                null
+            }
         }
 
         val existing = userDetails.findByUid(userUid)
@@ -57,7 +60,7 @@ class UserDetailService(
             agreeMarketing = req.agreeMarketing ?: existing.agreeMarketing,
             pushService = req.pushService ?: existing.pushService,
             pushMarketing = req.pushMarketing ?: existing.pushMarketing,
-            pushItems = pushItemsJson,
+            pushItems = pushItemsJson ?: existing.pushItems,
             memo = req.memo ?: existing.memo,
         ) ?: UserDetailEntity(
             userId = req.userId!!,
@@ -75,7 +78,7 @@ class UserDetailService(
             agreeMarketing = req.agreeMarketing,
             pushService = req.pushService,
             pushMarketing = req.pushMarketing,
-            pushItems = pushItemsJson,
+            pushItems = pushItemsJson?: "[]",
             memo = req.memo,
         )
 
