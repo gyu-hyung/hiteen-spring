@@ -67,6 +67,7 @@ class SecurityConfig(
                     "/favicon.ico",
                     "/actuator/**",
                     "/api/health",
+                    "/api/terms/**",
                     "/api/user/profile/ss/{id}",
                 ).permitAll()
 
