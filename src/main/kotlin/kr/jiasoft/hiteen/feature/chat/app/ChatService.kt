@@ -224,7 +224,8 @@ class ChatService(
             entity = savedMsg,
             sender = sender,
             assets = assets,
-            unreadCount = (memberCount - 1)
+            unreadCount = (memberCount - 1),
+            roomUid = room.uid
         )
     }
 
@@ -270,7 +271,7 @@ class ChatService(
             val readers = readersMap[m.id] ?: 0L
             val unread = ((memberCount - 1) - readers).coerceAtLeast(0L).toInt()
 
-            MessageSummary.from(m, sender, assets, unread)
+            MessageSummary.from(m, sender, assets, unread, room.uid)
         }
     }
 
@@ -368,6 +369,7 @@ class ChatService(
                 lastMessage = if (last != null) {
                     MessageSummary(
                         messageUid = last.uid,
+                        roomUid = r.uid,
                         content = last.content,
                         kind = last.kind,
                         emojiCode = last.emojiCode,

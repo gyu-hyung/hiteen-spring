@@ -75,6 +75,9 @@ data class MessageSummary(
     @param:Schema(description = "메시지 UID", example = "b2a1f4a1-23b3-4c8f-9a7e-9e3d94c5f3a4")
     val messageUid: UUID,
 
+    @param:Schema(description = "룸 UID", example = "b2a1f4a1-23b3-4c8f-9a7e-9e3d94c5f3a4")
+    val roomUid: UUID,
+
     @param:Schema(description = "메시지 내용", example = "안녕하세요!")
     val content: String?,
 
@@ -101,7 +104,7 @@ data class MessageSummary(
     val assets: List<MessageAssetSummary>?,
 ) {
     companion object {
-        fun from(entity: ChatMessageEntity, sender: UserSummary?, assets: List<MessageAssetSummary>?, unreadCount: Int? = null): MessageSummary {
+        fun from(entity: ChatMessageEntity, sender: UserSummary?, assets: List<MessageAssetSummary>?, unreadCount: Int? = null, roomUid: UUID): MessageSummary {
             return MessageSummary(
                 messageUid = entity.uid,
                 content = entity.content,
@@ -112,6 +115,7 @@ data class MessageSummary(
                 createdAt = entity.createdAt,
                 sender = sender,
                 assets = assets,
+                roomUid = roomUid,
             )
         }
     }
