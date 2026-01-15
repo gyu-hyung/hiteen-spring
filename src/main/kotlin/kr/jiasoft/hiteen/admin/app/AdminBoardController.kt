@@ -9,6 +9,7 @@ import kr.jiasoft.hiteen.common.dto.ApiResult
 import kr.jiasoft.hiteen.common.dto.ApiPage
 import kr.jiasoft.hiteen.common.dto.PageUtil
 import kr.jiasoft.hiteen.feature.asset.app.AssetService
+import kr.jiasoft.hiteen.feature.board.infra.BoardAssetRepository
 import kr.jiasoft.hiteen.feature.board.domain.BoardEntity
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import org.springframework.http.MediaType
@@ -23,6 +24,7 @@ import java.util.UUID
 class AdminBoardController(
     private val adminBoardRepository: AdminBoardRepository,
     private val assetService: AssetService,
+    private val boardAssetRepository: BoardAssetRepository,
 ) {
 
     /**
@@ -141,6 +143,20 @@ class AdminBoardController(
             category = category,
         ).toList()
 
+        // ✅ 첨부파일(board_assets) 조회 후 boardId별로 매핑
+        val boardIds = list.map { it.id }
+        val attachmentsMap: Map<Long, List<UUID>> = if (boardIds.isEmpty()) {
+            emptyMap()
+        } else {
+            boardIds.associateWith { boardId ->
+                boardAssetRepository.findAllByBoardId(boardId)?.map { it.uid } ?: emptyList()
+            }
+        }
+
+        val listWithAttachments = list.map { row ->
+            row.copy(attachments = attachmentsMap[row.id] ?: emptyList())
+        }
+
         val totalCount = adminBoardRepository.totalCount(
             search = search,
             searchType = searchType,
@@ -150,7 +166,7 @@ class AdminBoardController(
         )
 
         return ResponseEntity.ok(
-            ApiResult.success(PageUtil.of(list, totalCount, page, size))
+            ApiResult.success(PageUtil.of(listWithAttachments, totalCount, page, size))
         )
     }
 }
