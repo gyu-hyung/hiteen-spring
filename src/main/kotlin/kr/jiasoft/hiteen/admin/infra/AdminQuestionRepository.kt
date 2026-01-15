@@ -90,7 +90,7 @@ interface AdminQuestionRepository : CoroutineCrudRepository<QuestionEntity, Long
             AND (
                 :hasAsset IS NULL
                 OR (:hasAsset = true AND ((q.image IS NOT NULL AND q.image <> '') OR (q.sound IS NOT NULL AND q.sound <> '')))
-                OR (:hasAsset = false AND ((q.image IS NULL OR q.image = '') AND (q.sound IS NULL OR q.sound = '')))
+                OR (:hasAsset = false AND ((q.image IS NULL OR q.image = '') OR (q.sound IS NULL OR q.sound = '')))
             )
     """)
     suspend fun totalCount(
@@ -140,7 +140,7 @@ interface AdminQuestionRepository : CoroutineCrudRepository<QuestionEntity, Long
             AND (
                 :hasAsset IS NULL
                 OR (:hasAsset = true AND ((q.image IS NOT NULL AND q.image <> '') OR (q.sound IS NOT NULL AND q.sound <> '')))
-                OR (:hasAsset = false AND ((q.image IS NULL OR q.image = '') AND (q.sound IS NULL OR q.sound = '')))
+                OR (:hasAsset = false AND ((q.image IS NULL OR q.image = '') OR (q.sound IS NULL OR q.sound = '')))
             )
         ORDER BY
             q.status DESC,
