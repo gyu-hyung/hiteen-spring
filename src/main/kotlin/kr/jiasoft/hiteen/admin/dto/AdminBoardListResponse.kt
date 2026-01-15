@@ -36,4 +36,5 @@ data class AdminBoardListResponse (
     val deletedAt: OffsetDateTime?,
     val createdUid: UUID?,
     val nickname: String?,
+    val attachments: List<UUID>? = null,
 )
