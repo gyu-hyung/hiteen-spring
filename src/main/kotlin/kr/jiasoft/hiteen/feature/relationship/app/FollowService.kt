@@ -143,6 +143,7 @@ class FollowService(
             )
         )
         expService.grantExp(meId, "FOLLOW_ACCEPT", otherId)
+//        expService.grantExp(otherId, "FOLLOW_ACCEPT", meId, null, meId)
         pushService.sendAndSavePush(
             listOf(otherId),
             me.id,

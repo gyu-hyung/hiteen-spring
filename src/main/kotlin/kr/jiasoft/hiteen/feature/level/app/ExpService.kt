@@ -23,7 +23,8 @@ class ExpService(
         userId: Long,
         actionCode: String,
         targetId: Long? = null,
-        dynamicPoints: Int? = null
+        dynamicPoints: Int? = null,
+        requestId: Long? = null,
     ) {
         val action = props.actions[actionCode]
             ?: throw IllegalArgumentException("정의되지 않은 액션 코드: $actionCode")
@@ -74,7 +75,8 @@ class ExpService(
             ).awaitSingleOrNull()
         }
 
-        addDeltaExp(points).awaitSingleOrNull()
+        //userId 가 requestId 와 같을때에만 경험치 delta 기록
+        if(requestId == null || userId == requestId) addDeltaExp(points).awaitSingleOrNull()
 
     }
 
