@@ -145,7 +145,6 @@ class CodeService(
 //            )
 //        ]
 //    )
-    @CacheEvict(cacheNames = ["code"], key = "#existing.codeGroup")
     suspend fun deleteCode(userId: Long, id: Long) {
         val existing = codeRepository.findById(id)
             ?: throw IllegalArgumentException("해당 코드가 존재하지 않습니다: id=$id")
@@ -154,7 +153,12 @@ class CodeService(
             deletedId = userId,
             deletedAt = OffsetDateTime.now()
         )
-        codeRepository.save(deleted)
+        codeRepository.delete(deleted)
+        deleteCodeCache(existing.codeGroup)
+    }
+
+    @CacheEvict(cacheNames = ["code"], key = "#codeGroup.toUpperCase()")
+    suspend fun deleteCodeCache(codeGroup: String) {
     }
 
 
