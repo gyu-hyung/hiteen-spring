@@ -1,7 +1,10 @@
 package kr.jiasoft.hiteen.admin.services
 
 import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.flow.Flow
+import kr.jiasoft.hiteen.admin.dto.AdminSchoolClassesResponse
 import kr.jiasoft.hiteen.admin.dto.AdminSchoolResponse
+import kr.jiasoft.hiteen.admin.infra.AdminSchoolClassRepository
 import kr.jiasoft.hiteen.admin.infra.AdminSchoolRepository
 import kr.jiasoft.hiteen.common.dto.ApiPage
 import kr.jiasoft.hiteen.common.dto.PageUtil
@@ -10,6 +13,7 @@ import org.springframework.stereotype.Service
 @Service
 class AdminSchoolService(
     private val schools: AdminSchoolRepository,
+    private val classes: AdminSchoolClassRepository,
 ) {
     suspend fun listSchools(
         sido: String?, type: Int?, searchType: String?, search: String?,
@@ -31,5 +35,11 @@ class AdminSchoolService(
         )
 
         return data
+    }
+
+    suspend fun listClasses(
+        schoolId: Long, year: Int
+    ): List<AdminSchoolClassesResponse> {
+        return classes.listBySchoolYear(schoolId, year).toList()
     }
 }

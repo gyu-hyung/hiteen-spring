@@ -1,9 +1,12 @@
 package kr.jiasoft.hiteen.admin.app
 
 import io.swagger.v3.oas.annotations.Parameter
+import kotlinx.coroutines.flow.Flow
 import kr.jiasoft.hiteen.admin.dto.AdminIdOnlyRequest
+import kr.jiasoft.hiteen.admin.dto.AdminSchoolClassesResponse
 import kr.jiasoft.hiteen.admin.dto.AdminSchoolSaveRequest
 import kr.jiasoft.hiteen.admin.dto.AdminSchoolResponse
+import kr.jiasoft.hiteen.admin.infra.AdminSchoolClassRepository
 import kr.jiasoft.hiteen.admin.infra.AdminSchoolRepository
 import kr.jiasoft.hiteen.admin.services.AdminSchoolService
 import kr.jiasoft.hiteen.common.dto.ApiPage
@@ -20,6 +23,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 @RestController
@@ -41,6 +45,26 @@ class AdminSchoolController(
         val data = schoolService.listSchools(
             sido, type, searchType, search, page, size
         )
+
+        return success(data)
+    }
+
+    // 학급 목록
+    @GetMapping("/classes")
+    suspend fun getClasses(
+        @RequestParam schoolId: Long = 0,
+        @RequestParam year: Int,
+    ): ResponseEntity<ApiResult<List<AdminSchoolClassesResponse>>> {
+        if (schoolId < 1) {
+            return failure("학교구분을 선택하세요.")
+        }
+
+        var schoolYear = year
+        if (year < 2025) {
+            schoolYear = getSchoolYear()
+        }
+
+        val data = schoolService.listClasses(schoolId, schoolYear)
 
         return success(data)
     }
@@ -147,5 +171,17 @@ class AdminSchoolController(
         adminSchoolRepository.save(data)
 
         return success(school, "학교정보가 삭제되었습니다.")
+    }
+
+
+    // 현재 학년도
+    fun getSchoolYear(today: LocalDate = LocalDate.now()): Int {
+        val startDate = LocalDate.of(today.year, 3, 1)
+
+        return if (today.isBefore(startDate)) {
+            today.year - 1
+        } else {
+            today.year
+        }
     }
 }
