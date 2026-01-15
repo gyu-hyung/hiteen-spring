@@ -87,6 +87,11 @@ interface AdminQuestionRepository : CoroutineCrudRepository<QuestionEntity, Long
             AND (
                 :seasonId IS NULL OR (exists (select 1 from question_items qi where q.id = qi.question_id and season_id = :seasonId))
             )
+            AND (
+                :hasAsset IS NULL
+                OR (:hasAsset = true AND ((q.image IS NOT NULL AND q.image <> '') OR (q.sound IS NOT NULL AND q.sound <> '')))
+                OR (:hasAsset = false AND ((q.image IS NULL OR q.image = '') AND (q.sound IS NULL OR q.sound = '')))
+            )
     """)
     suspend fun totalCount(
         search: String?,
@@ -94,6 +99,7 @@ interface AdminQuestionRepository : CoroutineCrudRepository<QuestionEntity, Long
         status: String?,
         type: String?,
         seasonId: Long?,
+        hasAsset: Boolean?,
     ): Int
 
 
@@ -131,6 +137,11 @@ interface AdminQuestionRepository : CoroutineCrudRepository<QuestionEntity, Long
             AND (
                 :seasonId IS NULL OR (exists (select 1 from question_items qi where q.id = qi.question_id and season_id = :seasonId))
             )
+            AND (
+                :hasAsset IS NULL
+                OR (:hasAsset = true AND ((q.image IS NOT NULL AND q.image <> '') OR (q.sound IS NOT NULL AND q.sound <> '')))
+                OR (:hasAsset = false AND ((q.image IS NULL OR q.image = '') AND (q.sound IS NULL OR q.sound = '')))
+            )
         ORDER BY
             q.status DESC,
             CASE WHEN :order = 'DESC' THEN q.created_at END DESC,
@@ -146,6 +157,7 @@ interface AdminQuestionRepository : CoroutineCrudRepository<QuestionEntity, Long
         status: String?,
         type: String?,
         seasonId: Long?,
+        hasAsset: Boolean?,
     ): Flow<QuestionEntity>
 
 
