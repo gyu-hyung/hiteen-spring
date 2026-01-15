@@ -1,25 +1,34 @@
 package kr.jiasoft.hiteen.admin.app
 
-import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.Parameter
+import kr.jiasoft.hiteen.admin.dto.AdminIdOnlyRequest
+import kr.jiasoft.hiteen.admin.dto.AdminSchoolSaveRequest
 import kr.jiasoft.hiteen.admin.dto.AdminSchoolResponse
+import kr.jiasoft.hiteen.admin.infra.AdminSchoolRepository
 import kr.jiasoft.hiteen.admin.services.AdminSchoolService
 import kr.jiasoft.hiteen.common.dto.ApiPage
 import kr.jiasoft.hiteen.common.dto.ApiResult
+import kr.jiasoft.hiteen.common.extensions.failure
+import kr.jiasoft.hiteen.common.extensions.success
+import kr.jiasoft.hiteen.feature.school.domain.SchoolEntity
+import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import org.springframework.http.ResponseEntity
+import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.ModelAttribute
+import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import java.time.LocalDateTime
 
 @RestController
 @RequestMapping("/api/admin/school")
 class AdminSchoolController(
+    private val adminSchoolRepository: AdminSchoolRepository,
     private val schoolService: AdminSchoolService,
 ) {
-    @Operation(
-        summary = "관리자 > 학교 목록",
-        description = "시도, 학교구분, 키워드, 페이지, 페이지 크기 등의 옵션을 이용해 학교 목록을 조회합니다."
-    )
+    // 학교 목록
     @GetMapping("/schools")
     suspend fun getSchools(
         @RequestParam sido: String? = null,
@@ -28,11 +37,115 @@ class AdminSchoolController(
         @RequestParam search: String? = null,
         @RequestParam page: Int = 1,
         @RequestParam size: Int = 10
-    ): ResponseEntity<ApiResult<ApiPage<AdminSchoolResponse>>?> {
+    ): ResponseEntity<ApiResult<ApiPage<AdminSchoolResponse>>> {
         val data = schoolService.listSchools(
             sido, type, searchType, search, page, size
         )
 
-        return ResponseEntity.ok(ApiResult.Companion.success(data))
+        return success(data)
+    }
+
+    // 학교정보 등록/수정
+    @PostMapping("/save")
+    suspend fun saveSchool(
+        @Parameter req: AdminSchoolSaveRequest,
+        @AuthenticationPrincipal(expression = "user") user: UserEntity,
+    ) : ResponseEntity<ApiResult<Any>> {
+        if (req.name.isNullOrBlank()) {
+            return failure("학교명을 입력해 주세요.")
+        }
+        if (req.type < 1) {
+            return failure("학교구분을 선택하세요.")
+        }
+        if (req.latitude == null || req.latitude == 0.0 || req.longitude == null || req.longitude == 0.0) {
+            return failure("학교 위치를 선택해 주세요.")
+        }
+        if (req.address.isNullOrBlank()) {
+            return failure("주소를 입력해 주세요.")
+        }
+
+        val mode = req.mode ?: "add"
+
+        val result = if (mode == "edit") {
+            // 수정
+            val school = req.id?.let { adminSchoolRepository.findById(it) }
+                ?: return failure("존재하지 않는 학교입니다(${req.id})")
+
+            val data = school.copy(
+                name = req.name,
+                sido = req.sido,
+                sidoName = req.sidoName,
+                type = req.type,
+                typeName = req.typeName,
+                zipcode = req.zipcode,
+                address = req.address,
+                latitude = req.latitude,
+                longitude = req.longitude,
+                foundDate = req.foundDate,
+                updatedId = user.id,
+                updatedAt = LocalDateTime.now(),
+                modified = 1,
+            )
+
+            adminSchoolRepository.save(data)
+        } else {
+            // 등록
+            val maxNum = adminSchoolRepository.findMaxSchoolCodeNumber() ?: 0
+            val code = "H" + String.format("%06d", maxNum + 1)
+
+            val data = SchoolEntity(
+                code = code,
+                name = req.name,
+                sido = req.sido,
+                sidoName = req.sidoName,
+                type = req.type,
+                typeName = req.typeName,
+                zipcode = req.zipcode,
+                address = req.address,
+                latitude = req.latitude,
+                longitude = req.longitude,
+                foundDate = req.foundDate,
+                modified = 1,
+                createdId = user.id,
+                createdAt = LocalDateTime.now(),
+                updatedId = user.id,
+                updatedAt = LocalDateTime.now(),
+            )
+
+            adminSchoolRepository.save(data)
+        }
+
+        val message = if (mode == "add") {
+            "학교정보가 등록되었습니다."
+        } else {
+            "학교정보가 변경되었습니다."
+        }
+
+        return success(result, message)
+    }
+
+    /**
+     * 학교정보 삭제 (Soft Delete)
+     */
+    @PostMapping("/delete")
+    suspend fun deleteSchool(
+        @Parameter(description = "학교 ID")
+        @ModelAttribute req: AdminIdOnlyRequest,
+        @AuthenticationPrincipal(expression = "user") user: UserEntity,
+    ): ResponseEntity<ApiResult<Any>> {
+        val id = req.id
+
+        val school = adminSchoolRepository.findById(id)
+            ?: return failure("존재하지 않는 학교입니다(${id})")
+
+        val data = school.copy(
+            deletedId = user.id,
+            deletedAt = LocalDateTime.now(),
+            modified = 1,
+        )
+
+        adminSchoolRepository.save(data)
+
+        return success(school, "학교정보가 삭제되었습니다.")
     }
 }

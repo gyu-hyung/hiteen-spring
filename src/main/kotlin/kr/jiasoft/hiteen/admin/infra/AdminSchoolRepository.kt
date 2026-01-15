@@ -57,7 +57,7 @@ interface AdminSchoolRepository : CoroutineCrudRepository<SchoolEntity, Long> {
         ORDER BY sido ASC, type ASC, name ASC
         LIMIT :limit OFFSET :offset
     """)
-    fun listSearchResults(
+    suspend fun listSearchResults(
         sido: String?,
         type: Int?,
         searchType: String?,
@@ -65,4 +65,11 @@ interface AdminSchoolRepository : CoroutineCrudRepository<SchoolEntity, Long> {
         limit: Int,
         offset: Int,
     ): Flow<AdminSchoolResponse>
+
+    @Query("""
+        SELECT MAX(CAST(SUBSTRING(code, 2) AS INTEGER))
+        FROM schools
+        WHERE code LIKE 'H%'
+    """)
+    suspend fun findMaxSchoolCodeNumber(): Int?
 }
