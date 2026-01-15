@@ -143,14 +143,14 @@ class AdminBoardController(
             category = category,
         ).toList()
 
-        // ✅ 첨부파일(board_assets) 조회 후 boardId별로 매핑
+        // ✅ 첨부파일(board_assets) 조회 후 boardId별로 매핑 (N+1 방지)
         val boardIds = list.map { it.id }
         val attachmentsMap: Map<Long, List<UUID>> = if (boardIds.isEmpty()) {
             emptyMap()
         } else {
-            boardIds.associateWith { boardId ->
-                boardAssetRepository.findAllByBoardId(boardId)?.map { it.uid } ?: emptyList()
-            }
+            boardAssetRepository.findAllByBoardIdIn(boardIds.toTypedArray())
+                .toList()
+                .groupBy({ it.boardId }, { it.uid })
         }
 
         val listWithAttachments = list.map { row ->

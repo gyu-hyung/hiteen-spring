@@ -9,6 +9,7 @@ import kr.jiasoft.hiteen.common.dto.ApiPage
 import kr.jiasoft.hiteen.common.dto.PageUtil
 import kr.jiasoft.hiteen.feature.asset.app.AssetService
 import kr.jiasoft.hiteen.feature.poll.domain.PollEntity
+import kr.jiasoft.hiteen.feature.poll.infra.PollPhotoRepository
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -22,6 +23,7 @@ import java.util.UUID
 class AdminPollController(
     private val adminPollRepository: AdminPollRepository,
     private val assetService: AssetService,
+    private val pollPhotoRepository: PollPhotoRepository,
 ) {
 
     /**
@@ -128,6 +130,21 @@ class AdminPollController(
             uid = uid,
         ).toList()
 
+        // ✅ 첨부파일(poll_photos) 조회 후 pollId별로 매핑
+        val pollIds = list.map { it.id }
+        val attachmentsMap: Map<Long, List<UUID>> = if (pollIds.isEmpty()) {
+            emptyMap()
+        } else {
+            pollPhotoRepository.findAllByPollIdIn(pollIds.toTypedArray())
+                .toList()
+                .groupBy({ it.pollId }, { it.assetUid })
+                .mapValues { (_, uids) -> uids.filterNotNull() }
+        }
+
+        val listWithAttachments = list.map { row ->
+            row.copy(attachments = attachmentsMap[row.id] ?: emptyList())
+        }
+
         val totalCount = adminPollRepository.totalCount(
             search = search,
             searchType = searchType,
@@ -136,7 +153,7 @@ class AdminPollController(
         )
 
         return ResponseEntity.ok(
-            ApiResult.success(PageUtil.of(list, totalCount, page, size))
+            ApiResult.success(PageUtil.of(listWithAttachments, totalCount, page, size))
         )
     }
 }
