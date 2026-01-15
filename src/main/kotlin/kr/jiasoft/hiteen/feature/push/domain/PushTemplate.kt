@@ -196,7 +196,27 @@ enum class PushTemplate(
         code = "DAILY_FRIEND_SUGGESTION",
         title = "오늘의 친구 추천 시간이 왔어요! 🤝",
         message = "새로운 친구를 만나보세요! 오늘의 친구 추천 시간이 시작되었어요! 🤝"
-    )
+    ),
+
+    /**
+     * 게임 친구 랭킹 변동 알림
+     */
+    GAME_FRIEND_RANK_CHANGED(
+        code = "GAME_FRIEND_RANK_CHANGED",
+        title = "친구 랭킹 변동 📈",
+        message = "{nickname_iga} 게임 친구 랭킹이 {beforeRank}위 → {afterRank}위로 변했어!",
+        itemType = PushItemType.ALL,
+    ),
+
+    /**
+     * 게임에서 특정 친구를 추월했을 때(나 -> 친구) 알림
+     */
+    GAME_OVERTAKE_FRIEND(
+        code = "GAME_OVERTAKE_FRIEND",
+        title = "랭킹 추월 알림 🏃",
+        message = "{nickname_iga} {gameName}에서 너를 추월했어! 📉",
+        itemType = PushItemType.ALL,
+    ),
 
 
     ;
@@ -236,5 +256,4 @@ enum class PushTemplate(
 
 
 }
-
 

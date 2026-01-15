@@ -2,6 +2,7 @@ package kr.jiasoft.hiteen.feature.play.infra
 
 import kotlinx.coroutines.flow.Flow
 import kr.jiasoft.hiteen.feature.play.domain.GameScoreEntity
+import kr.jiasoft.hiteen.feature.play.dto.FriendRankView
 import kr.jiasoft.hiteen.feature.play.dto.GameScoreWithParticipantView
 import kr.jiasoft.hiteen.feature.play.dto.RankingView
 import org.springframework.data.r2dbc.repository.Query
@@ -114,7 +115,32 @@ interface GameScoreRepository : CoroutineCrudRepository<GameScoreEntity, Long> {
     ): Flow<GameScoreWithParticipantView>
 
 
-
-
+    /**
+     * 친구 랭킹(친구+나) 추월 판정용 최소 정보(rank, userId)
+     */
+    @Query("""
+        SELECT
+            ROW_NUMBER() OVER (ORDER BY gs.score ASC, CASE WHEN gs.updated_at IS NOT NULL THEN gs.updated_at ELSE gs.created_at END ASC) AS rank,
+            u.id AS user_id
+        FROM game_scores gs
+        JOIN season_participants sp ON gs.participant_id = sp.id
+        JOIN users u ON sp.user_id = u.id
+        WHERE gs.season_id = :seasonId
+          AND gs.game_id   = :gameId
+          AND sp.league    = :league
+          AND (
+                :participantIds IS NULL
+                OR sp.id = ANY(:participantIds)
+              )
+        ORDER BY gs.score ASC, CASE WHEN gs.updated_at IS NOT NULL THEN gs.updated_at ELSE gs.created_at END ASC
+        LIMIT :limit
+    """)
+    fun findFriendRanks(
+        seasonId: Long,
+        gameId: Long,
+        league: String,
+        participantIds: Array<Long>?,
+        limit: Int = 200,
+    ): Flow<FriendRankView>
 
 }

@@ -7,6 +7,7 @@ import kr.jiasoft.hiteen.feature.ad.app.AdService
 import kr.jiasoft.hiteen.feature.level.app.ExpService
 import kr.jiasoft.hiteen.feature.level.infra.TierRepository
 import kr.jiasoft.hiteen.feature.play.domain.*
+import kr.jiasoft.hiteen.feature.play.dto.FriendRankView
 import kr.jiasoft.hiteen.feature.play.dto.GameScoreResponse
 import kr.jiasoft.hiteen.feature.play.dto.GameStatus
 import kr.jiasoft.hiteen.feature.play.dto.RankingResponse
@@ -20,9 +21,12 @@ import kr.jiasoft.hiteen.feature.play.infra.SeasonParticipantRepository
 import kr.jiasoft.hiteen.feature.play.infra.SeasonRepository
 import kr.jiasoft.hiteen.feature.point.app.PointService
 import kr.jiasoft.hiteen.feature.point.domain.PointPolicy
+import kr.jiasoft.hiteen.feature.push.app.PushService
+import kr.jiasoft.hiteen.feature.push.domain.PushTemplate
 import kr.jiasoft.hiteen.feature.relationship.infra.FriendRepository
 import kr.jiasoft.hiteen.feature.user.domain.SeasonStatusType
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
+import kr.jiasoft.hiteen.feature.user.infra.UserRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.reactive.TransactionalOperator
 import org.springframework.transaction.reactive.executeAndAwait
@@ -43,12 +47,16 @@ class GameService(
     private val rankingViewRepository: GameScoreRepository,
     private val friendRepository: FriendRepository,
 
+    private val userRepository: UserRepository,
+
     private val expService: ExpService,
     private val pointService: PointService,
 
+    private val pushService: PushService,
+
     private val adService: AdService,
     private val txOperator: TransactionalOperator,
-    ) {
+) {
 
 
     /**
@@ -182,16 +190,26 @@ class GameService(
         //경험치 부여
         grantExp(userId, gameId, wordChallengeGameId)
 
-        //게임 이력
-        val existing = gameScoreRepository.findBySeasonIdAndParticipantIdAndGameId(participant.seasonId, participant.id, gameId)
         // 시도 횟수별 가산점 (0.01초 * n), 최대 1 초 까지
+        val existing = gameScoreRepository.findBySeasonIdAndParticipantIdAndGameId(participant.seasonId, participant.id, gameId)
         val tryCount = (existing?.totalTryCount?.plus(1)) ?: 1
         val advantage = BigDecimal("0.01").multiply(BigDecimal(tryCount))
         val finalScore = score
             .subtract(advantage)
             .coerceAtLeast(BigDecimal.ZERO)
-//            .setScale(2, RoundingMode.DOWN)
+
+        //게임 이력
         saveHistory(gameHistoryUid,  participant.seasonId, participant.id, gameId, finalScore)
+
+        // ✅ 점수 반영 전 친구 랭킹(친구+나) 목록 저장 (추월 판정용 최소 정보)
+        val friendIds = friendRepository.findAllFriendship(userId).toSet()
+        val beforeRanks = getFriendRankSnapshot(
+            seasonId = participant.seasonId,
+            gameId = gameId,
+            league = participant.league,
+            userId = userId,
+            friendIds = friendIds
+        )
 
         val scoreEntity =  if (existing != null) {
             val isToday = existing.updatedAt?.toLocalDate()?.isEqual(LocalDate.now()) ?: existing.createdAt.toLocalDate().isEqual(LocalDate.now())
@@ -200,144 +218,102 @@ class GameService(
             createScore(participant.seasonId, participant.id, gameId, finalScore)
         }
 
+        // ✅ 신기록 달성 여부(개인 베스트 개선/최초 기록)
+        // - 점수는 낮을수록 좋음
+        val isNewRecord = (existing == null) || (scoreEntity.score < existing.score)
+
+        // ✅ 점수 반영 후 친구 랭킹(친구+나) 목록 재조회
+        // - 신기록일 때만 추월 알림을 보내기 위해, 신기록이 아니면 여기서 종료
+        if (!isNewRecord) {
+            return GameScoreResponse.fromEntity(scoreEntity, score, advantage)
+        }
+
+        val afterRanks = getFriendRankSnapshot(
+            seasonId = participant.seasonId,
+            gameId = gameId,
+            league = participant.league,
+            userId = userId,
+            friendIds = friendIds
+        )
+
+        // ✅ "내가 특정 친구를 추월"한 경우만 해당 친구에게 푸시
+        // - beforeRanks가 비어있는 경우: '이전에는 랭킹이 없었다(아예 참여/기록 X)'로 보고, after에서 친구보다 앞이면 추월로 판단
+        if (afterRanks.isNotEmpty()) {
+            val beforeByUser: Map<Long, FriendRankView> = beforeRanks.associateBy { it.userId }
+            val afterByUser: Map<Long, FriendRankView> = afterRanks.associateBy { it.userId }
+
+            val myAfterRank = afterByUser[userId]?.rank
+            if (myAfterRank != null) {
+                // 게임명
+                val gameName = gameRepository.findById(gameId)?.name ?: "게임"
+                // 내 닉네임
+                val myNickname = userRepository.findById(userId)?.nickname ?: "친구"
+
+                val myBeforeRank = beforeByUser[userId]?.rank ?: Int.MAX_VALUE
+
+                // ✅ 같은 리그(=현재 랭킹 스냅샷 afterRanks)에 실제로 포함된 친구만 대상으로 필터링
+                val eligibleFriendIds = friendIds.filter { afterByUser.containsKey(it) }
+
+                val overtakenFriendIds = eligibleFriendIds.filter { friendId ->
+                    val friendAfterRank = afterByUser[friendId]?.rank ?: return@filter false
+
+                    // before에 friend가 없다면 비교 불가(친구도 랭킹에 없었다)
+                    val friendBeforeRank = beforeByUser[friendId]?.rank ?: return@filter false
+
+                    val wasBehindBefore = myBeforeRank > friendBeforeRank// 내가 친구보다 뒤였음
+                    val isAheadNow = myAfterRank < friendAfterRank// 내가 친구보다 앞섰음
+
+                    wasBehindBefore && isAheadNow
+                }
+
+                overtakenFriendIds.forEach { friendId ->
+                    pushService.sendAndSavePush(
+                        userIds = listOf(friendId),
+                        userId = userId,
+                        templateData = PushTemplate.GAME_OVERTAKE_FRIEND.buildPushData(
+                            "nickname" to myNickname,
+                            "gameName" to gameName,
+                        ),
+                        extraData = mapOf(
+                            "gameId" to gameId.toString(),
+                            "seasonId" to participant.seasonId.toString(),
+                            "league" to participant.league,
+                        )
+                    )
+                }
+            }
+        }
 
         return GameScoreResponse.fromEntity(scoreEntity, score, advantage)
     }
 
-
-//    /**
-//     * 게임 종료 (점수 등록)
-//     * */
-//    suspend fun recordScore(
-//        gameId: Long,
-//        score: Double,
-//        userId: Long,
-//        tierId: Long,
-//        retryType: String? = null,
-//        transactionId: String? = null
-//    ): GameScoreEntity {
-//        val today = LocalDate.now()
-//        val wordChallengeGameId = getWordChallenge()
-//
-//        if (!gameRepository.existsByIdAndDeletedAtIsNull(gameId))
-//            throw IllegalArgumentException("유효하지 않은 게임 ID 입니다. (gameId=$gameId)")
-//
-//        //참가정보
-//        val participant = getOrCreateParticipant(userId, tierId)
-//
-//        //게임 이력
-//        val existing = gameScoreRepository.findBySeasonIdAndParticipantIdAndGameId(participant.seasonId, participant.id, gameId)
-//
-//        return if (existing != null) {
-//            val lastPlayedDate = existing.updatedAt?.toLocalDate() ?: existing.createdAt.toLocalDate()
-//
-//            if (lastPlayedDate.isEqual(today)) {
-//                handleRetry(gameId, userId, retryType, transactionId)
-//                grantExp(userId, gameId, wordChallengeGameId)
-//
-//                // 시도 횟수별 가산점 (0.08초 * n)
-//                val nextTryCount = existing.tryCount + 1
-//                val advantage = 0.08 * (nextTryCount - 1)
-//
-//                // 0.08초 단위는 Double 이므로 Long score 변환 시 ms 단위로 보정 필요할 수 있음
-//                val adjustedScore = (score - advantage).coerceAtLeast(0.0)
-//
-//                saveOrUpdateScore(existing, adjustedScore, nextTryCount)
-//            } else {
-//
-//                pointService.applyPolicy(userId, PointPolicy.GAME_PLAY, gameId)
-//                grantExp(userId, gameId, wordChallengeGameId)
-//                saveOrUpdateScore(existing, score, 1)
-//            }
-//        } else {
-//
-//            pointService.applyPolicy(userId, PointPolicy.GAME_PLAY, gameId)
-//            grantExp(userId, gameId, wordChallengeGameId)
-//            createNewScore(participant.seasonId, participant.id, gameId, score)
-//        }
-//    }
-
-    private suspend fun grantExp(userId: Long, gameId: Long, wordChallengeGameId: Long?) {
-        if (gameId == wordChallengeGameId) {
-            expService.grantExp(userId, "ENGLISH_CHALLENGE", gameId)
-        } else {
-            expService.grantExp(userId, "GAME_PLAY", gameId)
-        }
-    }
-
-
-    // =============== 헬퍼 메서드 ===============
-
-    private suspend fun getOrCreateParticipant(userId: Long, tierId: Long): SeasonParticipantEntity {
-        val season = seasonRepository.findActiveSeason() ?: throw NoSuchElementException("현재 진행 중인 시즌이 없습니다. 관리자 문의")
-        return seasonParticipantRepository.findActiveParticipant(userId, season.id) ?: run {
-            val tier = tierRepository.findById(tierId)
-                ?: throw IllegalStateException("유저의 리그를 확인할 수 없습니다.")
-
-            seasonParticipantRepository.save(
-                SeasonParticipantEntity(
-                    seasonId = season.id,
-                    userId = userId,
-                    tierId = tierId,
-                    league = getLeague(tier.level),
-                    joinedType = "AUTO_JOIN"
-                )
-            )
-        }
-    }
-
-
-    private suspend fun handleRetry(
+    private suspend fun getFriendRankSnapshot(
+        seasonId: Long,
         gameId: Long,
+        league: String,
         userId: Long,
-        retryType: String?,
-        transactionId: String?,
-    ) {
-        when (retryType) {
-            "POINT" -> pointService.applyPolicy(userId, PointPolicy.GAME_PLAY, gameId)
-            "AD" -> {
-                if (transactionId == null) throw IllegalArgumentException("광고 재도전은 transactionId 가 필요합니다.")
-                // 광고 시청 인증, 재도전(최대 5회) 보상 횟수 체크 포함
-                adService.verifyAdRewardAndUseForRetry(transactionId, userId, gameId)
-            }
-            else -> throw IllegalStateException("오늘 이미 게임을 진행했어~")
-        }
+        friendIds: Set<Long>,
+    ): List<FriendRankView> {
+        val targetIds = (friendIds + userId)
+
+        val participantIds = seasonParticipantRepository
+            .findByUserIds(seasonId, gameId, league, targetIds)
+            .map { it.id }
+            .toList()
+            .toTypedArray()
+
+        if (participantIds.isEmpty()) return emptyList()
+
+        return rankingViewRepository
+            .findFriendRanks(
+                seasonId = seasonId,
+                gameId = gameId,
+                league = league,
+                participantIds = participantIds,
+                limit = 200
+            )
+            .toList()
     }
-
-    private suspend fun updateScore(existing: GameScoreEntity, score: BigDecimal, tryCount: Int? = null): GameScoreEntity {
-        val finalScore = minOf(existing.score, score)
-        // 기존 점수가 더 좋을 경우 updatedAt 유지
-        val finalUpdatedAt = if(existing.score > score) OffsetDateTime.now() else existing.updatedAt
-
-        val updated = existing.copy(
-            score = finalScore,
-            tryCount = tryCount ?: (existing.tryCount + 1),
-            totalTryCount = existing.totalTryCount + 1,
-            updatedAt = finalUpdatedAt
-        )
-        return gameScoreRepository.save(updated)
-    }
-
-    private suspend fun createScore(seasonId: Long, participantId: Long, gameId: Long, score: BigDecimal): GameScoreEntity {
-        val newScore = GameScoreEntity(
-            seasonId = seasonId,
-            participantId = participantId,
-            gameId = gameId,
-            score = score,
-            tryCount = 1,
-            totalTryCount = 1
-        )
-        return gameScoreRepository.save(newScore)
-    }
-
-    private suspend fun saveHistory(gameHistoryUid: UUID, seasonId: Long, participantId: Long, gameId: Long, score: BigDecimal){
-        val history = gameHistoryRepository.findByUidAndSeasonIdAndParticipantIdAndGameId(gameHistoryUid, seasonId, participantId, gameId)
-            ?: throw IllegalArgumentException("유효하지 않은 게임 이력 ID 입니다. (gameHistoryUid=$gameHistoryUid)")
-        gameHistoryRepository.save(
-            history.copy(status = GameHistoryStatus.DONE.name, score = score)
-        )
-    }
-
 
     /**
      * 실시간 랭킹 조회 (game_scores + league 기준)
@@ -345,6 +321,7 @@ class GameService(
      * 랭킹 기준 변경 시
      * GameScoreRepository.findScoresWithParticipantsBySeasonAndGame
      * GameScoreRepository.findSeasonRankingFiltered
+     * GameScoreRepository.findFriendRanks
      *
      */
     suspend fun getRealtimeRanking(
@@ -513,5 +490,82 @@ class GameService(
         }
     }
 
+    // ====== helpers (recordScore에서 사용하는 함수들) ======
 
+    private suspend fun grantExp(userId: Long, gameId: Long, wordChallengeGameId: Long?) {
+        if (gameId == wordChallengeGameId) {
+            expService.grantExp(userId, "ENGLISH_CHALLENGE", gameId)
+        } else {
+            expService.grantExp(userId, "GAME_PLAY", gameId)
+        }
+    }
+
+    private suspend fun getOrCreateParticipant(userId: Long, tierId: Long): SeasonParticipantEntity {
+        val season = seasonRepository.findActiveSeason() ?: throw NoSuchElementException("현재 진행 중인 시즌이 없습니다. 관리자 문의")
+        return seasonParticipantRepository.findActiveParticipant(userId, season.id) ?: run {
+            val tier = tierRepository.findById(tierId)
+                ?: throw IllegalStateException("유저의 리그를 확인할 수 없습니다.")
+
+            seasonParticipantRepository.save(
+                SeasonParticipantEntity(
+                    seasonId = season.id,
+                    userId = userId,
+                    tierId = tierId,
+                    league = getLeague(tier.level),
+                    joinedType = "AUTO_JOIN"
+                )
+            )
+        }
+    }
+
+    private suspend fun handleRetry(
+        gameId: Long,
+        userId: Long,
+        retryType: String?,
+        transactionId: String?,
+    ) {
+        when (retryType) {
+            "POINT" -> pointService.applyPolicy(userId, PointPolicy.GAME_PLAY, gameId)
+            "AD" -> {
+                if (transactionId == null) throw IllegalArgumentException("광고 재도전은 transactionId 가 필요합니다.")
+                // 광고 시청 인증, 재도전(최대 5회) 보상 횟수 체크 포함
+                adService.verifyAdRewardAndUseForRetry(transactionId, userId, gameId)
+            }
+            else -> throw IllegalStateException("오늘 이미 게임을 진행했어~")
+        }
+    }
+
+    private suspend fun updateScore(existing: GameScoreEntity, score: BigDecimal, tryCount: Int? = null): GameScoreEntity {
+        val finalScore = minOf(existing.score, score)
+        // 기존 점수가 더 좋을 경우 updatedAt 유지
+        val finalUpdatedAt = if(existing.score > score) OffsetDateTime.now() else existing.updatedAt
+
+        val updated = existing.copy(
+            score = finalScore,
+            tryCount = tryCount ?: (existing.tryCount + 1),
+            totalTryCount = existing.totalTryCount + 1,
+            updatedAt = finalUpdatedAt
+        )
+        return gameScoreRepository.save(updated)
+    }
+
+    private suspend fun createScore(seasonId: Long, participantId: Long, gameId: Long, score: BigDecimal): GameScoreEntity {
+        val newScore = GameScoreEntity(
+            seasonId = seasonId,
+            participantId = participantId,
+            gameId = gameId,
+            score = score,
+            tryCount = 1,
+            totalTryCount = 1
+        )
+        return gameScoreRepository.save(newScore)
+    }
+
+    private suspend fun saveHistory(gameHistoryUid: UUID, seasonId: Long, participantId: Long, gameId: Long, score: BigDecimal){
+        val history = gameHistoryRepository.findByUidAndSeasonIdAndParticipantIdAndGameId(gameHistoryUid, seasonId, participantId, gameId)
+            ?: throw IllegalArgumentException("유효하지 않은 게임 이력 ID 입니다. (gameHistoryUid=$gameHistoryUid)")
+        gameHistoryRepository.save(
+            history.copy(status = GameHistoryStatus.DONE.name, score = score)
+        )
+    }
 }
