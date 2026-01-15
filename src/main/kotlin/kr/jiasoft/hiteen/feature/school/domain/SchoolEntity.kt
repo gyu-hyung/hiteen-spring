@@ -8,6 +8,7 @@ import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.OffsetDateTime
 
 @Schema(description = "학교 엔티티")
 @Table("schools")
@@ -76,5 +77,8 @@ data class SchoolEntity(
 
     @Column("found_date")
     @param:Schema(description = "학교 설립일", example = "1995-03-01")
-    val foundDate: LocalDate? = null
+    val foundDate: LocalDate? = null,
+
+    @param:Schema(description = "관리자 변경 여부 (기본값 0)", example = "1")
+    val modified: Int = 0,
 )
