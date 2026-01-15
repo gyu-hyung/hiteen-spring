@@ -20,4 +20,5 @@ data class AdminPollResponse (
     val nickname: String,
     @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm:ss")
     val createdAt: OffsetDateTime,
+    val attachments: List<UUID>?,
 )
