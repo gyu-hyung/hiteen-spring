@@ -23,6 +23,8 @@ class CodeService(
     /**
      * 파일 첨부 포함 공통 코드 생성
      */
+
+
     @CacheEvict(cacheNames = ["code"], key = "#group.toUpperCase()")
     suspend fun createCodesWithFiles(
         group: String,
@@ -106,19 +108,7 @@ class CodeService(
 
 
     /** 코드 수정 (파일 첨부 지원, 변경된 값만 업데이트) */
-    @Caching(
-        evict = [
-            CacheEvict(
-                cacheNames = ["code"],
-                key = "#result.codeGroup", // 저장 후 최종(변경 후) codeGroup 캐시 무효화
-            ),
-            CacheEvict(
-                cacheNames = ["code"],
-                key = "#existing.codeGroup", // 기존 codeGroup 캐시도 무효화(그룹 변경 케이스)
-                beforeInvocation = true
-            )
-        ]
-    )
+    @CacheEvict(cacheNames = ["code"], key = "#dto.group.toUpperCase()")
     suspend fun updateCode(userId: Long, id: Long, dto: CodeRequest, file: FilePart?): CodeWithAssetResponse {
         val existing = codeRepository.findById(id)
             ?: throw IllegalArgumentException("해당 코드가 존재하지 않습니다: id=$id")
