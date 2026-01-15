@@ -63,7 +63,7 @@ enum class PushTemplate(
     NEW_POST(
         code = "NEW_POST",
         title = "새 글 등록 알림 🔔",
-        message = "방금 새로운 글이 올라왔어~ 🔔",
+        message = "방금 새로운 글이 올라왔어 🔔",
         itemType = PushItemType.NEW_POST
     ),
 
@@ -218,6 +218,16 @@ enum class PushTemplate(
         itemType = PushItemType.ALL,
     ),
 
+
+    /**
+     * 초대코드로 가입한 경우 (초대자에게 알림)
+     */
+    INVITE_CODE_JOINED(
+        code = "INVITE_CODE_JOINED",
+        title = "초대코드 가입 🎉",
+        message = "{nickname_iga} 내 초대코드로 가입했어!",
+        itemType = PushItemType.ALL,
+    ),
 
     ;
 

@@ -19,6 +19,8 @@ import kr.jiasoft.hiteen.feature.point.app.PointService
 import kr.jiasoft.hiteen.feature.point.domain.PointPolicy
 import kr.jiasoft.hiteen.feature.poll.infra.PollCommentRepository
 import kr.jiasoft.hiteen.feature.poll.infra.PollUserRepository
+import kr.jiasoft.hiteen.feature.push.app.PushService
+import kr.jiasoft.hiteen.feature.push.domain.PushTemplate
 import kr.jiasoft.hiteen.feature.relationship.domain.FollowStatus
 import kr.jiasoft.hiteen.feature.relationship.domain.FriendStatus
 import kr.jiasoft.hiteen.feature.relationship.dto.RelationshipCounts
@@ -68,6 +70,7 @@ class UserService (
     private val pointService: PointService,
     private val interestRepository: InterestRepository,
 //    private val interestUserService: InterestUserService,
+    private val pushService: PushService,
 ) {
 
 
@@ -349,8 +352,20 @@ class UserService (
             inviteService.registerInviteCode(updated)
             // 초대코드로 가입 처리
             if (!inviteCode.isNullOrBlank()) {
-                val ok = inviteService.handleInviteJoin(updated, inviteCode)
-                if (!ok) throw BusinessValidationException(mapOf("inviteCode" to "유효하지 않은 초대코드입니다."))
+                val inviterId = inviteService.handleInviteJoin(updated, inviteCode)
+                if (inviterId == null) throw BusinessValidationException(mapOf("inviteCode" to "유효하지 않은 초대코드입니다."))
+
+                // ✅ 초대자에게 푸시 알림 (중복 조회 없음)
+                pushService.sendAndSavePush(
+                    userIds = listOf(inviterId),
+                    userId = updated.id,
+                    templateData = PushTemplate.INVITE_CODE_JOINED.buildPushData(
+                        "nickname" to updated.nickname,
+                    ),
+                    extraData = mapOf(
+                        "joinUserId" to updated.id.toString(),
+                    )
+                )
             }
             // JWT
             val (access, refresh) = jwtProvider.generateTokens(updated.username)
@@ -555,7 +570,4 @@ class UserService (
     }
 
 }
-
-
-
 
