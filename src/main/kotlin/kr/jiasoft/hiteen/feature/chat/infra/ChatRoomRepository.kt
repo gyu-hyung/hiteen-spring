@@ -29,7 +29,10 @@ interface ChatRoomRepository : CoroutineCrudRepository<ChatRoomEntity, Long> {
     /** 내가 속한 방 목록 (최근 메시지 시간순) */
     @Query("""
         SELECT 
-            (select string_agg((select nickname from users where id = user_id), ',') from chat_users where chat_room_id = r.id and user_id != :userId) room_name,
+            CASE 
+                WHEN r.room_name is null THEN (select string_agg((select nickname from users where id = user_id), ',') from chat_users where chat_room_id = r.id and user_id != :userId)
+                WHEN r.room_name is not null THEN r.room_name
+            END room_name,
 			r.* 
         FROM chat_rooms r
         JOIN chat_users cu ON cu.chat_room_id = r.id
