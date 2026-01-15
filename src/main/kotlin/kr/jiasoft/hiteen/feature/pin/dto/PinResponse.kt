@@ -41,8 +41,8 @@ data class PinResponse(
     @param:Schema(description = "허용된 친구 목록 (FRIENDS 공개 범위일 경우만 포함)")
     val allowedFriends: List<AllowedFriend> = emptyList(),
 
-    @param:Schema(description = "생성 일시", example = "2025.09.18 10:15")
-    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm")
+    @param:Schema(description = "생성 일시", example = "2025.09.18 10:15:00")
+    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm:ss")
     val createdAt: OffsetDateTime? = null,
 ) {
     companion object {
