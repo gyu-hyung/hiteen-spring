@@ -23,7 +23,7 @@ interface CodeRepository : CoroutineCrudRepository<CodeEntity, Long> {
     @Query("SELECT code FROM codes WHERE code_group = :group ORDER BY code DESC LIMIT 1")
     suspend fun findLastCodeByGroup(group: String): String?
 
-    // ---- paging/list ----
+
 
     @Query("""
         SELECT c.*, ca.uid
