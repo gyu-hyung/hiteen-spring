@@ -109,6 +109,9 @@ data class MessageSummary(
     @param:Schema(description = "이모지 개수", example = "1")
     val emojiCount: Int? = null,
 
+    @param:Schema(description = "이모지별 개수 집계 DTO")
+    val emojiList: List<EmojisCountRow>? = null,
+
     @param:Schema(description = "읽지 않은 사용자 수", example = "3")
     val unreadCount: Int? = null,
 
@@ -123,13 +126,14 @@ data class MessageSummary(
     val assets: List<MessageAssetSummary>?,
 ) {
     companion object {
-        fun from(entity: ChatMessageEntity, sender: UserSummary?, assets: List<MessageAssetSummary>?, unreadCount: Int? = null, roomUid: UUID): MessageSummary {
+        fun from(entity: ChatMessageEntity, sender: UserSummary?, assets: List<MessageAssetSummary>?, unreadCount: Int? = null, roomUid: UUID, emojiList: List<EmojisCountRow>? = null): MessageSummary {
             return MessageSummary(
                 messageUid = entity.uid,
                 content = entity.content,
                 kind = entity.kind,
                 emojiCode = entity.emojiCode,
                 emojiCount = entity.emojiCount,
+                emojiList = emojiList,
                 unreadCount = unreadCount,
                 createdAt = entity.createdAt,
                 sender = sender,
