@@ -166,12 +166,13 @@ class ChatService(
                 userId = sendUser.id,
                 content = req.content,
                 kind = when {
+                    req.emojiList != null -> 3
                     files.isNotEmpty() -> 2
                     req.emojiCode != null -> 1
                     else -> 0
                 },
-                emojiCode = req.emojiCode,
-                emojiCount = req.emojiCount,
+                emojiCode = req.emojiList?.first()?.emojiCode ?: req.emojiCode,
+                emojiCount = req.emojiList?.first()?.emojiCount ?: req.emojiCount,
                 createdAt = OffsetDateTime.now(),
             )
         )
@@ -227,15 +228,31 @@ class ChatService(
 
         // 푸시 전송
         val pushUserIds = activeMembers.filter { it.userId != sender.id  }.map { it.userId }
-        val pushMessage = when (req.kind) {
+        val pushMessage = when (savedMsg.kind) {
             0 -> "${sendUser.nickname}: ${req.content}"
             1 -> {
                 val emoji = emojiReplace(req.emojiCode!!)
                 if (req.emojiCount == null) "${sendUser.nickname}: $emoji"
                 else "${sendUser.nickname}: $emoji x${req.emojiCount}"
             }
-            2 -> "${sendUser.nickname} sent an image"
+            2 -> "사진을 보냈습니다."
+            3 -> {
+                val rows = req.emojiList.orEmpty()
+                val uniqueCodes = rows.map { it.emojiCode }.distinct()
 
+                // suspend 호출은 여기(코루틴 본문)에서만 수행
+                val emojiMap: Map<String, String> = uniqueCodes.associateWith { code ->
+                    emojiReplace(code)
+                }
+
+                val emojiSummary = rows
+                    .joinToString(" ") { row ->
+                        val emoji = emojiMap[row.emojiCode] ?: "[이모티콘]"
+                        "$emoji x${row.emojiCount}"
+                    }
+
+                "${sendUser.nickname}: $emojiSummary".trim()
+            }
             else -> "${sendUser.nickname}: ${req.content}"
         }
 

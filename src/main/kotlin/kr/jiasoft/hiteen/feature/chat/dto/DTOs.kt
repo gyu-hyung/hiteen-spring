@@ -46,12 +46,21 @@ data class SendMessageRequest(
 
     @param:Schema(description = "이모지 개수", example = "1")
     val emojiCount: Int? = null,
-) {
-    @get:Schema(description = "메시지 종류 (자동 결정: 0=텍스트, 1=이모지, 2=이미지)")
-    val kind: Int
-        get() = if (emojiCode != null) 1 else 0
-}
 
+    @param:Schema(description = "이모지별 개수 집계 DTO")
+    val emojiList: List<EmojisCountRow>? = null,
+)
+//{
+//    @get:Schema(description = "메시지 종류 (자동 결정: 0=텍스트, 1=이모지, 2=이미지)")
+//    val kind: Int
+//        get() = if (emojiCode != null) 1 else 0
+//}
+
+@Schema(description = "이모지별 개수 집계 DTO")
+data class EmojisCountRow(
+    @Column("emoji_code") val emojiCode: String,
+    @Column("emoji_count") val emojiCount: Int,
+)
 
 @Schema(description = "채팅방 요약 응답 DTO")
 data class RoomSummaryResponse(
