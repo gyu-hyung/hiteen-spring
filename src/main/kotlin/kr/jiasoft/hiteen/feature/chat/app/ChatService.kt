@@ -270,7 +270,8 @@ class ChatService(
             sender = sender,
             assets = assets,
             unreadCount = (memberCount - 1),
-            roomUid = room.uid
+            roomUid = room.uid,
+            emojiList = req.emojiList
         )
     }
 
