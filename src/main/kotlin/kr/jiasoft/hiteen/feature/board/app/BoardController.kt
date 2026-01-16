@@ -42,11 +42,15 @@ class BoardController(
         @Parameter(description = "팔로우한 사용자만") @RequestParam(defaultValue = "false") followOnly: Boolean,
         @Parameter(description = "친구만") @RequestParam(defaultValue = "false") friendOnly: Boolean,
         @Parameter(description = "같은 학교만") @RequestParam(defaultValue = "false") sameSchoolOnly: Boolean,
+        @Parameter(description = "게시글 상태 (ALL/ACTIVE/INACTIVE) - boards.status 컬럼") @RequestParam(required = false) status: String? = "ALL",
+        @Parameter(description = "노출 상태 (ALL/ACTIVE/INACTIVE) - startDate/endDate 기반") @RequestParam(required = false) displayStatus: String? = "ALL",
         @AuthenticationPrincipal(expression = "user") user: UserEntity
     ): ResponseEntity<ApiResult<ApiPage<BoardResponse>>> {
         val boards = service.listBoardsByPage(
             category, q, page, size, user.id,
-            followOnly, friendOnly, sameSchoolOnly
+            followOnly, friendOnly, sameSchoolOnly,
+            status,
+            displayStatus,
         )
         return ResponseEntity.ok(ApiResult.success(boards))
     }

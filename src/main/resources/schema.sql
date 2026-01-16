@@ -762,6 +762,33 @@ CREATE TABLE board_assets (
   UNIQUE (board_id, uid)
 );
 
+
+-- ========================
+-- 게시판 > 배너
+-- ========================
+CREATE TABLE public.board_banners (
+    id bigserial NOT NULL,
+    board_id int8 NOT NULL,
+    uid uuid NOT NULL,
+    seq int4 NOT NULL DEFAULT 1,
+
+    CONSTRAINT board_banners_pkey PRIMARY KEY (id),
+    CONSTRAINT board_banners_board_id_uid_key UNIQUE (board_id, uid),
+
+    CONSTRAINT board_banners_board_id_fkey
+        FOREIGN KEY (board_id)
+        REFERENCES public.boards(id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT board_banners_uid_fkey
+        FOREIGN KEY (uid)
+        REFERENCES public.assets(uid)
+);
+CREATE INDEX ix_board_banners_board_id_seq
+ON public.board_banners (board_id, seq);
+
+
+
 -- ========================
 -- 게시판 > 댓글
 -- ========================
