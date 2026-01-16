@@ -55,6 +55,25 @@ interface BoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
                     AND u.school_id = (SELECT school_id FROM users WHERE id = :userId)
               )
           )
+          AND (
+              :status IS NULL OR :status = 'ALL'
+              OR b.status = :status
+          )
+          AND (
+              :displayStatus IS NULL OR :displayStatus = 'ALL'
+              OR (
+                  :displayStatus = 'ACTIVE'
+                  AND (b.start_date IS NULL OR b.start_date <= CURRENT_DATE)
+                  AND (b.end_date IS NULL OR b.end_date >= CURRENT_DATE)
+              )
+              OR (
+                  :displayStatus = 'INACTIVE'
+                  AND (
+                      (b.start_date IS NOT NULL AND b.start_date > CURRENT_DATE)
+                      OR (b.end_date IS NOT NULL AND b.end_date < CURRENT_DATE)
+                  )
+              )
+          )
     """)
     suspend fun countSearchResults(
         category: String?,
@@ -62,7 +81,9 @@ interface BoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
         userId: Long,
         followOnly: Boolean,
         friendOnly: Boolean,
-        sameSchoolOnly: Boolean
+        sameSchoolOnly: Boolean,
+        status: String?,
+        displayStatus: String?,
     ): Int
 
 
@@ -124,6 +145,25 @@ interface BoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
                     AND u.school_id = (SELECT school_id FROM users WHERE id = :userId)
               )
           )
+          AND (
+              :status IS NULL OR :status = 'ALL'
+              OR b.status = :status
+          )
+          AND (
+              :displayStatus IS NULL OR :displayStatus = 'ALL'
+              OR (
+                  :displayStatus = 'ACTIVE'
+                  AND (b.start_date IS NULL OR b.start_date <= CURRENT_DATE)
+                  AND (b.end_date IS NULL OR b.end_date >= CURRENT_DATE)
+              )
+              OR (
+                  :displayStatus = 'INACTIVE'
+                  AND (
+                      (b.start_date IS NOT NULL AND b.start_date > CURRENT_DATE)
+                      OR (b.end_date IS NOT NULL AND b.end_date < CURRENT_DATE)
+                  )
+              )
+          )
         ORDER BY b.id DESC
         LIMIT :limit OFFSET :offset
     """)
@@ -135,7 +175,9 @@ interface BoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
         userId: Long,
         followOnly: Boolean,
         friendOnly: Boolean,
-        sameSchoolOnly: Boolean
+        sameSchoolOnly: Boolean,
+        status: String?,
+        displayStatus: String?,
     ): Flow<BoardResponse>
 
 
