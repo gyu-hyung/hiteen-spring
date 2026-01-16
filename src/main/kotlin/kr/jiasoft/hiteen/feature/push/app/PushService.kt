@@ -204,6 +204,91 @@ class PushService(
         return builder.build()
     }
 
+    /**
+     * FCM 토픽 기반 푸시 전송 + push 요약 저장
+     *
+     * - 토픽 푸시는 개별 대상(토큰/유저)을 서버에서 알 필요가 없으므로 user_details 조회를 하지 않습니다.
+     * - 또한 Firebase가 개별 토큰 성공/실패를 반환하지 않으므로 push_detail을 저장하지 않습니다.
+     */
+    suspend fun sendAndSavePushToTopic(
+        topic: PushItemType,
+        userId: Long? = null,
+        templateData: Map<String, Any>,
+        extraData: Map<String, Any> = emptyMap(),
+    ): SendResult {
+        val finalData = templateData + extraData
+
+        // ① push 요약 저장 (토픽 전송은 대상 수를 알 수 없어 total=0)
+        val push = pushRepository.save(
+            PushEntity(
+                type = if (finalData["silent"] == true) "silent" else "notification",
+                code = finalData["code"]?.toString(),
+                title = finalData["title"]?.toString(),
+                message = finalData["message"]?.toString(),
+                total = 0L,
+                createdId = userId,
+            )
+        )
+
+        // ② 실제 토픽 전송 (1회)
+        val messageData = finalData.mapValues { it.value.toString() }
+        val isSilent = messageData["silent"]?.toBoolean() == true
+
+        val builder = Message.builder()
+            .setTopic(topic.name)
+            .putAllData(messageData)
+
+        if (!isSilent) {
+            builder.setNotification(
+                Notification.builder()
+                    .setTitle(messageData["title"] ?: "알림")
+                    .setBody(messageData["message"] ?: "")
+                    .build()
+            )
+
+            builder.setAndroidConfig(
+                AndroidConfig.builder()
+                    .setPriority(AndroidConfig.Priority.HIGH)
+                    .setNotification(
+                        AndroidNotification.builder()
+                            .setChannelId("default_channel")
+                            .setSound("default")
+                            .build()
+                    )
+                    .build()
+            )
+        }
+
+        var sendSucceeded = true
+        var sendError: String? = null
+
+        withContext(Dispatchers.IO) {
+            try {
+                firebaseMessaging.send(builder.build())
+            } catch (ex: Exception) {
+                sendSucceeded = false
+                sendError = ex.message
+            }
+        }
+
+        // ③ push 요약 업데이트 (토픽은 성공/실패 건수를 정밀하게 알 수 없어, 전송 성공 여부만 기록)
+        pushRepository.save(
+            push.copy(
+                success = if (sendSucceeded) 1L else 0L,
+                failure = if (sendSucceeded) 0L else 1L,
+                updatedAt = OffsetDateTime.now(),
+            )
+        )
+
+        if (!sendSucceeded) {
+            println("⚠️ [PushService] topic=${topic.name} pushId=${push.id} send failed: $sendError")
+        } else {
+            println("✅ [PushService] topic=${topic.name} pushId=${push.id} send ok")
+        }
+
+        return SendResult(push.id, if (sendSucceeded) 1 else 0, if (sendSucceeded) 0 else 1)
+    }
+
     data class SendResult(
         val pushId: Long,
         val success: Int,

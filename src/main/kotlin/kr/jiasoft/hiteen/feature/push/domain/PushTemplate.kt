@@ -205,17 +205,17 @@ enum class PushTemplate(
         code = "GAME_FRIEND_RANK_CHANGED",
         title = "친구 랭킹 변동 📈",
         message = "{nickname_iga} 게임 친구 랭킹이 {beforeRank}위 → {afterRank}위로 변했어!",
-        itemType = PushItemType.ALL,
+        itemType = PushItemType.GAME,
     ),
 
     /**
-     * 게임에서 특정 친구를 추월했을 때(나 -> 친구) 알림
+     * 게임에서 특정 친구를 추월했을 때 친구에게 알림
      */
     GAME_OVERTAKE_FRIEND(
         code = "GAME_OVERTAKE_FRIEND",
         title = "랭킹 추월 알림 🏃",
         message = "{nickname_iga} {gameName}에서 너를 추월했어! 📉",
-        itemType = PushItemType.ALL,
+        itemType = PushItemType.GAME,
     ),
 
 
@@ -227,6 +227,17 @@ enum class PushTemplate(
         title = "초대코드 가입 🎉",
         message = "{nickname_iga} 내 초대코드로 가입했어!",
         itemType = PushItemType.ALL,
+    ),
+
+    /**
+     * 보상 리그 시작 알림
+     * - (시즌, 리그, 게임) 점수 등록자 수가 10명 이상이 되는 순간 1회 발송
+     */
+    REWARD_LEAGUE_START(
+        code = "REWARD_LEAGUE_START",
+        title = "리그가 시작됐어! 🏆",
+        message = "{league} 리그 보상전이 시작됐어! 지금 참여해봐!",
+        itemType = PushItemType.GAME,
     ),
 
     ;
