@@ -134,14 +134,15 @@ class GameService(
             val participant = getOrCreateParticipant(userId, tierId)
 
             // 기존 진행중이었던 게임 확인
-            val pending = gameHistoryRepository
-                .findTop1ByParticipantIdAndGameIdAndStatusOrderByCreatedAtDesc(
-                    participant.id,
-                    gameId,
-                    GameHistoryStatus.PLAYING.name
-                )
+//            val pending =
+//                gameHistoryRepository
+//                .findTop1ByParticipantIdAndGameIdAndStatusOrderByCreatedAtDesc(
+//                    participant.id,
+//                    gameId,
+//                    GameHistoryStatus.PLAYING.name
+//                )
 
-            pending?.uid?.let { return@executeAndAwait it }
+//            pending?.uid?.let { return@executeAndAwait it }
 
             //게임 스코어
             val existing = gameScoreRepository.findBySeasonIdAndParticipantIdAndGameId(participant.seasonId, participant.id, gameId)
