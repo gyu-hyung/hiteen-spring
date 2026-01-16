@@ -72,4 +72,13 @@ interface AdminSchoolRepository : CoroutineCrudRepository<SchoolEntity, Long> {
         WHERE code LIKE 'H%'
     """)
     suspend fun findMaxSchoolCodeNumber(): Int?
+
+    // 학교의 회원수 체크
+    // 해당 학교의 회원이 있으면 학교를 삭제하지 못하게 하기 위해..
+    @Query("""
+        SELECT COUNT(*)
+        FROM users
+        WHERE deleted_at IS NULL AND school_id = :schoolId
+    """)
+    suspend fun countSchoolUsers(schoolId: Long): Int
 }
