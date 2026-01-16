@@ -1,12 +1,10 @@
 package kr.jiasoft.hiteen.admin.app
 
 import io.swagger.v3.oas.annotations.Parameter
-import kotlinx.coroutines.flow.Flow
 import kr.jiasoft.hiteen.admin.dto.AdminIdOnlyRequest
 import kr.jiasoft.hiteen.admin.dto.AdminSchoolClassesResponse
 import kr.jiasoft.hiteen.admin.dto.AdminSchoolSaveRequest
 import kr.jiasoft.hiteen.admin.dto.AdminSchoolResponse
-import kr.jiasoft.hiteen.admin.infra.AdminSchoolClassRepository
 import kr.jiasoft.hiteen.admin.infra.AdminSchoolRepository
 import kr.jiasoft.hiteen.admin.services.AdminSchoolService
 import kr.jiasoft.hiteen.common.dto.ApiPage
@@ -161,6 +159,11 @@ class AdminSchoolController(
 
         val school = adminSchoolRepository.findById(id)
             ?: return failure("존재하지 않는 학교입니다(${id})")
+
+        val countUsers = adminSchoolRepository.countSchoolUsers(school.id)
+        if (countUsers > 0) {
+            return failure("학교의 회원이 존재하여 삭제할 수 없습니다.")
+        }
 
         val data = school.copy(
             deletedId = user.id,

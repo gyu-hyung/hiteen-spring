@@ -1,7 +1,6 @@
 package kr.jiasoft.hiteen.admin.services
 
 import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.flow.Flow
 import kr.jiasoft.hiteen.admin.dto.AdminSchoolClassesResponse
 import kr.jiasoft.hiteen.admin.dto.AdminSchoolResponse
 import kr.jiasoft.hiteen.admin.infra.AdminSchoolClassRepository
