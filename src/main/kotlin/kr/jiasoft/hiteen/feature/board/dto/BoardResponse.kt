@@ -44,6 +44,12 @@ data class BoardResponse(
     @param:Schema(description = "첨부파일 UID 리스트", example = "[\"550e8400-e29b-41d4-a716-446655441111\"]")
     val attachments: List<UUID>? = null,
 
+    @param:Schema(description = "(EVENT) 큰 배너 UID 리스트", example = "[\"550e8400-e29b-41d4-a716-446655441111\"]")
+    val largeBanners: List<UUID>? = null,
+
+    @param:Schema(description = "(EVENT) 작은 배너 UID 리스트", example = "[\"550e8400-e29b-41d4-a716-446655441112\"]")
+    val smallBanners: List<UUID>? = null,
+
     @param:Schema(description = "시작일", example = "2025-09-01")
     val startDate: LocalDate? = null,
 
@@ -152,4 +158,3 @@ data class BoardResponse(
 
     }
 }
-

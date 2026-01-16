@@ -770,22 +770,16 @@ CREATE TABLE public.board_banners (
     id bigserial NOT NULL,
     board_id int8 NOT NULL,
     uid uuid NOT NULL,
-    seq int4 NOT NULL DEFAULT 1,
+    banner_type varchar(20) NOT NULL DEFAULT 'LARGE',
+    seq int4 DEFAULT 1 NOT NULL,
 
-    CONSTRAINT board_banners_pkey PRIMARY KEY (id),
     CONSTRAINT board_banners_board_id_uid_key UNIQUE (board_id, uid),
-
-    CONSTRAINT board_banners_board_id_fkey
-        FOREIGN KEY (board_id)
-        REFERENCES public.boards(id)
-        ON DELETE CASCADE,
-
-    CONSTRAINT board_banners_uid_fkey
-        FOREIGN KEY (uid)
-        REFERENCES public.assets(uid)
+    CONSTRAINT board_banners_pkey PRIMARY KEY (id),
+    CONSTRAINT board_banners_board_id_fkey FOREIGN KEY (board_id) REFERENCES public.boards(id) ON DELETE CASCADE,
+    CONSTRAINT board_banners_uid_fkey FOREIGN KEY (uid) REFERENCES public.assets(uid)
 );
-CREATE INDEX ix_board_banners_board_id_seq
-ON public.board_banners (board_id, seq);
+CREATE INDEX ix_board_banners_board_id_seq ON public.board_banners USING btree (board_id, seq);
+CREATE INDEX ix_board_banners_board_id_type_seq ON public.board_banners USING btree (board_id, banner_type, seq);
 
 
 
@@ -1399,3 +1393,67 @@ CREATE TABLE reward_league_start_notifications (
   created_at timestamptz DEFAULT now(),
   UNIQUE (season_id, league, game_id)
 );
+
+
+
+
+
+
+
+          CREATE TABLE public.exp_actions (
+    id BIGSERIAL NOT NULL,
+    action_code VARCHAR(100) NOT NULL,
+    description VARCHAR(255) NOT NULL,
+    points INT NOT NULL,
+    daily_limit INT NULL,
+    enabled BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT exp_actions_pkey PRIMARY KEY (id),
+    CONSTRAINT uq_exp_actions_action_code UNIQUE (action_code)
+);
+
+
+
+INSERT INTO public.exp_actions
+    (action_code, description, points, daily_limit, enabled)
+VALUES
+    ('PIN_REGISTER', '핀 등록', 3, 3, true),
+    ('FRIEND_ADD', '친구 추가', 5, null, true),
+    ('FRIEND_PROFILE_VISIT', '친구 프로필 방문', 1, 1, true),
+    ('CHAT', '채팅', 5, null, true),
+    ('CHAT_QUICK_EMOJI', '채팅 퀵 이모지 보내기', 3, 5, true),
+    ('CREATE_BOARD', '게시글 작성', 3, 5, true),
+    ('CREATE_BOARD_COMMENT', '게시글 댓글/대댓글 작성', 2, 5, true),
+    ('LIKE_BOARD', '게시글 좋아요', 1, 5, true),
+    ('LIKE_BOARD_COMMENT', '게시글 댓글 좋아요', 1, 5, true),
+    ('CREATE_VOTE', '투표 등록', 3, null, true),
+    ('VOTE_PARTICIPATE', '투표 참여', 1, 3, true),
+    ('CREATE_VOTE_COMMENT', '투표 댓글/대댓글 작성', 2, 5, true),
+    ('LIKE_VOTE', '투표 좋아요', 1, 5, true),
+    ('LIKE_VOTE_COMMENT', '투표 댓글 좋아요', 1, 5, true),
+    ('INTEREST_TAG_REGISTER', '관심태그 등록', 10, null, true),
+    ('TODAY_FRIEND_CHECK', '오늘의 친구 확인', 5, 1, true),
+    ('FOLLOW_REQUEST', '팔로우 요청', 10, null, true),
+    ('FOLLOW_ACCEPT', '친구(팔로우) 수락', 10, null, true),
+    ('SHARE', '공유하기', 5, 3, true),
+    ('GAME_PLAY', '게임 플레이', 10, null, true),
+    ('WATCH_AD', '게임 광고 보기', 5, 5, true),
+    ('ENGLISH_STUDY', '영어 단어 학습', 10, null, true),
+    ('ENGLISH_CHALLENGE', '영단어 챌린지 도전', 15, null, true),
+    ('POINT_CHARGE', '포인트 충전', 10, null, true),
+    ('LEVEL_UP', '레벨업', 15, null, true),
+    ('NOTICE_READ', '공지/이벤트 확인', 3, null, true),
+    ('ATTENDANCE', '출석 체크', 3, 1, true),
+    ('FRIEND_INVITE', '친구 초대', 30, null, true),
+    ('STREAK_ATTENDANCE', '연속 출석', 20, null, true),
+    ('SESSION_REWARD', '일일 접속 시간 보상', 0, null, true),
+    ('REPORT_CONTENT', '부적절 컨텐츠 신고받음', -10, null, true)
+ON CONFLICT (action_code)
+DO UPDATE SET
+    description = EXCLUDED.description,
+    points = EXCLUDED.points,
+    daily_limit = EXCLUDED.daily_limit,
+    enabled = EXCLUDED.enabled,
+    updated_at = CURRENT_TIMESTAMP;

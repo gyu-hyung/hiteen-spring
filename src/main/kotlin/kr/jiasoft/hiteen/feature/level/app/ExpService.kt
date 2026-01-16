@@ -14,6 +14,7 @@ import java.time.LocalDate
 @Service
 class ExpService(
     private val props: ExpProperties,
+    private val expActionProvider: ExpActionProvider,
     private val userRepository: UserRepository,
     private val tierRepository: TierRepository,
     private val userExpHistoryRepository: UserExpHistoryRepository,
@@ -26,8 +27,7 @@ class ExpService(
         dynamicPoints: Int? = null,
         requestId: Long? = null,
     ) {
-        val action = props.actions[actionCode]
-            ?: throw IllegalArgumentException("정의되지 않은 액션 코드: $actionCode")
+        val action = expActionProvider.get(actionCode)
 
         val points = dynamicPoints ?: action.points
         if (points == 0) return
@@ -213,4 +213,3 @@ class ExpService(
 
 
 }
-

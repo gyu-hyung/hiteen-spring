@@ -28,35 +28,6 @@ class BoardController(
     private val service: BoardService,
 ) {
 
-
-    @Operation(
-        summary = "게시글 목록 조회 (페이지 기반)",
-        description = "카테고리, 검색어, 페이지, 페이지 크기 등의 옵션을 이용해 게시글 목록을 조회합니다. 관리자 전용 페이지네이션 방식입니다."
-    )
-    @GetMapping("/page")
-    suspend fun listByPage(
-        @Parameter(description = "카테고리") @RequestParam(required = false) category: String?,
-        @Parameter(description = "검색어") @RequestParam(required = false) q: String?,
-        @Parameter(description = "페이지 번호 (0부터 시작)") @RequestParam(defaultValue = "0") page: Int,
-        @Parameter(description = "페이지 당 개수 (기본 20)") @RequestParam(defaultValue = "20") size: Int,
-        @Parameter(description = "팔로우한 사용자만") @RequestParam(defaultValue = "false") followOnly: Boolean,
-        @Parameter(description = "친구만") @RequestParam(defaultValue = "false") friendOnly: Boolean,
-        @Parameter(description = "같은 학교만") @RequestParam(defaultValue = "false") sameSchoolOnly: Boolean,
-        @Parameter(description = "게시글 상태 (ALL/ACTIVE/INACTIVE) - boards.status 컬럼") @RequestParam(required = false) status: String? = "ALL",
-        @Parameter(description = "노출 상태 (ALL/ACTIVE/INACTIVE) - startDate/endDate 기반") @RequestParam(required = false) displayStatus: String? = "ALL",
-        @AuthenticationPrincipal(expression = "user") user: UserEntity
-    ): ResponseEntity<ApiResult<ApiPage<BoardResponse>>> {
-        val boards = service.listBoardsByPage(
-            category, q, page, size, user.id,
-            followOnly, friendOnly, sameSchoolOnly,
-            status,
-            displayStatus,
-        )
-        return ResponseEntity.ok(ApiResult.success(boards))
-    }
-
-
-
     @Operation(
         summary = "게시글 목록 조회",
         description = "카테고리, 검색어, 작성자, 커서 기반 페이지네이션 옵션을 이용해 게시글 목록을 조회합니다."
