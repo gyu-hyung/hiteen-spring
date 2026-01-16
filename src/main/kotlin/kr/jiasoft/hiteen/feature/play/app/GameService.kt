@@ -3,6 +3,8 @@ package kr.jiasoft.hiteen.feature.play.app
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.flow.toSet
+import kotlinx.coroutines.reactor.awaitSingleOrNull
+import kr.jiasoft.hiteen.common.context.DeltaContextHelper
 import kr.jiasoft.hiteen.feature.ad.app.AdService
 import kr.jiasoft.hiteen.feature.level.app.ExpService
 import kr.jiasoft.hiteen.feature.level.infra.TierRepository
@@ -145,15 +147,23 @@ class GameService(
 //            pending?.uid?.let { return@executeAndAwait it }
 
             //게임 스코어
-            val existing = gameScoreRepository.findBySeasonIdAndParticipantIdAndGameId(participant.seasonId, participant.id, gameId)
-            if (existing != null) {
-                val lastPlayedDate = existing.updatedAt?.toLocalDate() ?: existing.createdAt.toLocalDate()
+//            val existing = gameScoreRepository.findBySeasonIdAndParticipantIdAndGameId(participant.seasonId, participant.id, gameId)
+//            if (existing != null) {
+//                val lastPlayedDate = existing.updatedAt?.toLocalDate() ?: existing.createdAt.toLocalDate()
 
                 //오늘 게임한 적이 있다면 && 시도 횟수가 3회 이상이면 재도전 처리
-                if (lastPlayedDate.isEqual(LocalDate.now()) && existing.tryCount > 2) {
-                    handleRetry(gameId, userId, retryType, transactionId)
-                }
-            }
+//                if (lastPlayedDate.isEqual(LocalDate.now()) && existing.tryCount > 2) {
+//                    handleRetry(gameId, userId, retryType, transactionId)
+//                }
+//            }
+
+            val todayTryCount = gameHistoryRepository.listToday(gameId, participant.id, participant.seasonId,)
+                .toList().size
+
+            DeltaContextHelper.skipMeta().awaitSingleOrNull()
+            if( todayTryCount >=3 ) handleRetry(gameId, userId, retryType, transactionId)
+
+
 
             val history = gameHistoryRepository.save(
                 GameHistoryEntity(
@@ -188,9 +198,6 @@ class GameService(
         //참가정보
         val participant = getOrCreateParticipant(userId, tierId)
 
-        //경험치 부여
-        grantExp(userId, gameId, wordChallengeGameId)
-
         // 시도 횟수별 가산점 (0.01초 * n), 최대 1 초 까지
         val existing = gameScoreRepository.findBySeasonIdAndParticipantIdAndGameId(participant.seasonId, participant.id, gameId)
         val tryCount = (existing?.totalTryCount?.plus(1)) ?: 1
@@ -201,6 +208,9 @@ class GameService(
 
         //게임 이력
         saveHistory(gameHistoryUid,  participant.seasonId, participant.id, gameId, finalScore)
+
+        //경험치 부여
+        grantExp(userId, gameId, wordChallengeGameId)
 
         // ✅ 점수 반영 전 친구 랭킹(친구+나) 목록 저장 (추월 판정용 최소 정보)
         val friendIds = friendRepository.findAllFriendship(userId).toSet()
@@ -565,6 +575,10 @@ class GameService(
     private suspend fun saveHistory(gameHistoryUid: UUID, seasonId: Long, participantId: Long, gameId: Long, score: BigDecimal){
         val history = gameHistoryRepository.findByUidAndSeasonIdAndParticipantIdAndGameId(gameHistoryUid, seasonId, participantId, gameId)
             ?: throw IllegalArgumentException("유효하지 않은 게임 이력 ID 입니다. (gameHistoryUid=$gameHistoryUid)")
+        //이미 종료된 게임인지 확인
+        if (history.status == GameHistoryStatus.DONE.name) {
+            throw IllegalStateException("이미 종료된 게임 이력입니다. (gameHistoryUid=$gameHistoryUid)")
+        }
         gameHistoryRepository.save(
             history.copy(status = GameHistoryStatus.DONE.name, score = score)
         )
