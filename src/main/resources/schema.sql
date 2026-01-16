@@ -1386,3 +1386,16 @@ CREATE TABLE user_session (
 --  codes,
 --  users;
 
+
+-- ========================
+-- 보상 리그 시작 알림 트리거 기록(중복 발송 방지)
+-- season+league+game 단위로 1회만 생성되도록 UNIQUE 제약 사용
+-- ========================
+CREATE TABLE reward_league_start_notifications (
+  id         bigserial PRIMARY KEY,
+  season_id  bigint NOT NULL REFERENCES seasons(id) ON DELETE CASCADE,
+  league     varchar(20) NOT NULL,
+  game_id    bigint NOT NULL REFERENCES games(id) ON DELETE CASCADE,
+  created_at timestamptz DEFAULT now(),
+  UNIQUE (season_id, league, game_id)
+);
