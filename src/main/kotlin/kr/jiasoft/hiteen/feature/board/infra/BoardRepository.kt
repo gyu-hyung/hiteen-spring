@@ -109,7 +109,16 @@ interface BoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
             (SELECT COUNT(*)::bigint FROM board_comments bc WHERE bc.board_id = b.id AND bc.deleted_at IS NULL) AS comment_count,
             EXISTS (SELECT 1 FROM board_likes bl2 WHERE bl2.board_id = b.id AND bl2.user_id = :userId) AS liked_by_me,
             COALESCE((
-                SELECT array_agg(ba.uid) FROM board_assets ba WHERE ba.board_id = b.id
+                CASE 
+                    WHEN b.category IN ('EVENT','EVENT_WINNING') THEN (
+                        SELECT array_agg(bb.uid ORDER BY bb.banner_type ASC, bb.seq ASC, bb.id ASC)
+                        FROM board_banners bb
+                        WHERE bb.board_id = b.id
+                    )
+                    ELSE (
+                        SELECT array_agg(ba.uid) FROM board_assets ba WHERE ba.board_id = b.id
+                    )
+                END
             ), ARRAY[]::uuid[]) AS attachments
         FROM boards b
         WHERE b.deleted_at IS NULL
@@ -208,13 +217,22 @@ interface BoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
             (SELECT COUNT(*)::bigint FROM board_comments bc WHERE bc.board_id = b.id AND bc.deleted_at IS NULL) AS comment_count,
             EXISTS (SELECT 1 FROM board_likes bl2 WHERE bl2.board_id = b.id AND bl2.user_id = :userId) AS liked_by_me,
             COALESCE((
-                SELECT array_agg(ba.uid) FROM board_assets ba WHERE ba.board_id = b.id
+                CASE 
+                    WHEN b.category IN ('EVENT','EVENT_WINNING') THEN (
+                        SELECT array_agg(bb.uid ORDER BY bb.banner_type ASC, bb.seq ASC, bb.id ASC)
+                        FROM board_banners bb
+                        WHERE bb.board_id = b.id
+                    )
+                    ELSE (
+                        SELECT array_agg(ba.uid) FROM board_assets ba WHERE ba.board_id = b.id
+                    )
+                END
             ), ARRAY[]::uuid[]) AS attachments
         FROM boards b
         LEFT JOIN users u ON b.created_id = u.id
         WHERE b.deleted_at IS NULL
           AND (
-                (:category IS NULL AND b.category != 'NOTICE')
+                (:category IS NULL AND b.category NOT IN ('NOTICE', 'EVENT', 'EVENT_WINNING'))
                 OR b.category = :category
           )
           AND (
@@ -283,7 +301,16 @@ interface BoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
             (SELECT COUNT(*)::bigint FROM board_comments bc WHERE bc.board_id = b.id AND bc.deleted_at IS NULL) AS comment_count,
             EXISTS (SELECT 1 FROM board_likes bl2 WHERE bl2.board_id = b.id AND bl2.user_id = :userId) AS liked_by_me,
             COALESCE((
-                SELECT array_agg(ba.uid) FROM board_assets ba WHERE ba.board_id = b.id
+                CASE 
+                    WHEN b.category IN ('EVENT','EVENT_WINNING') THEN (
+                        SELECT array_agg(bb.uid ORDER BY bb.banner_type ASC, bb.seq ASC, bb.id ASC)
+                        FROM board_banners bb
+                        WHERE bb.board_id = b.id
+                    )
+                    ELSE (
+                        SELECT array_agg(ba.uid) FROM board_assets ba WHERE ba.board_id = b.id
+                    )
+                END
             ), ARRAY[]::uuid[]) AS attachments
         FROM boards b
         LEFT JOIN users u ON b.created_id = u.id
