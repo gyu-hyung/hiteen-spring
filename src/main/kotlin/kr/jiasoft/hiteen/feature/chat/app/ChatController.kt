@@ -108,7 +108,7 @@ class ChatController(
     suspend fun sendMessage(
         @Parameter(description = "채팅방 UID") @PathVariable roomUid: UUID,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
-        @Parameter(description = "메시지 전송 요청 DTO") req: SendMessageRequest,
+        @Parameter(description = "메시지 전송 요청 DTO") @RequestBody req: SendMessageRequest,
         @Parameter(description = "첨부 파일들") @RequestPart(name = "files", required = false) filesFlux: Flux<FilePart>?,
     ) : ResponseEntity<ApiResult<Any>> {
 
@@ -132,6 +132,36 @@ class ChatController(
         return ResponseEntity.ok(ApiResult.success(msgRes))
     }
 
+
+
+    @Operation(summary = "메시지 전송", description = "특정 채팅방에 메시지를 전송합니다.")
+    @PostMapping("/{roomUid}/messages/file")
+    suspend fun sendMessageFile(
+        @Parameter(description = "채팅방 UID") @PathVariable roomUid: UUID,
+        @AuthenticationPrincipal(expression = "user") user: UserEntity,
+        @Parameter(description = "메시지 전송 요청 DTO") req: SendMessageRequest,
+        @Parameter(description = "첨부 파일들") @RequestPart(name = "files", required = false) filesFlux: Flux<FilePart>?,
+    ) : ResponseEntity<ApiResult<Any>> {
+
+        val files: List<FilePart> = filesFlux?.collectList()?.awaitSingle() ?: emptyList()
+
+        //메세지 송신
+        val msgRes = service.sendMessage(roomUid, user, req, files)
+
+        //message broadcast
+        val payload = mapper.writeValueAsString(
+            mapOf(
+                "type" to "message",
+                "data" to msgRes
+            )
+        )
+        chatHub.publish(roomUid, payload)
+
+        chatUserRepository.listActiveUserUidsByUid(roomUid).collect { userUid ->
+            chatHub.publishUserNotify(userUid, payload)
+        }
+        return ResponseEntity.ok(ApiResult.success(msgRes))
+    }
 
     @Operation(summary = "메시지 읽음 처리", description = "특정 메시지를 읽음 처리합니다.")
     @PostMapping("/{roomUid}/messages/{messageUid}/read")

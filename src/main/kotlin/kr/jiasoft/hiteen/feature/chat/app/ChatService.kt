@@ -159,12 +159,24 @@ class ChatService(
             throw IllegalArgumentException("not a member")
         }
 
+        // ✅ kind=3(emojiList)일 때 DB에 저장할 content를 '♥️ x100 💩 x100 ...' 형태로 구성
+        val emojiListContent: String? = req.emojiList?.let { rows ->
+            val uniqueCodes = rows.map { it.emojiCode }.distinct()
+            val emojiMap: Map<String, String> = uniqueCodes.associateWith { code ->
+                emojiReplace(code)
+            }
+            rows.joinToString(" ") { row ->
+                val emoji = emojiMap[row.emojiCode] ?: "[이모티콘]"
+                "$emoji x${row.emojiCount}"
+            }
+        }
+
         // 메시지 저장
         val savedMsg = messages.save(
             ChatMessageEntity(
                 chatRoomId = room.id,
                 userId = sendUser.id,
-                content = req.content,
+                content = emojiListContent ?: req.content,
                 kind = when {
                     req.emojiList != null -> 3
                     files.isNotEmpty() -> 2
@@ -237,20 +249,7 @@ class ChatService(
             }
             2 -> "사진을 보냈습니다."
             3 -> {
-                val rows = req.emojiList.orEmpty()
-                val uniqueCodes = rows.map { it.emojiCode }.distinct()
-
-                // suspend 호출은 여기(코루틴 본문)에서만 수행
-                val emojiMap: Map<String, String> = uniqueCodes.associateWith { code ->
-                    emojiReplace(code)
-                }
-
-                val emojiSummary = rows
-                    .joinToString(" ") { row ->
-                        val emoji = emojiMap[row.emojiCode] ?: "[이모티콘]"
-                        "$emoji x${row.emojiCount}"
-                    }
-
+                val emojiSummary = emojiListContent ?: ""
                 "${sendUser.nickname}: $emojiSummary".trim()
             }
             else -> "${sendUser.nickname}: ${req.content}"
