@@ -1,11 +1,12 @@
 package kr.jiasoft.hiteen.admin.dto
 
 import com.fasterxml.jackson.annotation.JsonFormat
-import kr.jiasoft.hiteen.admin.dto.AdminPollSelectResponse
 import java.time.OffsetDateTime
 import java.util.UUID
 
-data class AdminPollResponse (
+// 리포지토리에서 직접 매핑되는 중간 DTO
+// `selects`는 json/text로 받아 컨트롤러에서 파싱합니다.
+data class AdminPollDetailRow(
     val id: Long,
     val question: String,
     val photo: UUID?,
@@ -22,6 +23,6 @@ data class AdminPollResponse (
     @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm:ss")
     val createdAt: OffsetDateTime,
     val attachments: List<UUID>?,
-    // 상세에서 선택지 정보를 포함하기 위한 필드 추가
-    val selects: List<AdminPollSelectResponse>? = emptyList<AdminPollSelectResponse>(),
+    val selects: String? // JSON text
 )
+

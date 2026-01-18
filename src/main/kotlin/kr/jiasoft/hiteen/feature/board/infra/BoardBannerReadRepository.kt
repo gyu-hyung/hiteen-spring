@@ -16,7 +16,7 @@ interface BoardBannerReadRepository : CoroutineCrudRepository<BoardBannerEntity,
 
     @Query(
         """
-        SELECT board_id AS boardId, uid, banner_type AS bannerType, seq
+        SELECT board_id, uid, banner_type, seq
         FROM board_banners
         WHERE board_id = ANY(:boardIds)
         ORDER BY board_id ASC, banner_type ASC, seq ASC, id ASC
@@ -24,4 +24,3 @@ interface BoardBannerReadRepository : CoroutineCrudRepository<BoardBannerEntity,
     )
     fun findAllByBoardIdIn(boardIds: Array<Long>): Flow<BannerRow>
 }
-
