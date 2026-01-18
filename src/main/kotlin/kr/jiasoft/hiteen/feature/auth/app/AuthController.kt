@@ -348,4 +348,31 @@ class AuthController(
 
     }
 
+
+    @Operation(summary = "관리자 휴대폰 인증번호 발송", description = "관리자 계정으로 등록된 휴대폰으로 인증번호를 발송합니다.")
+    @PostMapping("/admin/code")
+    suspend fun adminAuthCode(
+        @Valid @Parameter(description = "관리자 휴대폰 인증 요청 DTO") req: AuthCodeRequest
+    ): ResponseEntity<ApiResult<Any>> {
+        val phone = req.phone.filter { it.isDigit() }
+
+        // 관리자 계정 여부 확인
+        val user = userRepository.findActiveByPhone(phone)
+            ?: throw IllegalArgumentException("관리자 계정이 존재하지 않습니다.")
+
+        if (user.role != "ADMIN") {
+            throw IllegalArgumentException("관리자 권한이 없습니다.")
+        }
+
+        val code = (100000..999999).random().toString()
+        val message = "[하이틴 관리자] 인증번호는 [$code] 입니다."
+
+        val success = smsService.sendPhone(phone, message, code)
+        if (success) {
+            return ResponseEntity.ok(ApiResult.success(true, "관리자 인증번호를 발송했습니다."))
+        } else {
+            throw IllegalStateException("인증번호 발송 실패")
+        }
+    }
+
 }
