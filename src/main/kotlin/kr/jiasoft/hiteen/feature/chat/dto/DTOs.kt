@@ -248,6 +248,10 @@ data class ChatRoomMemberResponse(
     @param:Schema(description = "닉네임", example = "홍길동")
     @Column("nickname")
     val nickname: String? = null,
+
+    @param:Schema(description = "해당 채팅방의 방장(생성자) 여부", example = "false")
+    @Column("is_owner")
+    val isOwner: Boolean,
 )
 
 
@@ -266,4 +270,3 @@ data class ChatRoomInviteRequest(
     @param:Schema(description = "초대할 사용자 UID 목록", example = "[\"550e8400-e29b-41d4-a716-446655440000\"]")
     val peerUids: List<UUID>
 )
-

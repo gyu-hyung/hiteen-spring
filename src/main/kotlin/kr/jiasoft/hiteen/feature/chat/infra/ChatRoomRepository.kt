@@ -79,7 +79,8 @@ interface ChatRoomRepository : CoroutineCrudRepository<ChatRoomEntity, Long> {
             u.uid      AS user_uid,
             cu.id      AS chat_user_id,
             u.asset_uid AS asset_uid,
-            u.nickname AS nickname
+            u.nickname AS nickname,
+            CASE WHEN cu.user_id = r.created_id THEN true ELSE false END AS is_owner
         FROM chat_users cu
         JOIN chat_rooms r ON r.id = cu.chat_room_id
         JOIN users u ON u.id = cu.user_id
