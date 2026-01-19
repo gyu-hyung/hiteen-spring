@@ -11,8 +11,11 @@ import kr.jiasoft.hiteen.common.dto.ApiResult
 import kr.jiasoft.hiteen.feature.relationship.dto.ContactResponse
 import kr.jiasoft.hiteen.feature.relationship.dto.RelationshipSearchItem
 import kr.jiasoft.hiteen.feature.relationship.dto.UpdateLocationModeRequest
+import kr.jiasoft.hiteen.feature.relationship.dto.ContactSyncJobCreateResponse
+import kr.jiasoft.hiteen.feature.relationship.dto.ContactSyncJobStatusResponse
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import org.springframework.core.io.buffer.DataBufferUtils
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.http.codec.multipart.FilePart
@@ -25,7 +28,8 @@ import java.util.zip.GZIPInputStream
 @RequestMapping("/api/friends")
 @SecurityRequirement(name = "bearerAuth")   // 🔑 JWT 인증 필요
 class FriendController(
-    private val friendService: FriendService
+    private val friendService: FriendService,
+    private val contactSyncJobService: ContactSyncJobService,
 ) {
 
     @Operation(summary = "내 친구 목록 조회", description = "수락된 친구 목록을 조회합니다.")
@@ -146,5 +150,34 @@ class FriendController(
         friendService.updateLocationMode(user.id, friend.id, req.mode)
 
         return ResponseEntity.ok(ApiResult.success("위치 모드가 '${req.mode}' 로 변경되었습니다."))
+    }
+
+
+    @Operation(
+        summary = "연락처 동기화 Job 생성(비동기)",
+        description = "연락처가 많아 동기 응답이 오래 걸릴 때 사용합니다. 즉시 jobId를 반환하고, 결과는 status API로 조회합니다."
+    )
+    @PostMapping("/contacts/jobs", consumes = [MediaType.TEXT_PLAIN_VALUE])
+    suspend fun createContactsJob(
+        @AuthenticationPrincipal(expression = "user") user: UserEntity,
+        @RequestBody rawContacts: String,
+    ): ResponseEntity<ApiResult<ContactSyncJobCreateResponse>> {
+        val jobId = contactSyncJobService.createJob(user.id, rawContacts)
+        return ResponseEntity.status(HttpStatus.ACCEPTED)
+            .body(ApiResult(true, ContactSyncJobCreateResponse(jobId)))
+    }
+
+
+    @Operation(
+        summary = "연락처 동기화 Job 상태 조회",
+        description = "jobId로 처리 상태(PENDING/DONE/FAILED) 및 완료 시 결과를 조회합니다."
+    )
+    @GetMapping("/contacts/jobs/{jobId}")
+    suspend fun getContactsJob(
+        @AuthenticationPrincipal(expression = "user") user: UserEntity,
+        @PathVariable jobId: String,
+    ): ResponseEntity<ApiResult<ContactSyncJobStatusResponse>> {
+        val data = contactSyncJobService.getJob(jobId, user.id)
+        return ResponseEntity.ok(ApiResult(true, data))
     }
 }
