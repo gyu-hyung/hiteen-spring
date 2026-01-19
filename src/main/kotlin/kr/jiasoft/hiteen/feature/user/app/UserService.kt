@@ -503,8 +503,8 @@ class UserService (
         }
         //최대 6장
         val existingCount = userPhotosRepository.countByUserId(user.id)
-        if (existingCount + files.size > 6) {
-            throw BusinessValidationException(mapOf("file" to "최대 6장의 사진만 등록할 수 있습니다."))
+        if (existingCount + files.size > 3) {
+            throw BusinessValidationException(mapOf("file" to "최대 3장의 사진만 등록할 수 있습니다."))
         }
 
         files.forEach { file ->
