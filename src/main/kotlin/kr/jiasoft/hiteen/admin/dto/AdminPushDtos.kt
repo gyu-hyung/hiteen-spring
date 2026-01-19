@@ -1,9 +1,7 @@
 package kr.jiasoft.hiteen.admin.dto
 
+import com.fasterxml.jackson.annotation.JsonFormat
 import io.swagger.v3.oas.annotations.media.Schema
-import jakarta.validation.constraints.Max
-import jakarta.validation.constraints.Min
-import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size
 import java.time.OffsetDateTime
 
@@ -18,7 +16,9 @@ data class AdminPushListResponse(
     val success: Long,
     val failure: Long,
     val createdId: Long?,
+    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm:ss")
     val createdAt: OffsetDateTime?,
+    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm:ss")
     val deletedAt: OffsetDateTime?,
 )
 
@@ -39,6 +39,7 @@ data class AdminPushDetailItem(
     val messageId: String?,
     val error: String?,
     val success: Int,
+    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm:ss")
     val createdAt: OffsetDateTime?,
 )
 
@@ -76,14 +77,11 @@ data class AdminPushSearchParams(
 
 @Schema(description = "관리자 푸시 상세 목록 조회 조건")
 data class AdminPushDetailSearchParams(
-    @field:Min(1)
     val page: Int = 1,
 
-    @field:Min(1)
-    @field:Max(200)
     val size: Int = 50,
 
-    val success: String? = null, // ALL|SUCCESS|FAIL
+     val success: String? = null, // ALL|SUCCESS|FAIL
 )
 
 @Schema(description = "관리자 푸시 소프트 삭제 응답")
@@ -91,4 +89,3 @@ data class AdminPushDeleteResponse(
     val id: Long,
     val deleted: Boolean,
 )
-
