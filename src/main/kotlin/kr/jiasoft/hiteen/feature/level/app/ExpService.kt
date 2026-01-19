@@ -136,8 +136,8 @@ class ExpService(
     ): Boolean {
         return when (actionCode) {
             "FRIEND_ADD" -> existTargetId(userId, actionCode, targetId!!, dailyLimit)
-            "FRIEND_PROFILE_VISIT" -> existTargetIdAndToDay(userId, actionCode, targetId!!)
-            "CHAT" -> existTargetIdAndToDay(userId, actionCode, targetId)
+            "FRIEND_PROFILE_VISIT" -> countTargetIdAndToDay(userId, actionCode, targetId!!, dailyLimit)
+            "CHAT" -> countTargetIdAndToDay(userId, actionCode, targetId!!, dailyLimit)
             "INTEREST_TAG_REGISTER" -> exists(userId, actionCode)
             "TINFRIEND_REQUEST" -> existTargetId(userId, actionCode, targetId!!, dailyLimit)
             "FOLLOW_REQUEST" -> existTargetId(userId, actionCode, targetId!!, dailyLimit)
