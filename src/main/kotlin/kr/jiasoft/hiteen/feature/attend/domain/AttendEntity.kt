@@ -2,6 +2,7 @@ package kr.jiasoft.hiteen.feature.attend.domain
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import org.springframework.data.annotation.Id
+import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
 import java.time.LocalDate
 import java.time.OffsetDateTime
@@ -21,6 +22,7 @@ data class AttendEntity(
 
     val addPoint: Int = 0,
 
+    @Column("created_at")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm")
-    val createdAt: OffsetDateTime = OffsetDateTime.now()
+    val createdAt: OffsetDateTime? = null,
 )

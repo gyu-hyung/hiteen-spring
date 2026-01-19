@@ -67,17 +67,21 @@ interface AttendRepository : CoroutineCrudRepository<AttendEntity, Long> {
 
     /**
      * 단순 출석 현황용: 최근 7일(오늘 포함) 동안의 출석 날짜만 가져온다.
-     * - 서비스에서 "연속" 여부/초기화 여부를 단순 계산한다.
+     * - DB CURRENT_DATE는 세션 타임존에 따라 달라질 수 있어, 서비스에서 KST today를 받아 사용한다.
      */
     @Query("""
         SELECT attend_date
         FROM attends
         WHERE user_id = :userId
-          AND attend_date BETWEEN CURRENT_DATE - INTERVAL '6 day' AND CURRENT_DATE
+          AND attend_date BETWEEN :startDate AND :endDate
         GROUP BY attend_date
         ORDER BY attend_date ASC
     """)
-    fun findAttendDatesLast7Days(userId: Long): Flow<LocalDate>
+    fun findAttendDatesBetween(
+        userId: Long,
+        startDate: LocalDate,
+        endDate: LocalDate,
+    ): Flow<LocalDate>
 
 
     fun findAllByUserIdOrderByIdDesc(userId: Long): Flow<AttendEntity>
