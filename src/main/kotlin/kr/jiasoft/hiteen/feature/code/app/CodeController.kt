@@ -68,6 +68,8 @@ class CodeController(
     @PostMapping("/group/{group}", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     suspend fun createCodes(
         @Parameter(description = "코드 그룹명") @PathVariable group: String,
+        @Parameter(description = "코드 그룹 표시명(code_group_name). 미지정 시 group 값을 사용")
+        @RequestPart(name = "code_group_name", required = false) codeGroupName: String? = null,
         @Parameter(description = "임시컬럼1") @RequestPart(name = "col1", required = false) col1: String? = null,
         @Parameter(description = "임시컬럼1") @RequestPart(name = "col2", required = false) col2: String? = null,
         @Parameter(description = "임시컬럼1") @RequestPart(name = "col3", required = false) col3: String? = null,
@@ -75,7 +77,8 @@ class CodeController(
         @Parameter(description = "첨부할 파일들") @RequestPart(name = "files", required = false) filesFlux: Flux<FilePart>?,
     ): ResponseEntity<ApiResult<List<CodeEntity>>> {
         val files: List<FilePart> = filesFlux?.collectList()?.awaitSingle().orEmpty()
-        val saved = codeService.createCodesWithFiles(group, user.id, files, "", col1, col2, col3)
+        val groupNameToSave = codeGroupName?.trim().takeUnless { it.isNullOrBlank() } ?: group
+        val saved = codeService.createCodesWithFiles(group, groupNameToSave, user.id, files, "", col1, col2, col3)
         return ResponseEntity.ok(ApiResult.success(saved))
     }
 
