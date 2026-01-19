@@ -27,7 +27,7 @@ class ExpService(
         dynamicPoints: Int? = null,
         requestId: Long? = null,
     ) {
-        val action = expActionProvider.get(actionCode)
+        val action = expActionProvider.get(actionCode)?: return
 
         val points = dynamicPoints ?: action.points
         if (points == 0) return
