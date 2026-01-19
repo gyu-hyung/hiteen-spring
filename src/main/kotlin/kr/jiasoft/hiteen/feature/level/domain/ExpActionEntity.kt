@@ -1,9 +1,10 @@
 package kr.jiasoft.hiteen.feature.level.domain
 
+import com.fasterxml.jackson.annotation.JsonFormat
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
-import java.time.LocalDateTime
+import java.time.OffsetDateTime
 
 @Table("exp_actions")
 data class ExpActionEntity(
@@ -26,9 +27,11 @@ data class ExpActionEntity(
     val enabled: Boolean = true,
 
     @Column("created_at")
-    val createdAt: LocalDateTime? = null,
+    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm:ss")
+    val createdAt: OffsetDateTime? = null,
 
     @Column("updated_at")
-    val updatedAt: LocalDateTime? = null,
+    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm:ss")
+    val updatedAt: OffsetDateTime? = null,
 )
 
