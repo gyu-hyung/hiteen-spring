@@ -410,7 +410,7 @@ class ChatService(
                 roomTitle = r.roomName,
                 memberCount = members.toList().count(),
                 unreadCount = unreadCount,
-                assetUid = otherMember?.assetUid,
+                assetUid = r.assetUid?.toString() ?: otherMember?.assetUid,
                 updatedAt = r.updatedAt ?: r.createdAt,
                 lastMessage = if (last != null) {
                     MessageSummary(
