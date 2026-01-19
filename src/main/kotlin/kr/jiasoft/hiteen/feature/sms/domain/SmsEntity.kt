@@ -1,5 +1,6 @@
 package kr.jiasoft.hiteen.feature.sms.domain
 
+import com.fasterxml.jackson.annotation.JsonFormat
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
@@ -18,7 +19,9 @@ data class SmsEntity(
     val failure: Long? = null,
     val createdId: Long? = null,
     @Column("created_at")
+    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm:ss")
     val createdAt: OffsetDateTime,
     @Column("updated_at")
+    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm:ss")
     val updatedAt: OffsetDateTime? = null,
 )
