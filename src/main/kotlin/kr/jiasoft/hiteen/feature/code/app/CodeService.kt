@@ -10,7 +10,6 @@ import kr.jiasoft.hiteen.feature.code.dto.CodeRequest
 import kr.jiasoft.hiteen.feature.code.dto.CodeWithAssetResponse
 import kr.jiasoft.hiteen.feature.code.infra.CodeRepository
 import org.springframework.cache.annotation.CacheEvict
-import org.springframework.cache.annotation.Caching
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
 import java.time.OffsetDateTime
@@ -28,6 +27,7 @@ class CodeService(
     @CacheEvict(cacheNames = ["code"], key = "#group.toUpperCase()")
     suspend fun createCodesWithFiles(
         group: String,
+        codeGroupName: String = group,
         createdUserId: Long,
         files: List<FilePart>,
         codeNamePrefix: String = "",
@@ -56,7 +56,7 @@ class CodeService(
                 CodeEntity(
                     codeName = asset.originFileName,
                     code = newCode,
-                    codeGroupName = group,
+                    codeGroupName = codeGroupName,
                     codeGroup = normalizedGroup,
                     status = CodeStatus.ACTIVE,
                     col1 = col1,

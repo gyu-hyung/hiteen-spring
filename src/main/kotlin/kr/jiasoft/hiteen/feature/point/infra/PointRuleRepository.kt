@@ -11,6 +11,7 @@ interface PointRuleRepository : CoroutineCrudRepository<PointRuleEntity, Long> {
         FROM point_rules
         WHERE action_code = :actionCode
           AND deleted_at IS NULL
+        ORDER BY id
         LIMIT 1
     """)
     suspend fun findActiveByActionCode(actionCode: String): PointRuleEntity?

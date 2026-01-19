@@ -15,6 +15,7 @@ interface CodeRepository : CoroutineCrudRepository<CodeEntity, Long> {
         FROM codes c
         left join code_assets ca on c.id = ca.code_id 
         WHERE deleted_at IS null
+        AND c.status = 'ACTIVE'
         AND (
             :group IS NULL
             OR c.code_group = :group
