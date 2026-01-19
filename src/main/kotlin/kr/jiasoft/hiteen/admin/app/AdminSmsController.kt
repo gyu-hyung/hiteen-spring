@@ -1,18 +1,20 @@
 package kr.jiasoft.hiteen.admin.app
 
+import io.swagger.v3.oas.annotations.Parameter
+import jakarta.validation.Valid
+import kr.jiasoft.hiteen.admin.dto.AdminSmsSendRequest
+import kr.jiasoft.hiteen.admin.dto.AdminSmsSendResponse
 import kr.jiasoft.hiteen.admin.dto.AdminSmsDetailResponse
 import kr.jiasoft.hiteen.admin.dto.AdminSmsListResponse
 import kr.jiasoft.hiteen.admin.services.AdminSmsService
 import kr.jiasoft.hiteen.common.dto.ApiPage
 import kr.jiasoft.hiteen.common.dto.ApiResult
 import kr.jiasoft.hiteen.common.extensions.success
+import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import org.springframework.http.ResponseEntity
+import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.validation.annotation.Validated
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/api/admin/sms")
@@ -20,6 +22,15 @@ import org.springframework.web.bind.annotation.RestController
 class AdminSmsController(
     private val adminSmsService: AdminSmsService,
 ) {
+
+    @PostMapping("/send")
+    suspend fun send(
+        @AuthenticationPrincipal(expression = "user") user: UserEntity,
+        @Parameter @Valid @RequestBody request: AdminSmsSendRequest,
+    ): ResponseEntity<ApiResult<AdminSmsSendResponse>> {
+        val data = adminSmsService.sendSms(user.id, request)
+        return success(data)
+    }
 
     @GetMapping
     suspend fun list(
@@ -57,4 +68,3 @@ class AdminSmsController(
         return success(data)
     }
 }
-
