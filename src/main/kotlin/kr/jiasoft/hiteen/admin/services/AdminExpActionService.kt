@@ -74,8 +74,7 @@ class AdminExpActionService(
         points = points,
         dailyLimit = dailyLimit,
         enabled = enabled,
-        createdAt = createdAt?.toString(),
-        updatedAt = updatedAt?.toString(),
+        createdAt = createdAt,
+        updatedAt = updatedAt,
     )
 }
-

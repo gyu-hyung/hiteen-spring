@@ -1,7 +1,9 @@
 package kr.jiasoft.hiteen.admin.dto
 
+import com.fasterxml.jackson.annotation.JsonFormat
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size
+import java.time.OffsetDateTime
 
 data class AdminExpActionResponse(
     val actionCode: String,
@@ -9,8 +11,10 @@ data class AdminExpActionResponse(
     val points: Int,
     val dailyLimit: Int?,
     val enabled: Boolean,
-    val createdAt: String?,
-    val updatedAt: String?,
+    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm:ss")
+    val createdAt: OffsetDateTime?,
+    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm:ss")
+    val updatedAt: OffsetDateTime?,
 )
 
 data class AdminExpActionCreateRequest(
