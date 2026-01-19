@@ -67,6 +67,19 @@ enum class PushTemplate(
         itemType = PushItemType.NEW_POST
     ),
 
+
+    /**
+     * 새 글 등록 알림
+     * boardUid
+     */
+    NEW_VOTE(
+        code = "NEW_POST",
+        title = "새 투표 등록 알림 🔔",
+        message = "방금 새로운 투표가 올라왔어 🔔",
+        itemType = PushItemType.NEW_POST
+    ),
+
+
     /**
      * 핀 등록 알림
      */
