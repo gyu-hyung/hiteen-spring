@@ -31,6 +31,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.http.server.reactive.ServerHttpResponse
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.crypto.password.PasswordEncoder
+import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 
 @Tag(name = "Auth", description = "인증 관련 API")
@@ -82,7 +83,7 @@ class AuthController(
     @Operation(summary = "휴대폰 인증번호 발송", description = "회원가입 시 휴대폰 번호로 6자리 인증번호를 발송합니다.")
     @PostMapping("/code")
     suspend fun authCode(
-        @Valid @Parameter(description = "휴대폰 인증 요청 DTO") req: AuthCodeRequest
+        @Validated @Parameter(description = "휴대폰 인증 요청 DTO") req: AuthCodeRequest
     ): ResponseEntity<ApiResult<Any>> {
         val phone = req.phone.filter { it.isDigit() }
 
@@ -105,7 +106,7 @@ class AuthController(
     @Operation(summary = "휴대폰 인증번호 검증", description = "휴대폰으로 받은 인증번호를 검증합니다.")
     @PostMapping("/verify")
     suspend fun authVerify(
-        @Valid @Parameter(description = "휴대폰 인증 검증 요청 DTO") req: VerifyRequest
+        @Validated @Parameter(description = "휴대폰 인증 검증 요청 DTO") req: VerifyRequest
     ): ResponseEntity<ApiResult<Any>> {
         val minute = 5
         val phone = req.phone.filter { it.isDigit() }
@@ -154,7 +155,7 @@ class AuthController(
     @Operation(summary = "비밀번호 재설정 코드 발송", description = "비밀번호를 잊은 사용자가 휴대폰으로 인증코드를 받습니다.")
     @PostMapping("/password/code")
     suspend fun sendResetPasswordCode(
-        @Parameter(description = "비밀번호 재설정 코드 발송 요청 DTO") @Valid req: AuthPasswordCodeRequest
+        @Parameter(description = "비밀번호 재설정 코드 발송 요청 DTO") @Validated req: AuthPasswordCodeRequest
     ): ResponseEntity<ApiResult<Any>> {
         val phone = req.phone!!.filter { it.isDigit() }
 
@@ -184,7 +185,7 @@ class AuthController(
     @Operation(summary = "비밀번호 검증", description = "비밀번호 검증용 API")
     @GetMapping("/password/valid")
     suspend fun validatePassword(
-        @Parameter(description = "비밀번호 검증 DTO") @Valid req: PasswordCheckRequest
+        @Parameter(description = "비밀번호 검증 DTO") @Validated req: PasswordCheckRequest
     ): ResponseEntity<ApiResult<Any>> {
         return ResponseEntity.ok(ApiResult.success(req.password, "통과"))
     }
@@ -193,7 +194,7 @@ class AuthController(
     @Operation(summary = "비밀번호 재설정", description = "휴대폰 인증번호를 검증하고, 새 비밀번호로 변경합니다.(인증번호만 보내면 검증)")
     @PostMapping("/password/reset/valid")
     suspend fun resetPasswordValid(
-        @Parameter(description = "비밀번호 재설정 요청 DTO") @Valid req: ResetPasswordValidRequest
+        @Parameter(description = "비밀번호 재설정 요청 DTO") @Validated req: ResetPasswordValidRequest
     ): ResponseEntity<ApiResult<Any>> {
         val phone = req.phone.filter { it.isDigit() }
 
@@ -218,7 +219,7 @@ class AuthController(
     @Operation(summary = "비밀번호 재설정", description = "휴대폰 인증번호를 검증하고, 새 비밀번호로 변경합니다.(인증번호만 보내면 검증)")
     @PostMapping("/password/reset")
     suspend fun resetPassword(
-        @Parameter(description = "비밀번호 재설정 요청 DTO") @Valid req: ResetPasswordRequest
+        @Parameter(description = "비밀번호 재설정 요청 DTO") @Validated req: ResetPasswordRequest
     ): ResponseEntity<ApiResult<Any>> {
         val phone = req.phone.filter { it.isDigit() }
 
@@ -269,7 +270,7 @@ class AuthController(
     @PostMapping("/password/change/valid")
     suspend fun changePasswordValid(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
-        @Parameter(description = "비밀번호 초기화 DTO") @Valid req: PasswordCheckRequest
+        @Parameter(description = "비밀번호 초기화 DTO") @Validated req: PasswordCheckRequest
     ): ResponseEntity<ApiResult<Any>> {
 
         if (!encoder.matches(req.password, user.password)) {
@@ -291,7 +292,7 @@ class AuthController(
     @PostMapping("/password/change")
     suspend fun changePassword(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
-        @Parameter(description = "비밀번호 초기화 DTO") @Valid req: PassWordChangeRequest
+        @Parameter(description = "비밀번호 초기화 DTO") @Validated req: PassWordChangeRequest
     ): ResponseEntity<ApiResult<Any>> {
 
         if (!encoder.matches(req.oldPassword, user.password)) {
@@ -316,7 +317,7 @@ class AuthController(
     @PostMapping("/phone/change")
     suspend fun changePhone(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
-        @Parameter(description = "비밀번호 초기화 DTO") @Valid req: ChangePhoneRequest
+        @Parameter(description = "비밀번호 초기화 DTO") @Validated req: ChangePhoneRequest
     ): ResponseEntity<ApiResult<Any>> {
 
         val phone = req.phone.filter { it.isDigit() }
@@ -352,7 +353,7 @@ class AuthController(
     @Operation(summary = "관리자 휴대폰 인증번호 발송", description = "관리자 계정으로 등록된 휴대폰으로 인증번호를 발송합니다.")
     @PostMapping("/admin/code")
     suspend fun adminAuthCode(
-        @Valid @Parameter(description = "관리자 휴대폰 인증 요청 DTO") req: AuthCodeRequest
+        @Validated @Parameter(description = "관리자 휴대폰 인증 요청 DTO") req: AuthCodeRequest
     ): ResponseEntity<ApiResult<Any>> {
         val phone = req.phone.filter { it.isDigit() }
 

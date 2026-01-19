@@ -2,6 +2,7 @@ package kr.jiasoft.hiteen.feature.chat.dto
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import io.swagger.v3.oas.annotations.media.Schema
+import jakarta.validation.constraints.NotBlank
 import kr.jiasoft.hiteen.feature.chat.domain.ChatMessageEntity
 import kr.jiasoft.hiteen.feature.chat.domain.ChatRoomInviteMode
 import kr.jiasoft.hiteen.feature.user.dto.UserSummary
@@ -18,6 +19,7 @@ data class CreateRoomRequest(
     @param:Schema(description = "같은 멤버 채팅방 재사용 여부", example = "false")
     val reuseExactMembers: Boolean = false,
 
+    @field:NotBlank(message = "채팅방 이름을 입력해줘~")
     @param:Schema(description = "채팅방 이름(room_name)", example = "우리반 단톡")
     val roomName: String? = null,
 

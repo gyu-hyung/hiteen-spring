@@ -20,6 +20,7 @@ import kr.jiasoft.hiteen.feature.user.domain.SeasonStatusType
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
+import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 
 @Tag(name = "Game", description = "게임 관련 API")
@@ -70,7 +71,7 @@ class GameController(
     @Operation(summary = "게임시작")
     @PostMapping("/start")
     suspend fun start(
-        @Valid @Parameter(description = "점수 등록 요청 DTO") req: GameStartRequest,
+        @Validated @Parameter(description = "점수 등록 요청 DTO") req: GameStartRequest,
         @AuthenticationPrincipal(expression = "user") user: UserEntity
     ): ResponseEntity<ApiResult<Any>> =
         ResponseEntity.ok(ApiResult.success(gameService.gameStart(
@@ -85,7 +86,7 @@ class GameController(
     @Operation(summary = "게임종료")
     @PostMapping("/end")
     suspend fun recordScore(
-        @Valid @Parameter(description = "점수 등록 요청 DTO") req: ScoreRequest,
+        @Validated @Parameter(description = "점수 등록 요청 DTO") req: ScoreRequest,
         @AuthenticationPrincipal(expression = "user") user: UserEntity
     ): ResponseEntity<ApiResult<GameScoreResponse>> =
         ResponseEntity.ok(ApiResult.success(gameService.recordScore(
