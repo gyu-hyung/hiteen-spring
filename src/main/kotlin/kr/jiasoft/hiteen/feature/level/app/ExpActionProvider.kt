@@ -16,7 +16,7 @@ class ExpActionProvider(
     private val props: ExpProperties,
 ) {
 
-    suspend fun get(actionCode: String): ExpActionProperty {
+    suspend fun get(actionCode: String): ExpActionProperty? {
         val db = expActionRepository.findByActionCode(actionCode)
         if (db != null && db.enabled) {
             return ExpActionProperty(
@@ -27,7 +27,6 @@ class ExpActionProvider(
         }
 
         return props.actions[actionCode]
-            ?: throw IllegalArgumentException("정의되지 않은 액션 코드: $actionCode")
     }
 }
 
