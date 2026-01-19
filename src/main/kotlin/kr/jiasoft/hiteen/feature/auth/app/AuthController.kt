@@ -358,12 +358,12 @@ class AuthController(
         val phone = req.phone.filter { it.isDigit() }
 
         // 관리자 계정 여부 확인
-        val user = userRepository.findActiveByPhone(phone)
-            ?: throw IllegalArgumentException("관리자 계정이 존재하지 않습니다.")
+        val user = userRepository.findActiveByUsername(phone)
+            ?: throw IllegalArgumentException("계정이 존재하지 않습니다.")
 
-        if (user.role != "ADMIN") {
-            throw IllegalArgumentException("관리자 권한이 없습니다.")
-        }
+//        if (user.role != "ADMIN") {
+//            throw IllegalArgumentException("관리자 권한이 없습니다.")
+//        }
 
         val code = (100000..999999).random().toString()
         val message = "[하이틴 관리자] 인증번호는 [$code] 입니다."

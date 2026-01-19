@@ -20,13 +20,4 @@ interface UserContactRepository : CoroutineCrudRepository<UserContactEntity, Lon
         RETURNING id
     """)
     suspend fun upsert(userId: Long, phone: String, name: String? = null): Long
-
-    @Query("""
-        INSERT INTO user_contacts (user_id, phone)
-        SELECT :userId, x.phone
-        FROM unnest(:phones) AS x(phone)
-        ON CONFLICT (user_id, phone) DO UPDATE
-        SET updated_at = now()
-    """)
-    suspend fun upsertAllPhones(userId: Long, phones: List<String>)
 }

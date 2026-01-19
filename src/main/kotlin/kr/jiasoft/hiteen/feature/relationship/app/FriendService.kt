@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.flow.toSet
 import kr.jiasoft.hiteen.common.exception.BusinessValidationException
+import kr.jiasoft.hiteen.feature.contact.infra.UserContactBulkRepository
 import kr.jiasoft.hiteen.feature.contact.infra.UserContactRepository
 import kr.jiasoft.hiteen.feature.level.app.ExpService
 import kr.jiasoft.hiteen.feature.location.domain.LocationHistory
@@ -42,6 +43,7 @@ class FriendService(
 
     private val userRepository: UserRepository,
     private val userContactRepository: UserContactRepository,
+    private val userContactBulkRepository: UserContactBulkRepository,
 
     private val userService: UserService,
     private val locationCacheRedisService: LocationCacheRedisService,
@@ -109,7 +111,7 @@ class FriendService(
 
         // 2) DB에 연락처 저장 (bulk upsert)
         // per-row upsert(1000번 왕복) 대신 1번 쿼리로 처리
-        userContactRepository.upsertAllPhones(userId, phones.toList())
+        userContactBulkRepository.upsertAllPhones(userId, phones.toList())
 
         // 3) 가입 사용자 조회
         val registeredUsers = userRepository.findAllUserSummaryByPhoneIn(phones, userId).toList()
