@@ -248,8 +248,8 @@ enum class PushTemplate(
      */
     REWARD_LEAGUE_START(
         code = "REWARD_LEAGUE_START",
-        title = "리그가 시작됐어! 🏆",
-        message = "{league} 리그 보상전이 시작됐어! 지금 참여해봐!",
+        title = "보상 리그 시작 알림 🏆",
+        message = "지금 보상 리그가 시작됐어. 친구들 보다 먼저 달리고 보상 챙기자!",
         itemType = PushItemType.GAME,
     ),
 
