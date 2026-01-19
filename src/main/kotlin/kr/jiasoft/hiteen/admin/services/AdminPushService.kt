@@ -1,0 +1,150 @@
+package kr.jiasoft.hiteen.admin.services
+
+import kr.jiasoft.hiteen.admin.dto.AdminPushCreateRequest
+import kr.jiasoft.hiteen.admin.dto.AdminPushDeleteResponse
+import kr.jiasoft.hiteen.admin.dto.AdminPushDetailItem
+import kr.jiasoft.hiteen.admin.dto.AdminPushDetailResponse
+import kr.jiasoft.hiteen.admin.dto.AdminPushListResponse
+import kr.jiasoft.hiteen.admin.infra.AdminPushDetailRepository
+import kr.jiasoft.hiteen.admin.infra.AdminPushRepository
+import kr.jiasoft.hiteen.common.dto.ApiPage
+import kr.jiasoft.hiteen.common.dto.PageUtil
+import kr.jiasoft.hiteen.feature.push.app.PushService
+import kr.jiasoft.hiteen.feature.push.domain.PushEntity
+import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
+
+@Service
+class AdminPushService(
+    private val adminPushRepository: AdminPushRepository,
+    private val adminPushDetailRepository: AdminPushDetailRepository,
+    private val pushService: PushService,
+) {
+
+    suspend fun list(
+        page: Int,
+        size: Int,
+        order: String,
+        searchType: String,
+        search: String?,
+        status: String?,
+    ): ApiPage<AdminPushListResponse> {
+        val p = page.coerceAtLeast(1)
+        val s = size.coerceIn(1, 100)
+        val offset = (p - 1) * s
+
+        val normalizedSearch = search?.trim()?.takeIf { it.isNotBlank() }
+        val normalizedSearchType = when (searchType.trim().uppercase()) {
+            "ALL", "CODE", "TITLE", "MESSAGE" -> searchType.trim().uppercase()
+            else -> "ALL"
+        }
+        val normalizedStatus = when (status?.trim()?.uppercase()) {
+            null, "" -> "ACTIVE"
+            "ACTIVE", "DELETED", "ALL" -> status.trim().uppercase()
+            else -> "ACTIVE"
+        }
+        val normalizedOrder = when (order.trim().uppercase()) {
+            "ASC" -> "ASC"
+            else -> "DESC"
+        }
+
+        val total = adminPushRepository.countList(normalizedSearch, normalizedSearchType, normalizedStatus)
+        val rows = adminPushRepository.list(normalizedSearch, normalizedSearchType, normalizedStatus, normalizedOrder, s, offset)
+
+        return PageUtil.of(
+            items = rows.map { it.toListResponse() },
+            total = total,
+            page = p,
+            size = s,
+        )
+    }
+
+    suspend fun get(pushId: Long, detailPage: Int, detailSize: Int, success: String?): AdminPushDetailResponse {
+        val push = adminPushRepository.findById(pushId)
+            ?: throw IllegalStateException("push not found: $pushId")
+
+        val p = detailPage.coerceAtLeast(1)
+        val s = detailSize.coerceIn(1, 200)
+        val offset = (p - 1) * s
+
+        val normalizedSuccess = when (success?.trim()?.uppercase()) {
+            null, "", "ALL" -> "ALL"
+            "SUCCESS" -> "SUCCESS"
+            "FAIL" -> "FAIL"
+            else -> "ALL"
+        }
+
+        val details = adminPushDetailRepository.listByPushId(pushId, normalizedSuccess, s, offset)
+
+        return AdminPushDetailResponse(
+            push = push.toListResponse(),
+            details = details.map { d ->
+                AdminPushDetailItem(
+                    id = d.id,
+                    pushId = d.pushId,
+                    userId = d.userId,
+                    deviceOs = d.deviceOs,
+                    deviceToken = d.deviceToken,
+                    phone = d.phone,
+                    messageId = d.messageId,
+                    error = d.error,
+                    success = d.success,
+                    createdAt = d.createdAt,
+                )
+            },
+        )
+    }
+
+    @Transactional
+    suspend fun createAndSend(createdId: Long?, request: AdminPushCreateRequest): AdminPushListResponse {
+        val templateData = mutableMapOf<String, Any>()
+        request.code?.let { templateData["code"] = it }
+        request.title?.let { templateData["title"] = it }
+        request.message?.let { templateData["message"] = it }
+        templateData["silent"] = (request.type?.lowercase() == "silent")
+
+        // PushService는 sendAndSavePush에서 push/push_detail을 저장해줌
+        pushService.sendAndSavePush(
+            userIds = request.userIds,
+            userId = createdId,
+            templateData = templateData,
+        )
+
+        // 방금 저장된 pushId를 PushService에서 반환하지 않기 때문에,
+        // 관리용 API에서는 최신 1건을 다시 조회(동시성 고려 필요). 여기서는 createdId 기준으로 가장 최근 push 1건을 가져옴.
+        val latest = adminPushRepository.list(
+            search = null,
+            searchType = "ALL",
+            status = "ALL",
+            order = "DESC",
+            limit = 1,
+            offset = 0,
+        ).firstOrNull() ?: throw IllegalStateException("push create failed")
+
+        return latest.toListResponse()
+    }
+
+    @Transactional
+    suspend fun delete(pushId: Long): AdminPushDeleteResponse {
+        val updated = adminPushRepository.softDelete(pushId)
+        if (updated == 0) {
+            val exists = adminPushRepository.findById(pushId)
+            if (exists == null) throw IllegalStateException("push not found: $pushId")
+        }
+        return AdminPushDeleteResponse(id = pushId, deleted = true)
+    }
+
+    private fun PushEntity.toListResponse(): AdminPushListResponse = AdminPushListResponse(
+        id = id,
+        type = type,
+        code = code,
+        title = title,
+        message = message,
+        total = total,
+        success = success,
+        failure = failure,
+        createdId = createdId,
+        createdAt = createdAt,
+        deletedAt = deletedAt,
+    )
+}

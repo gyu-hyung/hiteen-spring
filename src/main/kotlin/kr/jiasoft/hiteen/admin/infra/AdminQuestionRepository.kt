@@ -75,8 +75,8 @@ interface AdminQuestionRepository : CoroutineCrudRepository<QuestionEntity, Long
             )
             AND (
                 :status IS NULL OR :status = 'ALL'
-                OR (:status = 'ACTIVE' AND q.status = 1)
-                OR (:status = 'INACTIVE' AND q.status = 0)
+                OR (:status = '1' AND q.status = 1)
+                OR (:status = '0' AND q.status = 0)
             )
             AND (
                 :type IS NULL OR :type = 'ALL'
@@ -125,8 +125,8 @@ interface AdminQuestionRepository : CoroutineCrudRepository<QuestionEntity, Long
             )
             AND (
                 :status IS NULL OR :status = 'ALL'
-                OR (:status = 'ACTIVE' AND q.status = 1)
-                OR (:status = 'INACTIVE' AND q.status = 0)
+                OR (:status = '1' AND q.status = 1)
+                OR (:status = '0' AND q.status = 0)
             )
             AND (
                 :type IS NULL OR :type = 'ALL'
