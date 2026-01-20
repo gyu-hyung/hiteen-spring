@@ -14,7 +14,7 @@ interface GiftishowGoodsRepository : CoroutineCrudRepository<GoodsGiftishowEntit
     fun findAllByGoodsCodeIn(goodsCodes: List<String>): Flow<GoodsGiftishowEntity>
 
 //    @Query("UPDATE goods_giftishow SET del_yn = 1 WHERE gg.goods_code LIKE 'G%'")
-    @Query("UPDATE goods_giftishow gg SET deleted_at = now() WHERE gg.goods_code LIKE 'G%'")
+    @Query("UPDATE goods_giftishow gg SET del_yn = 1 WHERE gg.goods_code LIKE 'G%'")
     suspend fun markAllDeleted()
 
     suspend fun findAllByOrderByCreatedAtDesc(): List<GoodsGiftishowEntity>
@@ -28,6 +28,7 @@ interface GiftishowGoodsRepository : CoroutineCrudRepository<GoodsGiftishowEntit
                MAX(category1_name) AS category_name
         FROM goods_giftishow
         WHERE status = 1 
+        AND del_yn = 0
         AND deleted_at IS NULL
         GROUP BY category1_seq
         ORDER BY category1_seq
@@ -37,15 +38,15 @@ interface GiftishowGoodsRepository : CoroutineCrudRepository<GoodsGiftishowEntit
 
     @Query("""
         SELECT DISTINCT
-            goods_type_cd AS goods_type_cd,
-            goods_type_nm AS goods_type_name
+            goods_type_cd AS goodsTypeCd,
+            goods_type_nm AS goodsTypeName
         FROM goods_giftishow
         WHERE status = 1 
+        AND del_yn = 0
         AND deleted_at IS NULL
         ORDER BY goods_type_cd
     """)
     fun findGoodsTypes(): Flow<GoodsTypeDto>
-
 
 
     /**
@@ -54,7 +55,8 @@ interface GiftishowGoodsRepository : CoroutineCrudRepository<GoodsGiftishowEntit
     @Query("""
         SELECT g.*
         FROM goods_giftishow g
-        WHERE deleted_at IS NULL AND status = 1
+        WHERE g.deleted_at IS NULL
+          AND g.status = 1
             AND (
                 :search IS NULL
                 OR (

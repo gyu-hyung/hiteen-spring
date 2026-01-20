@@ -2,114 +2,141 @@ package kr.jiasoft.hiteen.admin.app
 
 import kotlinx.coroutines.flow.toList
 import kr.jiasoft.hiteen.admin.dto.AdminGiftResponse
-import kr.jiasoft.hiteen.admin.dto.AdminPlayResponse
+import kr.jiasoft.hiteen.admin.dto.GoodsCategoryDto
+import kr.jiasoft.hiteen.admin.dto.GoodsTypeDto
 import kr.jiasoft.hiteen.admin.infra.AdminGiftRepository
-import kr.jiasoft.hiteen.admin.infra.AdminPlayRepository
-import kr.jiasoft.hiteen.common.dto.ApiResult
 import kr.jiasoft.hiteen.common.dto.ApiPage
+import kr.jiasoft.hiteen.common.dto.ApiPageCursor
+import kr.jiasoft.hiteen.common.dto.ApiResult
 import kr.jiasoft.hiteen.common.dto.PageUtil
-import kr.jiasoft.hiteen.feature.asset.app.AssetService
+import kr.jiasoft.hiteen.feature.gift.app.GiftAppService
+import kr.jiasoft.hiteen.feature.gift.app.GiftshowClient
 import kr.jiasoft.hiteen.feature.gift.domain.GiftCategory
 import kr.jiasoft.hiteen.feature.gift.domain.GiftType
+import kr.jiasoft.hiteen.feature.gift.dto.GiftProvideRequest
+import kr.jiasoft.hiteen.feature.gift.dto.GiftResponse
+import kr.jiasoft.hiteen.feature.gift.dto.client.GiftishowApiResponse
+import kr.jiasoft.hiteen.feature.gift.dto.client.biz.GiftishowBizMoneyResult
+import kr.jiasoft.hiteen.feature.giftishow.domain.GoodsGiftishowEntity
+import kr.jiasoft.hiteen.feature.giftishow.infra.GiftishowGoodsRepository
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import org.springframework.http.ResponseEntity
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.annotation.AuthenticationPrincipal
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
 
 @RestController
 @RequestMapping("/api/admin/gift")
+@PreAuthorize("hasRole('ADMIN')")
 class AdminGiftController(
     private val repository: AdminGiftRepository,
-    private val assetService: AssetService,
+    private val giftAppService: GiftAppService,
+    private val giftishowGoodsRepository: GiftishowGoodsRepository,
+    private val giftshowClient: GiftshowClient,
 ) {
 
     /**
-     * 게시글 등록 / 수정
+     * 관리자 -> 사용자 선물 생성(지급)
+     * 기존: POST /api/gift/admin/create
      */
-//    @PostMapping(consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
-//    suspend fun saveBoard(
-//        @RequestPart("req") req: AdminBoardCreateRequest,
-//        @Parameter(description = "첨부 이미지")
-////        @RequestPart(name = "file", required = false) file: FilePart?,
-//        @AuthenticationPrincipal(expression = "user") user: UserEntity,
-//    ): ResponseEntity<ApiResult<BoardEntity>> {
-//
-////        val asset = file?.let {
-////            assetService.uploadImage(it, user.id, AssetCategory.BOARD)
-////        }
-//
-//        val result = if (req.id == null) {
-//            // ✅ 등록
-//            val entity = BoardEntity(
-//                category = req.category,
-//                subject = req.subject,
-//                content = req.content,
-//                link = req.link,
-//                ip = req.ip,
-////                assetUid = asset?.uid,
-//                startDate = req.startDate,
-//                endDate = req.endDate,
-//                status = req.status,
-//                address = req.address,
-//                detailAddress = req.detailAddress,
-//                lat = req.lat,
-//                lng = req.lng,
-//                createdId = user.id,
-//                createdAt = OffsetDateTime.now(),
-//            )
-//
-//            adminBoardRepository.save(entity)
-//
-//        } else {
-//            // ✅ 수정
-//            val origin = adminBoardRepository.findById(req.id)
-//                ?: throw IllegalArgumentException("존재하지 않는 게시글입니다. id=${req.id}")
-//
-//            val updated = origin.copy(
-//                category = req.category,
-//                subject = req.subject,
-//                content = req.content,
-//                link = req.link,
-////                assetUid = asset?.uid ?: origin.assetUid,
-//                startDate = req.startDate,
-//                endDate = req.endDate,
-//                status = req.status,
-//                address = req.address,
-//                detailAddress = req.detailAddress,
-//                lat = req.lat,
-//                lng = req.lng,
-//                updatedId = user.id,
-//                updatedAt = OffsetDateTime.now(),
-//            )
-//
-//            adminBoardRepository.save(updated)
-//        }
-//
-//        return ResponseEntity.ok(ApiResult.success(result))
-//    }
+    @PostMapping("/create")
+    suspend fun createGift(
+        @AuthenticationPrincipal(expression = "user") user: UserEntity,
+        request: GiftProvideRequest,
+    ): ResponseEntity<ApiResult<GiftResponse>> {
+        return ResponseEntity.ok(ApiResult.success(giftAppService.createGift(user.id, request)))
+    }
+
 
     /**
-     * 게시글 삭제 (Soft Delete)
+     * 기프트쇼 비즈머니 조회
      */
-//    @DeleteMapping
-//    suspend fun deleteBoard(
-//        @RequestParam id: Long,
-//        @AuthenticationPrincipal(expression = "user") user: UserEntity,
-//    ): ResponseEntity<ApiResult<Any>> {
-//
-//        val origin = adminBoardRepository.findById(id)
-//            ?: throw IllegalArgumentException("존재하지 않는 게시글입니다. id=$id")
-//
-//        val deleted = origin.copy(
-//            deletedId = user.id,
-//            deletedAt = OffsetDateTime.now(),
-//        )
-//
-//        adminBoardRepository.save(deleted)
-//
-//        return ResponseEntity.ok(ApiResult.success(origin))
-//    }
+    @GetMapping("/giftishow/bizmoney")
+    suspend fun getBizMoney(
+        @AuthenticationPrincipal(expression = "user") user: UserEntity,
+    ): ResponseEntity<ApiResult<GiftishowApiResponse<GiftishowBizMoneyResult>>> {
+        return ResponseEntity.ok(ApiResult.success(giftshowClient.bizMoney()))
+    }
+
+
+    /**
+     * 기프트쇼 발송 취소 (trId 기준)
+     * - 실제로 쿠폰이 발송된 상태(SENT)에서만 의미가 있음
+     */
+    @PostMapping("/voucher/cancel")
+    suspend fun cancelVoucher(
+        @RequestParam trId: String,
+        @AuthenticationPrincipal(expression = "user") user: UserEntity,
+    ): ResponseEntity<ApiResult<GiftishowApiResponse<String>>> {
+        return ResponseEntity.ok(ApiResult.success(giftshowClient.cancelVoucher(trId)))
+    }
+
+
+    /**
+     * 상품 카테고리 (관리자 모달용)3
+     */
+    @GetMapping("/goods/categories")
+    suspend fun getGoodsCategories(
+        @AuthenticationPrincipal(expression = "user") user: UserEntity,
+    ): ResponseEntity<ApiResult<List<GoodsCategoryDto>>> {
+        val list = giftishowGoodsRepository.findCategories().toList()
+        return ResponseEntity.ok(ApiResult.success(list))
+    }
+
+
+    /**
+     * 상품 종류 (관리자 모달용)
+     */
+    @GetMapping("/goods/types")
+    suspend fun getGoodsTypes(
+        @AuthenticationPrincipal(expression = "user") user: UserEntity,
+    ): ResponseEntity<ApiResult<List<GoodsTypeDto>>> {
+        val list = giftishowGoodsRepository.findGoodsTypes()?.toList()
+        return ResponseEntity.ok(ApiResult.success(list))
+    }
+
+
+    /**
+     * 기프트쇼 상품 목록조회 (관리자 모달용)
+     */
+    @GetMapping("/goods")
+    suspend fun getGoods(
+        @RequestParam size: Int = 10,
+        @RequestParam(required = false) lastId: Long?,
+        @RequestParam search: String? = null,
+        @RequestParam searchType: String = "ALL",
+        @RequestParam categorySeq: Int? = null,
+        @RequestParam goodsTypeCd: String? = null,
+        @AuthenticationPrincipal(expression = "user") user: UserEntity,
+    ): ResponseEntity<ApiResult<ApiPageCursor<GoodsGiftishowEntity>>> {
+
+        val list = giftishowGoodsRepository.listByCursorId(
+            size = size,
+            lastId = lastId,
+            search = search,
+            searchType = searchType,
+            categorySeq = categorySeq,
+            goodsTypeCd = goodsTypeCd,
+        ).toList()
+
+        val nextCursor = list.lastOrNull()?.id?.toString()
+
+        return ResponseEntity.ok(
+            ApiResult.success(
+                ApiPageCursor(
+                    items = list,
+                    nextCursor = nextCursor,
+                    perPage = size,
+                )
+            )
+        )
+    }
+
 
     /**
      * 목록 조회

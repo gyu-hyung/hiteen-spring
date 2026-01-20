@@ -147,8 +147,10 @@ class GiftishowSyncService(
                     goldDiscountRate = detail?.goldDiscountRate,
                     vipDiscountRate = detail?.vipDiscountRate,
                     platinumDiscountRate = detail?.platinumDiscountRate,
+                    status = existing?.status ?: 0,
 
-                    deletedAt = null,
+                    delYn = 0,
+                    deletedAt = existing?.deletedAt,
                 )
 
                 repo.save(entity)
