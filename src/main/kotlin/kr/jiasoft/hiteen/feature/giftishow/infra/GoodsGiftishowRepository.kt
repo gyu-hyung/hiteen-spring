@@ -28,7 +28,6 @@ interface GiftishowGoodsRepository : CoroutineCrudRepository<GoodsGiftishowEntit
                MAX(category1_name) AS category_name
         FROM goods_giftishow
         WHERE status = 1 
-        AND del_yn = 0
         AND deleted_at IS NULL
         GROUP BY category1_seq
         ORDER BY category1_seq
@@ -38,12 +37,13 @@ interface GiftishowGoodsRepository : CoroutineCrudRepository<GoodsGiftishowEntit
 
     @Query("""
         SELECT DISTINCT
-            goods_type_cd AS goodsTypeCd,
-            goods_type_nm AS goodsTypeName
+            goods_type_cd AS goods_type_cd,
+            goods_type_nm AS goods_type_name
         FROM goods_giftishow
-        WHERE status = 1 
-        AND del_yn = 0
-        AND deleted_at IS NULL
+        WHERE status = 1
+          AND deleted_at IS NULL
+          AND goods_type_cd IS NOT NULL
+          AND goods_type_cd <> ''
         ORDER BY goods_type_cd
     """)
     fun findGoodsTypes(): Flow<GoodsTypeDto>
