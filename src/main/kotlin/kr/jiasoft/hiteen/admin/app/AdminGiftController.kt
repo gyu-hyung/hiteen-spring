@@ -96,7 +96,7 @@ class AdminGiftController(
     suspend fun getGoodsTypes(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ): ResponseEntity<ApiResult<List<GoodsTypeDto>>> {
-        val list = giftishowGoodsRepository.findGoodsTypes()?.toList()
+        val list = giftishowGoodsRepository.findGoodsTypes().toList()
         return ResponseEntity.ok(ApiResult.success(list))
     }
 
