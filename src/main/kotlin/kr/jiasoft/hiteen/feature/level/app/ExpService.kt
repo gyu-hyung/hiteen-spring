@@ -203,7 +203,7 @@ class ExpService(
         targetId: Long,
         dailyLimit: Int?
     ): Boolean {
-        val exists = userExpHistoryRepository.existsTargetId(userId, actionCode, targetId)
+        val exists = userExpHistoryRepository.existsTargetIdAndToday(userId, actionCode, targetId, LocalDate.now())
         if(exists) return false
 
         // 총 횟수 제한
