@@ -148,7 +148,15 @@ class AssetService(
         val hasDims = stored.width != null && stored.height != null
         val isSvg = stored.ext?.lowercase() == "svg"
 
-        if (!isImageMime && !hasDims && !isSvg) {
+        // mimeType(probeContentType)는 확장자 기반일 수 있어 손상 파일도 image/* 로 나올 수 있음.
+        // 따라서 SVG가 아닌 경우는 실제 디코딩 성공(=width/height 추출)까지 되었는지로 판별한다.
+        if (!isSvg && !hasDims) {
+            Files.deleteIfExists(stored.absolutePath)
+            throw IllegalArgumentException("이미지 파일이 손상되었거나 지원되지 않는 포맷입니다.")
+        }
+
+        // SVG는 dims가 없을 수 있으니 mimeType으로만 체크
+        if (isSvg && !isImageMime) {
             Files.deleteIfExists(stored.absolutePath)
             throw IllegalArgumentException("이미지 파일만 업로드할 수 있습니다.")
         }
@@ -207,8 +215,7 @@ class AssetService(
 
         // 6️⃣ 파일명 안전 생성
         val baseName = original.originFileName
-            ?.substringBeforeLast('.', original.originFileName)
-            ?: "asset_${original.id}"
+            .substringBeforeLast('.')
 
         // 7️⃣ 엔티티 생성
         val entity = AssetEntity(
