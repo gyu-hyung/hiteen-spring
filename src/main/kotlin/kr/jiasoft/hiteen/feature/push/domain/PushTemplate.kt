@@ -15,6 +15,18 @@ enum class PushTemplate(
     val itemType: PushItemType? = null,
 ) {
     /**
+     * 관리자 발송(커스텀)
+     * - 관리자 페이지에서 임의 title/message로 발송할 때 사용
+     * - 분류/통계용 코드로만 쓰고, 실제 title/message는 발송 시 덮어씀
+     */
+    ADMIN_SEND(
+        code = "ADMIN_SEND",
+        title = "관리자 알림",
+        message = "관리자 발송 알림",
+        itemType = PushItemType.ALL,
+    ),
+
+    /**
      * 친구 요청
      */
     FRIEND_REQUEST(

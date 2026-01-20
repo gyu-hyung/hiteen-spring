@@ -45,9 +45,6 @@ data class AdminPushDetailItem(
 
 @Schema(description = "관리자 푸시 생성 요청")
 data class AdminPushCreateRequest(
-    @field:Size(max = 50)
-    val code: String? = null,
-
     @field:Size(max = 255)
     val title: String? = null,
 
@@ -58,6 +55,11 @@ data class AdminPushCreateRequest(
      */
     @field:Size(max = 50)
     val type: String? = "notification",
+
+    /**
+     * true면 전체 회원(USER) 대상으로 발송합니다.
+     */
+    val sendAll: Boolean = false,
 
     /**
      * 대상 userId 목록

@@ -10,8 +10,9 @@ data class SmsDetailEntity (
     val id: Long = 0,
     val smsId: Long,
     val phone: String,
-    val success: Boolean,
+    val success: Int = 0,
     val error: String? = null,
     val createdAt: OffsetDateTime,
     val updatedAt: OffsetDateTime? = null,
+    val deletedAt: OffsetDateTime? = null,
 )
