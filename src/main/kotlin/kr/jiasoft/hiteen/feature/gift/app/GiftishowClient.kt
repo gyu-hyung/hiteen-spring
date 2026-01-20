@@ -20,4 +20,9 @@ interface GiftshowClient {
     suspend fun detailVoucher(trId: String): Map<String, Any?>
     suspend fun issueVoucher(req: GiftishowVoucherSendRequest): GiftishowApiResponse<GiftishowInnerResponse<GiftishowVoucherSendResponseDto>>
     suspend fun bizMoney(): GiftishowApiResponse<GiftishowBizMoneyResult>
+
+    /**
+     * 기프티쇼 발송 취소(trId)
+     */
+    suspend fun cancelVoucher(trId: String): GiftishowApiResponse<String>
 }

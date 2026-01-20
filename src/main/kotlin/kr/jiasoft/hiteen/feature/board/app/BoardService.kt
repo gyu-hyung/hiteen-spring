@@ -7,6 +7,7 @@ import kr.jiasoft.hiteen.common.dto.ApiPageCursor
 import kr.jiasoft.hiteen.feature.asset.app.AssetService
 import kr.jiasoft.hiteen.feature.asset.domain.AssetCategory
 import kr.jiasoft.hiteen.feature.asset.dto.AssetResponse
+import kr.jiasoft.hiteen.feature.board.app.event.BoardCreatedEvent
 import kr.jiasoft.hiteen.feature.board.domain.BoardAssetEntity
 import kr.jiasoft.hiteen.feature.board.domain.BoardBannerType
 import kr.jiasoft.hiteen.feature.board.domain.BoardCategory
@@ -33,6 +34,7 @@ import kr.jiasoft.hiteen.feature.push.domain.PushTemplate
 import kr.jiasoft.hiteen.feature.relationship.infra.FollowRepository
 import kr.jiasoft.hiteen.feature.user.app.UserService
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.dao.DuplicateKeyException
 import org.springframework.http.HttpStatus
 import org.springframework.http.codec.multipart.FilePart
@@ -56,6 +58,7 @@ class BoardService(
     private val expService: ExpService,
     private val pointService: PointService,
     private val pushService: PushService,
+    private val eventPublisher: ApplicationEventPublisher,
 
     private val followRepository: FollowRepository,
     private val txOperator: TransactionalOperator,
@@ -286,12 +289,11 @@ class BoardService(
             //포인트
             pointService.applyPolicy(user.id, PointPolicy.STORY_POST, saved.id)
             //포스팅 알림
-            val followerIds = followRepository.findAllFollowerIds(user.id).toList()
-            pushService.sendAndSavePush(
-                followerIds,
-                user.id,
-                PushTemplate.NEW_POST.buildPushData("nickname" to user),
-                mapOf("boardUid" to saved.uid.toString())
+            eventPublisher.publishEvent(
+                BoardCreatedEvent(
+                    boardUid = saved.uid,
+                    authorId = user.id,
+                )
             )
 
             saved.uid
