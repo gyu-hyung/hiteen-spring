@@ -120,6 +120,26 @@ interface AdminUserRepository : CoroutineCrudRepository<UserEntity, Long> {
     """)
     suspend fun listSearchUsers(
         role: String? = "USER",
+         keyword: String?
+    ): Flow<AdminUserSearchResponse>
+
+    /**
+     * 회원 검색(ROLE 조건 없음) - AdminUserController 전용
+     * 기존 listSearchUsers는 다른 곳에서 사용할 수 있으므로 건드리지 않고 신규로 추가.
+     */
+    @Query("""
+        SELECT u.*
+        FROM users u
+        WHERE u.deleted_at IS NULL
+            AND (
+                :keyword IS NULL
+                OR (
+                        u.nickname LIKE CONCAT('%', :keyword, '%')
+                        OR u.phone LIKE CONCAT('%', :keyword, '%')
+                )
+            )
+    """)
+    suspend fun listSearchUsersAllRoles(
         keyword: String?
     ): Flow<AdminUserSearchResponse>
 

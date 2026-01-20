@@ -10,6 +10,7 @@ import kr.jiasoft.hiteen.admin.dto.AdminUserResponse
 import kr.jiasoft.hiteen.admin.dto.AdminUserRoleUpdateRequest
 import kr.jiasoft.hiteen.admin.dto.AdminUserRoleUpdateResponse
 import kr.jiasoft.hiteen.admin.dto.AdminUserSaveRequest
+import kr.jiasoft.hiteen.admin.dto.AdminUserSearchResponse
 import kr.jiasoft.hiteen.admin.infra.AdminFollowRepository
 import kr.jiasoft.hiteen.admin.infra.AdminFriendRepository
 import kr.jiasoft.hiteen.admin.infra.AdminUserRepository
@@ -46,6 +47,15 @@ class AdminUserController (
     private val adminUserService: AdminUserService,
 ) {
 
+    // 회원 검색 (role 조건 없음)
+    @GetMapping("/users/search")
+    suspend fun getUsersSearch(
+        @RequestParam keyword: String? = null,
+        @AuthenticationPrincipal(expression = "user") user: UserEntity,
+    ): ResponseEntity<ApiResult<List<AdminUserSearchResponse>>> {
+        val data = adminUserRepository.listSearchUsersAllRoles(keyword).toList()
+        return ResponseEntity.ok(ApiResult.success(data))
+    }
 
     @GetMapping("/users")
     suspend fun getUsers(

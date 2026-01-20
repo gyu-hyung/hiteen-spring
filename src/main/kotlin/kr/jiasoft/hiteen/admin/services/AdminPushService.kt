@@ -7,10 +7,12 @@ import kr.jiasoft.hiteen.admin.dto.AdminPushDetailResponse
 import kr.jiasoft.hiteen.admin.dto.AdminPushListResponse
 import kr.jiasoft.hiteen.admin.infra.AdminPushDetailRepository
 import kr.jiasoft.hiteen.admin.infra.AdminPushRepository
+import kr.jiasoft.hiteen.admin.infra.AdminUserRepository
 import kr.jiasoft.hiteen.common.dto.ApiPage
 import kr.jiasoft.hiteen.common.dto.PageUtil
 import kr.jiasoft.hiteen.feature.push.app.PushService
 import kr.jiasoft.hiteen.feature.push.domain.PushEntity
+import kr.jiasoft.hiteen.feature.push.domain.PushTemplate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -19,6 +21,7 @@ class AdminPushService(
     private val adminPushRepository: AdminPushRepository,
     private val adminPushDetailRepository: AdminPushDetailRepository,
     private val pushService: PushService,
+    private val adminUserRepository: AdminUserRepository,
 ) {
 
     suspend fun list(
@@ -98,14 +101,28 @@ class AdminPushService(
     @Transactional
     suspend fun createAndSend(createdId: Long?, request: AdminPushCreateRequest): AdminPushListResponse {
         val templateData = mutableMapOf<String, Any>()
-        request.code?.let { templateData["code"] = it }
+
+        // 관리자 발송은 PushTemplate.ADMIN_SEND로 타입(code)을 고정
+        templateData["code"] = PushTemplate.ADMIN_SEND.code
+        // title/message는 관리자 요청값으로 덮어씀
         request.title?.let { templateData["title"] = it }
         request.message?.let { templateData["message"] = it }
         templateData["silent"] = (request.type?.lowercase() == "silent")
 
-        // PushService는 sendAndSavePush에서 push/push_detail을 저장해줌
+        val targetUserIds: List<Long> = if (request.sendAll) {
+            adminUserRepository.findByRole("USER").map { it.id }
+        } else {
+            request.userIds
+        }
+
+        if (targetUserIds.isEmpty()) {
+            throw IllegalArgumentException("회원을 한 명 이상 선택해 주세요.")
+        }
+
+        // PushService 내부에서 토큰 500개 단위 chunk로 멀티캐스트 발송/상세로그 저장을 처리하므로,
+        // 여기서는 1회 호출로 "일괄발송"(push 1건 + detail 다건) 되도록 한다.
         pushService.sendAndSavePush(
-            userIds = request.userIds,
+            userIds = targetUserIds,
             userId = createdId,
             templateData = templateData,
         )

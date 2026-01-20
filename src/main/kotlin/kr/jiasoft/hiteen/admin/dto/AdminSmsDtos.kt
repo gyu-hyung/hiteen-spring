@@ -23,7 +23,11 @@ data class AdminSmsListResponse(
 @Schema(description = "관리자 SMS 상세")
 data class AdminSmsDetailResponse(
     val sms: AdminSmsListResponse,
-    val authLogs: List<AdminSmsAuthResponse>,
+    /** 인증문자(sms_auth) 로그 */
+    val authLogs: List<AdminSmsAuthResponse> = emptyList(),
+
+    /** 일반문자(sms_details) 로그 */
+    val smsDetails: List<AdminSmsDetailLogResponse> = emptyList(),
 )
 
 @Schema(description = "관리자 SMS 인증 로그")
@@ -41,3 +45,17 @@ data class AdminSmsAuthResponse(
     val deletedAt: OffsetDateTime?,
 )
 
+@Schema(description = "관리자 SMS 발송 상세 로그")
+data class AdminSmsDetailLogResponse(
+    val id: Long,
+    val smsId: Long,
+    val phone: String,
+    val success: Int,
+    val error: String?,
+    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm:ss")
+    val createdAt: OffsetDateTime,
+    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm:ss")
+    val updatedAt: OffsetDateTime?,
+    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm:ss")
+    val deletedAt: OffsetDateTime?,
+)
