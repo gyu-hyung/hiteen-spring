@@ -9,16 +9,69 @@ import kr.jiasoft.hiteen.feature.asset.dto.StoredFile
 import net.coobird.thumbnailator.Thumbnails
 import net.coobird.thumbnailator.geometry.Positions
 import org.springframework.http.codec.multipart.FilePart
-import java.awt.image.BufferedImage
 import java.nio.file.Files
 import java.nio.file.Path
 import java.time.LocalDate
 import java.util.*
 import javax.imageio.ImageIO
+import javax.imageio.ImageReader
 
 class AssetStorage(
     private val root: Path
 ) {
+
+    private fun normalizeExt(formatName: String?): String? = when (formatName?.lowercase()) {
+        null -> null
+        "jpeg", "jpg" -> "jpg"
+        "png" -> "png"
+        "gif" -> "gif"
+        "bmp" -> "bmp"
+        "webp" -> "webp"
+        "wbmp" -> "wbmp"
+        else -> formatName.lowercase()
+    }
+
+    private fun guessMimeByExt(ext: String?): String? = when (ext?.lowercase()) {
+        "jpg", "jpeg" -> "image/jpeg"
+        "png" -> "image/png"
+        "gif" -> "image/gif"
+        "webp" -> "image/webp"
+        "bmp" -> "image/bmp"
+        "svg" -> "image/svg+xml"
+        else -> null
+    }
+
+    private fun detectImageFormat(path: Path): String? {
+        return try {
+            ImageIO.createImageInputStream(path.toFile()).use { iis ->
+                val readers = ImageIO.getImageReaders(iis)
+                if (readers.hasNext()) {
+                    val reader: ImageReader = readers.next()
+                    try {
+                        normalizeExt(reader.formatName)
+                    } finally {
+                        try { reader.dispose() } catch (_: Throwable) {}
+                    }
+                } else null
+            }
+        } catch (_: Throwable) {
+            null
+        }
+    }
+
+    private fun readImage(path: Path) =
+        ImageIO.createImageInputStream(path.toFile()).use { iis ->
+            val readers = ImageIO.getImageReaders(iis)
+            if (!readers.hasNext()) return@use null
+            val reader = readers.next()
+            try {
+                reader.input = iis
+                reader.read(0)
+            } finally {
+                try { reader.dispose() } catch (_: Throwable) {}
+            }
+        }
+
     /** 저장: 날짜 폴더/랜덤파일명. 확장자 유지 */
     suspend fun save(
         filePart: FilePart,
@@ -27,19 +80,27 @@ class AssetStorage(
         category: AssetCategory = AssetCategory.COMMON
     ): StoredFile {
         val orig = filePart.filename()
-        val ext = orig.substringAfterLast('.', "").lowercase().ifBlank { null }
+        val extFromName = orig.substringAfterLast('.', "").lowercase().ifBlank { null }
 
-        if (ext != null && allowedExts.isNotEmpty() && !allowedExts.contains(ext)) {
-            throw IllegalArgumentException("허용되지 않은 확장자: .$ext")
+        if (extFromName != null && allowedExts.isNotEmpty() && !allowedExts.contains(extFromName)) {
+            throw IllegalArgumentException("허용되지 않은 확장자: .$extFromName")
         }
 
         // 파일을 임시로 받아 사이즈 검사
-        val tmp = Files.createTempFile("upload-", ".$ext")
+        val tmp = Files.createTempFile("upload-", ".${extFromName ?: "tmp"}")
         try {
             // transferTo는 non-blocking 처리가 되어 있음
             filePart.transferTo(tmp).awaitSingleOrNull()
             val size = Files.size(tmp)
             if (size > maxSizeBytes) throw IllegalArgumentException("파일 용량 초과: ${size}bytes")
+
+            // ✅ 실제 이미지 포맷 기반으로 확장자 정정 (ex: webp인데 jpg로 들어오는 케이스)
+            val detectedExt = detectImageFormat(tmp)
+            val finalExt = detectedExt ?: extFromName
+
+            if (finalExt != null && allowedExts.isNotEmpty() && !allowedExts.contains(finalExt)) {
+                throw IllegalArgumentException("허용되지 않은 확장자(실제 포맷 기준): .$finalExt")
+            }
 
             val today = LocalDate.now()
             val dir = root.resolve(
@@ -48,7 +109,7 @@ class AssetStorage(
             Files.createDirectories(dir)
 
             val randomName = UUID.randomUUID().toString().replace("-", "")
-            val storedName = if (ext != null) "$randomName.$ext" else randomName
+            val storedName = if (finalExt != null) "$randomName.$finalExt" else randomName
             val dest = dir.resolve(storedName)
 
             // 이동
@@ -58,10 +119,11 @@ class AssetStorage(
 
             // 이미지면 크기 추출
             val (w, h) = try {
-                ImageIO.read(dest.toFile())?.let { it.width to it.height } ?: (null to null)
+                readImage(dest)?.let { it.width to it.height } ?: (null to null)
             } catch (_: Throwable) { null to null }
 
-            val mime = try { Files.probeContentType(dest) } catch (_: Throwable) { null }
+            val mime = guessMimeByExt(finalExt)
+                ?: try { Files.probeContentType(dest) } catch (_: Throwable) { null }
 
             val relDir = root.relativize(dir).toString().replace('\\', '/') + "/"
 
@@ -69,7 +131,7 @@ class AssetStorage(
                 relativePath = relDir,
                 absolutePath = dest,
                 originFileName = orig,
-                ext = ext,
+                ext = finalExt,
                 size = size,
                 width = w,
                 height = h,
@@ -81,6 +143,22 @@ class AssetStorage(
         }
     }
 
+    private fun ensureWebpWriterAvailable() {
+        val writers = ImageIO.getImageWritersByFormatName("webp")
+        if (!writers.hasNext()) {
+            throw IllegalStateException(
+                "Specified format is not supported: webp (ImageIO writer not found). " +
+                    "Add a WebP ImageIO writer (e.g. org.sejda.imageio:webp-imageio)."
+            )
+        }
+    }
+
+    private fun isMacArm64(): Boolean {
+        val os = System.getProperty("os.name")?.lowercase() ?: ""
+        val arch = System.getProperty("os.arch")?.lowercase() ?: ""
+        return os.contains("mac") && (arch.contains("aarch64") || arch.contains("arm64"))
+    }
+
     suspend fun createThumbnail(
         sourcePath: Path,
         ext: String,
@@ -89,9 +167,17 @@ class AssetStorage(
         mode: ThumbnailMode = ThumbnailMode.COVER,
     ): StoredFile = withContext(Dispatchers.IO) {
 
-        val safeExt = ext.lowercase()
-        if (safeExt == "gif" || safeExt == "svg") {
+        val srcExt = ext.lowercase()
+        if (srcExt == "gif" || srcExt == "svg") {
             throw IllegalArgumentException("GIF, SVG는 리사이즈 불가")
+        }
+
+        // ✅ 기본은 webp로 생성하되, 로컬 mac arm64에서 네이티브 로딩 이슈가 있으면 jpg로 폴백
+        var outExt = "webp"
+        try {
+            ensureWebpWriterAvailable()
+        } catch (_: Throwable) {
+            outExt = "jpg"
         }
 
         val today = LocalDate.now()
@@ -100,46 +186,60 @@ class AssetStorage(
         )
         Files.createDirectories(dir)
 
-        val newName = "${UUID.randomUUID()}.$safeExt"
+        val newName = "${UUID.randomUUID()}.$outExt"
         val dest = dir.resolve(newName)
 
-        val builder = Thumbnails.of(sourcePath.toFile())
-            .useExifOrientation(true)    // ✅ 회전 문제 해결(핵심)
-            .outputFormat(safeExt)
-            .outputQuality(0.9)          // 필요하면 조절
+        val srcImage = readImage(sourcePath)
+            ?: throw IllegalArgumentException("지원되지 않는 이미지 포맷입니다.")
+
+        val builder = Thumbnails.of(srcImage)
+            .useExifOrientation(true)
+            .outputFormat(outExt)
+            .outputQuality(0.9)
 
         when (mode) {
-            ThumbnailMode.COVER -> {
-                // ✅ 비율 유지 + 중앙 크롭 → 결과는 정확히 width x height
-                builder
-                    .crop(Positions.CENTER)
-                    .size(width, height)
-            }
-            ThumbnailMode.CONTAIN -> {
-                // ✅ 비율 유지 + 전체가 보이게 → 한 변이 덜 찰 수 있음(여백은 프론트에서 object-fit: contain)
-                builder
-                    .size(width, height)
-                    .keepAspectRatio(true)
-            }
+            ThumbnailMode.COVER -> builder.crop(Positions.CENTER).size(width, height)
+            ThumbnailMode.CONTAIN -> builder.size(width, height).keepAspectRatio(true)
         }
 
-        builder.toFile(dest.toFile())
+        try {
+            builder.toFile(dest.toFile())
+        } catch (e: UnsatisfiedLinkError) {
+            // mac arm64에서 x86_64 dylib 로딩 실패 케이스
+            if (outExt == "webp" && isMacArm64()) {
+                outExt = "jpg"
+                val dest2 = dest.parent.resolve(dest.fileName.toString().replaceAfterLast('.', outExt))
+                Thumbnails.of(srcImage)
+                    .useExifOrientation(true)
+                    .outputFormat(outExt)
+                    .outputQuality(0.9)
+                    .apply {
+                        when (mode) {
+                            ThumbnailMode.COVER -> crop(Positions.CENTER).size(width, height)
+                            ThumbnailMode.CONTAIN -> size(width, height).keepAspectRatio(true)
+                        }
+                    }
+                    .toFile(dest2.toFile())
+                return@withContext finalizeThumb(dest2, outExt, width, height)
+            }
+            throw e
+        }
 
-        val mime = try { Files.probeContentType(dest) } catch (_: Throwable) { null }
+        finalizeThumb(dest, outExt, width, height)
+    }
+
+    private fun finalizeThumb(dest: Path, outExt: String, width: Int, height: Int): StoredFile {
+        val mime = guessMimeByExt(outExt) ?: try { Files.probeContentType(dest) } catch (_: Throwable) { null }
         val size = Files.size(dest)
-
-        // 실제 생성된 크기 다시 읽기(정확도)
         val (outW, outH) = try {
-            ImageIO.read(dest.toFile())?.let { it.width to it.height } ?: (width to height)
+            readImage(dest)?.let { it.width to it.height } ?: (width to height)
         } catch (_: Throwable) { width to height }
-
-        val relDir = root.relativize(dir).toString().replace('\\', '/') + "/"
-
-        StoredFile(
+        val relDir = root.relativize(dest.parent).toString().replace('\\', '/') + "/"
+        return StoredFile(
             relativePath = relDir,
             absolutePath = dest,
-            originFileName = newName,
-            ext = safeExt,
+            originFileName = dest.fileName.toString(),
+            ext = outExt,
             size = size,
             width = outW,
             height = outH,

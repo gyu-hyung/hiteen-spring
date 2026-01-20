@@ -206,12 +206,11 @@ class AssetService(
         )
 
         // 6️⃣ 파일명 안전 생성
-        val baseName = original.originFileName
-            .substringBeforeLast('.', original.originFileName)
+        val baseName = original.originFileName.substringBeforeLast('.')
 
         // 7️⃣ 엔티티 생성
         val entity = AssetEntity(
-            originFileName = "${baseName}_${width}x${height}.$ext",
+            originFileName = "${baseName}_${width}x${height}.${resizedStored.ext}",
             storeFileName = resizedStored.absolutePath.fileName.toString(),
             filePath = resizedStored.relativePath,
             type = resizedStored.mimeTypeGuess,
