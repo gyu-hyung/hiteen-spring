@@ -205,6 +205,11 @@ class UserService (
         return userRepository.findSummaryInfoById(userId)
     }
 
+    suspend fun findUserSummaryByIds(userIds: List<Long>): List<UserSummary> {
+        if (userIds.isEmpty()) return emptyList()
+        return userRepository.findSummaryByIds(userIds)
+    }
+
     @Cacheable(cacheNames = ["userEntity"], key = "#id")
     suspend fun findByUsername(id: Long): UserEntity {
         println("✅✅✅✅✅✅✅✅✅✅✅✅✅ VVVV")
