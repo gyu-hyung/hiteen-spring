@@ -7,10 +7,13 @@ import kr.jiasoft.hiteen.admin.dto.AdminPushDetailResponse
 import kr.jiasoft.hiteen.admin.dto.AdminPushListResponse
 import kr.jiasoft.hiteen.admin.infra.AdminPushDetailRepository
 import kr.jiasoft.hiteen.admin.infra.AdminPushRepository
+import kr.jiasoft.hiteen.admin.infra.AdminUserRepository
 import kr.jiasoft.hiteen.common.dto.ApiPage
 import kr.jiasoft.hiteen.common.dto.PageUtil
-import kr.jiasoft.hiteen.feature.push.app.PushService
+import kr.jiasoft.hiteen.feature.push.app.event.PushSendRequestedEvent
 import kr.jiasoft.hiteen.feature.push.domain.PushEntity
+import kr.jiasoft.hiteen.feature.push.domain.PushTemplate
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -18,7 +21,8 @@ import org.springframework.transaction.annotation.Transactional
 class AdminPushService(
     private val adminPushRepository: AdminPushRepository,
     private val adminPushDetailRepository: AdminPushDetailRepository,
-    private val pushService: PushService,
+    private val adminUserRepository: AdminUserRepository,
+    private val eventPublisher: ApplicationEventPublisher,
 ) {
 
     suspend fun list(
@@ -98,16 +102,32 @@ class AdminPushService(
     @Transactional
     suspend fun createAndSend(createdId: Long?, request: AdminPushCreateRequest): AdminPushListResponse {
         val templateData = mutableMapOf<String, Any>()
-        request.code?.let { templateData["code"] = it }
+
+        // 관리자 발송은 PushTemplate.ADMIN_SEND로 타입(code)을 고정
+        templateData["code"] = PushTemplate.ADMIN_SEND.code
+        // title/message는 관리자 요청값으로 덮어씀
         request.title?.let { templateData["title"] = it }
         request.message?.let { templateData["message"] = it }
         templateData["silent"] = (request.type?.lowercase() == "silent")
 
-        // PushService는 sendAndSavePush에서 push/push_detail을 저장해줌
-        pushService.sendAndSavePush(
-            userIds = request.userIds,
-            userId = createdId,
-            templateData = templateData,
+        val targetUserIds: List<Long> = if (request.sendAll) {
+            adminUserRepository.findByRole("USER").map { it.id }
+        } else {
+            request.userIds
+        }
+
+        if (targetUserIds.isEmpty()) {
+            throw IllegalArgumentException("회원을 한 명 이상 선택해 주세요.")
+        }
+
+        // PushService 내부에서 토큰 500개 단위 chunk로 멀티캐스트 발송/상세로그 저장을 처리하므로,
+        // 여기서는 이벤트로 분리해 API 응답을 블로킹하지 않도록 한다.
+        eventPublisher.publishEvent(
+            PushSendRequestedEvent(
+                userIds = targetUserIds,
+                actorUserId = createdId,
+                templateData = templateData,
+            )
         )
 
         // 방금 저장된 pushId를 PushService에서 반환하지 않기 때문에,

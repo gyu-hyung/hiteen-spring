@@ -2,6 +2,8 @@ package kr.jiasoft.hiteen.admin.services
 
 import kr.jiasoft.hiteen.admin.dto.AdminUserResponse
 import kr.jiasoft.hiteen.admin.dto.AdminUserSaveRequest
+import kr.jiasoft.hiteen.admin.dto.AdminUserRoleUpdateRequest
+import kr.jiasoft.hiteen.admin.dto.AdminUserRoleUpdateResponse
 import kr.jiasoft.hiteen.admin.infra.AdminUserRepository
 import kr.jiasoft.hiteen.feature.asset.app.AssetService
 import kr.jiasoft.hiteen.feature.asset.infra.AssetRepository
@@ -38,6 +40,41 @@ class AdminUserService(
 
     private val txOperator: TransactionalOperator,
 ) {
+
+    suspend fun updateRole(request: AdminUserRoleUpdateRequest, admin: UserEntity): AdminUserRoleUpdateResponse {
+        val normalizedRole = request.role.trim().uppercase()
+        require(normalizedRole == "ADMIN" || normalizedRole == "USER") { "role must be ADMIN or USER" }
+
+        val targetUid = try { UUID.fromString(request.uid) } catch (_: Exception) {
+            throw IllegalArgumentException("invalid uid")
+        }
+
+        if (admin.uid == targetUid) {
+            throw IllegalArgumentException("본인 계정의 role은 변경할 수 없습니다.")
+        }
+
+        return txOperator.executeAndAwait {
+            val target = adminUserRepository.findByUid(targetUid)
+                ?: throw IllegalArgumentException("존재하지 않는 사용자입니다.")
+
+            val now = OffsetDateTime.now()
+            val saved = adminUserRepository.save(
+                target.copy(
+                    role = normalizedRole,
+                    updatedId = admin.id,
+                    updatedAt = now,
+                )
+            )
+
+            AdminUserRoleUpdateResponse(
+                id = saved.id,
+                uid = saved.uid.toString(),
+                role = saved.role,
+                updatedId = saved.updatedId,
+                updatedAt = saved.updatedAt,
+            )
+        }
+    }
 
     suspend fun save(request: AdminUserSaveRequest, admin: UserEntity): AdminUserResponse {
         return txOperator.executeAndAwait {

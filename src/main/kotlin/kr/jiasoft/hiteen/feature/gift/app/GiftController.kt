@@ -7,7 +7,6 @@ import kr.jiasoft.hiteen.admin.dto.GoodsTypeDto
 import kr.jiasoft.hiteen.common.dto.ApiPageCursor
 import kr.jiasoft.hiteen.common.dto.ApiResult
 import kr.jiasoft.hiteen.feature.gift.dto.GiftBuyRequest
-import kr.jiasoft.hiteen.feature.gift.dto.GiftProvideRequest
 import kr.jiasoft.hiteen.feature.gift.dto.GiftIssueRequest
 import kr.jiasoft.hiteen.feature.gift.dto.GiftResponse
 import kr.jiasoft.hiteen.feature.gift.dto.GiftUseRequest
@@ -15,7 +14,6 @@ import kr.jiasoft.hiteen.feature.giftishow.domain.GoodsGiftishowEntity
 import kr.jiasoft.hiteen.feature.giftishow.infra.GiftishowGoodsRepository
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import org.springframework.http.ResponseEntity
-import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
@@ -50,19 +48,6 @@ class GiftController (
         request: GiftBuyRequest
     ): ResponseEntity<ApiResult<GiftResponse>> {
         return ResponseEntity.ok(ApiResult.success(giftAppService.buyGift(user.id, user.uid, request)))
-    }
-
-
-    /**
-     * 관리자 -> 사용자 선물 지급
-     * */
-    @PostMapping("/admin/create")
-    @PreAuthorize("hasRole('ADMIN')")
-    suspend fun createGift(
-        @AuthenticationPrincipal(expression = "user") user: UserEntity,
-        request: GiftProvideRequest
-    ): ResponseEntity<ApiResult<GiftResponse>> {
-        return ResponseEntity.ok(ApiResult.success(giftAppService.createGift(user.id, request)))
     }
 
 
@@ -160,6 +145,7 @@ class GiftController (
         @RequestParam searchType: String = "ALL",
         @RequestParam categorySeq: Int? = null,
         @RequestParam goodsTypeCd: String? = null,
+        @RequestParam(required = false) brandCode: String? = null,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ): ResponseEntity<ApiResult<ApiPageCursor<GoodsGiftishowEntity>>> {
 
@@ -168,9 +154,9 @@ class GiftController (
             lastId = lastId,
             search = search,
             searchType = searchType,
-//            status = "ACTIVE",
             categorySeq = categorySeq,
             goodsTypeCd = goodsTypeCd,
+            brandCode = brandCode,
         ).toList()
 
         // 다음 커서 (마지막 id)
@@ -191,4 +177,3 @@ class GiftController (
 
 
 }
-

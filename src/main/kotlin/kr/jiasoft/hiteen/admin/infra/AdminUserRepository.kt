@@ -120,6 +120,26 @@ interface AdminUserRepository : CoroutineCrudRepository<UserEntity, Long> {
     """)
     suspend fun listSearchUsers(
         role: String? = "USER",
+         keyword: String?
+    ): Flow<AdminUserSearchResponse>
+
+    /**
+     * 회원 검색(ROLE 조건 없음) - AdminUserController 전용
+     * 기존 listSearchUsers는 다른 곳에서 사용할 수 있으므로 건드리지 않고 신규로 추가.
+     */
+    @Query("""
+        SELECT u.*
+        FROM users u
+        WHERE u.deleted_at IS NULL
+            AND (
+                :keyword IS NULL
+                OR (
+                        u.nickname LIKE CONCAT('%', :keyword, '%')
+                        OR u.phone LIKE CONCAT('%', :keyword, '%')
+                )
+            )
+    """)
+    suspend fun listSearchUsersAllRoles(
         keyword: String?
     ): Flow<AdminUserSearchResponse>
 
@@ -138,4 +158,45 @@ interface AdminUserRepository : CoroutineCrudRepository<UserEntity, Long> {
         role: String? = "USER",
         phones: List<String>
     ): List<UserEntity>
+
+    @Query("""
+        SELECT 
+            u.*,
+            (SELECT name FROM schools s WHERE s.id = u.school_id) AS school_name,
+            (SELECT tier_name_kr FROM tiers t WHERE t.id = u.tier_id) AS tier_name_kr,
+            (SELECT uid FROM tiers t WHERE t.id = u.tier_id) AS tier_asset_uid,
+            (SELECT level FROM tiers t WHERE t.id = u.tier_id) AS level,
+            (select total_point from user_points_summary ups where ups.user_id = u.id) point,
+            (select total_cash from user_cash_summary ups where ups.user_id = u.id) cash
+        FROM users u
+        WHERE
+            (
+                :search IS NULL
+                OR (
+                    :searchType = 'ALL' AND (
+                        u.nickname LIKE CONCAT('%', :search, '%')
+                        OR u.phone LIKE CONCAT('%', :search, '%')
+                    )
+                )
+                OR (:searchType = 'nickname' AND u.nickname LIKE CONCAT('%', :search, '%'))
+                OR (:searchType = 'phone' AND u.phone LIKE CONCAT('%', :search, '%'))
+            )
+            AND (
+                :status IS NULL OR :status = 'ALL'
+                OR (:status = 'ACTIVE' AND u.deleted_at IS NULL)
+                OR (:status = 'DELETED' AND u.deleted_at IS NOT NULL)
+            )
+            AND (:role IS NULL OR u.role = :role)
+            AND (:lastId IS NULL OR u.id < :lastId)
+        ORDER BY u.id DESC
+        LIMIT :size
+    """)
+    fun listByCursorId(
+        size: Int,
+        lastId: Long?,
+        search: String?,
+        searchType: String,
+        role: String?,
+        status: String?,
+    ): Flow<AdminUserResponse>
 }

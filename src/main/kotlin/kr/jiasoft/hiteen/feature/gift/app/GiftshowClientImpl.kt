@@ -83,7 +83,7 @@ class GiftshowClientImpl(
 
 
 
-    suspend fun cancelVoucher(trId: String): GiftishowApiResponse<String> {
+    override suspend fun cancelVoucher(trId: String): GiftishowApiResponse<String> {
         val form = baseForm("0202").apply {
             put("tr_Id", trId)
             put("user_Id", userId)

@@ -10,7 +10,7 @@ import kr.jiasoft.hiteen.feature.contact.infra.UserContactRepository
 import kr.jiasoft.hiteen.feature.level.app.ExpService
 import kr.jiasoft.hiteen.feature.location.domain.LocationHistory
 import kr.jiasoft.hiteen.feature.location.infra.cache.LocationCacheRedisService
-import kr.jiasoft.hiteen.feature.push.app.PushService
+import kr.jiasoft.hiteen.feature.push.app.event.PushSendRequestedEvent
 import kr.jiasoft.hiteen.feature.push.domain.PushTemplate
 import kr.jiasoft.hiteen.feature.relationship.RelationHistoryService
 import kr.jiasoft.hiteen.feature.relationship.domain.FollowEntity
@@ -29,6 +29,7 @@ import kr.jiasoft.hiteen.feature.user.app.UserService
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import kr.jiasoft.hiteen.feature.user.dto.UserResponse
 import kr.jiasoft.hiteen.feature.user.infra.UserRepository
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
@@ -48,7 +49,8 @@ class FriendService(
     private val userService: UserService,
     private val locationCacheRedisService: LocationCacheRedisService,
     private val expService: ExpService,
-    private val pushService: PushService,
+
+    private val eventPublisher: ApplicationEventPublisher,
 ) {
     private val now: OffsetDateTime get() = OffsetDateTime.now(ZoneOffset.UTC)
 
@@ -183,10 +185,12 @@ class FriendService(
                     )
                 )
                 expService.grantExp(meId, "FRIEND_ADD", targetId)
-                pushService.sendAndSavePush(
-                    listOf(targetId),
-                    me.id,
-                    PushTemplate.FRIEND_REQUEST.buildPushData("nickname" to me.nickname)
+                eventPublisher.publishEvent(
+                    PushSendRequestedEvent(
+                        userIds = listOf(targetId),
+                        actorUserId = me.id,
+                        templateData = PushTemplate.FRIEND_REQUEST.buildPushData("nickname" to me.nickname),
+                    )
                 )
                 relationHistoryService.log(meId, targetId, RelationType.FRIEND.name, RelationAction.REQUEST.name)
             }
@@ -217,10 +221,12 @@ class FriendService(
 //                    )
                     expService.grantExp(meId, "FRIEND_ADD", targetId)
                     expService.grantExp(targetId, "FRIEND_ADD", meId, null, meId)
-                    pushService.sendAndSavePush(
-                        listOf(targetId),
-                        me.id,
-                        PushTemplate.FRIEND_ACCEPT.buildPushData("nickname" to me.nickname)
+                    eventPublisher.publishEvent(
+                        PushSendRequestedEvent(
+                            userIds = listOf(targetId),
+                            actorUserId = meId,
+                            templateData = PushTemplate.FRIEND_ACCEPT.buildPushData("nickname" to me.nickname),
+                        )
                     )
                     relationHistoryService.log(meId, targetId, RelationType.FRIEND.name, RelationAction.ACCEPT.name)
                 } else {
@@ -286,10 +292,12 @@ class FriendService(
 
         expService.grantExp(meId, "FRIEND_ADD", requesterId)
         expService.grantExp(requesterId, "FRIEND_ADD", meId, null, meId)
-        pushService.sendAndSavePush(
-            listOf(requesterId),
-            meId,
-            PushTemplate.FRIEND_ACCEPT.buildPushData("nickname" to me.nickname)
+        eventPublisher.publishEvent(
+            PushSendRequestedEvent(
+                userIds = listOf(requesterId),
+                actorUserId = meId,
+                templateData = PushTemplate.FRIEND_ACCEPT.buildPushData("nickname" to me.nickname),
+            )
         )
         relationHistoryService.log(meId, requesterId, RelationType.FRIEND.name, RelationAction.ACCEPT.name)
     }

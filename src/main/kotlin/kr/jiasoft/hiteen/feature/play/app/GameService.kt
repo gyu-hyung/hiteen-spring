@@ -23,12 +23,13 @@ import kr.jiasoft.hiteen.feature.play.infra.SeasonParticipantRepository
 import kr.jiasoft.hiteen.feature.play.infra.SeasonRepository
 import kr.jiasoft.hiteen.feature.point.app.PointService
 import kr.jiasoft.hiteen.feature.point.domain.PointPolicy
-import kr.jiasoft.hiteen.feature.push.app.PushService
+import kr.jiasoft.hiteen.feature.push.app.event.PushSendRequestedEvent
 import kr.jiasoft.hiteen.feature.push.domain.PushTemplate
 import kr.jiasoft.hiteen.feature.relationship.infra.FriendRepository
 import kr.jiasoft.hiteen.feature.user.domain.SeasonStatusType
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import kr.jiasoft.hiteen.feature.user.infra.UserRepository
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import org.springframework.transaction.reactive.TransactionalOperator
 import org.springframework.transaction.reactive.executeAndAwait
@@ -54,11 +55,10 @@ class GameService(
     private val expService: ExpService,
     private val pointService: PointService,
 
-    private val pushService: PushService,
-
     private val adService: AdService,
     private val txOperator: TransactionalOperator,
     private val rewardLeagueStartNotifier: RewardLeagueStartNotifier,
+    private val eventPublisher: ApplicationEventPublisher,
 ) {
 
 
@@ -287,17 +287,19 @@ class GameService(
                 }
 
                 overtakenFriendIds.forEach { friendId ->
-                    pushService.sendAndSavePush(
-                        userIds = listOf(friendId),
-                        userId = userId,
-                        templateData = PushTemplate.GAME_OVERTAKE_FRIEND.buildPushData(
-                            "nickname" to myNickname,
-                            "gameName" to gameName,
-                        ),
-                        extraData = mapOf(
-                            "gameId" to gameId.toString(),
-                            "seasonId" to participant.seasonId.toString(),
-                            "league" to participant.league,
+                    eventPublisher.publishEvent(
+                        PushSendRequestedEvent(
+                            userIds = listOf(friendId),
+                            actorUserId = userId,
+                            templateData = PushTemplate.GAME_OVERTAKE_FRIEND.buildPushData(
+                                "nickname" to myNickname,
+                                "gameName" to gameName,
+                            ),
+                            extraData = mapOf(
+                                "gameId" to gameId.toString(),
+                                "seasonId" to participant.seasonId.toString(),
+                                "league" to participant.league,
+                            ),
                         )
                     )
                 }
