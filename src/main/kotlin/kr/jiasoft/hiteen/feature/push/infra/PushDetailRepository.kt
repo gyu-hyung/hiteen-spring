@@ -1,6 +1,5 @@
 package kr.jiasoft.hiteen.feature.push.infra
 
-import kr.jiasoft.hiteen.common.dto.ApiPageCursor
 import kr.jiasoft.hiteen.feature.notification.dto.PushNotificationResponse
 import kr.jiasoft.hiteen.feature.push.domain.PushDetailEntity
 import org.springframework.data.r2dbc.repository.Query
@@ -10,9 +9,11 @@ import org.springframework.stereotype.Repository
 @Repository
 interface PushDetailRepository : CoroutineCrudRepository<PushDetailEntity, Long> {
 
-    suspend fun deleteByUserId(userId: Long)
+    @Query("UPDATE push_detail SET deleted_at = NOW() WHERE user_id = :userId AND deleted_at IS NULL")
+    suspend fun softDeleteByUserId(userId: Long)
 
-    suspend fun deleteByPushIdAndUserId(pushId: Long, userId: Long)
+    @Query("UPDATE push_detail SET deleted_at = NOW() WHERE id = :id AND user_id = :userId AND deleted_at IS NULL")
+    suspend fun softDeleteByIdAndUserId(id: Long, userId: Long)
 
 
     @Query("""
