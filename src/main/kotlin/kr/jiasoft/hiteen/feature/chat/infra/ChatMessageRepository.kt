@@ -98,4 +98,32 @@ interface ChatMessageRepository : CoroutineCrudRepository<ChatMessageEntity, Lon
         LIMIT :size
     """)
     fun pageByRoomWithEmoji(roomId: Long, cursor: OffsetDateTime?, size: Int): Flow<ChatMessageEntity>
+
+    /** 채팅방 메시지 페이징 요약 (최적화 버전) */
+    @Query("""
+        SELECT 
+            m.id,
+            m.uid as message_uid,
+            m.user_id,
+            m.content,
+            m.kind,
+            m.emoji_code,
+            m.emoji_count,
+            m.created_at,
+            u.id as sender_id,
+            u.uid as sender_uid,
+            u.username as sender_username,
+            u.nickname as sender_nickname,
+            u.asset_uid::text as sender_asset_uid,
+            (SELECT count(*)::int FROM chat_users cu WHERE cu.chat_room_id = m.chat_room_id AND cu.deleted_at IS NULL) as member_count,
+            (SELECT count(*)::int FROM chat_users cu2 WHERE cu2.chat_room_id = m.chat_room_id AND cu2.last_read_message_id >= m.id AND cu2.user_id <> m.user_id AND cu2.deleted_at IS NULL) as reader_count
+        FROM chat_messages m
+        JOIN users u ON u.id = m.user_id
+        WHERE m.chat_room_id = :roomId
+          AND m.deleted_at IS NULL
+          AND (:cursor IS NULL OR m.created_at < :cursor)
+        ORDER BY m.created_at DESC, m.id DESC
+        LIMIT :size
+    """)
+    fun pageMessagesSummary(roomId: Long, cursor: OffsetDateTime?, size: Int): Flow<kr.jiasoft.hiteen.feature.chat.dto.MessageSummaryProjection>
 }

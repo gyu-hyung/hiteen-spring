@@ -199,22 +199,22 @@ data class ChatRoomResponse(
     @param:Schema(description = "생성자 ID", example = "1001")
     val createdId: Long,
 
-    @param:Schema(description = "채팅방 생성 일시", example = "2025.09.18 10:15")
-    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm")
+    @param:Schema(description = "채팅방 생성 일시", example = "2025.09.18 10:15:30")
+    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm:ss")
     val createdAt: OffsetDateTime,
 
     @param:Schema(description = "수정자 ID", example = "1002")
     val updatedId: Long? = null,
 
-    @param:Schema(description = "채팅방 수정 일시", example = "2025.09.18 10:15")
-    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm")
+    @param:Schema(description = "채팅방 수정 일시", example = "2025.09.18 10:15:30")
+    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm:ss")
     val updatedAt: OffsetDateTime? = null,
 
     @param:Schema(description = "삭제자 ID", example = "1003")
     val deletedId: Long? = null,
 
-    @param:Schema(description = "채팅방 삭제 일시", example = "2025.09.18 10:15")
-    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm")
+    @param:Schema(description = "채팅방 삭제 일시", example = "2025.09.18 10:15:30")
+    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm:ss")
     val deletedAt: OffsetDateTime? = null,
 
     @param:Schema(description = "채팅방 이름", example = "우리반 단톡")
@@ -296,6 +296,31 @@ data class RoomSummaryProjection(
     val lastSenderUsername: String?,
     val lastSenderNickname: String?,
     val lastSenderAssetUid: String?
+)
+
+/**
+ * pageMessages 최적화용 프로젝션
+ */
+data class MessageSummaryProjection(
+    val id: Long,
+    val messageUid: UUID,
+    val userId: Long,
+    val content: String?,
+    val kind: Int,
+    val emojiCode: String?,
+    val emojiCount: Int?,
+    val createdAt: OffsetDateTime,
+
+    // Sender info
+    val senderId: Long,
+    val senderUid: UUID,
+    val senderUsername: String,
+    val senderNickname: String?,
+    val senderAssetUid: String?,
+
+    // Reader info
+    val readerCount: Int,
+    val memberCount: Int
 )
 
 
