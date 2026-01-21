@@ -207,7 +207,26 @@ class ChatController(
     suspend fun leaveRoom(
         @Parameter(description = "채팅방 UID") @PathVariable roomUid: UUID,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
-    ) = ResponseEntity.ok(ApiResult.success(service.leaveRoom(roomUid, user.id)))
+    ): ResponseEntity<ApiResult<Unit>> {
+        val result = service.leaveRoom(roomUid, user.id)
+
+        // ✅ 퇴장 시스템 메시지가 있으면 웹소켓 브로드캐스트
+        result?.let { msgSummary ->
+            val payload = mapper.writeValueAsString(
+                mapOf(
+                    "type" to "message",
+                    "data" to msgSummary
+                )
+            )
+            chatHub.publish(roomUid, payload)
+
+            chatUserRepository.listActiveUserUidsByUid(roomUid).collect { userUid ->
+                chatHub.publishUserNotify(userUid, payload)
+            }
+        }
+
+        return ResponseEntity.ok(ApiResult.success(Unit))
+    }
 
 
     @Operation(summary = "채팅방 수정", description = "채팅방 이름/초대권한/썸네일을 수정합니다. 썸네일 파일은 1개만 업로드 가능합니다.")

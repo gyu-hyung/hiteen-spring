@@ -326,14 +326,52 @@ class ChatService(
 
 
     /** 방 나가기 */
-    suspend fun leaveRoom(roomUid: UUID, currentUserId: Long) {
+    suspend fun leaveRoom(roomUid: UUID, currentUserId: Long): MessageSummary? {
         val room = rooms.findByUid(roomUid) ?: error("room not found")
         val me = chatUsers.findActive(room.id, currentUserId) ?: error("not a member")
+        val leavingUser = users.findById(currentUserId) ?: error("user not found")
+
         chatUsers.save(me.copy(leavingAt = OffsetDateTime.now(), deletedAt = OffsetDateTime.now()))
-        //20251202 1:1 채팅방이면 채팅방 삭제
-        if(chatUsers.countActiveByRoomId(room.id) <= 1) {
+
+        // 20251202 1:1 채팅방이면 채팅방 삭제
+        val remainingCount = chatUsers.countActiveByRoomId(room.id)
+        if(remainingCount < 1) {
             rooms.softDeleteById(room.id)
+            return null
         }
+
+        // --- ✅ 퇴장 시스템 메시지 생성 및 저장 (kind 4) ---
+        val now = OffsetDateTime.now()
+        val ownerId = room.createdId
+        val systemContent = "${leavingUser.nickname}님이 나갔습니다."
+
+        val savedMsg = messages.save(
+            ChatMessageEntity(
+                chatRoomId = room.id,
+                userId = ownerId, // 방장(owner)을 발송자로 저장
+                content = systemContent,
+                kind = 4, // 시스템 메세지
+                createdAt = now,
+            )
+        )
+
+        // 채팅방 업데이트 (마지막 메시지 갱신)
+        rooms.save(
+            room.copy(
+                lastUserId = ownerId,
+                lastMessageId = savedMsg.id,
+                updatedId = currentUserId,
+                updatedAt = savedMsg.createdAt
+            )
+        )
+
+        return MessageSummary.from(
+            entity = savedMsg,
+            sender = users.findSummaryInfoById(ownerId),
+            assets = emptyList(),
+            roomUid = room.uid,
+            unreadCount = remainingCount.toInt()
+        )
     }
 
 
