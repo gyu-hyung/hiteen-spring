@@ -21,10 +21,12 @@ interface AdminLevelRepository : CoroutineCrudRepository<TierEntity, Long> {
         search: String?,
     ): Flow<AdminLevelResponse>
 
+    // 레벨에 해당하는 회원수 체크
+    // 해당 레벨의 회원이 있으면 삭제하지 못하게 하기 위해..
     @Query("""
-        SELECT MAX(rank_order)
+        SELECT COUNT(*)
         FROM tiers
-        WHERE deleted_at IS NULL
+        WHERE deleted_at IS NULL AND tier_id = :tierId
     """)
-    suspend fun findMaxRankOrder(): Int?
+    suspend fun countLevelUsers(tierId: Long): Int
 }

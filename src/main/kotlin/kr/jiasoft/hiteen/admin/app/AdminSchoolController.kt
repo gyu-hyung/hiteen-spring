@@ -1,6 +1,7 @@
 package kr.jiasoft.hiteen.admin.app
 
 import io.swagger.v3.oas.annotations.Parameter
+import jakarta.validation.Valid
 import kr.jiasoft.hiteen.admin.dto.AdminIdOnlyRequest
 import kr.jiasoft.hiteen.admin.dto.AdminSchoolClassesResponse
 import kr.jiasoft.hiteen.admin.dto.AdminSchoolSaveRequest
@@ -18,6 +19,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
@@ -70,22 +72,9 @@ class AdminSchoolController(
     // 학교정보 등록/수정
     @PostMapping("/save")
     suspend fun saveSchool(
-        @Parameter req: AdminSchoolSaveRequest,
+        @Valid @ModelAttribute req: AdminSchoolSaveRequest,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ) : ResponseEntity<ApiResult<Any>> {
-        if (req.name.isNullOrBlank()) {
-            return failure("학교명을 입력해 주세요.")
-        }
-        if (req.type < 1) {
-            return failure("학교구분을 선택하세요.")
-        }
-        if (req.latitude == null || req.latitude == 0.0 || req.longitude == null || req.longitude == 0.0) {
-            return failure("학교 위치를 선택해 주세요.")
-        }
-        if (req.address.isNullOrBlank()) {
-            return failure("주소를 입력해 주세요.")
-        }
-
         val mode = req.mode ?: "add"
 
         val result = if (mode == "edit") {
@@ -175,7 +164,6 @@ class AdminSchoolController(
 
         return success(school, "학교정보가 삭제되었습니다.")
     }
-
 
     // 현재 학년도
     fun getSchoolYear(today: LocalDate = LocalDate.now()): Int {

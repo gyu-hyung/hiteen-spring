@@ -1,8 +1,10 @@
 package kr.jiasoft.hiteen.admin.app
 
+import jakarta.validation.Valid
 import kotlinx.coroutines.flow.toList
 import kr.jiasoft.hiteen.admin.dto.AdminFollowResponse
 import kr.jiasoft.hiteen.admin.dto.AdminFriendResponse
+import kr.jiasoft.hiteen.admin.dto.AdminMyPasswordChangeRequest
 import kr.jiasoft.hiteen.admin.dto.AdminUserResponse
 import kr.jiasoft.hiteen.admin.dto.AdminUserSaveRequest
 import kr.jiasoft.hiteen.admin.infra.AdminFollowRepository
@@ -12,6 +14,8 @@ import kr.jiasoft.hiteen.admin.services.AdminUserService
 import kr.jiasoft.hiteen.common.dto.ApiPage
 import kr.jiasoft.hiteen.common.dto.ApiResult
 import kr.jiasoft.hiteen.common.dto.PageUtil
+import kr.jiasoft.hiteen.common.extensions.failure
+import kr.jiasoft.hiteen.common.extensions.success
 import kr.jiasoft.hiteen.feature.user.app.UserService
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import org.springframework.http.ResponseEntity
@@ -24,9 +28,9 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
-import java.lang.IllegalArgumentException
 import java.time.OffsetDateTime
 import java.util.UUID
+import kotlin.IllegalArgumentException
 
 @RestController
 @RequestMapping("/api/admin/user")
@@ -224,5 +228,23 @@ class AdminUserController (
         )
     }
 
+    // 관리자 본인 비밀번호 변경
+    @PostMapping("/password/my/change")
+    suspend fun changeMyPassword(
+        @Valid @RequestBody req: AdminMyPasswordChangeRequest,
+        @AuthenticationPrincipal(expression = "user") user: UserEntity,
+    ): ResponseEntity<ApiResult<Any>> {
 
+        if (!encoder.matches(req.oldPassword, user.password)) {
+            return failure("기존 비밀번호가 일치하지 않습니다.")
+        }
+
+        val data = user.copy(
+            password = encoder.encode(req.newPassword),
+            updatedAt = OffsetDateTime.now(),
+            updatedId = user.id
+        )
+
+        return success(data, "비밀번호가 변경되었습니다.")
+    }
 }
