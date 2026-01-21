@@ -295,33 +295,51 @@ class ChatService(
         val room = rooms.findByUid(roomUid) ?: error("room not found")
         chatUsers.findActive(room.id, userId) ?: error("not a member")
 
-        // 최신 페이지 (DESC)
-//        val messagePage = messages.pageByRoom(room.id!!, cursor, size).toList()
-        val messagePage = messages.pageByRoomWithEmoji(room.id, cursor, size).toList()
-        if (messagePage.isEmpty()) return emptyList()
+        // 최신 페이지 조회 (최적화 버전)
+        val projections = messages.pageMessagesSummary(room.id, cursor, size).toList()
+        if (projections.isEmpty()) return emptyList()
 
-        val memberCount = chatUsers.countActiveByRoomId(room.id).toInt()
+        // 메시지 id 목록 수집
+        val msgIds = projections.map { it.id }
 
-        val minId = messagePage.minOf { it.id}
-        val maxId = messagePage.maxOf { it.id}
-        val readersMap = messages.countReadersInIdRange(room.id, minId, maxId)
-            .toList()
-            .associate { it.messageId to it.readerCount }
+        // 에셋 일괄 조회 (N+1 방지)
+        val assetsMap = msgAssets.findAllByMessageIdIn(msgIds).toList()
+            .groupBy { it.messageId }
+            .mapValues { (_, assets) ->
+                assets.map { a -> MessageAssetSummary(a.uid, a.width, a.height) }
+            }
 
-        return messagePage.map { m ->
-            val assets = msgAssets.listByMessage(m.id).map { a ->
-                MessageAssetSummary(
-                    a.uid,
-                    a.width,
-                    a.height
-                )
-            }.toList()
-
-            val sender = users.findSummaryInfoById(m.userId)
-            val readers = readersMap[m.id] ?: 0L
-            val unread = ((memberCount - 1) - readers).coerceAtLeast(0L).toInt()
-
-            MessageSummary.from(m, sender, assets, unread, room.uid)
+        return projections.map { p ->
+            MessageSummary(
+                messageUid = p.messageUid,
+                roomUid = room.uid,
+                content = p.content,
+                kind = p.kind,
+                emojiCode = p.emojiCode,
+                emojiCount = p.emojiCount,
+                createdAt = p.createdAt,
+                sender = UserSummary(
+                    id = p.senderId,
+                    uid = p.senderUid.toString(),
+                    username = p.senderUsername,
+                    nickname = p.senderNickname,
+                    address = null,
+                    detailAddress = null,
+                    phone = null,
+                    mood = null,
+                    moodEmoji = null,
+                    mbti = null,
+                    expPoints = 0,
+                    tierId = 0,
+                    tierName = "",
+                    assetUid = p.senderAssetUid,
+                    gender = null,
+                    isFriend = null,
+                    isFriendRequest = null
+                ),
+                assets = assetsMap[p.id] ?: emptyList(),
+                unreadCount = (p.memberCount - 1 - p.readerCount).coerceAtLeast(0)
+            )
         }
     }
 
