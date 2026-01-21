@@ -12,12 +12,13 @@ import kr.jiasoft.hiteen.feature.point.domain.PointPolicy
 import kr.jiasoft.hiteen.feature.poll.domain.*
 import kr.jiasoft.hiteen.feature.poll.dto.*
 import kr.jiasoft.hiteen.feature.poll.infra.*
-import kr.jiasoft.hiteen.feature.push.app.PushService
+import kr.jiasoft.hiteen.feature.push.app.event.PushSendRequestedEvent
 import kr.jiasoft.hiteen.feature.push.domain.PushTemplate
 import kr.jiasoft.hiteen.feature.relationship.infra.FriendRepository
 import kr.jiasoft.hiteen.feature.user.app.UserService
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import kr.jiasoft.hiteen.feature.user.dto.UserResponseIncludes
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.dao.DuplicateKeyException
 import org.springframework.http.HttpStatus
 import org.springframework.http.codec.multipart.FilePart
@@ -43,7 +44,7 @@ class PollService(
     private val assetService: AssetService,
     private val expService: ExpService,
     private val pointService: PointService,
-    private val pushService: PushService,
+    private val eventPublisher: ApplicationEventPublisher,
 ) {
 
     private enum class PollStatus {
@@ -264,13 +265,14 @@ class PollService(
         pointService.applyPolicy(user.id, PointPolicy.VOTE_QUESTION, id)
         //포스팅 알림
         val friendIds = friendRepository.findAllFriendship(user.id).toList()
-        pushService.sendAndSavePush(
-            friendIds,
-            user.id,
-            PushTemplate.NEW_VOTE.buildPushData("nickname" to user.nickname),
-            mapOf("pollId" to pollEntity.id.toString())
+        eventPublisher.publishEvent(
+            PushSendRequestedEvent(
+                userIds = friendIds,
+                actorUserId = user.id,
+                templateData = PushTemplate.NEW_VOTE.buildPushData("nickname" to user.nickname),
+                extraData = mapOf("pollId" to pollEntity.id.toString()),
+            )
         )
-
         return id
     }
 
@@ -452,23 +454,26 @@ class PollService(
         )
 
         parent?.let { extraData["parentUid"] = it.uid.toString() }
-        if(p.createdId != user.id) {//남의 글에만 알림
-            pushService.sendAndSavePush(
-                listOf(p.createdId),
-                user.id,
-                PushTemplate.VOTE_COMMENT.buildPushData("nickname" to user.nickname),
-                extraData
+        if(p.createdId != user.id) {
+            eventPublisher.publishEvent(
+                PushSendRequestedEvent(
+                    userIds = listOf(p.createdId),
+                    actorUserId = user.id,
+                    templateData = PushTemplate.VOTE_COMMENT.buildPushData("nickname" to user.nickname),
+                    extraData = extraData,
+                )
             )
         }
 
-        //부모 댓글 작성자에게 답글 알림
         parent?.let {
-            if( it.createdId == user.id ) return@let//본인글이면 패스
-            pushService.sendAndSavePush(
-                listOf(it.createdId),
-                user.id,
-                PushTemplate.VOTE_REPLY.buildPushData("nickname" to user.nickname),
-                extraData
+            if( it.createdId == user.id ) return@let
+            eventPublisher.publishEvent(
+                PushSendRequestedEvent(
+                    userIds = listOf(it.createdId),
+                    actorUserId = user.id,
+                    templateData = PushTemplate.VOTE_REPLY.buildPushData("nickname" to user.nickname),
+                    extraData = extraData,
+                )
             )
         }
 

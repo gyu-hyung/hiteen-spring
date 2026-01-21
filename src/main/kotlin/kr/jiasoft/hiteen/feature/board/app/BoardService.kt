@@ -7,7 +7,6 @@ import kr.jiasoft.hiteen.common.dto.ApiPageCursor
 import kr.jiasoft.hiteen.feature.asset.app.AssetService
 import kr.jiasoft.hiteen.feature.asset.domain.AssetCategory
 import kr.jiasoft.hiteen.feature.asset.dto.AssetResponse
-import kr.jiasoft.hiteen.feature.board.app.event.BoardCreatedEvent
 import kr.jiasoft.hiteen.feature.board.domain.BoardAssetEntity
 import kr.jiasoft.hiteen.feature.board.domain.BoardBannerType
 import kr.jiasoft.hiteen.feature.board.domain.BoardCategory
@@ -29,7 +28,7 @@ import kr.jiasoft.hiteen.feature.board.infra.BoardRepository
 import kr.jiasoft.hiteen.feature.level.app.ExpService
 import kr.jiasoft.hiteen.feature.point.app.PointService
 import kr.jiasoft.hiteen.feature.point.domain.PointPolicy
-import kr.jiasoft.hiteen.feature.push.app.PushService
+import kr.jiasoft.hiteen.feature.push.app.event.PushSendRequestedEvent
 import kr.jiasoft.hiteen.feature.push.domain.PushTemplate
 import kr.jiasoft.hiteen.feature.relationship.infra.FollowRepository
 import kr.jiasoft.hiteen.feature.user.app.UserService
@@ -57,7 +56,6 @@ class BoardService(
     private val userService: UserService,
     private val expService: ExpService,
     private val pointService: PointService,
-    private val pushService: PushService,
     private val eventPublisher: ApplicationEventPublisher,
 
     private val followRepository: FollowRepository,
@@ -288,13 +286,21 @@ class BoardService(
             expService.grantExp(user.id, "CREATE_BOARD", saved.id)
             //포인트
             pointService.applyPolicy(user.id, PointPolicy.STORY_POST, saved.id)
-            //포스팅 알림
-            eventPublisher.publishEvent(
-                BoardCreatedEvent(
-                    boardUid = saved.uid,
-                    authorId = user.id,
+
+            //포스팅 알림 (PushEventListener로만 전송되도록 PushSendRequestedEvent 발행)
+            val followerIds = followRepository.findAllFollowerIds(user.id).toList()
+            if (followerIds.isNotEmpty()) {
+                eventPublisher.publishEvent(
+                    PushSendRequestedEvent(
+                        userIds = followerIds,
+                        actorUserId = user.id,
+                        templateData = PushTemplate.NEW_POST.buildPushData(
+                            "nickname" to user.nickname,
+                        ),
+                        extraData = mapOf("boardUid" to saved.uid.toString()),
+                    )
                 )
-            )
+            }
 
             saved.uid
         }
@@ -470,22 +476,26 @@ class BoardService(
         parent?.let { extraData["parentUid"] = it.uid.toString() }
 
         //본인 글 아닐때만 알림
-        if( b.createdId != user.id ) {
-            pushService.sendAndSavePush(
-                listOf(b.createdId),
-                user.id,
-                PushTemplate.BOARD_COMMENT.buildPushData("nickname" to user.nickname),
-                extraData
+        if( b.createdId != user.id && ( parent == null || parent.createdId != b.createdId ) ) {
+            eventPublisher.publishEvent(
+                PushSendRequestedEvent(
+                    userIds = listOf(b.createdId),
+                    actorUserId = user.id,
+                    templateData = PushTemplate.BOARD_COMMENT.buildPushData("nickname" to user.nickname),
+                    extraData = extraData,
+                )
             )
         }
-        //부모 댓글 작성자에게 답글 알림
+
         parent?.let {
-            if( it.createdId == user.id ) return@let//본인글이면 패스
-            pushService.sendAndSavePush(
-                listOf(it.createdId),
-                user.id,
-                PushTemplate.BOARD_REPLY.buildPushData("nickname" to user.nickname),
-                extraData
+            if( it.createdId == user.id ) return@let
+            eventPublisher.publishEvent(
+                PushSendRequestedEvent(
+                    userIds = listOf(it.createdId),
+                    actorUserId = user.id,
+                    templateData = PushTemplate.BOARD_REPLY.buildPushData("nickname" to user.nickname),
+                    extraData = extraData,
+                )
             )
         }
 
@@ -570,3 +580,4 @@ class BoardService(
 
 
 }
+

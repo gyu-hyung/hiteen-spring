@@ -19,7 +19,7 @@ import kr.jiasoft.hiteen.feature.point.app.PointService
 import kr.jiasoft.hiteen.feature.point.domain.PointPolicy
 import kr.jiasoft.hiteen.feature.poll.infra.PollCommentRepository
 import kr.jiasoft.hiteen.feature.poll.infra.PollUserRepository
-import kr.jiasoft.hiteen.feature.push.app.PushService
+import kr.jiasoft.hiteen.feature.push.app.event.PushSendRequestedEvent
 import kr.jiasoft.hiteen.feature.push.domain.PushTemplate
 import kr.jiasoft.hiteen.feature.relationship.domain.FollowStatus
 import kr.jiasoft.hiteen.feature.relationship.domain.FriendStatus
@@ -45,6 +45,7 @@ import org.springframework.http.codec.multipart.FilePart
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
+import org.springframework.context.ApplicationEventPublisher
 import java.time.OffsetDateTime
 import java.util.UUID
 
@@ -70,7 +71,7 @@ class UserService (
     private val pointService: PointService,
     private val interestRepository: InterestRepository,
 //    private val interestUserService: InterestUserService,
-    private val pushService: PushService,
+    private val eventPublisher: ApplicationEventPublisher,
 ) {
 
 
@@ -356,14 +357,16 @@ class UserService (
                 if (inviterId == null) throw BusinessValidationException(mapOf("inviteCode" to "유효하지 않은 초대코드입니다."))
 
                 // ✅ 초대자에게 푸시 알림 (중복 조회 없음)
-                pushService.sendAndSavePush(
-                    userIds = listOf(inviterId),
-                    userId = updated.id,
-                    templateData = PushTemplate.INVITE_CODE_JOINED.buildPushData(
-                        "nickname" to updated.nickname,
-                    ),
-                    extraData = mapOf(
-                        "joinUserId" to updated.id.toString(),
+                eventPublisher.publishEvent(
+                    PushSendRequestedEvent(
+                        userIds = listOf(inviterId),
+                        actorUserId = updated.id,
+                        templateData = PushTemplate.INVITE_CODE_JOINED.buildPushData(
+                            "nickname" to updated.nickname,
+                        ),
+                        extraData = mapOf(
+                            "joinUserId" to updated.id.toString(),
+                        ),
                     )
                 )
             }

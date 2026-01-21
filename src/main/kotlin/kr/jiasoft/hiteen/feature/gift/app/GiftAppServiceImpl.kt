@@ -28,10 +28,12 @@ import kr.jiasoft.hiteen.feature.play.infra.SeasonRepository
 import kr.jiasoft.hiteen.feature.point.app.PointService
 import kr.jiasoft.hiteen.feature.point.domain.PointPolicy
 import kr.jiasoft.hiteen.feature.push.app.PushService
+import kr.jiasoft.hiteen.feature.push.app.event.PushSendRequestedEvent
 import kr.jiasoft.hiteen.feature.push.domain.PushTemplate
 import kr.jiasoft.hiteen.feature.user.app.UserService
 import kr.jiasoft.hiteen.feature.user.infra.UserRepository
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import org.springframework.transaction.reactive.TransactionalOperator
 import org.springframework.transaction.reactive.executeAndAwait
@@ -60,7 +62,9 @@ class GiftAppServiceImpl (
     private val giftishowLogsRepository: GiftishowLogsRepository,
 
     private val txOperator: TransactionalOperator,
-): GiftAppService {
+
+    private val eventPublisher: ApplicationEventPublisher,
+) : GiftAppService {
 
 
     @Value("\${giftishow.template-id}")
@@ -170,12 +174,17 @@ class GiftAppServiceImpl (
             )
         )
 
-        // 푸시 전송
-        pushService.sendAndSavePush(listOf(receiverUser.id), null, mapOf(
-            "code" to PushTemplate.GIFT_MESSAGE.code,
-            "title" to PushTemplate.GIFT_MESSAGE.title,
-            "message" to memo
-        ))
+        eventPublisher.publishEvent(
+            PushSendRequestedEvent(
+                userIds = listOf(receiverUser.id),
+                actorUserId = null,
+                templateData = mapOf(
+                    "code" to PushTemplate.GIFT_MESSAGE.code,
+                    "title" to PushTemplate.GIFT_MESSAGE.title,
+                    "message" to memo,
+                ),
+            )
+        )
 
         return findGift(receiverUser.id, giftUser.id)
     }
