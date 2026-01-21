@@ -7,6 +7,7 @@ import kr.jiasoft.hiteen.common.dto.ApiResult
 import kr.jiasoft.hiteen.feature.level.app.ExpService
 import kr.jiasoft.hiteen.feature.point.domain.PointEntity
 import kr.jiasoft.hiteen.feature.point.domain.PointPolicy
+import kr.jiasoft.hiteen.feature.point.dto.PointBalanceResponse
 import kr.jiasoft.hiteen.feature.point.dto.PointChargeRequest
 import kr.jiasoft.hiteen.feature.point.dto.PointSummary
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
@@ -44,6 +45,14 @@ class PointController(
         )))
     }
 
+    @Operation(summary = "내 포인트 보유액 조회")
+    @GetMapping("/balance")
+    suspend fun getMyPointBalance(
+        @AuthenticationPrincipal(expression = "user") user: UserEntity,
+    ): ResponseEntity<ApiResult<PointBalanceResponse>> {
+        val total = pointService.getUserTotalPoints(user.id)
+        return ResponseEntity.ok(ApiResult.success(PointBalanceResponse(total)))
+    }
 
     @Operation(summary = "포인트 충전")
     @PostMapping("/charge")
