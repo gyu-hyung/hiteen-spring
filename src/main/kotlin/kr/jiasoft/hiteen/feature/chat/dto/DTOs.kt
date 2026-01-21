@@ -82,8 +82,8 @@ data class RoomSummaryResponse(
     @param:Schema(description = "프로필 이미지 UID", example = "f580e8e8-adee-4285-b181-3fed545e7be0")
     val assetUid: String?,
 
-    @param:Schema(description = "마지막 업데이트 시각", example = "2025.09.18 10:15")
-    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm")
+    @param:Schema(description = "마지막 업데이트 시각", example = "2025.09.18 10:15:30")
+    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm:ss")
     val updatedAt: OffsetDateTime?,
 
     @param:Schema(description = "마지막 메시지 요약 정보")
@@ -117,8 +117,8 @@ data class MessageSummary(
     @param:Schema(description = "읽지 않은 사용자 수", example = "3")
     val unreadCount: Int? = null,
 
-    @param:Schema(description = "메세지 작성 시각", example = "2025.09.18 10:15")
-//    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm")
+    @param:Schema(description = "메세지 작성 시각", example = "2025.09.18 10:15:30")
+    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm:ss")
     val createdAt: OffsetDateTime?,
 
     @param:Schema(description = "보낸 사람 정보")
@@ -267,6 +267,35 @@ data class ChatRoomDetailResponse(
 
     @param:Schema(description = "최근 발생한 시스템 메세지 (초대 등)")
     val systemMessage: MessageSummary? = null,
+)
+
+/**
+ * listRoomsSnapshot 최적화용 프로젝션
+ */
+data class RoomSummaryProjection(
+    val id: Long,
+    val roomUid: UUID,
+    val roomTitle: String,
+    val memberCount: Int,
+    val unreadCount: Int,
+    val assetUid: String?,
+    val updatedAt: OffsetDateTime?,
+
+    // Last Message Fields
+    val lastMessageId: Long?,
+    val lastMessageUid: UUID?,
+    val lastContent: String?,
+    val lastKind: Int?,
+    val lastEmojiCode: String?,
+    val lastEmojiCount: Int?,
+    val lastCreatedAt: OffsetDateTime?,
+
+    // Last Message Sender Fields
+    val lastSenderId: Long?,
+    val lastSenderUid: UUID?,
+    val lastSenderUsername: String?,
+    val lastSenderNickname: String?,
+    val lastSenderAssetUid: String?
 )
 
 
