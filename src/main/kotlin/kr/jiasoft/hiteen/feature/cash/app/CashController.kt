@@ -12,6 +12,7 @@ import kr.jiasoft.hiteen.feature.point.domain.PointPolicy
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
+import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
@@ -48,7 +49,7 @@ class CashController(
     @PostMapping("/exchange")
     suspend fun exchangeCashToPoint(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
-        @Valid req: CashExchangeRequest,
+        @Validated req: CashExchangeRequest,
     ) {
 
 //        if (cash < 10 || cash % 10 != 0) {

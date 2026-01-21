@@ -58,5 +58,14 @@ object DeltaContextHelper {
             Mono.empty()
         }
 
+    fun skipMeta(): Mono<Unit> =
+        Mono.deferContextual { ctx ->
+            val exchange = ctx.getOrEmpty<ServerWebExchange>("SERVER_EXCHANGE")
+                .orElse(null)
+                ?: return@deferContextual Mono.empty()
+
+            exchange.attributes[MetaDeltaKeys.SKIP_META] = true
+            Mono.empty()
+        }
 
 }

@@ -8,6 +8,7 @@ import kr.jiasoft.hiteen.feature.asset.app.AssetService
 import kr.jiasoft.hiteen.feature.asset.domain.AssetCategory
 import kr.jiasoft.hiteen.feature.asset.dto.AssetResponse
 import kr.jiasoft.hiteen.feature.board.domain.BoardAssetEntity
+import kr.jiasoft.hiteen.feature.board.domain.BoardBannerType
 import kr.jiasoft.hiteen.feature.board.domain.BoardCategory
 import kr.jiasoft.hiteen.feature.board.domain.BoardCommentEntity
 import kr.jiasoft.hiteen.feature.board.domain.BoardCommentLikeEntity
@@ -19,6 +20,7 @@ import kr.jiasoft.hiteen.feature.board.dto.BoardCreateRequest
 import kr.jiasoft.hiteen.feature.board.dto.BoardResponse
 import kr.jiasoft.hiteen.feature.board.dto.BoardUpdateRequest
 import kr.jiasoft.hiteen.feature.board.infra.BoardAssetRepository
+import kr.jiasoft.hiteen.feature.board.infra.BoardBannerReadRepository
 import kr.jiasoft.hiteen.feature.board.infra.BoardCommentLikeRepository
 import kr.jiasoft.hiteen.feature.board.infra.BoardCommentRepository
 import kr.jiasoft.hiteen.feature.board.infra.BoardLikeRepository
@@ -45,6 +47,7 @@ import java.util.UUID
 class BoardService(
     private val boards: BoardRepository,
     private val boardAssetRepository: BoardAssetRepository,
+    private val boardBannerReadRepository: BoardBannerReadRepository,
     private val comments: BoardCommentRepository,
     private val likes: BoardLikeRepository,
     private val commentLikes: BoardCommentLikeRepository,
@@ -87,7 +90,16 @@ class BoardService(
             expService.grantExp(userId, "NOTICE_READ", b.id)
         }
 
-        return b.copy(
+        val withBanners = if (b.category == BoardCategory.EVENT.name || b.category == BoardCategory.EVENT_WINNING.name) {
+            val bannerRows = boardBannerReadRepository.findAllByBoardIdIn(arrayOf(b.id)).toList()
+            val large = bannerRows.filter { it.bannerType == BoardBannerType.LARGE.name }.map { it.uid }
+            val small = bannerRows.filter { it.bannerType == BoardBannerType.SMALL.name }.map { it.uid }
+            b.copy(largeBanners = large, smallBanners = small)
+        } else {
+            b
+        }
+
+        return withBanners.copy(
             content = b.content,
             hits = (b.hits) + 1,
             user = userSummary,
@@ -102,7 +114,9 @@ class BoardService(
 
     suspend fun listBoardsByPage(
         category: String?, q: String?, page: Int, size: Int, currentUserId: Long?,
-        followOnly: Boolean, friendOnly: Boolean, sameSchoolOnly: Boolean
+        followOnly: Boolean, friendOnly: Boolean, sameSchoolOnly: Boolean,
+        status: String?,
+        displayStatus: String?,
     ): ApiPage<BoardResponse> {
         val p = page.coerceAtLeast(0)
         val s = size.coerceIn(1, 100)
@@ -110,29 +124,53 @@ class BoardService(
         val uid = currentUserId ?: -1L
 
         // 총 개수
-        val total = boards.countSearchResults(category, q, uid, followOnly, friendOnly, sameSchoolOnly)
+        val total = boards.countSearchResults(category, q, uid, followOnly, friendOnly, sameSchoolOnly, status, displayStatus)
         val lastPage = if (total == 0) 0 else (total - 1) / s
 
-        val rows = boards.searchSummariesByPage(category, q, s, offset, uid, followOnly, friendOnly, sameSchoolOnly)
+        val rows = boards.searchSummariesByPage(category, q, s, offset, uid, followOnly, friendOnly, sameSchoolOnly, status, displayStatus)
             .map { row ->
                 row.copy(
                     subject = row.subject,
                     content = row.content.take(160),
                     user = userService.findUserSummary(row.createdId),
-                    attachments = boardAssetRepository.findAllByBoardId(row.id)?.map { it.uid }
+                    attachments = if (row.category == BoardCategory.EVENT.name || row.category == BoardCategory.EVENT_WINNING.name) {
+                        row.attachments
+                    } else {
+                        boardAssetRepository.findAllByBoardId(row.id)?.map { it.uid }
+                    }
                 )
             }
             .toList()
 
+        // EVENT 배너 분리 매핑(배치 조회)
+        val eventIds = rows.filter { it.category == BoardCategory.EVENT.name || it.category == BoardCategory.EVENT_WINNING.name }
+            .map { it.id }
+        val bannerMap: Map<Long, Pair<List<UUID>, List<UUID>>> = if (eventIds.isEmpty()) {
+            emptyMap()
+        } else {
+            val bannerRows = boardBannerReadRepository.findAllByBoardIdIn(eventIds.toTypedArray()).toList()
+            bannerRows.groupBy { it.boardId }.mapValues { (_, list) ->
+                val large = list.filter { it.bannerType == BoardBannerType.LARGE.name }.map { it.uid }
+                val small = list.filter { it.bannerType == BoardBannerType.SMALL.name }.map { it.uid }
+                large to small
+            }
+        }
+
+        val finalRows = rows.map { r ->
+            if (r.category == BoardCategory.EVENT.name || r.category == BoardCategory.EVENT_WINNING.name) {
+                val (large, small) = bannerMap[r.id] ?: (emptyList<UUID>() to emptyList())
+                r.copy(largeBanners = large, smallBanners = small)
+            } else r
+        }
+
         return ApiPage(
             total = total,
             lastPage = lastPage,
-            items = rows,
+            items = finalRows,
             perPage = s,
             currentPage = p
         )
     }
-
 
 
     suspend fun listBoardsByCursor(
@@ -156,16 +194,42 @@ class BoardService(
                 expService.grantExp(userId, "FRIEND_PROFILE_VISIT", user.id)
             }
         }
+        val mapped = items.map { row ->
+            row.copy(
+                subject = row.subject,
+                content = row.content.take(160),
+                user = userService.findUserSummary(row.createdId),
+                attachments = if (row.category == BoardCategory.EVENT.name || row.category == BoardCategory.EVENT_WINNING.name) {
+                    row.attachments
+                } else {
+                    boardAssetRepository.findAllByBoardId(row.id)?.map { it.uid }
+                }
+            )
+        }
+
+        val eventIds = mapped.filter { it.category == BoardCategory.EVENT.name || it.category == BoardCategory.EVENT_WINNING.name }
+            .map { it.id }
+        val bannerMap: Map<Long, Pair<List<UUID>, List<UUID>>> = if (eventIds.isEmpty()) {
+            emptyMap()
+        } else {
+            val bannerRows = boardBannerReadRepository.findAllByBoardIdIn(eventIds.toTypedArray()).toList()
+            bannerRows.groupBy { it.boardId }.mapValues { (_, list) ->
+                val large = list.filter { it.bannerType == BoardBannerType.LARGE.name }.map { it.uid }
+                val small = list.filter { it.bannerType == BoardBannerType.SMALL.name }.map { it.uid }
+                large to small
+            }
+        }
+
+        val finalItems = mapped.map { r ->
+            if (r.category == BoardCategory.EVENT.name || r.category == BoardCategory.EVENT_WINNING.name) {
+                val (large, small) = bannerMap[r.id] ?: (emptyList<UUID>() to emptyList())
+                r.copy(largeBanners = large, smallBanners = small)
+            } else r
+        }
+
         return ApiPageCursor(
             nextCursor = nextCursor,
-            items = items.map { row ->
-                row.copy(
-                    subject = row.subject,
-                    content = row.content.take(160),
-                    user = userService.findUserSummary(row.createdId),
-                    attachments = boardAssetRepository.findAllByBoardId(row.id)?.map { it.uid }
-                )
-            },
+            items = finalItems,
             perPage = s
         )
     }
@@ -267,8 +331,9 @@ class BoardService(
         }
 
         // 2) 파일 업로드 -> 매핑 추가 + 대표이미지 후보(첫 번째 업로드)
-        if (files.isNotEmpty()) {
+        val uploadedUids: List<UUID> = if (files.isNotEmpty()) {
             val uploadedFiles = assetService.uploadImages(files, currentUserId, AssetCategory.POST)
+            val uids = uploadedFiles.map { it.uid }.toList()
             uploadedFiles.forEach { a ->
                 boardAssetRepository.save(
                     BoardAssetEntity(
@@ -277,6 +342,19 @@ class BoardService(
                     )
                 )
             }
+            uids
+        } else {
+            emptyList()
+        }
+
+        // 3) 대표 이미지(assetUid) 결정
+        // - 새 파일이 있으면 첫 번째 업로드 파일을 대표로
+        // - replaceAssets=true이고 새 파일이 없으면 대표 제거(null)
+        // - 그 외에는 남아있는 첨부 중 최신(없으면 null)으로 대표 재지정
+        val newAssetUid: UUID? = when {
+            uploadedUids.isNotEmpty() -> uploadedUids.first()
+            replaceAssets == true -> null
+            else -> boardAssetRepository.findTopUidByBoardIdOrderByIdDesc(boardId)
         }
 
         // 4) 본문/메타 갱신 저장
@@ -285,7 +363,7 @@ class BoardService(
             subject = req.subject ?: b.subject,
             content = req.content ?: b.content,
             link = req.link ?: b.link,
-//            assetUid = newAssetUid,
+            assetUid = newAssetUid,
             startDate = req.startDate ?: b.startDate,
             endDate = req.endDate ?: b.endDate,
             status = req.status ?: b.status,

@@ -2,6 +2,7 @@ package kr.jiasoft.hiteen.feature.chat.dto
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import io.swagger.v3.oas.annotations.media.Schema
+import jakarta.validation.constraints.NotBlank
 import kr.jiasoft.hiteen.feature.chat.domain.ChatMessageEntity
 import kr.jiasoft.hiteen.feature.chat.domain.ChatRoomInviteMode
 import kr.jiasoft.hiteen.feature.user.dto.UserSummary
@@ -18,6 +19,7 @@ data class CreateRoomRequest(
     @param:Schema(description = "같은 멤버 채팅방 재사용 여부", example = "false")
     val reuseExactMembers: Boolean = false,
 
+    @field:NotBlank(message = "채팅방 이름을 입력해줘~")
     @param:Schema(description = "채팅방 이름(room_name)", example = "우리반 단톡")
     val roomName: String? = null,
 
@@ -46,12 +48,21 @@ data class SendMessageRequest(
 
     @param:Schema(description = "이모지 개수", example = "1")
     val emojiCount: Int? = null,
-) {
-    @get:Schema(description = "메시지 종류 (자동 결정: 0=텍스트, 1=이모지, 2=이미지)")
-    val kind: Int
-        get() = if (emojiCode != null) 1 else 0
-}
 
+    @param:Schema(description = "이모지별 개수 집계 DTO")
+    val emojiList: List<EmojisCountRow>? = null,
+)
+//{
+//    @get:Schema(description = "메시지 종류 (자동 결정: 0=텍스트, 1=이모지, 2=이미지)")
+//    val kind: Int
+//        get() = if (emojiCode != null) 1 else 0
+//}
+
+@Schema(description = "이모지별 개수 집계 DTO")
+data class EmojisCountRow(
+    @Column("emoji_code") val emojiCode: String,
+    @Column("emoji_count") val emojiCount: Int,
+)
 
 @Schema(description = "채팅방 요약 응답 DTO")
 data class RoomSummaryResponse(
@@ -100,6 +111,9 @@ data class MessageSummary(
     @param:Schema(description = "이모지 개수", example = "1")
     val emojiCount: Int? = null,
 
+    @param:Schema(description = "이모지별 개수 집계 DTO")
+    val emojiList: List<EmojisCountRow>? = null,
+
     @param:Schema(description = "읽지 않은 사용자 수", example = "3")
     val unreadCount: Int? = null,
 
@@ -114,13 +128,14 @@ data class MessageSummary(
     val assets: List<MessageAssetSummary>?,
 ) {
     companion object {
-        fun from(entity: ChatMessageEntity, sender: UserSummary?, assets: List<MessageAssetSummary>?, unreadCount: Int? = null, roomUid: UUID): MessageSummary {
+        fun from(entity: ChatMessageEntity, sender: UserSummary?, assets: List<MessageAssetSummary>?, unreadCount: Int? = null, roomUid: UUID, emojiList: List<EmojisCountRow>? = null): MessageSummary {
             return MessageSummary(
                 messageUid = entity.uid,
                 content = entity.content,
                 kind = entity.kind,
                 emojiCode = entity.emojiCode,
                 emojiCount = entity.emojiCount,
+                emojiList = emojiList,
                 unreadCount = unreadCount,
                 createdAt = entity.createdAt,
                 sender = sender,
@@ -235,6 +250,10 @@ data class ChatRoomMemberResponse(
     @param:Schema(description = "닉네임", example = "홍길동")
     @Column("nickname")
     val nickname: String? = null,
+
+    @param:Schema(description = "해당 채팅방의 방장(생성자) 여부", example = "false")
+    @Column("is_owner")
+    val isOwner: Boolean,
 )
 
 
@@ -253,4 +272,3 @@ data class ChatRoomInviteRequest(
     @param:Schema(description = "초대할 사용자 UID 목록", example = "[\"550e8400-e29b-41d4-a716-446655440000\"]")
     val peerUids: List<UUID>
 )
-

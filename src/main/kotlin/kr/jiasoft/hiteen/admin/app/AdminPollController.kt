@@ -1,14 +1,18 @@
 package kr.jiasoft.hiteen.admin.app
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import kotlinx.coroutines.flow.toList
+import kr.jiasoft.hiteen.admin.dto.AdminPollDetailRow
 import kr.jiasoft.hiteen.admin.dto.AdminPollResponse
 import kr.jiasoft.hiteen.admin.dto.AdminPollSaveRequest
+import kr.jiasoft.hiteen.admin.dto.AdminPollSelectResponse
 import kr.jiasoft.hiteen.admin.infra.AdminPollRepository
 import kr.jiasoft.hiteen.common.dto.ApiResult
 import kr.jiasoft.hiteen.common.dto.ApiPage
 import kr.jiasoft.hiteen.common.dto.PageUtil
 import kr.jiasoft.hiteen.feature.asset.app.AssetService
 import kr.jiasoft.hiteen.feature.poll.domain.PollEntity
+import kr.jiasoft.hiteen.feature.poll.infra.PollPhotoRepository
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -22,6 +26,8 @@ import java.util.UUID
 class AdminPollController(
     private val adminPollRepository: AdminPollRepository,
     private val assetService: AssetService,
+    private val pollPhotoRepository: PollPhotoRepository,
+    private val objectMapper: ObjectMapper,
 ) {
 
     /**
@@ -128,6 +134,21 @@ class AdminPollController(
             uid = uid,
         ).toList()
 
+        // ✅ 첨부파일(poll_photos) 조회 후 pollId별로 매핑
+        val pollIds = list.map { it.id }
+        val attachmentsMap: Map<Long, List<UUID>> = if (pollIds.isEmpty()) {
+            emptyMap()
+        } else {
+            pollPhotoRepository.findAllByPollIdIn(pollIds.toTypedArray())
+                .toList()
+                .groupBy({ it.pollId }, { it.assetUid })
+                .mapValues { (_, uids) -> uids.filterNotNull() }
+        }
+
+        val listWithAttachments = list.map { row ->
+            row.copy(attachments = attachmentsMap[row.id] ?: emptyList())
+        }
+
         val totalCount = adminPollRepository.totalCount(
             search = search,
             searchType = searchType,
@@ -136,7 +157,69 @@ class AdminPollController(
         )
 
         return ResponseEntity.ok(
-            ApiResult.success(PageUtil.of(list, totalCount, page, size))
+            ApiResult.success(PageUtil.of(listWithAttachments, totalCount, page, size))
         )
+    }
+
+    /**
+     * 게시글 상세 조회
+     */
+    @GetMapping("/{id}")
+    suspend fun detail(
+        @PathVariable id: Long,
+        @AuthenticationPrincipal(expression = "user") user: UserEntity,
+    ): ResponseEntity<ApiResult<AdminPollResponse>> {
+
+        val row: AdminPollDetailRow = adminPollRepository.findDetailById(id)
+            ?: throw IllegalArgumentException("존재하지 않는 게시글입니다. id=$id")
+
+        // 첨부파일 조회
+        val attachments = pollPhotoRepository.findAllByPollId(id)
+            .toList()
+            .sortedBy { it.seq }
+            .mapNotNull { it.assetUid }
+
+        // selects(JSON) 파싱 -> List<AdminPollSelectResponse>
+        val selects: List<AdminPollSelectResponse> = if (row.selects.isNullOrBlank()) {
+            emptyList()
+        } else {
+            try {
+                val node = objectMapper.readTree(row.selects)
+                if (node.isArray) {
+                    node.map { n ->
+                        AdminPollSelectResponse(
+                            id = n.get("id").asLong(),
+                            seq = n.get("seq").asInt(),
+                            content = if (n.hasNonNull("content")) n.get("content").asText() else null,
+                            voteCount = n.get("vote_count").asInt(),
+                            photo = if (n.hasNonNull("photo")) UUID.fromString(n.get("photo").asText()) else null
+                        )
+                    }
+                } else emptyList()
+            } catch (e: Exception) {
+                emptyList()
+            }
+        }
+
+        val result = AdminPollResponse(
+            id = row.id,
+            question = row.question,
+            photo = row.photo,
+            voteCount = row.voteCount,
+            commentCount = row.commentCount,
+            likeCount = row.likeCount,
+            reportCount = row.reportCount,
+            allowComment = row.allowComment,
+            options = row.options,
+            startDate = row.startDate,
+            endDate = row.endDate,
+            status = row.status,
+            nickname = row.nickname,
+            createdAt = row.createdAt,
+            attachments = attachments,
+            selects = selects,
+        )
+
+        return ResponseEntity.ok(ApiResult.success(result))
     }
 }

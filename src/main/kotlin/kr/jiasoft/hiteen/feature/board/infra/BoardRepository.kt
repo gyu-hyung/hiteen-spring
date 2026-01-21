@@ -55,6 +55,25 @@ interface BoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
                     AND u.school_id = (SELECT school_id FROM users WHERE id = :userId)
               )
           )
+          AND (
+              :status IS NULL OR :status = 'ALL'
+              OR b.status = :status
+          )
+          AND (
+              :displayStatus IS NULL OR :displayStatus = 'ALL'
+              OR (
+                  :displayStatus = 'ACTIVE'
+                  AND (b.start_date IS NULL OR b.start_date <= CURRENT_DATE)
+                  AND (b.end_date IS NULL OR b.end_date >= CURRENT_DATE)
+              )
+              OR (
+                  :displayStatus = 'INACTIVE'
+                  AND (
+                      (b.start_date IS NOT NULL AND b.start_date > CURRENT_DATE)
+                      OR (b.end_date IS NOT NULL AND b.end_date < CURRENT_DATE)
+                  )
+              )
+          )
     """)
     suspend fun countSearchResults(
         category: String?,
@@ -62,7 +81,9 @@ interface BoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
         userId: Long,
         followOnly: Boolean,
         friendOnly: Boolean,
-        sameSchoolOnly: Boolean
+        sameSchoolOnly: Boolean,
+        status: String?,
+        displayStatus: String?,
     ): Int
 
 
@@ -88,7 +109,16 @@ interface BoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
             (SELECT COUNT(*)::bigint FROM board_comments bc WHERE bc.board_id = b.id AND bc.deleted_at IS NULL) AS comment_count,
             EXISTS (SELECT 1 FROM board_likes bl2 WHERE bl2.board_id = b.id AND bl2.user_id = :userId) AS liked_by_me,
             COALESCE((
-                SELECT array_agg(ba.uid) FROM board_assets ba WHERE ba.board_id = b.id
+                CASE 
+                    WHEN b.category IN ('EVENT','EVENT_WINNING') THEN (
+                        SELECT array_agg(bb.uid ORDER BY bb.banner_type ASC, bb.seq ASC, bb.id ASC)
+                        FROM board_banners bb
+                        WHERE bb.board_id = b.id
+                    )
+                    ELSE (
+                        SELECT array_agg(ba.uid) FROM board_assets ba WHERE ba.board_id = b.id
+                    )
+                END
             ), ARRAY[]::uuid[]) AS attachments
         FROM boards b
         WHERE b.deleted_at IS NULL
@@ -124,6 +154,25 @@ interface BoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
                     AND u.school_id = (SELECT school_id FROM users WHERE id = :userId)
               )
           )
+          AND (
+              :status IS NULL OR :status = 'ALL'
+              OR b.status = :status
+          )
+          AND (
+              :displayStatus IS NULL OR :displayStatus = 'ALL'
+              OR (
+                  :displayStatus = 'ACTIVE'
+                  AND (b.start_date IS NULL OR b.start_date <= CURRENT_DATE)
+                  AND (b.end_date IS NULL OR b.end_date >= CURRENT_DATE)
+              )
+              OR (
+                  :displayStatus = 'INACTIVE'
+                  AND (
+                      (b.start_date IS NOT NULL AND b.start_date > CURRENT_DATE)
+                      OR (b.end_date IS NOT NULL AND b.end_date < CURRENT_DATE)
+                  )
+              )
+          )
         ORDER BY b.id DESC
         LIMIT :limit OFFSET :offset
     """)
@@ -135,7 +184,9 @@ interface BoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
         userId: Long,
         followOnly: Boolean,
         friendOnly: Boolean,
-        sameSchoolOnly: Boolean
+        sameSchoolOnly: Boolean,
+        status: String?,
+        displayStatus: String?,
     ): Flow<BoardResponse>
 
 
@@ -166,13 +217,22 @@ interface BoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
             (SELECT COUNT(*)::bigint FROM board_comments bc WHERE bc.board_id = b.id AND bc.deleted_at IS NULL) AS comment_count,
             EXISTS (SELECT 1 FROM board_likes bl2 WHERE bl2.board_id = b.id AND bl2.user_id = :userId) AS liked_by_me,
             COALESCE((
-                SELECT array_agg(ba.uid) FROM board_assets ba WHERE ba.board_id = b.id
+                CASE 
+                    WHEN b.category IN ('EVENT','EVENT_WINNING') THEN (
+                        SELECT array_agg(bb.uid ORDER BY bb.banner_type ASC, bb.seq ASC, bb.id ASC)
+                        FROM board_banners bb
+                        WHERE bb.board_id = b.id
+                    )
+                    ELSE (
+                        SELECT array_agg(ba.uid) FROM board_assets ba WHERE ba.board_id = b.id
+                    )
+                END
             ), ARRAY[]::uuid[]) AS attachments
         FROM boards b
         LEFT JOIN users u ON b.created_id = u.id
         WHERE b.deleted_at IS NULL
           AND (
-                (:category IS NULL AND b.category != 'NOTICE')
+                (:category IS NULL AND b.category NOT IN ('NOTICE', 'EVENT', 'EVENT_WINNING'))
                 OR b.category = :category
           )
           AND (
@@ -241,7 +301,16 @@ interface BoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
             (SELECT COUNT(*)::bigint FROM board_comments bc WHERE bc.board_id = b.id AND bc.deleted_at IS NULL) AS comment_count,
             EXISTS (SELECT 1 FROM board_likes bl2 WHERE bl2.board_id = b.id AND bl2.user_id = :userId) AS liked_by_me,
             COALESCE((
-                SELECT array_agg(ba.uid) FROM board_assets ba WHERE ba.board_id = b.id
+                CASE 
+                    WHEN b.category IN ('EVENT','EVENT_WINNING') THEN (
+                        SELECT array_agg(bb.uid ORDER BY bb.banner_type ASC, bb.seq ASC, bb.id ASC)
+                        FROM board_banners bb
+                        WHERE bb.board_id = b.id
+                    )
+                    ELSE (
+                        SELECT array_agg(ba.uid) FROM board_assets ba WHERE ba.board_id = b.id
+                    )
+                END
             ), ARRAY[]::uuid[]) AS attachments
         FROM boards b
         LEFT JOIN users u ON b.created_id = u.id

@@ -267,7 +267,7 @@ class PollService(
         pushService.sendAndSavePush(
             friendIds,
             user.id,
-            PushTemplate.NEW_POST.buildPushData("nickname" to user.nickname),
+            PushTemplate.NEW_VOTE.buildPushData("nickname" to user.nickname),
             mapOf("pollId" to pollEntity.id.toString())
         )
 

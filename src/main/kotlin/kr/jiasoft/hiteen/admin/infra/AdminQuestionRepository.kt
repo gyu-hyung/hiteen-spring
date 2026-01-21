@@ -75,8 +75,8 @@ interface AdminQuestionRepository : CoroutineCrudRepository<QuestionEntity, Long
             )
             AND (
                 :status IS NULL OR :status = 'ALL'
-                OR (:status = 'ACTIVE' AND q.status = 1)
-                OR (:status = 'INACTIVE' AND q.status = 0)
+                OR (:status = '1' AND q.status = 1)
+                OR (:status = '0' AND q.status = 0)
             )
             AND (
                 :type IS NULL OR :type = 'ALL'
@@ -87,6 +87,11 @@ interface AdminQuestionRepository : CoroutineCrudRepository<QuestionEntity, Long
             AND (
                 :seasonId IS NULL OR (exists (select 1 from question_items qi where q.id = qi.question_id and season_id = :seasonId))
             )
+            AND (
+                :hasAsset IS NULL
+                OR (:hasAsset = true AND ((q.image IS NOT NULL AND q.image <> '') OR (q.sound IS NOT NULL AND q.sound <> '')))
+                OR (:hasAsset = false AND ((q.image IS NULL OR q.image = '') OR (q.sound IS NULL OR q.sound = '')))
+            )
     """)
     suspend fun totalCount(
         search: String?,
@@ -94,6 +99,7 @@ interface AdminQuestionRepository : CoroutineCrudRepository<QuestionEntity, Long
         status: String?,
         type: String?,
         seasonId: Long?,
+        hasAsset: Boolean?,
     ): Int
 
 
@@ -119,8 +125,8 @@ interface AdminQuestionRepository : CoroutineCrudRepository<QuestionEntity, Long
             )
             AND (
                 :status IS NULL OR :status = 'ALL'
-                OR (:status = 'ACTIVE' AND q.status = 1)
-                OR (:status = 'INACTIVE' AND q.status = 0)
+                OR (:status = '1' AND q.status = 1)
+                OR (:status = '0' AND q.status = 0)
             )
             AND (
                 :type IS NULL OR :type = 'ALL'
@@ -130,6 +136,11 @@ interface AdminQuestionRepository : CoroutineCrudRepository<QuestionEntity, Long
             )
             AND (
                 :seasonId IS NULL OR (exists (select 1 from question_items qi where q.id = qi.question_id and season_id = :seasonId))
+            )
+            AND (
+                :hasAsset IS NULL
+                OR (:hasAsset = true AND ((q.image IS NOT NULL AND q.image <> '') OR (q.sound IS NOT NULL AND q.sound <> '')))
+                OR (:hasAsset = false AND ((q.image IS NULL OR q.image = '') OR (q.sound IS NULL OR q.sound = '')))
             )
         ORDER BY
             q.status DESC,
@@ -146,6 +157,7 @@ interface AdminQuestionRepository : CoroutineCrudRepository<QuestionEntity, Long
         status: String?,
         type: String?,
         seasonId: Long?,
+        hasAsset: Boolean?,
     ): Flow<QuestionEntity>
 
 

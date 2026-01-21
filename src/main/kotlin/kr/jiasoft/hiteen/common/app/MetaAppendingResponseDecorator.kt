@@ -62,7 +62,7 @@ class MetaAppendingResponseDecorator(
                         val user = auth.principal as? CustomUserDetails
                             ?: return@flatMap Mono.just(bytes)
 
-                        buildMeta(user.user.id).map { baseMeta ->
+                        buildMeta(user.user.id).flatMap flatMapBytes@{ baseMeta ->
 
                             val obj = json as ObjectNode
 
@@ -71,9 +71,14 @@ class MetaAppendingResponseDecorator(
                             val deltaCash = exchange.attributes[MetaDeltaKeys.DELTA_CASH] as? Int ?: 0
                             val deltaTier = exchange.attributes[MetaDeltaKeys.DELTA_TIER] as? Map<*, *>
 
+                            // ✅ 포인트 이벤트 등 meta 주입을 원치 않는 요청은 meta를 붙이지 않는다.
+                            val skipMeta = exchange.attributes[MetaDeltaKeys.SKIP_META] as? Boolean ?: false
+                            if (skipMeta) {
+                                return@flatMapBytes Mono.just(bytes)
+                            }
 
                             if (deltaExp == 0 && deltaPoint == 0 && deltaCash == 0) {
-                                return@map bytes
+                                return@flatMapBytes Mono.just(bytes)
                             }
 
                             val metaNode = mapper.createObjectNode()
@@ -89,14 +94,11 @@ class MetaAppendingResponseDecorator(
                                 val tierNode = mapper.createObjectNode()
                                 tierNode.put("from", deltaTier["from"] as Int)
                                 tierNode.put("to", deltaTier["to"] as Int)
-
                                 metaNode.set<ObjectNode>("deltaTier", tierNode)
                             }
 
-
                             obj.set<ObjectNode>("meta", metaNode)
-
-                            mapper.writeValueAsBytes(obj)
+                            Mono.just(mapper.writeValueAsBytes(obj))
                         }
                     }
                     .defaultIfEmpty(bytes)

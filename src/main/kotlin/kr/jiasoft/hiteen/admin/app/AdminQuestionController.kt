@@ -175,12 +175,13 @@ class AdminQuestionController (
         @RequestParam search: String? = null,
         @RequestParam searchType: String = "ALL",
         @RequestParam status: String? = null,
-//        @RequestParam id: Long? = null,
-//        @RequestParam uid: String? = null,
 
         // ⭐ 추가
         @RequestParam type: String? = null,
         @RequestParam seasonId: Long? = null,
+
+        // ⭐ 추가: true=이미지/사운드 중 하나라도 있는 것만, false=둘 다 없는 것만
+        @RequestParam hasAsset: Boolean? = null,
 
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ): ResponseEntity<ApiResult<ApiPage<QuestionEntity?>>> {
@@ -196,6 +197,7 @@ class AdminQuestionController (
 
             type = type,
             seasonId = seasonId,
+            hasAsset = hasAsset,
 
         ).toList()
 
@@ -207,6 +209,7 @@ class AdminQuestionController (
 
             type = type,
             seasonId = seasonId,
+            hasAsset = hasAsset,
         )
 
         return ResponseEntity.ok(ApiResult.success(PageUtil.of(list, totalCount, page, size)))

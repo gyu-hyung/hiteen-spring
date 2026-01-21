@@ -9,6 +9,7 @@ import kr.jiasoft.hiteen.feature.code.domain.CodeStatus
 import kr.jiasoft.hiteen.feature.code.dto.CodeRequest
 import kr.jiasoft.hiteen.feature.code.dto.CodeWithAssetResponse
 import kr.jiasoft.hiteen.feature.code.infra.CodeRepository
+import org.springframework.cache.annotation.CacheEvict
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
 import java.time.OffsetDateTime
@@ -21,8 +22,12 @@ class CodeService(
     /**
      * 파일 첨부 포함 공통 코드 생성
      */
+
+
+    @CacheEvict(cacheNames = ["code"], key = "#group.toUpperCase()")
     suspend fun createCodesWithFiles(
         group: String,
+        codeGroupName: String = group,
         createdUserId: Long,
         files: List<FilePart>,
         codeNamePrefix: String = "",
@@ -51,7 +56,7 @@ class CodeService(
                 CodeEntity(
                     codeName = asset.originFileName,
                     code = newCode,
-                    codeGroupName = group,
+                    codeGroupName = codeGroupName,
                     codeGroup = normalizedGroup,
                     status = CodeStatus.ACTIVE,
                     col1 = col1,
@@ -80,6 +85,7 @@ class CodeService(
 
 
     /** 코드 단일 등록 (파일 첨부 지원) */
+    @CacheEvict(cacheNames = ["code"], key = "#dto.group.toUpperCase()")
     suspend fun createCode(userId: Long, dto: CodeRequest, file: FilePart?): CodeWithAssetResponse {
         val uploaded = file?.let { assetService.uploadImage(it, userId, AssetCategory.CODE) }
         val entity = CodeEntity(
@@ -102,6 +108,7 @@ class CodeService(
 
 
     /** 코드 수정 (파일 첨부 지원, 변경된 값만 업데이트) */
+    @CacheEvict(cacheNames = ["code"], key = "#dto.group.toUpperCase()")
     suspend fun updateCode(userId: Long, id: Long, dto: CodeRequest, file: FilePart?): CodeWithAssetResponse {
         val existing = codeRepository.findById(id)
             ?: throw IllegalArgumentException("해당 코드가 존재하지 않습니다: id=$id")
@@ -129,6 +136,15 @@ class CodeService(
 
 
     /** 코드 삭제 (소프트 삭제 처리) */
+//    @Caching(
+//        evict = [
+//            CacheEvict(
+//                cacheNames = ["code"],
+//                key = "#existing.codeGroup",
+//                beforeInvocation = true
+//            )
+//        ]
+//    )
     suspend fun deleteCode(userId: Long, id: Long) {
         val existing = codeRepository.findById(id)
             ?: throw IllegalArgumentException("해당 코드가 존재하지 않습니다: id=$id")
@@ -137,7 +153,12 @@ class CodeService(
             deletedId = userId,
             deletedAt = OffsetDateTime.now()
         )
-        codeRepository.save(deleted)
+        codeRepository.delete(deleted)
+        deleteCodeCache(existing.codeGroup)
+    }
+
+    @CacheEvict(cacheNames = ["code"], key = "#codeGroup.toUpperCase()")
+    suspend fun deleteCodeCache(codeGroup: String) {
     }
 
 

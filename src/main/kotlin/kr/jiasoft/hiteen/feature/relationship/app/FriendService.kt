@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.flow.toSet
 import kr.jiasoft.hiteen.common.exception.BusinessValidationException
+import kr.jiasoft.hiteen.feature.contact.infra.UserContactBulkRepository
 import kr.jiasoft.hiteen.feature.contact.infra.UserContactRepository
 import kr.jiasoft.hiteen.feature.level.app.ExpService
 import kr.jiasoft.hiteen.feature.location.domain.LocationHistory
@@ -42,6 +43,7 @@ class FriendService(
 
     private val userRepository: UserRepository,
     private val userContactRepository: UserContactRepository,
+    private val userContactBulkRepository: UserContactBulkRepository,
 
     private val userService: UserService,
     private val locationCacheRedisService: LocationCacheRedisService,
@@ -83,28 +85,43 @@ class FriendService(
 
 
     suspend fun getContacts(user: UserEntity, rawContacts: String): ContactResponse {
-        // 1. 연락처 문자열 -> 전화번호 리스트
-        val phones = rawContacts.split("\n")
-            .map { it.filter { ch -> ch.isDigit() } }
+        return getContactsInternal(userId = user.id, rawContacts = rawContacts)
+    }
+
+    /**
+     * 동기/비동기(잡) 공용 로직
+     */
+    internal suspend fun getContactsInternal(userId: Long, rawContacts: String): ContactResponse {
+        // 1) 연락처 문자열 -> 전화번호 dedupe
+        // split은 1천~수만 라인에서도 충분히 동작하지만, 긴 문자열에서 trim/필터를 최소화
+        val phones = rawContacts
+            .lineSequence()
+            .map { line ->
+                buildString {
+                    line.forEach { ch -> if (ch.isDigit()) append(ch) }
+                }
+            }
+            .map { it.trim() }
             .filter { it.isNotBlank() }
             .toSet()
 
-        if (phones.isEmpty())
+        if (phones.isEmpty()) {
             throw BusinessValidationException(mapOf("message" to "연락처 정보가 없습니다."))
+        }
 
+        // 2) DB에 연락처 저장 (bulk upsert)
+        // per-row upsert(1000번 왕복) 대신 1번 쿼리로 처리
+        userContactBulkRepository.upsertAllPhones(userId, phones.toList())
 
-        // 2. DB에 연락처 저장 (중복은 upsert 처리)
-        phones.forEach { phone -> userContactRepository.upsert(user.id, phone) }
+        // 3) 가입 사용자 조회
+        val registeredUsers = userRepository.findAllUserSummaryByPhoneIn(phones, userId).toList()
 
-        // 3. 가입 사용자 조회
-        val registeredUsers = userRepository.findAllUserSummaryByPhoneIn(phones, user.id).toList()
+        // 4) 친구 관계 조회
+        val friendIds = friendRepository.findAllFriendship(userId).toSet()
 
-        // 4. 친구 관계 조회
-        val friendIds = friendRepository.findAllFriendship(user.id).toSet()
-
-        // 5. 그룹 분류
+        // 5) 그룹 분류
         val friendList = registeredUsers.filter { it.id in friendIds }
-        val registeredAndNotFriend = registeredUsers.filter { it.id !in friendIds && it.id != user.id }
+        val registeredAndNotFriend = registeredUsers.filter { it.id !in friendIds && it.id != userId }
         val notRegistered = phones.filter { phone -> registeredUsers.none { it.phone == phone } }
 
         return ContactResponse(registeredAndNotFriend, friendList, notRegistered)
@@ -165,6 +182,7 @@ class FriendService(
                         statusAt = now, createdAt = now,
                     )
                 )
+                expService.grantExp(meId, "FRIEND_ADD", targetId)
                 pushService.sendAndSavePush(
                     listOf(targetId),
                     me.id,
@@ -198,7 +216,7 @@ class FriendService(
 //                        )
 //                    )
                     expService.grantExp(meId, "FRIEND_ADD", targetId)
-                    expService.grantExp(targetId, "FRIEND_ADD", meId)
+                    expService.grantExp(targetId, "FRIEND_ADD", meId, null, meId)
                     pushService.sendAndSavePush(
                         listOf(targetId),
                         me.id,
@@ -267,10 +285,10 @@ class FriendService(
 
 
         expService.grantExp(meId, "FRIEND_ADD", requesterId)
-        expService.grantExp(requesterId, "FRIEND_ADD", meId)
+        expService.grantExp(requesterId, "FRIEND_ADD", meId, null, meId)
         pushService.sendAndSavePush(
             listOf(requesterId),
-            me.id,
+            meId,
             PushTemplate.FRIEND_ACCEPT.buildPushData("nickname" to me.nickname)
         )
         relationHistoryService.log(meId, requesterId, RelationType.FRIEND.name, RelationAction.ACCEPT.name)
