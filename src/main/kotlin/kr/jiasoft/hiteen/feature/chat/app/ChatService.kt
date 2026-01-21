@@ -18,6 +18,7 @@ import kr.jiasoft.hiteen.feature.level.app.ExpService
 import kr.jiasoft.hiteen.feature.push.app.event.PushSendRequestedEvent
 import kr.jiasoft.hiteen.feature.push.domain.PushTemplate
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
+import kr.jiasoft.hiteen.feature.user.dto.UserSummary
 import kr.jiasoft.hiteen.feature.user.infra.UserRepository
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
@@ -425,48 +426,66 @@ class ChatService(
     suspend fun listRoomsSnapshot(currentUserId: Long, limit: Int, offset: Int): RoomsSnapshotResponse {
         val cursor = messages.findCurrentCursorByUserId(currentUserId)
 
-        val roomsList = rooms.listRooms(currentUserId, limit, offset).map { r ->
-            val members = chatUsers.listActiveUserIds(r.id)
+        val projections = rooms.listRoomSummaries(currentUserId, limit, offset).toList()
+        if (projections.isEmpty()) return RoomsSnapshotResponse(cursor = cursor, rooms = emptyList())
 
-            // 마지막 메시지 + 작성자 조회
-            val last = messages.findLastMessage(r.id)
-            val sender = last?.userId?.let { uid -> users.findSummaryInfoById(uid) }
-            //상대방 assetUid
-            val otherMemberId = members.firstOrNull { it != currentUserId }
-            val otherMember = otherMemberId?.let { users.findSummaryInfoById(it) }
+        // 마지막 메시지들의 id 목록 수집
+        val lastMsgIds = projections.mapNotNull { it.lastMessageId }
 
-            // 마지막 메시지 asset
-            val lastAssets = last?.id?.let { msgAssets.listByMessage(it).map { a ->
-                MessageAssetSummary(
-                    a.uid,
-                    a.width,
-                    a.height
+        // 에셋 일괄 조회 (N+1 방지)
+        val assetsMap = if (lastMsgIds.isNotEmpty()) {
+            msgAssets.findAllByMessageIdIn(lastMsgIds).toList()
+                .groupBy { it.messageId }
+                .mapValues { (_, assets) ->
+                    assets.map { a -> MessageAssetSummary(a.uid, a.width, a.height) }
+                }
+        } else emptyMap()
+
+        val roomsList = projections.map { p ->
+            val lastMsgSummary = p.lastMessageId?.let { lid ->
+                MessageSummary(
+                    messageUid = p.lastMessageUid!!,
+                    roomUid = p.roomUid,
+                    content = p.lastContent,
+                    kind = p.lastKind ?: 0,
+                    emojiCode = p.lastEmojiCode,
+                    emojiCount = p.lastEmojiCount,
+                    createdAt = p.lastCreatedAt,
+                    sender = if (p.lastSenderId != null) {
+                        UserSummary(
+                            id = p.lastSenderId,
+                            uid = p.lastSenderUid.toString(),
+                            username = p.lastSenderUsername ?: "",
+                            nickname = p.lastSenderNickname,
+                            address = null,
+                            detailAddress = null,
+                            phone = null,
+                            mood = null,
+                            moodEmoji = null,
+                            mbti = null,
+                            expPoints = 0,
+                            tierId = 0,
+                            tierName = "",
+                            assetUid = p.lastSenderAssetUid,
+                            gender = null,
+                            isFriend = null,
+                            isFriendRequest = null
+                        )
+                    } else null,
+                    assets = assetsMap[lid] ?: emptyList()
                 )
-            }.toList() } ?: emptyList()
-
-            val unreadCount = messages.countUnread(r.id, currentUserId).toInt()
+            }
 
             RoomSummaryResponse(
-                roomUid = r.uid,
-                roomTitle = r.roomName,
-                memberCount = members.toList().count(),
-                unreadCount = unreadCount,
-                assetUid = r.assetUid?.toString() ?: otherMember?.assetUid,
-                updatedAt = r.updatedAt ?: r.createdAt,
-                lastMessage = if (last != null) {
-                    MessageSummary(
-                        messageUid = last.uid,
-                        roomUid = r.uid,
-                        content = last.content,
-                        kind = last.kind,
-                        emojiCode = last.emojiCode,
-                        createdAt = last.createdAt,
-                        sender = sender,
-                        assets = lastAssets
-                    )
-                } else null,
+                roomUid = p.roomUid,
+                roomTitle = p.roomTitle,
+                memberCount = p.memberCount,
+                unreadCount = p.unreadCount,
+                assetUid = p.assetUid,
+                updatedAt = p.updatedAt,
+                lastMessage = lastMsgSummary
             )
-        }.toList()
+        }
 
         return RoomsSnapshotResponse(cursor = cursor, rooms = roomsList)
     }

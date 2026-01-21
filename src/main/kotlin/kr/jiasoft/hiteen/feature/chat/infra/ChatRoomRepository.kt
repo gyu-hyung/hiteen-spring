@@ -91,4 +91,57 @@ interface ChatRoomRepository : CoroutineCrudRepository<ChatRoomEntity, Long> {
         ORDER BY cu.id ASC
     """)
     fun listActiveMembersByRoomUid(roomUid: UUID): Flow<ChatRoomMemberResponse>
+
+    /** 내가 속한 방 목록 (최적화 버전) */
+    @Query("""
+        SELECT 
+            r.id,
+            r.uid as room_uid,
+            CASE 
+                WHEN r.room_name IS NOT NULL AND r.room_name != '' THEN r.room_name
+                ELSE (
+                    SELECT string_agg(u_inner.nickname, ', ') 
+                    FROM chat_users cu_inner 
+                    JOIN users u_inner ON u_inner.id = cu_inner.user_id 
+                    WHERE cu_inner.chat_room_id = r.id 
+                      AND cu_inner.user_id != :userId 
+                      AND cu_inner.deleted_at IS NULL
+                )
+            END as room_title,
+            (SELECT count(*)::int FROM chat_users cu2 WHERE cu2.chat_room_id = r.id AND cu2.deleted_at IS NULL) as member_count,
+            (SELECT count(*)::int FROM chat_messages m JOIN chat_users cu3 ON cu3.chat_room_id = m.chat_room_id WHERE m.chat_room_id = r.id AND cu3.user_id = :userId AND m.id > COALESCE(cu3.last_read_message_id, 0) AND m.deleted_at IS NULL AND m.id <= r.last_message_id) as unread_count,
+            COALESCE(r.asset_uid::text, (
+                SELECT u_other.asset_uid::text 
+                FROM chat_users cu_other 
+                JOIN users u_other ON u_other.id = cu_other.user_id 
+                WHERE cu_other.chat_room_id = r.id 
+                  AND cu_other.user_id != :userId 
+                  AND cu_other.deleted_at IS NULL 
+                LIMIT 1
+            )) as asset_uid,
+            COALESCE(r.updated_at, r.created_at) as updated_at,
+            m.id as last_message_id,
+            m.uid as last_message_uid,
+            m.content as last_content,
+            m.kind as last_kind,
+            m.emoji_code as last_emoji_code,
+            m.emoji_count as last_emoji_count,
+            m.created_at as last_created_at,
+            su.id as last_sender_id,
+            su.uid as last_sender_uid,
+            su.username as last_sender_username,
+            su.nickname as last_sender_nickname,
+            su.asset_uid::text as last_sender_asset_uid
+        FROM chat_rooms r
+        JOIN chat_users cu ON cu.chat_room_id = r.id
+        LEFT JOIN chat_messages m ON m.id = r.last_message_id
+        LEFT JOIN users su ON su.id = m.user_id
+        WHERE cu.user_id = :userId
+          AND r.last_message_id IS NOT NULL
+          AND cu.deleted_at IS NULL 
+          AND r.deleted_at IS NULL
+        ORDER BY COALESCE(r.updated_at, r.created_at) DESC NULLS LAST
+        LIMIT :limit OFFSET :offset
+    """)
+    fun listRoomSummaries(userId: Long, limit: Int, offset: Int): Flow<kr.jiasoft.hiteen.feature.chat.dto.RoomSummaryProjection>
 }
