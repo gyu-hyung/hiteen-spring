@@ -3,6 +3,7 @@ package kr.jiasoft.hiteen.admin.infra
 import kotlinx.coroutines.flow.Flow
 import kr.jiasoft.hiteen.admin.dto.GoodsCategoryDto
 import kr.jiasoft.hiteen.admin.dto.GoodsTypeDto
+import kr.jiasoft.hiteen.admin.dto.GoodsBrandDto
 import kr.jiasoft.hiteen.feature.giftishow.domain.GoodsGiftishowEntity
 import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
@@ -10,11 +11,6 @@ import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 interface AdminGoodsRepository : CoroutineCrudRepository<GoodsGiftishowEntity, Long> {
 
 
-//    SELECT DISTINCT
-//    category1_seq AS category_seq,
-//    category1_name AS category_name
-//    FROM goods_giftishow
-//    ORDER BY category1_seq
     @Query("""
         SELECT category1_seq AS category_seq,
                MAX(category1_name) AS category_name
@@ -33,6 +29,18 @@ interface AdminGoodsRepository : CoroutineCrudRepository<GoodsGiftishowEntity, L
         ORDER BY goods_type_cd
     """)
     fun findGoodsTypes(): Flow<GoodsTypeDto>
+
+
+    @Query("""
+        SELECT DISTINCT
+            brand_code AS brand_code,
+            brand_name AS brand_name
+        FROM goods_giftishow
+        WHERE brand_name IS NOT NULL
+          AND brand_name <> ''
+        ORDER BY brand_name
+    """)
+    fun findBrands(): Flow<GoodsBrandDto>
 
 
     @Query("""

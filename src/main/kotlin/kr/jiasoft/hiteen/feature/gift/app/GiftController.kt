@@ -130,7 +130,7 @@ class GiftController (
      * */
     @GetMapping("/goods/types")
     suspend fun getGoodsTypes(): ResponseEntity<ApiResult<List<GoodsTypeDto>>> {
-        val list = giftishowGoodsRepository.findGoodsTypes()?.toList()
+        val list = giftishowGoodsRepository.findGoodsTypes().toList()
         return ResponseEntity.ok(ApiResult.success(list))
     }
 
@@ -145,6 +145,7 @@ class GiftController (
         @RequestParam searchType: String = "ALL",
         @RequestParam categorySeq: Int? = null,
         @RequestParam goodsTypeCd: String? = null,
+        @RequestParam(required = false) brandCode: String? = null,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ): ResponseEntity<ApiResult<ApiPageCursor<GoodsGiftishowEntity>>> {
 
@@ -153,9 +154,9 @@ class GiftController (
             lastId = lastId,
             search = search,
             searchType = searchType,
-//            status = "ACTIVE",
             categorySeq = categorySeq,
             goodsTypeCd = goodsTypeCd,
+            brandCode = brandCode,
         ).toList()
 
         // 다음 커서 (마지막 id)

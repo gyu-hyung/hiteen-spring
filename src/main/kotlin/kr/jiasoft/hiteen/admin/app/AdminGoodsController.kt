@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.toList
 import kr.jiasoft.hiteen.admin.dto.GoodsCategoryDto
 import kr.jiasoft.hiteen.admin.dto.GoodsGiftishowCreateRequest
 import kr.jiasoft.hiteen.admin.dto.GoodsTypeDto
+import kr.jiasoft.hiteen.admin.dto.GoodsBrandDto
 import kr.jiasoft.hiteen.admin.infra.AdminGoodsRepository
 import kr.jiasoft.hiteen.common.dto.ApiPage
 import kr.jiasoft.hiteen.common.dto.ApiResult
@@ -212,10 +213,12 @@ class AdminGoodsController (
         return ResponseEntity.ok(ApiResult.success(list))
     }
 
+    /**
+     * 브랜드 목록 (필터용)
+     */
     @GetMapping("/brands")
-    suspend fun getGoodsBrands(): ResponseEntity<ApiResult<List<GoodsCategoryDto>>> {
-        val list = adminGoodsRepository.findCategories().toList()
-        println("list = ${list}")
+    suspend fun getGoodsBrands(): ResponseEntity<ApiResult<List<GoodsBrandDto>>> {
+        val list = adminGoodsRepository.findBrands().toList()
         return ResponseEntity.ok(ApiResult.success(list))
     }
 
