@@ -244,6 +244,7 @@ class AdminUserController (
             updatedAt = OffsetDateTime.now(),
             updatedId = user.id
         )
+        adminUserRepository.save(data)
 
         return success(data, "비밀번호가 변경되었습니다.")
     }
