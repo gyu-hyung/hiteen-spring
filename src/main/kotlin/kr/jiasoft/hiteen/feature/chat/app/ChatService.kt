@@ -120,7 +120,7 @@ class ChatService(
 
 
     /** 방 조회 TODO 상세 구현(메세지 목록?, 참여 멤버?)*/
-    suspend fun getRoomByUid(roomUid: UUID): ChatRoomDetailResponse {
+    suspend fun getRoomByUid(roomUid: UUID, systemMessage: MessageSummary? = null): ChatRoomDetailResponse {
         val room = rooms.findByUidAndDeletedAtIsNull(roomUid) ?: error("room not found")
         val members = rooms.listActiveMembersByRoomUid(roomUid).toList()
 
@@ -140,7 +140,7 @@ class ChatService(
             inviteMode = room.inviteMode,
         )
 
-        return ChatRoomDetailResponse(room = roomRes, members = members)
+        return ChatRoomDetailResponse(room = roomRes, members = members, systemMessage = systemMessage)
     }
 
 
@@ -458,31 +458,66 @@ class ChatService(
         if (distinctPeerUids.isEmpty()) return getRoomByUid(roomUid)
 
         // UID -> userId 변환 (없는 유저면 예외)
-        val inviteeIds = distinctPeerUids.map { uid ->
-            users.findByUid(uid.toString())?.id
+        val invitees = distinctPeerUids.map { uid ->
+            users.findByUid(uid.toString())
                 ?: throw BusinessValidationException(mapOf("peerUid" to "not found: $uid"))
         }
 
         // 본인 제외 + 중복 제거
-        val filteredInviteeIds = inviteeIds.filter { it != inviterUserId }.distinct()
-        if (filteredInviteeIds.isEmpty()) return getRoomByUid(roomUid)
+        val filteredInvitees = invitees.filter { it.id != inviterUserId }.distinctBy { it.id }
+        if (filteredInvitees.isEmpty()) return getRoomByUid(roomUid)
 
         // 이미 활성 멤버는 제외
         val existingActiveIds = chatUsers.listActiveUserIds(room.id).toList().toSet()
+        val reallyNewInvitees = filteredInvitees.filter { it.id !in existingActiveIds }
+        if (reallyNewInvitees.isEmpty()) return getRoomByUid(roomUid)
+
         val now = OffsetDateTime.now()
 
-        filteredInviteeIds
-            .filter { it !in existingActiveIds }
-            .forEach { inviteeId ->
-                chatUsers.upsertRejoin(
-                    chatRoomId = room.id,
-                    userId = inviteeId,
-                    joiningAt = now,
-                    pushAt = now,
-                )
-            }
+        reallyNewInvitees.forEach { invitee ->
+            chatUsers.upsertRejoin(
+                chatRoomId = room.id,
+                userId = invitee.id,
+                joiningAt = now,
+                pushAt = now,
+            )
+        }
 
-        return getRoomByUid(roomUid)
+        // --- ✅ 초대 시스템 메시지 생성 및 저장 (kind 4) ---
+        val inviter = users.findById(inviterUserId) ?: error("inviter not found")
+        val ownerId = room.createdId // 방장 ID
+        val inviteeNames = reallyNewInvitees.joinToString(", ") { it.nickname }
+        val systemContent = "${inviter.nickname}님이 ${inviteeNames}님을 초대했습니다."
+
+        val savedMsg = messages.save(
+            ChatMessageEntity(
+                chatRoomId = room.id,
+                userId = ownerId, // 방장(owner)을 발송자로 저장
+                content = systemContent,
+                kind = 4, // 시스템 메세지
+                createdAt = now,
+            )
+        )
+
+        // 채팅방 업데이트 (마지막 메시지 갱신)
+        rooms.save(
+            room.copy(
+                lastUserId = ownerId,
+                lastMessageId = savedMsg.id,
+                updatedId = inviterUserId,
+                updatedAt = savedMsg.createdAt
+            )
+        )
+
+        val systemMsgSummary = MessageSummary.from(
+            entity = savedMsg,
+            sender = users.findSummaryInfoById(ownerId),
+            assets = emptyList(),
+            roomUid = room.uid,
+            unreadCount = (chatUsers.countActiveByRoomId(room.id).toInt() - 1)
+        )
+
+        return getRoomByUid(roomUid, systemMsgSummary)
     }
 
     /**
