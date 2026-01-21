@@ -572,5 +572,19 @@ class UserService (
         }
     }
 
-}
+    /** 틴프로필 삭제 (사진, 관심사 전체 삭제) */
+    suspend fun deleteTeenProfile(user: UserEntity) {
+        // 1) 추가 사진 삭제
+        val photos = userPhotosRepository.findByUserId(user.id)?.toList() ?: emptyList()
+        photos.forEach { photo ->
+            try {
+                assetService.softDelete(photo.uid, user.id)
+            } catch (_: Throwable) {}
+        }
+        userPhotosRepository.deleteByUserId(user.id)
 
+        // 2) 관심사 삭제
+        interestUserRepository.deleteByUserId(user.id)
+    }
+
+}
