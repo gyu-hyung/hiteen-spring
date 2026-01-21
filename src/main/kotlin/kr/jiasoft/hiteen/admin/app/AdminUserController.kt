@@ -1,11 +1,14 @@
 package kr.jiasoft.hiteen.admin.app
 
+import io.swagger.v3.oas.annotations.Parameter
 import jakarta.validation.Valid
 import kotlinx.coroutines.flow.toList
 import kr.jiasoft.hiteen.admin.dto.AdminFollowResponse
 import kr.jiasoft.hiteen.admin.dto.AdminFriendResponse
 import kr.jiasoft.hiteen.admin.dto.AdminMyPasswordChangeRequest
 import kr.jiasoft.hiteen.admin.dto.AdminUserResponse
+import kr.jiasoft.hiteen.admin.dto.AdminUserRoleUpdateRequest
+import kr.jiasoft.hiteen.admin.dto.AdminUserRoleUpdateResponse
 import kr.jiasoft.hiteen.admin.dto.AdminUserSaveRequest
 import kr.jiasoft.hiteen.admin.infra.AdminFollowRepository
 import kr.jiasoft.hiteen.admin.infra.AdminFriendRepository
@@ -238,6 +241,15 @@ class AdminUserController (
         if (!encoder.matches(req.oldPassword, user.password)) {
             return failure("기존 비밀번호가 일치하지 않습니다.")
         }
+
+    @PostMapping("/role")
+    suspend fun updateRole(
+        @Parameter @Valid @RequestBody request: AdminUserRoleUpdateRequest,
+        @AuthenticationPrincipal(expression = "user") user: UserEntity,
+    ): ResponseEntity<ApiResult<AdminUserRoleUpdateResponse>> {
+        val data = adminUserService.updateRole(request, user)
+        return ResponseEntity.ok(ApiResult.success(data))
+    }
 
         val data = user.copy(
             password = encoder.encode(req.newPassword),
