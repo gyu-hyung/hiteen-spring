@@ -15,12 +15,13 @@ import kr.jiasoft.hiteen.feature.chat.infra.ChatRoomRepository
 import kr.jiasoft.hiteen.feature.chat.infra.ChatUserRepository
 import kr.jiasoft.hiteen.feature.code.infra.CodeRepository
 import kr.jiasoft.hiteen.feature.level.app.ExpService
-import kr.jiasoft.hiteen.feature.push.app.PushService
+import kr.jiasoft.hiteen.feature.push.app.event.PushSendRequestedEvent
 import kr.jiasoft.hiteen.feature.push.domain.PushTemplate
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import kr.jiasoft.hiteen.feature.user.infra.UserRepository
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
+import org.springframework.context.ApplicationEventPublisher
 import java.time.OffsetDateTime
 import java.util.UUID
 
@@ -35,8 +36,8 @@ class ChatService(
 //    private val soketiBroadcaster: SoketiBroadcaster,
 
     private val expService: ExpService,
-    private val pushService: PushService,
     private val assetService: AssetService,
+    private val eventPublisher: ApplicationEventPublisher,
 ) {
 
     /**
@@ -255,14 +256,16 @@ class ChatService(
             else -> "${sendUser.nickname}: ${req.content}"
         }
 
-        pushService.sendAndSavePush(
-            pushUserIds,
-            sendUser.id,
-            PushTemplate.CHAT_MESSAGE.buildPushData(
-                "nickname" to sendUser.nickname,
-                        "chat_message" to pushMessage,
-            ),
-            mapOf("roomUid" to room.uid.toString())
+        eventPublisher.publishEvent(
+            PushSendRequestedEvent(
+                userIds = pushUserIds,
+                actorUserId = sendUser.id,
+                templateData = PushTemplate.CHAT_MESSAGE.buildPushData(
+                    "nickname" to sendUser.nickname,
+                    "chat_message" to pushMessage,
+                ),
+                extraData = mapOf("roomUid" to room.uid.toString()),
+            )
         )
 
         return MessageSummary.from(

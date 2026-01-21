@@ -10,9 +10,10 @@ import kr.jiasoft.hiteen.admin.infra.AdminPushRepository
 import kr.jiasoft.hiteen.admin.infra.AdminUserRepository
 import kr.jiasoft.hiteen.common.dto.ApiPage
 import kr.jiasoft.hiteen.common.dto.PageUtil
-import kr.jiasoft.hiteen.feature.push.app.PushService
+import kr.jiasoft.hiteen.feature.push.app.event.PushSendRequestedEvent
 import kr.jiasoft.hiteen.feature.push.domain.PushEntity
 import kr.jiasoft.hiteen.feature.push.domain.PushTemplate
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -20,8 +21,8 @@ import org.springframework.transaction.annotation.Transactional
 class AdminPushService(
     private val adminPushRepository: AdminPushRepository,
     private val adminPushDetailRepository: AdminPushDetailRepository,
-    private val pushService: PushService,
     private val adminUserRepository: AdminUserRepository,
+    private val eventPublisher: ApplicationEventPublisher,
 ) {
 
     suspend fun list(
@@ -120,11 +121,13 @@ class AdminPushService(
         }
 
         // PushService 내부에서 토큰 500개 단위 chunk로 멀티캐스트 발송/상세로그 저장을 처리하므로,
-        // 여기서는 1회 호출로 "일괄발송"(push 1건 + detail 다건) 되도록 한다.
-        pushService.sendAndSavePush(
-            userIds = targetUserIds,
-            userId = createdId,
-            templateData = templateData,
+        // 여기서는 이벤트로 분리해 API 응답을 블로킹하지 않도록 한다.
+        eventPublisher.publishEvent(
+            PushSendRequestedEvent(
+                userIds = targetUserIds,
+                actorUserId = createdId,
+                templateData = templateData,
+            )
         )
 
         // 방금 저장된 pushId를 PushService에서 반환하지 않기 때문에,
