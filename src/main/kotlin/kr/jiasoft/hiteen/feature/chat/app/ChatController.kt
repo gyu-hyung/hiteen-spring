@@ -87,7 +87,26 @@ class ChatController(
         @Parameter(description = "채팅방 UID") @PathVariable roomUid: UUID,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
         @Parameter(description = "초대 요청 DTO") @RequestBody req: ChatRoomInviteRequest,
-    ) = ResponseEntity.ok(ApiResult.success(service.inviteMembers(roomUid, user.id, req.peerUids)))
+    ): ResponseEntity<ApiResult<ChatRoomDetailResponse>> {
+        val res = service.inviteMembers(roomUid, user.id, req.peerUids)
+
+        // ✅ 초대 시스템 메시지가 있으면 웹소켓 브로드캐스트 (sendMessage와 동일 로직)
+        res.systemMessage?.let { msgSummary ->
+            val payload = mapper.writeValueAsString(
+                mapOf(
+                    "type" to "message",
+                    "data" to msgSummary
+                )
+            )
+            chatHub.publish(roomUid, payload)
+
+            chatUserRepository.listActiveUserUidsByUid(roomUid).collect { userUid ->
+                chatHub.publishUserNotify(userUid, payload)
+            }
+        }
+
+        return ResponseEntity.ok(ApiResult.success(res))
+    }
 
 
     //TODO : 호출 시 읽음처리

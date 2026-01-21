@@ -264,6 +264,9 @@ data class ChatRoomDetailResponse(
 
     @param:Schema(description = "참여중인 유저 목록")
     val members: List<ChatRoomMemberResponse>,
+
+    @param:Schema(description = "최근 발생한 시스템 메세지 (초대 등)")
+    val systemMessage: MessageSummary? = null,
 )
 
 
