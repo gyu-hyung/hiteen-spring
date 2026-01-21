@@ -71,12 +71,17 @@ class BoardService(
         val userSummary = userService.findUserSummary(b.createdId)
 
         val perPage = 15
-        val commentList = comments.findComments(b.uid, null, userId, null, perPage + 1)
-                .map { comments ->
-                    comments.copy(
-                        user = userService.findUserSummary(comments.createdId)
-                    )
-                }.toList()
+        val rawComments = comments.findComments(b.uid, null, userId, null, perPage + 1).toList()
+
+        // 댓글 작성자 정보 일괄 조회
+        val commentAuthorIds = rawComments.map { it.createdId }.distinct()
+        val commentAuthorMap = userService.findUserSummaryByIds(commentAuthorIds).associateBy { it.id }
+
+        val commentList = rawComments.map { comment ->
+            comment.copy(
+                user = commentAuthorMap[comment.createdId]
+            )
+        }
 
         val hasMore = commentList.size > perPage
         val items = if (hasMore) commentList.dropLast(1) else commentList
@@ -129,22 +134,21 @@ class BoardService(
         val lastPage = if (total == 0) 0 else (total - 1) / s
 
         val rows = boards.searchSummariesByPage(category, q, s, offset, uid, followOnly, friendOnly, sameSchoolOnly, status, displayStatus)
-            .map { row ->
-                row.copy(
-                    subject = row.subject,
-                    content = row.content.take(160),
-                    user = userService.findUserSummary(row.createdId),
-                    attachments = if (row.category == BoardCategory.EVENT.name || row.category == BoardCategory.EVENT_WINNING.name) {
-                        row.attachments
-                    } else {
-                        boardAssetRepository.findAllByBoardId(row.id)?.map { it.uid }
-                    }
-                )
-            }
             .toList()
 
+        // 유저 정보 일괄 조회 (N+1 방지)
+        val authorIds = rows.map { it.createdId }.distinct()
+        val userMap = userService.findUserSummaryByIds(authorIds).associateBy { it.id }
+
+        val mapped = rows.map { row ->
+            row.copy(
+                content = row.content.take(160),
+                user = userMap[row.createdId]
+            )
+        }
+
         // EVENT 배너 분리 매핑(배치 조회)
-        val eventIds = rows.filter { it.category == BoardCategory.EVENT.name || it.category == BoardCategory.EVENT_WINNING.name }
+        val eventIds = mapped.filter { it.category == BoardCategory.EVENT.name || it.category == BoardCategory.EVENT_WINNING.name }
             .map { it.id }
         val bannerMap: Map<Long, Pair<List<UUID>, List<UUID>>> = if (eventIds.isEmpty()) {
             emptyMap()
@@ -157,7 +161,7 @@ class BoardService(
             }
         }
 
-        val finalRows = rows.map { r ->
+        val finalRows = mapped.map { r ->
             if (r.category == BoardCategory.EVENT.name || r.category == BoardCategory.EVENT_WINNING.name) {
                 val (large, small) = bannerMap[r.id] ?: (emptyList<UUID>() to emptyList())
                 r.copy(largeBanners = large, smallBanners = small)
@@ -195,16 +199,15 @@ class BoardService(
                 expService.grantExp(userId, "FRIEND_PROFILE_VISIT", user.id)
             }
         }
+
+        // 유저 정보 일괄 조회 (N+1 방지)
+        val authorIds = items.map { it.createdId }.distinct()
+        val userMap = userService.findUserSummaryByIds(authorIds).associateBy { it.id }
+
         val mapped = items.map { row ->
             row.copy(
-                subject = row.subject,
                 content = row.content.take(160),
-                user = userService.findUserSummary(row.createdId),
-                attachments = if (row.category == BoardCategory.EVENT.name || row.category == BoardCategory.EVENT_WINNING.name) {
-                    row.attachments
-                } else {
-                    boardAssetRepository.findAllByBoardId(row.id)?.map { it.uid }
-                }
+                user = userMap[row.createdId]
             )
         }
 
