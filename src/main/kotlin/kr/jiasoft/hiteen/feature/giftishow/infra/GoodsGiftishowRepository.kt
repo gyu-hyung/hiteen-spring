@@ -79,6 +79,7 @@ interface GiftishowGoodsRepository : CoroutineCrudRepository<GoodsGiftishowEntit
             )
             AND (:categorySeq IS NULL OR g.category1_seq = :categorySeq)
             AND (:goodsTypeCd IS NULL OR g.goods_type_cd = :goodsTypeCd)
+            AND (:brandCode IS NULL OR g.brand_code = :brandCode)
             AND (:lastId IS NULL OR g.id < :lastId)
         ORDER BY g.id DESC
         LIMIT :size
@@ -90,6 +91,7 @@ interface GiftishowGoodsRepository : CoroutineCrudRepository<GoodsGiftishowEntit
         searchType: String,
         categorySeq: Int?,
         goodsTypeCd: String?,
+        brandCode: String?,
     ): Flow<GoodsGiftishowEntity>
 
 

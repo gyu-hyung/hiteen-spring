@@ -139,7 +139,7 @@ class GiftAppServiceImpl (
                 seasonRank = req.seasonRank
             )
         } else {
-            req.giftCategory.toTemplate().defaultMemo!!
+            req.memo ?: req.giftCategory.toTemplate().defaultMemo!!
         }
 
 

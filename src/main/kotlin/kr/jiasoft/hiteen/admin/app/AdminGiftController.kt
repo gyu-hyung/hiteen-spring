@@ -112,6 +112,7 @@ class AdminGiftController(
         @RequestParam searchType: String = "ALL",
         @RequestParam categorySeq: Int? = null,
         @RequestParam goodsTypeCd: String? = null,
+        @RequestParam(required = false) brandCode: String? = null,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ): ResponseEntity<ApiResult<ApiPageCursor<GoodsGiftishowEntity>>> {
 
@@ -122,6 +123,7 @@ class AdminGiftController(
             searchType = searchType,
             categorySeq = categorySeq,
             goodsTypeCd = goodsTypeCd,
+            brandCode = brandCode,
         ).toList()
 
         val nextCursor = list.lastOrNull()?.id?.toString()

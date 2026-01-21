@@ -17,6 +17,7 @@ import kr.jiasoft.hiteen.admin.infra.AdminUserRepository
 import kr.jiasoft.hiteen.admin.services.AdminUserService
 import kr.jiasoft.hiteen.common.dto.ApiPage
 import kr.jiasoft.hiteen.common.dto.ApiResult
+import kr.jiasoft.hiteen.common.dto.ApiPageCursor
 import kr.jiasoft.hiteen.common.dto.PageUtil
 import kr.jiasoft.hiteen.common.extensions.failure
 import kr.jiasoft.hiteen.common.extensions.success
@@ -88,9 +89,44 @@ class AdminUserController (
             role = role
         )
 
-        return ResponseEntity.ok(ApiResult.Companion.success(PageUtil.of(res, totalCount, page, size)))
+        return ResponseEntity.ok(ApiResult.success(PageUtil.of(res, totalCount, page, size)))
     }
 
+    /**
+     * 회원 목록 조회 (커서 기반)
+     * - nextCursor: 마지막 row의 id
+     */
+    @GetMapping("/users/cursor")
+    suspend fun getUsersByCursor(
+        @RequestParam size: Int = 10,
+        @RequestParam(required = false) lastId: Long?,
+        @RequestParam search: String? = null,
+        @RequestParam searchType: String = "ALL",
+        @RequestParam status: String? = null,
+        @RequestParam role: String? = null,
+        @AuthenticationPrincipal(expression = "user") user: UserEntity,
+    ): ResponseEntity<ApiResult<ApiPageCursor<AdminUserResponse>>> {
+        val list = adminUserRepository.listByCursorId(
+            size = size,
+            lastId = lastId,
+            search = search,
+            searchType = searchType,
+            role = role,
+            status = status,
+        ).toList()
+
+        val nextCursor = list.lastOrNull()?.id?.toString()
+
+        return ResponseEntity.ok(
+            ApiResult.success(
+                ApiPageCursor(
+                    items = list,
+                    nextCursor = nextCursor,
+                    perPage = size,
+                )
+            )
+        )
+    }
 
 
     @GetMapping("/user")
@@ -252,15 +288,6 @@ class AdminUserController (
             return failure("기존 비밀번호가 일치하지 않습니다.")
         }
 
-    @PostMapping("/role")
-    suspend fun updateRole(
-        @Parameter @Valid @RequestBody request: AdminUserRoleUpdateRequest,
-        @AuthenticationPrincipal(expression = "user") user: UserEntity,
-    ): ResponseEntity<ApiResult<AdminUserRoleUpdateResponse>> {
-        val data = adminUserService.updateRole(request, user)
-        return ResponseEntity.ok(ApiResult.success(data))
-    }
-
         val data = user.copy(
             password = encoder.encode(req.newPassword),
             updatedAt = OffsetDateTime.now(),
@@ -268,5 +295,14 @@ class AdminUserController (
         )
 
         return success(data, "비밀번호가 변경되었습니다.")
+    }
+
+    @PostMapping("/role")
+    suspend fun updateRole(
+        @Parameter @Valid @RequestBody request: AdminUserRoleUpdateRequest,
+        @AuthenticationPrincipal(expression = "user") user: UserEntity,
+    ): ResponseEntity<ApiResult<AdminUserRoleUpdateResponse>> {
+        val data = adminUserService.updateRole(request, user)
+        return ResponseEntity.ok(ApiResult.success(data))
     }
 }
