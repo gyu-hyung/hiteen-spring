@@ -9,8 +9,6 @@ import java.util.UUID
 
 interface AdminBoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
 
-
-
     @Query("""
         SELECT 
             b.*,
@@ -20,6 +18,8 @@ interface AdminBoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
             ( SELECT u.nickname FROM users u WHERE u.id = b.created_id ) AS nickname
         FROM boards b
         WHERE
+           b.deleted_at IS NULL
+           AND
             (
                 :search IS NULL
                 OR (
@@ -52,10 +52,30 @@ interface AdminBoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
             )
     
             AND (
+                :displayStatus IS NULL OR :displayStatus = 'ALL'
+                OR (
+                    :displayStatus = 'ACTIVE'
+                    AND (b.start_date IS NULL OR b.start_date <= CURRENT_DATE)
+                    AND (b.end_date IS NULL OR b.end_date >= CURRENT_DATE)
+                )
+                OR (
+                    :displayStatus = 'INACTIVE'
+                    AND (
+                        (b.start_date IS NOT NULL AND b.start_date > CURRENT_DATE)
+                        OR (b.end_date IS NOT NULL AND b.end_date < CURRENT_DATE)
+                    )
+                )
+            )
+    
+            AND (
                 :category IS NULL OR :category = 'ALL'
                 OR (:category = 'POST' AND b.category = 'POST')
                 OR (:category = 'NOTICE' AND b.category = 'NOTICE')
-                OR (:category = 'EVENT' AND b.category = 'EVENT')
+                OR (
+                    :category = 'EVENT'
+                    AND b.category IN ('EVENT', 'EVENT_WINNING')
+                )
+                OR (:category = 'EVENT_WINNING' AND b.category = 'EVENT_WINNING')
             )
     
             AND (
@@ -68,7 +88,7 @@ interface AdminBoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
             CASE WHEN :order = 'DESC' THEN b.created_at END DESC,
             CASE WHEN :order = 'ASC' THEN b.created_at END ASC
     
-        LIMIT :size OFFSET (:page - 1) * :size
+        LIMIT :size OFFSET GREATEST((:page - 1) * :size, 0)
     """)
     fun listByPage(
         page: Int,
@@ -77,6 +97,7 @@ interface AdminBoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
         search: String?,
         searchType: String,
         status: String?,
+        displayStatus: String?,
         uid: UUID?,
         category: String?,
     ): Flow<AdminBoardListResponse>
@@ -88,6 +109,8 @@ interface AdminBoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
         SELECT COUNT(*)
         FROM boards b
         WHERE
+           b.deleted_at IS NULL
+           AND
             (
                 :search IS NULL
                 OR (
@@ -120,10 +143,30 @@ interface AdminBoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
             )
     
             AND (
+                :displayStatus IS NULL OR :displayStatus = 'ALL'
+                OR (
+                    :displayStatus = 'ACTIVE'
+                    AND (b.start_date IS NULL OR b.start_date <= CURRENT_DATE)
+                    AND (b.end_date IS NULL OR b.end_date >= CURRENT_DATE)
+                )
+                OR (
+                    :displayStatus = 'INACTIVE'
+                    AND (
+                        (b.start_date IS NOT NULL AND b.start_date > CURRENT_DATE)
+                        OR (b.end_date IS NOT NULL AND b.end_date < CURRENT_DATE)
+                    )
+                )
+            )
+    
+            AND (
                 :category IS NULL OR :category = 'ALL'
                 OR (:category = 'POST' AND b.category = 'POST')
                 OR (:category = 'NOTICE' AND b.category = 'NOTICE')
-                OR (:category = 'EVENT' AND b.category = 'EVENT')
+                OR (
+                    :category = 'EVENT'
+                    AND b.category IN ('EVENT', 'EVENT_WINNING')
+                )
+                OR (:category = 'EVENT_WINNING' AND b.category = 'EVENT_WINNING')
             )
     
             AND (
@@ -135,6 +178,7 @@ interface AdminBoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
         search: String?,
         searchType: String,
         status: String?,
+        displayStatus: String?,
         uid: UUID?,
         category: String?,
     ): Int

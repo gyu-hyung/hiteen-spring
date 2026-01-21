@@ -1,9 +1,8 @@
 package kr.jiasoft.hiteen.admin.infra
 
 import kotlinx.coroutines.flow.Flow
-import kr.jiasoft.hiteen.admin.dto.AdminPinResponse
+import kr.jiasoft.hiteen.admin.dto.AdminPollDetailRow
 import kr.jiasoft.hiteen.admin.dto.AdminPollResponse
-import kr.jiasoft.hiteen.feature.pin.domain.PinEntity
 import kr.jiasoft.hiteen.feature.poll.domain.PollEntity
 import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
@@ -76,8 +75,6 @@ interface AdminPollRepository : CoroutineCrudRepository<PollEntity, Long> {
 
 
 
-
-
     @Query("""
         SELECT COUNT(*)
         FROM polls p
@@ -113,6 +110,48 @@ interface AdminPollRepository : CoroutineCrudRepository<PollEntity, Long> {
     ): Int
 
 
+    // --- Admin 상세 조회용 쿼리 추가 ---
+    @Query("""
+        SELECT
+            p.id,
+            p.question,
+            p.photo,
+            p.vote_count,
+            (SELECT COUNT(*)::bigint FROM poll_comments pc WHERE pc.poll_id = p.id AND pc.deleted_at IS NULL) AS comment_count,
+            (SELECT COUNT(*)::bigint FROM poll_likes pl WHERE pl.poll_id = p.id) AS like_count,
+            p.report_count,
+            p.allow_comment,
+            (
+                SELECT jsonb_agg(row_to_json(r))
+                FROM (
+                    SELECT ps.id, ps.seq, ps.content, ps.vote_count,
+                        (
+                            SELECT psp.asset_uid
+                            FROM poll_select_photos psp
+                            WHERE psp.select_id = ps.id
+                            ORDER BY psp.seq ASC, psp.id ASC
+                            LIMIT 1
+                        ) AS photo
+                    FROM poll_selects ps
+                    WHERE ps.poll_id = p.id
+                    ORDER BY ps.seq ASC
+                ) r
+            ) AS selects,
+            (
+                SELECT ARRAY_AGG(ps.content ORDER BY ps.seq ASC) FROM poll_selects ps WHERE ps.poll_id = p.id
+            ) AS options,
+            NULL::text AS start_date,
+            NULL::text AS end_date,
+            p.status AS status,
+            u.nickname AS nickname,
+            p.created_at
+        FROM polls p
+        JOIN users u ON u.id = p.created_id
+        WHERE p.id = :id
+        LIMIT 1
+    """)
+    suspend fun findDetailById(id: Long): AdminPollDetailRow?
+
+
 
 }
-

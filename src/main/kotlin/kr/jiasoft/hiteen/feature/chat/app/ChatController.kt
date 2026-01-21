@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
+import jakarta.validation.Valid
 import kotlinx.coroutines.reactor.awaitSingle
 import kr.jiasoft.hiteen.common.dto.ApiResult
 import kr.jiasoft.hiteen.feature.chat.dto.*
@@ -14,6 +15,7 @@ import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.security.core.annotation.AuthenticationPrincipal
+import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 import reactor.core.publisher.Flux
 import java.time.OffsetDateTime
@@ -64,7 +66,7 @@ class ChatController(
     @PostMapping("/rooms-with-file", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     suspend fun createRoomJson(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
-        @Parameter(description = "그룹 채팅방 생성 요청 DTO") req: CreateRoomRequest,
+        @Parameter(description = "그룹 채팅방 생성 요청 DTO") @Validated req: CreateRoomRequest,
         @Parameter(description = "첨부 파일(대표 썸네일, 1개)") @RequestPart(name = "file", required = false) file: FilePart?,
     ) : ResponseEntity<ApiResult<Any>> {
         val roomUid = service.createRoom(user.id, req, file)
@@ -108,7 +110,7 @@ class ChatController(
     suspend fun sendMessage(
         @Parameter(description = "채팅방 UID") @PathVariable roomUid: UUID,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
-        @Parameter(description = "메시지 전송 요청 DTO") req: SendMessageRequest,
+        @Parameter(description = "메시지 전송 요청 DTO") @RequestBody req: SendMessageRequest,
         @Parameter(description = "첨부 파일들") @RequestPart(name = "files", required = false) filesFlux: Flux<FilePart>?,
     ) : ResponseEntity<ApiResult<Any>> {
 
@@ -132,6 +134,36 @@ class ChatController(
         return ResponseEntity.ok(ApiResult.success(msgRes))
     }
 
+
+
+    @Operation(summary = "메시지 전송", description = "특정 채팅방에 메시지를 전송합니다.")
+    @PostMapping("/{roomUid}/messages/file")
+    suspend fun sendMessageFile(
+        @Parameter(description = "채팅방 UID") @PathVariable roomUid: UUID,
+        @AuthenticationPrincipal(expression = "user") user: UserEntity,
+        @Parameter(description = "메시지 전송 요청 DTO") req: SendMessageRequest,
+        @Parameter(description = "첨부 파일들") @RequestPart(name = "files", required = false) filesFlux: Flux<FilePart>?,
+    ) : ResponseEntity<ApiResult<Any>> {
+
+        val files: List<FilePart> = filesFlux?.collectList()?.awaitSingle() ?: emptyList()
+
+        //메세지 송신
+        val msgRes = service.sendMessage(roomUid, user, req, files)
+
+        //message broadcast
+        val payload = mapper.writeValueAsString(
+            mapOf(
+                "type" to "message",
+                "data" to msgRes
+            )
+        )
+        chatHub.publish(roomUid, payload)
+
+        chatUserRepository.listActiveUserUidsByUid(roomUid).collect { userUid ->
+            chatHub.publishUserNotify(userUid, payload)
+        }
+        return ResponseEntity.ok(ApiResult.success(msgRes))
+    }
 
     @Operation(summary = "메시지 읽음 처리", description = "특정 메시지를 읽음 처리합니다.")
     @PostMapping("/{roomUid}/messages/{messageUid}/read")

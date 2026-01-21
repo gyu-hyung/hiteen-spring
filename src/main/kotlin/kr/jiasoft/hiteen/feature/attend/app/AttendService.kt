@@ -2,6 +2,7 @@ package kr.jiasoft.hiteen.feature.attend.app
 
 import kotlinx.coroutines.flow.toList
 import kr.jiasoft.hiteen.common.dto.ApiPageCursor
+import kr.jiasoft.hiteen.common.time.AppClock
 import kr.jiasoft.hiteen.feature.attend.domain.AttendEntity
 import kr.jiasoft.hiteen.feature.attend.infra.AttendRepository
 import kr.jiasoft.hiteen.feature.level.app.ExpService
@@ -17,6 +18,7 @@ class AttendService(
     private val attendRepository: AttendRepository,
     private val expService: ExpService,
     private val pointService: PointService,
+    private val appClock: AppClock,
 ) {
 
     /**
@@ -24,10 +26,9 @@ class AttendService(
      * - 연속 출석이 7일을 넘으면 7일 단위로 사이클이 돌아야 한다.
      *   예) 9일 연속이면 UI에는 최근 2일만 1~2로 보이도록 반환
      * - 하루라도 빠지면 초기화(빈 목록)
-     * - ✅ 추가 요구사항: 호출 시 오늘 출석을 안 했다면 자동으로 출석 처리
      */
     suspend fun consecutiveAttendDays(userId: Long): List<ConsecutiveAttendDay> {
-        val today = LocalDate.now()
+        val today = appClock.todayKst()
 
         // 0) 오늘 출석이 없으면 자동 출석 처리
         if (attendRepository.findByUserIdAndAttendDate(userId, today) == null) {
@@ -35,7 +36,14 @@ class AttendService(
             attend(userId, today)
         }
 
-        val attendedDates = attendRepository.findAttendDatesLast7Days(userId).toList().toSet()
+        val attendedDates = attendRepository
+            .findAttendDatesBetween(
+                userId = userId,
+                startDate = today.minusDays(6),
+                endDate = today,
+            )
+            .toList()
+            .toSet()
         if (attendedDates.isEmpty()) return emptyList()
 
         // 1) 오늘 포함 최근 7일 내에서 '연속' 체크
@@ -106,7 +114,7 @@ class AttendService(
      * 출석하기
      */
     suspend fun attend(userId: Long, date: LocalDate? = null): Result<AttendEntity> {
-        val today = date ?: LocalDate.now()
+        val today = date ?: appClock.todayKst()
 
         // 오늘 이미 출석했는지 확인
         val existing = attendRepository.findByUserIdAndAttendDate(userId, today)
@@ -144,7 +152,8 @@ class AttendService(
                 PointPolicy.ATTEND_DAY7 -> 20
                 else -> 3
             },
-            createdAt = OffsetDateTime.now()
+            // KST 기준으로 저장(UTC 서버에서도 날짜 경계 혼선 방지)
+            createdAt = OffsetDateTime.now(appClock.zoneId())
         )
 
         val saved = attendRepository.save(attend)

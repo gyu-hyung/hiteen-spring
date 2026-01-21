@@ -159,19 +159,32 @@ class ChatService(
             throw IllegalArgumentException("not a member")
         }
 
+        // ✅ kind=3(emojiList)일 때 DB에 저장할 content를 '♥️ x100 💩 x100 ...' 형태로 구성
+        val emojiListContent: String? = req.emojiList?.let { rows ->
+            val uniqueCodes = rows.map { it.emojiCode }.distinct()
+            val emojiMap: Map<String, String> = uniqueCodes.associateWith { code ->
+                emojiReplace(code)
+            }
+            rows.joinToString(" ") { row ->
+                val emoji = emojiMap[row.emojiCode] ?: "[이모티콘]"
+                "$emoji x${row.emojiCount}"
+            }
+        }
+
         // 메시지 저장
         val savedMsg = messages.save(
             ChatMessageEntity(
                 chatRoomId = room.id,
                 userId = sendUser.id,
-                content = req.content,
+                content = emojiListContent ?: req.content,
                 kind = when {
+                    req.emojiList != null -> 3
                     files.isNotEmpty() -> 2
                     req.emojiCode != null -> 1
                     else -> 0
                 },
-                emojiCode = req.emojiCode,
-                emojiCount = req.emojiCount,
+                emojiCode = req.emojiList?.first()?.emojiCode ?: req.emojiCode,
+                emojiCount = req.emojiList?.first()?.emojiCount ?: req.emojiCount,
                 createdAt = OffsetDateTime.now(),
             )
         )
@@ -227,15 +240,18 @@ class ChatService(
 
         // 푸시 전송
         val pushUserIds = activeMembers.filter { it.userId != sender.id  }.map { it.userId }
-        val pushMessage = when (req.kind) {
+        val pushMessage = when (savedMsg.kind) {
             0 -> "${sendUser.nickname}: ${req.content}"
             1 -> {
                 val emoji = emojiReplace(req.emojiCode!!)
                 if (req.emojiCount == null) "${sendUser.nickname}: $emoji"
                 else "${sendUser.nickname}: $emoji x${req.emojiCount}"
             }
-            2 -> "${sendUser.nickname} sent an image"
-
+            2 -> "사진을 보냈습니다."
+            3 -> {
+                val emojiSummary = emojiListContent ?: ""
+                "${sendUser.nickname}: $emojiSummary".trim()
+            }
             else -> "${sendUser.nickname}: ${req.content}"
         }
 
@@ -254,7 +270,8 @@ class ChatService(
             sender = sender,
             assets = assets,
             unreadCount = (memberCount - 1),
-            roomUid = room.uid
+            roomUid = room.uid,
+            emojiList = req.emojiList
         )
     }
 
@@ -393,7 +410,7 @@ class ChatService(
                 roomTitle = r.roomName,
                 memberCount = members.toList().count(),
                 unreadCount = unreadCount,
-                assetUid = otherMember?.assetUid,
+                assetUid = r.assetUid?.toString() ?: otherMember?.assetUid,
                 updatedAt = r.updatedAt ?: r.createdAt,
                 lastMessage = if (last != null) {
                     MessageSummary(

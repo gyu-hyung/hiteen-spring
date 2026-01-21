@@ -63,9 +63,22 @@ enum class PushTemplate(
     NEW_POST(
         code = "NEW_POST",
         title = "새 글 등록 알림 🔔",
-        message = "방금 새로운 글이 올라왔어~ 🔔",
+        message = "방금 새로운 글이 올라왔어 🔔",
         itemType = PushItemType.NEW_POST
     ),
+
+
+    /**
+     * 새 글 등록 알림
+     * boardUid
+     */
+    NEW_VOTE(
+        code = "NEW_POST",
+        title = "새 투표 등록 알림 🔔",
+        message = "방금 새로운 투표가 올라왔어 🔔",
+        itemType = PushItemType.NEW_POST
+    ),
+
 
     /**
      * 핀 등록 알림
@@ -196,8 +209,49 @@ enum class PushTemplate(
         code = "DAILY_FRIEND_SUGGESTION",
         title = "오늘의 친구 추천 시간이 왔어요! 🤝",
         message = "새로운 친구를 만나보세요! 오늘의 친구 추천 시간이 시작되었어요! 🤝"
-    )
+    ),
 
+    /**
+     * 게임 친구 랭킹 변동 알림
+     */
+    GAME_FRIEND_RANK_CHANGED(
+        code = "GAME_FRIEND_RANK_CHANGED",
+        title = "친구 랭킹 변동 📈",
+        message = "{nickname_iga} 게임 친구 랭킹이 {beforeRank}위 → {afterRank}위로 변했어!",
+        itemType = PushItemType.GAME,
+    ),
+
+    /**
+     * 게임에서 특정 친구를 추월했을 때 친구에게 알림
+     */
+    GAME_OVERTAKE_FRIEND(
+        code = "GAME_OVERTAKE_FRIEND",
+        title = "랭킹 추월 알림 🏃",
+        message = "{nickname_iga} {gameName}에서 너를 추월했어! 📉",
+        itemType = PushItemType.GAME,
+    ),
+
+
+    /**
+     * 초대코드로 가입한 경우 (초대자에게 알림)
+     */
+    INVITE_CODE_JOINED(
+        code = "INVITE_CODE_JOINED",
+        title = "초대코드 가입 🎉",
+        message = "{nickname_iga} 내 초대코드로 가입했어!",
+        itemType = PushItemType.ALL,
+    ),
+
+    /**
+     * 보상 리그 시작 알림
+     * - (시즌, 리그, 게임) 점수 등록자 수가 10명 이상이 되는 순간 1회 발송
+     */
+    REWARD_LEAGUE_START(
+        code = "REWARD_LEAGUE_START",
+        title = "보상 리그 시작 알림 🏆",
+        message = "지금 보상 리그가 시작됐어. 친구들 보다 먼저 달리고 보상 챙기자!",
+        itemType = PushItemType.GAME,
+    ),
 
     ;
 
@@ -236,5 +290,4 @@ enum class PushTemplate(
 
 
 }
-
 

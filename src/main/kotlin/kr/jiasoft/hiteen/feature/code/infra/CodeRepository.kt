@@ -15,7 +15,12 @@ interface CodeRepository : CoroutineCrudRepository<CodeEntity, Long> {
         FROM codes c
         left join code_assets ca on c.id = ca.code_id 
         WHERE deleted_at IS null
-        AND (:group IS NULL OR c.code_group = :group)
+        AND c.status = 'ACTIVE'
+        AND (
+            :group IS NULL
+            OR c.code_group = :group
+            OR c.code_group ILIKE CONCAT(:group, '%')
+        )
         ORDER BY code_group, code
     """)
     fun findByGroup(group: String?): Flux<CodeWithAssetResponse>
@@ -23,14 +28,18 @@ interface CodeRepository : CoroutineCrudRepository<CodeEntity, Long> {
     @Query("SELECT code FROM codes WHERE code_group = :group ORDER BY code DESC LIMIT 1")
     suspend fun findLastCodeByGroup(group: String): String?
 
-    // ---- paging/list ----
+
 
     @Query("""
         SELECT c.*, ca.uid
         FROM codes c
         left join code_assets ca on c.id = ca.code_id
         WHERE c.deleted_at IS NULL
-          AND (:group IS NULL OR c.code_group = :group)
+          AND (
+              :group IS NULL
+              OR c.code_group = :group
+              OR c.code_group ILIKE CONCAT(:group, '%')
+          )
           AND (:status IS NULL OR c.status = :status)
           AND (
               :search IS NULL
@@ -65,7 +74,11 @@ interface CodeRepository : CoroutineCrudRepository<CodeEntity, Long> {
         SELECT COUNT(1)
         FROM codes c
         WHERE c.deleted_at IS NULL
-          AND (:group IS NULL OR c.code_group = :group)
+          AND (
+              :group IS NULL
+              OR c.code_group = :group
+              OR c.code_group ILIKE CONCAT(:group, '%')
+          )
           AND (:status IS NULL OR c.status = :status)
           AND (
               :search IS NULL

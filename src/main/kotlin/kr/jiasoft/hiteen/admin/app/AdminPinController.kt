@@ -1,9 +1,6 @@
 package kr.jiasoft.hiteen.admin.app
 
-import io.swagger.v3.oas.annotations.Parameter
 import kotlinx.coroutines.flow.toList
-import kr.jiasoft.hiteen.admin.dto.AdminBoardCreateRequest
-import kr.jiasoft.hiteen.admin.dto.AdminBoardListResponse
 import kr.jiasoft.hiteen.admin.dto.AdminPinResponse
 import kr.jiasoft.hiteen.admin.dto.AdminPinSaveRequest
 import kr.jiasoft.hiteen.admin.infra.AdminPinRepository
@@ -11,7 +8,6 @@ import kr.jiasoft.hiteen.common.dto.ApiResult
 import kr.jiasoft.hiteen.common.dto.ApiPage
 import kr.jiasoft.hiteen.common.dto.PageUtil
 import kr.jiasoft.hiteen.feature.asset.app.AssetService
-import kr.jiasoft.hiteen.feature.board.domain.BoardEntity
 import kr.jiasoft.hiteen.feature.pin.domain.PinEntity
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import org.springframework.http.MediaType

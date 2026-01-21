@@ -40,10 +40,11 @@ class InviteService(
 
     /**
      * 초대코드로 회원가입한 경우 처리
+     * @return 초대자 userId (성공 시), 실패 시 null
      */
-    suspend fun handleInviteJoin(newUser: UserEntity, code: String): Boolean {
+    suspend fun handleInviteJoin(newUser: UserEntity, code: String): Long? {
         if (newUser.phone.isBlank() || code.isBlank()) {
-            return false
+            return null
         }
 
         // 이미 초대코드 이벤트에 참여한 휴대폰인지 체크 (중복 지급 방지)
@@ -54,16 +55,16 @@ class InviteService(
         }
 
         // 초대한 회원 찾기
-        val inviter = userRepository.findByInviteCode(code) ?: return false
+        val inviter = userRepository.findByInviteCode(code) ?: return null
 
         // 초대 내역 저장
         val invite = InviteEntity(
             type = "Register",
-            userId = inviter.id,//초대한 회원
+            userId = inviter.id, // 초대한 회원
             phone = newUser.phone,
             code = code,
             status = 1,
-            joinId = newUser.id,//초대받은 회원
+            joinId = newUser.id, // 초대받은 회원
             joinPoint = invitePoint,
             joinDate = OffsetDateTime.now()
         )
@@ -73,10 +74,10 @@ class InviteService(
         val updatedInviter = inviter.copy(inviteJoins = inviter.inviteJoins + 1)
         userRepository.save(updatedInviter)
 
-        //point +1000
+        // point +1000
         pointService.applyPolicy(inviter.id, PointPolicy.FRIEND_INVITE, newUser.id)
 
-        return true
+        return inviter.id
     }
 
 

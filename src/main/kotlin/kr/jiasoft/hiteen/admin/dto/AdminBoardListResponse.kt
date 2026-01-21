@@ -36,4 +36,9 @@ data class AdminBoardListResponse (
     val deletedAt: OffsetDateTime?,
     val createdUid: UUID?,
     val nickname: String?,
+    val attachments: List<UUID>? = null,
+
+    // 이벤트 배너 분리 응답(호환을 위해 attachments는 유지)
+    val largeBanners: List<UUID>? = null,
+    val smallBanners: List<UUID>? = null,
 )

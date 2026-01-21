@@ -47,3 +47,4 @@ src/main/resources/assets/
 # Firebase service account credentials
 src/main/resources/firebase/*.json
 /assets/
+

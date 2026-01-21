@@ -23,6 +23,7 @@ import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.security.core.annotation.AuthenticationPrincipal
+import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 import reactor.core.publisher.Flux
 import java.util.*
@@ -68,7 +69,7 @@ class UserController(
     @Operation(summary = "회원가입", description = "신규 회원을 등록합니다.")
     @PostMapping(consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     suspend fun register(
-        @Valid userRegisterForm: UserRegisterForm,
+        @Validated userRegisterForm: UserRegisterForm,
         @RequestPart("file", required = false) file: FilePart?
     ): ResponseEntity<ApiResult<UserResponseWithTokens>> {
         val user = userService.register(userRegisterForm, file)
@@ -130,7 +131,7 @@ class UserController(
     @PostMapping("/me/update", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     suspend fun update(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
-        @Valid userUpdateForm: UserUpdateForm,
+        @Validated userUpdateForm: UserUpdateForm,
         @RequestPart("file", required = false) file: FilePart?
     ): ResponseEntity<ApiResult<UserResponse>> =
         ResponseEntity.ok(ApiResult.success(userService.updateUser(user, userUpdateForm, file)))

@@ -2,7 +2,7 @@ package kr.jiasoft.hiteen.feature.point.domain
 
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Table
-import org.threeten.bp.OffsetDateTime
+import java.time.OffsetDateTime
 
 @Table("point_rules")
 data class PointRuleEntity(

@@ -14,6 +14,7 @@ import java.time.LocalDate
 @Service
 class ExpService(
     private val props: ExpProperties,
+    private val expActionProvider: ExpActionProvider,
     private val userRepository: UserRepository,
     private val tierRepository: TierRepository,
     private val userExpHistoryRepository: UserExpHistoryRepository,
@@ -23,10 +24,10 @@ class ExpService(
         userId: Long,
         actionCode: String,
         targetId: Long? = null,
-        dynamicPoints: Int? = null
+        dynamicPoints: Int? = null,
+        requestId: Long? = null,
     ) {
-        val action = props.actions[actionCode]
-            ?: throw IllegalArgumentException("정의되지 않은 액션 코드: $actionCode")
+        val action = expActionProvider.get(actionCode)?: return
 
         val points = dynamicPoints ?: action.points
         if (points == 0) return
@@ -74,7 +75,8 @@ class ExpService(
             ).awaitSingleOrNull()
         }
 
-        addDeltaExp(points).awaitSingleOrNull()
+        //userId 가 requestId 와 같을때에만 경험치 delta 기록
+        if(requestId == null || userId == requestId) addDeltaExp(points).awaitSingleOrNull()
 
     }
 
@@ -134,8 +136,8 @@ class ExpService(
     ): Boolean {
         return when (actionCode) {
             "FRIEND_ADD" -> existTargetId(userId, actionCode, targetId!!, dailyLimit)
-            "FRIEND_PROFILE_VISIT" -> existTargetIdAndToDay(userId, actionCode, targetId!!)
-            "CHAT" -> existTargetIdAndToDay(userId, actionCode, targetId)
+            "FRIEND_PROFILE_VISIT" -> countTargetIdAndToDay(userId, actionCode, targetId!!, dailyLimit)
+            "CHAT" -> countTargetIdAndToDay(userId, actionCode, targetId!!, dailyLimit)
             "INTEREST_TAG_REGISTER" -> exists(userId, actionCode)
             "TINFRIEND_REQUEST" -> existTargetId(userId, actionCode, targetId!!, dailyLimit)
             "FOLLOW_REQUEST" -> existTargetId(userId, actionCode, targetId!!, dailyLimit)
@@ -211,4 +213,3 @@ class ExpService(
 
 
 }
-
