@@ -118,7 +118,7 @@ data class MessageSummary(
     val unreadCount: Int? = null,
 
     @param:Schema(description = "메세지 작성 시각", example = "2025.09.18 10:15:30")
-    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm:ss")
+//    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm:ss")
     val createdAt: OffsetDateTime?,
 
     @param:Schema(description = "보낸 사람 정보")
