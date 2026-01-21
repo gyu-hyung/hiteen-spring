@@ -212,6 +212,13 @@ class AdminGoodsController (
         return ResponseEntity.ok(ApiResult.success(list))
     }
 
+    @GetMapping("/brands")
+    suspend fun getGoodsBrands(): ResponseEntity<ApiResult<List<GoodsCategoryDto>>> {
+        val list = adminGoodsRepository.findCategories().toList()
+        println("list = ${list}")
+        return ResponseEntity.ok(ApiResult.success(list))
+    }
+
 
 
     @GetMapping("/types")
