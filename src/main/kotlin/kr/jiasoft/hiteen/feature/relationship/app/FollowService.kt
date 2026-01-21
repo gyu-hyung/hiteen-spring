@@ -3,7 +3,7 @@ package kr.jiasoft.hiteen.feature.relationship.app
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kr.jiasoft.hiteen.feature.level.app.ExpService
-import kr.jiasoft.hiteen.feature.push.app.PushService
+import kr.jiasoft.hiteen.feature.push.app.event.PushSendRequestedEvent
 import kr.jiasoft.hiteen.feature.push.domain.PushTemplate
 import kr.jiasoft.hiteen.feature.relationship.RelationHistoryService
 import kr.jiasoft.hiteen.feature.relationship.domain.FollowEntity
@@ -16,6 +16,7 @@ import kr.jiasoft.hiteen.feature.user.app.UserService
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import kr.jiasoft.hiteen.feature.user.dto.UserResponse
 import kr.jiasoft.hiteen.feature.user.infra.UserRepository
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
@@ -31,7 +32,8 @@ class FollowService(
     private val userRepository: UserRepository,
     private val userService: UserService,
     private val expService: ExpService,
-    private val pushService: PushService,
+
+    private val eventPublisher: ApplicationEventPublisher,
 ) {
     private val now: OffsetDateTime get() = OffsetDateTime.now(ZoneOffset.UTC)
 
@@ -110,10 +112,12 @@ class FollowService(
                     )
                 )
                 expService.grantExp(meId, "FOLLOW_REQUEST", otherId)
-                pushService.sendAndSavePush(
-                    listOf(otherId),
-                    me.id,
-                    PushTemplate.FOLLOW_REQUEST.buildPushData("nickname" to me.nickname)
+                eventPublisher.publishEvent(
+                    PushSendRequestedEvent(
+                        userIds = listOf(otherId),
+                        actorUserId = me.id,
+                        templateData = PushTemplate.FOLLOW_REQUEST.buildPushData("nickname" to me.nickname),
+                    )
                 )
                 relationHistoryService.log(meId, otherId, RelationType.FOLLOW.name, RelationAction.REQUEST.name)
             }
@@ -144,10 +148,12 @@ class FollowService(
         )
         expService.grantExp(meId, "FOLLOW_ACCEPT", otherId)
 //        expService.grantExp(otherId, "FOLLOW_ACCEPT", meId, null, meId)
-        pushService.sendAndSavePush(
-            listOf(otherId),
-            me.id,
-            PushTemplate.FOLLOW_ACCEPT.buildPushData("nickname" to me.nickname)
+        eventPublisher.publishEvent(
+            PushSendRequestedEvent(
+                userIds = listOf(otherId),
+                actorUserId = me.id,
+                templateData = PushTemplate.FOLLOW_ACCEPT.buildPushData("nickname" to me.nickname),
+            )
         )
         relationHistoryService.log(meId, otherId, RelationType.FOLLOW.name, RelationAction.ACCEPT.name)
     }

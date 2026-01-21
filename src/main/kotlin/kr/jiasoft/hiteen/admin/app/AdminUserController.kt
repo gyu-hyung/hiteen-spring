@@ -1,18 +1,23 @@
 package kr.jiasoft.hiteen.admin.app
 
+import io.swagger.v3.oas.annotations.Parameter
 import jakarta.validation.Valid
 import kotlinx.coroutines.flow.toList
 import kr.jiasoft.hiteen.admin.dto.AdminFollowResponse
 import kr.jiasoft.hiteen.admin.dto.AdminFriendResponse
 import kr.jiasoft.hiteen.admin.dto.AdminMyPasswordChangeRequest
 import kr.jiasoft.hiteen.admin.dto.AdminUserResponse
+import kr.jiasoft.hiteen.admin.dto.AdminUserRoleUpdateRequest
+import kr.jiasoft.hiteen.admin.dto.AdminUserRoleUpdateResponse
 import kr.jiasoft.hiteen.admin.dto.AdminUserSaveRequest
+import kr.jiasoft.hiteen.admin.dto.AdminUserSearchResponse
 import kr.jiasoft.hiteen.admin.infra.AdminFollowRepository
 import kr.jiasoft.hiteen.admin.infra.AdminFriendRepository
 import kr.jiasoft.hiteen.admin.infra.AdminUserRepository
 import kr.jiasoft.hiteen.admin.services.AdminUserService
 import kr.jiasoft.hiteen.common.dto.ApiPage
 import kr.jiasoft.hiteen.common.dto.ApiResult
+import kr.jiasoft.hiteen.common.dto.ApiPageCursor
 import kr.jiasoft.hiteen.common.dto.PageUtil
 import kr.jiasoft.hiteen.common.extensions.failure
 import kr.jiasoft.hiteen.common.extensions.success
@@ -43,6 +48,15 @@ class AdminUserController (
     private val adminUserService: AdminUserService,
 ) {
 
+    // 회원 검색 (role 조건 없음)
+    @GetMapping("/users/search")
+    suspend fun getUsersSearch(
+        @RequestParam keyword: String? = null,
+        @AuthenticationPrincipal(expression = "user") user: UserEntity,
+    ): ResponseEntity<ApiResult<List<AdminUserSearchResponse>>> {
+        val data = adminUserRepository.listSearchUsersAllRoles(keyword).toList()
+        return ResponseEntity.ok(ApiResult.success(data))
+    }
 
     @GetMapping("/users")
     suspend fun getUsers(
@@ -75,9 +89,44 @@ class AdminUserController (
             role = role
         )
 
-        return ResponseEntity.ok(ApiResult.Companion.success(PageUtil.of(res, totalCount, page, size)))
+        return ResponseEntity.ok(ApiResult.success(PageUtil.of(res, totalCount, page, size)))
     }
 
+    /**
+     * 회원 목록 조회 (커서 기반)
+     * - nextCursor: 마지막 row의 id
+     */
+    @GetMapping("/users/cursor")
+    suspend fun getUsersByCursor(
+        @RequestParam size: Int = 10,
+        @RequestParam(required = false) lastId: Long?,
+        @RequestParam search: String? = null,
+        @RequestParam searchType: String = "ALL",
+        @RequestParam status: String? = null,
+        @RequestParam role: String? = null,
+        @AuthenticationPrincipal(expression = "user") user: UserEntity,
+    ): ResponseEntity<ApiResult<ApiPageCursor<AdminUserResponse>>> {
+        val list = adminUserRepository.listByCursorId(
+            size = size,
+            lastId = lastId,
+            search = search,
+            searchType = searchType,
+            role = role,
+            status = status,
+        ).toList()
+
+        val nextCursor = list.lastOrNull()?.id?.toString()
+
+        return ResponseEntity.ok(
+            ApiResult.success(
+                ApiPageCursor(
+                    items = list,
+                    nextCursor = nextCursor,
+                    perPage = size,
+                )
+            )
+        )
+    }
 
 
     @GetMapping("/user")
@@ -247,5 +296,14 @@ class AdminUserController (
         adminUserRepository.save(data)
 
         return success(data, "비밀번호가 변경되었습니다.")
+    }
+
+    @PostMapping("/role")
+    suspend fun updateRole(
+        @Parameter @Valid @RequestBody request: AdminUserRoleUpdateRequest,
+        @AuthenticationPrincipal(expression = "user") user: UserEntity,
+    ): ResponseEntity<ApiResult<AdminUserRoleUpdateResponse>> {
+        val data = adminUserService.updateRole(request, user)
+        return ResponseEntity.ok(ApiResult.success(data))
     }
 }

@@ -18,10 +18,12 @@ import kr.jiasoft.hiteen.feature.pin.dto.PinUpdateRequest
 import kr.jiasoft.hiteen.feature.pin.infra.PinRepository
 import kr.jiasoft.hiteen.feature.pin.infra.PinUsersRepository
 import kr.jiasoft.hiteen.feature.push.app.PushService
+import kr.jiasoft.hiteen.feature.push.app.event.PushSendRequestedEvent
 import kr.jiasoft.hiteen.feature.push.domain.PushTemplate
 import kr.jiasoft.hiteen.feature.relationship.infra.FriendRepository
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import kr.jiasoft.hiteen.feature.user.infra.UserRepository
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import java.time.OffsetDateTime
 
@@ -35,6 +37,7 @@ class PinService(
     private val expService: ExpService,
     private val pushService: PushService,
     private val friendRepository: FriendRepository,
+    private val eventPublisher: ApplicationEventPublisher,
 ) {
 
     enum class VISIBILITY {
@@ -175,32 +178,25 @@ class PinService(
         expService.grantExp(user.id, "PIN_REGISTER", pin.id)
 
         // ⑤ 푸시 알림 전송
-        coroutineScope {
-            launch {
-                try {
-                    // FRIENDS 공개일 때: 선택된 친구에게만 푸시
-                    // 그 외에는 전체 친구에게 푸시
-                    val friendIds =
-                        if (dto.visibility == "FRIENDS" && selectedFriendIds.isNotEmpty()) {
-                            selectedFriendIds
-                        } else {
-                            friendRepository.findAllFriendship(user.id).toList()
-                        }
-
-                    if (friendIds.isNotEmpty()) {
-                        pushService.sendAndSavePush(
-                            friendIds,
-                            user.id,
-                            PushTemplate.PIN_REGISTER.buildPushData("nickname" to user.nickname)
-                        )
-                        println("📢 ${friendIds.size}명에게 PIN_ALERT 푸시 전송 완료")
-                    } else {
-                        println("⚠️ 푸시 전송 대상 없음 — visibility=${dto.visibility}")
-                    }
-                } catch (e: Exception) {
-                    println("‼️ PIN_ALERT 푸시 전송 중 오류: ${e.message}")
+        try {
+            val friendIds =
+                if (dto.visibility == "FRIENDS" && selectedFriendIds.isNotEmpty()) {
+                    selectedFriendIds
+                } else {
+                    friendRepository.findAllFriendship(user.id).toList()
                 }
+
+            if (friendIds.isNotEmpty()) {
+                eventPublisher.publishEvent(
+                    PushSendRequestedEvent(
+                        userIds = friendIds,
+                        actorUserId = user.id,
+                        templateData = PushTemplate.PIN_REGISTER.buildPushData("nickname" to user.nickname),
+                    )
+                )
             }
+        } catch (_: Exception) {
+            // 푸시 실패가 핀 등록을 실패시키면 안 되므로 무시
         }
 
         return pin

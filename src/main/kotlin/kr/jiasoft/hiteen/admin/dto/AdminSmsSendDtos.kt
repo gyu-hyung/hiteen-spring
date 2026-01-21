@@ -22,7 +22,14 @@ data class AdminSmsSendRequest(
     val callback: String? = null,
 
     /**
+     * true면 전체 회원(USER) 대상으로 발송합니다.
+     * (AdminPointController.give의 receivers에 "all" 넣는 방식과 동일 목적)
+     */
+    val sendAll: Boolean = false,
+
+    /**
      * 수신자 목록(01012345678 형태 권장)
+     * 전체 전송을 센티넬로 처리하고 싶으면 "all"을 넣어도 됩니다.
      */
     val phones: List<@NotBlank String>,
 )
@@ -38,4 +45,3 @@ data class AdminSmsSendResponse(
     @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm:ss")
     val createdAt: OffsetDateTime,
 )
-

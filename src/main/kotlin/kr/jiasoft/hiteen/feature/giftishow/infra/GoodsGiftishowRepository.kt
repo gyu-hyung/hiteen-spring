@@ -14,7 +14,7 @@ interface GiftishowGoodsRepository : CoroutineCrudRepository<GoodsGiftishowEntit
     fun findAllByGoodsCodeIn(goodsCodes: List<String>): Flow<GoodsGiftishowEntity>
 
 //    @Query("UPDATE goods_giftishow SET del_yn = 1 WHERE gg.goods_code LIKE 'G%'")
-    @Query("UPDATE goods_giftishow gg SET deleted_at = now() WHERE gg.goods_code LIKE 'G%'")
+    @Query("UPDATE goods_giftishow gg SET del_yn = 1 WHERE gg.goods_code LIKE 'G%'")
     suspend fun markAllDeleted()
 
     suspend fun findAllByOrderByCreatedAtDesc(): List<GoodsGiftishowEntity>
@@ -40,12 +40,13 @@ interface GiftishowGoodsRepository : CoroutineCrudRepository<GoodsGiftishowEntit
             goods_type_cd AS goods_type_cd,
             goods_type_nm AS goods_type_name
         FROM goods_giftishow
-        WHERE status = 1 
-        AND deleted_at IS NULL
+        WHERE status = 1
+          AND deleted_at IS NULL
+          AND goods_type_cd IS NOT NULL
+          AND goods_type_cd <> ''
         ORDER BY goods_type_cd
     """)
     fun findGoodsTypes(): Flow<GoodsTypeDto>
-
 
 
     /**
@@ -54,7 +55,8 @@ interface GiftishowGoodsRepository : CoroutineCrudRepository<GoodsGiftishowEntit
     @Query("""
         SELECT g.*
         FROM goods_giftishow g
-        WHERE deleted_at IS NULL AND status = 1
+        WHERE g.deleted_at IS NULL
+          AND g.status = 1
             AND (
                 :search IS NULL
                 OR (
@@ -77,6 +79,7 @@ interface GiftishowGoodsRepository : CoroutineCrudRepository<GoodsGiftishowEntit
             )
             AND (:categorySeq IS NULL OR g.category1_seq = :categorySeq)
             AND (:goodsTypeCd IS NULL OR g.goods_type_cd = :goodsTypeCd)
+            AND (:brandCode IS NULL OR g.brand_code = :brandCode)
             AND (:lastId IS NULL OR g.id < :lastId)
         ORDER BY g.id DESC
         LIMIT :size
@@ -88,6 +91,7 @@ interface GiftishowGoodsRepository : CoroutineCrudRepository<GoodsGiftishowEntit
         searchType: String,
         categorySeq: Int?,
         goodsTypeCd: String?,
+        brandCode: String?,
     ): Flow<GoodsGiftishowEntity>
 
 

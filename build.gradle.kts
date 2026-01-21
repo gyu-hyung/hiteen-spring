@@ -133,6 +133,10 @@ dependencies {
     implementation("com.twelvemonkeys.imageio:imageio-jpeg:3.12.0")
     implementation("com.twelvemonkeys.imageio:imageio-core:3.12.0")
     implementation("com.twelvemonkeys.imageio:imageio-metadata:3.12.0")
+    implementation("com.twelvemonkeys.imageio:imageio-webp:3.12.0")
+
+    // WebP ImageIO writer(썸네일 webp 출력용)
+    implementation("org.sejda.imageio:webp-imageio:0.1.6")
 }
 
 
