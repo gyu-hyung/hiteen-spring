@@ -1,6 +1,8 @@
 package kr.jiasoft.hiteen.feature.terms.dto
 
+import com.fasterxml.jackson.annotation.JsonFormat
 import kr.jiasoft.hiteen.feature.terms.domain.TermsEntity
+import java.time.OffsetDateTime
 import java.util.UUID
 
 data class TermsResponse(
@@ -12,7 +14,9 @@ data class TermsResponse(
     val content: String?,
     val sort: Short,
     val isRequired: Short,
-    val status: Short
+    val status: Short,
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm")
+    val createdAt: OffsetDateTime,
 ) {
     companion object {
         fun from(entity: TermsEntity) = TermsResponse(
@@ -24,7 +28,8 @@ data class TermsResponse(
             content = entity.content,
             sort = entity.sort,
             isRequired = entity.isRequired,
-            status = entity.status
+            status = entity.status,
+            createdAt = entity.createdAt,
         )
 
         /** 기존앱 호환용: HTML → TEXT */
