@@ -54,6 +54,14 @@ class PointController(
         return ResponseEntity.ok(ApiResult.success(PointBalanceResponse(total)))
     }
 
+    @Operation(summary = "내 포인트 잔액 조회 (심플)")
+    @GetMapping("/total")
+    suspend fun getMyTotalPoints(
+        @AuthenticationPrincipal(expression = "user") user: UserEntity,
+    ): ResponseEntity<ApiResult<Int>> {
+        return ResponseEntity.ok(ApiResult.success(pointService.getUserTotalPoints(user.id)))
+    }
+
     @Operation(summary = "포인트 충전")
     @PostMapping("/charge")
     suspend fun chargePoints(

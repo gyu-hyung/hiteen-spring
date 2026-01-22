@@ -14,10 +14,10 @@ interface GiftAppService {
     suspend fun findGift(receiverUserId: Long, giftUserId: Long) : GiftResponse?
 
     /** 사용자 -> 선물 구매 */
-    suspend fun buyGift(userId: Long, userUid: UUID, req: GiftBuyRequest) : GiftResponse
+    suspend fun buyGift(userId: Long, userUid: UUID, req: GiftBuyRequest) : List<GiftResponse>
 
     /** 관리자 -> 사용자 선물 지급 */
-    suspend fun createGift(userId: Long, req: GiftProvideRequest) : GiftResponse
+    suspend fun createGift(userId: Long, req: GiftProvideRequest) : List<GiftResponse>
 
     /** 사용자 -> 선물 발급 */
     suspend fun issueGift(userId: Long, req: GiftIssueRequest) : GiftResponse

@@ -1,6 +1,7 @@
 package kr.jiasoft.hiteen.feature.relationship.infra
 
 import kotlinx.coroutines.flow.Flow
+import kr.jiasoft.hiteen.feature.board.infra.CountProjection
 import kr.jiasoft.hiteen.feature.relationship.domain.FollowEntity
 import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
@@ -27,10 +28,33 @@ interface FollowRepository : CoroutineCrudRepository<FollowEntity, Long> {
     suspend fun countByFollowIdAndStatus(id: Long, name: String): Int
     suspend fun countByUserIdAndStatus(id: Long, name: String): Int
 
+    @Query("""
+        SELECT follow_id as id, COUNT(*)::int as count
+        FROM follows
+        WHERE follow_id IN (:userIds) AND status = :status
+        GROUP BY follow_id
+    """)
+    fun countBulkFollowersIn(userIds: List<Long>, status: String): Flow<CountProjection>
+
+    @Query("""
+        SELECT user_id as id, COUNT(*)::int as count
+        FROM follows
+        WHERE user_id IN (:userIds) AND status = :status
+        GROUP BY user_id
+    """)
+    fun countBulkFollowingIn(userIds: List<Long>, status: String): Flow<CountProjection>
+
     @Query("SELECT COUNT(*) FROM follows WHERE user_id = :followerId AND follow_id = :targetId")
     suspend fun existsFollow(followerId: Long, targetId: Long): Long
 
     @Query("SELECT status FROM follows WHERE user_id = :followerId AND follow_id = :targetId")
     suspend fun findStatusFollow(followerId: Long, targetId: Long): String?
+
+    @Query("""
+        SELECT follow_id as id, status as count_str
+        FROM follows
+        WHERE user_id = :currentUserId AND follow_id IN (:targetIds)
+    """)
+    fun findBulkStatusFollowIn(currentUserId: Long, targetIds: List<Long>): Flow<StatusProjection>
 
 }

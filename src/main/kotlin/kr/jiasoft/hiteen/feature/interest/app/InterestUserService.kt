@@ -102,13 +102,13 @@ class InterestUserService(
         )
         val saved = interestUserRepository.save(entity)
         expService.grantExp(user.id, "INTEREST_TAG_REGISTER", interestId)
-        return interestUserRepository.getInterestResponseById(saved.id, null).firstOrNull()
+        return interestUserRepository.getInterestResponseById(id = saved.id, userId = null).firstOrNull()
     }
 
     /** 특정 사용자의 모든 관심사 조회 */
     suspend fun getUserInterests(userUid: String): List<InterestUserResponse>? {
         val userEntity = userRepository.findByUid(userUid) ?: throw IllegalArgumentException("존재하지 않는 회원정보야~")
-        return interestUserRepository.getInterestResponseById(null, userEntity.id).toList()
+        return interestUserRepository.getInterestResponseById(id = null, userId = userEntity.id).toList()
     }
 
     /** 특정 관심사 삭제 */
@@ -139,8 +139,8 @@ class InterestUserService(
 
         // 2) 응답 구성 (recommendFriend에서 쓰던 로직 그대로)
         val targetUserResponse = userService.findUserResponse(targetUserId, user.id)
-        val interests = interestUserRepository.getInterestResponseById(null, targetUserId).toList()
-        val photos = userPhotosRepository.findByUserId(targetUserId)?.toList() ?: emptyList()
+        val interests = interestUserRepository.getInterestResponseById(id = null, userId = targetUserId).toList()
+        val photos = userPhotosRepository.findByUserId(targetUserId).toList()
 
         return FriendRecommendationResponse(
             user = targetUserResponse,
@@ -260,8 +260,8 @@ class InterestUserService(
 //        val fullUser = userRepository.findById(targetUser.id) ?: return null
 //        val school = fullUser.schoolId?.let { schoolRepository.findById(it) }
 
-        val interests = interestUserRepository.getInterestResponseById(null, targetUser.id).toList()
-        val photos = userPhotosRepository.findByUserId(targetUser.id)?.toList() ?: emptyList()
+        val interests = interestUserRepository.getInterestResponseById(id = null, userId = targetUser.id).toList()
+        val photos = userPhotosRepository.findByUserId(targetUser.id).toList()
 
         interestMatchHistoryRepository.save(
             InterestMatchHistoryEntity(

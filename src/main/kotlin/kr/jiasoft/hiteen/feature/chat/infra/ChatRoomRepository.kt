@@ -4,6 +4,7 @@ import kotlinx.coroutines.flow.Flow
 import kr.jiasoft.hiteen.feature.chat.domain.ChatRoomEntity
 import kr.jiasoft.hiteen.feature.chat.dto.ChatRoomMemberResponse
 import kr.jiasoft.hiteen.feature.chat.dto.ChatRoomResponse
+import kr.jiasoft.hiteen.feature.chat.dto.RoomSummaryProjection
 import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 import java.util.UUID
@@ -97,19 +98,7 @@ interface ChatRoomRepository : CoroutineCrudRepository<ChatRoomEntity, Long> {
         SELECT 
             r.id,
             r.uid as room_uid,
-            CASE 
-                WHEN r.room_name IS NOT NULL AND r.room_name != '' THEN r.room_name
-                ELSE (
-                    SELECT string_agg(u_inner.nickname, ', ') 
-                    FROM chat_users cu_inner 
-                    JOIN users u_inner ON u_inner.id = cu_inner.user_id 
-                    WHERE cu_inner.chat_room_id = r.id 
-                      AND cu_inner.user_id != :userId 
-                      AND cu_inner.deleted_at IS NULL
-                )
-            END as room_title,
-            (SELECT count(*)::int FROM chat_users cu2 WHERE cu2.chat_room_id = r.id AND cu2.deleted_at IS NULL) as member_count,
-            (SELECT count(*)::int FROM chat_messages m JOIN chat_users cu3 ON cu3.chat_room_id = m.chat_room_id WHERE m.chat_room_id = r.id AND cu3.user_id = :userId AND m.id > COALESCE(cu3.last_read_message_id, 0) AND m.deleted_at IS NULL AND m.id <= r.last_message_id) as unread_count,
+            r.room_name as room_title,
             COALESCE(r.asset_uid::text, (
                 SELECT u_other.asset_uid::text 
                 FROM chat_users cu_other 
@@ -143,5 +132,5 @@ interface ChatRoomRepository : CoroutineCrudRepository<ChatRoomEntity, Long> {
         ORDER BY COALESCE(r.updated_at, r.created_at) DESC NULLS LAST
         LIMIT :limit OFFSET :offset
     """)
-    fun listRoomSummaries(userId: Long, limit: Int, offset: Int): Flow<kr.jiasoft.hiteen.feature.chat.dto.RoomSummaryProjection>
+    fun listRoomSummaries(userId: Long, limit: Int, offset: Int): Flow<RoomSummaryProjection>
 }

@@ -22,16 +22,24 @@ class PushEventListener(
     fun onPushSendRequested(event: PushSendRequestedEvent) {
         applicationCoroutineScope.launch {
             try {
-                pushService.sendAndSavePush(
-                    userIds = event.userIds,
-                    userId = event.actorUserId,
-                    templateData = event.templateData,
-                    extraData = event.extraData,
-                )
+                if (event.topic != null) {
+                    pushService.sendAndSavePushToTopic(
+                        topic = event.topic,
+                        userId = event.actorUserId,
+                        templateData = event.templateData,
+                        extraData = event.extraData,
+                    )
+                } else if (event.userIds.isNotEmpty()) {
+                    pushService.sendAndSavePush(
+                        userIds = event.userIds,
+                        userId = event.actorUserId,
+                        templateData = event.templateData,
+                        extraData = event.extraData,
+                    )
+                }
             } catch (e: Exception) {
                 logger.warn("[PushEventListener] push send failed: {}", e.message, e)
             }
         }
     }
 }
-

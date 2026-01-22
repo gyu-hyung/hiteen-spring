@@ -27,5 +27,7 @@ interface RewardLeagueStartNotificationRepository : CoroutineCrudRepository<Rewa
         """
     )
     suspend fun countScoreParticipants(seasonId: Long, league: String, gameId: Long): Long
-}
 
+    @Query("SELECT name FROM games WHERE id = :gameId")
+    suspend fun findGameName(gameId: Long): String?
+}

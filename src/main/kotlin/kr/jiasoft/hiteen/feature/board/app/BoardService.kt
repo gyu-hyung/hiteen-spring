@@ -290,7 +290,7 @@ class BoardService(
             //포인트
             pointService.applyPolicy(user.id, PointPolicy.STORY_POST, saved.id)
 
-            //포스팅 알림 (PushEventListener로만 전송되도록 PushSendRequestedEvent 발행)
+            //포스팅 알림 (비동기 처리)
             val followerIds = followRepository.findAllFollowerIds(user.id).toList()
             if (followerIds.isNotEmpty()) {
                 eventPublisher.publishEvent(
@@ -422,13 +422,19 @@ class BoardService(
         currentUserId: Long?,
         cursor: UUID?,
         perPage: Int
-    ): List<BoardCommentResponse>
-            = comments.findComments(boardUid, parentUid, currentUserId ?: -1L, cursor, perPage)
-                .map { comments ->
-                    comments.copy(
-                        user = userService.findUserSummary(comments.createdId)
-                    )
-                }.toList()
+    ): List<BoardCommentResponse> {
+        val rawComments = comments.findComments(boardUid, parentUid, currentUserId ?: -1L, cursor, perPage).toList()
+        if (rawComments.isEmpty()) return emptyList()
+
+        val authorIds = rawComments.map { it.createdId }.distinct()
+        val userMap = userService.findUserSummaryByIds(authorIds).associateBy { it.id }
+
+        return rawComments.map { comment ->
+            comment.copy(
+                user = userMap[comment.createdId]
+            )
+        }
+    }
 
 
     suspend fun getComment(
@@ -446,13 +452,19 @@ class BoardService(
         userId: Long,
         cursor: UUID?,
         perPage: Int
-    ): List<BoardCommentResponse> =
-        comments.findMyComments(userId, cursor, perPage)
-            .map { comment ->
-                comment.copy(
-                    user = userService.findUserSummary(comment.createdId)
-                )
-            }.toList()
+    ): List<BoardCommentResponse> {
+        val rawComments = comments.findMyComments(userId, cursor, perPage).toList()
+        if (rawComments.isEmpty()) return emptyList()
+
+        val authorIds = rawComments.map { it.createdId }.distinct()
+        val userMap = userService.findUserSummaryByIds(authorIds).associateBy { it.id }
+
+        return rawComments.map { comment ->
+            comment.copy(
+                user = userMap[comment.createdId]
+            )
+        }
+    }
 
 
     suspend fun createComment(boardUid: UUID, req: BoardCommentRegisterRequest, user: UserEntity): BoardCommentResponse? {

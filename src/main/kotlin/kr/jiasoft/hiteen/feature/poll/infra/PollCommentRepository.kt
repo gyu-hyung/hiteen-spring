@@ -1,6 +1,7 @@
 package kr.jiasoft.hiteen.feature.poll.infra
 
 import kotlinx.coroutines.flow.Flow
+import kr.jiasoft.hiteen.feature.board.infra.CountProjection
 import kr.jiasoft.hiteen.feature.poll.domain.PollCommentEntity
 import kr.jiasoft.hiteen.feature.poll.dto.PollCommentResponse
 import org.springframework.data.r2dbc.repository.Query
@@ -11,9 +12,17 @@ import java.util.UUID
 @Repository
 interface PollCommentRepository : CoroutineCrudRepository<PollCommentEntity, Long> {
 
-    suspend fun findByUid(uid: UUID): PollCommentEntity?
-
     suspend fun countByCreatedIdAndDeletedAtIsNull(createdId: Long) : Int
+
+    @Query("""
+        SELECT created_id as id, COUNT(*)::int as count
+        FROM poll_comments
+        WHERE created_id IN (:userIds) AND deleted_at IS NULL
+        GROUP BY created_id
+    """)
+    fun countBulkByCreatedIdIn(userIds: List<Long>): Flow<CountProjection>
+
+    suspend fun findByUid(uid: UUID): PollCommentEntity?
 
     @Query("SELECT id FROM poll_comments WHERE uid = :uid")
     suspend fun findIdByUid(uid: UUID): Long?

@@ -3,6 +3,7 @@ package kr.jiasoft.hiteen.feature.chat.infra
 import kotlinx.coroutines.flow.Flow
 import kr.jiasoft.hiteen.feature.chat.domain.ChatUserEntity
 import kr.jiasoft.hiteen.feature.chat.dto.ActiveUsersRow
+import kr.jiasoft.hiteen.feature.chat.dto.ChatUserNicknameProjection
 import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 import java.time.OffsetDateTime
@@ -107,5 +108,13 @@ interface ChatUserRepository : CoroutineCrudRepository<ChatUserEntity, Long> {
         joiningAt: OffsetDateTime,
         pushAt: OffsetDateTime,
     ): Int
+
+    @Query("""
+        SELECT cu.*, u.nickname as nickname
+        FROM chat_users cu
+        JOIN users u ON u.id = cu.user_id
+        WHERE cu.chat_room_id IN (:roomIds) AND cu.deleted_at IS NULL
+    """)
+    fun findAllDetailedByRoomIds(roomIds: List<Long>): Flow<ChatUserNicknameProjection>
 
 }

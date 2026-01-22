@@ -21,9 +21,9 @@ class CashService(
 ) {
 
     /**
-     * 내 포인트 조회
+     * 내 캐시 조회
      * */
-    suspend fun getUserTotalPoints(userId: Long): Int {
+    suspend fun getUserTotalCash(userId: Long): Int {
         // summary 테이블 우선 조회, 없으면 fallback
         return cashSummaryRepository.findById(userId)?.totalCash
             ?: cashRepository.sumCashByUserId(userId) ?: 0
@@ -33,9 +33,9 @@ class CashService(
 
 
     /**
-     * 내포인트 이력
+     * 내 캐시 이력
      * */
-    suspend fun getUserPointHistory(
+    suspend fun getUserCashHistory(
         userId: Long,
         startDate: LocalDate? = null,
         endDate: LocalDate? = null
@@ -69,7 +69,7 @@ class CashService(
         val pointAmount = dynamicPoint ?: policy.amount
         // 2. 포인트 차감인 경우 보유 포인트 확인
         if (pointAmount < 0) {
-            val totalPoints = getUserTotalPoints(userId)
+            val totalPoints = getUserTotalCash(userId)
             if (totalPoints < -pointAmount) {
                 throw NotEnoughPointException("포인트가 부족합니다. (보유=${totalPoints}, 필요=${-pointAmount})")
             }
@@ -121,7 +121,7 @@ class CashService(
 
         // 3. 차감이면 잔액 확인
         if (cashAmount < 0) {
-            val total = getUserTotalPoints(userId)
+            val total = getUserTotalCash(userId)
             if (total < -cashAmount) {
                 throw NotEnoughPointException("포인트 부족")
             }

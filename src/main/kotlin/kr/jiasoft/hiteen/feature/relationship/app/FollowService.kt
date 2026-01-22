@@ -60,38 +60,54 @@ class FollowService(
 
     /** 내가 팔로우하고 있는 목록 (Following) */
     suspend fun listFollowing(me: UserEntity): List<RelationshipSummary> {
-        return followRepository.findAllByUserIdAndStatus(me.id, FollowStatus.ACCEPTED.name)
-            .map { e ->
-                val other = userService.findUserResponse(e.followId, me.id)
-                toFollowSummary(e, other)
-            }.toList()
+        val follows = followRepository.findAllByUserIdAndStatus(me.id, FollowStatus.ACCEPTED.name).toList()
+        if (follows.isEmpty()) return emptyList()
+
+        val otherIds = follows.map { it.followId }
+        val userMap = userService.findUserResponseByIds(otherIds, me.id).associateBy { it.id }
+
+        return follows.mapNotNull { e ->
+            userMap[e.followId]?.let { toFollowSummary(e, it) }
+        }
     }
 
     /** 나를 팔로우하는 목록 (Followers) */
     suspend fun listFollowers(me: UserEntity): List<RelationshipSummary> {
-        return followRepository.findAllByFollowIdAndStatus(me.id, FollowStatus.ACCEPTED.name)
-            .map { e ->
-                val other = userService.findUserResponse(e.userId, me.id)
-                toFollowSummary(e, other)
-            }.toList()
+        val follows = followRepository.findAllByFollowIdAndStatus(me.id, FollowStatus.ACCEPTED.name).toList()
+        if (follows.isEmpty()) return emptyList()
+
+        val otherIds = follows.map { it.userId }
+        val userMap = userService.findUserResponseByIds(otherIds, me.id).associateBy { it.id }
+
+        return follows.mapNotNull { e ->
+            userMap[e.userId]?.let { toFollowSummary(e, it) }
+        }
     }
 
     /** 내가 보낸 팔로우 요청 (아직 수락 안 됨) */
     suspend fun listOutgoing(me: UserEntity): List<RelationshipSummary> {
-        return followRepository.findAllByUserIdAndStatus(me.id, FollowStatus.PENDING.name)
-            .map { e ->
-                val other = userService.findUserResponse(e.followId, me.id)
-                toFollowSummary(e, other)
-            }.toList()
+        val follows = followRepository.findAllByUserIdAndStatus(me.id, FollowStatus.PENDING.name).toList()
+        if (follows.isEmpty()) return emptyList()
+
+        val otherIds = follows.map { it.followId }
+        val userMap = userService.findUserResponseByIds(otherIds, me.id).associateBy { it.id }
+
+        return follows.mapNotNull { e ->
+            userMap[e.followId]?.let { toFollowSummary(e, it) }
+        }
     }
 
     /** 내가 받은 팔로우 요청 (아직 수락 안 됨) */
     suspend fun listIncoming(me: UserEntity): List<RelationshipSummary> {
-        return followRepository.findAllByFollowIdAndStatus(me.id, FollowStatus.PENDING.name)
-            .map { e ->
-                val other = userService.findUserResponse(e.userId, me.id)
-                toFollowSummary(e, other)
-            }.toList()
+        val follows = followRepository.findAllByFollowIdAndStatus(me.id, FollowStatus.PENDING.name).toList()
+        if (follows.isEmpty()) return emptyList()
+
+        val otherIds = follows.map { it.userId }
+        val userMap = userService.findUserResponseByIds(otherIds, me.id).associateBy { it.id }
+
+        return follows.mapNotNull { e ->
+            userMap[e.userId]?.let { toFollowSummary(e, it) }
+        }
     }
 
 
