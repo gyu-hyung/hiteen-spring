@@ -33,7 +33,7 @@ class CashController(
     suspend fun getMyCashBalance(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ): ResponseEntity<ApiResult<CashBalanceResponse>> {
-        val total = cashService.getUserTotalPoints(user.id)
+        val total = cashService.getUserTotalCash(user.id)
         return ResponseEntity.ok(ApiResult.success(CashBalanceResponse(total)))
     }
 
@@ -44,9 +44,17 @@ class CashController(
         @RequestParam(required = false) startDate: LocalDate?,
         @RequestParam(required = false) endDate: LocalDate?
     ): ResponseEntity<ApiResult<CashSummary>> {
-        val total = cashService.getUserTotalPoints(user.id)
-        val history = cashService.getUserPointHistory(user.id, startDate, endDate)
+        val total = cashService.getUserTotalCash(user.id)
+        val history = cashService.getUserCashHistory(user.id, startDate, endDate)
         return ResponseEntity.ok(ApiResult.success(CashSummary(total, history)))
+    }
+
+    @Operation(summary = "내 캐시 잔액 조회 (심플)")
+    @GetMapping("/total")
+    suspend fun getMyTotalCash(
+        @AuthenticationPrincipal(expression = "user") user: UserEntity,
+    ): ResponseEntity<ApiResult<Int>> {
+        return ResponseEntity.ok(ApiResult.success(cashService.getUserTotalCash(user.id)))
     }
 
 

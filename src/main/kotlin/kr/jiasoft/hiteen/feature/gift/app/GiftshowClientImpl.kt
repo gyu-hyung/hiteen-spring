@@ -85,16 +85,38 @@ class GiftshowClientImpl(
 
     override suspend fun cancelVoucher(trId: String): GiftishowApiResponse<String> {
         val form = baseForm("0202").apply {
-            put("tr_Id", trId)
-            put("user_Id", userId)
+            // server expects lowercase param names: tr_id, user_id
+            put("tr_id", trId)
+            put("user_id", userId)
         }
-        return request("/cancel", form)
+
+        // call raw JSON to handle cases where `result` is an object rather than a simple string
+        val json = try {
+            call("/cancel", form)
+        } catch (ex: Exception) {
+            // rethrow to keep behavior
+            throw ex
+        }
+
+        // parse minimally using JsonNode to avoid mismatched type exceptions
+        val root = objectMapper.readTree(json)
+        val code = if (root.hasNonNull("code")) root.get("code").asText() else root.path("code").asText()
+        val message = if (root.has("message") && !root.get("message").isNull) root.get("message").asText() else null
+
+        val resultNode = root.get("result")
+        val resultStr: String? = when {
+            resultNode == null || resultNode.isNull -> null
+            resultNode.isTextual -> resultNode.asText()
+            else -> resultNode.toString()
+        }
+
+        return GiftishowApiResponse(code = code, message = message, result = resultStr)
     }
 
 
-    suspend fun retryVoucher(trId: String, smsFlag: String): GiftishowApiResponse<String> {
+    override suspend fun retryVoucher(trId: String, smsFlag: String): GiftishowApiResponse<String> {
         val form = baseForm("0203").apply {
-            put("tr_Id", trId)
+            put("tr_id", trId)
             put("sms_flag", smsFlag)
             put("user_id", userId)
         }
@@ -135,15 +157,13 @@ class GiftshowClientImpl(
         return request("/bizmoney", form)
     }
 
-
     suspend fun sendFailCancel(trId: String): GiftishowApiResponse<String> {
         val form = baseForm("0205").apply {
-            put("trId", trId)
+            put("tr_id", trId)
             put("user_id", userId)
         }
         return request("/send/Fail/cancel", form)
     }
-
 
 
 

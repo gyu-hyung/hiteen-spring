@@ -25,4 +25,9 @@ interface GiftshowClient {
      * 기프티쇼 발송 취소(trId)
      */
     suspend fun cancelVoucher(trId: String): GiftishowApiResponse<String>
+
+    /**
+     * 발송 재전송/재발송 요청 (trId, smsFlag)
+     */
+    suspend fun retryVoucher(trId: String, smsFlag: String): GiftishowApiResponse<String>
 }

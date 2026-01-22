@@ -59,56 +59,81 @@ class PollService(
         currentUserId: Long?,
         type: String = "all",
         author: UUID?
-    ): List<PollResponse> =
-        polls.findSummariesByCursor(cursor, size, currentUserId, type, author)
-            .map { row ->
-                val user = userService.findUserResponse(row.createdId, includes = UserResponseIncludes(school = true, tier = true))
+    ): List<PollResponse> {
+        val rows = polls.findSummariesByCursor(cursor, size, currentUserId, type, author).toList()
+        if (rows.isEmpty()) return emptyList()
 
-                val photos = pollPhotos.findAllByPollId(row.id)
-                    .toList()
-                    .sortedBy { it.seq }
-                    .map { it.assetUid.toString() }
+        val pollIds = rows.map { it.id }.toTypedArray()
+        val pollIdList = rows.map { it.id }
 
-                val selects = pollSelects.findSelectResponsesByPollId(row.id)
-                    .toList()
-//                val selects = pollSelects.findAllByPollId(row.id)
-//                    .toList()
-//                    .sortedBy { it.seq }
-//                    .map { select ->
-//                        val selectPhotos = pollSelectPhotos.findAllBySelectId(select.id)
-//                            .toList()
-//                            .sortedBy { it.seq }
-//                            .mapNotNull { it.assetUid?.toString() }
-//
-//                        PollSelectResponse(
-//                            id = select.id,
-//                            seq = select.seq,
-//                            content = select.content,
-//                            voteCount = select.voteCount,
-//                            photos = selectPhotos
-//                        )
-//                    }
+        // 1) 사진(PollPhotos) 일괄 조회 (N+1 방지)
+        val photosMap = pollPhotos.findAllByPollIdIn(pollIds).toList()
+            .groupBy { it.pollId }
+            .mapValues { (_, list) ->
+                list.sortedBy { it.seq }.map { it.assetUid.toString() }
+            }
 
-                val totalVotes = selects.sumOf { it.voteCount }
+        // 2) 선택지(PollSelects) 일괄 조회 (N+1 방지)
+        val selectsMap = pollSelects.findSelectSummariesByPollIdIn(pollIds).toList()
+            .groupBy { it.pollId }
+            .mapValues { (_, list) ->
+                list.map { p ->
+                    PollSelectResponse(
+                        id = p.id,
+                        seq = p.seq,
+                        content = p.content,
+                        voteCount = p.voteCount,
+                        photos = p.photoUid?.let { listOf(it.toString()) } ?: emptyList()
+                    )
+                }
+            }
 
-                PollResponse(
-                    id = row.id,
-                    question = row.question,
-                    photos = photos,
-                    selects = selects,
-                    colorStart = row.colorStart,
-                    colorEnd = row.colorEnd,
-                    voteCount = totalVotes,
-                    commentCount = row.commentCount,
-                    likeCount = row.likeCount,
-                    likedByMe = row.likedByMe,
-                    votedByMe = row.votedByMe,
-                    votedSeq = row.votedSeq,
-                    allowComment = row.allowComment,
-                    createdAt = row.createdAt,
-                    user = user,
-                )
-            }.toList()
+        // 3) 좋아요 수 일괄 조회 (N+1 방지)
+        val likeCountMap = pollLikes.countBulkByPollIdIn(pollIdList).toList()
+            .associate { it.id to it.count }
+
+        // 4) 내가 좋아요/투표 했는지 여부 일괄 조회 (로그인 시, N+1 방지)
+        val likedByMeSet = if (currentUserId != null) {
+            pollLikes.findAllIdsByUserIdAndPollIdIn(currentUserId, pollIdList).toList().toSet()
+        } else emptySet()
+
+        val votedByMeMap = if (currentUserId != null) {
+            pollUsers.findAllByUserIdAndPollIdIn(currentUserId, pollIdList).toList()
+                .associateBy { it.pollId }
+        } else emptyMap()
+
+        // 5) 작성자 정보 일괄 조회 (N+1 방지)
+        val authorIds = rows.map { it.createdId }.distinct()
+        val userMap = userService.findUserResponseByIds(
+            targetIds = authorIds,
+            currentUserId = currentUserId,
+            includes = UserResponseIncludes(school = true, tier = true)
+        ).associateBy { it.id }
+
+        return rows.map { row ->
+            val selects = selectsMap[row.id] ?: emptyList()
+            val totalVotes = selects.sumOf { it.voteCount }
+            val voted = votedByMeMap[row.id]
+
+            PollResponse(
+                id = row.id,
+                question = row.question,
+                photos = photosMap[row.id] ?: emptyList(),
+                selects = selects,
+                colorStart = row.colorStart,
+                colorEnd = row.colorEnd,
+                voteCount = totalVotes,
+                commentCount = row.commentCount,
+                likeCount = likeCountMap[row.id] ?: 0,
+                likedByMe = likedByMeSet.contains(row.id),
+                votedByMe = voted != null,
+                votedSeq = voted?.seq,
+                allowComment = row.allowComment,
+                createdAt = row.createdAt,
+                user = userMap[row.createdId]
+            )
+        }
+    }
 
 
 
@@ -123,29 +148,31 @@ class PollService(
             .sortedBy { it.seq }
             .map { it.assetUid.toString() }
 
-        // ③ 선택지 + 선택지 이미지
-        val selects = pollSelects.findAllByPollId(id)
-            .toList()
-            .sortedBy { it.seq }
-            .map { sel ->
-                val selectPhotos = pollSelectPhotos.findAllBySelectId(sel.id)
-                    .toList()
-                    .sortedBy { it.seq }
-                    .mapNotNull { it.assetUid?.toString() }
+        // ③ 선택지 조회
+        val selectEntities = pollSelects.findAllByPollId(id).toList().sortedBy { it.seq }
+        val selectIds = selectEntities.map { it.id }
 
-                PollSelectResponse(
-                    id = sel.id,
-                    seq = sel.seq,
-                    content = sel.content,
-                    voteCount = sel.voteCount,
-                    photos = selectPhotos
-                )
+        // ④ 선택지 이미지 일괄 조회 (N+1 방지)
+        val selectPhotosMap = pollSelectPhotos.findAllBySelectIdIn(selectIds).toList()
+            .groupBy { it.selectId }
+            .mapValues { (_, list) ->
+                list.sortedBy { it.seq }.mapNotNull { it.assetUid?.toString() }
             }
 
-        // ④ 총 투표 수 계산
+        val selects = selectEntities.map { sel ->
+            PollSelectResponse(
+                id = sel.id,
+                seq = sel.seq,
+                content = sel.content,
+                voteCount = sel.voteCount,
+                photos = selectPhotosMap[sel.id] ?: emptyList()
+            )
+        }
+
+        // ⑤ 총 투표 수 계산
         val totalVotes = selects.sumOf { it.voteCount }
 
-        // ⑤ PollResponse 반환
+        // ⑥ PollResponse 반환
         return PollResponse(
             id = poll.id,
             question = poll.question,
@@ -156,14 +183,19 @@ class PollService(
             voteCount = totalVotes,
             commentCount = poll.commentCount,
             likeCount = poll.likeCount,
-            likedByMe = poll.likedByMe,
-            votedByMe = poll.votedByMe,
-            votedSeq = poll.votedSeq,
+            likedByMe = rowLikedByMe(poll),
+            votedByMe = rowVotedByMe(poll),
+            votedSeq = rowVotedSeq(poll),
             allowComment = poll.allowComment,
             createdAt = poll.createdAt,
             user = user,
         )
     }
+
+    // Helper functions to handle PollSummaryRow
+    private fun rowLikedByMe(p: PollSummaryRow) = p.likedByMe
+    private fun rowVotedByMe(p: PollSummaryRow) = p.votedByMe
+    private fun rowVotedSeq(p: PollSummaryRow) = p.votedSeq
 
 
 
@@ -409,31 +441,41 @@ class PollService(
         currentUserId: Long?,
         cursor: UUID?,
         perPage: Int
-    ): List<PollCommentResponse>
-            = comments.findComments(pollId, parentUid, currentUserId ?: -1L, cursor, perPage + 1)
-                .map { comment ->
-                        comment.copy(
-                            user = userService.findUserResponse(comment.createdId)
-                        )
-                    }.toList()
+    ): List<PollCommentResponse> {
+        val rawComments = comments.findComments(pollId, parentUid, currentUserId ?: -1L, cursor, perPage + 1).toList()
+        if (rawComments.isEmpty()) return emptyList()
+
+        val authorIds = rawComments.map { it.createdId }.distinct()
+        val userMap = userService.findUserResponseByIds(
+            targetIds = authorIds,
+            currentUserId = currentUserId,
+            includes = UserResponseIncludes(school = true)
+        ).associateBy { it.id }
+
+        return rawComments.map { comment ->
+            comment.copy(
+                user = userMap[comment.createdId]
+            )
+        }
+    }
 
     suspend fun getComment(
         pollId: Long,
         commentUid: UUID,
         currentUserId: Long,
-    ): PollCommentResponse?
-        = comments.findComment(pollId, commentUid, currentUserId)
-            .let { comment ->
-                comment?.copy(
-                    user = userService.findUserResponse(comment.createdId)
-                )
-            }
+    ): PollCommentResponse? {
+        val comment = comments.findComment(pollId, commentUid, currentUserId)
+        return comment?.copy(
+            user = userService.findUserResponse(comment.createdId)
+        )
+    }
 
 
     suspend fun createComment(req: PollCommentRegisterRequest, user: UserEntity): PollCommentResponse? {
-        val p = polls.findById(req.pollId)?: throw IllegalArgumentException("poll not found")
-        if(p.allowComment == 0) throw BusinessValidationException(mapOf("error" to "comment_not_allowed"))
-        val parent: PollCommentEntity? = req.parentUid?.let { comments.findByUid(it) }
+        val p = polls.findById(req.pollId) ?: throw IllegalArgumentException("poll not found")
+        if (p.allowComment == 0) throw BusinessValidationException(mapOf("error" to "comment_not_allowed"))
+
+        val parent: PollCommentEntity? = req.parentUid?.let { uid -> comments.findByUid(uid) }
         val saved = comments.save(
             PollCommentEntity(
                 pollId = p.id,
@@ -449,12 +491,10 @@ class PollService(
         expService.grantExp(user.id, "CREATE_VOTE_COMMENT", saved.id)
         pointService.applyPolicy(user.id, PointPolicy.VOTE_COMMENT, saved.id)
 
-        val extraData = mutableMapOf(
-            "pollId" to p.id.toString()
-        )
-
+        val extraData = mutableMapOf("pollId" to p.id.toString())
         parent?.let { extraData["parentUid"] = it.uid.toString() }
-        if(p.createdId != user.id) {
+
+        if (p.createdId != user.id) {
             eventPublisher.publishEvent(
                 PushSendRequestedEvent(
                     userIds = listOf(p.createdId),
@@ -465,16 +505,17 @@ class PollService(
             )
         }
 
-        parent?.let {
-            if( it.createdId == user.id ) return@let
-            eventPublisher.publishEvent(
-                PushSendRequestedEvent(
-                    userIds = listOf(it.createdId),
-                    actorUserId = user.id,
-                    templateData = PushTemplate.VOTE_REPLY.buildPushData("nickname" to user.nickname),
-                    extraData = extraData,
+        parent?.let { pr ->
+            if (pr.createdId != user.id) {
+                eventPublisher.publishEvent(
+                    PushSendRequestedEvent(
+                        userIds = listOf(pr.createdId),
+                        actorUserId = user.id,
+                        templateData = PushTemplate.VOTE_REPLY.buildPushData("nickname" to user.nickname),
+                        extraData = extraData,
+                    )
                 )
-            )
+            }
         }
 
         return getComment(req.pollId, saved.uid, user.id)
@@ -490,15 +531,12 @@ class PollService(
         val poll = polls.findById(pollId)
         val comment = comments.findByUid(commentUid) ?: throw notFound("comment")
 
-        // 보드 소속 검증 + 삭제된 댓글 제외(DDL/엔티티에 deletedAt 있음을 가정)
         if (comment.pollId != poll?.id) throw badRequest("comment does not belong to this board")
         if (comment.deletedAt != null) throw badRequest("comment already deleted")
-
-        // 권한: 작성자만 수정 (관리자 허용하고 싶으면 role 체크 추가)
         if (comment.createdId != currentUserId) throw forbidden("you are not the author")
 
         val trimmed = req.content.trim()
-        trimmed.let { if (it.isEmpty()) throw badRequest("content must not be blank") }
+        if (trimmed.isEmpty()) throw badRequest("content must not be blank")
 
         val merged = comment.copy(
             content = trimmed,
@@ -517,7 +555,6 @@ class PollService(
         val board = polls.findById(pollId)
         val comment = comments.findByUid(commentUid) ?: throw notFound("comment")
 
-        // 보드 소속 검증 + 중복 삭제 방지
         if (comment.pollId != board?.id) throw badRequest("comment does not belong to this board")
         if (comment.deletedAt != null) throw badRequest("comment already deleted")
         if (comment.createdId != currentUserId) throw forbidden("you are not the author")

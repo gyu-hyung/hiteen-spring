@@ -15,6 +15,7 @@ interface AdminGoodsRepository : CoroutineCrudRepository<GoodsGiftishowEntity, L
         SELECT category1_seq AS category_seq,
                MAX(category1_name) AS category_name
         FROM goods_giftishow
+        WHERE category1_seq IS NOT NULL
         GROUP BY category1_seq
         ORDER BY category1_seq
     """)
@@ -26,6 +27,10 @@ interface AdminGoodsRepository : CoroutineCrudRepository<GoodsGiftishowEntity, L
             goods_type_cd AS goods_type_cd,
             goods_type_nm AS goods_type_name
         FROM goods_giftishow
+        WHERE goods_type_cd IS NOT NULL
+          AND goods_type_cd <> ''
+          AND goods_type_nm IS NOT NULL
+          AND goods_type_nm <> ''
         ORDER BY goods_type_cd
     """)
     fun findGoodsTypes(): Flow<GoodsTypeDto>
@@ -36,7 +41,9 @@ interface AdminGoodsRepository : CoroutineCrudRepository<GoodsGiftishowEntity, L
             brand_code AS brand_code,
             brand_name AS brand_name
         FROM goods_giftishow
-        WHERE brand_name IS NOT NULL
+        WHERE brand_code IS NOT NULL
+          AND brand_code <> ''
+          AND brand_name IS NOT NULL
           AND brand_name <> ''
         ORDER BY brand_name
     """)

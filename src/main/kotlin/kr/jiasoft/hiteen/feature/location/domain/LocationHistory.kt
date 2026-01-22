@@ -1,5 +1,6 @@
 package kr.jiasoft.hiteen.feature.location.domain
 
+import com.fasterxml.jackson.annotation.JsonFormat
 import io.swagger.v3.oas.annotations.media.Schema
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
@@ -21,5 +22,6 @@ data class LocationHistory(
     val lng: Double,
 
     @param:Schema(description = "시간", example = "1726546546546")
+//    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
     val timestamp: Long,
 )

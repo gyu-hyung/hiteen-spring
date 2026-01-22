@@ -6,6 +6,7 @@ import kr.jiasoft.hiteen.feature.gift.dto.GiftIssueRequest
 import kr.jiasoft.hiteen.feature.gift.dto.GiftResponse
 import kr.jiasoft.hiteen.feature.gift.dto.GiftUseRequest
 import kr.jiasoft.hiteen.feature.giftishow.domain.GoodsGiftishowEntity
+import kr.jiasoft.hiteen.feature.gift.dto.client.GiftishowApiResponse
 import java.util.UUID
 
 interface GiftAppService {
@@ -14,10 +15,10 @@ interface GiftAppService {
     suspend fun findGift(receiverUserId: Long, giftUserId: Long) : GiftResponse?
 
     /** 사용자 -> 선물 구매 */
-    suspend fun buyGift(userId: Long, userUid: UUID, req: GiftBuyRequest) : GiftResponse
+    suspend fun buyGift(userId: Long, userUid: UUID, req: GiftBuyRequest) : List<GiftResponse>
 
     /** 관리자 -> 사용자 선물 지급 */
-    suspend fun createGift(userId: Long, req: GiftProvideRequest) : GiftResponse
+    suspend fun createGift(userId: Long, req: GiftProvideRequest, sendPush: Boolean = true) : List<GiftResponse>
 
     /** 사용자 -> 선물 발급 */
     suspend fun issueGift(userId: Long, req: GiftIssueRequest) : GiftResponse
@@ -32,5 +33,11 @@ interface GiftAppService {
 
     /** 기프트쇼 상품 목록조회 */
     suspend fun listGoods() : List<GoodsGiftishowEntity>
+
+    /** 선물 발송 취소 (기프티쇼) */
+    suspend fun cancelVoucher(giftUid: UUID, giftUserId: Long): GiftishowApiResponse<String>
+
+    /** 관리자용 선물 삭제: Voucher면 취소 API 호출, 그 외는 status=CANCELLED로 변경 */
+    suspend fun deleteGift(giftUid: UUID, giftUserId: Long): Any?
 
 }

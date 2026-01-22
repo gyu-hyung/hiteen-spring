@@ -14,7 +14,7 @@ import kr.jiasoft.hiteen.feature.user.domain.UserPhotosEntity
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Table
 import java.time.LocalDate
-import java.time.LocalDateTime
+import java.time.OffsetDateTime
 
 @Schema(description = "사용자 응답 DTO")
 @Table("users")
@@ -98,17 +98,20 @@ data class UserResponse(
     @param:Schema(description = "팔로우 요청 여부", example = "false")
     val isFollowedRequested: Boolean = false,
 
-    @param:Schema(description = "생성 일시", example = "2025.09.18 10:15")
-    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm")
-    val createdAt: LocalDateTime,
+    @param:Schema(description = "관리자 여부", example = "false")
+    val isAdmin: Boolean = false,
 
-    @param:Schema(description = "수정 일시", example = "2025.09.18 10:15")
+    @param:Schema(description = "최근 접속 일시", example = "2025.09.18 10:15")
     @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm")
-    val updatedAt: LocalDateTime?,
+    val updatedAt: OffsetDateTime? = null,
 
-    @param:Schema(description = "삭제 일시", example = "2025.09.18 10:15")
+    @param:Schema(description = "가입 일시", example = "2025.09.18 10:15")
     @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm")
-    val deletedAt: LocalDateTime?,
+    val createdAt: OffsetDateTime? = null,
+
+    @param:Schema(description = "삭제 일시 (탈퇴)", example = "2025.09.18 10:15")
+    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm")
+    val deletedAt: OffsetDateTime? = null,
 
     @param:Schema(description = "학교 정보")
     val school: SchoolDto?,
@@ -168,9 +171,9 @@ data class UserResponse(
                     isFriendRequested = isFriendRequested,
                     isFollowedRequested = isFollowedRequested,
                     locationMode = entity.locationMode,
-                    createdAt = entity.createdAt.toLocalDateTime(),
-                    updatedAt = entity.updatedAt?.toLocalDateTime(),
-                    deletedAt = entity.deletedAt?.toLocalDateTime(),
+                    createdAt = entity.createdAt,
+                    updatedAt = entity.updatedAt,
+                    deletedAt = entity.deletedAt,
                     school = school?.let { SchoolDto.from(it) },
                     schoolClass = classes,
                     tier = tier,

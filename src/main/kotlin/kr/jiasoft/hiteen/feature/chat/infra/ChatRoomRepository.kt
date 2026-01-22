@@ -4,6 +4,7 @@ import kotlinx.coroutines.flow.Flow
 import kr.jiasoft.hiteen.feature.chat.domain.ChatRoomEntity
 import kr.jiasoft.hiteen.feature.chat.dto.ChatRoomMemberResponse
 import kr.jiasoft.hiteen.feature.chat.dto.ChatRoomResponse
+import kr.jiasoft.hiteen.feature.chat.dto.RoomSummaryProjection
 import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 import java.util.UUID
@@ -91,4 +92,45 @@ interface ChatRoomRepository : CoroutineCrudRepository<ChatRoomEntity, Long> {
         ORDER BY cu.id ASC
     """)
     fun listActiveMembersByRoomUid(roomUid: UUID): Flow<ChatRoomMemberResponse>
+
+    /** 내가 속한 방 목록 (최적화 버전) */
+    @Query("""
+        SELECT 
+            r.id,
+            r.uid as room_uid,
+            r.room_name as room_title,
+            COALESCE(r.asset_uid::text, (
+                SELECT u_other.asset_uid::text 
+                FROM chat_users cu_other 
+                JOIN users u_other ON u_other.id = cu_other.user_id 
+                WHERE cu_other.chat_room_id = r.id 
+                  AND cu_other.user_id != :userId 
+                  AND cu_other.deleted_at IS NULL 
+                LIMIT 1
+            )) as asset_uid,
+            COALESCE(r.updated_at, r.created_at) as updated_at,
+            m.id as last_message_id,
+            m.uid as last_message_uid,
+            m.content as last_content,
+            m.kind as last_kind,
+            m.emoji_code as last_emoji_code,
+            m.emoji_count as last_emoji_count,
+            m.created_at as last_created_at,
+            su.id as last_sender_id,
+            su.uid as last_sender_uid,
+            su.username as last_sender_username,
+            su.nickname as last_sender_nickname,
+            su.asset_uid::text as last_sender_asset_uid
+        FROM chat_rooms r
+        JOIN chat_users cu ON cu.chat_room_id = r.id
+        LEFT JOIN chat_messages m ON m.id = r.last_message_id
+        LEFT JOIN users su ON su.id = m.user_id
+        WHERE cu.user_id = :userId
+          AND r.last_message_id IS NOT NULL
+          AND cu.deleted_at IS NULL 
+          AND r.deleted_at IS NULL
+        ORDER BY COALESCE(r.updated_at, r.created_at) DESC NULLS LAST
+        LIMIT :limit OFFSET :offset
+    """)
+    fun listRoomSummaries(userId: Long, limit: Int, offset: Int): Flow<RoomSummaryProjection>
 }

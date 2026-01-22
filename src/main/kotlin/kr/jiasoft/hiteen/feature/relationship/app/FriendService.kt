@@ -1,28 +1,18 @@
 package kr.jiasoft.hiteen.feature.relationship.app
 
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.flow.toSet
 import kr.jiasoft.hiteen.common.exception.BusinessValidationException
 import kr.jiasoft.hiteen.feature.contact.infra.UserContactBulkRepository
-import kr.jiasoft.hiteen.feature.contact.infra.UserContactRepository
 import kr.jiasoft.hiteen.feature.level.app.ExpService
 import kr.jiasoft.hiteen.feature.location.domain.LocationHistory
 import kr.jiasoft.hiteen.feature.location.infra.cache.LocationCacheRedisService
 import kr.jiasoft.hiteen.feature.push.app.event.PushSendRequestedEvent
 import kr.jiasoft.hiteen.feature.push.domain.PushTemplate
 import kr.jiasoft.hiteen.feature.relationship.RelationHistoryService
-import kr.jiasoft.hiteen.feature.relationship.domain.FollowEntity
-import kr.jiasoft.hiteen.feature.relationship.domain.FollowStatus
-import kr.jiasoft.hiteen.feature.relationship.domain.FriendEntity
-import kr.jiasoft.hiteen.feature.relationship.domain.FriendStatus
-import kr.jiasoft.hiteen.feature.relationship.domain.LocationMode
-import kr.jiasoft.hiteen.feature.relationship.domain.RelationAction
-import kr.jiasoft.hiteen.feature.relationship.domain.RelationType
-import kr.jiasoft.hiteen.feature.relationship.dto.ContactResponse
-import kr.jiasoft.hiteen.feature.relationship.dto.RelationshipSummary
-import kr.jiasoft.hiteen.feature.relationship.dto.RelationshipSearchItem
+import kr.jiasoft.hiteen.feature.relationship.domain.*
+import kr.jiasoft.hiteen.feature.relationship.dto.*
 import kr.jiasoft.hiteen.feature.relationship.infra.FollowRepository
 import kr.jiasoft.hiteen.feature.relationship.infra.FriendRepository
 import kr.jiasoft.hiteen.feature.user.app.UserService
@@ -33,6 +23,7 @@ import org.springframework.context.ApplicationEventPublisher
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
+import java.time.Instant
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 
@@ -43,7 +34,7 @@ class FriendService(
     private val relationHistoryService: RelationHistoryService,
 
     private val userRepository: UserRepository,
-    private val userContactRepository: UserContactRepository,
+//    private val userContactRepository: UserContactRepository,
     private val userContactBulkRepository: UserContactBulkRepository,
 
     private val userService: UserService,
@@ -74,7 +65,9 @@ class FriendService(
             statusAt = e.statusAt,
             lat = latestLocation?.lat,
             lng = latestLocation?.lng,
-            lastSeenAt = latestLocation?.timestamp,
+            lastSeenAt = latestLocation?.timestamp?.let {
+                Instant.ofEpochMilli(it).atOffset(ZoneOffset.ofHours(9))
+            },
             myLocationMode = myMode,
             theirLocationMode = theirMode
         )
@@ -131,38 +124,51 @@ class FriendService(
 
 
     suspend fun listFriends(me: UserEntity): List<RelationshipSummary> {
-        return friendRepository.findAllAccepted(me.id)
-            .map { e ->
-                val otherId = if (e.userId == me.id) e.friendId else e.userId
-                val other = userService.findUserResponse(otherId, me.id)
+        val friends = friendRepository.findAllAccepted(me.id).toList()
+        if (friends.isEmpty()) return emptyList()
 
-                // Redis/Mongo에서 최신 위치 조회 (uid기준)
-                val latestLocation = other.uid.let { uid ->
-                    locationCacheRedisService.getLatest(uid)
-                }
+        val otherIds = friends.map { if (it.userId == me.id) it.friendId else it.userId }
+        val userMap = userService.findUserResponseByIds(otherIds, me.id).associateBy { it.id }
 
+        return friends.mapNotNull { e ->
+            val otherId = if (e.userId == me.id) e.friendId else e.userId
+            userMap[otherId]?.let { other ->
+                val latestLocation = locationCacheRedisService.getLatest(other.uid)
                 toRelationshipSummary(e, me.id, other, latestLocation)
-            }.toList()
+            }
+        }
     }
 
 
     suspend fun listOutgoing(me: UserEntity): List<RelationshipSummary> {
-        return friendRepository.findAllOutgoingPending(me.id)
-            .map { e ->
-                val otherId = if (e.userId == me.id) e.friendId else e.userId
-                val other = userService.findUserResponse(otherId, me.id)
+        val friends = friendRepository.findAllOutgoingPending(me.id).toList()
+        if (friends.isEmpty()) return emptyList()
+
+        val otherIds = friends.map { if (it.userId == me.id) it.friendId else it.userId }
+        val userMap = userService.findUserResponseByIds(otherIds, me.id).associateBy { it.id }
+
+        return friends.mapNotNull { e ->
+            val otherId = if (e.userId == me.id) e.friendId else e.userId
+            userMap[otherId]?.let { other ->
                 toRelationshipSummary(e, me.id, other, null)
-            }.toList()
+            }
+        }
     }
 
 
     suspend fun listIncoming(me: UserEntity): List<RelationshipSummary> {
-        return friendRepository.findAllIncomingPending(me.id)
-            .map { e ->
-                val otherId = if (e.userId == me.id) e.friendId else e.userId
-                val other = userService.findUserResponse(otherId, me.id)
+        val friends = friendRepository.findAllIncomingPending(me.id).toList()
+        if (friends.isEmpty()) return emptyList()
+
+        val otherIds = friends.map { if (it.userId == me.id) it.friendId else it.userId }
+        val userMap = userService.findUserResponseByIds(otherIds, me.id).associateBy { it.id }
+
+        return friends.mapNotNull { e ->
+            val otherId = if (e.userId == me.id) e.friendId else e.userId
+            userMap[otherId]?.let { other ->
                 toRelationshipSummary(e, me.id, other, null)
-            }.toList()
+            }
+        }
     }
 
 
@@ -365,9 +371,17 @@ class FriendService(
             .filter { it.uid != me.uid.toString() }
             .toList()
 
+        if (publics.isEmpty()) return emptyList()
+
+        // 검색된 사용자들의 ID 목록 추출
+        val otherIds = publics.map { it.id }
+
+        // 친구 관계 한 번에 조회 (N+1 최적화)
+        val relations = friendRepository.findAllBetweenBulk(meId, otherIds).toList()
+        val relationMap = relations.associateBy { if (it.userId == meId) it.friendId else it.userId }
+
         return publics.map { pu ->
-            val otherId = requireUserIdByUid(pu.uid)
-            val rel = friendRepository.findBetween(meId, otherId)
+            val rel = relationMap[pu.id]
             val relation = when {
                 rel == null -> null
                 rel.status == FriendStatus.ACCEPTED.name -> "ACCEPTED"

@@ -92,6 +92,15 @@ data class VoteCountRow(
     val votes: Long
 )
 
+data class SelectionSummaryProjection(
+    val pollId: Long,
+    val id: Long,
+    val seq: Int,
+    val content: String,
+    val voteCount: Int,
+    val photoUid: UUID?
+)
+
 
 data class PollSummaryRow(
     val id: Long,
@@ -209,7 +218,7 @@ data class PollCommentResponse(
     val createdId: Long,
 
     @param:Schema(description = "작성 일시", example = "2025.09.18 10:15")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm")
+    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm")
     val createdAt: OffsetDateTime,
 
     @param:Schema(description = "작성자 요약 정보")

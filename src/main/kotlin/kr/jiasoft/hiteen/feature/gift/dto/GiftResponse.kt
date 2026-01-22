@@ -45,4 +45,6 @@ data class GiftResponse (
 
     val receiver: UserSummary,
     val goods: GoodsGiftishowEntity? = null,
+
+    val statusName: String? = null,
 )

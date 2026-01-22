@@ -21,6 +21,8 @@ import kr.jiasoft.hiteen.common.dto.ApiPageCursor
 import kr.jiasoft.hiteen.common.dto.PageUtil
 import kr.jiasoft.hiteen.common.extensions.failure
 import kr.jiasoft.hiteen.common.extensions.success
+import kr.jiasoft.hiteen.feature.cash.app.CashService
+import kr.jiasoft.hiteen.feature.point.app.PointService
 import kr.jiasoft.hiteen.feature.user.app.UserService
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import org.springframework.http.ResponseEntity
@@ -28,6 +30,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -46,6 +49,8 @@ class AdminUserController (
     private val adminFollowRepository: AdminFollowRepository,
     private val encoder: PasswordEncoder,
     private val adminUserService: AdminUserService,
+    private val pointService: PointService,
+    private val cashService: CashService,
 ) {
 
     // 회원 검색 (role 조건 없음)
@@ -305,5 +310,27 @@ class AdminUserController (
     ): ResponseEntity<ApiResult<AdminUserRoleUpdateResponse>> {
         val data = adminUserService.updateRole(request, user)
         return ResponseEntity.ok(ApiResult.success(data))
+    }
+
+    /**
+     * 특정 회원의 포인트 조회
+     */
+    @GetMapping("/users/{userId}/point")
+    suspend fun getUserPoint(
+        @PathVariable userId: Long,
+        @AuthenticationPrincipal(expression = "user") user: UserEntity,
+    ): ResponseEntity<ApiResult<Int>> {
+        return ResponseEntity.ok(ApiResult.success(pointService.getUserTotalPoints(userId)))
+    }
+
+    /**
+     * 특정 회원의 캐시 조회
+     */
+    @GetMapping("/users/{userId}/cash")
+    suspend fun getUserCash(
+        @PathVariable userId: Long,
+        @AuthenticationPrincipal(expression = "user") user: UserEntity,
+    ): ResponseEntity<ApiResult<Int>> {
+        return ResponseEntity.ok(ApiResult.success(cashService.getUserTotalCash(userId)))
     }
 }

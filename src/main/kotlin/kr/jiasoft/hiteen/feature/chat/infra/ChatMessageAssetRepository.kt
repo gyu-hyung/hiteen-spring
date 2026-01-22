@@ -8,4 +8,6 @@ import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 interface ChatMessageAssetRepository : CoroutineCrudRepository<ChatMessageAssetEntity, Long> {
     @Query("SELECT * FROM chat_messages_assets WHERE message_id=:messageId")
     fun listByMessage(messageId: Long): Flow<ChatMessageAssetEntity>
+
+    fun findAllByMessageIdIn(messageIds: Collection<Long>): Flow<ChatMessageAssetEntity>
 }

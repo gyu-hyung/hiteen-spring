@@ -29,6 +29,40 @@ INSERT INTO poll_templates
 (question, answers, state, created_at, updated_at, deleted_at)
 VALUES('더 기쁜 소식은?', '["내 최애 아이돌 그룹의 컴백", "새로운 맛있는 음식 발견"]'::jsonb, 1, '2025-09-26 14:25:55.854', NULL, NULL);
 
+
+
+
+INSERT INTO public.codes (code, code_name, code_group, code_group_name, status, col1)
+VALUES
+('MCON_001', 'MCON_001', 'MCON', '현재 나의 상태', 'ACTIVE', '기분 최고야'),
+('MCON_002', 'MCON_002', 'MCON', '현재 나의 상태', 'ACTIVE', '눈물펑펑'),
+('MCON_003', 'MCON_003', 'MCON', '현재 나의 상태', 'ACTIVE', '욱참는중'),
+('MCON_004', 'MCON_004', 'MCON', '현재 나의 상태', 'ACTIVE', '두근두근해'),
+('MCON_005', 'MCON_005', 'MCON', '현재 나의 상태', 'ACTIVE', '생각많음주의'),
+('MCON_006', 'MCON_006', 'MCON', '현재 나의 상태', 'ACTIVE', '너무 심심해'),
+('MCON_007', 'MCON_007', 'MCON', '현재 나의 상태', 'ACTIVE', '나좀멋진듯'),
+('MCON_008', 'MCON_008', 'MCON', '현재 나의 상태', 'ACTIVE', '텐션폭발중'),
+('MCON_009', 'MCON_009', 'MCON', '현재 나의 상태', 'ACTIVE', '울컥하는중'),
+('MCON_010', 'MCON_010', 'MCON', '현재 나의 상태', 'ACTIVE', '녹아내리는중'),
+('MCON_011', 'MCON_011', 'MCON', '현재 나의 상태', 'ACTIVE', '열공하는중'),
+('MCON_012', 'MCON_012', 'MCON', '현재 나의 상태', 'ACTIVE', '쉿!조용모드'),
+('MCON_013', 'MCON_013', 'MCON', '현재 나의 상태', 'ACTIVE', '몽글몽글해'),
+('MCON_014', 'MCON_014', 'MCON', '현재 나의 상태', 'ACTIVE', '으으~덜덜덜'),
+('MCON_015', 'MCON_015', 'MCON', '현재 나의 상태', 'ACTIVE', '공포그잡채'),
+('MCON_016', 'MCON_016', 'MCON', '현재 나의 상태', 'ACTIVE', '나도아프��'),
+('MCON_017', 'MCON_017', 'MCON', '현재 나의 상태', 'ACTIVE', '웃겨죽음'),
+('MCON_018', 'MCON_018', 'MCON', '현재 나의 상태', 'ACTIVE', '뭔가..수상해'),
+('MCON_019', 'MCON_019', 'MCON', '현재 나의 상태', 'ACTIVE', '웩.토나와'),
+('MCON_020', 'MCON_020', 'MCON', '현재 나의 상태', 'ACTIVE', '잠자는중'),
+('MCON_021', 'MCON_021', 'MCON', '현재 나의 상태', 'ACTIVE', '악!깜딱이야'),
+('MCON_022', 'MCON_022', 'MCON', '현재 나의 상태', 'ACTIVE', '이불탄신일'),
+('MCON_023', 'MCON_023', 'MCON', '현재 나의 상태', 'ACTIVE', '욕나온다'),
+('MCON_024', 'MCON_024', 'MCON', '현재 나의 상태', 'ACTIVE', '곤란한데..');
+
+
+
+
+
 -- Lv1 브론즈 (0~199)
 INSERT INTO tiers (tier_code, tier_name_kr, division_no, rank_order, min_points, max_points)
 VALUES

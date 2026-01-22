@@ -48,7 +48,7 @@ class NotificationController(
 
     @DeleteMapping
     suspend fun deletePushNotification(
-        @AuthenticationPrincipal(expression = "user") user: UserEntity, @RequestParam id: Long, @RequestParam all: Boolean
+        @AuthenticationPrincipal(expression = "user") user: UserEntity, @RequestParam id: Long? = null, @RequestParam(required = false) all: Boolean = false
     ): ResponseEntity<ApiResult<String>> {
         notificationService.delete(user.id, id, all)
         return ResponseEntity.ok(ApiResult.success("성공"))

@@ -41,11 +41,12 @@ class NotificationService(
     }
 
 
-     suspend fun delete(userId: Long, pushId: Long, all: Boolean) {
+     suspend fun delete(userId: Long, pushId: Long? = null, all: Boolean) {
         if(all) {
-            pushDetailRepository.deleteByUserId(userId)
+            pushDetailRepository.softDeleteByUserId(userId)
         } else {
-            pushDetailRepository.deleteByPushIdAndUserId(pushId, userId)
+            requireNotNull(pushId)
+            pushDetailRepository.softDeleteByIdAndUserId(pushId, userId)
         }
     }
 

@@ -15,4 +15,6 @@ data class GiftBuyRequest (
     @field:Schema(description = "메모")
     val memo: String? = null,
 
+    @field:Schema(description = "수량", defaultValue = "1")
+    val quantity: Int = 1,
 )

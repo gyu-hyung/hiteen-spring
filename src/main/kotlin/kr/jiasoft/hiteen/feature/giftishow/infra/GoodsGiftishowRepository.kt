@@ -1,11 +1,14 @@
 package kr.jiasoft.hiteen.feature.giftishow.infra
 
 import kotlinx.coroutines.flow.Flow
+import kr.jiasoft.hiteen.admin.dto.GoodsBrandDto
 import kr.jiasoft.hiteen.admin.dto.GoodsCategoryDto
 import kr.jiasoft.hiteen.admin.dto.GoodsTypeDto
 import kr.jiasoft.hiteen.feature.giftishow.domain.GoodsGiftishowEntity
 import org.springframework.data.r2dbc.repository.Query
+import org.springframework.data.r2dbc.repository.Modifying
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
+import java.time.OffsetDateTime
 
 interface GiftishowGoodsRepository : CoroutineCrudRepository<GoodsGiftishowEntity, Long> {
 
@@ -13,14 +16,15 @@ interface GiftishowGoodsRepository : CoroutineCrudRepository<GoodsGiftishowEntit
 
     fun findAllByGoodsCodeIn(goodsCodes: List<String>): Flow<GoodsGiftishowEntity>
 
-//    @Query("UPDATE goods_giftishow SET del_yn = 1 WHERE gg.goods_code LIKE 'G%'")
-    @Query("UPDATE goods_giftishow gg SET del_yn = 1 WHERE gg.goods_code LIKE 'G%'")
+    @Modifying
+    @Query("UPDATE goods_giftishow SET del_yn = 1 WHERE goods_code NOT LIKE 'H%'")
     suspend fun markAllDeleted()
 
+    @Modifying
+    @Query("UPDATE goods_giftishow SET del_yn = 1, deleted_at = NOW() WHERE goods_code NOT LIKE 'H%' AND (updated_at IS NULL OR updated_at < :since)")
+    suspend fun markDeletedNotUpdatedSince(since: OffsetDateTime)
+
     suspend fun findAllByOrderByCreatedAtDesc(): List<GoodsGiftishowEntity>
-
-
-
 
 
     @Query("""
@@ -28,7 +32,8 @@ interface GiftishowGoodsRepository : CoroutineCrudRepository<GoodsGiftishowEntit
                MAX(category1_name) AS category_name
         FROM goods_giftishow
         WHERE status = 1 
-        AND deleted_at IS NULL
+        AND del_yn = 0
+        AND category1_seq IS NOT NULL
         GROUP BY category1_seq
         ORDER BY category1_seq
     """)
@@ -41,12 +46,30 @@ interface GiftishowGoodsRepository : CoroutineCrudRepository<GoodsGiftishowEntit
             goods_type_nm AS goods_type_name
         FROM goods_giftishow
         WHERE status = 1
-          AND deleted_at IS NULL
+          AND del_yn = 0
           AND goods_type_cd IS NOT NULL
           AND goods_type_cd <> ''
+          AND goods_type_nm IS NOT NULL
+          AND goods_type_nm <> ''
         ORDER BY goods_type_cd
     """)
     fun findGoodsTypes(): Flow<GoodsTypeDto>
+
+
+    @Query("""
+        SELECT DISTINCT
+            brand_code AS brand_code,
+            brand_name AS brand_name
+        FROM goods_giftishow
+        WHERE status = 1
+          AND del_yn = 0
+          AND brand_code IS NOT NULL
+          AND brand_code <> ''
+          AND brand_name IS NOT NULL
+          AND brand_name <> ''
+        ORDER BY brand_name
+    """)
+    fun findBrands(): Flow<GoodsBrandDto>
 
 
     /**
@@ -55,7 +78,7 @@ interface GiftishowGoodsRepository : CoroutineCrudRepository<GoodsGiftishowEntit
     @Query("""
         SELECT g.*
         FROM goods_giftishow g
-        WHERE g.deleted_at IS NULL
+        WHERE g.del_yn = 0
           AND g.status = 1
             AND (
                 :search IS NULL

@@ -178,4 +178,13 @@ class UserController(
         = ResponseEntity.ok(ApiResult.success(userService.myReferralList(user.id)))
 
 
+    @Operation(summary = "틴프로필 삭제", description = "사용자의 사진과 관심사를 모두 삭제합니다.")
+    @DeleteMapping("/teen-profile")
+    suspend fun deleteTeenProfile(
+        @AuthenticationPrincipal(expression = "user") user: UserEntity
+    ): ResponseEntity<ApiResult<Unit>> {
+        userService.deleteTeenProfile(user)
+        return ResponseEntity.ok(ApiResult.success(Unit, "틴프로필이 삭제되었습니다."))
+    }
+
 }

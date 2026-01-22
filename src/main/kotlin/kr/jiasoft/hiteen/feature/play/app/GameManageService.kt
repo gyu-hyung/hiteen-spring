@@ -379,7 +379,7 @@ class GameManageService(
                                     GiftType.GiftCard,
 
                             giftCategory = GiftCategory.Challenge,
-                            receiveUserUid = ranking.userUid!!,
+                            receiveUserUids = listOf(ranking.userUid!!),
                             memo = policy.message,
 
                             goodsCode = goodsCode,
