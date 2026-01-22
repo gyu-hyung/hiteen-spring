@@ -36,6 +36,7 @@ interface PollRepository : CoroutineCrudRepository<PollEntity, Long> {
             p.created_at
         FROM polls p
         WHERE p.deleted_at IS NULL
+          AND p.status = 'ACTIVE'
           AND (
               :type = 'all'
               OR (:type = 'mine' AND p.created_id = :currentUserId)
