@@ -1,5 +1,6 @@
 package kr.jiasoft.hiteen.feature.gift.app
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import kotlinx.coroutines.flow.toList
 import kr.jiasoft.hiteen.feature.cash.app.CashService
 import kr.jiasoft.hiteen.feature.cash.domain.CashPolicy
@@ -17,6 +18,7 @@ import kr.jiasoft.hiteen.feature.gift.dto.GiftIssueRequest
 import kr.jiasoft.hiteen.feature.gift.dto.GiftResponse
 import kr.jiasoft.hiteen.feature.gift.dto.GiftStatus
 import kr.jiasoft.hiteen.feature.gift.dto.GiftUseRequest
+import kr.jiasoft.hiteen.feature.gift.dto.client.GiftishowApiResponse
 import kr.jiasoft.hiteen.feature.gift.dto.client.voucher.GiftishowVoucherSendRequest
 import kr.jiasoft.hiteen.feature.gift.dto.toResponse
 import kr.jiasoft.hiteen.feature.giftishow.domain.GiftishowLogsEntity
@@ -64,6 +66,8 @@ class GiftAppServiceImpl (
     private val txOperator: TransactionalOperator,
 
     private val eventPublisher: ApplicationEventPublisher,
+    private val giftshowClient: GiftshowClient,
+    private val objectMapper: ObjectMapper,
 ) : GiftAppService {
 
 
@@ -186,7 +190,12 @@ class GiftAppServiceImpl (
                 userId = user.id,
                 status = GiftStatus.WAIT.code,
                 receiveDate = OffsetDateTime.now(),
-                pubExpiredDate = OffsetDateTime.now().plusMonths(1),// 한달 안에 발급받아야함
+                // GiftType Shop 이면 발급기한 무제한
+                pubExpiredDate = if (req.giftCategory == GiftCategory.Shop) {
+                    null
+                } else {
+                    OffsetDateTime.now().plusDays(30)
+                },
                 goodsCode = req.goodsCode,
                 gameId = req.gameId,
                 seasonId = req.seasonId,
@@ -233,6 +242,10 @@ class GiftAppServiceImpl (
         val giftUser = giftUserRepository.findByGiftIdAndUserId(gift.id, userId)
         val receiverUser = userRepository.findById(giftUser.userId)
 
+        // pubExpiredDate 발급만료일자 지났는지?
+        if (giftUser.pubExpiredDate != null && giftUser.pubExpiredDate.isBefore(OffsetDateTime.now()))
+            throw IllegalArgumentException("발급만료일자가 지난 선물입니다.")
+
         when (gift.type) {
 
             GiftType.Point -> {
@@ -256,9 +269,6 @@ class GiftAppServiceImpl (
             }
 
             GiftType.Voucher -> {
-                // pubExpiredDate 발급만료일자 지났는지?
-                if (giftUser.pubExpiredDate.isBefore(OffsetDateTime.now()))
-                    throw IllegalArgumentException("발급만료일자가 지난 선물입니다.")
 
                 val goodsEntity = giftUser.goodsCode?.let {
                     giftishowGoodsRepository.findByGoodsCode(it)
@@ -467,6 +477,150 @@ class GiftAppServiceImpl (
 
     override suspend fun listGoods() : List<GoodsGiftishowEntity> {
         return giftishowGoodsRepository.findAll().toList()
+    }
+
+    override suspend fun cancelVoucher(giftUid: UUID, giftUserId: Long): GiftishowApiResponse<String> {
+        val giftUser = giftUserRepository.findById(giftUserId)
+            ?: throw IllegalArgumentException("존재하지 않는 선물 수신 정보입니다.")
+
+        val gift = giftRepository.findById(giftUser.giftId)
+            ?: throw IllegalArgumentException("존재하지 않는 선물 정보입니다.")
+
+        if (gift.uid != giftUid) {
+            throw IllegalArgumentException("잘못된 선물 식별자입니다.")
+        }
+
+        val log = giftishowLogsRepository.findFirstByGiftUserIdOrderByCreatedAtDesc(giftUserId)
+            ?: throw IllegalArgumentException("취소할 수 있는 발송 이력이 없습니다.")
+
+        val trId = log.trId ?: throw IllegalArgumentException("trId를 찾을 수 없습니다.")
+
+        // 1) 기본 취소 시도 (GET/POST 내부 구현)
+        var response = giftshowClient.cancelVoucher(trId)
+
+        if (response.code == "0000") {
+            giftUserRepository.save(giftUser.copy(status = GiftStatus.CANCELLED.code))
+
+            // update giftishow log
+            try {
+                val updatedLog = log.copy(
+                    response = objectMapper.writeValueAsString(response),
+                    code = response.code,
+                    message = response.message,
+                    status = GiftStatus.CANCELLED.code,
+                    updatedAt = OffsetDateTime.now()
+                )
+                giftishowLogsRepository.save(updatedLog)
+            } catch (ex: Exception) {
+                println("[GiftAppService] failed to update giftishow log after cancel success: ${ex.message}")
+            }
+
+            return response
+        }
+
+        // 2) 취소 실패하면 재전송(retry) 한 번 시도
+        println("[GiftAppService] cancel failed(code=${response.code}), trying cancel again")
+        try {
+            val secondResp = giftshowClient.cancelVoucher(trId)
+            println("[GiftAppService] second cancel response: code=${secondResp.code}, message=${secondResp.message}")
+            if (secondResp.code == "0000") {
+                giftUserRepository.save(giftUser.copy(status = GiftStatus.CANCELLED.code))
+
+                // update giftishow log with second response
+                try {
+                    val updatedLog = log.copy(
+                        response = objectMapper.writeValueAsString(secondResp),
+                        code = secondResp.code,
+                        message = secondResp.message,
+                        status = GiftStatus.CANCELLED.code,
+                        updatedAt = OffsetDateTime.now()
+                    )
+                    giftishowLogsRepository.save(updatedLog)
+                } catch (ex: Exception) {
+                    println("[GiftAppService] failed to update giftishow log after second cancel success: ${ex.message}")
+                }
+
+                return secondResp
+            }
+            // continue to detail check if second attempt not successful
+        } catch (ex: Exception) {
+            println("[GiftAppService] second cancel attempt exception: ${ex.message}")
+        }
+
+        // 3) 재전송도 실패하면 상세조회해서 상태 확인 (폐기 상태면 완료 처리)
+        println("[GiftAppService] retry failed or non-success, checking voucher detail for trId=$trId")
+        val detail = try {
+            giftshowClient.detailVoucher(trId)
+        } catch (ex: Exception) {
+            println("[GiftAppService] detailVoucher failed: ${ex.message}")
+            null
+        }
+
+        // detail 구조: { "result": [ { "couponInfoList": [ { "pinStatusCd": "07", "pinStatusNm": "구매취소(폐기)", ... } ], "resCode": "0000" } ] }
+        val isDisposed = try {
+            val resultList = (detail?.get("result") as? List<Map<String, Any?>>)
+            val wrapper = resultList?.firstOrNull()
+            val couponInfoList = wrapper?.get("couponInfoList") as? List<Map<String, Any?>>
+            val first = couponInfoList?.firstOrNull()
+            val pinStatusCd = first?.get("pinStatusCd") as? String
+            val pinStatusNm = first?.get("pinStatusNm") as? String
+
+            (pinStatusCd == "07") || (pinStatusNm?.contains("폐기") == true)
+        } catch (ex: Exception) {
+            println("[GiftAppService] parse detail failed: ${ex.message}")
+            false
+        }
+
+        if (isDisposed) {
+            giftUserRepository.save(giftUser.copy(status = GiftStatus.CANCELLED.code))
+            // update log with detail info
+            try {
+                val detailJson = detail?.let { objectMapper.writeValueAsString(it) }
+                val updatedLog = log.copy(
+                    response = detailJson ?: log.response,
+                    code = "0000",
+                    message = "disposed",
+                    status = GiftStatus.CANCELLED.code,
+                    updatedAt = OffsetDateTime.now()
+                )
+                giftishowLogsRepository.save(updatedLog)
+            } catch (ex: Exception) {
+                println("[GiftAppService] failed to update giftishow log after detail disposed: ${ex.message}")
+            }
+
+            return GiftishowApiResponse(code = "0000", message = "disposed", result = "disposed")
+        }
+
+        // 모두 실패한 경우 원래 응답을 그대로 전달하거나 예외로 처리
+        throw IllegalArgumentException("기프티쇼 취소/재전송/상세조회로도 폐기 확인되지 않음: ${response.message}")
+    }
+
+    override suspend fun deleteGift(giftUid: UUID, giftUserId: Long): Any? {
+        val giftUser = giftUserRepository.findById(giftUserId)
+            ?: throw IllegalArgumentException("존재하지 않는 선물 수신 정보입니다.")
+
+        val gift = giftRepository.findById(giftUser.giftId)
+            ?: throw IllegalArgumentException("존재하지 않는 선물 정보입니다.")
+
+        if (gift.uid != giftUid) throw IllegalArgumentException("잘못된 선물 식별자입니다.")
+
+        return when (gift.type) {
+            GiftType.Voucher -> {
+                // try cancel via giftshow
+                val resp = cancelVoucher(giftUid, giftUserId)
+                if (resp.code == "0000") {
+                    mapOf("result" to "cancelled")
+                } else {
+//                    mapOf("result" to "failed", "reason" to resp.message)
+                    throw IllegalArgumentException("기프티쇼 취소 실패: ${resp.message}")
+                }
+            }
+            else -> {
+                // non-voucher: mark cancelled locally
+                giftUserRepository.save(giftUser.copy(status = GiftStatus.CANCELLED.code))
+                mapOf("result" to "marked_cancelled")
+            }
+        }
     }
 
 
