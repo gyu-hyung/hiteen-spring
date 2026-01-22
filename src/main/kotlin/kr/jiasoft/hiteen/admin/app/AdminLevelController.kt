@@ -34,7 +34,7 @@ class AdminLevelController(
         @RequestParam searchType: String? = null,
         @RequestParam search: String? = null,
     ): ResponseEntity<ApiResult<List<AdminLevelResponse>>> {
-        val data = adminLevelRepository.listLevels(search).toList()
+        val data = adminLevelRepository.listLevels(searchType, search).toList()
 
         return success(data)
     }

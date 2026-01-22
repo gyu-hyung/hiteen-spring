@@ -16,6 +16,7 @@ import kr.jiasoft.hiteen.feature.push.domain.PushTemplate
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDateTime
 
 @Service
 class AdminPushService(
@@ -26,40 +27,33 @@ class AdminPushService(
 ) {
 
     suspend fun list(
-        page: Int,
-        size: Int,
-        order: String,
-        searchType: String,
+        type: String?,
+        startDate: LocalDateTime?,
+        endDate: LocalDateTime?,
+        searchType: String?,
         search: String?,
-        status: String?,
+        page: Int,
+        perPage: Int,
+        order: String,
     ): ApiPage<AdminPushListResponse> {
-        val p = page.coerceAtLeast(1)
-        val s = size.coerceIn(1, 100)
-        val offset = (p - 1) * s
+        val page = page.coerceAtLeast(1)
+        val perPage = perPage.coerceIn(1, 100)
+        val offset = (page - 1) * perPage
 
-        val normalizedSearch = search?.trim()?.takeIf { it.isNotBlank() }
-        val normalizedSearchType = when (searchType.trim().uppercase()) {
-            "ALL", "CODE", "TITLE", "MESSAGE" -> searchType.trim().uppercase()
-            else -> "ALL"
-        }
-        val normalizedStatus = when (status?.trim()?.uppercase()) {
-            null, "" -> "ACTIVE"
-            "ACTIVE", "DELETED", "ALL" -> status.trim().uppercase()
-            else -> "ACTIVE"
-        }
-        val normalizedOrder = when (order.trim().uppercase()) {
+        val search = search?.trim()?.takeIf { it.isNotBlank() }
+        val order = when (order.trim().uppercase()) {
             "ASC" -> "ASC"
             else -> "DESC"
         }
 
-        val total = adminPushRepository.countList(normalizedSearch, normalizedSearchType, normalizedStatus)
-        val rows = adminPushRepository.list(normalizedSearch, normalizedSearchType, normalizedStatus, normalizedOrder, s, offset)
+        val total = adminPushRepository.countList(type, startDate, endDate, searchType, search)
+        val rows = adminPushRepository.list(type, startDate, endDate, searchType, search, order, perPage, offset)
 
         return PageUtil.of(
             items = rows.map { it.toListResponse() },
             total = total,
-            page = p,
-            size = s,
+            page = page,
+            size = perPage,
         )
     }
 
@@ -133,9 +127,11 @@ class AdminPushService(
         // 방금 저장된 pushId를 PushService에서 반환하지 않기 때문에,
         // 관리용 API에서는 최신 1건을 다시 조회(동시성 고려 필요). 여기서는 createdId 기준으로 가장 최근 push 1건을 가져옴.
         val latest = adminPushRepository.list(
-            search = null,
+            type = null,
+            startDate = null,
+            endDate = null,
             searchType = "ALL",
-            status = "ALL",
+            search = null,
             order = "DESC",
             limit = 1,
             offset = 0,
