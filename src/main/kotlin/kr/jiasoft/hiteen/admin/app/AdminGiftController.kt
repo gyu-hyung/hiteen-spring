@@ -2,9 +2,12 @@ package kr.jiasoft.hiteen.admin.app
 
 import kotlinx.coroutines.flow.toList
 import kr.jiasoft.hiteen.admin.dto.AdminGiftResponse
+import kr.jiasoft.hiteen.admin.dto.AdminUserResponse
+import kr.jiasoft.hiteen.admin.dto.GoodsBrandDto
 import kr.jiasoft.hiteen.admin.dto.GoodsCategoryDto
 import kr.jiasoft.hiteen.admin.dto.GoodsTypeDto
 import kr.jiasoft.hiteen.admin.infra.AdminGiftRepository
+import kr.jiasoft.hiteen.admin.infra.AdminUserRepository
 import kr.jiasoft.hiteen.common.dto.ApiPage
 import kr.jiasoft.hiteen.common.dto.ApiPageCursor
 import kr.jiasoft.hiteen.common.dto.ApiResult
@@ -48,7 +51,7 @@ class AdminGiftController(
     suspend fun createGift(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
         request: GiftProvideRequest,
-    ): ResponseEntity<ApiResult<GiftResponse>> {
+    ): ResponseEntity<ApiResult<List<GiftResponse>>> {
         return ResponseEntity.ok(ApiResult.success(giftAppService.createGift(user.id, request)))
     }
 

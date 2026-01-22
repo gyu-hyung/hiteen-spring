@@ -76,6 +76,21 @@ interface ChatMessageRepository : CoroutineCrudRepository<ChatMessageEntity, Lon
     """)
     suspend fun findCurrentCursorByUserId(userId: Long): Long
 
+    /** 여러 방의 안읽은 메세지 수 일괄 조회 */
+    @Query("""
+        SELECT m.chat_room_id AS message_id, COUNT(*)::bigint AS reader_count
+        FROM chat_messages m
+        JOIN chat_users cu ON cu.chat_room_id = m.chat_room_id
+        WHERE cu.user_id = :userId
+          AND cu.chat_room_id IN (:roomIds)
+          AND m.id > COALESCE(cu.last_read_message_id, 0)
+          AND m.user_id <> :userId
+          AND m.deleted_at IS NULL
+          AND cu.deleted_at IS NULL
+        GROUP BY m.chat_room_id
+    """)
+    fun countUnreadByRoomIds(roomIds: List<Long>, userId: Long): Flow<ReadersCountRow>
+
     /** 채팅방 메시지 페이징: 이모지 제외 */
     @Query("""
         SELECT * FROM chat_messages
@@ -114,9 +129,7 @@ interface ChatMessageRepository : CoroutineCrudRepository<ChatMessageEntity, Lon
             u.uid as sender_uid,
             u.username as sender_username,
             u.nickname as sender_nickname,
-            u.asset_uid::text as sender_asset_uid,
-            (SELECT count(*)::int FROM chat_users cu WHERE cu.chat_room_id = m.chat_room_id AND cu.deleted_at IS NULL) as member_count,
-            (SELECT count(*)::int FROM chat_users cu2 WHERE cu2.chat_room_id = m.chat_room_id AND cu2.last_read_message_id >= m.id AND cu2.user_id <> m.user_id AND cu2.deleted_at IS NULL) as reader_count
+            u.asset_uid::text as sender_asset_uid
         FROM chat_messages m
         JOIN users u ON u.id = m.user_id
         WHERE m.chat_room_id = :roomId

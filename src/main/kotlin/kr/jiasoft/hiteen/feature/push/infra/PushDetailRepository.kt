@@ -24,11 +24,12 @@ interface PushDetailRepository : CoroutineCrudRepository<PushDetailEntity, Long>
             p.title, 
             p.message, 
             d.success,
-            (select u.nickname from users u where u.id = p.created_id) nickname,
-            (select u.asset_uid from users u where u.id = p.created_id) asset_uid,
+            u.nickname AS nickname,
+            u.asset_uid AS asset_uid,
             d.created_at 
         FROM push_detail d
         JOIN push p ON p.id = d.push_id
+        LEFT JOIN users u ON u.id = p.created_id
         WHERE d.deleted_at IS NULL 
         AND d.user_id = :userId
         AND (:cursor IS NULL OR d.id < :cursor)

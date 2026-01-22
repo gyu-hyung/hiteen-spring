@@ -26,6 +26,7 @@ import kr.jiasoft.hiteen.feature.relationship.domain.FriendStatus
 import kr.jiasoft.hiteen.feature.relationship.dto.RelationshipCounts
 import kr.jiasoft.hiteen.feature.relationship.infra.FollowRepository
 import kr.jiasoft.hiteen.feature.relationship.infra.FriendRepository
+import kr.jiasoft.hiteen.feature.school.dto.SchoolDto
 import kr.jiasoft.hiteen.feature.school.infra.SchoolClassesRepository
 import kr.jiasoft.hiteen.feature.school.infra.SchoolRepository
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
@@ -120,7 +121,7 @@ class UserService (
         } else null
 
         val interests = if (includes.interests) {
-            interestUserRepository.getInterestResponseById(null, targetUser.id).toList()
+            interestUserRepository.getInterestResponseById(id = null, userId = targetUser.id).toList()
         } else null
 
         val relationshipCounts = if (includes.relationshipCounts) {
@@ -208,6 +209,93 @@ class UserService (
     suspend fun findUserSummaryByIds(userIds: List<Long>): List<UserSummary> {
         if (userIds.isEmpty()) return emptyList()
         return userRepository.findSummaryByIds(userIds)
+    }
+
+    suspend fun findUserResponseByIds(
+        targetIds: List<Long>,
+        currentUserId: Long? = null,
+        includes: UserResponseIncludes = UserResponseIncludes.full()
+    ): List<UserResponse> {
+        if (targetIds.isEmpty()) return emptyList()
+        val targetUsers = userRepository.findAllById(targetIds).toList()
+        if (targetUsers.isEmpty()) return emptyList()
+
+        // 1) 학교/반/티어 정보 일괄 조회
+        val schoolIds = targetUsers.mapNotNull { it.schoolId }.distinct()
+        val classIds = targetUsers.mapNotNull { it.classId }.distinct()
+        val tierIds = targetUsers.map { it.tierId }.distinct()
+
+        val schoolMap = if (includes.school && schoolIds.isNotEmpty())
+            schoolRepository.findAllById(schoolIds).toList().associateBy { it.id }
+        else emptyMap()
+
+        val classMap = if (includes.schoolClass && classIds.isNotEmpty())
+            schoolClassesRepository.findAllById(classIds).toList().associateBy { it.id }
+        else emptyMap()
+
+        val tierMap = if (includes.tier && tierIds.isNotEmpty())
+            tierRepository.findAllById(tierIds).toList().associateBy { it.id }
+        else emptyMap()
+
+        // 2) 관심사 일괄 조회
+        val interestMap = if (includes.interests)
+            interestUserRepository.getInterestResponseByUserIds(targetIds).toList().groupBy { it.userId }
+        else emptyMap()
+
+        // 3) 관계 카운트 정보 일괄 조회
+        val postCounts = if (includes.relationshipCounts) boardRepository.countBulkByCreatedIdIn(targetIds).toList().associate { it.id to it.count } else emptyMap()
+        val voteCounts = if (includes.relationshipCounts) pollUserRepository.countBulkByUserIdIn(targetIds).toList().associate { it.id to it.count } else emptyMap()
+        val bCommentCounts = if (includes.relationshipCounts) boardCommentRepository.countBulkByCreatedIdIn(targetIds).toList().associate { it.id to it.count } else emptyMap()
+        val pCommentCounts = if (includes.relationshipCounts) pollCommentRepository.countBulkByCreatedIdIn(targetIds).toList().associate { it.id to it.count } else emptyMap()
+        val friendCounts = if (includes.relationshipCounts) friendRepository.countBulkFriendshipIn(targetIds).toList().associate { it.id to it.count } else emptyMap()
+        val followerCounts = if (includes.relationshipCounts) followRepository.countBulkFollowersIn(targetIds, FollowStatus.ACCEPTED.name).toList().associate { it.id to it.count } else emptyMap()
+        val followingCounts = if (includes.relationshipCounts) followRepository.countBulkFollowingIn(targetIds, FollowStatus.ACCEPTED.name).toList().associate { it.id to it.count } else emptyMap()
+
+        // 4) 사진 일괄 조회
+        val photoMap = if (includes.photos)
+            userPhotosRepository.findAllByUserIdIn(targetIds).toList().groupBy { it.userId }
+        else emptyMap()
+
+        // 5) 관계 플래그 일괄 조회 (로그인 시)
+        val friendStatusMap = if (includes.relationshipFlags && currentUserId != null)
+            friendRepository.findBulkStatusFriendIn(currentUserId, targetIds).toList().associate { it.id to it.countStr }
+        else emptyMap()
+
+        val followStatusMap = if (includes.relationshipFlags && currentUserId != null)
+            followRepository.findBulkStatusFollowIn(currentUserId, targetIds).toList().associate { it.id to it.countStr }
+        else emptyMap()
+
+        // 6) 결과 조립
+        return targetUsers.map { user ->
+            val relationshipCounts = if (includes.relationshipCounts) {
+                RelationshipCounts(
+                    postCount = postCounts[user.id] ?: 0,
+                    voteCount = voteCounts[user.id] ?: 0,
+                    boardCommentCount = bCommentCounts[user.id] ?: 0,
+                    pollCommentCount = pCommentCounts[user.id] ?: 0,
+                    friendCount = friendCounts[user.id] ?: 0,
+                    followerCount = followerCounts[user.id] ?: 0,
+                    followingCount = followingCounts[user.id] ?: 0
+                )
+            } else null
+
+            val fStatus = friendStatusMap[user.id]
+            val flStatus = followStatusMap[user.id]
+
+            UserResponse.from(
+                entity = user,
+                school = schoolMap[user.schoolId],
+                classes = classMap[user.classId],
+                tier = tierMap[user.tierId],
+                interests = interestMap[user.id],
+                relationshipCounts = relationshipCounts,
+                photos = photoMap[user.id],
+                isFriend = fStatus == FriendStatus.ACCEPTED.name,
+                isFriendRequested = fStatus == FriendStatus.PENDING.name,
+                isFollowed = flStatus == FollowStatus.ACCEPTED.name,
+                isFollowedRequested = flStatus == FollowStatus.PENDING.name
+            )
+        }
     }
 
     @Cacheable(cacheNames = ["userEntity"], key = "#id")
@@ -547,8 +635,8 @@ class UserService (
 
 
     suspend fun getPhotosById(userId: Long): List<UserPhotosEntity> {
-        val flow = userPhotosRepository.findByUserId(userId)?.toList()
-        return flow?.toList() ?: emptyList()
+        val flow = userPhotosRepository.findByUserId(userId).toList()
+        return flow
     }
 
 
@@ -556,7 +644,7 @@ class UserService (
         val userEntity = userRepository.findByUid(userUid)
             ?: throw BusinessValidationException(mapOf("user" to "존재하지 않는 사용자입니다."))
 
-        return userPhotosRepository.findByUserId(userEntity.id)?.toList() ?: emptyList()
+        return userPhotosRepository.findByUserId(userEntity.id).toList()
     }
 
     suspend fun myReferralList(userId: Long): List<ReferralSummary> {

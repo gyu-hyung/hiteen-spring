@@ -8,7 +8,8 @@ import java.util.UUID
 interface UserPhotosRepository : CoroutineCrudRepository<UserPhotosEntity, Long> {
 
     suspend fun findByIdAndUserId(id: Long, userId: Long): UserPhotosEntity?
-    suspend fun findByUserId(userId: Long): Flow<UserPhotosEntity>?
+    fun findByUserId(userId: Long): Flow<UserPhotosEntity>
+    fun findAllByUserIdIn(userIds: List<Long>): Flow<UserPhotosEntity>
     suspend fun deleteByIdAndUserId(id: Long, userId: Long): Long
     suspend fun countByUserId(userId: Long): Long
 

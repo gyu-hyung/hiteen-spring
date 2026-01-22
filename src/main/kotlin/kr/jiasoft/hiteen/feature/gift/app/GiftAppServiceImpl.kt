@@ -96,7 +96,7 @@ class GiftAppServiceImpl (
         userId: Long,
         userUid: UUID,
         req: GiftBuyRequest,
-    ): GiftResponse {
+    ): List<GiftResponse> {
         return txOperator.executeAndAwait {
 
             val res = createGift(
@@ -104,15 +104,16 @@ class GiftAppServiceImpl (
                 GiftProvideRequest(
                     giftType = if (req.goodsCode.startsWith("G")) GiftType.Voucher else GiftType.GiftCard,
                     giftCategory = GiftCategory.Shop,
-                    receiveUserUid = req.receiveUserUid ?: userUid,
+                    receiveUserUids = List(req.quantity) { req.receiveUserUid ?: userUid },
                     goodsCode = req.goodsCode,
                     memo = req.memo,
                 )
             )
 
             //캐시 차감
-            res.goods?.realPrice?.let {
-                if (it > 0) cashService.applyPolicy(userId, CashPolicy.BUY, res.giftUserId, -it)
+            val totalPrice = res.sumOf { it.goods?.realPrice ?: 0 }
+            if (totalPrice > 0) {
+                cashService.applyPolicy(userId, CashPolicy.BUY, res.first().giftUserId, -totalPrice)
             }
 
             res
@@ -125,9 +126,9 @@ class GiftAppServiceImpl (
      * Type: Voucher, Delivery, GiftCard --Point, Cash 는 적립으로 처리
      * Category: Join, Challenge, Admin, Event, Shop
      * */
-    override suspend fun createGift(userId: Long, req: GiftProvideRequest) : GiftResponse {
-        val receiverUser = userRepository.findByUid(req.receiveUserUid.toString())
-            ?: throw IllegalArgumentException("존재하지 않는 수신자")
+    override suspend fun createGift(userId: Long, req: GiftProvideRequest) : List<GiftResponse> {
+        val receiverUsers = userRepository.findAllByUidIn(req.receiveUserUids)
+        if (receiverUsers.isEmpty()) throw IllegalArgumentException("존재하지 않는 수신자")
 
         val memo = if (req.giftCategory == GiftCategory.Challenge) {
             GiftMessageFormatter.challengeMemo(
@@ -154,11 +155,17 @@ class GiftAppServiceImpl (
         )
 
 
-        // 2️⃣ GiftUsers 생성
-        val giftUser = giftUserRepository.save(
+        // 2️⃣ GiftUsers 생성 (여러명 또는 여러개 지원)
+        // 수신자 UID 리스트(receiveUserUids)의 순서대로 각각 GiftUsers를 생성합니다.
+        // (단일 유저에게 여러개를 보내는 경우 receiveUserUids에 동일 UID가 여러번 들어있을 수 있음)
+        val receiverMap = receiverUsers.associateBy { it.uid.toString() }
+
+        val giftUsers = req.receiveUserUids.mapNotNull { uid ->
+            val user = receiverMap[uid.toString()] ?: return@mapNotNull null
+
             GiftUsersEntity(
                 giftId = gift.id,
-                userId = receiverUser.id,
+                userId = user.id,
                 status = GiftStatus.WAIT.code,
                 receiveDate = OffsetDateTime.now(),
                 pubExpiredDate = OffsetDateTime.now().plusMonths(1),// 한달 안에 발급받아야함
@@ -172,11 +179,15 @@ class GiftAppServiceImpl (
                 deliveryAddress1 = req.deliveryAddress1,
                 deliveryAddress2 = req.deliveryAddress2,
             )
-        )
+        }
 
+        val savedGiftUsers = giftUserRepository.saveAll(giftUsers).toList()
+
+        // 푸시 알림 (중복 제거된 사용자에게만 발송)
+        val uniqueUserIds = savedGiftUsers.map { it.userId }.distinct()
         eventPublisher.publishEvent(
             PushSendRequestedEvent(
-                userIds = listOf(receiverUser.id),
+                userIds = uniqueUserIds,
                 actorUserId = null,
                 templateData = mapOf(
                     "code" to PushTemplate.GIFT_MESSAGE.code,
@@ -186,7 +197,7 @@ class GiftAppServiceImpl (
             )
         )
 
-        return findGift(receiverUser.id, giftUser.id)
+        return savedGiftUsers.map { findGift(it.userId, it.id) }
     }
 
     /**

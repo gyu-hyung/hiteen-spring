@@ -309,7 +309,16 @@ class ChatService(
                 assets.map { a -> MessageAssetSummary(a.uid, a.width, a.height) }
             }
 
+        // 방 참여 멤버들의 마지막 읽은 메시지 ID 정보 일괄 조회 (N+1 최적화)
+        val members = chatUsers.listByRoom(room.id).toList()
+        val memberCount = members.size
+
         return projections.map { p ->
+            // Kotlin 레벨에서 읽음 수 계산 (DB 상관 서브쿼리 제거로 속도 개선)
+            val readerCount = members.count { m ->
+                m.userId != p.userId && (m.lastReadMessageId ?: 0) >= p.id
+            }
+
             MessageSummary(
                 messageUid = p.messageUid,
                 roomUid = room.uid,
@@ -338,7 +347,7 @@ class ChatService(
                     isFriendRequest = null
                 ),
                 assets = assetsMap[p.id] ?: emptyList(),
-                unreadCount = (p.memberCount - 1 - p.readerCount).coerceAtLeast(0)
+                unreadCount = (memberCount - 1 - readerCount).coerceAtLeast(0)
             )
         }
     }
@@ -442,16 +451,25 @@ class ChatService(
 
     /** 목록 스냅샷: cursor + rooms(with unreadCount) */
     suspend fun listRoomsSnapshot(currentUserId: Long, limit: Int, offset: Int): RoomsSnapshotResponse {
-        val cursor = messages.findCurrentCursorByUserId(currentUserId)
+        val userId = currentUserId
+        val cursor = messages.findCurrentCursorByUserId(userId)
 
-        val projections = rooms.listRoomSummaries(currentUserId, limit, offset).toList()
+        val projections = rooms.listRoomSummaries(userId, limit, offset).toList()
         if (projections.isEmpty()) return RoomsSnapshotResponse(cursor = cursor, rooms = emptyList())
 
-        // 마지막 메시지들의 id 목록 수집
-        val lastMsgIds = projections.mapNotNull { it.lastMessageId }
+        val roomIds = projections.map { it.id }
 
-        // 에셋 일괄 조회 (N+1 방지)
-        val assetsMap = if (lastMsgIds.isNotEmpty()) {
+        // 1) 각 방의 안읽은 메시지 수 일괄 조회 (N+1 방지)
+        val unreadMap: Map<Long, Int> = messages.countUnreadByRoomIds(roomIds, userId).toList()
+            .associate { it.messageId to it.readerCount.toInt() }
+
+        // 2) 각 방의 멤버 정보 일괄 조회 (멤버 수 및 제목 생성용, N+1 방지)
+        val membersGroupByRoom: Map<Long, List<ChatUserNicknameProjection>> = chatUsers.findAllDetailedByRoomIds(roomIds).toList()
+            .groupBy { it.chatRoomId }
+
+        // 3) 마지막 메시지용 에셋 일괄 조회 (N+1 방지)
+        val lastMsgIds = projections.mapNotNull { it.lastMessageId }
+        val assetsMap: Map<Long, List<MessageAssetSummary>> = if (lastMsgIds.isNotEmpty()) {
             msgAssets.findAllByMessageIdIn(lastMsgIds).toList()
                 .groupBy { it.messageId }
                 .mapValues { (_, assets) ->
@@ -460,6 +478,21 @@ class ChatService(
         } else emptyMap()
 
         val roomsList = projections.map { p ->
+            val roomMembers = membersGroupByRoom[p.id] ?: emptyList()
+
+            // 방 제목 생성 (room_name이 없으면 참여자 닉네임 조합)
+            val computedTitle = if (!p.roomTitle.isNullOrBlank()) {
+                p.roomTitle
+            } else {
+                roomMembers.filter { it.userId != userId }
+                    .take(3) // 최대 3명까지 노출
+                    .joinToString(", ") { it.nickname }
+                    .let { nicknames ->
+                        if (roomMembers.size > 4) "$nicknames 외 ${roomMembers.size - 4}명"
+                        else nicknames
+                    }
+            }
+
             val lastMsgSummary = p.lastMessageId?.let { lid ->
                 MessageSummary(
                     messageUid = p.lastMessageUid!!,
@@ -468,7 +501,7 @@ class ChatService(
                     kind = p.lastKind ?: 0,
                     emojiCode = p.lastEmojiCode,
                     emojiCount = p.lastEmojiCount,
-                    createdAt = p.lastCreatedAt,
+                    createdAt = p.lastCreatedAt!!,
                     sender = if (p.lastSenderId != null) {
                         UserSummary(
                             id = p.lastSenderId,
@@ -496,9 +529,9 @@ class ChatService(
 
             RoomSummaryResponse(
                 roomUid = p.roomUid,
-                roomTitle = p.roomTitle,
-                memberCount = p.memberCount,
-                unreadCount = p.unreadCount,
+                roomTitle = computedTitle,
+                memberCount = roomMembers.size,
+                unreadCount = unreadMap[p.id] ?: 0,
                 assetUid = p.assetUid,
                 updatedAt = p.updatedAt,
                 lastMessage = lastMsgSummary
@@ -532,10 +565,12 @@ class ChatService(
         val distinctPeerUids = peerUids.distinct()
         if (distinctPeerUids.isEmpty()) return getRoomByUid(roomUid)
 
-        // UID -> userId 변환 (없는 유저면 예외)
-        val invitees = distinctPeerUids.map { uid ->
-            users.findByUid(uid.toString())
-                ?: throw BusinessValidationException(mapOf("peerUid" to "not found: $uid"))
+        // UID -> userId 변환 (N+1 방지: 일괄 조회)
+        val invitees = users.findAllByUidIn(distinctPeerUids)
+        if (invitees.size != distinctPeerUids.size) {
+            val foundUids = invitees.map { it.uid.toString() }.toSet()
+            val missingUid = distinctPeerUids.find { it.toString() !in foundUids }
+            throw BusinessValidationException(mapOf("peerUid" to "not found: $missingUid"))
         }
 
         // 본인 제외 + 중복 제거

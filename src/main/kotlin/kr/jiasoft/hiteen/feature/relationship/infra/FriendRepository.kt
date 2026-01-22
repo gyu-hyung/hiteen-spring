@@ -1,11 +1,16 @@
 package kr.jiasoft.hiteen.feature.relationship.infra
 
 import kotlinx.coroutines.flow.Flow
+import kr.jiasoft.hiteen.feature.board.infra.CountProjection
 import kr.jiasoft.hiteen.feature.relationship.domain.FriendEntity
 import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 import org.springframework.stereotype.Repository
 
+data class StatusProjection(
+    val id: Long,
+    val countStr: String?
+)
 
 @Repository
 interface FriendRepository : CoroutineCrudRepository<FriendEntity, Long> {
@@ -17,6 +22,17 @@ interface FriendRepository : CoroutineCrudRepository<FriendEntity, Long> {
           AND status = 'ACCEPTED'
     """)
     suspend fun countFriendship(userId: Long): Int
+
+    @Query("""
+        SELECT u_id as id, COUNT(*)::int as count
+        FROM (
+            SELECT user_id as u_id FROM friends WHERE status = 'ACCEPTED' AND user_id IN (:userIds)
+            UNION ALL
+            SELECT friend_id as u_id FROM friends WHERE status = 'ACCEPTED' AND friend_id IN (:userIds)
+        ) combined
+        GROUP BY u_id
+    """)
+    fun countBulkFriendshipIn(userIds: List<Long>): Flow<CountProjection>
 
     @Query("""
         SELECT CASE WHEN user_id = :userId THEN friend_id ELSE user_id END AS friend_id
@@ -41,6 +57,26 @@ interface FriendRepository : CoroutineCrudRepository<FriendEntity, Long> {
            OR (user_id = :targetId AND friend_id = :userId)
     """)
     suspend fun findStatusFriend(userId: Long, targetId: Long): String
+
+    @Query("""
+        SELECT 
+            CASE WHEN user_id = :currentUserId THEN friend_id ELSE user_id END as id,
+            status as count_str
+        FROM friends 
+        WHERE (user_id = :currentUserId AND friend_id IN (:targetIds)) 
+           OR (friend_id = :currentUserId AND user_id IN (:targetIds))
+    """)
+    fun findBulkStatusFriendIn(currentUserId: Long, targetIds: List<Long>): Flow<StatusProjection>
+
+    /**
+     * 특정 사용자와 여러 타겟 사용자들 간의 친구 관계 목록을 조회합니다.
+     */
+    @Query("""
+        SELECT * FROM friends 
+        WHERE (user_id = :currentUserId AND friend_id IN (:targetIds)) 
+           OR (friend_id = :currentUserId AND user_id IN (:targetIds))
+    """)
+    fun findAllBetweenBulk(currentUserId: Long, targetIds: List<Long>): Flow<FriendEntity>
 
     // 두 사용자 사이의 관계 한 건(단일행 정책)
     @Query("""

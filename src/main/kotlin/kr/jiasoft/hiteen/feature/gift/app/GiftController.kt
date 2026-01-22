@@ -46,7 +46,7 @@ class GiftController (
     suspend fun buyGift(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
         request: GiftBuyRequest
-    ): ResponseEntity<ApiResult<GiftResponse>> {
+    ): ResponseEntity<ApiResult<List<GiftResponse>>> {
         return ResponseEntity.ok(ApiResult.success(giftAppService.buyGift(user.id, user.uid, request)))
     }
 
