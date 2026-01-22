@@ -449,7 +449,7 @@ class PollService(
         val userMap = userService.findUserResponseByIds(
             targetIds = authorIds,
             currentUserId = currentUserId,
-            includes = UserResponseIncludes.minimal()
+            includes = UserResponseIncludes(school = true)
         ).associateBy { it.id }
 
         return rawComments.map { comment ->
