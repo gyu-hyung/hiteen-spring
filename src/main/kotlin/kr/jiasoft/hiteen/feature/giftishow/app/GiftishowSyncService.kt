@@ -31,9 +31,9 @@ class GiftishowSyncService(
 
         logger.info("📌 [Giftishow Sync] 상품 동기화 시작 (자동 페이지 반복)")
 
+        val syncStartTime = OffsetDateTime.now()
         var page = 1
         var dataCnt = 0
-        var isFirstPage = true
 
         while (true) {
 
@@ -56,14 +56,6 @@ class GiftishowSyncService(
             if (goodsList.isEmpty()) {
                 logger.info("⛔ 더 이상 상품 없음 — 페이지 반복 종료")
                 break
-            }
-
-            // ------------------------------
-            // 2) 첫 페이지에서만 기존 데이터 soft delete `G` 포함 기프트쇼 상품들만
-            // ------------------------------
-            if (isFirstPage) {
-                repo.markAllDeleted()
-                isFirstPage = false
             }
 
             // ------------------------------
@@ -150,7 +142,8 @@ class GiftishowSyncService(
                     status = existing?.status ?: 0,
 
                     delYn = 0,
-                    deletedAt = existing?.deletedAt,
+                    deletedAt = null,
+                    updatedAt = OffsetDateTime.now(),
                 )
 
                 repo.save(entity)
@@ -159,6 +152,11 @@ class GiftishowSyncService(
 
             page++
         }
+
+        // ------------------------------
+        // 4) 싱크 과정에서 업데이트되지 않은 상품들 soft delete
+        // ------------------------------
+        repo.markDeletedNotUpdatedSince(syncStartTime)
 
         logger.info("🎉 상품 동기화 완료 — 총 ${dataCnt}개 업데이트")
     }

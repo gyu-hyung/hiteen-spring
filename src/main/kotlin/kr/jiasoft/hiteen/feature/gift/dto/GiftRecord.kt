@@ -48,13 +48,51 @@ data class GiftRecord (
         receiver: UserSummary,
         goods: GoodsGiftishowEntity? = null,
     ): GiftResponse {
+        val giftStatus = GiftStatus.from(this.status)
+
+        val statusName = when (this.giftType) {
+            GiftType.Voucher -> {
+                when (giftStatus) {
+                    GiftStatus.WAIT -> "대기"
+                    GiftStatus.SENT -> "발행"
+                    GiftStatus.USED -> "교환(사용완료)"
+                    GiftStatus.EXPIRED -> "기간만료"
+                    GiftStatus.CANCELLED -> "취소"
+                    else -> giftStatus.description
+                }
+            }
+            GiftType.Delivery -> {
+                when (giftStatus) {
+                    GiftStatus.WAIT -> "대기"
+                    GiftStatus.DELIVERY_REQUESTED -> "배송 요청"
+                    GiftStatus.DELIVERY_DONE -> "배송 완료"
+                    GiftStatus.CANCELLED -> "취소"
+                    else -> giftStatus.description
+                }
+            }
+            GiftType.GiftCard -> {
+                when (giftStatus) {
+                    GiftStatus.WAIT -> "대기"
+                    GiftStatus.GRANT_REQUESTED -> "지급 요청"
+                    GiftStatus.GRANTED -> "지급 완료"
+                    GiftStatus.CANCELLED -> "취소"
+                    else -> giftStatus.description
+                }
+            }
+            else -> {
+                if (giftStatus == GiftStatus.CANCELLED) "취소"
+                else giftStatus.description
+            }
+        }
+
         return GiftResponse(
             giftId = this.giftId,
             giftUid = this.giftUid,
             giftUserId = this.giftUserId,
             giftType = this.giftType,
             giftCategory = this.giftCategory,
-            status = GiftStatus.from(this.status),
+            status = giftStatus,
+            statusName = statusName,
             userId = this.userId,
 
             memo = this.memo,
@@ -86,4 +124,3 @@ data class GiftRecord (
             goods = goods,
         )
     }
-

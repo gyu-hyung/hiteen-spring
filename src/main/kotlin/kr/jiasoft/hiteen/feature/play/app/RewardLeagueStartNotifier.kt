@@ -2,9 +2,10 @@ package kr.jiasoft.hiteen.feature.play.app
 
 import kr.jiasoft.hiteen.feature.play.domain.RewardLeagueStartNotificationEntity
 import kr.jiasoft.hiteen.feature.play.infra.RewardLeagueStartNotificationRepository
-import kr.jiasoft.hiteen.feature.push.app.PushService
+import kr.jiasoft.hiteen.feature.push.app.event.PushSendRequestedEvent
 import kr.jiasoft.hiteen.feature.push.domain.PushTemplate
 import kr.jiasoft.hiteen.feature.user.domain.PushItemType
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.stereotype.Service
 
@@ -17,7 +18,7 @@ import org.springframework.stereotype.Service
 @Service
 class RewardLeagueStartNotifier(
     private val repo: RewardLeagueStartNotificationRepository,
-    private val pushService: PushService,
+    private val eventPublisher: ApplicationEventPublisher,
 ) {
 
     suspend fun notifyIfReached(
@@ -49,21 +50,18 @@ class RewardLeagueStartNotifier(
 
         if (!inserted) return
 
-        // 알림 대상: FCM Topic 기반(전체 발송)
-        // - 실제 발송은 토픽 1회
-        // - push/push_detail 기록은 PushService에서 user_details(토큰) 기준으로 생성
-        val topic = PushTemplate.REWARD_LEAGUE_START.itemType ?: PushItemType.ALL
-
-        pushService.sendAndSavePushToTopic(
-            topic = topic,
-            userId = null,
-            templateData = PushTemplate.REWARD_LEAGUE_START.buildPushData(
-                "league" to league,
-            ),
-            extraData = mapOf(
-                "seasonId" to seasonId.toString(),
-                "league" to league,
-                "gameId" to gameId.toString(),
+        // ✅ 푸시 발송 (비동기 이벤트 발행)
+        eventPublisher.publishEvent(
+            PushSendRequestedEvent(
+                topic = PushItemType.EVENT,
+                templateData = PushTemplate.REWARD_LEAGUE_START.buildPushData(
+                    "gameName" to (repo.findGameName(gameId) ?: "게임")
+                ),
+                extraData = mapOf(
+                    "seasonId" to seasonId.toString(),
+                    "gameId" to gameId.toString(),
+                    "league" to league
+                )
             )
         )
     }

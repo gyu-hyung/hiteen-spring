@@ -13,6 +13,14 @@ interface BoardCommentRepository : CoroutineCrudRepository<BoardCommentEntity, L
 
     suspend fun countByCreatedIdAndDeletedAtIsNull(createdId: Long) : Int
 
+    @Query("""
+        SELECT created_id as id, COUNT(*)::int as count
+        FROM board_comments
+        WHERE created_id IN (:userIds) AND deleted_at IS NULL
+        GROUP BY created_id
+    """)
+    fun countBulkByCreatedIdIn(userIds: List<Long>): Flow<CountProjection>
+
     suspend fun findByUid(uid: UUID): BoardCommentEntity?
     fun findAllByBoardIdAndParentIdIsNullOrderByIdAsc(boardId: Long): Flow<BoardCommentEntity>
     fun findAllByParentIdOrderByIdAsc(parentId: Long): Flow<BoardCommentEntity>

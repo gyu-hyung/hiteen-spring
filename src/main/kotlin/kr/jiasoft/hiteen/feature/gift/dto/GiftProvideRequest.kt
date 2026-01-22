@@ -11,8 +11,8 @@ data class GiftProvideRequest (
     val giftType: GiftType,
     @field:Schema(description = "카테고리 (Join, Challenge, Admin, Event, Shop)")
     val giftCategory: GiftCategory,
-    @field:Schema(description = "수신자 uid")
-    val receiveUserUid: UUID,
+    @field:Schema(description = "수신자 uids")
+    val receiveUserUids: List<UUID>,
     @field:Schema(description = "메모")
     val memo: String? = null,
 

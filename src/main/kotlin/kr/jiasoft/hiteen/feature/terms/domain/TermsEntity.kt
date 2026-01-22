@@ -2,7 +2,7 @@ package kr.jiasoft.hiteen.feature.terms.domain
 
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Table
-import java.time.LocalDateTime
+import java.time.OffsetDateTime
 import java.util.UUID
 
 @Table("terms")
@@ -26,7 +26,7 @@ data class TermsEntity(
     val updatedId: Long? = null,                             // 수정 유저ID
     val deletedId: Long? = null,                             // 삭제 유저ID
 
-    val createdAt: LocalDateTime = LocalDateTime.now(),      // 등록일시
-    val updatedAt: LocalDateTime? = null,                    // 수정일시
-    val deletedAt: LocalDateTime? = null                     // 삭제일시
+    val createdAt: OffsetDateTime = OffsetDateTime.now(),      // 등록일시
+    val updatedAt: OffsetDateTime? = null,                    // 수정일시
+    val deletedAt: OffsetDateTime? = null                     // 삭제일시
 )

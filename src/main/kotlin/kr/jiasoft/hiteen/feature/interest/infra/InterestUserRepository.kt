@@ -8,11 +8,12 @@ import kr.jiasoft.hiteen.feature.interest.dto.InterestUserResponse
 import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 import org.springframework.stereotype.Repository
+import java.util.*
 
 @Repository
 interface InterestUserRepository : CoroutineCrudRepository<InterestUserEntity, Long> {
 
-    suspend fun findByUserId(userId: Long): Flow<InterestUserEntity>
+    fun findByUserId(userId: Long): Flow<InterestUserEntity>
 
     suspend fun findByUserIdAndInterestId(userId: Long, interestId: Long): InterestUserEntity?
 
@@ -29,7 +30,7 @@ interface InterestUserRepository : CoroutineCrudRepository<InterestUserEntity, L
             SELECT id FROM interests WHERE category IN ('추천방식', '추천옵션', '추천제외')
         )
     """)
-    suspend fun findByUserIdAndNotInSystemCategory(userId: Long): Flow<InterestUserEntity>
+    fun findByUserIdAndNotInSystemCategory(userId: Long): Flow<InterestUserEntity>
 
 
     @Query("""
@@ -54,7 +55,28 @@ interface InterestUserRepository : CoroutineCrudRepository<InterestUserEntity, L
         WHERE (:id IS NULL OR iu.id = :id)
           AND (:userId IS NULL OR iu.user_id = :userId)
     """)
-    suspend fun getInterestResponseById(id: Long?, userId: Long?): Flow<InterestUserResponse>
+    fun getInterestResponseById(id: Long?, userId: Long?): Flow<InterestUserResponse>
+
+    @Query("""
+        SELECT
+          (SELECT u.uid FROM users u WHERE u.id = iu.user_id) AS user_uid,
+          i.id, i.topic, i.category, i.status,
+          iu.*
+        FROM interest_user iu JOIN interests i ON iu.interest_id = i.id
+        WHERE (:userUid IS NULL OR iu.user_id = (SELECT id FROM users WHERE uid = :userUid))
+          AND (:userId IS NULL OR iu.user_id = :userId)
+    """)
+    fun getInterestResponseByUserUid(userUid: UUID?, userId: Long?): Flow<InterestUserResponse>
+
+    @Query("""
+        SELECT
+          (SELECT u.uid FROM users u WHERE u.id = iu.user_id) AS user_uid,
+          i.id, i.topic, i.category, i.status,
+          iu.*
+        FROM interest_user iu JOIN interests i ON iu.interest_id = i.id
+        WHERE iu.user_id IN (:userIds)
+    """)
+    fun getInterestResponseByUserIds(userIds: List<Long>): Flow<InterestUserResponse>
 
 
     @Query("""

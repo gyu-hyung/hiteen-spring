@@ -76,6 +76,21 @@ interface ChatMessageRepository : CoroutineCrudRepository<ChatMessageEntity, Lon
     """)
     suspend fun findCurrentCursorByUserId(userId: Long): Long
 
+    /** 여러 방의 안읽은 메세지 수 일괄 조회 */
+    @Query("""
+        SELECT m.chat_room_id AS message_id, COUNT(*)::bigint AS reader_count
+        FROM chat_messages m
+        JOIN chat_users cu ON cu.chat_room_id = m.chat_room_id
+        WHERE cu.user_id = :userId
+          AND cu.chat_room_id IN (:roomIds)
+          AND m.id > COALESCE(cu.last_read_message_id, 0)
+          AND m.user_id <> :userId
+          AND m.deleted_at IS NULL
+          AND cu.deleted_at IS NULL
+        GROUP BY m.chat_room_id
+    """)
+    fun countUnreadByRoomIds(roomIds: List<Long>, userId: Long): Flow<ReadersCountRow>
+
     /** 채팅방 메시지 페이징: 이모지 제외 */
     @Query("""
         SELECT * FROM chat_messages
@@ -98,4 +113,30 @@ interface ChatMessageRepository : CoroutineCrudRepository<ChatMessageEntity, Lon
         LIMIT :size
     """)
     fun pageByRoomWithEmoji(roomId: Long, cursor: OffsetDateTime?, size: Int): Flow<ChatMessageEntity>
+
+    /** 채팅방 메시지 페이징 요약 (최적화 버전) */
+    @Query("""
+        SELECT 
+            m.id,
+            m.uid as message_uid,
+            m.user_id,
+            m.content,
+            m.kind,
+            m.emoji_code,
+            m.emoji_count,
+            m.created_at,
+            u.id as sender_id,
+            u.uid as sender_uid,
+            u.username as sender_username,
+            u.nickname as sender_nickname,
+            u.asset_uid::text as sender_asset_uid
+        FROM chat_messages m
+        JOIN users u ON u.id = m.user_id
+        WHERE m.chat_room_id = :roomId
+          AND m.deleted_at IS NULL
+          AND (:cursor IS NULL OR m.created_at < :cursor)
+        ORDER BY m.created_at DESC, m.id DESC
+        LIMIT :size
+    """)
+    fun pageMessagesSummary(roomId: Long, cursor: OffsetDateTime?, size: Int): Flow<kr.jiasoft.hiteen.feature.chat.dto.MessageSummaryProjection>
 }

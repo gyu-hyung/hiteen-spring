@@ -82,8 +82,8 @@ data class RoomSummaryResponse(
     @param:Schema(description = "프로필 이미지 UID", example = "f580e8e8-adee-4285-b181-3fed545e7be0")
     val assetUid: String?,
 
-    @param:Schema(description = "마지막 업데이트 시각", example = "2025.09.18 10:15")
-    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm")
+    @param:Schema(description = "마지막 업데이트 시각", example = "2025.09.18 10:15:30")
+    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm:ss")
     val updatedAt: OffsetDateTime?,
 
     @param:Schema(description = "마지막 메시지 요약 정보")
@@ -99,13 +99,13 @@ data class MessageSummary(
     @param:Schema(description = "룸 UID", example = "b2a1f4a1-23b3-4c8f-9a7e-9e3d94c5f3a4")
     val roomUid: UUID,
 
-    @param:Schema(description = "메시지 내용", example = "안녕하세요!")
+    @param:Schema(description = "메시지 내용", example = "안녕!")
     val content: String?,
 
-    @param:Schema(description = "메시지 종류 (0=일반, 1=이미지, 2=이모지 등)", example = "0")
-    val kind: Int = 0,
+    @param:Schema(description = "메시지 종류 (0=텍스트, 1=이모지, 2=이미지, 4=시스템)", example = "0")
+    val kind: Int,
 
-    @param:Schema(description = "이모지 코드", example = "👍")
+    @param:Schema(description = "이모지 코드", example = "E_001")
     val emojiCode: String? = null,
 
     @param:Schema(description = "이모지 개수", example = "1")
@@ -114,18 +114,18 @@ data class MessageSummary(
     @param:Schema(description = "이모지별 개수 집계 DTO")
     val emojiList: List<EmojisCountRow>? = null,
 
-    @param:Schema(description = "읽지 않은 사용자 수", example = "3")
-    val unreadCount: Int? = null,
+    @param:Schema(description = "발신 시각", example = "2025.09.18 10:15:30")
+//    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm:ss")
+    val createdAt: OffsetDateTime,
 
-    @param:Schema(description = "메세지 작성 시각", example = "2025.09.18 10:15")
-//    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm")
-    val createdAt: OffsetDateTime?,
-
-    @param:Schema(description = "보낸 사람 정보")
+    @param:Schema(description = "발신자 정보")
     val sender: UserSummary?,
 
-    @param:Schema(description = "첨부된 메시지 자산 목록")
-    val assets: List<MessageAssetSummary>?,
+    @param:Schema(description = "첨부된 에셋(이미지 등) 목록")
+    val assets: List<MessageAssetSummary> = emptyList(),
+
+    @param:Schema(description = "읽지 않은 멤버 수", example = "3")
+    val unreadCount: Int? = 0
 ) {
     companion object {
         fun from(entity: ChatMessageEntity, sender: UserSummary?, assets: List<MessageAssetSummary>?, unreadCount: Int? = null, roomUid: UUID, emojiList: List<EmojisCountRow>? = null): MessageSummary {
@@ -139,7 +139,7 @@ data class MessageSummary(
                 unreadCount = unreadCount,
                 createdAt = entity.createdAt,
                 sender = sender,
-                assets = assets,
+                assets = assets ?: emptyList(),
                 roomUid = roomUid,
             )
         }
@@ -199,22 +199,22 @@ data class ChatRoomResponse(
     @param:Schema(description = "생성자 ID", example = "1001")
     val createdId: Long,
 
-    @param:Schema(description = "채팅방 생성 일시", example = "2025.09.18 10:15")
-    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm")
+    @param:Schema(description = "채팅방 생성 일시", example = "2025.09.18 10:15:30")
+    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm:ss")
     val createdAt: OffsetDateTime,
 
     @param:Schema(description = "수정자 ID", example = "1002")
     val updatedId: Long? = null,
 
-    @param:Schema(description = "채팅방 수정 일시", example = "2025.09.18 10:15")
-    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm")
+    @param:Schema(description = "채팅방 수정 일시", example = "2025.09.18 10:15:30")
+    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm:ss")
     val updatedAt: OffsetDateTime? = null,
 
     @param:Schema(description = "삭제자 ID", example = "1003")
     val deletedId: Long? = null,
 
-    @param:Schema(description = "채팅방 삭제 일시", example = "2025.09.18 10:15")
-    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm")
+    @param:Schema(description = "채팅방 삭제 일시", example = "2025.09.18 10:15:30")
+    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm:ss")
     val deletedAt: OffsetDateTime? = null,
 
     @param:Schema(description = "채팅방 이름", example = "우리반 단톡")
@@ -264,6 +264,59 @@ data class ChatRoomDetailResponse(
 
     @param:Schema(description = "참여중인 유저 목록")
     val members: List<ChatRoomMemberResponse>,
+
+    @param:Schema(description = "최근 발생한 시스템 메세지 (초대 등)")
+    val systemMessage: MessageSummary? = null,
+)
+
+/**
+ * listRoomsSnapshot 최적화용 프로젝션
+ */
+data class RoomSummaryProjection(
+    val id: Long,
+    val roomUid: UUID,
+    val roomTitle: String?,
+    val memberCount: Int?,
+    val unreadCount: Int?,
+    val assetUid: String?,
+    val updatedAt: OffsetDateTime?,
+
+    // Last Message Fields
+    val lastMessageId: Long?,
+    val lastMessageUid: UUID?,
+    val lastContent: String?,
+    val lastKind: Int?,
+    val lastEmojiCode: String?,
+    val lastEmojiCount: Int?,
+    val lastCreatedAt: OffsetDateTime?,
+
+    // Last Message Sender Fields
+    val lastSenderId: Long?,
+    val lastSenderUid: UUID?,
+    val lastSenderUsername: String?,
+    val lastSenderNickname: String?,
+    val lastSenderAssetUid: String?
+)
+
+/**
+ * pageMessages 최적화용 프로젝션
+ */
+data class MessageSummaryProjection(
+    val id: Long,
+    val messageUid: UUID,
+    val userId: Long,
+    val content: String?,
+    val kind: Int,
+    val emojiCode: String?,
+    val emojiCount: Int?,
+    val createdAt: OffsetDateTime,
+
+    // Sender info
+    val senderId: Long,
+    val senderUid: UUID,
+    val senderUsername: String,
+    val senderNickname: String?,
+    val senderAssetUid: String?,
 )
 
 
@@ -271,4 +324,22 @@ data class ChatRoomDetailResponse(
 data class ChatRoomInviteRequest(
     @param:Schema(description = "초대할 사용자 UID 목록", example = "[\"550e8400-e29b-41d4-a716-446655440000\"]")
     val peerUids: List<UUID>
+)
+
+/**
+ * ChatUserRepository.findAllDetailedByRoomIds 용 프로젝션
+ */
+data class ChatUserNicknameProjection(
+    val id: Long,
+    val chatRoomId: Long,
+    val userId: Long,
+    val lastReadMessageId: Long?,
+    val lastReadAt: OffsetDateTime?,
+    val status: Int?,
+    val push: Boolean?,
+    val pushAt: OffsetDateTime?,
+    val joiningAt: OffsetDateTime?,
+    val leavingAt: OffsetDateTime?,
+    val deletedAt: OffsetDateTime?,
+    val nickname: String
 )

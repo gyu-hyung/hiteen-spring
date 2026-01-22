@@ -5,6 +5,7 @@ import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 import kotlinx.coroutines.flow.Flow
 import kr.jiasoft.hiteen.feature.poll.dto.PollSelectResponse
+import kr.jiasoft.hiteen.feature.poll.dto.SelectionSummaryProjection
 
 interface PollSelectRepository : CoroutineCrudRepository<PollSelectEntity, Long> {
 
@@ -30,6 +31,26 @@ interface PollSelectRepository : CoroutineCrudRepository<PollSelectEntity, Long>
     fun findSelectResponsesByPollId(
         pollId: Long
     ): Flow<PollSelectResponse>
+
+    @Query("""
+        SELECT
+            ps.poll_id,
+            ps.id              AS id,
+            ps.seq             AS seq,
+            ps.content         AS content,
+            ps.vote_count      AS vote_count,
+            (
+                SELECT psp.asset_uid
+                FROM poll_select_photos psp
+                WHERE psp.select_id = ps.id
+                ORDER BY psp.seq ASC, psp.id ASC
+                LIMIT 1
+            )                  AS photo_uid
+        FROM poll_selects ps
+        WHERE ps.poll_id = ANY(:pollIds)
+        ORDER BY ps.poll_id ASC, ps.seq ASC
+    """)
+    fun findSelectSummariesByPollIdIn(pollIds: Array<Long>): Flow<SelectionSummaryProjection>
 
     @Query("DELETE FROM poll_selects WHERE poll_id = :pollId")
     suspend fun deleteAllByPollId(pollId: Long)

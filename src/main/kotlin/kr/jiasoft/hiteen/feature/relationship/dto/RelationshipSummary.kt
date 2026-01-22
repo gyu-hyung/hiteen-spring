@@ -31,6 +31,7 @@ data class RelationshipSummary(
     @param:Schema(description = "경도", example = "127.0000")
     val lng: Double? = null,
 
-    @param:Schema(description = "마지막 위치 확인 시간", example = "1705586166000")
-    val lastSeenAt: Long? = null,
+    @param:Schema(description = "마지막 위치 확인 시간", example = "2025.09.18 10:15:30")
+    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm:ss")
+    val lastSeenAt: OffsetDateTime? = null,
 )
