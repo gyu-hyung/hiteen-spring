@@ -107,13 +107,31 @@ class GiftAppServiceImpl (
                     receiveUserUids = List(req.quantity) { req.receiveUserUid ?: userUid },
                     goodsCode = req.goodsCode,
                     memo = req.memo,
-                )
+                ),
+                sendPush = false
             )
 
             //캐시 차감
             val totalPrice = res.sumOf { it.goods?.realPrice ?: 0 }
             if (totalPrice > 0) {
                 cashService.applyPolicy(userId, CashPolicy.BUY, res.first().giftUserId, -totalPrice)
+            }
+
+            // 캐시 차감 성공 후 푸시 알림 발송
+            val uniqueUserIds = res.map { it.receiver.id }.distinct()
+            val memo = res.firstOrNull()?.memo
+            if (memo != null) {
+                eventPublisher.publishEvent(
+                    PushSendRequestedEvent(
+                        userIds = uniqueUserIds,
+                        actorUserId = null,
+                        templateData = mapOf(
+                            "code" to PushTemplate.GIFT_MESSAGE.code,
+                            "title" to PushTemplate.GIFT_MESSAGE.title,
+                            "message" to GiftCategory.Shop.toTemplate().defaultMemo!!
+                        ),
+                    )
+                )
             }
 
             res
@@ -126,7 +144,7 @@ class GiftAppServiceImpl (
      * Type: Voucher, Delivery, GiftCard --Point, Cash 는 적립으로 처리
      * Category: Join, Challenge, Admin, Event, Shop
      * */
-    override suspend fun createGift(userId: Long, req: GiftProvideRequest) : List<GiftResponse> {
+    override suspend fun createGift(userId: Long, req: GiftProvideRequest, sendPush: Boolean) : List<GiftResponse> {
         val receiverUsers = userRepository.findAllByUidIn(req.receiveUserUids)
         if (receiverUsers.isEmpty()) throw IllegalArgumentException("존재하지 않는 수신자")
 
@@ -183,19 +201,21 @@ class GiftAppServiceImpl (
 
         val savedGiftUsers = giftUserRepository.saveAll(giftUsers).toList()
 
-        // 푸시 알림 (중복 제거된 사용자에게만 발송)
-        val uniqueUserIds = savedGiftUsers.map { it.userId }.distinct()
-        eventPublisher.publishEvent(
-            PushSendRequestedEvent(
-                userIds = uniqueUserIds,
-                actorUserId = null,
-                templateData = mapOf(
-                    "code" to PushTemplate.GIFT_MESSAGE.code,
-                    "title" to PushTemplate.GIFT_MESSAGE.title,
-                    "message" to memo,
-                ),
+        // 푸시 알림 (선택적 발송)
+        if (sendPush) {
+            val uniqueUserIds = savedGiftUsers.map { it.userId }.distinct()
+            eventPublisher.publishEvent(
+                PushSendRequestedEvent(
+                    userIds = uniqueUserIds,
+                    actorUserId = null,
+                    templateData = mapOf(
+                        "code" to PushTemplate.GIFT_MESSAGE.code,
+                        "title" to PushTemplate.GIFT_MESSAGE.title,
+                        "message" to memo,
+                    ),
+                )
             )
-        )
+        }
 
         return savedGiftUsers.map { findGift(it.userId, it.id) }
     }

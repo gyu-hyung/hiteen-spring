@@ -17,7 +17,7 @@ interface GiftAppService {
     suspend fun buyGift(userId: Long, userUid: UUID, req: GiftBuyRequest) : List<GiftResponse>
 
     /** 관리자 -> 사용자 선물 지급 */
-    suspend fun createGift(userId: Long, req: GiftProvideRequest) : List<GiftResponse>
+    suspend fun createGift(userId: Long, req: GiftProvideRequest, sendPush: Boolean = true) : List<GiftResponse>
 
     /** 사용자 -> 선물 발급 */
     suspend fun issueGift(userId: Long, req: GiftIssueRequest) : GiftResponse
