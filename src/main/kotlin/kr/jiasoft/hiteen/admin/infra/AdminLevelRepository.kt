@@ -14,10 +14,25 @@ interface AdminLevelRepository : CoroutineCrudRepository<TierEntity, Long> {
             t.*,
             (SELECT COUNT(*) FROM users WHERE tier_id = t.id AND deleted_at IS NULL) member_count
         FROM tiers t
-        WHERE t.deleted_at IS NULL AND (:search IS NULL OR t.tier_name_kr ILIKE '%' || :search || '%')
-        ORDER BY t.level ASC, t.division_no ASC, t.rank_order ASC
+        WHERE t.deleted_at IS NULL
+            AND (
+                :search IS NULL
+                OR (
+                    :searchType = 'ALL' AND (
+                        t.tier_code ILIKE '%' || :search || '%'
+                        OR t.tier_name_kr ILIKE '%' || :search || '%'
+                    )
+                )
+                OR (:searchType = 'code' AND t.tier_code ILIKE '%' || :search || '%')
+                OR (:searchType = 'name' AND t.tier_name_kr ILIKE '%' || :search || '%')
+            )
+        ORDER BY
+            t.level ASC,
+            t.division_no ASC,
+            t.rank_order ASC
     """)
     suspend fun listLevels(
+        searchType: String?,
         search: String?,
     ): Flow<AdminLevelResponse>
 
@@ -25,8 +40,9 @@ interface AdminLevelRepository : CoroutineCrudRepository<TierEntity, Long> {
     // 해당 레벨의 회원이 있으면 삭제하지 못하게 하기 위해..
     @Query("""
         SELECT COUNT(*)
-        FROM tiers
-        WHERE deleted_at IS NULL AND tier_id = :tierId
+        FROM users
+        WHERE deleted_at IS NULL
+            AND tier_id = :tierId
     """)
     suspend fun countLevelUsers(tierId: Long): Int
 }

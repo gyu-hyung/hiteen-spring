@@ -4,6 +4,7 @@ import kr.jiasoft.hiteen.feature.push.domain.PushEntity
 import org.springframework.data.r2dbc.repository.Modifying
 import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
+import java.time.LocalDateTime
 
 interface AdminPushRepository : CoroutineCrudRepository<PushEntity, Long> {
 
@@ -12,48 +13,149 @@ interface AdminPushRepository : CoroutineCrudRepository<PushEntity, Long> {
         SELECT COUNT(*)
         FROM push p
         WHERE (
-            :status = 'ALL'
-            OR (:status = 'ACTIVE' AND p.deleted_at IS NULL)
-            OR (:status = 'DELETED' AND p.deleted_at IS NOT NULL)
-        )
-          AND (
-            :search IS NULL
-            OR (
-                :searchType = 'ALL'
-                OR (:searchType = 'CODE' AND COALESCE(p.code, '') ILIKE ('%' || :search || '%'))
-                OR (:searchType = 'TITLE' AND COALESCE(p.title, '') ILIKE ('%' || :search || '%'))
-                OR (:searchType = 'MESSAGE' AND COALESCE(p.message, '') ILIKE ('%' || :search || '%'))
+                :type IS NULL
+                OR p.code ILIKE ('%' || :type || '%')
             )
-          )
+            AND (
+                :startDate IS NULL
+                OR p.created_at >= :startDate
+            )
+            AND (
+                :endDate IS NULL
+                OR p.created_at < :endDate
+            )
+            AND (
+                :search IS NULL
+                OR (
+                    :searchType = 'ALL' AND (
+                        COALESCE(p.title, '') ILIKE ('%' || :search || '%')
+                        OR COALESCE(p.message, '') ILIKE ('%' || :search || '%')
+                        OR EXISTS (
+                            SELECT 1
+                            FROM push_detail pd
+                            JOIN users u ON u.id = pd.user_id
+                            WHERE pd.push_id = p.id
+                                AND (
+                                    COALESCE(u.nickname, '') ILIKE ('%' || :search || '%')
+                                    OR COALESCE(u.phone, '') ILIKE ('%' || :search || '%')
+                                )
+                        )
+                    )
+                )
+                OR (
+                    :searchType = 'TITLE'
+                     AND COALESCE(p.title, '') ILIKE ('%' || :search || '%')
+                )
+                OR (
+                    :searchType = 'MESSAGE'
+                    AND COALESCE(p.message, '') ILIKE ('%' || :search || '%')
+                )
+                OR (
+                    :searchType = 'NICKNAME'
+                    AND EXISTS (
+                        SELECT 1
+                        FROM push_detail pd
+                        JOIN users u ON u.id = pd.user_id
+                        WHERE pd.push_id = p.id AND COALESCE(u.nickname, '') ILIKE ('%' || :search || '%')
+                    )
+                )
+                OR (
+                    :searchType = 'PHONE'
+                    AND EXISTS (
+                        SELECT 1
+                        FROM push_detail pd
+                        JOIN users u ON u.id = pd.user_id
+                        WHERE pd.push_id = p.id AND COALESCE(u.phone, '') ILIKE ('%' || :search || '%')
+                    )
+                )
+            )
         """
     )
-    suspend fun countList(search: String?, searchType: String, status: String): Int
+    suspend fun countList(
+        type: String?,
+        startDate: LocalDateTime?,
+        endDate: LocalDateTime?,
+        searchType: String?,
+        search: String?,
+    ): Int
 
     @Query(
         """
-        SELECT *
+        SELECT p.*
         FROM push p
         WHERE (
-            :status = 'ALL'
-            OR (:status = 'ACTIVE' AND p.deleted_at IS NULL)
-            OR (:status = 'DELETED' AND p.deleted_at IS NOT NULL)
-        )
-          AND (
-            :search IS NULL
-            OR (
-                :searchType = 'ALL'
-                OR (:searchType = 'CODE' AND COALESCE(p.code, '') ILIKE ('%' || :search || '%'))
-                OR (:searchType = 'TITLE' AND COALESCE(p.title, '') ILIKE ('%' || :search || '%'))
-                OR (:searchType = 'MESSAGE' AND COALESCE(p.message, '') ILIKE ('%' || :search || '%'))
+                :type IS NULL
+                OR p.code ILIKE ('%' || :type || '%')
             )
-          )
+            AND (
+                :startDate IS NULL
+                OR p.created_at >= :startDate
+            )
+            AND (
+                :endDate IS NULL
+                OR p.created_at < :endDate
+            )
+            AND (
+                :search IS NULL
+                OR (
+                    :searchType = 'ALL' AND (
+                        COALESCE(p.title, '') ILIKE ('%' || :search || '%')
+                        OR COALESCE(p.message, '') ILIKE ('%' || :search || '%')
+                        OR EXISTS (
+                            SELECT 1
+                            FROM push_detail pd
+                            JOIN users u ON u.id = pd.user_id
+                            WHERE pd.push_id = p.id
+                                AND (
+                                    COALESCE(u.nickname, '') ILIKE ('%' || :search || '%')
+                                    OR COALESCE(u.phone, '') ILIKE ('%' || :search || '%')
+                                )
+                        )
+                    )
+                )
+                OR (
+                    :searchType = 'TITLE'
+                     AND COALESCE(p.title, '') ILIKE ('%' || :search || '%')
+                )
+                OR (
+                    :searchType = 'MESSAGE'
+                    AND COALESCE(p.message, '') ILIKE ('%' || :search || '%')
+                )
+                OR (
+                    :searchType = 'NICKNAME'
+                    AND EXISTS (
+                        SELECT 1
+                        FROM push_detail pd
+                        JOIN users u ON u.id = pd.user_id
+                        WHERE pd.push_id = p.id AND COALESCE(u.nickname, '') ILIKE ('%' || :search || '%')
+                    )
+                )
+                OR (
+                    :searchType = 'PHONE'
+                    AND EXISTS (
+                        SELECT 1
+                        FROM push_detail pd
+                        JOIN users u ON u.id = pd.user_id
+                        WHERE pd.push_id = p.id AND COALESCE(u.phone, '') ILIKE ('%' || :search || '%')
+                    )
+                )
+            )
         ORDER BY
             CASE WHEN :order = 'ASC' THEN p.id END ASC,
             CASE WHEN :order = 'DESC' THEN p.id END DESC
         LIMIT :limit OFFSET :offset
         """
     )
-    suspend fun list(search: String?, searchType: String, status: String, order: String, limit: Int, offset: Int): List<PushEntity>
+    suspend fun list(
+        type: String?,
+        startDate: LocalDateTime?,
+        endDate: LocalDateTime?,
+        searchType: String?,
+        search: String?,
+        order: String,
+        limit: Int,
+        offset: Int,
+    ): List<PushEntity>
 
     @Modifying
     @Query("UPDATE push SET deleted_at = now() WHERE id = :id AND deleted_at IS NULL")

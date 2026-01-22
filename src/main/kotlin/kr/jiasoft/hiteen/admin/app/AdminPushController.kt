@@ -15,6 +15,8 @@ import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
+import java.time.LocalDate
+import org.slf4j.LoggerFactory
 
 @RestController
 @RequestMapping("/api/admin/push")
@@ -23,22 +25,29 @@ class AdminPushController(
     private val adminPushService: AdminPushService,
 ) {
 
+    private val log = LoggerFactory.getLogger(javaClass)
+
     @GetMapping
     suspend fun list(
+        @RequestParam type: String? = null,
+        @RequestParam startDate: LocalDate? = null,
+        @RequestParam endDate: LocalDate? = null,
+        @RequestParam searchType: String? = null,
+        @RequestParam search: String? = null,
         @RequestParam page: Int = 1,
-        @RequestParam size: Int = 20,
+        @RequestParam size: Int = 10,
         @RequestParam order: String = "DESC",
-        @RequestParam(required = false) search: String? = null,
-        @RequestParam searchType: String = "ALL",
-        @RequestParam(required = false) status: String? = null,
     ): ResponseEntity<ApiResult<ApiPage<AdminPushListResponse>>> {
+        val startDate = startDate?.atStartOfDay()
+        val endDate = endDate?.plusDays(1)?.atStartOfDay()
+
+        log.info(
+            "AdminPush list params => type={}, startDate={}, endDate={}, searchType={}, search={}, page={}, size={}, order={}",
+            type, startDate, endDate, searchType, search, page, size, order
+        )
+
         val data = adminPushService.list(
-            page = page,
-            size = size,
-            order = order,
-            searchType = searchType,
-            search = search,
-            status = status,
+            type, startDate, endDate, searchType, search, page, size, order
         )
         return success(data)
     }
