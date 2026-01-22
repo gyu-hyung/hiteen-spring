@@ -51,7 +51,7 @@ data class GiftUsersEntity(
 
     @field:Schema(description = "상품 발급 만료일")
     @Column("pub_expired_date")
-    val pubExpiredDate: OffsetDateTime,
+    val pubExpiredDate: OffsetDateTime? = null,
 
     @field:Schema(description = "상품 사용 만료일")
     @Column("use_expired_date")

@@ -91,6 +91,7 @@ interface AdminGiftRepository : CoroutineCrudRepository<GiftEntity, Long> {
               OR (:status = 'DELIVERY_DONE' AND gu.status = 5)
               OR (:status = 'GRANT_REQUESTED' AND gu.status = 6)
               OR (:status = 'GRANTED' AND gu.status = 7)
+              OR (:status = 'CANCELLED' AND gu.status = -1)
           )
           AND (
                 :uid IS NULL
@@ -158,6 +159,7 @@ interface AdminGiftRepository : CoroutineCrudRepository<GiftEntity, Long> {
               OR (:status = 'DELIVERY_DONE' AND gu.status = 5)
               OR (:status = 'GRANT_REQUESTED' AND gu.status = 6)
               OR (:status = 'GRANTED' AND gu.status = 7)
+              OR (:status = 'CANCELLED' AND gu.status = -1)
           )
           AND (
                 :uid IS NULL

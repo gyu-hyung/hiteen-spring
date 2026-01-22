@@ -33,6 +33,7 @@ interface GiftishowGoodsRepository : CoroutineCrudRepository<GoodsGiftishowEntit
         FROM goods_giftishow
         WHERE status = 1 
         AND del_yn = 0
+        AND category1_seq IS NOT NULL
         GROUP BY category1_seq
         ORDER BY category1_seq
     """)
@@ -48,9 +49,27 @@ interface GiftishowGoodsRepository : CoroutineCrudRepository<GoodsGiftishowEntit
           AND del_yn = 0
           AND goods_type_cd IS NOT NULL
           AND goods_type_cd <> ''
+          AND goods_type_nm IS NOT NULL
+          AND goods_type_nm <> ''
         ORDER BY goods_type_cd
     """)
     fun findGoodsTypes(): Flow<GoodsTypeDto>
+
+
+    @Query("""
+        SELECT DISTINCT
+            brand_code AS brand_code,
+            brand_name AS brand_name
+        FROM goods_giftishow
+        WHERE status = 1
+          AND del_yn = 0
+          AND brand_code IS NOT NULL
+          AND brand_code <> ''
+          AND brand_name IS NOT NULL
+          AND brand_name <> ''
+        ORDER BY brand_name
+    """)
+    fun findBrands(): Flow<GoodsBrandDto>
 
 
     /**

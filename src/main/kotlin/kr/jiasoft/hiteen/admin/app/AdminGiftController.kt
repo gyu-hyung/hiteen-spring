@@ -26,8 +26,10 @@ import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.annotation.AuthenticationPrincipal
+import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
@@ -50,7 +52,7 @@ class AdminGiftController(
     @PostMapping("/create")
     suspend fun createGift(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
-        request: GiftProvideRequest,
+        @RequestBody request: GiftProvideRequest,
     ): ResponseEntity<ApiResult<List<GiftResponse>>> {
         return ResponseEntity.ok(ApiResult.success(giftAppService.createGift(user.id, request)))
     }
@@ -68,15 +70,17 @@ class AdminGiftController(
 
 
     /**
-     * 기프트쇼 발송 취소 (trId 기준)
-     * - 실제로 쿠폰이 발송된 상태(SENT)에서만 의미가 있음
+     * 선물 삭제 (관리자용)
+     * - giftType 이 Voucher 인 경우 기프티쇼 취소 API를 호출합니다.
      */
-    @PostMapping("/voucher/cancel")
-    suspend fun cancelVoucher(
-        @RequestParam trId: String,
+    @PostMapping("/delete")
+    suspend fun deleteGift(
+        @RequestParam giftUid: UUID,
+        @RequestParam giftUserId: Long,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
-    ): ResponseEntity<ApiResult<GiftishowApiResponse<String>>> {
-        return ResponseEntity.ok(ApiResult.success(giftshowClient.cancelVoucher(trId)))
+    ): ResponseEntity<ApiResult<Any?>> {
+        val res = giftAppService.deleteGift(giftUid, giftUserId)
+        return ResponseEntity.ok(ApiResult.success(res))
     }
 
 
