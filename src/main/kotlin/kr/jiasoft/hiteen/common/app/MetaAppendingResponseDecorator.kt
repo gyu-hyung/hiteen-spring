@@ -62,24 +62,19 @@ class MetaAppendingResponseDecorator(
                         val user = auth.principal as? CustomUserDetails
                             ?: return@flatMap Mono.just(bytes)
 
+                        val deltaExp   = exchange.attributes[MetaDeltaKeys.DELTA_EXP] as? Int ?: 0
+                        val deltaPoint = exchange.attributes[MetaDeltaKeys.DELTA_POINT] as? Int ?: 0
+                        val deltaCash = exchange.attributes[MetaDeltaKeys.DELTA_CASH] as? Int ?: 0
+                        val deltaTier = exchange.attributes[MetaDeltaKeys.DELTA_TIER] as? Map<*, *>
+                        val skipMeta = exchange.attributes[MetaDeltaKeys.SKIP_META] as? Boolean ?: false
+
+                        if (skipMeta || (deltaExp == 0 && deltaPoint == 0 && deltaCash == 0 && deltaTier == null)) {
+                            return@flatMap Mono.just(bytes)
+                        }
+
                         buildMeta(user.user.id).flatMap flatMapBytes@{ baseMeta ->
 
                             val obj = json as ObjectNode
-
-                            val deltaExp   = exchange.attributes[MetaDeltaKeys.DELTA_EXP] as? Int ?: 0
-                            val deltaPoint = exchange.attributes[MetaDeltaKeys.DELTA_POINT] as? Int ?: 0
-                            val deltaCash = exchange.attributes[MetaDeltaKeys.DELTA_CASH] as? Int ?: 0
-                            val deltaTier = exchange.attributes[MetaDeltaKeys.DELTA_TIER] as? Map<*, *>
-
-                            // ✅ 포인트 이벤트 등 meta 주입을 원치 않는 요청은 meta를 붙이지 않는다.
-                            val skipMeta = exchange.attributes[MetaDeltaKeys.SKIP_META] as? Boolean ?: false
-                            if (skipMeta) {
-                                return@flatMapBytes Mono.just(bytes)
-                            }
-
-                            if (deltaExp == 0 && deltaPoint == 0 && deltaCash == 0) {
-                                return@flatMapBytes Mono.just(bytes)
-                            }
 
                             val metaNode = mapper.createObjectNode()
                             metaNode.put("totalExp", (baseMeta["totalExp"] ?: 0).toString().toInt())
