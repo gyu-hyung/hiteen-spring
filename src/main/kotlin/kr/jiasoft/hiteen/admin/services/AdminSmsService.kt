@@ -122,8 +122,8 @@ class AdminSmsService(
     suspend fun list(
         startDate: LocalDateTime?,
         endDate: LocalDateTime?,
-        searchType: String?,
-        search: String?,
+        searchType: String? = null,
+        search: String? = null,
         page: Int,
         perPage: Int,
         order: String,
