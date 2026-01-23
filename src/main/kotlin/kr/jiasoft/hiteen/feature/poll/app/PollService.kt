@@ -494,7 +494,8 @@ class PollService(
         val extraData = mutableMapOf("pollId" to p.id.toString())
         parent?.let { extraData["parentUid"] = it.uid.toString() }
 
-        if (p.createdId != user.id) {
+        //본인 글 아닐때만 알림
+        if( p.createdId != user.id && ( parent == null || parent.createdId != p.createdId ) ) {
             eventPublisher.publishEvent(
                 PushSendRequestedEvent(
                     userIds = listOf(p.createdId),
