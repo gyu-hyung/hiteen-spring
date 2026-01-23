@@ -1457,3 +1457,20 @@ DO UPDATE SET
     daily_limit = EXCLUDED.daily_limit,
     enabled = EXCLUDED.enabled,
     updated_at = CURRENT_TIMESTAMP;
+
+-- ========================
+-- 대시보드 통계
+-- ========================
+CREATE TABLE dashboard_statistics (
+    id                bigserial PRIMARY KEY,
+    date              date NOT NULL UNIQUE,
+    total_user_count  bigint DEFAULT 0,
+    today_join_count  bigint DEFAULT 0,
+    school_type1_count bigint DEFAULT 0,
+    school_type2_count bigint DEFAULT 0,
+    school_type3_count bigint DEFAULT 0,
+    school_type9_count bigint DEFAULT 0,
+    region_stats      text, -- JSON string for region mapping
+    created_at        timestamptz DEFAULT now()
+);
+

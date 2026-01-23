@@ -19,7 +19,7 @@ data class ReportEntity(
 
     val type: String, // 신고 구분 (댓글/글/실시간/채팅 …)
 
-    val reportableType: String? = null, // 컨텐츠 모델명
+    val reportableType: String? = null, //불쾌한 사진, 허위 프로필, 사진 도용, 욕설 및 비방, 불법촬영물 공유, 기타
 
     val reportableId: Long? = null, // 컨텐츠 PK
 
@@ -27,7 +27,7 @@ data class ReportEntity(
 
     val photoUid: String? = null, // 신고 사진 UID
 
-    val status: Int = 0, // 상태: 대기(0), 완료(1)
+    val status: Int = 0, // 상태: 대기(0), 처리(1), 반려(2)
 
     val answer: String? = null, // 답변내용
 

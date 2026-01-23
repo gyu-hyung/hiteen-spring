@@ -39,7 +39,7 @@ data class ReportResponse(
     @field:Schema(description = "신고 사진 UID", example = "e7d8f690-9c3e-11ee-b9d1-0242ac120002")
     val photoUid: String?,
 
-    @field:Schema(description = "상태 (0=대기, 1=완료)", example = "0")
+    @field:Schema(description = "상태 (0=대기, 1=처리, 2=반려)", example = "0")
     val status: Int,
 
     @field:Schema(description = "답변 내용", example = "조치 완료")
@@ -91,16 +91,19 @@ data class ReportRequest(
     @field:Schema(description = "신고 대상 회원 UID", example = "550e8400-e29b-41d4-a716-446655440000")
     val targetUid: UUID? = null,
 
-    @field:Schema(description = "신고 구분 (BOARD / COMMENT / POLL / POLL_COMMENT)", example = "COMMENT")
+    @field:Schema(description = "신고 구분 (BOARD / COMMENT / POLL / POLL_COMMENT / TEEN_PICK)", example = "COMMENT")
     val type: String,
 
-    @field:Schema(description = "신고 대상 UID 또는 ID(BOARD / COMMENT / POLL_COMMENT)", example = "550e8400-e29b-41d4-a716-446655440111")
+    @field:Schema(description = "[불쾌한 사진 / 허위 프로필 / 사진 도용 / 욕설 및 비방 / 불법촬영물 공유 / 기타]", example = "불쾌한 사진")
+    val reportableType: String,
+
+    @field:Schema(description = "신고 대상 UID 또는 ID(BOARD / COMMENT / POLL_COMMENT / TEEN_PICK)", example = "550e8400-e29b-41d4-a716-446655440111")
     val targetContentUid: UUID? = null,
 
     @field:Schema(description = "신고 대상 UID 또는 ID(POLL)", example = "101")
     val targetContentId: Long? = null,
 
-    @field:Schema(description = "신고 사유", example = "욕설/비방")
+    @field:Schema(description = "신고 사유", example = "~~~~~")
     val reason: String? = null,
 
     @field:Schema(description = "신고 사진 UID", example = "e7d8f690-9c3e-11ee-b9d1-0242ac120002")
