@@ -24,8 +24,9 @@ class ExpService(
         userId: Long,
         actionCode: String,
         targetId: Long? = null,
-        dynamicPoints: Int? = null,
         requestId: Long? = null,
+        dynamicPoints: Int? = null,
+        dynamicMemo: String? = null,
     ) {
         val action = expActionProvider.get(actionCode)?: return
 
@@ -57,13 +58,18 @@ class ExpService(
         userRepository.updateExpAndTier(userId, newExp, newTier?.id)
 
         // 이력 기록 (가산/감점 모두 기록)
+        val baseReason = if (points > 0) action.description else "[감점] ${action.description}"
+        val reason = dynamicMemo?.takeIf { it.isNotBlank() }?.let {
+            if (points > 0) it else "[감점] $it"
+        } ?: baseReason
+
         userExpHistoryRepository.save(
             UserExpHistoryEntity(
                 userId = userId,
                 actionCode = actionCode,
                 targetId = targetId,
                 points = points, // 음수 가능
-                reason = if (points > 0) action.description else "[감점] ${action.description}"
+                reason = reason,
             )
         )
 
