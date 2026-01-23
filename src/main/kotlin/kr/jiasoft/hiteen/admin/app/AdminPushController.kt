@@ -16,7 +16,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 import java.time.LocalDate
-import org.slf4j.LoggerFactory
 
 @RestController
 @RequestMapping("/api/admin/push")
@@ -24,9 +23,6 @@ import org.slf4j.LoggerFactory
 class AdminPushController(
     private val adminPushService: AdminPushService,
 ) {
-
-    private val log = LoggerFactory.getLogger(javaClass)
-
     @GetMapping
     suspend fun list(
         @RequestParam type: String? = null,
@@ -40,11 +36,6 @@ class AdminPushController(
     ): ResponseEntity<ApiResult<ApiPage<AdminPushListResponse>>> {
         val startDate = startDate?.atStartOfDay()
         val endDate = endDate?.plusDays(1)?.atStartOfDay()
-
-        log.info(
-            "AdminPush list params => type={}, startDate={}, endDate={}, searchType={}, search={}, page={}, size={}, order={}",
-            type, startDate, endDate, searchType, search, page, size, order
-        )
 
         val data = adminPushService.list(
             type, startDate, endDate, searchType, search, page, size, order

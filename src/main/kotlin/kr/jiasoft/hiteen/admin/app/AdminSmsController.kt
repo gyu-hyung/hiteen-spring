@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
+import java.time.LocalDate
 
 @RestController
 @RequestMapping("/api/admin/sms")
@@ -34,18 +35,19 @@ class AdminSmsController(
 
     @GetMapping
     suspend fun list(
+        @RequestParam startDate: LocalDate? = null,
+        @RequestParam endDate: LocalDate? = null,
+        @RequestParam searchType: String? = null,
+        @RequestParam search: String? = null,
         @RequestParam page: Int = 1,
-        @RequestParam size: Int = 20,
+        @RequestParam size: Int = 10,
         @RequestParam order: String = "DESC",
-        @RequestParam(required = false) search: String? = null,
-        @RequestParam searchType: String = "ALL", // ALL|PHONE|CONTENT|TITLE
     ): ResponseEntity<ApiResult<ApiPage<AdminSmsListResponse>>> {
+        val startDate = startDate?.atStartOfDay()
+        val endDate = endDate?.plusDays(1)?.atStartOfDay()
+
         val data = adminSmsService.list(
-            page = page,
-            size = size,
-            order = order,
-            searchType = searchType,
-            search = search,
+            startDate, endDate, searchType, search, page, size, order
         )
         return success(data)
     }
