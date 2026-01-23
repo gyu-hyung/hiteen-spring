@@ -81,6 +81,7 @@ class AdminPushService(
                     id = d.id,
                     pushId = d.pushId,
                     userId = d.userId,
+                    userName = d.userName,
                     deviceOs = d.deviceOs,
                     deviceToken = d.deviceToken,
                     phone = d.phone,

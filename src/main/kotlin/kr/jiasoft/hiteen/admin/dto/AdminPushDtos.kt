@@ -33,6 +33,7 @@ data class AdminPushDetailItem(
     val id: Long,
     val pushId: Long?,
     val userId: Long?,
+    val userName: String?,
     val deviceOs: String?,
     val deviceToken: String?,
     val phone: String?,

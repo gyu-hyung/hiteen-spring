@@ -19,6 +19,7 @@ import kr.jiasoft.hiteen.feature.sms.domain.SmsEntity
 import kr.jiasoft.hiteen.feature.sms.domain.SmsProperties
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDateTime
 import java.time.OffsetDateTime
 
 @Service
@@ -119,34 +120,32 @@ class AdminSmsService(
     }
 
     suspend fun list(
-        page: Int,
-        size: Int,
-        order: String,
-        searchType: String,
+        startDate: LocalDateTime?,
+        endDate: LocalDateTime?,
+        searchType: String?,
         search: String?,
+        page: Int,
+        perPage: Int,
+        order: String,
     ): ApiPage<AdminSmsListResponse> {
-        val p = page.coerceAtLeast(1)
-        val s = size.coerceIn(1, 100)
-        val offset = (p - 1) * s
+        val page = page.coerceAtLeast(1)
+        val perPage = perPage.coerceIn(1, 100)
+        val offset = (page - 1) * perPage
 
-        val normalizedSearch = search?.trim()?.takeIf { it.isNotBlank() }
-        val normalizedSearchType = when (searchType.trim().uppercase()) {
-            "ALL", "PHONE", "CONTENT", "TITLE" -> searchType.trim().uppercase()
-            else -> "ALL"
-        }
-        val normalizedOrder = when (order.trim().uppercase()) {
+        val search = search?.trim()?.takeIf { it.isNotBlank() }
+        val order = when (order.trim().uppercase()) {
             "ASC" -> "ASC"
             else -> "DESC"
         }
 
-        val total = adminSmsRepository.countList(normalizedSearch, normalizedSearchType)
-        val rows = adminSmsRepository.list(normalizedSearch, normalizedSearchType, normalizedOrder, s, offset)
+        val total = adminSmsRepository.countList(startDate, endDate, searchType, search)
+        val rows = adminSmsRepository.list(startDate, endDate, searchType, search, order, perPage, offset)
 
         return PageUtil.of(
             items = rows.map { it.toResponse() },
-            total = total,
-            page = p,
-            size = s,
+            total,
+            page,
+            size = perPage,
         )
     }
 

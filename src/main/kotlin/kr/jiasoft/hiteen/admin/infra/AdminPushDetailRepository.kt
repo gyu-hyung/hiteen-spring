@@ -1,5 +1,6 @@
 package kr.jiasoft.hiteen.admin.infra
 
+import kr.jiasoft.hiteen.admin.dto.AdminPushDetailWithUserDto
 import kr.jiasoft.hiteen.feature.push.domain.PushDetailEntity
 import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
@@ -11,8 +12,8 @@ interface AdminPushDetailRepository : CoroutineCrudRepository<PushDetailEntity, 
 
     @Query(
         """
-        SELECT *
-        FROM push_detail d
+        SELECT d.*, u.nickname AS user_name
+        FROM push_detail d LEFT JOIN users u ON u.id = d.user_id
         WHERE d.push_id = :pushId
           AND d.deleted_at IS NULL
           AND (
@@ -24,6 +25,6 @@ interface AdminPushDetailRepository : CoroutineCrudRepository<PushDetailEntity, 
         LIMIT :limit OFFSET :offset
         """
     )
-    suspend fun listByPushId(pushId: Long, success: String, limit: Int, offset: Int): List<PushDetailEntity>
+    suspend fun listByPushId(pushId: Long, success: String, limit: Int, offset: Int): List<AdminPushDetailWithUserDto>
 }
 
