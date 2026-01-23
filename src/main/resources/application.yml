@@ -39,8 +39,8 @@ spring:
         enabled: false
       host: 127.0.0.1
       port: 6379
-#      password: hiteen1234
-      password:
+      password: hiteen1234
+#      password:
       timeout: 5s
       client-type: lettuce
 
