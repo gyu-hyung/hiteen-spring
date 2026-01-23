@@ -101,9 +101,9 @@ class BatchService(
 
 
     /**
-     * 매일 0시에 게임 시즌 종료 처리
+     * 매일 0시 3초에 게임 시즌 종료 처리
      */
-    @Scheduled(cron = "0 0 0 * * *", zone = "Asia/Seoul")
+    @Scheduled(cron = "3 0 0 * * *", zone = "Asia/Seoul")
     fun autoManageSeasons() = runBlocking {
         val today = LocalDate.now()
         val yesterday = today.minusDays(1)
