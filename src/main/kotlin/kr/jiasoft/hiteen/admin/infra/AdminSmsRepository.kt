@@ -11,34 +11,51 @@ interface AdminSmsRepository : CoroutineCrudRepository<SmsEntity, Long> {
         """
         SELECT COUNT(*)
         FROM sms s
-        WHERE (
-                :startDate IS NULL
-                OR s.created_at >= :startDate
-            )
-            AND (
-                :endDate IS NULL
-                OR s.created_at < :endDate
-            )
+        WHERE (:startDate IS NULL OR s.created_at >= :startDate)
+            AND (:endDate IS NULL OR s.created_at < :endDate)
             AND (
                 :search IS NULL
                 OR (
-                    :searchType = 'ALL' AND (
+                    (:searchType = 'ALL' AND (
                         COALESCE(s.callback, '') ILIKE ('%' || :search || '%')
                         OR COALESCE(s.title, '') ILIKE ('%' || :search || '%')
                         OR COALESCE(s.content, '') ILIKE ('%' || :search || '%')
+                        OR EXISTS (
+                            SELECT 1
+                            FROM sms_auth sa
+                            WHERE sa.sms_id = s.id
+                                AND COALESCE(sa.phone, '') ILIKE ('%' || :search || '%')
+                        )
+                        OR EXISTS (
+                            SELECT 1
+                            FROM sms_details sd
+                            WHERE sd.sms_id = s.id
+                                AND COALESCE(sd.phone, '') ILIKE ('%' || :search || '%')
+                        )
+                    ))
+                    OR (:searchType = 'CALLBACK'
+                        AND COALESCE(s.callback, '') ILIKE ('%' || :search || '%')
                     )
-                )
-                OR (
-                    :searchType = 'PHONE'
-                    AND COALESCE(s.callback, '') ILIKE ('%' || :search || '%')
-                )
-                OR (
-                    :searchType = 'TITLE'
-                     AND COALESCE(s.title, '') ILIKE ('%' || :search || '%')
-                )
-                OR (
-                    :searchType = 'MESSAGE'
-                    AND COALESCE(s.content, '') ILIKE ('%' || :search || '%')
+                    OR (:searchType = 'TITLE'
+                         AND COALESCE(s.title, '') ILIKE ('%' || :search || '%')
+                    )
+                    OR (:searchType = 'MESSAGE'
+                        AND COALESCE(s.content, '') ILIKE ('%' || :search || '%')
+                    )
+                    OR (:searchType = 'PHONE' AND (
+                        EXISTS (
+                            SELECT 1
+                            FROM sms_auth sa
+                            WHERE sa.sms_id = s.id
+                                AND COALESCE(sa.phone, '') ILIKE ('%' || :search || '%')
+                        )
+                        OR EXISTS (
+                            SELECT 1
+                            FROM sms_details sd
+                            WHERE sd.sms_id = s.id
+                                AND COALESCE(sd.phone, '') ILIKE ('%' || :search || '%')
+                        )
+                    ))
                 )
             )
         """
@@ -54,34 +71,51 @@ interface AdminSmsRepository : CoroutineCrudRepository<SmsEntity, Long> {
         """
         SELECT *
         FROM sms s
-        WHERE (
-                :startDate IS NULL
-                OR s.created_at >= :startDate
-            )
-            AND (
-                :endDate IS NULL
-                OR s.created_at < :endDate
-            )
+        WHERE (:startDate IS NULL OR s.created_at >= :startDate)
+            AND (:endDate IS NULL OR s.created_at < :endDate)
             AND (
                 :search IS NULL
                 OR (
-                    :searchType = 'ALL' AND (
+                    (:searchType = 'ALL' AND (
                         COALESCE(s.callback, '') ILIKE ('%' || :search || '%')
                         OR COALESCE(s.title, '') ILIKE ('%' || :search || '%')
                         OR COALESCE(s.content, '') ILIKE ('%' || :search || '%')
+                        OR EXISTS (
+                            SELECT 1
+                            FROM sms_auth sa
+                            WHERE sa.sms_id = s.id
+                                AND COALESCE(sa.phone, '') ILIKE ('%' || :search || '%')
+                        )
+                        OR EXISTS (
+                            SELECT 1
+                            FROM sms_details sd
+                            WHERE sd.sms_id = s.id
+                                AND COALESCE(sd.phone, '') ILIKE ('%' || :search || '%')
+                        )
+                    ))
+                    OR (:searchType = 'CALLBACK'
+                        AND COALESCE(s.callback, '') ILIKE ('%' || :search || '%')
                     )
-                )
-                OR (
-                    :searchType = 'PHONE'
-                    AND COALESCE(s.callback, '') ILIKE ('%' || :search || '%')
-                )
-                OR (
-                    :searchType = 'TITLE'
-                     AND COALESCE(s.title, '') ILIKE ('%' || :search || '%')
-                )
-                OR (
-                    :searchType = 'MESSAGE'
-                    AND COALESCE(s.content, '') ILIKE ('%' || :search || '%')
+                    OR (:searchType = 'TITLE'
+                         AND COALESCE(s.title, '') ILIKE ('%' || :search || '%')
+                    )
+                    OR (:searchType = 'MESSAGE'
+                        AND COALESCE(s.content, '') ILIKE ('%' || :search || '%')
+                    )
+                    OR (:searchType = 'PHONE' AND (
+                        EXISTS (
+                            SELECT 1
+                            FROM sms_auth sa
+                            WHERE sa.sms_id = s.id
+                                AND COALESCE(sa.phone, '') ILIKE ('%' || :search || '%')
+                        )
+                        OR EXISTS (
+                            SELECT 1
+                            FROM sms_details sd
+                            WHERE sd.sms_id = s.id
+                                AND COALESCE(sd.phone, '') ILIKE ('%' || :search || '%')
+                        )
+                    ))
                 )
             )
         ORDER BY
