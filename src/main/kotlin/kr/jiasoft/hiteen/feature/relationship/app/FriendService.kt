@@ -190,7 +190,12 @@ class FriendService(
                         statusAt = now, createdAt = now,
                     )
                 )
-                expService.grantExp(meId, "FRIEND_ADD", targetId)
+                expService.grantExp(
+                    userId = meId,
+                    actionCode = "FRIEND_ADD",
+                    targetId = targetId,
+                    requestId = meId,
+                )
                 eventPublisher.publishEvent(
                     PushSendRequestedEvent(
                         userIds = listOf(targetId),
@@ -225,8 +230,18 @@ class FriendService(
 //                            statusAt = now, createdAt = now
 //                        )
 //                    )
-                    expService.grantExp(meId, "FRIEND_ADD", targetId)
-                    expService.grantExp(targetId, "FRIEND_ADD", meId, null, meId)
+                    expService.grantExp(
+                        userId = meId,
+                        actionCode = "FRIEND_ADD",
+                        targetId = targetId,
+                        requestId = meId,
+                    )
+                    expService.grantExp(
+                        userId = targetId,
+                        actionCode = "FRIEND_ADD",
+                        targetId = meId,
+                        requestId = meId,
+                    )
                     eventPublisher.publishEvent(
                         PushSendRequestedEvent(
                             userIds = listOf(targetId),
@@ -296,8 +311,18 @@ class FriendService(
         }
 
 
-        expService.grantExp(meId, "FRIEND_ADD", requesterId)
-        expService.grantExp(requesterId, "FRIEND_ADD", meId, null, meId)
+        expService.grantExp(
+            userId = requesterId,
+            actionCode = "FRIEND_ADD",
+            targetId = meId,
+            requestId = meId,
+        )
+        expService.grantExp(
+            userId = meId,
+            actionCode = "FRIEND_ADD",
+            targetId = requesterId,
+            requestId = requesterId,
+        )
         eventPublisher.publishEvent(
             PushSendRequestedEvent(
                 userIds = listOf(requesterId),

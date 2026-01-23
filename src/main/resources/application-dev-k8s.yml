@@ -122,7 +122,11 @@ admob:
 jwt:
   secret: ac0da6c32199d5d4829ca62b05f2a353ab926e2855de718e28286ca64bc2f9df
   access-expiration: 864000000
-  refresh-expiration: 1209600000
+#  2주
+#  refresh-expiration: 1209600000
+#  1년
+  refresh-expiration: 31536000000
+
 
 springdoc:
   api-docs.path: /api-docs
