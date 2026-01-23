@@ -290,7 +290,7 @@ class AdminUserController (
     ): ResponseEntity<ApiResult<Any>> {
 
         if (!encoder.matches(req.oldPassword, user.password)) {
-            return failure("기존 비밀번호가 일치하지 않습니다.")
+            throw IllegalArgumentException("기존 비밀번호가 일치하지 않습니다.")
         }
 
         val data = user.copy(
