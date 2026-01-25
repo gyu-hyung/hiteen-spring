@@ -1,0 +1,12 @@
+apiVersion: v2
+name: hiteen-monitoring
+description: Monitoring stack for Hiteen (kube-prometheus-stack + Grafana ingress)
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+
+dependencies:
+  - name: kube-prometheus-stack
+    version: "^66.0.0"
+    repository: "https://prometheus-community.github.io/helm-charts"
+
