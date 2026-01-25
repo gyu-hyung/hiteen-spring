@@ -1,0 +1,113 @@
+# 모니터링 차트는 별도 네임스페이스(monitoring)에 설치하는 것을 권장합니다.
+# 예: helm upgrade --install monitoring ./hiteen-monitoring-chart -n monitoring
+
+nameOverride: ""
+fullnameOverride: "monitoring"
+
+ingress:
+  className: nginx
+  grafanaHost: monitor.dev.hiteen.co.kr
+
+kube-prometheus-stack:
+  fullnameOverride: monitoring
+
+  grafana:
+    enabled: true
+
+    # ConfigMap 기반 dashboard provisioning
+    dashboardProviders:
+      dashboardproviders.yaml:
+        apiVersion: 1
+        providers:
+          - name: 'hiteen'
+            orgId: 1
+            folder: 'Hiteen'
+            type: file
+            disableDeletion: false
+            editable: true
+            options:
+              path: /var/lib/grafana/dashboards/hiteen
+
+    dashboards:
+      hiteen:
+        hiteen-spring:
+          gnetId: 4701
+          revision: 1
+          datasource: Prometheus
+
+        redis:
+          gnetId: 11835
+          revision: 1
+          datasource: Prometheus
+
+    ingress:
+      enabled: true
+      ingressClassName: nginx
+      annotations:
+        nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+      hosts:
+        - monitor.dev.hiteen.co.kr
+      path: /
+      pathType: Prefix
+
+  prometheus:
+    prometheusSpec:
+      retention: 7d
+      resources:
+        requests:
+          cpu: 200m
+          memory: 1Gi
+        limits:
+          cpu: 1
+          memory: 2Gi
+
+  alertmanager:
+    enabled: true
+
+  # PrometheusRule(알럿 룰) 기본 세트
+  additionalPrometheusRulesMap:
+    hiteen-default:
+      groups:
+        - name: hiteen.rules
+          rules:
+            - alert: HiteenInstanceDown
+              expr: up{job=~"hiteen.*"} == 0
+              for: 2m
+              labels:
+                severity: critical
+              annotations:
+                summary: "Hiteen instance down"
+                description: "Prometheus가 Hiteen 타겟을 스크랩하지 못합니다. job={{ $labels.job }} instance={{ $labels.instance }}"
+
+            - alert: HiteenHighErrorRate
+              expr: |
+                (sum(rate(http_server_requests_seconds_count{status=~"5..",job=~"hiteen.*"}[5m]))
+                /
+                sum(rate(http_server_requests_seconds_count{job=~"hiteen.*"}[5m]))) > 0.05
+              for: 5m
+              labels:
+                severity: warning
+              annotations:
+                summary: "Hiteen 5xx error rate high"
+                description: "최근 5분 5xx 비율이 5% 초과. job={{ $labels.job }}"
+
+            - alert: HiteenHighLatencyP95
+              expr: |
+                histogram_quantile(0.95,
+                  sum by (le) (rate(http_server_requests_seconds_bucket{job=~"hiteen.*"}[5m]))
+                ) > 1
+              for: 10m
+              labels:
+                severity: warning
+              annotations:
+                summary: "Hiteen latency p95 high"
+                description: "p95 응답시간이 1초 초과(최근 5분)."
+
+            - alert: RedisInstanceDown
+              expr: up{job=~"redis.*|.*redis.*"} == 0
+              for: 2m
+              labels:
+                severity: critical
+              annotations:
+                summary: "Redis exporter down"
+                description: "Redis exporter 타겟이 down 입니다. job={{ $labels.job }} instance={{ $labels.instance }}"

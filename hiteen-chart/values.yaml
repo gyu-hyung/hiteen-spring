@@ -169,3 +169,24 @@ ingress:
           backend:
             serviceName: hiteen-test
             servicePort: 8080
+
+# ============================================
+# Metrics (Prometheus Operator)
+# ============================================
+metrics:
+  enabled: true
+
+  serviceMonitor:
+    enabled: true
+    # kube-prometheus-stack가 설치된 네임스페이스
+    namespace: monitoring
+    # kube-prometheus-stack 기본 selector는 보통 release 레이블 기준입니다.
+    # 설치 시 릴리스명을 무엇으로 했는지에 맞춰 변경하세요.
+    releaseLabel: monitoring
+
+    interval: 15s
+    scrapeTimeout: 10s
+    path: /actuator/prometheus
+
+    honorLabels: true
+

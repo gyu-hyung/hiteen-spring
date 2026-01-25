@@ -1,0 +1,8 @@
+모니터링 차트가 설치되었습니다.
+
+Grafana 접속:
+  https://{{ index .Values "kube-prometheus-stack" "grafana" "ingress" "hosts" 0 }}
+
+Grafana admin 비밀번호 확인:
+  kubectl -n {{ .Release.Namespace }} get secret {{ (include "hiteen-monitoring.fullname" .) }}-grafana -o jsonpath='{.data.admin-password}' | base64 --decode; echo
+
