@@ -16,6 +16,7 @@ interface DashboardAggregateRepository : CoroutineCrudRepository<DashboardStatis
         FROM users u
         JOIN schools s ON u.school_id = s.id
         WHERE u.deleted_at IS NULL
+          AND COALESCE(u.role, '') <> 'ADMIN'
         GROUP BY s.type
     """)
     fun getSchoolTypeStats(): Flow<SchoolTypeStatRaw>
@@ -25,27 +26,29 @@ interface DashboardAggregateRepository : CoroutineCrudRepository<DashboardStatis
         FROM users u
         JOIN schools s ON u.school_id = s.id
         WHERE u.deleted_at IS NULL
+          AND COALESCE(u.role, '') <> 'ADMIN'
         GROUP BY s.sido
     """)
     fun getRegionStats(): Flow<RegionStatRaw>
 
-    @Query("SELECT COUNT(*) FROM users WHERE deleted_at IS NULL")
+    @Query("SELECT COUNT(*) FROM users WHERE deleted_at IS NULL AND COALESCE(role, '') <> 'ADMIN'")
     suspend fun getTotalUserCount(): Long
 
-    @Query("SELECT COUNT(*) FROM users WHERE deleted_at IS NULL AND created_at >= CURRENT_DATE")
+    @Query("SELECT COUNT(*) FROM users WHERE deleted_at IS NULL AND created_at >= CURRENT_DATE AND COALESCE(role, '') <> 'ADMIN'")
     suspend fun getTodayJoinCount(): Long
 
-    @Query("SELECT COUNT(*) FROM users WHERE deleted_at IS NULL AND created_at >= DATE_TRUNC('month', CURRENT_DATE)")
+    @Query("SELECT COUNT(*) FROM users WHERE deleted_at IS NULL AND created_at >= DATE_TRUNC('month', CURRENT_DATE) AND COALESCE(role, '') <> 'ADMIN'")
     suspend fun getMonthJoinCount(): Long
 
-    @Query("SELECT COUNT(*) FROM users WHERE deleted_at IS NULL AND created_at >= CURRENT_DATE - INTERVAL '1 day' AND created_at < CURRENT_DATE")
+    @Query("SELECT COUNT(*) FROM users WHERE deleted_at IS NULL AND created_at >= CURRENT_DATE - INTERVAL '1 day' AND created_at < CURRENT_DATE AND COALESCE(role, '') <> 'ADMIN'")
     suspend fun getYesterdayJoinCount(): Long
 
     @Query("""
         SELECT COUNT(*) FROM users 
         WHERE deleted_at IS NULL 
-        AND created_at >= DATE_TRUNC('month', CURRENT_DATE - INTERVAL '1 month') 
-        AND created_at < DATE_TRUNC('month', CURRENT_DATE)
+          AND COALESCE(role, '') <> 'ADMIN'
+          AND created_at >= DATE_TRUNC('month', CURRENT_DATE - INTERVAL '1 month') 
+          AND created_at < DATE_TRUNC('month', CURRENT_DATE)
     """)
     suspend fun getLastMonthJoinCount(): Long
 }
