@@ -168,9 +168,9 @@ interface AdminGoodsRepository : CoroutineCrudRepository<GoodsGiftishowEntity, L
         UPDATE goods_giftishow
         SET status = :status,
             updated_at = NOW()
-        WHERE id = ANY(:ids)
+        WHERE id IN (:ids)
           AND deleted_at IS NULL
     """)
-    suspend fun updateStatusByIds(ids: List<Long>, status: Int): Int
+    suspend fun updateStatusByIds(ids: List<Long>, status: Int): Int?
 
 }
