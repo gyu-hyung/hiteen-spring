@@ -11,6 +11,8 @@ import kr.jiasoft.hiteen.feature.asset.dto.AssetResponse
 import kr.jiasoft.hiteen.feature.asset.dto.StoredFile
 import kr.jiasoft.hiteen.feature.asset.dto.toResponse
 import kr.jiasoft.hiteen.feature.asset.infra.AssetRepository
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
@@ -42,9 +44,11 @@ class AssetService(
     private val root: Path = Path.of(storageRoot).also { Files.createDirectories(it) }
     private val storage = AssetStorage(root)
 
-
-
-
+    /**
+     * 업로드/썸네일 생성은 이미지 디코드 등으로 순간 메모리를 크게 쓸 수 있어서
+     * 동시 실행을 제한합니다.
+     */
+    private val imageWorkSemaphore = Semaphore(permits = 2)
 
     suspend fun upload(
         file: FilePart,
@@ -61,10 +65,10 @@ class AssetService(
         currentUserId: Long,
         category: AssetCategory = AssetCategory.COMMON,
         originFileName: String? = null,
-    ): AssetResponse {
+    ): AssetResponse = imageWorkSemaphore.withPermit {
         val stored = storage.save(file, allowedImageExts, maxSizeBytes, category)
         ensureImageOrDelete(stored)
-        return uploadStored(stored, originFileName, currentUserId)
+        uploadStored(stored, originFileName, currentUserId)
     }
 
     suspend fun uploadWordAsset(
@@ -118,8 +122,10 @@ class AssetService(
     ): List<AssetResponse> = coroutineScope {
         files.mapIndexed { idx, f ->
             async {
-                val origin = originFileNames?.getOrNull(idx)
-                uploadImage(f, currentUserId, category, origin)  // 이미지 전용 wrapper 사용
+                imageWorkSemaphore.withPermit {
+                    val origin = originFileNames?.getOrNull(idx)
+                    uploadImage(f, currentUserId, category, origin)
+                }
             }
         }.awaitAll()
     }
@@ -160,8 +166,7 @@ class AssetService(
         height: Int,
         currentUserId: Long? = null,
         mode: ThumbnailMode = ThumbnailMode.COVER,
-    ): AssetEntity {
-
+    ): AssetEntity = imageWorkSemaphore.withPermit {
         // 1️⃣ 원본 조회 (DB → non-blocking OK)
         val original = findByUid(uid)
             ?: throw IllegalArgumentException("존재하지 않는 파일 (uid=$uid)")
