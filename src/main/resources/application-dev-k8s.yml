@@ -128,7 +128,9 @@ jwt:
 #  2주
 #  refresh-expiration: 1209600000
 #  1년
-  refresh-expiration: 31536000000
+#  refresh-expiration: 31536000000
+#  10년
+  refresh-expiration: 315360000000
 
 
 springdoc:
