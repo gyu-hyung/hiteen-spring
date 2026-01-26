@@ -42,6 +42,11 @@ class AdController(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ): ResponseEntity<ApiResult<String>> {
 
+        val available = pointService.validateDailyCap(user.id, PointPolicy.AD_REWARD)
+        if (!available) {
+            return ResponseEntity.badRequest().body(ApiResult.failure("오늘은 더 이상 광고 포인트를 받을 수 없습니다."))
+        }
+
         pointService.applyPolicy(user.id, PointPolicy.AD_REWARD)
         expService.grantExp(user.id, "WATCH_AD")
 

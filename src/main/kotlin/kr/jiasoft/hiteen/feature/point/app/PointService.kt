@@ -145,6 +145,38 @@ class PointService(
 
 
 
+    /**
+     * 정책 일일 제한(dailyCap) 횟수 검증만 수행
+     * - 제한을 초과하면 applyPolicy와 동일하게 로그만 남기고 포인트는 계속 진행되도록 합니다.
+     */
+    suspend fun validateDailyCap(userId: Long, pointPolicy: PointPolicy): Boolean {
+        val rule = pointRuleRepository.findActiveByActionCode(pointPolicy.code)
+            ?: throw IllegalStateException("포인트 정책이 존재하지 않습니다. ($pointPolicy)")
+
+        rule.dailyCap?.let { cap ->
+            val todayCount = pointRepository.countByUserAndPolicyAndDate(userId, pointPolicy.code, LocalDate.now())
+            if (todayCount >= cap) {
+                println("오늘은 더 이상 '${rule.actionCode}' 포인트를 받을 수 없습니다. (일일 제한: $cap)")
+                // applyPolicy 동작과 동일하게 예외는 던지지 않음
+                return false
+            }
+        }
+        return true
+    }
+
+    /** point_rules 기준으로 특정 정책의 일일 제한(dailyCap) 값을 조회 */
+    suspend fun getDailyCap(pointPolicy: PointPolicy): Int? {
+        val rule = pointRuleRepository.findActiveByActionCode(pointPolicy.code)
+            ?: throw IllegalStateException("포인트 정책이 존재하지 않습니다. ($pointPolicy)")
+        return rule.dailyCap
+    }
+
+    /** dailyCap이 null이면 기본값을 반환(하위호환/안전장치) */
+    suspend fun getDailyCapOrDefault(pointPolicy: PointPolicy, defaultCap: Int): Int {
+        return getDailyCap(pointPolicy) ?: defaultCap
+    }
+
+
 //    suspend fun verifyPayment(paymentKey: String, orderId: String, amount: Int): Boolean {
 //        return try {
 //            val response = webClient.post()
