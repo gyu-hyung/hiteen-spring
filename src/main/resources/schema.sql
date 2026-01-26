@@ -79,6 +79,7 @@ CREATE TABLE users (
   tier_id           bigint REFERENCES tiers(id),
   asset_uid         uuid REFERENCES assets(uid),
   school_id         bigint,
+  school_updated_at timestamptz,
   grade             varchar(30),
   gender            varchar(30),
   birthday		    date,

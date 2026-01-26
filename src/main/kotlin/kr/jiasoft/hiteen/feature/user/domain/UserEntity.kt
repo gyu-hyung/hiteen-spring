@@ -2,6 +2,7 @@ package kr.jiasoft.hiteen.feature.user.domain
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import org.springframework.data.annotation.Id
+import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
 import java.time.LocalDate
 import java.time.OffsetDateTime
@@ -62,6 +63,10 @@ data class UserEntity (
 
     /* 학교 id */
     val schoolId: Long? = null,
+
+    /* 학교 변경일 (학교 변경 후 30일 제한 정책용) */
+    @Column("school_updated_at")
+    val schoolUpdatedAt: OffsetDateTime? = null,
 
     /* 학급 id */
     val classId: Long? = null,
