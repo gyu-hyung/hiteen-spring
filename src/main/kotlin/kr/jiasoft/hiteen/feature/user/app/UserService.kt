@@ -617,10 +617,16 @@ class UserService (
         if (files.isNullOrEmpty()) {
             throw BusinessValidationException(mapOf("file" to "이미지가 필요합니다."))
         }
-        //최대 6장
+
         val existingCount = userPhotosRepository.countByUserId(user.id)
-        if (existingCount + files.size > 3) {
-            throw BusinessValidationException(mapOf("file" to "최대 3장의 사진만 등록할 수 있습니다."))
+        val imageCount = existingCount + files.size
+        //최소 3장
+        if (imageCount < 3) {
+            throw BusinessValidationException(mapOf("file" to "최소 사진 3장은 꼭 등록해야 돼"))
+        }
+        //최대 6장
+        if (imageCount > 6) {
+            throw BusinessValidationException(mapOf("file" to "사진은 최대 6장까지 등록할 수 있어"))
         }
 
         files.forEach { file ->
