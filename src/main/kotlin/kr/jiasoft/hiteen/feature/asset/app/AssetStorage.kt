@@ -72,6 +72,30 @@ class AssetStorage(
             }
         }
 
+    /**
+     * 이미지 전체 디코드 없이(픽셀 로딩 없이) 메타데이터로만 width/height 추출
+     * - 대용량 이미지 업로드 시 OOM 방지에 중요
+     */
+    private fun readImageDimensions(path: Path): Pair<Int?, Int?> {
+        return try {
+            ImageIO.createImageInputStream(path.toFile()).use { iis ->
+                val readers = ImageIO.getImageReaders(iis)
+                if (!readers.hasNext()) return (null to null)
+                val reader = readers.next()
+                try {
+                    reader.input = iis
+                    val w = reader.getWidth(0)
+                    val h = reader.getHeight(0)
+                    w to h
+                } finally {
+                    try { reader.dispose() } catch (_: Throwable) {}
+                }
+            }
+        } catch (_: Throwable) {
+            null to null
+        }
+    }
+
     /** 저장: 날짜 폴더/랜덤파일명. 확장자 유지 */
     suspend fun save(
         filePart: FilePart,
@@ -117,10 +141,8 @@ class AssetStorage(
                 Files.move(tmp, dest)
             }
 
-            // 이미지면 크기 추출
-            val (w, h) = try {
-                readImage(dest)?.let { it.width to it.height } ?: (null to null)
-            } catch (_: Throwable) { null to null }
+            // 이미지면 크기 추출 (✅ 전체 디코드 대신 메타데이터 기반)
+            val (w, h) = readImageDimensions(dest)
 
             val mime = guessMimeByExt(finalExt)
                 ?: try { Files.probeContentType(dest) } catch (_: Throwable) { null }
@@ -231,9 +253,7 @@ class AssetStorage(
     private fun finalizeThumb(dest: Path, outExt: String, width: Int, height: Int): StoredFile {
         val mime = guessMimeByExt(outExt) ?: try { Files.probeContentType(dest) } catch (_: Throwable) { null }
         val size = Files.size(dest)
-        val (outW, outH) = try {
-            readImage(dest)?.let { it.width to it.height } ?: (width to height)
-        } catch (_: Throwable) { width to height }
+        val (outW, outH) = readImageDimensions(dest).let { (w, h) -> (w ?: width) to (h ?: height) }
         val relDir = root.relativize(dest.parent).toString().replace('\\', '/') + "/"
         return StoredFile(
             relativePath = relDir,
@@ -297,12 +317,7 @@ class AssetStorage(
                 )
             }
 
-            val (w, h) = try {
-                ImageIO.read(dest.toFile())?.let { it.width to it.height }
-                    ?: (null to null)
-            } catch (_: Throwable) {
-                null to null
-            }
+            val (w, h) = readImageDimensions(dest)
 
             val mime = try {
                 Files.probeContentType(dest)
