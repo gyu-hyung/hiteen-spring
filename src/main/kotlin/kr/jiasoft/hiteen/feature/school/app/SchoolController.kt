@@ -90,6 +90,14 @@ class SchoolController(
         return ResponseEntity.ok(ApiResult.success(classes))
     }
 
+
+    @Operation(summary = "현재 학년도 조회", description = "UserEntity.year 과 비교하여 학교 변경")
+    @GetMapping("/school-year")
+    suspend fun getCurrentSchoolYear(): ResponseEntity<ApiResult<Int>> {
+        val schoolYear = getSchoolYear()
+        return ResponseEntity.ok(ApiResult.success(schoolYear))
+    }
+
     fun getSchoolYear(date: LocalDateTime? = null): Int {
         val now = date ?: LocalDateTime.now()
 

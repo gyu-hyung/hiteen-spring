@@ -543,6 +543,25 @@ class UserService (
 //            }
 //        }
 
+        // ✅ 학교 변경 30일 제한 정책
+        val schoolChanged = existing.schoolId != newSchoolId
+        val schoolUpdatedAtToSave = if (schoolChanged) {
+            val lastChangedAt = existing.schoolUpdatedAt
+            if (lastChangedAt != null) {
+                val nextAllowedAt = lastChangedAt.plusDays(30)
+                if (OffsetDateTime.now().isBefore(nextAllowedAt)) {
+                    throw BusinessValidationException(
+                        mapOf(
+                            "schoolId" to "학교는 변경 후 30일 동안 수정할 수 없습니다. (다음 변경 가능: $nextAllowedAt)"
+                        )
+                    )
+                }
+            }
+            OffsetDateTime.now()
+        } else {
+            existing.schoolUpdatedAt
+        }
+
         // 3) 엔티티 복사
         val updated = existing.copy(
 //            username      = newUsername,
@@ -556,6 +575,7 @@ class UserService (
             moodEmoji     = newMoodEmoji,
             assetUid      = newAssetUid,
             schoolId      = newSchoolId,
+            schoolUpdatedAt = schoolUpdatedAtToSave,
             classId       = newClassId,
             grade         = newGrade,
             gender        = newGender,
