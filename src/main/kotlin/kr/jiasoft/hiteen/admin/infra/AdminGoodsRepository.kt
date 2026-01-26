@@ -164,4 +164,13 @@ interface AdminGoodsRepository : CoroutineCrudRepository<GoodsGiftishowEntity, L
         goodsTypeCd: String?,
         ): Flow<GoodsGiftishowEntity>
 
+    @Query("""
+        UPDATE goods_giftishow
+        SET status = :status,
+            updated_at = NOW()
+        WHERE id = ANY(:ids)
+          AND deleted_at IS NULL
+    """)
+    suspend fun updateStatusByIds(ids: List<Long>, status: Int): Int
+
 }

@@ -2,6 +2,7 @@ package kr.jiasoft.hiteen.admin.app
 
 import io.swagger.v3.oas.annotations.Parameter
 import kotlinx.coroutines.flow.toList
+import kr.jiasoft.hiteen.admin.dto.AdminGoodsBulkStatusRequest
 import kr.jiasoft.hiteen.admin.dto.GoodsCategoryDto
 import kr.jiasoft.hiteen.admin.dto.GoodsGiftishowCreateRequest
 import kr.jiasoft.hiteen.admin.dto.GoodsTypeDto
@@ -20,7 +21,9 @@ import org.springframework.http.codec.multipart.FilePart
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RequestPart
@@ -231,5 +234,25 @@ class AdminGoodsController (
         return ResponseEntity.ok(ApiResult.success(list))
     }
 
+
+    @PatchMapping("/status")
+    suspend fun bulkUpdateStatus(
+        @RequestBody req: AdminGoodsBulkStatusRequest,
+        @AuthenticationPrincipal(expression = "user") user: UserEntity,
+    ): ResponseEntity<ApiResult<Map<String, Any>>> {
+        require(req.ids.isNotEmpty()) { "ids는 비어있을 수 없습니다." }
+        require(req.status == 0 || req.status == 1) { "status는 0 또는 1 이어야 합니다." }
+
+        val updatedCount = adminGoodsRepository.updateStatusByIds(req.ids.distinct(), req.status)
+
+        return ResponseEntity.ok(
+            ApiResult.success(
+                mapOf(
+                    "updatedCount" to updatedCount,
+                    "status" to req.status,
+                )
+            )
+        )
+    }
 
 }
