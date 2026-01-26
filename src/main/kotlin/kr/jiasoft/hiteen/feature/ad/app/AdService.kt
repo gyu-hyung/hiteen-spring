@@ -20,7 +20,12 @@ class AdService(
     private val userRepo: UserRepository,
 ) {
 
-    private val DAILY_AD_LIMIT = 5
+    // point_rules 설정이 없을 때만 하위호환 기본값
+    private val DEFAULT_DAILY_AD_LIMIT = 5
+
+    private suspend fun dailyAdLimit(): Int {
+        return pointService.getDailyCapOrDefault(PointPolicy.AD_REWARD, DEFAULT_DAILY_AD_LIMIT)
+    }
 
     /**
      * 광고 리워드 저장 + 포인트 지급, 보상 횟수 체크
@@ -33,9 +38,10 @@ class AdService(
         if (admobRewardRepository.existsByTransactionId(transactionId))
             throw IllegalArgumentException("이미 처리된 트랜잭션 ID입니다.")
 
+        val limit = dailyAdLimit()
         val todayCount = admobRewardRepository.countTodayByUserId(userId)
-        if (todayCount >= DAILY_AD_LIMIT)
-            throw IllegalStateException("오늘은 광고 보상 횟수(최대 $DAILY_AD_LIMIT 회)를 모두 사용했습니다.")
+        if (todayCount >= limit)
+            throw IllegalStateException("오늘은 광고 보상 횟수(최대 $limit 회)를 모두 사용했습니다.")
 
         // ✅ rawData(String?) → Json? 변환
         val jsonData = rawData?.let { Json.of(it) }
@@ -59,7 +65,7 @@ class AdService(
     /**
      * 광고 리워드 검증 및 포인트 지급 (차감 없음) + 남은 횟수 반환
      */
-    suspend fun verifyAdReward(
+    suspend fun  verifyAdReward(
         transactionId: String,
         userId: String,
         rawData: String? = null
@@ -70,7 +76,7 @@ class AdService(
 
         val reward = saveRewardAndGrantPoint(transactionId, id, rawData)
         val todayCount = admobRewardRepository.countTodayByUserId(id) // 저장 이후 카운트
-        val remaining = DAILY_AD_LIMIT - todayCount
+        val remaining = dailyAdLimit() - todayCount
         return AdRewardResult(reward, remaining)
     }
 
@@ -78,8 +84,8 @@ class AdService(
      * 남은 광고 보기 수
      * */
     suspend fun getRemainingCount(userId: Long) : Int {
-        val todayCount = admobRewardRepository.countTodayByUserId(userId) // 저장 이후 카운트
-        return  DAILY_AD_LIMIT - todayCount
+        val todayCount = admobRewardRepository.countTodayByUserId(userId)
+        return  dailyAdLimit() - todayCount
     }
 
     /**
@@ -97,4 +103,3 @@ class AdService(
         pointService.applyPolicy(userId, PointPolicy.GAME_PLAY, gameId)
     }
 }
-

@@ -607,3 +607,59 @@ DO UPDATE SET
     region_stats = EXCLUDED.region_stats,
     created_at = now();
 
+
+
+
+
+INSERT INTO public.codes
+(code, code_name, code_group, code_group_name, status, col1, col2, col3, created_id)
+VALUES
+('EIFFEL_TOWER', '에펠탑', 'LANDMARK', '세계 랜드마크', 'ACTIVE', '5', '48.858370', '2.294481', 1),
+('STATUE_OF_LIBERTY', '자유의 여신상', 'LANDMARK', '세계 랜드마크', 'ACTIVE', '5', '40.689247', '-74.044502', 1),
+('TAJ_MAHAL', '타지마할', 'LANDMARK', '세계 랜드마크', 'ACTIVE', '5', '27.175015', '78.042155', 1),
+('GREAT_WALL', '만리장성', 'LANDMARK', '세계 랜드마크', 'ACTIVE', '5', '40.431908', '116.570374', 1),
+('COLOSSEUM', '콜로세움', 'LANDMARK', '세계 랜드마크', 'ACTIVE', '5', '41.890210', '12.492231', 1),
+('MACHU_PICCHU', '마추픽추', 'LANDMARK', '세계 랜드마크', 'ACTIVE', '5', '-13.163141', '-72.544963', 1),
+('CHRIST_REDEEMER', '구세주 그리스도상', 'LANDMARK', '세계 랜드마크', 'ACTIVE', '5', '-22.951916', '-43.210487', 1),
+('PETRA', '페트라', 'LANDMARK', '세계 랜드마크', 'ACTIVE', '5', '30.328960', '35.444832', 1),
+('CHICHEN_ITZA', '치첸이트사', 'LANDMARK', '세계 랜드마크', 'ACTIVE', '5', '20.684285', '-88.567783', 1),
+('ANGKOR_WAT', '앙코르와트', 'LANDMARK', '세계 랜드마크', 'ACTIVE', '5', '13.412469', '103.866986', 1),
+
+('BIG_BEN', '빅벤', 'LANDMARK', '세계 랜드마크', 'ACTIVE', '4', '51.500729', '-0.124625', 1),
+('TIMES_SQUARE', '타임스퀘어', 'LANDMARK', '세계 랜드마크', 'ACTIVE', '4', '40.758896', '-73.985130', 1),
+('OPERA_HOUSE', '시드니 오페라 하우스', 'LANDMARK', '세계 랜드마크', 'ACTIVE', '4', '-33.856784', '151.215297', 1),
+('MOUNT_FUJI', '후지산', 'LANDMARK', '세계 랜드마크', 'ACTIVE', '4', '35.360638', '138.727363', 1),
+('NOTRE_DAME', '노트르담 대성당', 'LANDMARK', '세계 랜드마크', 'ACTIVE', '4', '48.852968', '2.349902', 1),
+('SAGRADA_FAMILIA', '사그라다 파밀리아', 'LANDMARK', '세계 랜드마크', 'ACTIVE', '4', '41.403629', '2.174356', 1),
+('BRANDENBURG_GATE', '브란덴부르크 문', 'LANDMARK', '세계 랜드마크', 'ACTIVE', '4', '52.516275', '13.377704', 1),
+('GOLDEN_GATE', '금문교', 'LANDMARK', '세계 랜드마크', 'ACTIVE', '4', '37.819929', '-122.478255', 1),
+('CN_TOWER', 'CN 타워', 'LANDMARK', '세계 랜드마크', 'ACTIVE', '4', '43.642566', '-79.387057', 1),
+('NEUSCHWANSTEIN', '노이슈반슈타인 성', 'LANDMARK', '세계 랜드마크', 'ACTIVE', '4', '47.557574', '10.749800', 1),
+
+('LOUVRE', '루브르 박물관', 'LANDMARK', '세계 랜드마크', 'ACTIVE', '3', '48.860611', '2.337644', 1),
+('VERSAILLES', '베르사유 궁전', 'LANDMARK', '세계 랜드마크', 'ACTIVE', '3', '48.804865', '2.120355', 1),
+('BUCKINGHAM', '버킹엄 궁전', 'LANDMARK', '세계 랜드마크', 'ACTIVE', '3', '51.501364', '-0.141890', 1),
+('EDINBURGH_CASTLE', '에든버러 성', 'LANDMARK', '세계 랜드마크', 'ACTIVE', '3', '55.948594', '-3.199913', 1),
+('STONEHENGE', '스톤헨지', 'LANDMARK', '세계 랜드마크', 'ACTIVE', '3', '51.178882', '-1.826215', 1),
+('NIAGARA_FALLS', '나이아가라 폭포', 'LANDMARK', '세계 랜드마크', 'ACTIVE', '3', '43.096214', '-79.037739', 1),
+('MOUNT_RUSHMORE', '러시모어 산', 'LANDMARK', '세계 랜드마크', 'ACTIVE', '3', '43.879102', '-103.459067', 1),
+('TABLE_MOUNTAIN', '테이블 마운틴', 'LANDMARK', '세계 랜드마크', 'ACTIVE', '3', '-33.962823', '18.409810', 1),
+('SANTORINI', '산토리니', 'LANDMARK', '세계 랜드마크', 'ACTIVE', '3', '36.393156', '25.461509', 1),
+('DUBAI_BURJ', '부르즈 할리파', 'LANDMARK', '세계 랜드마크', 'ACTIVE', '3', '25.197197', '55.274376', 1),
+
+('LOTUS_TEMPLE', '연꽃 사원', 'LANDMARK', '세계 랜드마크', 'ACTIVE', '2', '28.553492', '77.258826', 1),
+('MERLION', '머라이언', 'LANDMARK', '세계 랜드마크', 'ACTIVE', '2', '1.286788', '103.854502', 1),
+('GYEONGBOKGUNG', '경복궁', 'LANDMARK', '세계 랜드마크', 'ACTIVE', '2', '37.579617', '126.977041', 1),
+('NAMSAN_TOWER', '남산타워', 'LANDMARK', '세계 랜드마크', 'ACTIVE', '2', '37.551169', '126.988227', 1),
+('PETRONAS', '페트로나스 타워', 'LANDMARK', '세계 랜드마크', 'ACTIVE', '2', '3.157916', '101.711423', 1),
+('FUSHIMI_INARI', '후시미 이나리 신사', 'LANDMARK', '세계 랜드마크', 'ACTIVE', '2', '34.967140', '135.772671', 1),
+('ALHAMBRA', '알함브라 궁전', 'LANDMARK', '세계 랜드마크', 'ACTIVE', '2', '37.176077', '-3.588141', 1),
+('ACROPOLIS', '아크로폴리스', 'LANDMARK', '세계 랜드마크', 'ACTIVE', '2', '37.971532', '23.725749', 1),
+('MOAI', '모아이 석상', 'LANDMARK', '세계 랜드마크', 'ACTIVE', '2', '-27.112723', '-109.349686', 1),
+('KREMLIN', '크렘린 궁전', 'LANDMARK', '세계 랜드마크', 'ACTIVE', '2', '55.752023', '37.617499', 1),
+
+('ULURU', '울루루', 'LANDMARK', '세계 랜드마크', 'ACTIVE', '1', '-25.344428', '131.036882', 1),
+('BLUE_LAGOON', '블루라군', 'LANDMARK', '세계 랜드마크', 'ACTIVE', '1', '63.879016', '-22.445568', 1),
+('PLITVICE', '플리트비체 호수', 'LANDMARK', '세계 랜드마크', 'ACTIVE', '1', '44.880000', '15.616000', 1),
+('BANFF', '밴프 국립공원', 'LANDMARK', '세계 랜드마크', 'ACTIVE', '1', '51.496846', '-115.928056', 1),
+('REYKJAVIK', '레이캬비크', 'LANDMARK', '세계 랜드마크', 'ACTIVE', '1', '64.146582', '-21.942636', 1);
