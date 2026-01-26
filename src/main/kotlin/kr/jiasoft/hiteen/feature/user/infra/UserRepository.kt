@@ -70,6 +70,7 @@ interface UserRepository : CoroutineCrudRepository<UserEntity, Long> {
         WHERE (LOWER(username) LIKE LOWER(CONCAT('%', :q, '%'))
            OR  LOWER(COALESCE(nickname,'')) LIKE LOWER(CONCAT('%', :q, '%'))
            OR  LOWER(COALESCE(email,'')) LIKE LOWER(CONCAT('%', :q, '%')))
+          AND COALESCE(a.role, '') <> 'ADMIN'
         LIMIT :limit
     """)
     suspend fun searchSummary(q: String, limit: Int = 30): Flow<UserSummary>
@@ -80,6 +81,7 @@ interface UserRepository : CoroutineCrudRepository<UserEntity, Long> {
         , (select tier_name_kr from tiers where id = tier_id) tier_name
         , (select id from tiers where id = tier_id) tier_id
         FROM users a WHERE id = :id
+          AND COALESCE(a.role, '') <> 'ADMIN'
     """)
     suspend fun findSummaryInfoById(id: Long): UserSummary
 
@@ -89,6 +91,7 @@ interface UserRepository : CoroutineCrudRepository<UserEntity, Long> {
         , (select tier_name_kr from tiers where id = tier_id) tier_name
         , (select id from tiers where id = tier_id) tier_id
         FROM users a WHERE id IN (:ids)
+          AND COALESCE(a.role, '') <> 'ADMIN'
     """)
     suspend fun findSummaryByIds(ids: List<Long>): List<UserSummary>
 
@@ -214,12 +217,12 @@ interface UserRepository : CoroutineCrudRepository<UserEntity, Long> {
             AND fr.friend_id = u.id 
             AND fr.status = 'PENDING'
         WHERE u.phone IN (:phones)
+          AND COALESCE(u.role, '') <> 'ADMIN'
     """)
     fun findAllUserSummaryByPhoneIn(
         phones: Set<String>,
         currentUserId: Long
     ): Flow<UserSummary>
-
 
 
     suspend fun findIdByUidIn(uids: List<UUID>): List<Long>
