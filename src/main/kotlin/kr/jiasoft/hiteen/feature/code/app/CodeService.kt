@@ -117,6 +117,7 @@ class CodeService(
         val uploaded = file?.let { assetService.uploadImage(it, userId, AssetCategory.CODE) }
 
         val updated = existing.copy(
+            id = existing.id,
             code = if (dto.code != existing.code) dto.code else existing.code,
             codeName = if (dto.codeName != existing.codeName) dto.codeName else existing.codeName,
             codeGroupName = if (dto.group != existing.codeGroupName) dto.group else existing.codeGroupName,
