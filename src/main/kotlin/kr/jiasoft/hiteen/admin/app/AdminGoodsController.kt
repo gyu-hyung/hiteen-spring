@@ -235,7 +235,7 @@ class AdminGoodsController (
     }
 
 
-    @PatchMapping("/status")
+    @PostMapping("/status")
     suspend fun bulkUpdateStatus(
         @RequestBody req: AdminGoodsBulkStatusRequest,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
@@ -244,6 +244,7 @@ class AdminGoodsController (
         require(req.status == 0 || req.status == 1) { "status는 0 또는 1 이어야 합니다." }
 
         val updatedCount = adminGoodsRepository.updateStatusByIds(req.ids.distinct(), req.status)
+            ?: 0
 
         return ResponseEntity.ok(
             ApiResult.success(
