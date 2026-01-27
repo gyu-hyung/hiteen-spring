@@ -74,6 +74,10 @@ data class UserResponse(
     @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     val birthday: LocalDate?,
 
+    @param:Schema(description = "학교 변경일시 (학교 변경 후 30일 제한 정책용)", example = "2025.09.18 10:15")
+    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm")
+    val schoolUpdatedAt: OffsetDateTime? = null,
+
     @param:Schema(description = "프로필 데코레이션 코드", example = "P_001")
     val profileDecorationCode: String? = null,
 
@@ -163,6 +167,7 @@ data class UserResponse(
                     grade = entity.grade,
                     gender = entity.gender,
                     birthday = entity.birthday,
+                    schoolUpdatedAt = entity.schoolUpdatedAt,
                     profileDecorationCode = entity.profileDecorationCode,
                     inviteCode = entity.inviteCode,
                     inviteJoins = entity.inviteJoins,
