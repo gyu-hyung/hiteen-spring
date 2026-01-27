@@ -108,8 +108,7 @@ interface InterestUserRepository : CoroutineCrudRepository<InterestUserEntity, L
         FROM interest_user iu
         JOIN users u ON u.id = iu.user_id
         WHERE iu.interest_id IN (:interestIds)
-          AND iu.user_id <> :currentUserId     
-          AND COALESCE(u.role, '') <> 'ADMIN'
+          AND iu.user_id <> :currentUserId
           AND iu.user_id IN (
               SELECT user_id FROM user_photos GROUP BY user_id HAVING COUNT(*) >= 3
           )

@@ -8,29 +8,29 @@ Hiteen 개발/운영 k8s 환경에 **Prometheus + Grafana + Alertmanager**를 �
 
 ## 빠른 시작 (명령어 모음)
 
-> 전제: 로컬/서버에 `kubectl`, `helm`이 설치돼 있고, 현재 Kube context가 대상 클러스터를 가리키고 있어야 합니다.
+    > 전제: 로컬/서버에 `kubectl`, `helm`이 설치돼 있고, 현재 Kube context가 대상 클러스터를 가리키고 있어야 합니다.
 
 ### 0) Helm repo 준비
 ```bash
-helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
-helm repo add bitnami https://charts.bitnami.com/bitnami
-helm repo update
+    helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+    helm repo add bitnami https://charts.bitnami.com/bitnami
+    helm repo update
 ```
 
-### 1) 네임스페이스 생성
+### 1) 네임스페이스 생성 (이미 있으면 생략 가능)
 ```bash
-kubectl create namespace hiteen --dry-run=client -o yaml | kubectl apply -f -
-kubectl create namespace monitoring --dry-run=client -o yaml | kubectl apply -f -
+    kubectl create namespace hiteen --dry-run=client -o yaml | kubectl apply -f -
+    kubectl create namespace monitoring --dry-run=client -o yaml | kubectl apply -f -
 ```
 
 ### 2) 모니터링 차트 의존성 다운로드
 ```bash
-helm dependency update ./hiteen-monitoring-chart
+    helm dependency update ./hiteen-monitoring-chart
 ```
 
 ### 3) 모니터링 스택 설치/업그레이드
 ```bash
-helm upgrade --install monitoring ./hiteen-monitoring-chart -n monitoring
+  helm upgrade --install monitoring ./hiteen-monitoring-chart -n monitoring
 ```
 
 ### 4) (필수) Redis exporter 설치
@@ -40,30 +40,24 @@ Redis 대시보드/알럿은 exporter가 있어야 동작합니다.
 > Redis 비밀번호를 secret에서 읽어 주입하도록 했습니다.
 
 ```bash
-REDIS_PASSWORD=$(kubectl -n hiteen get secret redis-secret -o jsonpath='{.data.redis-password}' | base64 --decode)
-
-helm upgrade --install redis-exporter bitnami/redis-exporter \
-  -n monitoring \
-  --set redisAddress=redis://redis.hiteen.svc.cluster.local:6379 \
-  --set redisPassword="$REDIS_PASSWORD" \
-  --set serviceMonitor.enabled=true \
-  --set serviceMonitor.namespace=monitoring \
-  --set serviceMonitor.labels.release=monitoring
+    REDIS_PASSWORD=$(kubectl -n hiteen get secret redis-secret -o jsonpath='{.data.redis-password}' | base64 --decode)
+    
+    helm upgrade --install redis-exporter bitnami/redis-exporter \
+      -n monitoring \
+      --set redisAddress=redis://redis.hiteen.svc.cluster.local:6379 \
+      --set redisPassword="$REDIS_PASSWORD" \
+      --set serviceMonitor.enabled=true \
+      --set serviceMonitor.namespace=monitoring \
+      --set serviceMonitor.labels.release=monitoring
 ```
 
-### 5) (별도) Hiteen 앱 배포/업그레이드
-Hiteen 앱 메트릭 스크랩은 `hiteen-chart`에서 ServiceMonitor로 연결됩니다.
 
-```bash
-helm upgrade --install hiteen ./hiteen-chart -n hiteen
-```
-
-### 6) Grafana 초기 비밀번호 확인
+### 5) Grafana 초기 비밀번호 확인
 ```bash
 kubectl -n monitoring get secret monitoring-grafana -o jsonpath='{.data.admin-password}' | base64 --decode; echo
 ```
 
-### 7) 상태 확인
+### 6) 상태 확인
 ```bash
 kubectl -n monitoring get pods
 kubectl -n monitoring get ingress
