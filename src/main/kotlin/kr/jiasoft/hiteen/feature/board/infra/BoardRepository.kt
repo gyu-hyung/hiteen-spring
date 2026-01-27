@@ -119,7 +119,14 @@ interface BoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
             b.created_at     AS created_at,
             b.created_id     AS created_id,
             (SELECT COUNT(*)::bigint FROM board_likes bl WHERE bl.board_id = b.id) AS like_count,
-            (SELECT COUNT(*)::bigint FROM board_comments bc WHERE bc.board_id = b.id AND bc.deleted_at IS NULL) AS comment_count,
+            (
+                SELECT COUNT(*)::bigint
+                FROM board_comments bc
+                LEFT JOIN board_comments bp ON bp.id = bc.parent_id
+                WHERE bc.board_id = b.id
+                  AND bc.deleted_at IS NULL
+                  AND (bc.parent_id IS NULL OR bp.deleted_at IS NULL)
+            ) AS comment_count,
             EXISTS (SELECT 1 FROM board_likes bl2 WHERE bl2.board_id = b.id AND bl2.user_id = :userId) AS liked_by_me,
             COALESCE((
                 CASE 
@@ -227,7 +234,14 @@ interface BoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
             b.created_at     AS created_at,
             b.created_id     AS created_id,
             (SELECT COUNT(*)::bigint FROM board_likes bl WHERE bl.board_id = b.id) AS like_count,
-            (SELECT COUNT(*)::bigint FROM board_comments bc WHERE bc.board_id = b.id AND bc.deleted_at IS NULL) AS comment_count,
+            (
+                SELECT COUNT(*)::bigint
+                FROM board_comments bc
+                LEFT JOIN board_comments bp ON bp.id = bc.parent_id
+                WHERE bc.board_id = b.id
+                  AND bc.deleted_at IS NULL
+                  AND (bc.parent_id IS NULL OR bp.deleted_at IS NULL)
+            ) AS comment_count,
             EXISTS (SELECT 1 FROM board_likes bl2 WHERE bl2.board_id = b.id AND bl2.user_id = :userId) AS liked_by_me,
             COALESCE((
                 CASE 
@@ -298,12 +312,7 @@ interface BoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
             b.link,
             b.hits,
             b.asset_uid      AS asset_uid,
-            b.start_date,
-            b.end_date,
-            b.status,
-            b.address,
-            b.detail_address,
-            b.lat, 
+            b.lat,
             b.lng,
             u.grade,
             s.type           AS type,
@@ -312,7 +321,14 @@ interface BoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
             b.created_id     AS created_id,
             b.updated_at     AS updated_at,
             (SELECT COUNT(*)::bigint FROM board_likes bl WHERE bl.board_id = b.id) AS like_count,
-            (SELECT COUNT(*)::bigint FROM board_comments bc WHERE bc.board_id = b.id AND bc.deleted_at IS NULL) AS comment_count,
+            (
+                SELECT COUNT(*)::bigint
+                FROM board_comments bc
+                LEFT JOIN board_comments bp ON bp.id = bc.parent_id
+                WHERE bc.board_id = b.id
+                  AND bc.deleted_at IS NULL
+                  AND (bc.parent_id IS NULL OR bp.deleted_at IS NULL)
+            ) AS comment_count,
             EXISTS (SELECT 1 FROM board_likes bl2 WHERE bl2.board_id = b.id AND bl2.user_id = :userId) AS liked_by_me,
             COALESCE((
                 CASE 
@@ -329,8 +345,9 @@ interface BoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
         FROM boards b
         LEFT JOIN users u ON b.created_id = u.id
         LEFT JOIN schools s ON s.id = u.school_id
-        WHERE b.uid = :uid
-          AND b.deleted_at IS NULL
+        WHERE b.deleted_at IS NULL
+          AND b.uid = :uid
+        LIMIT 1
     """)
     suspend fun findDetailByUid(uid: UUID, userId: Long): BoardResponse?
 

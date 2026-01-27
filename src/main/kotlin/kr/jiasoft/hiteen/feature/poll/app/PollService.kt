@@ -589,6 +589,29 @@ class PollService(
     }
 
 
+    suspend fun listMyComments(
+        userId: Long,
+        cursor: UUID?,
+        perPage: Int
+    ): List<PollCommentResponse> {
+        val rawComments = comments.findMyComments(userId, cursor, perPage).toList()
+        if (rawComments.isEmpty()) return emptyList()
+
+        val authorIds = rawComments.map { it.createdId }.distinct()
+        val userMap = userService.findUserResponseByIds(
+            targetIds = authorIds,
+            currentUserId = userId,
+            includes = UserResponseIncludes(school = true)
+        ).associateBy { it.id }
+
+        return rawComments.map { comment ->
+            comment.copy(
+                user = userMap[comment.createdId]
+            )
+        }
+    }
+
+
     private fun notFound(what: String) = ResponseStatusException(HttpStatus.BAD_REQUEST, "$what not found")
     private fun badRequest(msg: String) = ResponseStatusException(HttpStatus.BAD_REQUEST, msg)
     private fun forbidden(msg: String) = ResponseStatusException(HttpStatus.FORBIDDEN, msg)
