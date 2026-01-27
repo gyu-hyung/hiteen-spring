@@ -12,12 +12,12 @@ spring:
     password: hiteen@2025
     pool:
       enabled: true
-      initial-size: 10         # 서버 시작 시 커넥션 미리 확보
-      max-size: 50            # 500 VU 기준 SAFE
+      initial-size: 10
+      max-size: 80
       max-idle-time: 60s
       max-life-time: 30m
       validation-query: "SELECT 1"
-      acquire-timeout: 10s     # 대기 시간 제한 → 지연 대기 줄임
+      acquire-timeout: 10s
       max-create-connection-time: 10s
 
   liquibase:
