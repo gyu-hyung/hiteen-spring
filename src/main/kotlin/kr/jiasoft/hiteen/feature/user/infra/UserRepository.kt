@@ -76,12 +76,12 @@ interface UserRepository : CoroutineCrudRepository<UserEntity, Long> {
     suspend fun searchSummary(q: String, limit: Int = 30): Flow<UserSummary>
 
     /* 친구/팔로우 사용자 정보회 */
+    //AND COALESCE(a.role, '') <> 'ADMIN'
     @Query("""
         SELECT a.*
         , (select tier_name_kr from tiers where id = tier_id) tier_name
         , (select id from tiers where id = tier_id) tier_id
         FROM users a WHERE id = :id
-          AND COALESCE(a.role, '') <> 'ADMIN'
     """)
     suspend fun findSummaryInfoById(id: Long): UserSummary
 
