@@ -387,7 +387,7 @@ class PollService(
 
 
     suspend fun vote(pollId: Long?, seq: Int, userId: Long) {
-        polls.findById(pollId!!) ?: throw IllegalArgumentException( "poll not found")
+        polls.findById(pollId!!) ?: throw IllegalArgumentException( "poll not found(vote)")
 
         val select = pollSelects.findAllByPollId(pollId)
             .toList()
@@ -472,7 +472,7 @@ class PollService(
 
 
     suspend fun createComment(req: PollCommentRegisterRequest, user: UserEntity): PollCommentResponse? {
-        val p = polls.findById(req.pollId) ?: throw IllegalArgumentException("poll not found")
+        val p = polls.findById(req.pollId) ?: throw IllegalArgumentException("poll not found(createComment)")
         if (p.allowComment == 0) throw BusinessValidationException(mapOf("error" to "comment_not_allowed"))
 
         val parent: PollCommentEntity? = req.parentUid?.let { uid -> comments.findByUid(uid) }
