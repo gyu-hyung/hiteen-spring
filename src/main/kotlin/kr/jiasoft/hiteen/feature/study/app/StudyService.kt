@@ -49,7 +49,7 @@ class StudyService(
 
             // type이 9인 경우 초등 문제로 대체
 
-            val items = questionItemsRepository.findAllBySeasonIdAndType(request.seasonId, type).toList()
+            val items = questionItemsRepository.findAllBySeasonId(request.seasonId).toList()
             val questionMap = questionRepository.findAllById(questionIds).toList().associateBy { it.id }
 
             // 3️⃣ 기존 학습 문제 응답 DTO 구성
