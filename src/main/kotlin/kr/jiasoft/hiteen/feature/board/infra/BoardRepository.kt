@@ -311,6 +311,7 @@ interface BoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
             b.content,
             b.link,
             b.hits,
+            b.status,
             b.asset_uid      AS asset_uid,
             b.lat,
             b.lng,
