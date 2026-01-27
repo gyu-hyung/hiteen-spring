@@ -302,7 +302,7 @@ class PollService(
                 userIds = friendIds,
                 actorUserId = user.id,
                 templateData = PushTemplate.NEW_VOTE.buildPushData("nickname" to user.nickname),
-                extraData = mapOf("pollId" to pollEntity.id.toString()),
+                extraData = mapOf("pollId" to id.toString()),
             )
         )
         return id
