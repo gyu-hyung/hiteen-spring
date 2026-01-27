@@ -48,7 +48,14 @@ interface BoardCommentRepository : CoroutineCrudRepository<BoardCommentEntity, L
             c.created_at  AS created_at,
             c.created_id  AS created_id,
             c.reply_count AS reply_count,
-            (select COUNT(*) from board_comments where board_id = b.id) board_comment_count,
+            (
+                SELECT COUNT(*)
+                FROM board_comments bc
+                LEFT JOIN board_comments bp ON bp.id = bc.parent_id
+                WHERE bc.board_id = b.id
+                  AND bc.deleted_at IS NULL
+                  AND (bc.parent_id IS NULL OR bp.deleted_at IS NULL)
+            ) board_comment_count,
             (SELECT COUNT(*)::bigint FROM board_comment_likes l WHERE l.comment_id = c.id) AS like_count,
             EXISTS (SELECT 1 FROM board_comment_likes l2 WHERE l2.comment_id = c.id AND l2.user_id = :userId) AS liked_by_me,
             p.uid AS parent_uid
@@ -75,7 +82,14 @@ interface BoardCommentRepository : CoroutineCrudRepository<BoardCommentEntity, L
             c.created_at  AS created_at,
             c.created_id  AS created_id,
             c.reply_count AS reply_count,
-            (select COUNT(*) from board_comments where board_id = b.id) board_comment_count,
+            (
+                SELECT COUNT(*)
+                FROM board_comments bc
+                LEFT JOIN board_comments bp ON bp.id = bc.parent_id
+                WHERE bc.board_id = b.id
+                  AND bc.deleted_at IS NULL
+                  AND (bc.parent_id IS NULL OR bp.deleted_at IS NULL)
+            ) board_comment_count,
             (SELECT COUNT(*)::bigint FROM board_comment_likes l WHERE l.comment_id = c.id) AS like_count,
             EXISTS (SELECT 1 FROM board_comment_likes l2 WHERE l2.comment_id = c.id AND l2.user_id = :userId) AS liked_by_me,
             p.uid AS parent_uid
@@ -110,7 +124,14 @@ interface BoardCommentRepository : CoroutineCrudRepository<BoardCommentEntity, L
             c.created_at  AS created_at,
             c.created_id  AS created_id,
             c.reply_count AS reply_count,
-            (select COUNT(*) from board_comments where board_id = b.id) board_comment_count,
+            (
+                SELECT COUNT(*)
+                FROM board_comments bc
+                LEFT JOIN board_comments bp ON bp.id = bc.parent_id
+                WHERE bc.board_id = b.id
+                  AND bc.deleted_at IS NULL
+                  AND (bc.parent_id IS NULL OR bp.deleted_at IS NULL)
+            ) board_comment_count,
             (SELECT COUNT(*)::bigint FROM board_comment_likes l WHERE l.comment_id = c.id) AS like_count,
             EXISTS (SELECT 1 FROM board_comment_likes l2 WHERE l2.comment_id = c.id AND l2.user_id = :userId) AS liked_by_me,
             p.uid AS parent_uid

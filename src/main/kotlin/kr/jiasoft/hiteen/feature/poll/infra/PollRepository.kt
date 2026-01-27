@@ -68,7 +68,14 @@ interface PollRepository : CoroutineCrudRepository<PollEntity, Long> {
             p.color_start,
             p.color_end,
             p.vote_count,
-            (SELECT COUNT(*)::bigint FROM poll_comments pc WHERE pc.poll_id = p.id AND pc.deleted_at IS NULL) AS comment_count,
+            (
+                SELECT COUNT(*)::bigint
+                FROM poll_comments pc
+                LEFT JOIN poll_comments pp ON pp.id = pc.parent_id
+                WHERE pc.poll_id = p.id
+                  AND pc.deleted_at IS NULL
+                  AND (pc.parent_id IS NULL OR pp.deleted_at IS NULL)
+            ) AS comment_count,
             (SELECT COUNT(*)::bigint FROM poll_likes pl WHERE pl.poll_id = p.id) AS like_count,
             EXISTS (SELECT 1 FROM poll_likes pl2 WHERE pl2.poll_id = p.id AND pl2.user_id = :currentUserId) AS liked_by_me,
             EXISTS (SELECT 1 FROM poll_users pu WHERE pu.poll_id = p.id AND pu.user_id = :currentUserId) AS voted_by_me,
