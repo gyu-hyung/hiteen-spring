@@ -15,10 +15,13 @@ import java.time.LocalDate
 import java.util.*
 import javax.imageio.ImageIO
 import javax.imageio.ImageReader
+import org.slf4j.LoggerFactory
 
 class AssetStorage(
     private val root: Path
 ) {
+
+    private val log = LoggerFactory.getLogger(javaClass)
 
     private fun normalizeExt(formatName: String?): String? = when (formatName?.lowercase()) {
         null -> null
@@ -103,6 +106,8 @@ class AssetStorage(
         maxSizeBytes: Long,
         category: AssetCategory = AssetCategory.COMMON
     ): StoredFile {
+        val t0 = System.nanoTime()
+
         val orig = filePart.filename()
         val extFromName = orig.substringAfterLast('.', "").lowercase().ifBlank { null }
 
@@ -113,14 +118,19 @@ class AssetStorage(
         // 파일을 임시로 받아 사이즈 검사
         val tmp = Files.createTempFile("upload-", ".${extFromName ?: "tmp"}")
         try {
+            val tTransferStart = System.nanoTime()
             // transferTo는 non-blocking 처리가 되어 있음
             filePart.transferTo(tmp).awaitSingleOrNull()
+            val tTransferMs = (System.nanoTime() - tTransferStart) / 1_000_000
+
             val size = Files.size(tmp)
             if (size > maxSizeBytes) throw IllegalArgumentException("파일 용량 초과: ${size}bytes")
 
+            val tDetectStart = System.nanoTime()
             // ✅ 실제 이미지 포맷 기반으로 확장자 정정 (ex: webp인데 jpg로 들어오는 케이스)
             val detectedExt = detectImageFormat(tmp)
             val finalExt = detectedExt ?: extFromName
+            val tDetectMs = (System.nanoTime() - tDetectStart) / 1_000_000
 
             if (finalExt != null && allowedExts.isNotEmpty() && !allowedExts.contains(finalExt)) {
                 throw IllegalArgumentException("허용되지 않은 확장자(실제 포맷 기준): .$finalExt")
@@ -136,18 +146,42 @@ class AssetStorage(
             val storedName = if (finalExt != null) "$randomName.$finalExt" else randomName
             val dest = dir.resolve(storedName)
 
+            val tMoveStart = System.nanoTime()
             // 이동
             withContext(Dispatchers.IO) {
                 Files.move(tmp, dest)
             }
+            val tMoveMs = (System.nanoTime() - tMoveStart) / 1_000_000
 
+            val tDimStart = System.nanoTime()
             // 이미지면 크기 추출 (✅ 전체 디코드 대신 메타데이터 기반)
             val (w, h) = readImageDimensions(dest)
+            val tDimMs = (System.nanoTime() - tDimStart) / 1_000_000
 
+            val tMimeStart = System.nanoTime()
             val mime = guessMimeByExt(finalExt)
                 ?: try { Files.probeContentType(dest) } catch (_: Throwable) { null }
+            val tMimeMs = (System.nanoTime() - tMimeStart) / 1_000_000
 
             val relDir = root.relativize(dir).toString().replace('\\', '/') + "/"
+
+            val totalMs = (System.nanoTime() - t0) / 1_000_000
+            log.debug(
+                "[asset.save] file={} category={} size={} extName={} extDetected={} finalExt={} transferMs={} detectMs={} moveMs={} dimMs={} mimeMs={} totalMs={} dest={}",
+                orig,
+                category,
+                size,
+                extFromName,
+                detectedExt,
+                finalExt,
+                tTransferMs,
+                tDetectMs,
+                tMoveMs,
+                tDimMs,
+                tMimeMs,
+                totalMs,
+                relDir + dest.fileName.toString(),
+            )
 
             return StoredFile(
                 relativePath = relDir,
