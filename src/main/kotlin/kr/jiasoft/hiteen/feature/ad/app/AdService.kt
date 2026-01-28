@@ -7,8 +7,10 @@ import kr.jiasoft.hiteen.feature.ad.infra.AdmobRewardRepository
 import kr.jiasoft.hiteen.feature.level.app.ExpService
 import kr.jiasoft.hiteen.feature.point.app.PointService
 import kr.jiasoft.hiteen.feature.point.domain.PointPolicy
+import kr.jiasoft.hiteen.feature.point.infra.PointRepository
 import kr.jiasoft.hiteen.feature.user.infra.UserRepository
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 import java.util.UUID
 
 
@@ -18,6 +20,7 @@ class AdService(
     private val pointService: PointService,
     private val expService: ExpService,
     private val userRepo: UserRepository,
+    private val pointRepository: PointRepository,
 ) {
 
     // point_rules 설정이 없을 때만 하위호환 기본값
@@ -81,11 +84,20 @@ class AdService(
     }
 
     /**
-     * 남은 광고 보기 수
+     * 남은 광고 보기 수 (운영)
+     * */
+//    suspend fun getRemainingCount(userId: Long) : Int {
+//        val todayCount = admobRewardRepository.countTodayByUserId(userId)
+//        return  dailyAdLimit() - todayCount
+//    }
+
+    /**
+     * 남은 광고 보기 수 (테스트용)
      * */
     suspend fun getRemainingCount(userId: Long) : Int {
-        val todayCount = admobRewardRepository.countTodayByUserId(userId)
-        return  dailyAdLimit() - todayCount
+        pointRepository.countByUserAndPolicyAndDate(userId, PointPolicy.AD_REWARD.code, LocalDate.now()).let {
+            return dailyAdLimit() - it
+        }
     }
 
     /**
