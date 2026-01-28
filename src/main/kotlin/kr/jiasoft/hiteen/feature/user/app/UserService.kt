@@ -449,8 +449,8 @@ class UserService (
             inviteService.registerInviteCode(updated)
             // 초대코드로 가입 처리
             if (!inviteCode.isNullOrBlank()) {
-                val inviterId = inviteService.handleInviteJoin(updated, inviteCode)
-                if (inviterId == null) throw BusinessValidationException(mapOf("inviteCode" to "유효하지 않은 초대코드입니다."))
+                val inviterId = inviteService.handleInviteJoin(updated, inviteCode.trim())
+                    ?: throw BusinessValidationException(mapOf("inviteCode" to "유효하지 않은 초대코드입니다."))
 
                 // ✅ 초대자에게 푸시 알림 (중복 조회 없음)
                 eventPublisher.publishEvent(
