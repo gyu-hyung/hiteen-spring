@@ -76,6 +76,8 @@ class InviteService(
 
         // point +1000
         pointService.applyPolicy(inviter.id, PointPolicy.FRIEND_INVITE, newUser.id)
+        // exp +30
+        expService.grantExp(inviter.id, "FRIEND_INVITE", newUser.id)
 
         return inviter.id
     }
