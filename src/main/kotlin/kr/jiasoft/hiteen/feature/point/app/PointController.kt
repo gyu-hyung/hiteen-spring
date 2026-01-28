@@ -62,23 +62,23 @@ class PointController(
         return ResponseEntity.ok(ApiResult.success(pointService.getUserTotalPoints(user.id)))
     }
 
-    @Operation(summary = "포인트 충전")
-    @PostMapping("/charge")
-    suspend fun chargePoints(
-        @AuthenticationPrincipal(expression = "user") user: UserEntity,
-        @Parameter(description = "포인트 충전 요청 DTO") req: PointChargeRequest
-    ): ResponseEntity<ApiResult<PointEntity>> {
-        val policy = when (req.amount) {
-            1000 -> PointPolicy.PAYMENT_1000
-            3000 -> PointPolicy.PAYMENT_3000
-            5000 -> PointPolicy.PAYMENT_5000
-            10000 -> PointPolicy.PAYMENT_10000
-            else -> throw IllegalArgumentException("지원하지 않는 충전 금액: ${req.amount}")
-        }
-        val point = pointService.applyPolicy(user.id, policy, refId = req.paymentId.toLongOrNull())
-        expService.grantExp(user.id, "POINT_CHARGE", point.id)
-        return ResponseEntity.ok(ApiResult.success(point))
-    }
+//    @Operation(summary = "포인트 충전")
+//    @PostMapping("/charge")
+//    suspend fun chargePoints(
+//        @AuthenticationPrincipal(expression = "user") user: UserEntity,
+//        @Parameter(description = "포인트 충전 요청 DTO") req: PointChargeRequest
+//    ): ResponseEntity<ApiResult<PointEntity>> {
+//        val policy = when (req.amount) {
+//            1000 -> PointPolicy.PAYMENT_1000
+//            3000 -> PointPolicy.PAYMENT_3000
+//            5000 -> PointPolicy.PAYMENT_5000
+//            10000 -> PointPolicy.PAYMENT_10000
+//            else -> throw IllegalArgumentException("지원하지 않는 충전 금액: ${req.amount}")
+//        }
+//        val point = pointService.applyPolicy(user.id, policy, refId = req.paymentId.toLongOrNull())
+//        expService.grantExp(user.id, "POINT_CHARGE", point.id)
+//        return ResponseEntity.ok(ApiResult.success(point))
+//    }
 
 
 }
