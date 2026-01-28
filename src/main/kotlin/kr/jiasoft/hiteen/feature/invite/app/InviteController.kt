@@ -20,10 +20,10 @@ class InviteController (
 
 
 
-    @PostMapping("/{targetUid}")
-    suspend fun createInvite(@AuthenticationPrincipal(expression = "user") user: UserEntity, @Parameter(description = "초대 대상 UUID") @PathVariable targetUid: UUID) {
-        ResponseEntity.ok(ApiResult.success(inviteService.giveInviteExp(user.id, targetUid)))
-    }
+//    @PostMapping("/{targetUid}")
+//    suspend fun createInvite(@AuthenticationPrincipal(expression = "user") user: UserEntity, @Parameter(description = "초대 대상 UUID") @PathVariable targetUid: UUID) {
+//        ResponseEntity.ok(ApiResult.success(inviteService.giveInviteExp(user.id, targetUid)))
+//    }
 
 
 }
