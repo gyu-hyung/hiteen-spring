@@ -20,6 +20,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.time.OffsetDateTime
 import java.util.*
+import org.slf4j.LoggerFactory
 
 @Service
 class AssetService(
@@ -29,6 +30,8 @@ class AssetService(
     @Value("\${app.asset.allowed-exts}") private val allowedExtsCsv: String,
     @Value("\${app.asset.max-size-bytes}") private val maxSizeBytes: Long,
 ) {
+
+    private val log = LoggerFactory.getLogger(javaClass)
 
     // CSV → List<String>, 공백 제거 + 소문자 통일 + 빈 항목 제거
     private val allowedExts: List<String> =
@@ -66,9 +69,35 @@ class AssetService(
         category: AssetCategory = AssetCategory.COMMON,
         originFileName: String? = null,
     ): AssetResponse = imageWorkSemaphore.withPermit {
+        val t0 = System.nanoTime()
+
+        val tSaveStart = System.nanoTime()
         val stored = storage.save(file, allowedImageExts, maxSizeBytes, category)
+        val tSaveMs = (System.nanoTime() - tSaveStart) / 1_000_000
+
+        val tEnsureStart = System.nanoTime()
         ensureImageOrDelete(stored)
-        uploadStored(stored, originFileName, currentUserId)
+        val tEnsureMs = (System.nanoTime() - tEnsureStart) / 1_000_000
+
+        val tDbStart = System.nanoTime()
+        val res = uploadStored(stored, originFileName, currentUserId)
+        val tDbMs = (System.nanoTime() - tDbStart) / 1_000_000
+
+        val totalMs = (System.nanoTime() - t0) / 1_000_000
+        log.debug(
+            "[uploadImage] userId={} category={} file={} size={} saveMs={} ensureMs={} dbMs={} totalMs={} storedPath={}",
+            currentUserId,
+            category,
+            file.filename(),
+            stored.size,
+            tSaveMs,
+            tEnsureMs,
+            tDbMs,
+            totalMs,
+            stored.relativePath + stored.absolutePath.fileName.toString(),
+        )
+
+        res
     }
 
     suspend fun uploadWordAsset(
@@ -119,15 +148,28 @@ class AssetService(
         currentUserId: Long,
         category: AssetCategory = AssetCategory.COMMON,
         originFileNames: List<String>? = null
-    ): List<AssetResponse> = coroutineScope {
-        files.mapIndexed { idx, f ->
-            async {
-                imageWorkSemaphore.withPermit {
-                    val origin = originFileNames?.getOrNull(idx)
-                    uploadImage(f, currentUserId, category, origin)
+    ): List<AssetResponse> {
+        val t0 = System.nanoTime()
+        val res = coroutineScope {
+            files.mapIndexed { idx, f ->
+                async {
+                    imageWorkSemaphore.withPermit {
+                        val origin = originFileNames?.getOrNull(idx)
+                        uploadImage(f, currentUserId, category, origin)
+                    }
                 }
-            }
-        }.awaitAll()
+            }.awaitAll()
+        }
+        val totalMs = (System.nanoTime() - t0) / 1_000_000
+        log.debug(
+            "[uploadImages] userId={} category={} count={} totalMs={} filenames={}",
+            currentUserId,
+            category,
+            files.size,
+            totalMs,
+            files.map { it.filename() }
+        )
+        return res
     }
 
     /** ⬇️ 저장/DB 로직을 한 곳에 모음: upload / uploadImage 둘 다 여기로 온다 */
