@@ -26,7 +26,7 @@ class InviteService(
     /** 내 초대코드로 등록한 친구 목록 */
     suspend fun findMyReferralList(userId: Long): List<Pair<Long, OffsetDateTime>> {
         return inviteRepository.findAllByUserId(userId)
-            .map { it.userId to it.joinDate }
+            .map { it.joinId to it.joinDate }
             .toList()
     }
 
