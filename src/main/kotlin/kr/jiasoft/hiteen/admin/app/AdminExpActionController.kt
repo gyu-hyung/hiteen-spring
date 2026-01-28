@@ -7,7 +7,9 @@ import kr.jiasoft.hiteen.admin.dto.AdminExpActionUpdateRequest
 import kr.jiasoft.hiteen.admin.services.AdminExpActionService
 import kr.jiasoft.hiteen.common.extensions.failure
 import kr.jiasoft.hiteen.common.extensions.success
+import kr.jiasoft.hiteen.common.dto.ApiPage
 import kr.jiasoft.hiteen.common.dto.ApiResult
+import kr.jiasoft.hiteen.common.dto.PageUtil
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
@@ -21,9 +23,20 @@ class AdminExpActionController(
     @GetMapping
     suspend fun list(
         @RequestParam enabled: Boolean? = null,
-    ): ResponseEntity<ApiResult<List<AdminExpActionResponse>>> {
-        val data = adminExpActionService.list(enabled).toList()
-        return success(data)
+        @RequestParam page: Int = 1,
+        @RequestParam size: Int = 10,
+        @RequestParam order: String = "DESC",
+    ): ResponseEntity<ApiResult<ApiPage<AdminExpActionResponse>>> {
+        val list = adminExpActionService.listByPage(
+            enabled = enabled,
+            page = page,
+            size = size,
+            order = order,
+        ).toList()
+
+        val totalCount = adminExpActionService.totalCount(enabled)
+
+        return ResponseEntity.ok(ApiResult.success(PageUtil.of(list, totalCount, page, size)))
     }
 
     @GetMapping("/{actionCode}")
@@ -71,4 +84,3 @@ class AdminExpActionController(
         }
     }
 }
-
