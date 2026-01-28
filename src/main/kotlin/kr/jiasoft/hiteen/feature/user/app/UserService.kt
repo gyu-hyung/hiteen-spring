@@ -49,6 +49,8 @@ import org.springframework.stereotype.Service
 import org.springframework.context.ApplicationEventPublisher
 import java.time.OffsetDateTime
 import java.util.UUID
+import org.slf4j.LoggerFactory
+import kr.jiasoft.hiteen.feature.asset.domain.ThumbnailMode
 
 @Service
 class UserService (
@@ -75,6 +77,7 @@ class UserService (
     private val eventPublisher: ApplicationEventPublisher,
 ) {
 
+    private val log = LoggerFactory.getLogger(javaClass)
 
     @Value("\${app.join.rejoin-days:30}")
     private val rejoinDays: Int = 30
@@ -614,6 +617,8 @@ class UserService (
 
 
     suspend fun registerPhotos(user: UserEntity, files: List<FilePart>?) : UserResponse {
+        val t0 = System.nanoTime()
+
         if (files.isNullOrEmpty()) {
             throw BusinessValidationException(mapOf("file" to "이미지가 필요합니다."))
         }
@@ -629,18 +634,64 @@ class UserService (
             throw BusinessValidationException(mapOf("file" to "사진은 최대 6장까지 등록할 수 있어"))
         }
 
-        files.forEach { file ->
-            // 1) 에셋 업로드
-            val asset = assetService.uploadImage(file, user.id, AssetCategory.USER_PHOTO)
+        log.debug(
+            "[registerPhotos] start userId={} existingCount={} uploadCount={} filenames={}",
+            user.id,
+            existingCount,
+            files.size,
+            files.map { it.filename() }
+        )
 
-            // 2) user_photos row 생성
+        val tUploadStart = System.nanoTime()
+        val uploaded = assetService.uploadImages(files, user.id, AssetCategory.USER_PHOTO)
+        val tUploadMs = (System.nanoTime() - tUploadStart) / 1_000_000
+
+        log.debug(
+            "[registerPhotos] upload done userId={} uploadedCount={} elapsedMs={} assetUids={}",
+            user.id,
+            uploaded.size,
+            tUploadMs,
+            uploaded.map { it.uid }
+        )
+
+        val tDbStart = System.nanoTime()
+        uploaded.forEach { asset ->
             val photoEntity = UserPhotosEntity(
                 userId = user.id,
                 uid = asset.uid
             )
-
             userPhotosRepository.save(photoEntity)
         }
+        val tDbMs = (System.nanoTime() - tDbStart) / 1_000_000
+
+        // ✅ 사이드 이펙트: 표준 프로필 사이즈(780x966) 썸네일을 미리 생성
+        // - /api/assets/{uid}/view/780x966 호출 시 생성 비용 없이 즉시 응답 가능
+        // - origin_id + width/height로 캐시되므로 중복 생성되지 않음
+        val tThumbStart = System.nanoTime()
+        uploaded.forEach { asset ->
+            runCatching {
+                assetService.getOrCreateThumbnail(
+                    uid = asset.uid,
+                    width = 780,
+                    height = 966,
+                    currentUserId = user.id,
+                    mode = ThumbnailMode.COVER
+                )
+            }.onFailure { e ->
+                log.warn("[registerPhotos] precreate thumbnail failed userId={} assetUid={} err={}", user.id, asset.uid, e.message)
+            }
+        }
+        val tThumbMs = (System.nanoTime() - tThumbStart) / 1_000_000
+
+        val totalMs = (System.nanoTime() - t0) / 1_000_000
+        log.debug(
+            "[registerPhotos] done userId={} uploadMs={} dbMs={} thumbMs={} totalMs={}",
+            user.id,
+            tUploadMs,
+            tDbMs,
+            tThumbMs,
+            totalMs
+        )
 
         return toUserResponse(user)
     }
