@@ -21,6 +21,7 @@ import java.nio.file.Path
 import java.time.OffsetDateTime
 import java.util.*
 import org.slf4j.LoggerFactory
+import kotlinx.coroutines.withTimeout
 
 @Service
 class AssetService(
@@ -142,7 +143,11 @@ class AssetService(
         }.awaitAll()
     }
 
-    /** 여러 이미지 업로드 (이미지 유효성 검사 포함) */
+    /** 여러 이미지 업로드 (이미지 유효성 검사 포함)
+     *
+     * 주의: uploadImage() 내부에서 imageWorkSemaphore.withPermit 을 이미 사용하므로,
+     * 여기서 다시 withPermit 을 걸면 (permits=2 기준) 중첩 획득으로 인해 데드락/무한대기가 발생할 수 있습니다.
+     */
     suspend fun uploadImages(
         files: List<FilePart>,
         currentUserId: Long,
@@ -150,16 +155,20 @@ class AssetService(
         originFileNames: List<String>? = null
     ): List<AssetResponse> {
         val t0 = System.nanoTime()
-        val res = coroutineScope {
-            files.mapIndexed { idx, f ->
-                async {
-                    imageWorkSemaphore.withPermit {
+
+        // 안전장치: 업로드가 무한정 대기하지 않도록 전체에 타임아웃
+        val res = withTimeout(5 * 60 * 1000L) {
+            coroutineScope {
+                files.mapIndexed { idx, f ->
+                    async {
                         val origin = originFileNames?.getOrNull(idx)
+                        // ✅ uploadImage가 내부에서 semaphore/검증/저장을 처리
                         uploadImage(f, currentUserId, category, origin)
                     }
-                }
-            }.awaitAll()
+                }.awaitAll()
+            }
         }
+
         val totalMs = (System.nanoTime() - t0) / 1_000_000
         log.debug(
             "[uploadImages] userId={} category={} count={} totalMs={} filenames={}",
