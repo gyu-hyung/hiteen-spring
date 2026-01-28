@@ -78,8 +78,8 @@ server:
 
 app:
   asset:
-#    storage-root: ${HOME}/assets
-    storage-root: D:/Project/Hiteen2/assets
+    storage-root: ${HOME}/assets
+#    storage-root: D:/Project/Hiteen2/assets
     static-locations: classpath:/assets/
     allowed-exts: jpg,jpeg,png,gif,webp,bmp,svg,mp4,mov,avi,mkv,pdf,txt,csv,zip,rar,gz
     max-size-bytes: 5242880 # 50MB

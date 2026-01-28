@@ -19,6 +19,28 @@ class AdminExpActionService(
         expActionRepository.findAllByEnabled(enabled)
             .map { it.toResponse() }
 
+    fun listByPage(
+        enabled: Boolean? = null,
+        page: Int = 1,
+        size: Int = 10,
+        order: String = "DESC",
+    ): Flow<AdminExpActionResponse> {
+        val safePage = if (page <= 0) 1 else page
+        val safeSize = if (size <= 0) 10 else size
+        val safeOrder = order.uppercase()
+        val offset = ((safePage - 1L) * safeSize).coerceAtLeast(0)
+
+        return expActionRepository.listByPage(
+            enabled = enabled,
+            order = safeOrder,
+            size = safeSize,
+            offset = offset,
+        ).map { it.toResponse() }
+    }
+
+    suspend fun totalCount(enabled: Boolean? = null): Int =
+        expActionRepository.totalCount(enabled)
+
     suspend fun get(actionCode: String): AdminExpActionResponse {
         val entity = expActionRepository.findByActionCode(actionCode)
             ?: throw IllegalArgumentException("존재하지 않는 액션 코드: $actionCode")
