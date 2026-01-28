@@ -11,5 +11,7 @@ interface TermsRepository : CoroutineCrudRepository<TermsEntity, Long> {
 
     suspend fun findByUidAndStatus(uid: UUID, status: Short): TermsEntity?
 
+    suspend fun findByUid(uid: UUID): TermsEntity?
+
     fun findAllByCategoryAndStatusOrderBySortAsc(category: String, status: Short): Flow<TermsEntity>
 }
