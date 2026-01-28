@@ -635,7 +635,7 @@ class UserService (
         }
 
         log.debug(
-            "[registerPhotos] start userId={} existingCount={} uploadCount={} filenames={}",
+            "✅✅ [registerPhotos] start userId={} existingCount={} uploadCount={} filenames={}",
             user.id,
             existingCount,
             files.size,
@@ -647,7 +647,7 @@ class UserService (
         val tUploadMs = (System.nanoTime() - tUploadStart) / 1_000_000
 
         log.debug(
-            "[registerPhotos] upload done userId={} uploadedCount={} elapsedMs={} assetUids={}",
+            "✅✅ [registerPhotos] upload done userId={} uploadedCount={} elapsedMs={} assetUids={}",
             user.id,
             uploaded.size,
             tUploadMs,
@@ -678,14 +678,14 @@ class UserService (
                     mode = ThumbnailMode.COVER
                 )
             }.onFailure { e ->
-                log.warn("[registerPhotos] precreate thumbnail failed userId={} assetUid={} err={}", user.id, asset.uid, e.message)
+                log.warn("✅✅ [registerPhotos] precreate thumbnail failed userId={} assetUid={} err={}", user.id, asset.uid, e.message)
             }
         }
         val tThumbMs = (System.nanoTime() - tThumbStart) / 1_000_000
 
         val totalMs = (System.nanoTime() - t0) / 1_000_000
         log.debug(
-            "[registerPhotos] done userId={} uploadMs={} dbMs={} thumbMs={} totalMs={}",
+            "✅✅ [registerPhotos] done userId={} uploadMs={} dbMs={} thumbMs={} totalMs={}",
             user.id,
             tUploadMs,
             tDbMs,
@@ -696,6 +696,77 @@ class UserService (
         return toUserResponse(user)
     }
 
+
+    /** 프로필 이미지 단건 등록 */
+    suspend fun registerPhotoSingle(user: UserEntity, file: FilePart?): UserResponse {
+        if (file == null) {
+            throw BusinessValidationException(mapOf("file" to "이미지가 필요합니다."))
+        }
+
+        val existingCount = userPhotosRepository.countByUserId(user.id).toInt()
+        val imageCount = existingCount + 1
+
+        // 정책 유지: 최소 3장 / 최대 6장
+        if (imageCount < 3) {
+            throw BusinessValidationException(mapOf("file" to "최소 사진 3장은 꼭 등록해야 돼"))
+        }
+        if (imageCount > 6) {
+            throw BusinessValidationException(mapOf("file" to "사진은 최대 6장까지 등록할 수 있어"))
+        }
+
+        val t0 = System.nanoTime()
+        log.debug(
+            "✅ [registerPhotoSingle] start userId={} existingCount={} filename={}",
+            user.id,
+            existingCount,
+            file.filename()
+        )
+
+        val tUploadStart = System.nanoTime()
+        val uploaded = assetService.uploadImage(file, user.id, AssetCategory.USER_PHOTO)
+        val uploadMs = (System.nanoTime() - tUploadStart) / 1_000_000
+
+        val tDbStart = System.nanoTime()
+        userPhotosRepository.save(
+            UserPhotosEntity(
+                userId = user.id,
+                uid = uploaded.uid
+            )
+        )
+        val dbMs = (System.nanoTime() - tDbStart) / 1_000_000
+
+        val tThumbStart = System.nanoTime()
+        runCatching {
+            assetService.getOrCreateThumbnail(
+                uid = uploaded.uid,
+                width = 780,
+                height = 966,
+                currentUserId = user.id,
+                mode = ThumbnailMode.COVER
+            )
+        }.onFailure { e ->
+            log.warn(
+                "✅ [registerPhotoSingle] precreate thumbnail failed userId={} assetUid={} err={}",
+                user.id,
+                uploaded.uid,
+                e.message
+            )
+        }
+        val thumbMs = (System.nanoTime() - tThumbStart) / 1_000_000
+
+        val totalMs = (System.nanoTime() - t0) / 1_000_000
+        log.debug(
+            "✅ [registerPhotoSingle] done userId={} uploadMs={} dbMs={} thumbMs={} totalMs={} assetUid={}",
+            user.id,
+            uploadMs,
+            dbMs,
+            thumbMs,
+            totalMs,
+            uploaded.uid
+        )
+
+        return toUserResponse(user)
+    }
 
     suspend fun deletePhoto(user: UserEntity, photoId: Long) {
         val exist = userPhotosRepository.findByIdAndUserId(photoId, user.id)

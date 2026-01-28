@@ -157,6 +157,16 @@ class UserController(
         return ResponseEntity.ok(ApiResult.success(userResponse))
     }
 
+    @Operation(summary = "프로필 이미지 단건 등록", description = "프로필 이미지를 1장 업로드합니다. 업로드 시 780x966 썸네일을 사전 생성합니다.")
+    @PostMapping("/photos/single", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+    suspend fun registerImageSingle(
+        @AuthenticationPrincipal(expression = "user") user: UserEntity,
+        @RequestPart("file", required = false) file: FilePart?
+    ): ResponseEntity<ApiResult<UserResponse>> {
+        val userResponse = userService.registerPhotoSingle(user, file)
+        return ResponseEntity.ok(ApiResult.success(userResponse))
+    }
+
     @Operation(summary = "사진 삭제", description = "사용자의 특정 사진을 삭제합니다.")
     @DeleteMapping("/photos/{photoId}")
     suspend fun deletePhoto(
