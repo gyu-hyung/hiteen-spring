@@ -113,7 +113,7 @@ class CashService(
         // 2. 일일 제한
         rule.dailyCap?.let { cap ->
             val todayCount =
-                cashRepository.countByUserAndPolicyAndDate(userId, cashPolicy.code, LocalDate.now())
+                cashRepository.countByUserAndPolicyAndDate(userId, rule.actionCode, LocalDate.now())
             if (todayCount >= cap)
                 println("오늘은 더 이상 '${rule.actionCode}' 포인트를 받을 수 없습니다. (일일 제한: $cap)")
 //                throw IllegalStateException("일일 포인트 제한 초과 ($pointPolicy)")
