@@ -26,6 +26,8 @@ class NotificationService(
                 title = it.title,
                 message = it.message,
                 success = it.success,
+                nickname = it.nickname,
+                assetUid = it.assetUid,
                 createdAt = it.createdAt
             )
         }
