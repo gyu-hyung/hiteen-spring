@@ -190,12 +190,12 @@ class FriendService(
                         statusAt = now, createdAt = now,
                     )
                 )
-                expService.grantExp(
-                    userId = meId,
-                    actionCode = "FRIEND_ADD",
-                    targetId = targetId,
-                    requestId = meId,
-                )
+//                expService.grantExp(
+//                    userId = meId,
+//                    actionCode = "FRIEND_ADD",
+//                    targetId = targetId,
+//                    requestId = meId,
+//                )
                 eventPublisher.publishEvent(
                     PushSendRequestedEvent(
                         userIds = listOf(targetId),
@@ -286,29 +286,29 @@ class FriendService(
 
 
         // === 팔로우 등록 (양방향, 중복 체크) ===
-        if (!followRepository.existsByUserIdAndFollowId(meId, requesterId)) {
-            followRepository.save(
-                FollowEntity(
-                    userId = meId,
-                    followId = requesterId,
-                    status = FollowStatus.ACCEPTED.name,
-                    statusAt = now,
-                    createdAt = now
-                )
-            )
-        }
-
-        if (!followRepository.existsByUserIdAndFollowId(requesterId, meId)) {
-            followRepository.save(
-                FollowEntity(
-                    userId = requesterId,
-                    followId = meId,
-                    status = FollowStatus.ACCEPTED.name,
-                    statusAt = now,
-                    createdAt = now
-                )
-            )
-        }
+//        if (!followRepository.existsByUserIdAndFollowId(meId, requesterId)) {
+//            followRepository.save(
+//                FollowEntity(
+//                    userId = meId,
+//                    followId = requesterId,
+//                    status = FollowStatus.ACCEPTED.name,
+//                    statusAt = now,
+//                    createdAt = now
+//                )
+//            )
+//        }
+//
+//        if (!followRepository.existsByUserIdAndFollowId(requesterId, meId)) {
+//            followRepository.save(
+//                FollowEntity(
+//                    userId = requesterId,
+//                    followId = meId,
+//                    status = FollowStatus.ACCEPTED.name,
+//                    statusAt = now,
+//                    createdAt = now
+//                )
+//            )
+//        }
 
 
         expService.grantExp(
