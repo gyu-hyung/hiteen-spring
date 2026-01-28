@@ -69,6 +69,7 @@ class BoardController(
         @Parameter(description = "첨부 파일들") @RequestPart(name = "files", required = false) filesFlux: Flux<FilePart>?,
         request: ServerHttpRequest
     ): ResponseEntity<ApiResult<Map<String, Any>>> {
+        println("✅✅ ✅✅ ✅✅ ✅✅ ✅✅ ✅✅ ✅✅ ✅✅ ✅✅ ✅✅ ")
         val ip = request.remoteAddress?.address?.hostAddress
         val files: List<FilePart> = filesFlux?.collectList()?.awaitSingle().orEmpty()
         val uid = service.create(boardCreateRequest, user, files, ip)
