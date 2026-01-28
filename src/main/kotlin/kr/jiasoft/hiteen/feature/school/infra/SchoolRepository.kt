@@ -21,7 +21,7 @@ interface SchoolRepository : CoroutineCrudRepository<SchoolEntity, Long> {
 
     @Query("""
         SELECT 
-            (select COUNT(*) from users where school_id = s.id and deleted_at is null AND COALESCE(role, '') <> 'ADMIN') member_count,
+            (select COUNT(*) from users where school_id = s.id and deleted_at is null) member_count,
             s.*
         FROM schools s
         WHERE (:keyword IS NULL OR name ILIKE '%' || :keyword || '%')
