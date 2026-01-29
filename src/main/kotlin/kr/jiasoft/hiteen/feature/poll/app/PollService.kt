@@ -58,9 +58,11 @@ class PollService(
         size: Int,
         currentUserId: Long?,
         type: String = "all",
-        author: UUID?
+        author: UUID?,
+        orderType: String? = null,
     ): List<PollResponse> {
-        val rows = polls.findSummariesByCursor(cursor, size, currentUserId, type, author).toList()
+        val order = PollOrderType.from(orderType)
+        val rows = polls.findSummariesByCursor(cursor, size, currentUserId, type, author, order.name).toList()
         if (rows.isEmpty()) return emptyList()
 
         val pollIds = rows.map { it.id }.toTypedArray()
