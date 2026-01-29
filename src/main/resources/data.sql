@@ -674,14 +674,14 @@ VALUES
 
 
 INSERT INTO public.api_keys (type, api_key_id, api_key, status)
-SELECT 'KAKAO_MAP', 'yysvn7vlpo', 'iw5HPDTNAJOshItxyLTcPdzomqpardJa6YIpjvdL', 'ACTIVE'
+SELECT 'NAVER_MAP', 'yysvn7vlpo', 'iw5HPDTNAJOshItxyLTcPdzomqpardJa6YIpjvdL', 'ACTIVE'
 WHERE NOT EXISTS (SELECT 1 FROM public.api_keys WHERE api_key_id = 'yysvn7vlpo');
 
 INSERT INTO public.api_keys (type, api_key_id, api_key, status)
-SELECT 'KAKAO_MAP', '529h1e1pww', 'J5d1UjvwQAan1KZmsNwXFYlG7DOBsyI5vOPPIOXV', 'ACTIVE'
+SELECT 'NAVER_MAP', '529h1e1pww', 'J5d1UjvwQAan1KZmsNwXFYlG7DOBsyI5vOPPIOXV', 'ACTIVE'
 WHERE NOT EXISTS (SELECT 1 FROM public.api_keys WHERE api_key_id = '529h1e1pww');
 
 INSERT INTO public.api_keys (type, api_key_id, api_key, status)
-SELECT 'KAKAO_MAP', 'u8isp6pzn3', 'K2A2UmBWd7wiABz2PRHm2DjkG1iN6d216neVEvZI', 'ACTIVE'
+SELECT 'NAVER_MAP', 'u8isp6pzn3', 'K2A2UmBWd7wiABz2PRHm2DjkG1iN6d216neVEvZI', 'ACTIVE'
 WHERE NOT EXISTS (SELECT 1 FROM public.api_keys WHERE api_key_id = 'u8isp6pzn3');
 
