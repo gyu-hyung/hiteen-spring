@@ -30,7 +30,14 @@ interface PollRepository : CoroutineCrudRepository<PollEntity, Long> {
             p.color_start,
             p.color_end,
             p.vote_count,
-            p.comment_count,
+            (
+                SELECT COUNT(*)::bigint
+                FROM poll_comments pc
+                LEFT JOIN poll_comments pp ON pp.id = pc.parent_id
+                WHERE pc.poll_id = p.id
+                  AND pc.deleted_at IS NULL
+                  AND (pc.parent_id IS NULL OR pp.deleted_at IS NULL)
+            ) AS comment_count,
             p.allow_comment,
             p.created_id,
             p.created_at
@@ -55,7 +62,14 @@ interface PollRepository : CoroutineCrudRepository<PollEntity, Long> {
         ORDER BY
           /* orderType: LATEST(default)/POPULAR/LIKE/COMMENT */
           CASE WHEN :orderType = 'POPULAR' THEN p.vote_count END DESC NULLS LAST,
-          CASE WHEN :orderType = 'COMMENT' THEN p.comment_count END DESC NULLS LAST,
+          CASE WHEN :orderType = 'COMMENT' THEN (
+            SELECT COUNT(*)::bigint
+            FROM poll_comments pc
+            LEFT JOIN poll_comments pp ON pp.id = pc.parent_id
+            WHERE pc.poll_id = p.id
+              AND pc.deleted_at IS NULL
+              AND (pc.parent_id IS NULL OR pp.deleted_at IS NULL)
+          ) END DESC NULLS LAST,
           CASE WHEN :orderType = 'LIKE' THEN COALESCE(pl_cnt.like_count, 0) END DESC NULLS LAST,
           CASE WHEN :orderType = 'LATEST' OR :orderType IS NULL OR :orderType = '' THEN p.id END DESC NULLS LAST,
           /* fallback tie-breaker */
