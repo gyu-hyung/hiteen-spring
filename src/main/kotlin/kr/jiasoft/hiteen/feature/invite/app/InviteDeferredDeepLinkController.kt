@@ -325,8 +325,10 @@ class InviteDeferredDeepLinkController(
                       window.location.href = storeUrl;
                     });
 
-                     // 설치된 경우 앱 실행 시도
-                     window.location.href = appUrl;
+                    // 설치된 경우 앱 실행 시도
+                    if (!isIOS) {
+                      window.location.href = appUrl;
+                    }
 
                      // 미설치/실패 시 스토어로 폴백
                      // - Android: 설치 후 Install Referrer 자동 복원을 위해 자동 이동 유지
