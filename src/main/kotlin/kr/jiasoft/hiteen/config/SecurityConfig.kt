@@ -76,6 +76,7 @@ class SecurityConfig(
                     "/api/user/profile/ss/{id}",
                     // Android deferred token resolve (auth optional)
                     "/api/invite/deferred/resolve",
+                    "/api/app/map/keys",
                 ).permitAll()
 
                 // 초대 공유 링크(랜딩)
