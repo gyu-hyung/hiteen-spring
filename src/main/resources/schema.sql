@@ -1475,3 +1475,17 @@ CREATE TABLE dashboard_statistics (
     created_at        timestamptz DEFAULT now()
 );
 
+
+-- ========================
+-- 초대 디퍼드 딥링크 토큰(Install Referrer용)
+-- ========================
+CREATE TABLE invite_link_tokens (
+    id          BIGSERIAL PRIMARY KEY,
+    token       VARCHAR(80) NOT NULL UNIQUE,
+    code        VARCHAR(100) NOT NULL,
+    expires_at  TIMESTAMPTZ NOT NULL,
+    used_at     TIMESTAMPTZ,
+    used_by     BIGINT,
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
