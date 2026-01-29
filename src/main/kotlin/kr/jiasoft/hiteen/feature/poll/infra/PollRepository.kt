@@ -35,6 +35,11 @@ interface PollRepository : CoroutineCrudRepository<PollEntity, Long> {
             p.created_id,
             p.created_at
         FROM polls p
+        LEFT JOIN (
+            SELECT poll_id, COUNT(*)::bigint AS like_count
+            FROM poll_likes
+            GROUP BY poll_id
+        ) pl_cnt ON pl_cnt.poll_id = p.id
         WHERE p.deleted_at IS NULL
           AND p.status = 'ACTIVE'
           AND (
@@ -47,7 +52,14 @@ interface PollRepository : CoroutineCrudRepository<PollEntity, Long> {
           )
           AND (:cursor IS NULL OR p.id < :cursor)
           AND (:authorUid IS NULL OR p.created_id = (SELECT id FROM users WHERE uid = :authorUid))
-        ORDER BY p.id DESC
+        ORDER BY
+          /* orderType: LATEST(default)/POPULAR/LIKE/COMMENT */
+          CASE WHEN :orderType = 'POPULAR' THEN p.vote_count END DESC NULLS LAST,
+          CASE WHEN :orderType = 'COMMENT' THEN p.comment_count END DESC NULLS LAST,
+          CASE WHEN :orderType = 'LIKE' THEN COALESCE(pl_cnt.like_count, 0) END DESC NULLS LAST,
+          CASE WHEN :orderType = 'LATEST' OR :orderType IS NULL OR :orderType = '' THEN p.id END DESC NULLS LAST,
+          /* fallback tie-breaker */
+          p.id DESC
         LIMIT :size
     """)
     fun findSummariesByCursor(
@@ -55,7 +67,8 @@ interface PollRepository : CoroutineCrudRepository<PollEntity, Long> {
         size: Int,
         currentUserId: Long?,
         type: String,
-        authorUid: UUID?
+        authorUid: UUID?,
+        orderType: String?
     ): Flow<PollSummaryRow>
 
 
@@ -93,29 +106,4 @@ interface PollRepository : CoroutineCrudRepository<PollEntity, Long> {
         pollId: Long,
         currentUserId: Long
     ): PollSummaryRow?
-
-
-
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
