@@ -523,7 +523,11 @@ class UserService (
         val newMood         = param.mood ?: existing.mood
         val newMoodEmoji    = param.moodEmoji ?: existing.moodEmoji
         val newSchoolId     = param.schoolId ?: existing.schoolId
-        val newClassId      = param.classId ?: existing.classId
+        // 학교가 바뀌면 기존 학급 정보는 무효이므로 classId 초기화
+        // - param.classId가 명시되면 그 값을 사용
+        // - param.classId가 없고 schoolId가 변경되면 null로 초기화
+        // - 그 외에는 기존값 유지
+        val newClassId      = param.classId ?: if (existing.schoolId != newSchoolId) null else existing.classId
         val newGrade        = param.grade ?: existing.grade
         val newGender       = param.gender ?: existing.gender
         val newBirthday     = param.birthday ?: existing.birthday
