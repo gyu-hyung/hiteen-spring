@@ -146,11 +146,11 @@ class UserController(
         return ResponseEntity.ok(ApiResult.success("회원 탈퇴가 완료되었습니다."))
     }
 
-    @Operation(summary = "프로필 이미지 등록", description = "여러 장의 프로필 이미지를 업로드합니다.")
+    @Operation(summary = "프로필 이미지 등록", description = "여러 장의 프로필 이미지를 업로드합니다. 업로드 시 780x966 썸네일을 사전 생성합니다.")
     @PostMapping("/photos", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     suspend fun registerImages(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
-        @RequestPart("files", required = false) filesFlux: Flux<FilePart>
+    @RequestPart("files", required = false) filesFlux: Flux<FilePart>
     ): ResponseEntity<ApiResult<UserResponse>> {
         val files: List<FilePart> = filesFlux.collectList().awaitSingle()
         val userResponse = userService.registerPhotos(user, files)

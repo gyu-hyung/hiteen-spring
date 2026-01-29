@@ -1,12 +1,13 @@
 package kr.jiasoft.hiteen.feature.board.app
 
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kr.jiasoft.hiteen.common.dto.ApiPage
 import kr.jiasoft.hiteen.common.dto.ApiPageCursor
 import kr.jiasoft.hiteen.feature.asset.app.AssetService
 import kr.jiasoft.hiteen.feature.asset.domain.AssetCategory
 import kr.jiasoft.hiteen.feature.asset.dto.AssetResponse
+import kr.jiasoft.hiteen.feature.asset.app.event.AssetThumbnailPrecreateRequestedEvent
+import kr.jiasoft.hiteen.feature.asset.domain.ThumbnailMode
 import kr.jiasoft.hiteen.feature.board.domain.BoardAssetEntity
 import kr.jiasoft.hiteen.feature.board.domain.BoardBannerType
 import kr.jiasoft.hiteen.feature.board.domain.BoardCategory
@@ -62,8 +63,19 @@ class BoardService(
     private val txOperator: TransactionalOperator,
 ) {
 
+    private fun requestPostThumb800(uids: List<UUID>, currentUserId: Long) {
+        if (uids.isEmpty()) return
+        eventPublisher.publishEvent(
+            AssetThumbnailPrecreateRequestedEvent(
+                assetUids = uids,
+                width = 800,
+                height = 800,
+                mode = ThumbnailMode.COVER,
+                requestedByUserId = currentUserId,
+            )
+        )
+    }
 
-//    @Cacheable(cacheNames = ["boardDetail"], key = "#uid")
     suspend fun getBoard(uid: UUID, currentUserId: Long?): BoardResponse {
 
         val userId = currentUserId ?: -1L
@@ -252,6 +264,9 @@ class BoardService(
                 if (files.isNotEmpty()) assetService.uploadImages(files, user.id, AssetCategory.POST) else emptyList()
             val representativeUid: UUID? = uploaded.firstOrNull()?.uid
 
+            // ✅ 비동기 사이드이펙트: 게시글 이미지 800x800 썸네일 사전 생성
+            requestPostThumb800(uploaded.map { it.uid }, user.id)
+
             // 2) 대표이미지(assetUid)를 반영해 게시글 생성
             val saved = boards.save(
                 BoardEntity(
@@ -345,6 +360,10 @@ class BoardService(
         val uploadedUids: List<UUID> = if (files.isNotEmpty()) {
             val uploadedFiles = assetService.uploadImages(files, currentUserId, AssetCategory.POST)
             val uids = uploadedFiles.map { it.uid }.toList()
+
+            // ✅ 사이드이펙트: 게시글 이미지 800x800 썸네일 사전 생성
+            requestPostThumb800(uids, currentUserId)
+
             uploadedFiles.forEach { a ->
                 boardAssetRepository.save(
                     BoardAssetEntity(
