@@ -337,7 +337,7 @@ class InviteDeferredDeepLinkController(
                      if (!isIOS) {
                        setTimeout(function () {
                          window.location.href = storeUrl;
-                       }, 30000);
+                       }, 3000);
                      }
                    })();
                 </script>
