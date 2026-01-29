@@ -51,6 +51,7 @@ import java.time.OffsetDateTime
 import java.util.UUID
 import org.slf4j.LoggerFactory
 import kr.jiasoft.hiteen.feature.asset.domain.ThumbnailMode
+import kr.jiasoft.hiteen.feature.asset.dto.AssetResponse
 
 @Service
 class UserService (
@@ -643,8 +644,26 @@ class UserService (
         )
 
         val tUploadStart = System.nanoTime()
-        val uploaded = assetService.uploadImages(files, user.id, AssetCategory.USER_PHOTO)
+        val uploaded = mutableListOf<AssetResponse>()
+        val tThumbStart = System.nanoTime()
+
+        // ✅ 파일 1개 업로드(DB 저장) 완료될 때마다 즉시 썸네일 이벤트 발행
+        for (f in files) {
+            val a = assetService.uploadImage(f, user.id, AssetCategory.USER_PHOTO)
+            uploaded.add(a)
+            eventPublisher.publishEvent(
+                AssetThumbnailPrecreateRequestedEvent(
+                    assetUids = listOf(a.uid),
+                    width = 780,
+                    height = 966,
+                    mode = ThumbnailMode.COVER,
+                    requestedByUserId = user.id,
+                )
+            )
+        }
+
         val tUploadMs = (System.nanoTime() - tUploadStart) / 1_000_000
+        val tThumbMs = (System.nanoTime() - tThumbStart) / 1_000_000
 
         log.debug(
             "✅✅ [registerPhotos] upload done userId={} uploadedCount={} elapsedMs={} assetUids={}",
@@ -663,19 +682,6 @@ class UserService (
             userPhotosRepository.save(photoEntity)
         }
         val tDbMs = (System.nanoTime() - tDbStart) / 1_000_000
-
-        // ✅ 비동기 사이드이펙트: 표준 프로필 사이즈(780x966) 썸네일을 이벤트로 사전 생성
-        val tThumbStart = System.nanoTime()
-        eventPublisher.publishEvent(
-            AssetThumbnailPrecreateRequestedEvent(
-                assetUids = uploaded.map { it.uid },
-                width = 780,
-                height = 966,
-                mode = ThumbnailMode.COVER,
-                requestedByUserId = user.id,
-            )
-        )
-        val tThumbMs = (System.nanoTime() - tThumbStart) / 1_000_000
 
         val totalMs = (System.nanoTime() - t0) / 1_000_000
         log.debug(
@@ -705,7 +711,7 @@ class UserService (
             throw BusinessValidationException(mapOf("file" to "최소 사진 3장은 꼭 등록해야 돼"))
         }
         if (imageCount > 6) {
-            throw BusinessValidationException(mapOf("file" to "사진은 최대 6장까지 등록할 수 있어"))
+            throw BusinessValidationException(mapOf("file" to "사진은 최대 6장ㅌ까지 등록할 수 있어"))
         }
 
         val t0 = System.nanoTime()
