@@ -4,6 +4,7 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.toList
 import kr.jiasoft.hiteen.common.exception.BusinessValidationException
 import kr.jiasoft.hiteen.feature.asset.app.AssetService
+import kr.jiasoft.hiteen.feature.asset.app.event.AssetThumbnailPrecreateRequestedEvent
 import kr.jiasoft.hiteen.feature.asset.domain.AssetCategory
 import kr.jiasoft.hiteen.feature.auth.dto.JwtResponse
 import kr.jiasoft.hiteen.feature.auth.infra.JwtProvider
@@ -26,7 +27,6 @@ import kr.jiasoft.hiteen.feature.relationship.domain.FriendStatus
 import kr.jiasoft.hiteen.feature.relationship.dto.RelationshipCounts
 import kr.jiasoft.hiteen.feature.relationship.infra.FollowRepository
 import kr.jiasoft.hiteen.feature.relationship.infra.FriendRepository
-import kr.jiasoft.hiteen.feature.school.dto.SchoolDto
 import kr.jiasoft.hiteen.feature.school.infra.SchoolClassesRepository
 import kr.jiasoft.hiteen.feature.school.infra.SchoolRepository
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
@@ -664,23 +664,17 @@ class UserService (
         }
         val tDbMs = (System.nanoTime() - tDbStart) / 1_000_000
 
-        // ✅ 사이드 이펙트: 표준 프로필 사이즈(780x966) 썸네일을 미리 생성
-        // - /api/assets/{uid}/view/780x966 호출 시 생성 비용 없이 즉시 응답 가능
-        // - origin_id + width/height로 캐시되므로 중복 생성되지 않음
+        // ✅ 비동기 사이드이펙트: 표준 프로필 사이즈(780x966) 썸네일을 이벤트로 사전 생성
         val tThumbStart = System.nanoTime()
-        uploaded.forEach { asset ->
-            runCatching {
-                assetService.getOrCreateThumbnail(
-                    uid = asset.uid,
-                    width = 780,
-                    height = 966,
-                    currentUserId = user.id,
-                    mode = ThumbnailMode.COVER
-                )
-            }.onFailure { e ->
-                log.warn("✅✅ [registerPhotos] precreate thumbnail failed userId={} assetUid={} err={}", user.id, asset.uid, e.message)
-            }
-        }
+        eventPublisher.publishEvent(
+            AssetThumbnailPrecreateRequestedEvent(
+                assetUids = uploaded.map { it.uid },
+                width = 780,
+                height = 966,
+                mode = ThumbnailMode.COVER,
+                requestedByUserId = user.id,
+            )
+        )
         val tThumbMs = (System.nanoTime() - tThumbStart) / 1_000_000
 
         val totalMs = (System.nanoTime() - t0) / 1_000_000
@@ -736,22 +730,15 @@ class UserService (
         val dbMs = (System.nanoTime() - tDbStart) / 1_000_000
 
         val tThumbStart = System.nanoTime()
-        runCatching {
-            assetService.getOrCreateThumbnail(
-                uid = uploaded.uid,
+        eventPublisher.publishEvent(
+            AssetThumbnailPrecreateRequestedEvent(
+                assetUids = listOf(uploaded.uid),
                 width = 780,
                 height = 966,
-                currentUserId = user.id,
-                mode = ThumbnailMode.COVER
+                mode = ThumbnailMode.COVER,
+                requestedByUserId = user.id,
             )
-        }.onFailure { e ->
-            log.warn(
-                "✅ [registerPhotoSingle] precreate thumbnail failed userId={} assetUid={} err={}",
-                user.id,
-                uploaded.uid,
-                e.message
-            )
-        }
+        )
         val thumbMs = (System.nanoTime() - tThumbStart) / 1_000_000
 
         val totalMs = (System.nanoTime() - t0) / 1_000_000
