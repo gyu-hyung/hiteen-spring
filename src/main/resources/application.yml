@@ -86,6 +86,13 @@ app:
   join:
     rejoin-days: 30
     dev-allow-always: false
+  deeplink:
+    invite:
+      # 앱 설치되어 있으면 이동할 딥링크(커스텀 스킴 또는 유니버설링크)
+      app-scheme: "hiteen://invite"
+      # 미설치 시 스토어 폴백
+      android-store: "https://play.google.com/store/apps/details?id=kr.jiasoft.hiteen"
+      ios-store: "https://apps.apple.com/app/id0000000000"
 
 admob:
   key-url: https://www.gstatic.com/admob/reward/verifier-keys.json
