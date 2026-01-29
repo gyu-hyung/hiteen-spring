@@ -11,8 +11,6 @@ import kr.jiasoft.hiteen.feature.asset.dto.AssetResponse
 import kr.jiasoft.hiteen.feature.asset.dto.StoredFile
 import kr.jiasoft.hiteen.feature.asset.dto.toResponse
 import kr.jiasoft.hiteen.feature.asset.infra.AssetRepository
-import kotlinx.coroutines.sync.Semaphore
-import kotlinx.coroutines.sync.withPermit
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
@@ -48,12 +46,6 @@ class AssetService(
     private val root: Path = Path.of(storageRoot).also { Files.createDirectories(it) }
     private val storage = AssetStorage(root)
 
-    /**
-     * 업로드/썸네일 생성은 이미지 디코드 등으로 순간 메모리를 크게 쓸 수 있어서
-     * 동시 실행을 제한합니다.
-     */
-    private val imageWorkSemaphore = Semaphore(permits = 2)
-
     suspend fun upload(
         file: FilePart,
         originFileName: String?,
@@ -69,7 +61,7 @@ class AssetService(
         currentUserId: Long,
         category: AssetCategory = AssetCategory.COMMON,
         originFileName: String? = null,
-    ): AssetResponse = imageWorkSemaphore.withPermit {
+    ): AssetResponse {
         val t0 = System.nanoTime()
 
         val tSaveStart = System.nanoTime()
@@ -98,7 +90,7 @@ class AssetService(
             stored.relativePath + stored.absolutePath.fileName.toString(),
         )
 
-        res
+        return res
     }
 
     suspend fun uploadWordAsset(
@@ -217,7 +209,7 @@ class AssetService(
         height: Int,
         currentUserId: Long? = null,
         mode: ThumbnailMode = ThumbnailMode.COVER,
-    ): AssetEntity = imageWorkSemaphore.withPermit {
+    ): AssetEntity {
         // 1️⃣ 원본 조회 (DB → non-blocking OK)
         val original = findByUid(uid)
             ?: throw IllegalArgumentException("존재하지 않는 파일 (uid=$uid)")
@@ -241,17 +233,6 @@ class AssetService(
         if (ext in listOf("gif", "svg")) {
             throw IllegalArgumentException("GIF, SVG는 리사이즈 불가 (ext=$ext)")
         }
-
-        // 5️⃣ 🔥 썸네일 생성만 IO 디스패처로 격리
-//        val resizedStored = withContext(Dispatchers.IO) {
-//            storage.createThumbnail(
-//                sourcePath = originalPath,
-//                ext = ext,
-//                width = width,
-//                height = height,
-//                mode = mode,
-//            )
-//        }
 
         val resizedStored = storage.createThumbnail(
             sourcePath = originalPath,
@@ -287,8 +268,6 @@ class AssetService(
                 ?: throw e
         }
     }
-
-
 
 
     suspend fun findByUid(uid: UUID): AssetEntity? = assetRepository.findByUid(uid)
