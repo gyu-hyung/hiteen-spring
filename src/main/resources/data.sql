@@ -667,3 +667,21 @@ VALUES
 ('IGUAZU_FALLS', '이과수 폭포', 'LANDMARK', 'LANDMARK', 'ACTIVE', NULL, 'ARGENTINA', '-25.6953', '-54.4367', 1, '2026-01-26 16:00:22.805', NULL, NULL, NULL, NULL),
 ('SYDNEY_OPERA_HOUSE', '시드니 오페라하우스', 'LANDMARK', 'LANDMARK', 'ACTIVE', NULL, 'AUSTRALIA', '-33.8568', '151.2153', 1, '2026-01-26 16:00:22.805', NULL, NULL, NULL, NULL),
 ('EASTER_ISLAND', '이스터섬 모아이', 'LANDMARK', 'LANDMARK', 'ACTIVE', NULL, 'CHILE', '-27.1127', '-109.3497', 1, '2026-01-26 16:00:22.805', NULL, NULL, NULL, NULL);
+
+
+
+
+
+
+INSERT INTO public.api_keys (type, api_key_id, api_key, status)
+SELECT 'KAKAO_MAP', 'yysvn7vlpo', 'iw5HPDTNAJOshItxyLTcPdzomqpardJa6YIpjvdL', 'ACTIVE'
+WHERE NOT EXISTS (SELECT 1 FROM public.api_keys WHERE api_key_id = 'yysvn7vlpo');
+
+INSERT INTO public.api_keys (type, api_key_id, api_key, status)
+SELECT 'KAKAO_MAP', '529h1e1pww', 'J5d1UjvwQAan1KZmsNwXFYlG7DOBsyI5vOPPIOXV', 'ACTIVE'
+WHERE NOT EXISTS (SELECT 1 FROM public.api_keys WHERE api_key_id = '529h1e1pww');
+
+INSERT INTO public.api_keys (type, api_key_id, api_key, status)
+SELECT 'KAKAO_MAP', 'u8isp6pzn3', 'K2A2UmBWd7wiABz2PRHm2DjkG1iN6d216neVEvZI', 'ACTIVE'
+WHERE NOT EXISTS (SELECT 1 FROM public.api_keys WHERE api_key_id = 'u8isp6pzn3');
+
