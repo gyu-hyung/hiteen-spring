@@ -260,7 +260,7 @@ class PinService(
             ?: throw IllegalArgumentException("존재하지 않는 핀입니다.")
 
         if (pin.userId != user.id) {
-            throw IllegalAccessException("본인이 등록한 핀만 삭제할 수 있습니다.")
+            throw IllegalArgumentException("본인이 등록한 핀만 삭제할 수 있습니다.")
         }
 
         // 친구 공개 매핑 삭제
