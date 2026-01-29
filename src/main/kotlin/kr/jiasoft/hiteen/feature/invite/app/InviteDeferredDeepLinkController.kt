@@ -69,17 +69,17 @@ class InviteDeferredDeepLinkController(
                 <div class=\"card\">
                   <div class=\"title\">초대 링크를 여는 중…</div>
                   <p class=\"desc\">앱이 설치되어 있으면 앱으로 이동합니다. 설치되어 있지 않으면 스토어로 이동합니다.</p>
-+
-+                  <div class=\"mono\" id=\"inviteCode\">${escapeHtml(code)}</div>
-+                  <div class=\"hint\">
-+                    iPhone에서 설치 후 자동 적용이 안 되면, 위 코드를 가입 화면에서 직접 입력할 수 있어요.
-+                  </div>
-+                  <div class=\"row\" style=\"margin-top: 12px;\">
-+                    <button id=\"copyBtn\" type=\"button\">초대코드 복사</button>
-+                    <button id=\"openStoreBtn\" class=\"secondary\" type=\"button\">스토어 열기</button>
-+                  </div>
-+                  <div id=\"copied\" class=\"ok\">복사 완료! 앱 설치 후 가입 화면에서 붙여넣기해 주세요.</div>
-+                </div>
+
+                  <div class=\"mono\" id=\"inviteCode\">${escapeHtml(code)}</div>
+                  <div class=\"hint\">
+                    iPhone에서 설치 후 자동 적용이 안 되면, 위 코드를 가입 화면에서 직접 입력할 수 있어요.
+                  </div>
+                  <div class=\"row\" style=\"margin-top: 12px;\">
+                    <button id=\"copyBtn\" type=\"button\">초대코드 복사</button>
+                    <button id=\"openStoreBtn\" class=\"secondary\" type=\"button\">스토어 열기</button>
+                  </div>
+                  <div id=\"copied\" class=\"ok\">복사 완료! 앱 설치 후 가입 화면에서 붙여넣기해 주세요.</div>
+                </div>
                  <script>
                    (function () {
                      var ua = (navigator.userAgent || '').toLowerCase();
@@ -88,36 +88,36 @@ class InviteDeferredDeepLinkController(
 
                      var appUrl = ${jsString(appUrl)};
                      var storeUrl = isAndroid ? ${jsString(androidStoreWithReferrer)} : (isIOS ? ${jsString(iosStoreUrl)} : ${jsString(androidStoreWithReferrer)});
-+
-+                    var code = ${jsString(code)};
-+                    var copyBtn = document.getElementById('copyBtn');
-+                    var openStoreBtn = document.getElementById('openStoreBtn');
-+                    var copied = document.getElementById('copied');
-+
-+                    function copyText(text) {
-+                      if (navigator.clipboard && navigator.clipboard.writeText) {
-+                        return navigator.clipboard.writeText(text);
-+                      }
-+                      // fallback
-+                      var ta = document.createElement('textarea');
-+                      ta.value = text;
-+                      ta.style.position = 'fixed';
-+                      ta.style.opacity = '0';
-+                      document.body.appendChild(ta);
-+                      ta.focus(); ta.select();
-+                      try { document.execCommand('copy'); } catch (e) {}
-+                      document.body.removeChild(ta);
-+                      return Promise.resolve();
-+                    }
-+
-+                    copyBtn && copyBtn.addEventListener('click', function () {
-+                      copyText(code).then(function () {
-+                        if (copied) copied.style.display = 'block';
-+                      });
-+                    });
-+                    openStoreBtn && openStoreBtn.addEventListener('click', function () {
-+                      window.location.href = storeUrl;
-+                    });
+
+                    var code = ${jsString(code)};
+                    var copyBtn = document.getElementById('copyBtn');
+                    var openStoreBtn = document.getElementById('openStoreBtn');
+                    var copied = document.getElementById('copied');
+
+                    function copyText(text) {
+                      if (navigator.clipboard && navigator.clipboard.writeText) {
+                        return navigator.clipboard.writeText(text);
+                      }
+                      // fallback
+                      var ta = document.createElement('textarea');
+                      ta.value = text;
+                      ta.style.position = 'fixed';
+                      ta.style.opacity = '0';
+                      document.body.appendChild(ta);
+                      ta.focus(); ta.select();
+                      try { document.execCommand('copy'); } catch (e) {}
+                      document.body.removeChild(ta);
+                      return Promise.resolve();
+                    }
+
+                    copyBtn && copyBtn.addEventListener('click', function () {
+                      copyText(code).then(function () {
+                        if (copied) copied.style.display = 'block';
+                      });
+                    });
+                    openStoreBtn && openStoreBtn.addEventListener('click', function () {
+                      window.location.href = storeUrl;
+                    });
 
                      // 설치된 경우 앱 실행 시도
                      window.location.href = appUrl;
