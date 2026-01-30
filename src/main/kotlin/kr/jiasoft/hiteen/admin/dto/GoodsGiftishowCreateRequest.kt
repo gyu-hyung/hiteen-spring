@@ -8,6 +8,9 @@ data class GoodsGiftishowCreateRequest(
     @field:Schema(description = "상품 ID (있으면 수정, 없으면 등록)")
     val id: Long? = null,
 
+    @field:Schema(description = "상품 코드 타입 (H: 기프트카드, D: 배송상품)", example = "H")
+    val goodsCodeType: String? = "H",
+
     val goodsNo: Int,
     val goodsCode: String? = null,
 

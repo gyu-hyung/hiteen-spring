@@ -51,6 +51,25 @@ class AdminGoodsController (
         return "H" + nextNumber.toString().padStart(11, '0')
     }
 
+    private suspend fun generateNextDGoodsCode(): String {
+        val maxCode = adminGoodsRepository.findMaxDGoodsCode()
+
+        val nextNumber = maxCode
+            ?.substring(1)            // "00000000001"
+            ?.toLongOrNull()
+            ?.plus(1)
+            ?: 1L                     // 최초 생성 시
+
+        return "D" + nextNumber.toString().padStart(11, '0')
+    }
+
+    private suspend fun generateGoodsCode(type: String?): String {
+        return when (type?.uppercase()) {
+            "D" -> generateNextDGoodsCode()
+            else -> generateNextGoodsCode() // 기본값 H
+        }
+    }
+
 
     @PostMapping(consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     suspend fun saveGoods(
@@ -69,7 +88,7 @@ class AdminGoodsController (
 
             val entity = GoodsGiftishowEntity(
                 goodsNo = req.goodsNo,
-                goodsCode = generateNextGoodsCode(),
+                goodsCode = generateGoodsCode(req.goodsCodeType),
                 goodsName = req.goodsName,
                 brandCode = req.brandCode,
                 brandName = req.brandName,

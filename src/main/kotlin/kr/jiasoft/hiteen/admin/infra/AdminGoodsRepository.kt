@@ -59,6 +59,15 @@ interface AdminGoodsRepository : CoroutineCrudRepository<GoodsGiftishowEntity, L
     """)
     suspend fun findMaxHGoodsCode(): String?
 
+    @Query("""
+        SELECT goods_code
+        FROM goods_giftishow
+        WHERE goods_code LIKE 'D%'
+        ORDER BY goods_code DESC
+        LIMIT 1
+    """)
+    suspend fun findMaxDGoodsCode(): String?
+
 
     /**
      * 🔹 전체 개수 조회
