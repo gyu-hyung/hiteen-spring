@@ -3,6 +3,7 @@ package kr.jiasoft.hiteen.feature.notification.app
 import kr.jiasoft.hiteen.common.dto.ApiPageCursor
 import kr.jiasoft.hiteen.feature.notification.dto.PushNotificationResponse
 import kr.jiasoft.hiteen.feature.push.domain.PushTemplate
+import kr.jiasoft.hiteen.feature.push.domain.PushTemplateGroup
 import kr.jiasoft.hiteen.feature.push.infra.PushDetailRepository
 import org.springframework.stereotype.Service
 
@@ -15,10 +16,21 @@ class NotificationService(
         userId: Long,
         cursor: Long?,    // 마지막으로 조회된 push_detail.id
         limit: Int,       // 페이지당 개수
-        code: PushTemplate?
+        code: PushTemplate?,
+        group: PushTemplateGroup?,
     ): ApiPageCursor<PushNotificationResponse> {
 
-        val entities = pushDetailRepository.findByUserIdWithCursor(userId, cursor, limit, code?.code)
+        val entities = when {
+            code != null -> pushDetailRepository.findByUserIdWithCursor(userId, cursor, limit, code.code)
+            group != null -> {
+                val codes = PushTemplate.entries
+                    .filter { it.group == group }
+                    .map { it.code }
+                pushDetailRepository.findByUserIdWithCursorAndCodes(userId, cursor, limit, codes)
+            }
+            else -> pushDetailRepository.findByUserIdWithCursor(userId, cursor, limit, null)
+        }
+
         val items = entities.map {
             PushNotificationResponse(
                 id = it.id,
