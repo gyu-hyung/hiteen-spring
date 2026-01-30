@@ -75,17 +75,15 @@ class BoardService(
         )
     }
 
-    suspend fun getBoard(uid: UUID, currentUserId: Long?): BoardResponse {
-
-        val userId = currentUserId ?: -1L
-        val b = boards.findDetailByUid(uid, userId) ?: throw IllegalArgumentException("해당 글을 찾을 수 없어 😢")
+    suspend fun getBoard(uid: UUID, currentUserId: Long): BoardResponse {
+        val b = boards.findDetailByUid(uid, currentUserId) ?: throw IllegalArgumentException("해당 글을 찾을 수 없어 😢")
         b.deletedAt?.let {
             throw IllegalArgumentException("이미 삭제된 글이야 😢")
         }
         val userSummary = userService.findUserSummary(b.createdId)
 
         val perPage = 15
-        val rawComments = comments.findComments(b.uid, null, userId, null, perPage + 1).toList()
+        val rawComments = comments.findComments(b.uid, null, currentUserId, null, perPage + 1).toList()
 
         // 댓글 작성자 정보 일괄 조회
         val commentAuthorIds = rawComments.map { it.createdId }.distinct()
@@ -107,7 +105,7 @@ class BoardService(
 
         // 공지사항/이벤트 확인 시 경험치 부여
         if(b.category == "NOTICE" || b.category == "EVENT") {
-            expService.grantExp(userId, "NOTICE_READ", b.id)
+            expService.grantExp(currentUserId, "NOTICE_READ", b.id)
         }
 
         val withBanners = if (b.category == BoardCategory.EVENT.name || b.category == BoardCategory.EVENT_WINNING.name) {
