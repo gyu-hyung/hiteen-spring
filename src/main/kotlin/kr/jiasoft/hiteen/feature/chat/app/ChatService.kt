@@ -56,15 +56,40 @@ class ChatService(
         val existing = rooms.findDirectRoom(currentUserId, peer.id)
         if (existing != null) return existing.uid
 
+        val now = OffsetDateTime.now()
+
         val saved = rooms.save(
             ChatRoomEntity(
                 createdId = currentUserId,
-                createdAt = OffsetDateTime.now(),
-                updatedAt = OffsetDateTime.now()
+                createdAt = now,
+                updatedAt = now
             )
         )
-        chatUsers.save(ChatUserEntity(chatRoomId = saved.id, userId = currentUserId, push = true, pushAt = OffsetDateTime.now(), joiningAt = OffsetDateTime.now()))
-        chatUsers.save(ChatUserEntity(chatRoomId = saved.id, userId = peer.id, push = true, pushAt = OffsetDateTime.now(), joiningAt = OffsetDateTime.now()))
+        chatUsers.save(ChatUserEntity(chatRoomId = saved.id, userId = currentUserId, push = true, pushAt = now, joiningAt = now))
+        chatUsers.save(ChatUserEntity(chatRoomId = saved.id, userId = peer.id, push = true, pushAt = now, joiningAt = now))
+
+        // --- ✅ 입장 시스템 메시지 생성 및 저장 (kind 4) ---
+        val systemContent = "채팅방에 입장하였습니다."
+
+        val systemMsg = messages.save(
+            ChatMessageEntity(
+                chatRoomId = saved.id,
+                userId = saved.createdId, // 방장(owner)을 발송자로 저장(leaveRoom과 동일)
+                content = systemContent,
+                kind = 4,
+                createdAt = now,
+            )
+        )
+
+        rooms.save(
+            saved.copy(
+                lastUserId = saved.createdId,
+                lastMessageId = systemMsg.id,
+                updatedId = currentUserId,
+                updatedAt = systemMsg.createdAt,
+            )
+        )
+
         return saved.uid
     }
 
@@ -87,6 +112,8 @@ class ChatService(
             rooms.findRoomByExactActiveMembers(memberIds, memberIds.size)?.let { return it.uid }
         }
 
+        val now = OffsetDateTime.now()
+
         // 파일이 있으면 1개만 업로드해서 대표 썸네일로 사용
         val uploadedAssetUid: UUID? = if (file != null) {
             assetService.uploadImages(listOf(file), currentUserId, AssetCategory.COMMON).toList().firstOrNull()?.uid
@@ -96,7 +123,7 @@ class ChatService(
         val saved = rooms.save(
             ChatRoomEntity(
                 createdId = currentUserId,
-                createdAt = OffsetDateTime.now(),
+                createdAt = now,
                 roomName = req.roomName ?: members.joinToString(", ") { it.nickname },
                 inviteMode = req.inviteMode,
                 assetUid = uploadedAssetUid,
@@ -110,11 +137,33 @@ class ChatService(
                     chatRoomId = saved.id,
                     userId = uid,
                     push = true,
-                    pushAt = OffsetDateTime.now(),
-                    joiningAt = OffsetDateTime.now()
+                    pushAt = now,
+                    joiningAt = now
                 )
             )
         }
+
+        // --- ✅ 입장 시스템 메시지 생성 및 저장 (kind 4) ---
+        val systemContent = "채팅방에 입장하였습니다."
+
+        val systemMsg = messages.save(
+            ChatMessageEntity(
+                chatRoomId = saved.id,
+                userId = saved.createdId, // 방장(owner)을 발송자로 저장(leaveRoom과 동일)
+                content = systemContent,
+                kind = 4,
+                createdAt = now,
+            )
+        )
+
+        rooms.save(
+            saved.copy(
+                lastUserId = saved.createdId,
+                lastMessageId = systemMsg.id,
+                updatedId = currentUserId,
+                updatedAt = systemMsg.createdAt,
+            )
+        )
 
         return saved.uid
     }
@@ -459,15 +508,15 @@ class ChatService(
 
         val roomIds = projections.map { it.id }
 
-        // 1) 각 방의 안읽은 메시지 수 일괄 조회 (N+1 방지)
+        // 1) 각 방의 안읽은 메시지 수 일괄 조회
         val unreadMap: Map<Long, Int> = messages.countUnreadByRoomIds(roomIds, userId).toList()
             .associate { it.messageId to it.readerCount.toInt() }
 
-        // 2) 각 방의 멤버 정보 일괄 조회 (멤버 수 및 제목 생성용, N+1 방지)
+        // 2) 각 방의 멤버 정보 일괄 조회 (멤버 수 및 제목 생성용, 방 나간 유저 포함)
         val membersGroupByRoom: Map<Long, List<ChatUserNicknameProjection>> = chatUsers.findAllDetailedByRoomIds(roomIds).toList()
             .groupBy { it.chatRoomId }
 
-        // 3) 마지막 메시지용 에셋 일괄 조회 (N+1 방지)
+        // 3) 마지막 메시지용 에셋 일괄 조회
         val lastMsgIds = projections.mapNotNull { it.lastMessageId }
         val assetsMap: Map<Long, List<MessageAssetSummary>> = if (lastMsgIds.isNotEmpty()) {
             msgAssets.findAllByMessageIdIn(lastMsgIds).toList()
@@ -484,13 +533,18 @@ class ChatService(
             val computedTitle = if (!p.roomTitle.isNullOrBlank()) {
                 p.roomTitle
             } else {
-                roomMembers.filter { it.userId != userId }
-                    .take(3) // 최대 3명까지 노출
-                    .joinToString(", ") { it.nickname }
-                    .let { nicknames ->
-                        if (roomMembers.size > 4) "$nicknames 외 ${roomMembers.size - 4}명"
-                        else nicknames
-                    }
+                //단톡일때
+                if( roomMembers.size < 2 ) {
+                    roomMembers.filter { it.userId != userId }
+                        .take(3) // 최대 3명까지 노출
+                        .joinToString(", ") { it.nickname }
+                        .let { nicknames ->
+                            if (roomMembers.size > 4) "$nicknames 외 ${roomMembers.size - 4}명"
+                            else nicknames
+                        }
+                } else {//갠톡일때
+                    roomMembers.firstOrNull { it.userId != userId }?.nickname ?: "알 수 없음"
+                }
             }
 
             val lastMsgSummary = p.lastMessageId?.let { lid ->
