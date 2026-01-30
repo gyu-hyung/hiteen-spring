@@ -16,6 +16,7 @@ import kr.jiasoft.hiteen.feature.interest.infra.InterestRepository
 import kr.jiasoft.hiteen.feature.interest.infra.InterestUserRepository
 import kr.jiasoft.hiteen.feature.level.app.ExpService
 import kr.jiasoft.hiteen.feature.location.infra.cache.LocationCacheRedisService
+import kr.jiasoft.hiteen.feature.relationship.infra.RelationHistoryRepository
 import kr.jiasoft.hiteen.feature.user.app.UserService
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import kr.jiasoft.hiteen.feature.user.infra.UserPhotosRepository
@@ -36,6 +37,7 @@ class InterestUserService(
     private val expService: ExpService,
     private val locationCacheRedisService: LocationCacheRedisService,
     private val interestRepository: InterestRepository,
+    private val relationHistoryRepository: RelationHistoryRepository,
 ) {
 
     /**
@@ -137,7 +139,18 @@ class InterestUserService(
 
         val targetUserId = history.targetId
 
-        // 2) 응답 구성 (recommendFriend에서 쓰던 로직 그대로)
+        // 3) relation_history에서 팔로우 요청 후 거절(REJECTED) 당했는지 확인
+        val wasRejected = relationHistoryRepository.existsByUserIdAndTargetIdAndRelationTypeAndAction(
+            userId = user.id,
+            targetId = targetUserId,
+            relationType = "FOLLOW",
+            action = "DENIED"
+        )
+        if (wasRejected) {
+            return null
+        }
+
+        // 4) 응답 구성 (recommendFriend에서 쓰던 로직 그대로)
         val targetUserResponse = userService.findUserResponse(targetUserId, user.id)
         val interests = interestUserRepository.getInterestResponseById(id = null, userId = targetUserId).toList()
         val photos = userPhotosRepository.findByUserId(targetUserId).toList()
