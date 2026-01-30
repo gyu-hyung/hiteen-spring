@@ -1,0 +1,15 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls",
+      "delegate_permission/common.get_login_creds"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "kr.jiasoft.hiteen",
+      "sha256_cert_fingerprints": [
+        "EE:E8:12:A2:AF:A0:4C:10:10:11:A1:2C:BA:FF:5D:0D:16:AD:1C:43:C2:BE:F4:C6:AB:4F:4A:E2:06:D3:31:2C"
+      ]
+    }
+  }
+]
