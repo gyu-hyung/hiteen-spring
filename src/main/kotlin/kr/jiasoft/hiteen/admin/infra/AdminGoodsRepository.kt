@@ -107,6 +107,11 @@ interface AdminGoodsRepository : CoroutineCrudRepository<GoodsGiftishowEntity, L
             AND (:categorySeq IS NULL OR g.category1_seq = :categorySeq)
             AND (:goodsTypeCd IS NULL OR g.goods_type_cd = :goodsTypeCd)
             
+            AND (
+                :goodsCodeType IS NULL OR :goodsCodeType = 'ALL'
+                OR g.goods_code LIKE CONCAT(:goodsCodeType, '%')
+            )
+            
     """)
     suspend fun totalCount(
         search: String?,
@@ -114,6 +119,7 @@ interface AdminGoodsRepository : CoroutineCrudRepository<GoodsGiftishowEntity, L
         status: String?,
         categorySeq: Int?,
         goodsTypeCd: String?,
+        goodsCodeType: String?,
         ): Int
 
 
@@ -155,6 +161,11 @@ interface AdminGoodsRepository : CoroutineCrudRepository<GoodsGiftishowEntity, L
             
             AND (:categorySeq IS NULL OR g.category1_seq = :categorySeq)
             AND (:goodsTypeCd IS NULL OR g.goods_type_cd = :goodsTypeCd)
+            
+            AND (
+                :goodsCodeType IS NULL OR :goodsCodeType = 'ALL'
+                OR g.goods_code LIKE CONCAT(:goodsCodeType, '%')
+            )
 
         ORDER BY g.status DESC, 
             CASE WHEN :order = 'DESC' THEN g.created_at END DESC,
@@ -171,6 +182,7 @@ interface AdminGoodsRepository : CoroutineCrudRepository<GoodsGiftishowEntity, L
         status: String?,
         categorySeq: Int?,
         goodsTypeCd: String?,
+        goodsCodeType: String?,
         ): Flow<GoodsGiftishowEntity>
 
     @Query("""
