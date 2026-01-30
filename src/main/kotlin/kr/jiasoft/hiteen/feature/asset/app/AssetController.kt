@@ -80,6 +80,12 @@ class AssetController(
         @Parameter(description = "파일 UID") @PathVariable uid: UUID
     ): ResponseEntity<AssetResponse> {
         val e = assetService.get(uid) ?: return ResponseEntity.notFound().build()
+
+        // 🔒 BARCODE 카테고리는 직접 접근 불가 (전용 보안 엔드포인트 사용 필요)
+        if (e.filePath.startsWith("barcode/")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
+        }
+
         return ResponseEntity.ok(e.toResponse())
     }
 
@@ -115,6 +121,11 @@ class AssetController(
         assetService.increase(uid)
         val updated = assetService.findByUid(uid)?: throw IllegalArgumentException("존재하지않는 uid")
 
+        // 🔒 BARCODE 카테고리는 직접 접근 불가 (전용 보안 엔드포인트 사용 필요)
+        if (updated.filePath.startsWith("barcode/")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
+        }
+
         val path = assetService.resolveFilePath(updated.filePath + updated.storeFileName)
         if (!assetService.existsFile(path)) return ResponseEntity.notFound().build()
 
@@ -141,6 +152,11 @@ class AssetController(
         @AuthenticationPrincipal(expression = "user") user: UserEntity
     ): ResponseEntity<FileSystemResource> {
         val asset = assetService.findByUid(uid) ?: return ResponseEntity.notFound().build()
+
+        // 🔒 BARCODE 카테고리는 직접 접근 불가 (전용 보안 엔드포인트 사용 필요)
+        if (asset.filePath.startsWith("barcode/")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
+        }
 
         val path = assetService.resolveFilePath(asset.filePath + asset.storeFileName)
         if (!assetService.existsFile(path)) return ResponseEntity.notFound().build()
@@ -170,6 +186,13 @@ class AssetController(
         @PathVariable size: String,
         @RequestParam(defaultValue = "cover") mode: String,
     ): ResponseEntity<FileSystemResource> {
+
+        // 🔒 BARCODE 카테고리는 직접 접근 불가 (전용 보안 엔드포인트 사용 필요)
+        val originalAsset = assetService.findByUid(uid)
+            ?: return ResponseEntity.notFound().build()
+        if (originalAsset.filePath.startsWith("barcode/")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
+        }
 
         // 1️⃣ size 파싱 + 검증
         val (width, height) = parseSize(size)
@@ -252,6 +275,13 @@ class AssetController(
         @Parameter(description = "파일 UID") @PathVariable uid: UUID,
         @AuthenticationPrincipal(expression = "user") user: UserEntity
     ): ResponseEntity<ApiResult<AssetResponse>> {
+        val asset = assetService.get(uid) ?: return ResponseEntity.notFound().build()
+
+        // 🔒 BARCODE 카테고리는 직접 삭제 불가
+        if (asset.filePath.startsWith("barcode/")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
+        }
+
         val deleted = assetService.softDelete(uid, user.id) ?: return ResponseEntity.notFound().build()
         return ResponseEntity.ok(ApiResult.success(deleted.toResponse()))
     }
