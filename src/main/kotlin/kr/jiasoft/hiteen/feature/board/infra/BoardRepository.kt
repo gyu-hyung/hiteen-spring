@@ -347,8 +347,7 @@ interface BoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
         FROM boards b
         LEFT JOIN users u ON b.created_id = u.id
         LEFT JOIN schools s ON s.id = u.school_id
-        WHERE b.deleted_at IS NULL
-          AND b.uid = :uid
+        WHERE b.uid = :uid
         LIMIT 1
     """)
     suspend fun findDetailByUid(uid: UUID, userId: Long): BoardResponse?
