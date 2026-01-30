@@ -55,9 +55,9 @@ class BoardController(
     @GetMapping("/{boardUid}")
     suspend fun get(
         @Parameter(description = "게시글 UID") @PathVariable boardUid: UUID,
-        @AuthenticationPrincipal(expression = "user") user: UserEntity?
+        @AuthenticationPrincipal(expression = "user") user: UserEntity
     ): ResponseEntity<ApiResult<BoardResponse>> {
-        val board = service.getBoard(boardUid, user?.id)
+        val board = service.getBoard(boardUid, user.id)
         return ResponseEntity.ok(ApiResult.success(board))
     }
 
