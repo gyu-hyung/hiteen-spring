@@ -26,6 +26,7 @@ class NotificationService(
                 val codes = PushTemplate.entries
                     .filter { it.group == group }
                     .map { it.code }
+                    .toTypedArray()
                 pushDetailRepository.findByUserIdWithCursorAndCodes(userId, cursor, limit, codes)
             }
             else -> pushDetailRepository.findByUserIdWithCursor(userId, cursor, limit, null)
