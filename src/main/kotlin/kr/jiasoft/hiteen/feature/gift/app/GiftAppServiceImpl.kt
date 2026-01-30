@@ -310,6 +310,11 @@ class GiftAppServiceImpl (
                 // ▣ 1) 발행 요청
                 val issued = giftishowClient.issueVoucher(sendReq)
 
+                //기프티쇼 발행 실패
+                if (issued.code != "0000") {
+                    throw IllegalArgumentException("기프티쇼 발행 실패: ${issued.message}")
+                }
+
                 val pinNo = issued.result?.result?.pinNo
                     ?: throw IllegalArgumentException("기프티쇼 발행 응답에 pinNo가 없습니다.")
 
