@@ -114,8 +114,7 @@ interface PollRepository : CoroutineCrudRepository<PollEntity, Long> {
             p.deleted_at
         FROM polls p
         JOIN users u ON u.id = p.created_id
-        WHERE p.deleted_at IS NULL
-          AND p.id = :pollId
+        WHERE p.id = :pollId
         LIMIT 1
     """)
     suspend fun findSummaryById(

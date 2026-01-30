@@ -109,7 +109,6 @@ interface AdminUserRepository : CoroutineCrudRepository<UserEntity, Long> {
         SELECT u.*
         FROM users u
         WHERE u.deleted_at IS NULL
-            AND u.role = :role
             AND (
                 :keyword IS NULL
                 OR (
@@ -119,7 +118,6 @@ interface AdminUserRepository : CoroutineCrudRepository<UserEntity, Long> {
             )
     """)
     suspend fun listSearchUsers(
-        role: String? = "USER",
          keyword: String?
     ): Flow<AdminUserSearchResponse>
 

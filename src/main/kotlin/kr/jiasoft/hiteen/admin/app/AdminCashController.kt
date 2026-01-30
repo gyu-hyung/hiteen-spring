@@ -67,7 +67,7 @@ class AdminCashController(
         @RequestParam keyword: String? = null,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ): ResponseEntity<ApiResult<List<AdminUserSearchResponse>>> {
-        val data = userRepository.listSearchUsers("USER", keyword).toList()
+        val data = userRepository.listSearchUsers(keyword).toList()
 
         return success(data)
     }
