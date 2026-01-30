@@ -132,6 +132,7 @@ class PollService(
                 votedSeq = voted?.seq,
                 allowComment = row.allowComment,
                 createdAt = row.createdAt,
+                deletedAt = row.deletedAt,
                 user = userMap[row.createdId]
             )
         }
@@ -141,7 +142,11 @@ class PollService(
 
     suspend fun getPoll(id: Long, currentUserId: Long): PollResponse {
         // ① 기본 요약 데이터 조회
-        val poll = polls.findSummaryById(id, currentUserId) ?: throw notFound("poll")
+        val poll = polls.findSummaryById(id, currentUserId) ?: throw IllegalArgumentException("해당 투표를 찾을 수 없어 😢")
+        //삭제 된 투표 예외 처리
+        poll.deletedAt?.let {
+            throw IllegalArgumentException("이미 삭제된 투표야 😢")
+        }
         val user = userService.findUserResponse(poll.createdId, includes = UserResponseIncludes(school = true, tier = true))
 
         // ② 본문 이미지 (pollPhotos)
@@ -389,7 +394,11 @@ class PollService(
 
 
     suspend fun vote(pollId: Long?, seq: Int, userId: Long) {
-        polls.findById(pollId!!) ?: throw IllegalArgumentException( "poll not found(vote)")
+        val poll = polls.findById(pollId!!) ?: throw IllegalArgumentException( "해당 투표를 찾을 수 없습니다." )
+        // 삭제 된 투표 예외 처리
+        poll?.deletedAt?.let {
+            throw IllegalArgumentException("이미 삭제된 투표입니다.")
+        }
 
         val select = pollSelects.findAllByPollId(pollId)
             .toList()
@@ -474,7 +483,11 @@ class PollService(
 
 
     suspend fun createComment(req: PollCommentRegisterRequest, user: UserEntity): PollCommentResponse? {
-        val p = polls.findById(req.pollId) ?: throw IllegalArgumentException("poll not found(createComment)")
+        val p = polls.findById(req.pollId) ?: throw IllegalArgumentException("해당 투표를 찾을 수 없어 😢")
+        //삭제 된 투표 예외 처리
+        p.deletedAt?.let {
+            throw IllegalArgumentException("이미 삭제된 투표야 😢")
+        }
         if (p.allowComment == 0) throw BusinessValidationException(mapOf("error" to "comment_not_allowed"))
 
         val parent: PollCommentEntity? = req.parentUid?.let { uid -> comments.findByUid(uid) }

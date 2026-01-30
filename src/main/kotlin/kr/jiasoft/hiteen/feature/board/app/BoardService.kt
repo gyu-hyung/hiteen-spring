@@ -78,7 +78,10 @@ class BoardService(
     suspend fun getBoard(uid: UUID, currentUserId: Long?): BoardResponse {
 
         val userId = currentUserId ?: -1L
-        val b = boards.findDetailByUid(uid, userId) ?: throw IllegalArgumentException("해당 글을 찾을 수 없어 😥")
+        val b = boards.findDetailByUid(uid, userId) ?: throw IllegalArgumentException("해당 글을 찾을 수 없어 😢")
+        b.deletedAt?.let {
+            throw IllegalArgumentException("이미 삭제된 글이야 😢")
+        }
         val userSummary = userService.findUserSummary(b.createdId)
 
         val perPage = 15
