@@ -41,7 +41,7 @@ interface PollRepository : CoroutineCrudRepository<PollEntity, Long> {
             p.allow_comment,
             p.created_id,
             p.created_at,
-            p.deleted_at,
+            p.deleted_at
         FROM polls p
         LEFT JOIN (
             SELECT poll_id, COUNT(*)::bigint AS like_count
