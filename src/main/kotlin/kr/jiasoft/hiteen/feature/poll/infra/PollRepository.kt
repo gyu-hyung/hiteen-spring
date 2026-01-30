@@ -110,7 +110,8 @@ interface PollRepository : CoroutineCrudRepository<PollEntity, Long> {
             (SELECT seq FROM poll_users pu WHERE pu.poll_id = p.id AND pu.user_id = :currentUserId) AS voted_seq,
             p.allow_comment,
             p.created_id,
-            p.created_at
+            p.created_at,
+            p.deleted_at
         FROM polls p
         JOIN users u ON u.id = p.created_id
         WHERE p.deleted_at IS NULL
