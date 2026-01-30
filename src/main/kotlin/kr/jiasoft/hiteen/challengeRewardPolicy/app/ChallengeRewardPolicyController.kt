@@ -1,12 +1,17 @@
 package kr.jiasoft.hiteen.challengeRewardPolicy.app
 
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.toList
 import kr.jiasoft.hiteen.challengeRewardPolicy.dto.ChallengeRewardPolicyDeleteRequest
 import kr.jiasoft.hiteen.challengeRewardPolicy.dto.ChallengeRewardPolicyRow
 import kr.jiasoft.hiteen.challengeRewardPolicy.dto.ChallengeRewardPolicySaveRequest
 import kr.jiasoft.hiteen.challengeRewardPolicy.dto.ChallengeRewardPolicySingleSaveRequest
+import kr.jiasoft.hiteen.challengeRewardPolicy.dto.GameSelectItem
 import kr.jiasoft.hiteen.common.dto.ApiPage
 import kr.jiasoft.hiteen.common.dto.ApiResult
 import kr.jiasoft.hiteen.common.dto.PageUtil
+import kr.jiasoft.hiteen.feature.play.infra.GameRepository
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
@@ -16,6 +21,7 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/api/admin/challengeRewardPolicy")
 class ChallengeRewardPolicyController(
     private val service: ChallengeRewardPolicyService,
+    private val gameRepository: GameRepository,
 ) {
 
     /** 목록 */
@@ -27,6 +33,7 @@ class ChallengeRewardPolicyController(
         @RequestParam search: String? = null,
         @RequestParam searchType: String = "ALL",
         @RequestParam status: String? = null,
+        @RequestParam type: String? = null, // BRONZE, PLATINUM, CHALLENGER
         @RequestParam id: Long? = null,
         @RequestParam uid: String? = null,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
@@ -38,12 +45,14 @@ class ChallengeRewardPolicyController(
             search = search,
             searchType = searchType,
             status = status,
+            type = type,
         )
 
         val totalCount = service.totalCount(
             search = search,
             searchType = searchType,
             status = status,
+            type = type,
         )
 
         return ResponseEntity.ok().body(ApiResult.success(PageUtil.of(list, totalCount, page, size)))
@@ -78,5 +87,21 @@ class ChallengeRewardPolicyController(
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ) {
         service.delete(req, user.id)
+    }
+
+    /** 게임 목록 조회 (select용) */
+    @GetMapping("/games")
+    suspend fun searchGames(
+        @RequestParam(required = false) search: String? = null,
+        @AuthenticationPrincipal(expression = "user") user: UserEntity,
+    ): ResponseEntity<ApiResult<List<GameSelectItem>>> {
+        val games = gameRepository.findAllByDeletedAtIsNullOrderById()
+            .filter { game ->
+                search.isNullOrBlank() || game.name.contains(search, ignoreCase = true)
+            }
+            .map { GameSelectItem(id = it.id, name = it.name) }
+            .toList()
+
+        return ResponseEntity.ok(ApiResult.success(games))
     }
 }

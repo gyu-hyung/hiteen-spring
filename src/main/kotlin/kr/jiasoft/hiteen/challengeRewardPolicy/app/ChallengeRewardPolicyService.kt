@@ -23,6 +23,7 @@ class ChallengeRewardPolicyService(
         search: String?,
         searchType: String,
         status: String?,
+        type: String?,
     ): List<ChallengeRewardPolicyRow> =
         repository.listByPage(
             page = page,
@@ -31,6 +32,7 @@ class ChallengeRewardPolicyService(
             search = search,
             searchType = searchType,
             status = status,
+            type = type,
         ).toList()
 
     /** 개수조회 */
@@ -38,11 +40,13 @@ class ChallengeRewardPolicyService(
         search: String?,
         searchType: String,
         status: String?,
+        type: String?,
     ): Int =
         repository.totalCount(
             search = search,
             searchType = searchType,
             status = status,
+            type = type,
         )
 
 
