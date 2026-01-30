@@ -17,11 +17,11 @@ interface GiftishowGoodsRepository : CoroutineCrudRepository<GoodsGiftishowEntit
     fun findAllByGoodsCodeIn(goodsCodes: List<String>): Flow<GoodsGiftishowEntity>
 
     @Modifying
-    @Query("UPDATE goods_giftishow SET del_yn = 1 WHERE goods_code NOT LIKE 'H%'")
+    @Query("UPDATE goods_giftishow SET del_yn = 1 WHERE goods_code LIKE 'G%'")
     suspend fun markAllDeleted()
 
     @Modifying
-    @Query("UPDATE goods_giftishow SET del_yn = 1, deleted_at = NOW() WHERE goods_code NOT LIKE 'H%' AND (updated_at IS NULL OR updated_at < :since)")
+    @Query("UPDATE goods_giftishow SET del_yn = 1, deleted_at = NOW() WHERE goods_code LIKE 'G%' AND (updated_at IS NULL OR updated_at < :since)")
     suspend fun markDeletedNotUpdatedSince(since: OffsetDateTime)
 
     suspend fun findAllByOrderByCreatedAtDesc(): List<GoodsGiftishowEntity>
