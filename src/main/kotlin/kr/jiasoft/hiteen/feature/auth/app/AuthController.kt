@@ -27,6 +27,7 @@ import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import kr.jiasoft.hiteen.feature.user.dto.ResetPasswordRequest
 import kr.jiasoft.hiteen.feature.user.dto.UserResponseWithTokens
 import kr.jiasoft.hiteen.feature.user.infra.UserRepository
+import kr.jiasoft.hiteen.feature.user.app.UserDetailService
 import org.springframework.http.ResponseEntity
 import org.springframework.http.server.reactive.ServerHttpResponse
 import org.springframework.security.core.annotation.AuthenticationPrincipal
@@ -46,6 +47,7 @@ class AuthController(
 
     private val smsService: SmsService,
     private val authService: AuthService,
+    private val userDetailService: UserDetailService,
 ) {
 
 
@@ -149,6 +151,20 @@ class AuthController(
         return ResponseEntity.ok()
 //            .header(HttpHeaders.SET_COOKIE, cookie.toString())
             .body(ApiResult.success(mapOf("accessToken" to access.value, "refreshToken" to refresh.value)))
+    }
+
+
+    @Operation(
+        summary = "로그아웃",
+        description = "로그아웃 처리 - FCM 토큰(device_token)을 삭제합니다.",
+        security = [SecurityRequirement(name = "bearerAuth")]
+    )
+    @PostMapping("/logout")
+    suspend fun logout(
+        @AuthenticationPrincipal(expression = "user") user: UserEntity
+    ): ResponseEntity<ApiResult<Boolean>> {
+        userDetailService.clearDeviceToken(user.uid)
+        return ResponseEntity.ok(ApiResult.success(true, "로그아웃 완료"))
     }
 
 

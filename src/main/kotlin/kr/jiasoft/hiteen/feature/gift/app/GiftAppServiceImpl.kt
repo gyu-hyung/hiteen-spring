@@ -2,6 +2,7 @@ package kr.jiasoft.hiteen.feature.gift.app
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import kotlinx.coroutines.flow.toList
+import kr.jiasoft.hiteen.feature.asset.app.AssetService
 import kr.jiasoft.hiteen.feature.cash.app.CashService
 import kr.jiasoft.hiteen.feature.cash.domain.CashPolicy
 import kr.jiasoft.hiteen.feature.gift.domain.GiftCategory
@@ -49,6 +50,7 @@ class GiftAppServiceImpl (
     private val giftishowClient: GiftshowClient,
 
     private val userService: UserService,
+    private val assetService: AssetService,
 
     private val userRepository: UserRepository,
     private val gameRepository: GameRepository,
@@ -240,6 +242,7 @@ class GiftAppServiceImpl (
             throw IllegalArgumentException("존재하지 않는 선물")
         val template = gift.category.toTemplate()
         val giftUser = giftUserRepository.findByGiftIdAndUserId(gift.id, userId)
+            ?: throw IllegalArgumentException("존재하지 않는 선물 수신 정보")
         val receiverUser = userRepository.findById(giftUser.userId)
 
         // pubExpiredDate 발급만료일자 지났는지?
@@ -308,7 +311,14 @@ class GiftAppServiceImpl (
                 val issued = giftishowClient.issueVoucher(sendReq)
 
                 val pinNo = issued.result?.result?.pinNo
-                val couponImgUrl = issued.result?.result?.couponImgUrl
+                    ?: throw IllegalArgumentException("기프티쇼 발행 응답에 pinNo가 없습니다.")
+
+                // ▣ 1-1) PIN 번호로 바코드 이미지 생성 및 저장
+                val barcodeAsset = assetService.createBarcodeImage(
+                    pinNo = pinNo,
+                    currentUserId = giftUser.userId,
+                )
+                val barcodeAssetUid = barcodeAsset.uid.toString()
 
                 // ▣ 2) 상세 조회 (Map 기반)
                 val res = giftishowClient.detailVoucher(trId)
@@ -330,13 +340,13 @@ class GiftAppServiceImpl (
                     DateTimeFormatter.ofPattern("yyyyMMddHHmmssZ")
                 )
 
-                // 🔹 3) GiftUser 업데이트
+                // 🔹 3) GiftUser 업데이트 (couponImg에 바코드 asset uid 저장)
                 giftUserRepository.save(
                     giftUser.copy(
                         status = GiftStatus.SENT.code,
                         requestDate = OffsetDateTime.now(),
                         couponNo = pinNo,
-                        couponImg = couponImgUrl,
+                        couponImg = barcodeAssetUid,
                         pubDate = OffsetDateTime.now(),
                         useExpiredDate = expireAt
                     )
@@ -406,6 +416,7 @@ class GiftAppServiceImpl (
         val gift = giftRepository.findByUid(req.giftUid)
             ?: throw IllegalArgumentException("존재하지 않는 정보")
         val giftUser = giftUserRepository.findByGiftIdAndUserId(gift.id, userId)
+            ?: throw IllegalArgumentException("존재하지 않는 선물 수신 정보")
         giftUserRepository.save(giftUser.copy(
             status = GiftStatus.USED.code,
             useDate = OffsetDateTime.now(),
