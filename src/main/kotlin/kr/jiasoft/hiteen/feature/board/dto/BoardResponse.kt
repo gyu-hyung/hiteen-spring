@@ -94,6 +94,10 @@ data class BoardResponse(
     @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm")
     val updatedAt: OffsetDateTime? = null,
 
+    @param:Schema(description = "삭제 일시", example = "2025.09.18 10:15")
+    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm")
+    val deletedAt: OffsetDateTime? = null,
+
     @param:Schema(description = "좋아요 수", example = "42")
     val likeCount: Long = 0,
 

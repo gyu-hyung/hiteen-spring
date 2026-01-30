@@ -13,7 +13,7 @@ data class BoardEntity (
     val uid: UUID = UUID.randomUUID(),
     val category: String,
     val subject: String?,
-    val content: String,
+    val content: String?,
     val link: String? = null,
     val ip: String? = null,
     val hits: Int = 0,

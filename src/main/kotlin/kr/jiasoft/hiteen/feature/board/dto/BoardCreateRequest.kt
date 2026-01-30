@@ -21,13 +21,13 @@ data class BoardCreateRequest(
     )
     val subject: String?,
 
-    @field:NotBlank
+//    @field:NotBlank
     @param:Schema(
         description = "게시글 내용",
         example = "저녁 7시에 광주 체육관 앞에서 모여요!",
         required = true
     )
-    val content: String,
+    val content: String?,
 
     @field:Size(max = 50)
     @param:Schema(

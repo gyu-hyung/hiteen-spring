@@ -321,6 +321,7 @@ interface BoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
             b.created_at     AS created_at,
             b.created_id     AS created_id,
             b.updated_at     AS updated_at,
+            b.deleted_at     AS deleted_at,
             (SELECT COUNT(*)::bigint FROM board_likes bl WHERE bl.board_id = b.id) AS like_count,
             (
                 SELECT COUNT(*)::bigint
