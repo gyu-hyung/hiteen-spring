@@ -39,11 +39,17 @@ interface ChallengeRewardPolicyRepository
                 OR (:status = 'ACTIVE' AND crp.status = 1)
                 OR (:status = 'INACTIVE' AND crp.status = 0)
             )
+
+            AND (
+                :type IS NULL OR :type = 'ALL'
+                OR crp.type = :type
+            )
     """)
     suspend fun totalCount(
         search: String?,
         searchType: String,
         status: String?,
+        type: String?,
     ): Int
 
 
@@ -80,6 +86,11 @@ interface ChallengeRewardPolicyRepository
                 OR (:status = 'INACTIVE' AND crp.status = 0)
             )
 
+            AND (
+                :type IS NULL OR :type = 'ALL'
+                OR crp.type = :type
+            )
+
         ORDER BY
             (select min(level) from tiers where tier_code LIKE CONCAT('%', league, '%')),
             crp.order_no ASC,
@@ -95,5 +106,6 @@ interface ChallengeRewardPolicyRepository
         search: String?,
         searchType: String,
         status: String?,
+        type: String?,
     ): Flow<ChallengeRewardPolicyRow>
 }
