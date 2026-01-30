@@ -130,6 +130,10 @@ dependencies {
     implementation("net.coobird:thumbnailator:0.4.20")
     implementation("com.drewnoakes:metadata-extractor:2.19.0") // (선택) exif 관련 보조
 
+    // ZXing (바코드 생성)
+    implementation("com.google.zxing:core:3.5.3")
+    implementation("com.google.zxing:javase:3.5.3")
+
     // ImageIO 확장(서버 환경에서 JPEG/CMYK/Progressive 등 포맷 읽기 안정화)
     implementation("com.twelvemonkeys.imageio:imageio-jpeg:3.12.0")
     implementation("com.twelvemonkeys.imageio:imageio-core:3.12.0")
