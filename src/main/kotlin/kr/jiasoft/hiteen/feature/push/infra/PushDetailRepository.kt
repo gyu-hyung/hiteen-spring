@@ -63,7 +63,8 @@ interface PushDetailRepository : CoroutineCrudRepository<PushDetailEntity, Long>
           AND (:cursor IS NULL OR d.id < :cursor)
           AND (
             :codes IS NULL
-            OR p.code IN (:codes)
+            OR cardinality(:codes) = 0
+            OR p.code = ANY(:codes)
           )
         ORDER BY d.id DESC
         LIMIT :limit
@@ -72,7 +73,7 @@ interface PushDetailRepository : CoroutineCrudRepository<PushDetailEntity, Long>
         userId: Long,
         cursor: Long?,
         limit: Int,
-        codes: List<String>?
+        codes: Array<String>?
     ): List<PushNotificationResponse>
 
 }
