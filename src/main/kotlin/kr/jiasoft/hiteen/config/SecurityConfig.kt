@@ -77,6 +77,7 @@ class SecurityConfig(
                     // Android deferred token resolve (auth optional)
                     "/api/invite/deferred/resolve",
                     "/api/app/map/keys",
+                    "/.well-known/assetlinks.json"
                 ).permitAll()
 
                 // 초대 공유 링크(랜딩)
