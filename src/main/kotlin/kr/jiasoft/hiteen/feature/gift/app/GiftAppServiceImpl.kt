@@ -154,6 +154,19 @@ class GiftAppServiceImpl (
         val receiverUsers = userRepository.findAllByUidIn(req.receiveUserUids)
         if (receiverUsers.isEmpty()) throw IllegalArgumentException("존재하지 않는 수신자")
 
+        // 🔒 giftType과 goodsCode 일치 검증
+        if (req.goodsCode != null) {
+            val expectedPrefix = when (req.giftType) {
+                GiftType.Voucher -> "G"
+                GiftType.GiftCard -> "H"
+                GiftType.Delivery -> "D"
+                else -> null
+            }
+            if (expectedPrefix != null && !req.goodsCode.startsWith(expectedPrefix)) {
+                throw IllegalArgumentException("잘못된 요청")
+            }
+        }
+
         val memo = if (req.giftCategory == GiftCategory.Challenge) {
             GiftMessageFormatter.challengeMemo(
                 gameName = req.gameId?.let { gameRepository.findById(it)?.name },
@@ -422,8 +435,16 @@ class GiftAppServiceImpl (
             ?: throw IllegalArgumentException("존재하지 않는 정보")
         val giftUser = giftUserRepository.findByGiftIdAndUserId(gift.id, userId)
             ?: throw IllegalArgumentException("존재하지 않는 선물 수신 정보")
+
+        val newStatus = when (gift.type) {
+            GiftType.Voucher -> GiftStatus.USED.code          // 사용 완료
+            GiftType.Delivery -> GiftStatus.DELIVERY_DONE.code // 배송 완료
+            GiftType.GiftCard -> GiftStatus.GRANTED.code       // 지급 완료
+            GiftType.Point, GiftType.Cash -> GiftStatus.USED.code
+        }
+
         giftUserRepository.save(giftUser.copy(
-            status = GiftStatus.USED.code,
+            status = newStatus,
             useDate = OffsetDateTime.now(),
         ))
         return findGift(userId, giftUser.id)

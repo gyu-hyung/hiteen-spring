@@ -3,6 +3,7 @@ package kr.jiasoft.hiteen.admin.app
 import io.swagger.v3.oas.annotations.Operation
 import kotlinx.coroutines.flow.toList
 import kr.jiasoft.hiteen.admin.dto.AdminGiftResponse
+import kr.jiasoft.hiteen.admin.dto.AdminGiftStatusUpdateRequest
 import kr.jiasoft.hiteen.admin.dto.AdminUserResponse
 import kr.jiasoft.hiteen.admin.dto.GoodsBrandDto
 import kr.jiasoft.hiteen.admin.dto.GoodsCategoryDto
@@ -20,8 +21,10 @@ import kr.jiasoft.hiteen.feature.gift.domain.GiftCategory
 import kr.jiasoft.hiteen.feature.gift.domain.GiftType
 import kr.jiasoft.hiteen.feature.gift.dto.GiftProvideRequest
 import kr.jiasoft.hiteen.feature.gift.dto.GiftResponse
+import kr.jiasoft.hiteen.feature.gift.dto.GiftStatus
 import kr.jiasoft.hiteen.feature.gift.dto.client.GiftishowApiResponse
 import kr.jiasoft.hiteen.feature.gift.dto.client.biz.GiftishowBizMoneyResult
+import kr.jiasoft.hiteen.feature.gift.infra.GiftRepository
 import kr.jiasoft.hiteen.feature.gift.infra.GiftUserRepository
 import kr.jiasoft.hiteen.feature.giftishow.domain.GoodsGiftishowEntity
 import kr.jiasoft.hiteen.feature.giftishow.infra.GiftishowGoodsRepository
@@ -32,14 +35,15 @@ import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.annotation.AuthenticationPrincipal
-import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import java.time.OffsetDateTime
 import java.util.UUID
 
 @RestController
@@ -47,6 +51,7 @@ import java.util.UUID
 @PreAuthorize("hasRole('ADMIN')")
 class AdminGiftController(
     private val repository: AdminGiftRepository,
+    private val giftRepository: GiftRepository,
     private val giftAppService: GiftAppService,
     private val giftishowGoodsRepository: GiftishowGoodsRepository,
     private val giftshowClient: GiftshowClient,
@@ -94,7 +99,78 @@ class AdminGiftController(
 
 
     /**
-     * 상품 카테고리 (관리자 모달용)3
+     * 선물 상태 변경 (관리자용)
+     * - Delivery: 배송요청(4) → 배송완료(5)
+     * - GiftCard: 지급요청(6) → 지급완료(7)
+     */
+    @Operation(
+        summary = "선물 상태 변경 (관리자용)",
+        description = "배송상품/기프트카드의 상태를 변경합니다. (배송완료, 지급완료 등)"
+    )
+    @PutMapping("/status")
+    suspend fun updateGiftStatus(
+        @RequestBody req: AdminGiftStatusUpdateRequest,
+        @AuthenticationPrincipal(expression = "user") user: UserEntity,
+    ): ResponseEntity<ApiResult<AdminGiftResponse>> {
+        // 1️⃣ gift 조회
+        val gift = giftRepository.findByUid(req.giftUid)
+            ?: throw IllegalArgumentException("존재하지 않는 선물입니다.")
+
+        // 2️⃣ giftType 검증 (Delivery, GiftCard만 허용)
+        if (gift.type !in listOf(GiftType.Delivery, GiftType.GiftCard)) {
+            throw IllegalArgumentException("배송상품(Delivery) 또는 기프트카드(GiftCard)만 상태 변경이 가능합니다.")
+        }
+
+        // 3️⃣ 상태 코드 검증
+        val allowedStatuses = when (gift.type) {
+            GiftType.Delivery -> listOf(
+                GiftStatus.DELIVERY_REQUESTED.code,
+                GiftStatus.DELIVERY_DONE.code
+            )
+            GiftType.GiftCard -> listOf(
+                GiftStatus.GRANT_REQUESTED.code,
+                GiftStatus.GRANTED.code
+            )
+            else -> emptyList()
+        }
+
+        if (req.status !in allowedStatuses) {
+            throw IllegalArgumentException("허용되지 않는 상태 코드입니다: ${req.status}")
+        }
+
+        // 4️⃣ giftUser 조회 및 상태 변경
+        val giftUser = giftUserRepository.findByGiftId(gift.id)
+            ?: throw IllegalArgumentException("선물 수신 정보가 없습니다.")
+
+        val now = OffsetDateTime.now()
+        val updatedGiftUser = when (req.status) {
+            GiftStatus.DELIVERY_DONE.code, GiftStatus.GRANTED.code -> {
+                giftUser.copy(
+                    status = req.status,
+                    pubDate = now,
+                    useDate = now
+                )
+            }
+            else -> {
+                giftUser.copy(
+                    status = req.status,
+                    requestDate = now
+                )
+            }
+        }
+
+        giftUserRepository.save(updatedGiftUser)
+
+        // 5️⃣ 응답
+        val response = repository.findByUid(req.giftUid)
+            ?: throw IllegalArgumentException("선물 정보 조회 실패")
+
+        return ResponseEntity.ok(ApiResult.success(response))
+    }
+
+
+    /**
+     * 상품 카테고리 (관리자 모달용)
      */
     @GetMapping("/goods/categories")
     suspend fun getGoodsCategories(
@@ -129,6 +205,7 @@ class AdminGiftController(
         @RequestParam categorySeq: Int? = null,
         @RequestParam goodsTypeCd: String? = null,
         @RequestParam(required = false) brandCode: String? = null,
+        @RequestParam(required = false) goodsCodeType: String? = null, // G: 기프티쇼, H: 기프트카드, D: 배송상품
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ): ResponseEntity<ApiResult<ApiPageCursor<GoodsGiftishowEntity>>> {
 
@@ -140,6 +217,7 @@ class AdminGiftController(
             categorySeq = categorySeq,
             goodsTypeCd = goodsTypeCd,
             brandCode = brandCode,
+            goodsCodeType = goodsCodeType,
         ).toList()
 
         val nextCursor = list.lastOrNull()?.id?.toString()
