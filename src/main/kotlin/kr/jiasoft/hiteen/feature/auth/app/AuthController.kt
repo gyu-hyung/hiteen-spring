@@ -21,6 +21,7 @@ import kr.jiasoft.hiteen.feature.auth.dto.ResetPasswordValidRequest
 import kr.jiasoft.hiteen.feature.auth.dto.VerifyRequest
 import kr.jiasoft.hiteen.feature.auth.infra.BearerToken
 import kr.jiasoft.hiteen.feature.auth.infra.JwtProvider
+import kr.jiasoft.hiteen.feature.auth.infra.JwtSessionService
 import kr.jiasoft.hiteen.feature.sms.app.SmsService
 import kr.jiasoft.hiteen.feature.sms.infra.SmsAuthRepository
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
@@ -41,6 +42,7 @@ import org.springframework.web.bind.annotation.*
 class AuthController(
     private val encoder: PasswordEncoder,
     private val jwtProvider: JwtProvider,
+    private val jwtSessionService: JwtSessionService,
 
     private val userRepository: UserRepository,
     private val smsAuthRepository: SmsAuthRepository,
@@ -134,13 +136,28 @@ class AuthController(
         security = [SecurityRequirement(name = "bearerAuth")]
     )
     @PostMapping("/refresh")
-    fun refresh(
+    suspend fun refresh(
         @Parameter(description = "Refresh Token") @RequestParam refreshToken: String,
 //        @CookieValue(name = "refreshToken", required = true) refreshToken: String?,
     ): ResponseEntity<ApiResult<Map<String, String>>> {
         requireNotNull(refreshToken) { "RefreshToken cookie not found." }
 
-        val (access, refresh) = jwtProvider.refreshTokens(BearerToken(refreshToken))
+        val oldToken = BearerToken(refreshToken)
+        val oldJti = jwtProvider.extractJti(oldToken)
+        val username = jwtProvider.extractUsername(oldToken)
+            ?: throw IllegalArgumentException("Invalid refresh token")
+
+        // 🔒 기존 토큰의 jti 검증 (탈취된 토큰 사용 방지)
+        if (oldJti != null && jwtSessionService.hasSession(username)) {
+            if (!jwtSessionService.isValidSession(username, oldJti)) {
+                throw IllegalArgumentException("Session expired. Please login again.")
+            }
+        }
+
+        val (access, refresh, jti) = jwtProvider.refreshTokens(oldToken)
+
+        // 🔒 새 세션 등록
+        jwtSessionService.registerSession(username, jti)
 
 //        val cookie = ResponseCookie.from("refreshToken", refresh.value)
 //            .httpOnly(true)
@@ -156,7 +173,7 @@ class AuthController(
 
     @Operation(
         summary = "로그아웃",
-        description = "로그아웃 처리 - FCM 토큰(device_token)을 삭제합니다.",
+        description = "로그아웃 처리 - FCM 토큰(device_token)을 삭제하고 세션을 무효화합니다.",
         security = [SecurityRequirement(name = "bearerAuth")]
     )
     @PostMapping("/logout")
@@ -164,6 +181,8 @@ class AuthController(
         @AuthenticationPrincipal(expression = "user") user: UserEntity
     ): ResponseEntity<ApiResult<Boolean>> {
         userDetailService.clearDeviceToken(user.uid)
+        // 🔒 세션 무효화
+        jwtSessionService.invalidateSession(user.username)
         return ResponseEntity.ok(ApiResult.success(true, "로그아웃 완료"))
     }
 
@@ -268,6 +287,9 @@ class AuthController(
             // 인증코드 재사용 방지
             smsAuthRepository.save(data.copy(status = "VERIFIED"))
 
+            // 🔒 비밀번호 변경 시 기존 세션 무효화
+            jwtSessionService.invalidateSession(user.username)
+
             return ResponseEntity.ok(ApiResult.success("비밀번호가 재설정되었어~"))
         } else {
             throw IllegalArgumentException("newPassword is required")
@@ -320,6 +342,9 @@ class AuthController(
 
         val updated = user.copy(password = encoder.encode(req.newPassword))
         userRepository.save(updated)
+
+        // 🔒 비밀번호 변경 시 기존 세션 무효화
+        jwtSessionService.invalidateSession(user.username)
 
         return ResponseEntity.ok(ApiResult.success("비밀번호가 변경됐어"))
     }
