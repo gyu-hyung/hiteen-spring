@@ -158,6 +158,7 @@ class GiftController (
         @RequestParam categorySeq: Int? = null,
         @RequestParam goodsTypeCd: String? = null,
         @RequestParam(required = false) brandCode: String? = null,
+        @RequestParam(required = false) goodsCodeType: String? = null,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ): ResponseEntity<ApiResult<ApiPageCursor<GoodsGiftishowEntity>>> {
 
@@ -169,6 +170,7 @@ class GiftController (
             categorySeq = categorySeq,
             goodsTypeCd = goodsTypeCd,
             brandCode = brandCode,
+            goodsCodeType = goodsCodeType,
         ).toList()
 
         // 다음 커서 (마지막 id)

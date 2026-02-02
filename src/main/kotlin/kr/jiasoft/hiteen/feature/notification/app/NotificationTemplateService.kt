@@ -11,10 +11,11 @@ class NotificationTemplateService {
 
     fun getPushTemplatesGrouped(group: PushTemplateGroup?): List<PushTemplateGroupResponse> {
         val templates = PushTemplate.entries
+            .filter { it.group != null }  // group이 null인 템플릿 제외
             .filter { group == null || it.group == group }
 
         return templates
-            .groupBy { it.group }
+            .groupBy { it.group!! }  // 위에서 null 필터링했으므로 안전
             .entries
             .sortedBy { it.key.ordinal }
             .map { (g, list) ->

@@ -13,7 +13,7 @@ enum class PushTemplate(
     val title: String,
     val message: String,
     val itemType: PushItemType? = null,
-    val group: PushTemplateGroup = PushTemplateGroup.ETC,
+    val group: PushTemplateGroup? = null,
 ) {
     /**
      * 관리자 발송(커스텀)
@@ -108,7 +108,7 @@ enum class PushTemplate(
         title = "핀 등록 알림 📍",
         message = "{nickname_iga} 지금 핀을 등록했어 📍",
         PushItemType.PIN_ALERT,
-        group = PushTemplateGroup.ETC,
+        group = PushTemplateGroup.PIN,
     ),
 
 
@@ -167,7 +167,6 @@ enum class PushTemplate(
 //        message = "{nickname_iga} 새로운 메시지를 보냈어~"
         message = "{chat_message}",
         itemType = PushItemType.CHAT_MESSAGE,
-        group = PushTemplateGroup.ETC,
     ),
 
 
