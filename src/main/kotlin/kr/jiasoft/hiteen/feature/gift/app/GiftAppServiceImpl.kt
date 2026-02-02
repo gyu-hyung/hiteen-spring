@@ -82,6 +82,43 @@ class GiftAppServiceImpl (
     @Value("\${giftishow.callback}")
     private lateinit var callbackNo: String
 
+    /**
+     * 선물 상태 검증 (공통)
+     * @param giftType 선물 타입
+     * @param currentStatus 현재 상태
+     * @param action 액션 ("issue" | "use")
+     */
+    private fun validateGiftStatus(giftType: GiftType, currentStatus: Int, action: String) {
+        val allowedStatuses = when (action) {
+            "issue" -> when (giftType) {
+                GiftType.Point, GiftType.Cash, GiftType.Voucher, GiftType.Delivery, GiftType.GiftCard ->
+                    listOf(GiftStatus.WAIT.code)  // 대기 상태만 발급 가능
+            }
+            "use" -> when (giftType) {
+                GiftType.Voucher -> listOf(GiftStatus.SENT.code)                    // 발송완료 상태만 사용 가능
+                GiftType.Delivery -> listOf(GiftStatus.DELIVERY_REQUESTED.code)    // 배송요청 상태만 완료 처리 가능
+                GiftType.GiftCard -> listOf(GiftStatus.GRANT_REQUESTED.code)       // 지급요청 상태만 완료 처리 가능
+                GiftType.Point, GiftType.Cash -> listOf(GiftStatus.WAIT.code)      // 대기 상태만 사용 가능
+            }
+            else -> emptyList()
+        }
+
+        if (currentStatus !in allowedStatuses) {
+            val statusName = when (currentStatus) {
+                GiftStatus.CANCELLED.code -> "취소된"
+                GiftStatus.USED.code -> "이미 사용된"
+                GiftStatus.EXPIRED.code -> "기간 만료된"
+                GiftStatus.SENT.code -> "이미 발급된"
+                GiftStatus.DELIVERY_REQUESTED.code -> "이미 배송 요청된"
+                GiftStatus.DELIVERY_DONE.code -> "이미 배송 완료된"
+                GiftStatus.GRANT_REQUESTED.code -> "이미 지급 요청된"
+                GiftStatus.GRANTED.code -> "이미 지급 완료된"
+                GiftStatus.WAIT.code -> "아직 발급되지 않은"
+                else -> "처리할 수 없는 상태의"
+            }
+            throw IllegalArgumentException("${statusName} 선물입니다.")
+        }
+    }
 
     override suspend fun findGift(receiverUserId: Long, giftUserId: Long) : GiftResponse {
         val userSummary = userService.findUserSummary(receiverUserId)
@@ -258,6 +295,9 @@ class GiftAppServiceImpl (
             ?: throw IllegalArgumentException("존재하지 않는 선물 수신 정보")
         val receiverUser = userRepository.findById(giftUser.userId)
 
+        // 🔒 상태 검증: 발급 가능한 상태인지 확인
+        validateGiftStatus(gift.type, giftUser.status, "issue")
+
         // pubExpiredDate 발급만료일자 지났는지?
         if (giftUser.pubExpiredDate != null && giftUser.pubExpiredDate.isBefore(OffsetDateTime.now()))
             throw IllegalArgumentException("발급만료일자가 지난 선물입니다.")
@@ -404,7 +444,6 @@ class GiftAppServiceImpl (
 
             GiftType.Delivery -> {
                 giftUserRepository.save(giftUser.copy(
-//                    status = 4,//`배송요청` 상태 TODO 배송완료 시 어캐 상태변경함? 배치?
                     status = GiftStatus.DELIVERY_REQUESTED.code,
                     requestDate = OffsetDateTime.now(),
                     deliveryName = req.deliveryName,
@@ -435,6 +474,9 @@ class GiftAppServiceImpl (
             ?: throw IllegalArgumentException("존재하지 않는 정보")
         val giftUser = giftUserRepository.findByGiftIdAndUserId(gift.id, userId)
             ?: throw IllegalArgumentException("존재하지 않는 선물 수신 정보")
+
+        // 🔒 상태 검증: 사용 가능한 상태인지 확인
+        validateGiftStatus(gift.type, giftUser.status, "use")
 
         val newStatus = when (gift.type) {
             GiftType.Voucher -> GiftStatus.USED.code          // 사용 완료
@@ -643,13 +685,19 @@ class GiftAppServiceImpl (
 
         return when (gift.type) {
             GiftType.Voucher -> {
-                // try cancel via giftshow
-                val resp = cancelVoucher(giftUid, giftUserId)
-                if (resp.code == "0000") {
-                    mapOf("result" to "cancelled")
+                // SENT 상태이고, 사용기한이 만료되지 않은 경우에만 기프티쇼 취소 API 호출
+                val isNotExpired = giftUser.useExpiredDate == null || giftUser.useExpiredDate.isAfter(OffsetDateTime.now())
+                if (giftUser.status == GiftStatus.SENT.code && isNotExpired) {
+                    val resp = cancelVoucher(giftUid, giftUserId)
+                    if (resp.code == "0000") {
+                        mapOf("result" to "cancelled")
+                    } else {
+                        throw IllegalArgumentException("기프티쇼 취소 실패: ${resp.message}")
+                    }
                 } else {
-//                    mapOf("result" to "failed", "reason" to resp.message)
-                    throw IllegalArgumentException("기프티쇼 취소 실패: ${resp.message}")
+                    // WAIT, 만료 등 다른 상태는 로컬에서만 취소 처리
+                    giftUserRepository.save(giftUser.copy(status = GiftStatus.CANCELLED.code))
+                    mapOf("result" to "marked_cancelled")
                 }
             }
             else -> {
