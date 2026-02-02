@@ -90,6 +90,9 @@ data class UserResponse(
     @param:Schema(description = "위치 모드 활성화 여부", example = "true")
     val locationMode: Boolean,
 
+    @param:Schema(description = "학년도", example = "true")
+    val year: Int? = null,
+
     @param:Schema(description = "팔로우 여부", example = "false")
     val isFollowed: Boolean = false,
 
@@ -176,6 +179,7 @@ data class UserResponse(
                     isFriendRequested = isFriendRequested,
                     isFollowedRequested = isFollowedRequested,
                     locationMode = entity.locationMode,
+                    year = entity.year,
                     createdAt = entity.createdAt,
                     updatedAt = entity.updatedAt,
                     deletedAt = entity.deletedAt,
