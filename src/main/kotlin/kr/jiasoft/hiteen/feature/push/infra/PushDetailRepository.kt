@@ -26,6 +26,8 @@ interface PushDetailRepository : CoroutineCrudRepository<PushDetailEntity, Long>
             d.success,
             u.nickname AS nickname,
             u.asset_uid AS asset_uid,
+            p.target_type,
+            p.target_id,
             d.created_at 
         FROM push_detail d
         JOIN push p ON p.id = d.push_id
@@ -54,6 +56,8 @@ interface PushDetailRepository : CoroutineCrudRepository<PushDetailEntity, Long>
             d.success,
             u.nickname AS nickname,
             u.asset_uid AS asset_uid,
+            p.target_type,
+            p.target_id,
             d.created_at
         FROM push_detail d
         JOIN push p ON p.id = d.push_id
