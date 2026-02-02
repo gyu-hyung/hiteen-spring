@@ -104,9 +104,9 @@ class GameManageService(
 
         // 4️⃣ 시즌 종료 처리 (순차 실행: close → saveRankings → awards)
         seasonsToClose.forEach { season ->
-//            seasonRepository.close(season.id)
-//            saveSeasonRankings(season.id)
-//            awards(season.id)
+            seasonRepository.close(season.id)
+            saveSeasonRankings(season.id)
+            awards(season.id)
 
             log.info("🏁 시즌 종료 처리 완료: {} ({} ~ {})", season.seasonNo, season.startDate, season.endDate)
         }
