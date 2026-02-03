@@ -234,7 +234,7 @@ class FriendService(
                         userId = meId,
                         actionCode = "FRIEND_ADD",
                         targetId = targetId,
-                        requestId = meId,
+//                        requestId = meId,
                     )
                     expService.grantExp(
                         userId = targetId,
@@ -321,7 +321,7 @@ class FriendService(
             userId = meId,
             actionCode = "FRIEND_ADD",
             targetId = requesterId,
-            requestId = requesterId,
+//            requestId = requesterId,
         )
         eventPublisher.publishEvent(
             PushSendRequestedEvent(
