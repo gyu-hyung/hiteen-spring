@@ -62,7 +62,6 @@ interface AdminAcceptFollowRepository : CoroutineCrudRepository<FollowEntity, Lo
         search: String?,
     ): Int
 
-
     // 페이징 조회
     @Query("""
         SELECT 
