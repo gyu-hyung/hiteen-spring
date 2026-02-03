@@ -1,0 +1,5869 @@
+중등영어	abandon	버리다, 포기하다
+중등영어	able	~할 수 있는
+중등영어	above	"위에, 위로
+~위에, ~이상으로"
+중등영어	abroad	해외에, 해외로
+중등영어	absent	결석한
+중등영어	absolute	완전한, 절대적인
+중등영어	absorbing	마음을 빼앗는, 몰입하게 만드는
+중등영어	accelerate	가속하다, 가속화되다
+중등영어	accept	받아들이다, 수락하다
+중등영어	access	"접속하다, 접근하다
+(장소로의) 입장, 접근"
+중등영어	accident	사고, 사건, 우연
+중등영어	accompany	동행하다, 동반하다
+중등영어	accomplish	완수하다, 성취하다
+중등영어	accord	일치, 일치하다
+중등영어	account	(예금) 계좌, 설명, 이야기
+중등영어	accuracy	정확성, 정확도
+중등영어	accuse	고발하다, 비난하다
+중등영어	ache	아프다, 아픔
+중등영어	achieve	성취하다, 달성하다
+중등영어	acid	(맛이) 신, 산성의, 산
+중등영어	acknowledge	인정하다
+중등영어	acquire	얻다, 획득하다
+중등영어	action	"행동, 활동
+연기"
+중등영어	actually	실제로, 사실은
+중등영어	adapt	조정하다, 적응시키다
+중등영어	add	더하다, 추가하다
+중등영어	address	주소
+중등영어	adequate	적당한, 충분한
+중등영어	admire	칭찬하다, 존경하다, 감탄하다
+중등영어	admit	인정하다, (입학 · 입국 등을) 허가하다
+중등영어	adopt	채택하다, 받아들이다
+중등영어	adore	숭배하다, 아주 좋아하다
+중등영어	adult	성인, 성숙한
+중등영어	advance	전진, 전진하다, 진보하다
+중등영어	advantage	유리한 점, 이점
+중등영어	adventure	모험
+중등영어	advertise	광고하다
+중등영어	advice	충고, 조언
+중등영어	advocate	"옹호하다, 지지하다
+옹호자, 지지자"
+중등영어	affect	~에 영향을 미치다
+중등영어	afraid	두려워하는, 걱정하는
+중등영어	agent	대리인, 행위자, (스포츠 · 연애 부문의) 에이전트
+중등영어	agree	동의하다
+중등영어	agriculture	농업, 농사
+중등영어	ahead	앞으로, 앞에, 미리
+중등영어	aid	돕다, 도움
+중등영어	aim	겨누다, 목표
+중등영어	alarm	경보, 불안, 불안하게 하다
+중등영어	alien	이질적인, 외계의, 외계인
+중등영어	alive	살아 있는
+중등영어	alliance	동맹, 연합
+중등영어	allow	허락하다
+중등영어	almost	거의, 대체로
+중등영어	alone	홀로, 외로이
+중등영어	along	"~을 따라서
+(~을) 데리고, 함께"
+중등영어	aloud	큰 소리로
+중등영어	although	비록 ~이지만, ~임에도 불구하고
+중등영어	altogether	다같이, 다 합하여
+중등영어	amazing	놀랄만한, 굉장한
+중등영어	among	~의 사이에, ~간에 서로
+중등영어	amount	양, 총계, 총계가 ~에 이르다
+중등영어	amusing	재미있는, 즐거운
+중등영어	analyze	분석하다
+중등영어	ancestor	선조, 조상
+중등영어	ancient	옛날의, 고대의
+중등영어	angle	각, 각도
+중등영어	ankle	발목
+중등영어	anniversary	(해마다의) 기념일
+중등영어	annoy	짜증나게 하다, 귀찮게 하다
+중등영어	annual	1년의, 해마다의
+중등영어	another	다른 하나의, 다른 것
+중등영어	anthem	노래, 성가
+중등영어	anxious	걱정하는, 열망하는
+중등영어	anytime	언제든지
+중등영어	anyway	어쨌든
+중등영어	anywhere	어디에도
+중등영어	apart	따로, 떨어져서
+중등영어	apologize	사과하다
+중등영어	apparent	분명한, 명백한
+중등영어	appeal	"애원하다, 호소하다
+마음을 끌다, 매력"
+중등영어	appear	나타나다, ~처럼 보이다
+중등영어	apply	"적용하다, 적용되다
+지원하다, 신청하다"
+중등영어	appoint	"지명하다, 임명하다
+(시간 · 장소 등을) 정하다, 약속하다"
+중등영어	appreciate	감사하다, 고마워하다
+중등영어	approach	접근하다, 접근
+중등영어	appropriate	적당한, 적절한
+중등영어	approval	허가, 허락
+중등영어	approximate	~에 근접한, 대략적인
+중등영어	aquarium	수족관
+중등영어	architecture	건축, 건축물
+중등영어	area	지역, 범위
+중등영어	argue	논쟁하다, 주장하다
+중등영어	arms	무기, 병기
+중등영어	arrange	가지런히 하다, 배열하다
+중등영어	arrest	체포하다, 체포
+중등영어	arrive	도착하다
+중등영어	article	물품, (신문 · 잡지 등의) 기사
+중등영어	artificial	인공의, 가짜의
+중등영어	ascend	올라가다, 오르다
+중등영어	ash	재, 화산재, 담뱃재
+중등영어	ashamed	창피한, 부끄러운
+중등영어	aspect	측면, 양상
+중등영어	assault	공격하다, 폭행하다, 공격, 폭행
+중등영어	assemble	모이다, 모으다, 조립하다
+중등영어	asset	재산, 자산
+중등영어	assist	돕다
+중등영어	associate	교제하다, 관련시키다
+중등영어	assume	추정하다, 생각하다
+중등영어	athlete	운동선수
+중등영어	Atlantic	대서양, 대서양의
+중등영어	atmosphere	분위기, 공기
+중등영어	attach	붙이다, 첨부하다
+중등영어	attack	공격, 공격하다
+중등영어	attempt	시도, 시도하다
+중등영어	attend	출석하다, 참석하다
+중등영어	attention	주목
+중등영어	attitude	태도, 자세
+중등영어	attorney	변호사
+중등영어	attract	(마음 · 주의 · 흥미 등을) 끌다, 끌어당기다
+중등영어	audience	청중
+중등영어	author	저자, 작가
+중등영어	automobile	자동차
+중등영어	autumn	가을
+중등영어	available	이용할 수 있는, 구할 수 있는
+중등영어	avoid	피하다, 회피하다
+중등영어	award	상, 수상, (상 등을) 수여하다
+중등영어	aware	~을 알고 있는
+중등영어	awful	엄청난, 지독한
+중등영어	ax	도끼
+중등영어	background	배경
+중등영어	badly	나쁘게, 몹시, 심하게
+중등영어	baggage	(여행할 때의) 수하물, 짐
+중등영어	bank	은행, 둑, 제방
+중등영어	barber	이발사
+중등영어	barely	거의 ~않다[~없다]
+중등영어	bark	짖다
+중등영어	basketball	농구
+중등영어	bat	박쥐, (야구)배트
+중등영어	bath	목욕
+중등영어	bathroom	욕실, 화장실
+중등영어	battle	싸움, 전투
+중등영어	beam	광선, 빛, 빛나다
+중등영어	bean	콩
+중등영어	beast	짐승, 야수
+중등영어	beat	때리다, 이기다
+중등영어	bee	꿀벌
+중등영어	beer	맥주
+중등영어	beggar	거지
+중등영어	behavior	행동, 태도
+중등영어	behind	~뒤에
+중등영어	belong	(~에) 속하다
+중등영어	below	아래에, ~보다 아래에
+중등영어	beneath	아래[밑]에, ~아래[밑]에
+중등영어	beneficial	이로운, 이익을 주는
+중등영어	beside	~와 나란히, ~곁에
+중등영어	besides	~외에도, 게다가
+중등영어	bet	내기하다, 내기, 장담하다
+중등영어	between	~의 사이에
+중등영어	beverage	음료, 마실 것
+중등영어	bible	성서, 성경
+중등영어	bill	계산서, 지폐
+중등영어	bind	묶다, 매다
+중등영어	biography	전기, 일대기
+중등영어	biology	생물학
+중등영어	bit	작은 조각, 조금
+중등영어	bite	물다, 물어뜯다
+중등영어	bitter	(맛이)쓴, 지독한
+중등영어	blackboard	칠판
+중등영어	blame	비난, 비난하다
+중등영어	blind	눈이 먼, 맹인의
+중등영어	block	"사각형 덩어리, (도로로 나뉘는) 블록
+막다, 방해하다"
+중등영어	blood	피, 혈액
+중등영어	blossom	꽃, 꽃을 피우다
+중등영어	blow	(바람이) 불다, (입으로) 불다
+중등영어	board	판자, (배 · 비행기 등을) 타다
+중등영어	boil	끓이다
+중등영어	bold	대담한, 용감한
+중등영어	bomb	폭탄, 폭격하다
+중등영어	bone	뼈, (생성) 가시
+중등영어	boom	"붐, 갑작스런 대유행
+붐! 탕! 하는 소리"
+중등영어	border	국경, 경계선
+중등영어	boredom	지루함
+중등영어	borrow	빌리다
+중등영어	both	양쪽의, 둘 다의
+중등영어	bother	괴롭히다, 신경 쓰이게 하다
+중등영어	bottom	밑바닥, 맨 아래
+중등영어	boundary	경계선, 경계
+중등영어	bowl	사발, 그릇
+중등영어	branch	나뭇가지
+중등영어	bravery	용기, 용감
+중등영어	breakthrough	돌파구
+중등영어	breathe	호흡하다
+중등영어	breed	(새끼를)기르다, 낳다
+중등영어	brick	벽돌
+중등영어	brief	(시간 · 글 등이) 짧은, 간결한
+중등영어	bright	빛나는, 밝은
+중등영어	brilliant	빛나는, 눈부신, 훌륭한
+중등영어	bring	가져오다, 데려오다
+중등영어	broad	폭이 넓은, 폭넓은
+중등영어	bruise	멍, 멍들게 하다
+중등영어	bubble	거품, 비눗방울
+중등영어	bud	싹, 싹을 틔우다
+중등영어	bug	곤충, 벌레
+중등영어	build	세우다, 건축하다
+중등영어	bull	황소
+중등영어	burden	무거운 짐, 부담
+중등영어	burn	불태우다, 타다
+중등영어	burst	폭발하다, 터뜨리다
+중등영어	bury	묻다
+중등영어	cabbage	양배추
+중등영어	cage	우리, 새장
+중등영어	calm	"조용한, 평온한
+진정시키다"
+중등영어	camel	낙타
+중등영어	cancel	취소하다
+중등영어	cancer	암
+중등영어	candidate	후보자, 지원자
+중등영어	candle	초
+중등영어	canyon	깊은 협곡, 골짜기
+중등영어	capable	~할 수 있는, 유능한
+중등영어	capacity	능력, 용량, 수용력
+중등영어	capture	사로잡다, 포획하다
+중등영어	carbon	탄소
+중등영어	care	"걱정, 걱정하다
+조심, 돌보아 줌"
+중등영어	career	직업, (직업상의) 경력
+중등영어	careless	조심성 없는, 부주의한
+중등영어	carpenter	목수, 목공
+중등영어	carrot	당근
+중등영어	carry	나르다, 운반하다
+중등영어	cart	손수레
+중등영어	cartoon	만화
+중등영어	castle	성
+중등영어	catch	잡다
+중등영어	cause	원인, 이유, 초래하다
+중등영어	caution	조심, 경고
+중등영어	cave	굴, 동굴
+중등영어	cease	중지하다, 중단되다
+중등영어	ceiling	천장
+중등영어	celebrate	축하하다
+중등영어	cell	세포
+중등영어	cent	1센트
+중등영어	center	중심, 핵심
+중등영어	centigrade	섭씨
+중등영어	centimeter	센티미터(1미터의 100분의 1)
+중등영어	central	중심의, 중앙의
+중등영어	century	1세기
+중등영어	cereal	곡물, 시리얼
+중등영어	ceremony	의식, 의례
+중등영어	challenge	"도전하다, 도전
+힘든일, 어려운 일"
+중등영어	chaos	혼돈, 무질서
+중등영어	charge	책임, 요금
+중등영어	charity	자선, 자선단체
+중등영어	charm	매력
+중등영어	chase	쫓다, 추적하다
+중등영어	chat	잡담하다, 잡담
+중등영어	cheap	값이 싼
+중등영어	cheat	속이다, 속임수
+중등영어	cheek	뺨, 볼
+중등영어	cheer	격려, 응원, 환호
+중등영어	chemical	화학의, 화학적인
+중등영어	chick	병아리
+중등영어	chief	최고의, 주요한, 우두머리
+중등영어	childhood	어린 시절
+중등영어	chimney	굴뚝
+중등영어	choose	선택하다
+중등영어	chop	(음식 재료를) 썰다, 팍팍 찍다
+중등영어	chopstick	젓가락
+중등영어	circumstance	환경, 상황
+중등영어	citizen	시민, 주민
+중등영어	civilian	일반 시민, 민간인, 민간(인)의
+중등영어	civilization	문명, 개화
+중등영어	claim	(당연한 권리로서) 요구하다, 주장하다
+중등영어	clap	"손뼉을 치다
+박수, 탁[쿵] 소리"
+중등영어	classify	분류하다
+중등영어	classmate	학급 친구
+중등영어	claw	발톱
+중등영어	clay	찰흙, 점토
+중등영어	clear	맑은, 깨끗한, 깨끗이 지우다
+중등영어	clerk	사무원, 점원
+중등영어	client	고객
+중등영어	climate	기후
+중등영어	climb	오르다, 기어오르다
+중등영어	clock	(벽걸이)시계
+중등영어	close	닫다, 가까운
+중등영어	clothes	옷
+중등영어	clown	어릿광대
+중등영어	clue	실마리, 단서
+중등영어	coast	해안
+중등영어	cock	수탉
+중등영어	collaborate	공동으로 작업하다, 협력하다
+중등영어	collect	모으다, 수집하다
+중등영어	college	대학, 단과대학
+중등영어	combat	전투, 싸움, 싸우다
+중등영어	combination	결합, 조합
+중등영어	comfort	편안, 안락
+중등영어	command	명령, 명령하다, 지휘하다
+중등영어	comment	논평, 논평하다
+중등영어	commercial	상업의, 상업적인
+중등영어	committee	위원회
+중등영어	common	공통의, 흔한
+중등영어	community	공동체, (공동체) 주민
+중등영어	companion	친구, 동료
+중등영어	company	"회사
+일행, 동료, 함께 있음"
+중등영어	compare	비교하다, 비유하다
+중등영어	compensation	보상, 배상
+중등영어	competence	능숙함, 능숙
+중등영어	competition	경쟁, 시합
+중등영어	complain	불평하다, 항의하다
+중등영어	completion	완성, 완료
+중등영어	complex	복잡한, 복합체, 종합 빌딩
+중등영어	complicate	복잡하게 만들다
+중등영어	comply	따르다, 순응하다
+중등영어	component	구성요소, 성분
+중등영어	compose	구성하다
+중등영어	compound	혼합한, 혼합물
+중등영어	compress	압축하다
+중등영어	comprise	"포함하다
+~으로 구성되다, 구성하다"
+중등영어	compromise	타협, 타협하다
+중등영어	concentration	집중
+중등영어	concept	개념
+중등영어	concerned	"걱정스러운, 염려하는
+관계 있는, 관심 있는"
+중등영어	conclude	끝내다, 결론을 내리다
+중등영어	conduct	행동하다, 행동, 지도하다
+중등영어	cone	원뿔, (아이스크림의) 콘
+중등영어	confidence	자신감
+중등영어	confirm	확실하게 하다, 확인해 주다
+중등영어	conflict	싸우다, 싸움, 갈등
+중등영어	conform	따르다, 순응하다
+중등영어	confuse	혼동하다, 혼란시키다
+중등영어	congress	국회, 의회
+중등영어	connect	연결하다, 연결되다
+중등영어	conscience	양심
+중등영어	conscious	의식이 있는, 의식하고 있는
+중등영어	consent	동의, 동의하다
+중등영어	consequence	결과
+중등영어	consider	숙고하다, 고려하다
+중등영어	consist	구성되다, 일치하다
+중등영어	constant	변함없는, 끊임없는
+중등영어	construct	건설하다
+중등영어	consult	상담하다
+중등영어	consume	"(돈 · 에너지 등을) 쓰다, 소비하다
+먹다, 마시다"
+중등영어	contact	"접촉, 연락
+접촉하다, 연락하다"
+중등영어	contain	포함하다, ~이 들어있다
+중등영어	contaminate	오염시키다, 더럽히다
+중등영어	content	"내용물
+만족한"
+중등영어	context	문맥, 전후 사정, 배경
+중등영어	continent	대륙
+중등영어	contract	계약, 계약하다
+중등영어	contrary	반대의, 정반대
+중등영어	contrast	대조, 대조하다
+중등영어	contribution	공헌, 기부, 기부금
+중등영어	controversy	논쟁, 논의
+중등영어	convenience	편리함, 편의
+중등영어	conversation	대화
+중등영어	convey	운반하다, 전달하다
+중등영어	convince	납득시키다, 설득하다
+중등영어	cooperation	협력, 협동
+중등영어	cope	맞서다, 대처하다
+중등영어	core	중심, 핵심, 중심적인, 핵심적인
+중등영어	correctly	올바르게, 정확하게
+중등영어	cost	"가격
+~의 비용이 들다"
+중등영어	cough	기침하다, 기침
+중등영어	counsel	"상담하다, 조언하다
+상담, 조언"
+중등영어	courage	용기
+중등영어	court	법정, 법원, (테니스 등의) 코트
+중등영어	cousin	친척, 사촌
+중등영어	coward	겁쟁이
+중등영어	crab	게
+중등영어	crack	"갈라진 틈, 날카로운 소리
+금이 가다"
+중등영어	create	창조하다, 만들어내다
+중등영어	credit	신용
+중등영어	crew	(배 · 비행기 · 열차의) 승무원, 선원
+중등영어	crime	죄, 범죄
+중등영어	crisis	위기
+중등영어	criterion	(평가의) 기준
+중등영어	critical	비판적인, 중대한 위기의
+중등영어	crop	농작물, 수확물
+중등영어	crosswalk	횡단보도
+중등영어	crowd	군중, 무리
+중등영어	crucial	결정적인, 중대한
+중등영어	cruel	잔인한, 잔혹한
+중등영어	cube	정육면체
+중등영어	cucumber	오이
+중등영어	culture	문화
+중등영어	cure	치료, 치료하다
+중등영어	curious	호기심 많은, 궁금한
+중등영어	currency	통화, 화폐
+중등영어	current	현재의, 흐름
+중등영어	custom	관습, 풍습
+중등영어	customer	손님, 단골
+중등영어	cycle	자전거, 순환, 일회전
+중등영어	daily	매일의, 날마다의, 매일
+중등영어	dare	감히 ~하다
+중등영어	dawn	새벽
+중등영어	dead	죽은
+중등영어	deaf	귀가 먹은
+중등영어	dealer	중개인, 상인
+중등영어	dear	친애하는, 사랑하는, 사랑스러운
+중등영어	debate	논쟁하다, 토론하다, 논쟁, 토론
+중등영어	debt	빚, 채무
+중등영어	decade	10년
+중등영어	deceive	속이다
+중등영어	decide	결정하다, 결심하다
+중등영어	declare	선언하다, 공표하다
+중등영어	decorate	장식하다
+중등영어	decrease	감소하다, 감소시키다, 감소
+중등영어	dedicate	헌신하다, 전념하다
+중등영어	deer	사슴
+중등영어	defeat	패배, 패배시키다, 물리치다
+중등영어	defect	결점, 결함
+중등영어	defense	방어, 수비
+중등영어	define	정의하다, 분명히 하다
+중등영어	degree	등급, 정도
+중등영어	delay	연기하다, 연기, 지연
+중등영어	delete	삭제하다, 지우다
+중등영어	deliberately	신중히, 고의로
+중등영어	delicious	맛있는
+중등영어	delight	기쁨, 즐거움
+중등영어	delivery	배달
+중등영어	demand	요구하다, 요구
+중등영어	democracy	민주주의, 민주정치
+중등영어	demon	악마, 귀신
+중등영어	dental	이의, 치과의
+중등영어	deny	부인하다, 거절하다
+중등영어	departure	출발
+중등영어	depend	의존[의지]하다, 믿다
+중등영어	deposit	"(돈 · 물품 등을) 맡기다, 두다
+보증금"
+중등영어	depress	우울하게 만들다
+중등영어	derive	이끌어내다, 얻다, 유래되다
+중등영어	descend	내려가다, 내려오다
+중등영어	describe	묘사하다, 서술하다
+중등영어	desert	사막, 버리다, 저버리다
+중등영어	deserve	~할 만하다, ~을 받을 만하다
+중등영어	designate	"가리키다, 지정하다
+임명하다"
+중등영어	desire	바라다, 바램
+중등영어	desperate	절망적인, 필사적인
+중등영어	despite	~에도 불구하고
+중등영어	destination	목적지, 목표
+중등영어	destiny	운명
+중등영어	destroy	파괴하다
+중등영어	destruction	파괴
+중등영어	detail	세부사항, 상세히 설명하다
+중등영어	detect	발견하다, 탐지하다
+중등영어	determine	결심하다, 결정하다
+중등영어	develop	개발하다, 발전시키다
+중등영어	device	장치
+중등영어	devil	악마
+중등영어	devote	헌신하다, (노력 · 시간 등을) 쏟다
+중등영어	diameter	지름, 직경
+중등영어	dictionary	사진
+중등영어	diet	음식, 식사, 다이어트
+중등영어	different	다른
+중등영어	dig	파다
+중등영어	diligent	부지런한, 열심히 하는
+중등영어	dimension	치수, 차원, (pl.) 넓이, 규모
+중등영어	dinosaur	공룡
+중등영어	dip	담그다, 적시다
+중등영어	direct	직접적인, 지시하다
+중등영어	direction	방향, 지시
+중등영어	disadvantage	불리한 점
+중등영어	disagree	반대하다
+중등영어	disappear	사라지다
+중등영어	disappoint	실망시키다
+중등영어	disaster	재앙, 재난
+중등영어	discipline	훈련, 규율
+중등영어	discount	할인, 할인하다
+중등영어	discourage	용기를 잃게 하다, 낙담시키다
+중등영어	discover	발견하다, 알아내다
+중등영어	discriminate	식별하다, 차별하다
+중등영어	discuss	토론하다
+중등영어	disease	병, 질병
+중등영어	dishonest	부정직한
+중등영어	dislike	싫어하다
+중등영어	dismiss	"해고하다, 해산시키다
+묵살하다, 일축하다"
+중등영어	disorder	무질서, 혼란
+중등영어	display	"전시하다, 보이다
+진열, 전시"
+중등영어	disposal	배치, 처리
+중등영어	dispute	논쟁하다, 분쟁하다, 논쟁, 분쟁
+중등영어	distinction	구별, 차이
+중등영어	distinguish	구별하다
+중등영어	distribution	분배, 분포
+중등영어	district	구역, 지역
+중등영어	disturb	방해하다
+중등영어	ditch	도랑, 배수구
+중등영어	dive	잠수하다
+중등영어	diverse	다양한, 가지각색의
+중등영어	divide	나누다, 쪼개다
+중등영어	divorce	이혼, 이혼하다
+중등영어	documentary	문서로 이뤄진, 기록 영화
+중등영어	doll	인형
+중등영어	dolphin	돌고래
+중등영어	dominant	우세한, 지백적인
+중등영어	donation	기부, 기증
+중등영어	donkey	당나귀
+중등영어	dot	점, 점을 찍다
+중등영어	doubt	의심, 의심하다
+중등영어	downstairs	아래층, 아래층에
+중등영어	downtown	중심가, 상업지역, 상가
+중등영어	downward	아래쪽으로, 아래로 향한
+중등영어	dozen	12개, 10여 개
+중등영어	drag	끌다, 끌고 가다
+중등영어	dramatic	극적인
+중등영어	draw	"끌어당기다
+그리다"
+중등영어	drawer	서랍
+중등영어	drift	떠가다, 이동, 흐름
+중등영어	drip	(액체가) 뚝뚝 떨어지다, 물방울
+중등영어	drop	떨어지다, 떨어뜨리다
+중등영어	drought	가뭄
+중등영어	drug	약, 마약
+중등영어	dumb	언어 장애인의, 우둔한
+중등영어	dump	(쓰레기 따위를) 내버리다
+중등영어	during	~하는 동안
+중등영어	dust	먼지
+중등영어	duty	의무, 업무
+중등영어	each	각자의, 각각의
+중등영어	eager	간절히 바라는
+중등영어	earn	(돈을)벌다, 얻다
+중등영어	echo	메아리, 울리다
+중등영어	edge	모서리, 가장자리
+중등영어	education	교육
+중등영어	eel	뱀장어
+중등영어	effective	효과적인, 효력 있는
+중등영어	efficient	효율적인, 능률적인
+중등영어	effort	노력
+중등영어	either	"(둘 중) 어느 하나, (둘 중) 어느 하나의
+(부정문에서) ~도 또한 (아니다)"
+중등영어	elbow	팔꿈치
+중등영어	elder	손위의, 나이가 더 많은
+중등영어	election	선거, 선출
+중등영어	electric	전기의, 전기 장치의
+중등영어	elegance	우아함, 품위
+중등영어	element	요소, 성분
+중등영어	eliminate	제거하다
+중등영어	embarrass	당황하게 하다
+중등영어	emerge	(물속 · 어둠 속 등에서) 나오다, 나타나다
+중등영어	emergency	비상사태, 위급
+중등영어	emigrant	"(타국으로)이주해 나가는
+이주민, 이민"
+중등영어	emit	(소리 · 빛 · 열 등을) 내다, 발산하다
+중등영어	emotion	감정
+중등영어	emperor	황제
+중등영어	emphasize	강조하다
+중등영어	empire	제국, 왕국
+중등영어	employ	고용하다
+중등영어	empty	텅 빈
+중등영어	enable	~할 수 있게 하다
+중등영어	encounter	"(우연히) 만나다, 마주치다
+(위험 · 곤란 등에) 직면하다"
+중등영어	encourage	용기를 북돋우다
+중등영어	endure	견디다, 참다
+중등영어	enemy	적, 원수
+중등영어	enforce	강요하다
+중등영어	engage	"관여하다, 종사하다
+약혼하다, 약속하다"
+중등영어	engineer	기술자, 엔지니어
+중등영어	enormous	거대한, 엄청난
+중등영어	enough	충분한, 충분히
+중등영어	ensure	반드시 ~하게 하다, 보장하다
+중등영어	enter	들어가다
+중등영어	enterprise	기업, 회사
+중등영어	entire	완전한, 전체의
+중등영어	entry	입장, 참가
+중등영어	envelope	봉투
+중등영어	envious	부러워하는, 시기하는
+중등영어	environment	환경
+중등영어	equal	같은, 동등한
+중등영어	equipment	장비, 용품, 장비 설치
+중등영어	escape	달아나다, 탈출
+중등영어	especially	특별히
+중등영어	essential	필수의, 본질적인
+중등영어	establish	설립하다, 확립하다
+중등영어	estate	재산, 부동산
+중등영어	estimation	평가, 판단
+중등영어	eternal	영원한, 변함없는
+중등영어	ethnic	민족의
+중등영어	evaluate	평가하다
+중등영어	evaporate	증발시키다, 증발하다
+중등영어	even	(심지어) ~조차도
+중등영어	eventually	결국, 드디어
+중등영어	ever	언제나, 항상, 한번이라도
+중등영어	evidence	증거
+중등영어	evident	분명한, 명백한
+중등영어	evil	사악한, 악
+중등영어	evolve	발전하다, 진화하다
+중등영어	exactly	정확하게
+중등영어	examination	시험, 조사[검사]
+중등영어	examine	조사하다, 검사하다
+중등영어	example	예, 보기
+중등영어	except	~을 제외하고
+중등영어	exclude	제외시키다, 배제하다
+중등영어	exercise	운동, 연습, 운동하다
+중등영어	exhibit	전시하다, 보이다
+중등영어	exist	존재하다, 생존하다
+중등영어	expand	확대되다, 확대시키다, 팽창시키다
+중등영어	expend	(많은 돈 · 시간 · 노력 등을) 들이다[쓰다]
+중등영어	expensive	비싼
+중등영어	experience	경험, 경험하다
+중등영어	experiment	실험, 실험하다
+중등영어	expert	전문가, 전문가의
+중등영어	explanation	설명
+중등영어	explode	폭발하다, 터지다
+중등영어	explore	탐험하다
+중등영어	export	수출하다, 수출(품)
+중등영어	exposure	드러냄, 폭로
+중등영어	express	"표현하다, 나타내다
+급행의, 속달의"
+중등영어	extent	범위, 정도, 넓이
+중등영어	extra	여분의, 여분으로
+중등영어	extraordinary	보통이 아닌, 특이한
+중등영어	facile	손쉬운, 편리한
+중등영어	factor	요소, 요인
+중등영어	fail	실패하다
+중등영어	fair	공정한, 공평한
+중등영어	fairy	요정, 요정의
+중등영어	faith	신념, 믿음
+중등영어	false	잘못된, 거짓된
+중등영어	familiar	친근한, 잘 알고 있는
+중등영어	fan	"(가수 · 영화 등의) 팬
+부채, 선풍기"
+중등영어	fantasy	환상, 공상
+중등영어	farm	농장
+중등영어	farmer	농부
+중등영어	fascinate	넋을 빼앗다, 매혹하다
+중등영어	fashionable	유행하는
+중등영어	fasten	묶다, 채우다
+중등영어	fat	살찐, 지방
+중등영어	fatal	치명적인, 운명의
+중등영어	fate	운명
+중등영어	fault	잘못
+중등영어	favor	호의, 친절, 부탁
+중등영어	favorite	마음에 드는, 매우 좋아하는
+중등영어	fear	두려움, 두려워하다
+중등영어	feather	깃털
+중등영어	feature	얼굴 생김새, 특징
+중등영어	fee	요금, 수수료
+중등영어	feed	"먹이, 사료
+먹이를 주다, 먹이를 먹다"
+중등영어	fell	(나무를) 베어 넘어뜨리다
+중등영어	fellow	친구, 녀석
+중등영어	female	여자의, 암컷의, 여자, 암컷
+중등영어	fence	담장, 울타리
+중등영어	ferry	여객선, 나르다
+중등영어	fever	열, 열병
+중등영어	few	거의 없는, 소수의
+중등영어	fiction	소설, 꾸며낸 이야기
+중등영어	figure	"인물, 모습
+숫자, 수치, 계산하다"
+중등영어	fill	채우다
+중등영어	fin	지느러미
+중등영어	final	마지막의
+중등영어	finalize	마무리짓다, 완성하다
+중등영어	finish	끝나다, 끝내다
+중등영어	fireman	소방관
+중등영어	firm	"굳은, 단단한
+확실한, 확고한"
+중등영어	fist	주먹
+중등영어	fit	"(치수 · 모양 등이) 딱 들어맞다, 적합한
+건강한"
+중등영어	fix	고정시키다, 수리하다
+중등영어	flag	기, 깃발
+중등영어	flame	불꽃, 타오르다
+중등영어	flat	평평한, 납작한
+중등영어	flavor	향기, 맛
+중등영어	flaw	흠, (갈라진) 금
+중등영어	flexible	구부리기 쉬운, 융통성 있는
+중등영어	flight	비행, 항공편
+중등영어	float	(물 위나 공중에) 뜨다, 띄우다
+중등영어	flood	홍수, 넘치다, 쇄도하다
+중등영어	floor	바닥, 층
+중등영어	flow	흐르다
+중등영어	fluent	유창한
+중등영어	fluid	액체
+중등영어	focus	초점, 초점을 맞추다
+중등영어	fog	안개
+중등영어	fold	접다, 접어 포개다
+중등영어	follow	따라가다
+중등영어	fond	좋아하는
+중등영어	foolish	바보 같은
+중등영어	footprint	발자국
+중등영어	force	힘, 무력
+중등영어	foreign	외국의
+중등영어	forest	숲, 살림
+중등영어	forever	영원히, 언제나
+중등영어	forgive	용서하다
+중등영어	form	모양, 형태, 형성하다
+중등영어	formal	격식을 차린, 공식적인
+중등영어	former	예전의
+중등영어	fortune	행운, 재산
+중등영어	forward	앞으로, 전방으로
+중등영어	fossil	화석, 화석의
+중등영어	found	설립하다, 창립하다
+중등영어	fountain	분수
+중등영어	frame	틀, 뼈대
+중등영어	fraud	사기, 사기꾼
+중등영어	freedom	자유
+중등영어	freezing	몹시 추운
+중등영어	frequent	자주 일어나는, 빈번한
+중등영어	friendship	우정, 교우관계
+중등영어	frightful	무서운
+중등영어	frog	개구리
+중등영어	fruit	과일
+중등영어	frustrate	좌절 시키다
+중등영어	fry	튀김, 튀기다
+중등영어	fuel	연료, 연료를 공급하다
+중등영어	function	기능, (제대로) 기능하다
+중등영어	fundamental	기본적인, 핵심적인
+중등영어	further	그 이상의, 더욱, 더 멀리
+중등영어	fury	격분, 분노
+중등영어	fusion	융합, 결합
+중등영어	gain	얻다, 이익
+중등영어	gap	틈, 간격
+중등영어	garbage	쓰레기
+중등영어	garlic	마늘
+중등영어	gather	모이다, 모으다
+중등영어	gaze	뚫어지게 보다, 응시하다
+중등영어	gender	성, 성별
+중등영어	gene	유전자
+중등영어	general	"일반적인
+장군"
+중등영어	generate	발생시키다, 일으키다
+중등영어	generous	관대한, 너그러운
+중등영어	genetics	유전학
+중등영어	genius	천재, 천재적 재능
+중등영어	genre	장르, 유형
+중등영어	geography	지리, 지리학
+중등영어	geology	지질학
+중등영어	germ	세균
+중등영어	ghost	유령
+중등영어	gift	선물, 타고난 재능
+중등영어	global	지구의, 세계적인
+중등영어	glory	영광
+중등영어	goal	골, 목표
+중등영어	goat	염소
+중등영어	golden	금빛의, 황금 같은
+중등영어	goldfish	금붕어
+중등영어	goose	거위
+중등영어	govern	통치하다, 다스리다
+중등영어	grab	붙들다, 움켜쥐다
+중등영어	grace	우아함
+중등영어	grade	등급, 성적, 학년
+중등영어	gradual	점진적인, 서서히 일어나는
+중등영어	graduation	졸업
+중등영어	grain	곡물, (쌀 · 보리 등의) 낱알
+중등영어	grammar	문법
+중등영어	grand	웅장한
+중등영어	grant	승인하다, 허가하다
+중등영어	grass	풀, 풀밭
+중등영어	grave	무덤
+중등영어	gravity	중력, 인력
+중등영어	gray	잿빛의, 회색
+중등영어	greenhouse	온실, 비닐하우스
+중등영어	grief	슬픔, 비탄
+중등영어	grocery	식료품점, 식료품
+중등영어	grow	자라다
+중등영어	guarantee	보증, 보증하다
+중등영어	guard	지키다, 경비원
+중등영어	guess	추측하다
+중등영어	guilty	유죄의, 죄책감이 드는
+중등영어	gull	갈매기
+중등영어	gun	총
+중등영어	gym	체육관
+중등영어	habit	버릇, 습관
+중등영어	half	반, 절반
+중등영어	handicap	핸디캡, 불리한 조건, 신체장애
+중등영어	handkerchief	손수건
+중등영어	handle	"손잡이
+다루다, 처리하다"
+중등영어	hang	매달리다, 매달다
+중등영어	happen	(사건 · 사고 등이) 발생하다
+중등영어	hard	"열심히, 어려운, 힘든
+단단한, 딱딱한"
+중등영어	hardly	거의 ~않다
+중등영어	hardship	어려움, 고난
+중등영어	hardworking	열심히 일하는, 근면한
+중등영어	harm	손해, 해, 해를 끼치다
+중등영어	harmony	조화, 조화로움
+중등영어	harvest	수확, 추수
+중등영어	hasty	서두르는, 성급한
+중등영어	hawk	매
+중등영어	hazard	위험(요소)
+중등영어	headache	두통
+중등영어	healing	치료, 치유
+중등영어	heat	열, 가열하다
+중등영어	heaven	하늘, 천국
+중등영어	heavily	몹시, 심하게
+중등영어	heel	뒤꿈치, 뒤축
+중등영어	height	높이, 고도
+중등영어	hen	암탉
+중등영어	hesitation	망설임, 주저
+중등영어	hide	감추다, 숨기다
+중등영어	hike	도보여행하다
+중등영어	hire	고용하다
+중등영어	hold	"잡다, 붙들다, 유지하다
+(행사 · 대회 등을) 개최하다"
+중등영어	holy	성스러운, 신성한
+중등영어	honest	정직한
+중등영어	honor	영광, 명예
+중등영어	hook	갈고리
+중등영어	hop	(깡충) 뛰다
+중등영어	horror	공포
+중등영어	however	그러나, 아무리 ~할지라도
+중등영어	hug	껴안다
+중등영어	huge	거대한
+중등영어	humanitarian	인도주의적인
+중등영어	hurry	서두르다, 서두름
+중등영어	hurt	다치게 하다, 아프게 하다
+중등영어	hut	오두막
+중등영어	hydrogen	수소
+중등영어	ideal	이상, 이상적인
+중등영어	identity	"신원, 정체
+일치, 동일한"
+중등영어	idiot	바보, 천치
+중등영어	idle	게으른, 나태한
+중등영어	ignore	무시하다
+중등영어	ill	병든, 아픈
+중등영어	illegal	불법적인
+중등영어	illusion	환영, 망상
+중등영어	immediate	즉시의, 당장의
+중등영어	impact	(강력한)영향, 충격, 영향을 주다
+중등영어	import	수입하다, 수입(품)
+중등영어	impression	인상, 감명
+중등영어	improve	향상시키다, 나아지다
+중등영어	incentive	장려금, 동기
+중등영어	incident	사건, 일
+중등영어	include	포함하다, 포함시키다
+중등영어	income	수입, 소득
+중등영어	increase	증가하다, 증가시키다, 증가
+중등영어	indeed	참으로, 정말로
+중등영어	independent	의존하지 않는, 독립된
+중등영어	indicate	나타내다, 가리키다
+중등영어	individual	개개의, 개인의. 개인
+중등영어	industry	산업, 근면
+중등영어	infect	감염시키다, 전염시키다
+중등영어	infinite	무한한, 끝없는
+중등영어	influence	영향, 영향을 미치다
+중등영어	influenza	독감
+중등영어	inform	알리다
+중등영어	ingredient	성분, 재료
+중등영어	injure	상처를 입히다, 해를 주다
+중등영어	inner	안쪽의, 내적인
+중등영어	innovation	혁신, 쇄신
+중등영어	insect	벌레, 곤충
+중등영어	insert	삽입하다, 끼워 넣다
+중등영어	insist	주장하다, 고집하다
+중등영어	install	(장비 · 장치 등을) 설치하다
+중등영어	instance	예, 사례
+중등영어	instead	대신에
+중등영어	instruct	가르치다, 지시하다
+중등영어	instrument	기계, 기구, 악기
+중등영어	insult	모욕, 모욕하다
+중등영어	intellect	지성, 지능
+중등영어	intend	~할 작정이다
+중등영어	intention	의도, 목적
+중등영어	internal	내부의
+중등영어	international	국제간의, 국제적인
+중등영어	invade	침략하다, 침입하다
+중등영어	invent	발명하다, 고안하다
+중등영어	invest	투자하다
+중등영어	invite	초대하다
+중등영어	involve	포함시키다, (사건 등에) 연루시키다
+중등영어	iron	"철
+다리미, 다림질하다"
+중등영어	isolate	고립시키다, 격리시키다
+중등영어	issue	"문제, 논점
+발행하다, 발표하다"
+중등영어	itch	가렵다, 가려움
+중등영어	jail	교도소
+중등영어	jar	항아리, 단지
+중등영어	jealous	질투심 많은, 시기하는
+중등영어	jellyfish	해파리
+중등영어	job	직업, 일
+중등영어	join	참여하다, 가입하다
+중등영어	journal	신문, 잡지, 학술지
+중등영어	journey	여행, 여정, 여행하다
+중등영어	joy	기쁨
+중등영어	judge	판사, 심판, 판단하다
+중등영어	kettle	주전자
+중등영어	kid	아이
+중등영어	kidnap	유괴하다, 납치하다
+중등영어	kind	친절한, 종류
+중등영어	kindergarten	유치원
+중등영어	kingdom	왕국, 왕토
+중등영어	kite	연
+중등영어	knowledge	지식, 학식
+중등영어	labor	노동, 노동하다
+중등영어	lack	부족함, 부족
+중등영어	lake	호수, 연못
+중등영어	lamb	어린 양, 양고기
+중등영어	land	"땅, 육지, 나라
+착륙하다"
+중등영어	landscape	풍경, 경치
+중등영어	last	"마지막의, 지난
+지속되다, 계속되다"
+중등영어	latest	최근의, 최신의
+중등영어	laugh	웃다, 웃음(소리)
+중등영어	launch	"(로켓을) 쏘아 올리다
+(사업 등을) 시작하다"
+중등영어	laundry	세탁물, 세탁
+중등영어	law	법, 법률
+중등영어	lawn	잔디, 잔디밭
+중등영어	lawyer	변호사, 법률가
+중등영어	lay	누이다, 놓다
+중등영어	layer	(표면 위나 표면 사이의) 층, 막
+중등영어	lazy	게으른
+중등영어	leaf	잎, 나뭇잎
+중등영어	league	연맹, 동맹
+중등영어	leak	(가스 · 액체 등이) 새다
+중등영어	leave	남겨두다, 떠나다
+중등영어	legacy	유산
+중등영어	legend	전설
+중등영어	lend	빌려주다
+중등영어	length	길이
+중등영어	leopard	표범
+중등영어	let	~하게 하다, 허락하다
+중등영어	liberal	자유주의의, 자유로운
+중등영어	liberty	자유
+중등영어	license	먼허, 허가
+중등영어	lie	"거짓말, 거짓말하다
+눕다, 누워있다"
+중등영어	lifelong	일생의, 평생의
+중등영어	lift	들어 올리다
+중등영어	limit	한계, 제한하다
+중등영어	lip	입술
+중등영어	liquid	액체의, 액체
+중등영어	liver	간
+중등영어	load	짐, (짐을) 싣다
+중등영어	loaf	(빵) 한 덩어리
+중등영어	local	지역의, 지방의
+중등영어	locate	~에 위치시키다, 위치를 찾아내다
+중등영어	logic	논리, 논리학
+중등영어	lonely	외로운
+중등영어	loosen	풀다, 느슨하게 하다
+중등영어	lord	지배자, 주인
+중등영어	lovely	사랑스러운, 귀여운
+중등영어	lump	덩어리
+중등영어	lunar	달의, 음력의
+중등영어	lung	폐, 허파
+중등영어	luxury	호화로움, 사치, 사치품
+중등영어	mad	미친, 화가 난
+중등영어	magnetic	자석의, 자석 같은
+중등영어	main	주요한, 주된
+중등영어	maintain	유지하다, 주장하다
+중등영어	major	"주요한, 주된
+전공, 전공하다"
+중등영어	majority	대다수, 대부분
+중등영어	male	남자의, 수컷의, 남자, 수컷
+중등영어	mall	쇼핑센터
+중등영어	mammal	포유동물
+중등영어	manage	경영하다, 관리하다
+중등영어	mankind	인간, 인류
+중등영어	manual	안내서, 손으로 하는
+중등영어	manufacture	제조, 제조하다
+중등영어	map	지도
+중등영어	march	행진
+중등영어	Mars	화성
+중등영어	mass	많은 양, 대량의, 큰 덩어리
+중등영어	mat	매트, 돗자리
+중등영어	mate	친구, 동료, 짝
+중등영어	material	물질, 재료, 물질적인
+중등영어	math	수학
+중등영어	matter	문제, 중요하다
+중등영어	mature	성숙한, 성숙하다
+중등영어	maybe	어쩌면, 아마
+중등영어	meadow	목초지, 초원
+중등영어	meal	식사, 끼니
+중등영어	mean	의미하다
+중등영어	means	수단, 방법
+중등영어	measure	"치수, 측정, 측정하다
+조치"
+중등영어	meat	고기
+중등영어	mechanical	기계의, 기계적인
+중등영어	media	(신문 · TV 등의) 매체
+중등영어	medical	의학의, 의료의
+중등영어	medicine	약, 의학
+중등영어	melt	녹다, 녹이다
+중등영어	memorable	기억할 만한, 중대한
+중등영어	memorial	기념의, 기념비
+중등영어	mend	수선하다, 수리하다
+중등영어	mental	정신의, 마음의
+중등영어	mention	언급하다, 말하다
+중등영어	merely	단지, 그저
+중등영어	merit	장점
+중등영어	merry	즐거운
+중등영어	metal	금속
+중등영어	method	방법, 수단
+중등영어	midnight	한밤중
+중등영어	mild	부드러운, 온화한
+중등영어	mill	방앗간
+중등영어	millennium	천년, 새천년
+중등영어	millionaire	백만장자
+중등영어	mind	"마음, 정신
+꺼리다, 싫어하다"
+중등영어	minister	장관, 목사
+중등영어	minor	중요치 않은, 사소한
+중등영어	mirror	거울
+중등영어	misty	안개 낀
+중등영어	misunderstand	오해하다
+중등영어	mobile	가지고 이동할 수 있는
+중등영어	moderately	적당히, 알맞게
+중등영어	modern	현대의
+중등영어	moment	순간
+중등영어	monster	괴물, 도깨비
+중등영어	moral	도덕적인
+중등영어	mostly	대부분, 주로
+중등영어	motto	좌우명, 모토
+중등영어	mud	진흙
+중등영어	multimedia	멀티미디어, 다중매체
+중등영어	multiple	많은, 다양한
+중등영어	multiplex	복합 상영관, 멀티플렉스
+중등영어	multiply	증가시키다, 번식하다, 곱하다
+중등영어	multitude	다수, 군중
+중등영어	murder	살인, 살해하다
+중등영어	muscle	근육
+중등영어	museum	박물관
+중등영어	mushroom	버섯
+중등영어	musician	음악가
+중등영어	mutual	서로의, 공동의
+중등영어	myth	신화, (근거 없는) 이야기
+중등영어	nail	손톱, 못
+중등영어	naked	나체의, 벌거벗은
+중등영어	nap	낮잠, 잠깐 잠
+중등영어	narrow	폭이 좁은
+중등영어	national	국민의, 국가의
+중등영어	navy	해군
+중등영어	nearby	가까운, 가까이의
+중등영어	neat	산뜻한, 깔끔한
+중등영어	necessary	필요한
+중등영어	negative	부정적인
+중등영어	negotiate	협상하다, 교섭하다
+중등영어	nephew	조카
+중등영어	nervous	불안해하는
+중등영어	nest	둥지
+중등영어	neutral	중립적인, 중간의, 중성의
+중등영어	nevertheless	그럼에도 불구하고
+중등영어	nickname	별명, 애칭
+중등영어	niece	조카딸
+중등영어	nightmare	악몽
+중등영어	nod	(머리를) 끄덕이다
+중등영어	noisy	시끄러운
+중등영어	normal	보편적인, 평균적인
+중등영어	note	메모, 필기, 주목하다
+중등영어	notice	"통지, 통보
+주목, 알아차리다"
+중등영어	notion	개념, 생각
+중등영어	novel	소설
+중등영어	nowadays	오늘날. 요즘
+중등영어	nuclear	핵무기, 핵무기의
+중등영어	nut	(호두 · 밤 등과 같이 껍질이 딱딱한) 견과
+중등영어	nutrition	영양, 영양분
+중등영어	obey	복종하다, 따르다
+중등영어	object	"물건, 물체, 목표, 대상
+반대하다"
+중등영어	observe	관찰하다
+중등영어	obstacle	방해, 장애물
+중등영어	obtain	얻다, 획득하다
+중등영어	obvious	명백한, 분명한
+중등영어	occasionally	때때로, 가끔, 우연히
+중등영어	occupy	차지하다, 점령하다
+중등영어	occur	발생하다, 머리에 떠오르다
+중등영어	ocean	바다, 대양
+중등영어	offense	공격, 위법행위, 화나게 하는 행위
+중등영어	offer	"제공하다, 제공
+제안하다, 제안"
+중등영어	official	공적인, 공식적인, 공무원
+중등영어	often	자주
+중등영어	operate	수술하다, (기계 · 장치 등을) 조종하다
+중등영어	opponent	(경기 · 대회 등의) 상대, 반대자
+중등영어	opportunity	기회
+중등영어	oppose	반대하다
+중등영어	oral	구두의, 입의
+중등영어	orchard	과수원
+중등영어	order	"명령하다, 명령
+주문하다, 주문
+순서, 질서"
+중등영어	ordinary	보통의, 평범한
+중등영어	organ	"(생물의) 기관, 장기
+오르간(악기)"
+중등영어	organic	유기농의, 화학비료를 쓰지 않는
+중등영어	organization	조직, 단체
+중등영어	other	다른, 다른 것
+중등영어	otherwise	(만약) 그렇지 않으면
+중등영어	outbreak	(전쟁 · 질병 등의) 발생, 발발
+중등영어	outcome	결과, 성과
+중등영어	output	생산, 출력, 생산량
+중등영어	outstanding	눈에 확 띄는, 뛰어난
+중등영어	over	"~위에, ~을 넘어, ~이상으로
+끝이 난"
+중등영어	overall	전체적으로, 전체적인
+중등영어	overcome	극복하다
+중등영어	overflow	넘쳐흐르다, 넘치다, 넘침
+중등영어	overhear	엿듣다
+중등영어	overnight	밤사이에, 하룻밤 사이에
+중등영어	overweight	과체중의, 비만의
+중등영어	overwhelm	압도하다
+중등영어	owe	···에게 ~을 빚지고 있다, 신세를 지고 있다
+중등영어	owl	올빼미
+중등영어	own	자기 자신의, 소유하다
+중등영어	oxygen	산소
+중등영어	oyster	굴
+중등영어	Pacific	태평양, 태평양의
+중등영어	pain	아픔, 고통
+중등영어	pair	한 쌍, 한 벌
+중등영어	palace	궁전
+중등영어	palm	손바닥
+중등영어	panic	공포, 공황상태
+중등영어	paragraph	(문장의) 절, 단락
+중등영어	parallel	평행한
+중등영어	pardon	"뭐라고요?(다시 말해달라는 뜻으로 쓰는 말)
+용서, 용서하다"
+중등영어	partial	부분적인, 편파적인
+중등영어	participate	참여하다, 참가하다
+중등영어	particle	입자, 티끌
+중등영어	particular	특별한, 특정한
+중등영어	passenger	승객
+중등영어	passion	열정
+중등영어	passport	여권
+중등영어	past	지난, 과거의
+중등영어	path	길
+중등영어	patient	환자, 인내심이 강한
+중등영어	pause	잠시 멈추다, 중단하다
+중등영어	pea	완두콩
+중등영어	peach	복숭아
+중등영어	peak	꼭대기, 최고점
+중등영어	peanut	땅콩
+중등영어	pear	배
+중등영어	penalty	벌칙, 형벌
+중등영어	penniless	무일푼의
+중등영어	penny	(영국의 화폐 단위) 페니
+중등영어	perceive	감지하다, 인지하다
+중등영어	perform	실행하다, (연극 · 연주 등을) 공연하다
+중등영어	perhaps	아마도
+중등영어	period	기간, 시기
+중등영어	permanent	영구적인
+중등영어	permit	허락하다, 허가하다
+중등영어	personality	개성, 성격
+중등영어	persuade	설득하다
+중등영어	pet	반려동물, 애완동물
+중등영어	pharmacy	약국
+중등영어	philosopher	철학자
+중등영어	physical	육체의, 물질적인, 물리적인
+중등영어	pick	골라잡다, 뜯다
+중등영어	piece	한 장, 한 조각
+중등영어	pigeon	비둘기
+중등영어	pile	쌓다, 쌓이다, 쌓아 올린 더미
+중등영어	pillow	베개
+중등영어	pity	불쌍히 여김, 애석한 일
+중등영어	plain	"평범한, 쉬운, 명백한
+평원, 벌판"
+중등영어	planet	행성
+중등영어	pocket	주머니
+중등영어	poet	시인
+중등영어	poisonous	유독한, 독이 있는
+중등영어	polar	극지방의, 남[북]극의
+중등영어	pole	극, 막대기, 장대
+중등영어	policy	정책, 방침
+중등영어	politely	공손히, 예의바르게
+중등영어	politician	정치가
+중등영어	pollution	오염
+중등영어	pond	연못
+중등영어	popular	인기 있는
+중등영어	population	인구, 주민
+중등영어	pork	돼지고기
+중등영어	port	항구
+중등영어	portable	휴대할 수 있는, 휴대용의
+중등영어	positive	확신하고 있는, 긍정적인
+중등영어	possess	소유하다, 지니다
+중등영어	post	기둥, 우편, 우편물, (우편물을) 발송하다
+중등영어	pot	통, 병, 냄비
+중등영어	potential	"가능성이 있는, 잠재하는
+가능성, 잠재력"
+중등영어	pour	붓다, 퍼붓다
+중등영어	poverty	가난, 빈곤
+중등영어	practice	연습, 실행하다
+중등영어	praise	칭찬, 칭찬하다
+중등영어	pray	기원하다, 기도하다
+중등영어	precious	귀중한, 값비싼
+중등영어	precise	정확한, 정밀한
+중등영어	prefer	~을 더 좋아하다
+중등영어	preferable	더 좋은, 더 나은
+중등영어	pregnant	임신한
+중등영어	prejudice	선입관, 편견
+중등영어	prepare	준비하다
+중등영어	present	"선물, 현재의
+참석한, 주다"
+중등영어	preserve	보존하다, 유지하다
+중등영어	pressure	압력, 압박
+중등영어	pretend	~인 체하다, 가장하다
+중등영어	pretty	"예쁜, 귀여운
+꽤, 아주"
+중등영어	prevent	막다, 방해하다
+중등영어	previous	이전의, 앞의
+중등영어	prey	먹이, 희생자
+중등영어	principle	원리, 원칙
+중등영어	priority	우선사항
+중등영어	prison	감옥
+중등영어	privilege	특권, 특혜
+중등영어	probable	가능성 있는, 있음직한
+중등영어	problem	문제
+중등영어	procedure	과정, 방법
+중등영어	produce	생산하다
+중등영어	profession	직업
+중등영어	professor	교수
+중등영어	profit	이익, 이득
+중등영어	prompt	신속한
+중등영어	pronunciation	발음
+중등영어	proper	적당한, 적절한
+중등영어	property	재산
+중등영어	proportion	비율, 부분, 균형
+중등영어	propose	제안하다, 청혼하다
+중등영어	prospect	가망, 전망
+중등영어	prosper	번영하다
+중등영어	protein	단백질
+중등영어	prove	입증하다, ~으로 판명되다
+중등영어	provide	주다, 제공하다
+중등영어	psychology	심리학
+중등영어	public	대중, 일반인의, 공공의
+중등영어	publish	출판하다, 널리 알리다
+중등영어	pull	끌어당기다
+중등영어	pulse	맥박, 파동, 진동
+중등영어	pumpkin	호박
+중등영어	punish	처벌하다, 벌하다
+중등영어	purchase	사다, 구입하다, 구입
+중등영어	purpose	목적, 의도
+중등영어	purse	지갑
+중등영어	pursue	뒤쫓다, 추구하다
+중등영어	qualify	자격을 주다, 자격을 얻다
+중등영어	quality	질, 품질
+중등영어	quarrel	싸움, 싸우다
+중등영어	quarter	4분의 1, 25센트(1달러의 4분의 1)
+중등영어	quit	그만두다, 중지하다
+중등영어	quite	아주, 꽤
+중등영어	race	경주, 인종, 종족
+중등영어	raft	뗏목, 고무보트
+중등영어	rage	분노, 분노하다
+중등영어	railroad	철도
+중등영어	raise	올리다, 일으켜 세우다
+중등영어	random	무작위의, 닥치는 대로 하는
+중등영어	range	"범위, 영역
+~의 범위에 걸치다"
+중등영어	rank	계급, 등급, 등급을 매기다
+중등영어	rapid	빠른, 신속한
+중등영어	rate	비율, 등급, 요금
+중등영어	rather	오히려, 약간
+중등영어	raw	가공하지 않은, 날것의
+중등영어	ray	광선
+중등영어	reach	도착하다
+중등영어	reaction	반응, 반작용
+중등영어	realize	깨닫다
+중등영어	receipt	받기, 수령, 영수증
+중등영어	receive	받다
+중등영어	recently	최근에, 요즘에
+중등영어	recognize	알아차리다, 인정하다
+중등영어	recommend	추천하다, ~을 권하다
+중등영어	recover	회복하다
+중등영어	recycle	재활용하다
+중등영어	reduce	줄이다, 감소시키다
+중등영어	refer	말하다, 언급하다
+중등영어	referee	심판, 심판하다
+중등영어	reflect	반사하다, 반영하다, 심사숙고하다
+중등영어	refresh	상쾌하게 하다, 새롭게 하다
+중등영어	refund	환불, 환불하다
+중등영어	refuse	거절하다, 거부하다
+중등영어	regal	국왕의, 장엄한
+중등영어	regard	"주목하다, 주의하다
+관계, 관계하다
+~으로 여기다"
+중등영어	regarding	~에 관하여
+중등영어	region	지역, 지방
+중등영어	register	등록하다
+중등영어	regret	후회하다, 후회
+중등영어	regulation	규율, 규칙
+중등영어	reject	거절하다, 거부하다
+중등영어	relate	관계시키다, 관계가 있다
+중등영어	relay	계주, 교대, 전달하다
+중등영어	release	풀어주다, 석방하다
+중등영어	relevant	관계있는, 적절한
+중등영어	relieve	구제하다, (고통 등을) 덜어주다
+중등영어	religion	종교
+중등영어	rely	의지하다, 믿다
+중등영어	remain	남다, ~인 채로 남아있다
+중등영어	remark	말, 논평, 말하다, 논평하다
+중등영어	remarkable	주목할 만한, 놀라운
+중등영어	remember	기억하다
+중등영어	remind	생각나게 하다
+중등영어	remodel	개조하다
+중등영어	remove	치우다, 제거하다
+중등영어	repair	고치다, 수리하다
+중등영어	repeat	되풀이하다
+중등영어	replace	~을 대신하다, 대체하다
+중등영어	reply	"대답하다, 답장하다
+대답, 답장"
+중등영어	represent	나타내다, 대표하다
+중등영어	republic	공화국
+중등영어	reputation	평판
+중등영어	request	요청, 요청하다
+중등영어	require	요구하다, 필요로 하다
+중등영어	research	"(학술) 연구, 조사
+연구하다, 조사하다"
+중등영어	resent	분개하다
+중등영어	reserve	예약하다, 따로 남겨두다
+중등영어	reside	살다, 거주하다
+중등영어	resign	사직하다, 사임하다
+중등영어	resistance	저항, 반대, 레지스탕스
+중등영어	resource	자원
+중등영어	respect	존경하다
+중등영어	respond	대답하다, 반응하다
+중등영어	responsibility	책임, 의무
+중등영어	rest	휴식, 나머지
+중등영어	restore	회복시키다, 복구하다
+중등영어	restrict	제한하다, 금지하다
+중등영어	result	결과, 결과로 일어나다
+중등영어	retire	은퇴하다
+중등영어	return	돌아오다, 돌려주다
+중등영어	reveal	밝히다, 폭로하다
+중등영어	reverse	반대의, 반대, 반대로 하다
+중등영어	review	재검토, 재검토하다
+중등영어	revolution	혁명, 대변혁
+중등영어	reward	보상, 보상하다, 보답하다
+중등영어	riddle	수수께끼
+중등영어	ride	(말 · 탈 것 등을) 타다, 타고가다
+중등영어	ridiculous	우스운, 어리석은
+중등영어	right	옳은, 오른쪽의, 권리
+중등영어	rise	"증가, 오르다
+(해 · 달이) 떠오르다"
+중등영어	risk	위험, 위태롭게 하다
+중등영어	robbery	강도질, 강탈
+중등영어	role	역할
+중등영어	roll	회전하다
+중등영어	roof	지붕
+중등영어	roommate	한 방 사람, 같이 방을 쓰는 친구
+중등영어	root	뿌리, 근원
+중등영어	rough	거친, 험한
+중등영어	route	길, 경로
+중등영어	routine	일상적인, 틀에 박힌 일상
+중등영어	row	열, 줄
+중등영어	royal	왕의, 왕실의
+중등영어	rude	버릇없는, 무례한
+중등영어	ruler	"지배자, 통치자
+자"
+중등영어	rural	시골의
+중등영어	rush	"서두르다
+돌진하다, 쇄도하다"
+중등영어	rust	녹, 녹슬다
+중등영어	sacrifice	희생, 희생시키다
+중등영어	sad	슬픈
+중등영어	safe	안전한
+중등영어	sail	항해하다
+중등영어	salmon	연어
+중등영어	sand	모래
+중등영어	satellite	인공위성, 위성
+중등영어	satisfy	만족시키다
+중등영어	save	"안전하게 지키다, (사람 · 생명 등을) 구하다
+저축하다, 아끼다"
+중등영어	saying	말, 속담
+중등영어	scale	규모, 저울, 눈금
+중등영어	scar	상처, 흉터
+중등영어	scare	겁주다
+중등영어	scholar	학자
+중등영어	scissors	가위
+중등영어	scold	꾸짖다
+중등영어	scream	비명, 비명을 지르다
+중등영어	sculpture	조각, 조각품
+중등영어	search	찾다, 수색하다
+중등영어	secretary	비서
+중등영어	section	(나누어진) 한 부분, 부문
+중등영어	secure	안전한, 안전하게 하다
+중등영어	seed	씨, 씨앗
+중등영어	seek	찾다, 구하다
+중등영어	seem	~처럼 보이다, ~인 것 같다
+중등영어	selection	선택, 선발
+중등영어	selfish	이기적인
+중등영어	send	보내다
+중등영어	sensation	감각, 느낌, 센세이션, 대사건
+중등영어	sensible	분별 있는, 현명한
+중등영어	sensitive	민감한, 예민한
+중등영어	separate	분리된, 분리하다
+중등영어	sequence	연속, 순서
+중등영어	serious	심각한, 진지한
+중등영어	servant	하인
+중등영어	serve	~에 봉사하다, 도움을 주다
+중등영어	set	"놓다, 차리다
+(해 · 달 등이) 지다
+(함께 모은) 세트"
+중등영어	settle	정착하다, 해결하다
+중등영어	several	몇몇의, 몇 사람의
+중등영어	severe	엄격한, 가혹한, 심각한
+중등영어	shade	(시원한) 그늘
+중등영어	shadow	어둠, 그림자
+중등영어	share	몫, 분배하다, 공유하다
+중등영어	shark	상어
+중등영어	sharp	날카로운
+중등영어	sheep	양
+중등영어	shelf	선반
+중등영어	shell	(조개 · 달걀 등의) 껍질
+중등영어	shelter	은신처, 피난처, 주거지
+중등영어	shield	방패, 방패로 막다
+중등영어	shift	이동시키다, 바꾸다, 이동
+중등영어	shore	바닷가, 호숫가
+중등영어	shrink	움츠러들다, 오그라들다
+중등영어	shuttle	왕복의, 왕복 운행
+중등영어	shy	수줍어하는
+중등영어	sigh	한숨 쉬다, 한숨
+중등영어	sight	봄, 보기, 시야, 광경
+중등영어	sightseeing	관광
+중등영어	significant	중요한
+중등영어	silence	침묵, 고요
+중등영어	silly	어리석은
+중등영어	similar	같은, 유사한
+중등영어	simulation	모의실험, 시뮬레이션, 가장하기
+중등영어	since	"~한 이래로, ~이래로
+~이기 때문에"
+중등영어	sink	싱크대, 가라앉다
+중등영어	site	위치, 장소
+중등영어	situation	위치, 상황, 상태
+중등영어	skip	깡충 뛰다, (식사 · 수업 등을) 건너뛰다
+중등영어	slave	노예
+중등영어	sled	썰매
+중등영어	slight	약간의
+중등영어	slim	날씬한, 얇은
+중등영어	slip	미끄러지다, 미끄러짐
+중등영어	smell	냄새, 냄새가 나다
+중등영어	snail	달팽이
+중등영어	sneeze	재채기하다
+중등영어	soak	담그다, 흠뻑 젖다
+중등영어	soap	비누
+중등영어	sociology	사회학
+중등영어	soil	흙, 땅
+중등영어	sole	유일한, 단독의
+중등영어	solid	단단한, 고체
+중등영어	solution	해결, 해답
+중등영어	sometime	언젠가
+중등영어	sometimes	때때로
+중등영어	somewhat	어느 정도, 다소
+중등영어	somewhere	어딘가에
+중등영어	sore	아픈, 쓰린
+중등영어	sort	종류, 종류별로 분류하다
+중등영어	soul	정신, 영혼
+중등영어	source	원천, 출처
+중등영어	soy	콩, 간장
+중등영어	spade	삽
+중등영어	spare	"예비의, 여분의
+아끼다, (시간 · 돈 등을) 할애하다"
+중등영어	sparrow	참새
+중등영어	species	(분류상의) 종, 종류
+중등영어	specific	구체적인, 명확한
+중등영어	spectacle	광경, 구경거리
+중등영어	speech	연설, 말
+중등영어	spend	(돈 · 시간 · 노력 등을) 들이다[쓰다]
+중등영어	spill	흘리다, 쏟다
+중등영어	spirit	정신, 마음
+중등영어	split	나뉘다, 쪼개다
+중등영어	spoil	망치다
+중등영어	spot	얼룩, 장소, 지점
+중등영어	spread	펼치다, 퍼뜨리다
+중등영어	square	"정사각형, 정사각형의
+(네모진) 광장"
+중등영어	stable	안정적인
+중등영어	staff	직원
+중등영어	stair	계단
+중등영어	starfish	불가사리
+중등영어	statistics	통계, 통계학
+중등영어	status	동상, 조각상
+중등영어	steal	훔치다
+중등영어	steel	강철
+중등영어	stick	"붙이다
+막대기"
+중등영어	still	아직도, 여전히
+중등영어	stimulate	자극하다
+중등영어	stink	악취, 악취를 풍기다
+중등영어	stomach	위
+중등영어	strategy	전술, 전략
+중등영어	stream	시내, 개울, 흐름
+중등영어	strength	힘, 세기
+중등영어	stretch	뻗치다, 늘이다
+중등영어	strict	엄격한
+중등영어	strike	"치다, 때리다
+파업"
+중등영어	string	끈, 실
+중등영어	structure	구조, 구조물
+중등영어	struggle	투쟁, 싸움, 분투하다
+중등영어	stuck	움직일 수 없는, 꽉 막힌
+중등영어	stuff	"물건, 재료
+~에 채우다, 채워 넣다"
+중등영어	stupid	어리석은
+중등영어	subject	"(실험) 대상, 피실험자
+과목, 주제"
+중등영어	submit	제출하다
+중등영어	substance	물질, 본질, 실체
+중등영어	suck	빨아들이다, 빨다
+중등영어	suffer	괴로워하다, (고통 따위를) 겪다
+중등영어	sufficient	충분한
+중등영어	suggestion	제안, 암시, 시사
+중등영어	sum	합계, 액수
+중등영어	summary	요약, 요약한
+중등영어	summit	(산의) 정상, 꼭대기
+중등영어	sunny	햇볕이 내리쬐는, 화창한
+중등영어	supper	저녁 식사
+중등영어	supply	공급, 공급하다
+중등영어	suppose	추측하다, 생각하다, 가정하다
+중등영어	surface	표면, 수면
+중등영어	surge	"밀려오다, 솟구치다
+파도, 급증"
+중등영어	surgery	수술
+중등영어	surrender	항복하다, 포기하다, 항복, 포기
+중등영어	surround	둘러싸다, 포위하다
+중등영어	survey	(설문) 조사, 조사하다
+중등영어	survival	생존, 살아남음
+중등영어	suspicious	의심스러운
+중등영어	sustain	떠받치다, 유지하다
+중등영어	swallow	(꿀꺽) 삼키다, 제비
+중등영어	swear	맹세하다
+중등영어	sweat	땀, 땀을 흘리다
+중등영어	swift	신속한, 빠른
+중등영어	swing	"그네, 흔들리다
+(야구에서 방망이를) 휘두르다"
+중등영어	symbol	상징, 기호
+중등영어	symptom	증상, 징후
+중등영어	tail	꼬리
+중등영어	tale	이야기, 소설
+중등영어	talent	재주, 재능 있는 사람
+중등영어	tap	(가볍게) 두드리다, 두드리는 소리
+중등영어	task	해야 할 일, 직무
+중등영어	taste	맛보다, ~맛이 나다, 맛
+중등영어	tax	세금
+중등영어	tear	"눈물
+찢다, 찢어지다"
+중등영어	teen	십대, 십대의
+중등영어	telegraph	전보, 전보를 보내다
+중등영어	temperature	온도, 기온
+중등영어	temple	사찰, 절
+중등영어	temporary	일시적인, 임시의
+중등영어	tend	~하는 경향이 있다
+중등영어	tendency	경향, 성향
+중등영어	tension	긴장, 긴장감
+중등영어	term	기간, 학기, 말, 용어
+중등영어	terrible	끔찍한, 엄청난
+중등영어	terrific	굉장한, 무시무시한, 아주 멋진
+중등영어	territory	영토, 지역, 영역
+중등영어	textbook	교과서
+중등영어	then	그때, 그러고 나서
+중등영어	theory	이론
+중등영어	thermometer	온도계
+중등영어	thick	두꺼운
+중등영어	thieve	훔치다
+중등영어	thin	가는, 얇은
+중등영어	thirsty	목마른
+중등영어	thoroughly	완전히, 철저하게
+중등영어	though	비록 ~이지만
+중등영어	thought	생각하기, 사고
+중등영어	threat	위협, 협박
+중등영어	throat	목구멍
+중등영어	throughout	"~도처에, 도처에, 온통
+~동안 쭉, ~내내"
+중등영어	throw	던지다
+중등영어	thrust	밀어 넣다, 찌르다
+중등영어	thumb	엄지손가락
+중등영어	tidy	단정한, 깔끔한
+중등영어	tie	묶다, 묶는 끈
+중등영어	tight	꽉 조이는, 빈틈이 없는
+중등영어	tiny	작은, 조그마한
+중등영어	toe	발가락
+중등영어	tolerate	참다, 견디다
+중등영어	toll	(유료 도로 · 다리 등의) 통행료
+중등영어	tomb	묘지
+중등영어	tongue	혀, 말, 언어
+중등영어	tool	도구, 연장
+중등영어	tooth	이, 치아
+중등영어	tough	"(행동 · 일 등이) 거친, 강인한
+힘든"
+중등영어	toward	~쪽으로, ~을 향하여
+중등영어	trace	자취, 발자국, 추적하다
+중등영어	track	"트랙, 경주로, 길
+자국, 발자국
+뒤쫓다, 추적하다"
+중등영어	tradition	전통
+중등영어	traffic	교통
+중등영어	trait	특성, 특징
+중등영어	translate	번역하다, 통역하다
+중등영어	transmit	보내다, 전송하다
+중등영어	transport	운송, 운송하다
+중등영어	trap	덫, 함정
+중등영어	trash	쓰레기
+중등영어	tray	쟁반
+중등영어	treasure	보물
+중등영어	treat	"대접하다, 치료하다
+취급하다, 다루다"
+중등영어	treetop	나무 꼭대기
+중등영어	trend	경향, 추세
+중등영어	tribe	부족, 종족
+중등영어	trigger	방아쇠, 발사하다, 촉발시키다
+중등영어	trip	여행
+중등영어	trousers	바지
+중등영어	trust	신뢰, 신뢰하다
+중등영어	tune	멜로디, 조율하다
+중등영어	turkey	칠면조
+중등영어	turn	"돌다, 돌리다, 뒤집다
+변하다, 변화시키다
+차례"
+중등영어	turtle	거북
+중등영어	twin	쌍둥이(중의 한 명)
+중등영어	typical	대표하는, 전형적인
+중등영어	ultimate	궁극적인, 최후의
+중등영어	unable	~할 수 없는
+중등영어	unavoidable	피할 수 없는
+중등영어	unbelievable	믿을 수 없는, 믿겨지지 않는
+중등영어	undergo	(안 좋은 일 등을) 겪다, (수술 등을) 받다
+중등영어	underground	지하의, 지하에(서), 지하
+중등영어	underline	밑줄을 긋다, 강조하다
+중등영어	underneath	아래에, 밑에, ~의 아래[밑]에
+중등영어	undertake	떠맡다, 착수하다
+중등영어	unhappy	불행한
+중등영어	union	연합, 노동조합
+중등영어	unique	유일한, 독특한
+중등영어	unite	연합하다, 통합하다
+중등영어	universe	전 세계, 우주
+중등영어	unkind	불친절한
+중등영어	unknown	알려지지 않은
+중등영어	unless	~하지 않으면
+중등영어	until	~까지, ~할 때까지
+중등영어	update	갱신, 최신의 것으로 하다
+중등영어	upper	위쪽의, 더 위에 있는
+중등영어	upset	"화가 난, 속상한, 화나게 하다
+뒤엎다, 전복"
+중등영어	upstairs	위층, 위층에
+중등영어	uptown	도시의 주택가
+중등영어	upward	위로, 위로 향한
+중등영어	urban	도시의
+중등영어	urgent	긴급한
+중등영어	useless	쓸모없는
+중등영어	valid	유효한, 효과 있는
+중등영어	valley	계곡
+중등영어	value	가치
+중등영어	vapor	증기
+중등영어	variety	다양성, 변화
+중등영어	vary	각기 다르다, 달라지다
+중등영어	vase	꽃병
+중등영어	vehicle	차량, 차
+중등영어	vessel	(큰) 배, 그릇
+중등영어	veteran	노련가, 참전 용사
+중등영어	victim	희생자, 피해자
+중등영어	view	봄, 경치, 바라보다
+중등영어	vinegar	식초
+중등영어	violation	침해, 위반
+중등영어	violence	폭력, 폭행
+중등영어	violet	보라색, 보라색의
+중등영어	visit	방문하다
+중등영어	volcano	화산
+중등영어	volleyball	배구
+중등영어	volunteer	"자원봉사자, 지원자
+자진하여 ~하다"
+중등영어	vote	투표, 투표하다
+중등영어	voyage	항해, 항해하다
+중등영어	wage	임금, 급료
+중등영어	wall	담장, 벽
+중등영어	wallet	지갑
+중등영어	wander	헤매다, 떠돌아다니다
+중등영어	ware	제품, 상품
+중등영어	warn	경고하다
+중등영어	warrant	보증, 보증하다
+중등영어	watermelon	수박
+중등영어	way	길, 방법
+중등영어	weak	약한, 힘이 없는
+중등영어	wealth	재산, 부
+중등영어	weapon	무기
+중등영어	weather	날씨, 기후
+중등영어	web	거미줄, (복잡하게 연결된) ~망
+중등영어	weird	이상한, 기묘한
+중등영어	welfare	복지, 복지의
+중등영어	wellbeing	행복, 안녕, 복지
+중등영어	wet	젖은
+중등영어	wheat	밀
+중등영어	wheel	바퀴, (자동차의) 핸들
+중등영어	whether	~인지 아닌지, ~이든 아니든
+중등영어	whole	전부, 전부의
+중등영어	windmill	풍차
+중등영어	windy	바람이 많이 부는
+중등영어	wipe	닦다, 씻다
+중등영어	wise	현명한, 똑똑한
+중등영어	witch	마녀
+중등영어	withdraw	"물러나다, 철수하다
+(돈을) 인출하다"
+중등영어	within	~의 안쪽에, (시간) ~안에
+중등영어	wizard	(남자) 마법사
+중등영어	wonder	"궁금해 하다
+경이로움, 놀라움"
+중등영어	woodpecker	딱따구리
+중등영어	worth	~의 가치가 있는
+중등영어	wound	상처, 상처를 입히다
+중등영어	wrap	싸다, 포장하다, 싸개
+중등영어	wrinkle	주름
+중등영어	wrist	손목, 손목관절
+중등영어	yell	소리치다, 고함치다, 소리침
+중등영어	yet	"(not과 함께 쓰여) 아직 (~않다)
+이미, 벌써"
+중등영어	zone	지역, 구역
+고등영어	abandon	버리다, 포기하다
+고등영어	abnormal	비정상의, 이상한
+고등영어	aboard	(배 · 비행기 등에) 타고, 탑승하여
+고등영어	abolish	없애다, 폐지하다
+고등영어	abrupt	갑작스러운
+고등영어	absently	멍하니, 무심코
+고등영어	absolute	완전한, 절대적인
+고등영어	absorbing	마음을 빼앗는, 몰입하게 만드는
+고등영어	abstract	"추상적인
+추출하다, 뽑아내다"
+고등영어	absurd	어리석은, 터무니없는
+고등영어	abundant	풍부한
+고등영어	abuse	"학대하다, 욕하다, 남용하다
+남용, 학대, 욕설"
+고등영어	academy	(특수 분야의) 학교, 학원, 예술원
+고등영어	accelerate	가속하다, 가속화되다
+고등영어	accentuate	강조하다
+고등영어	access	"접근, 출입, 접근하다
+이용 권한, 이용하다"
+고등영어	accommodate	(살거나 지낼) 공간을 제공하다, 수용하다
+고등영어	accompany	"동행하다, 동반하다
+반주하다"
+고등영어	accomplish	완수하다, 성취하다
+고등영어	accord	"일치, 부합, 합의
+일치하다, 부합하다"
+고등영어	accordingly	따라서, 그에 따라
+고등영어	account	"(예금) 계좌, 중요, 중요함
+계산, 계산서
+설명, 설명하다"
+고등영어	accountable	책임이 있는
+고등영어	accountant	회계사, 경리
+고등영어	accumulate	축적하다, 모으다
+고등영어	accuracy	정확성, 정확도
+고등영어	accuse	고발하다, 비난하다
+고등영어	accustom	익숙하게 하다
+고등영어	acid	신, 산성의, 산
+고등영어	acknowledge	인정하다
+고등영어	acoustic	"청각의, 음향의
+(음악) 전자 장치를 쓰지 않은"
+고등영어	acquaint	알리다, 숙지시키다
+고등영어	acute	(감각 · 이해력이) 예리한, 극심한
+고등영어	adapt	"조정하다, 적응시키다
+각색하다"
+고등영어	addict	중독자, 중독시키다
+고등영어	address	주소, 연설, 연설하다
+고등영어	adequate	적당한, 충분한
+고등영어	adhere	들러붙다, 고수하다
+고등영어	adjust	조정하다, 적응하다
+고등영어	administer	경영하다, 관리하다
+고등영어	admiral	해군 대장, 제독
+고등영어	admonish	혼내다, 훈계하다
+고등영어	adolescence	청소년기, 사춘기
+고등영어	adopt	"채택하다, 받아들이다
+입양하다"
+고등영어	adore	숭배하다, 아주 좋아하다
+고등영어	adornment	장식품, 장식
+고등영어	advent	출현, 도래
+고등영어	adverb	부사
+고등영어	adverse	불리한, 부정적인, 반대의
+고등영어	adversity	역경, 고난
+고등영어	advocate	옹호하다, 지지하다, 옹호자, 지지자
+고등영어	aerial	공기의, 공중의, 항공기에 의한
+고등영어	aesthetic	미적인, 심미적인
+고등영어	affair	일, 문제, 업무
+고등영어	affection	애정, 애착
+고등영어	affirm	단언하다, 확인하다
+고등영어	affirmative	긍정적인, 동의하는, 긍정, 동의
+고등영어	afflict	괴롭히다
+고등영어	affluent	부유한, 풍족한
+고등영어	afford	~할 여유가 있다, ~을 살 돈이 있다
+고등영어	aftermath	(전쟁 · 사고 등의) 여파, 영향
+고등영어	agenda	협의사항, 안건
+고등영어	agent	대리인, 행위자, (스포츠, 연예 부문의) 에이전트
+고등영어	aggravate	악화시키다
+고등영어	aggregate	합계, 총-, 종합하다
+고등영어	aggress	공격하다, 시비를 걸다
+고등영어	agony	심한 고통, 괴로움
+고등영어	agriculture	농업, 농사
+고등영어	aid	돕다, 도움
+고등영어	ailment	병, 질병
+고등영어	airborne	하늘에 떠있는, 공중에 떠있는
+고등영어	airs	젠체하는 태도
+고등영어	aisle	(극장 · 비행기 등의 좌석 사이의) 통로, 복도
+고등영어	alert	방심 않는, 경계하는
+고등영어	algebra	대수학
+고등영어	alias	일명 ~라 불리는, 가명
+고등영어	alienate	소외시키다, (관계가) 멀어지게 하다
+고등영어	align	일렬정돈하다, 정렬하다
+고등영어	alike	비슷한, 똑같이
+고등영어	allege	(증거 없이) 주장하다, 혐의를 제기하다
+고등영어	alleviate	완화시키다
+고등영어	alley	골목, 오솔길
+고등영어	alliance	동맹, 연합
+고등영어	allocate	할당하다, 배정하다
+고등영어	allot	할당하다, 분배하다
+고등영어	allude	암시하다, 넌지시 언급하다
+고등영어	almighty	전능한
+고등영어	alter	바꾸다, 수정하다
+고등영어	alternate	"번갈아 하는, 하나 거르는
+번갈아 하다"
+고등영어	alternative	양자택일, 대안, 대체
+고등영어	altitude	높이, 고도
+고등영어	alumni	동창생
+고등영어	ambassador	(외국에 파견되는) 대사
+고등영어	ambiguous	모호한, 분명하지 않은
+고등영어	ambitious	야망을 품은, 야심찬
+고등영어	amend	(법을) 개정하다, 수정하다
+고등영어	amid	~하는 가운데, ~의 한복판에
+고등영어	amoral	도덕과 관계없는, 도덕관념이 없는
+고등영어	amphibian	양서류, 수륙 양용의
+고등영어	ample	충분한, 풍부한
+고등영어	amplifier	증폭기, 앰프
+고등영어	amusing	재미있는, 즐거운
+고등영어	analogy	유사, 유추, 비유
+고등영어	analyze	분석하다
+고등영어	anatomy	해부, 분석, 해부학, (해부학적) 구조
+고등영어	anchor	닻, 닻을 내리다, 정박하다
+고등영어	anecdote	일화
+고등영어	animate	"~에 생명을 주다, 만화 영화로 만들다
+생기 있는, 살아 있는"
+고등영어	annex	"부속 건물, 별관
+부속 문서, 부록
+합병하다"
+고등영어	annihilate	전멸시키다, 붕괴시키다
+고등영어	announce	발표하다, 알리다
+고등영어	annoy	짜증나게 하다
+고등영어	annual	1년의, 해마다의
+고등영어	anonymous	익명의
+고등영어	antedate	~보다 먼저 일어나다, 앞의 날짜로 앞당기다
+고등영어	anterior	앞의, 이전의
+고등영어	anthropology	인류학
+고등영어	antibiotic	항생제, 항생물질
+고등영어	anticipate	기대하다, 예상하다
+고등영어	antipathy	반감
+고등영어	antique	골동품, 고풍의
+고등영어	antonym	반의어
+고등영어	anxious	걱정하는, 열망하는
+고등영어	ape	침팬지, 고릴라, 유인원
+고등영어	apparatus	기구, 장치
+고등영어	appeal	"애원하다, 호소하다
+마음을 끌다, 매력"
+고등영어	appease	달래다
+고등영어	append	첨가하다, 첨부하다
+고등영어	appetite	식욕, 욕구
+고등영어	applaud	박수갈채를 보내다
+고등영어	appliance	가전제품, 전기 기구
+고등영어	apply	"적용하다, 적용되다
+지원하다, 신청하다"
+고등영어	appreciate	감사하다, 진가를 인정하다, 감상하다
+고등영어	apprehend	"이해하다
+체포하다, 염려하다"
+고등영어	appropriate	적당한, 적절한
+고등영어	approval	허가, 허락
+고등영어	approximate	"~에 근접하다
+(위치 · 수량이) ~에 가까운, 대략적인"
+고등영어	apron	앞치마
+고등영어	apt	~하는 경향이 있는, ~하기 쉬운
+고등영어	aptitude	적성, 소질
+고등영어	arbitrary	제멋대로인, 독단적인
+고등영어	arch	아치, 활 모양, 둥근 천장
+고등영어	archaeology	고고학
+고등영어	architecture	건축, 건축 양식, 건축물
+고등영어	archive	기록 보관소, (기록 · 데이터 등의) 보관
+고등영어	arctic	북극의, 북극
+고등영어	aristocrat	귀족
+고등영어	arithmetic	산수, 계산
+고등영어	arms	무기, 병기
+고등영어	aroma	향기
+고등영어	arouse	자극하다, (감정 등을) 불러일으키다
+고등영어	arrange	"가지런히 하다, 배열하다
+예정을 세우다"
+고등영어	array	"배열하다, 배치하다
+배열, 정렬"
+고등영어	arrest	체포하다, 체포
+고등영어	arrogant	거만한, 오만한
+고등영어	arrow	화살, 화살표
+고등영어	artery	동맥
+고등영어	article	물품, (신문 · 잡지 등의) 기사
+고등영어	artifact	공예품, 인공 유물
+고등영어	artificial	인공의, 가짜의
+고등영어	artillery	대포, 포병대
+고등영어	ascend	오르다, 상승하다
+고등영어	ascribe	~의 탓으로 돌리다
+고등영어	ash	재, 화산재, 담뱃재
+고등영어	ashtray	재떨이
+고등영어	aspect	측면, 면, 양상
+고등영어	aspire	열망하다
+고등영어	assassination	암살
+고등영어	assault	공격하다, 폭행하다, 습격, 폭행
+고등영어	assemble	모으다, 모이다, 조립하다
+고등영어	assertion	주장
+고등영어	assess	(가격 · 재산 등을) 평가하다, 가늠하다
+고등영어	asset	재산, 자산
+고등영어	assign	할당하다, 선임하다, (때 · 장소를) 지정하다
+고등영어	associate	교제하다, 관련시키다, 연합시키다
+고등영어	assume	"추정하다, 생각하다
+~을 떠맡다, ~인 척하다"
+고등영어	assure	장담하다, 보장하다
+고등영어	astonishing	깜짝 놀랄만한, 놀라운
+고등영어	astound	깜짝 놀라게 하다
+고등영어	astray	길을 잃은, 잘못된 길로 빠진
+고등영어	astrology	점성술, 점성학
+고등영어	astronaut	우주 비행사
+고등영어	astronomy	천문학
+고등영어	asymmetrical	비대칭의
+고등영어	atmosphere	분위기, 공기
+고등영어	atom	원자
+고등영어	attain	달성하다, 성취하다
+고등영어	attend	"출석하다
+시중들다, 간호하다"
+고등영어	attic	다락(방)
+고등영어	attorney	변호사
+고등영어	attract	마음을 끌다, 끌어당기다
+고등영어	attribute	~탓으로 돌리다
+고등영어	atypical	이례적인, 전형적이 아닌
+고등영어	auction	경매, 경매하다
+고등영어	audible	들을 수 있는, 잘 들리는
+고등영어	audience	청중, 관중
+고등영어	auditorium	강당, 방청석
+고등영어	auditory	청각의
+고등영어	authentic	진짜의, 진품인
+고등영어	author	저자, 작가
+고등영어	authority	권한, 권력, (권력) 기관
+고등영어	autobiography	자서전
+고등영어	autograph	자필서명, 사인, 사인하다
+고등영어	automate	자동화하다
+고등영어	autonomous	자주적인, 자치의, 자율적인
+고등영어	available	이용할 수 있는, 구할 수 있는, 시간 여유가 있는
+고등영어	avalanche	눈사태, 산사태, 쇄도
+고등영어	avenge	복수하다
+고등영어	avenue	(도시의) 거리, 도로
+고등영어	aviation	비행, 항공
+고등영어	avocation	부업, 취미
+고등영어	awful	엄청난, 지독한
+고등영어	awkward	어색한, 불편한
+고등영어	ax	도끼
+고등영어	axis	중심축, 축선
+고등영어	bachelor	"대학 졸업자, 학사
+독신 남자"
+고등영어	backbone	척추, 중추
+고등영어	backfire	역효과를 낳다
+고등영어	backward	뒤로, 뒤쪽으로
+고등영어	baggage	(여행할 때의) 수하물, 짐
+고등영어	bail	보석(금), 보석으로 풀어주다
+고등영어	bait	미끼
+고등영어	balance	균형, 잔액, 잔금
+고등영어	bald	대머리의, 털이 없는
+고등영어	ballot	무기명 투표
+고등영어	ballroom	연회장, 무도회장
+고등영어	bamboo	대나무
+고등영어	ban	금지, 금지하다
+고등영어	bang	"(뱅, 쾅, 쿵) 소리
+쿵 부딪히다, 쾅 닫다"
+고등영어	banish	추방하다, 내쫓다
+고등영어	bankrupt	파산한
+고등영어	banner	현수막
+고등영어	banquet	연회, 만찬
+고등영어	bar	"막대기, 막대
+술집, 빠
+막다, 금지하다"
+고등영어	barbaric	야만의, 미개한
+고등영어	bare	맨-, 발가벗은
+고등영어	barely	"거의 ~ 않다[없다]
+간신히, 겨우"
+고등영어	bargain	"(정상가 보다) 싼 물건, 특가품
+흥정하다, 협상하다"
+고등영어	barley	보리
+고등영어	barn	헛간, 광
+고등영어	barometer	기압계, 지표, 바로미터
+고등영어	barren	메마른, 불모의, 불임의
+고등영어	barrier	장벽, 장애물
+고등영어	barter	물물교환하다, 물물교환
+고등영어	basin	강 유역, 분지, 대야, (요트 등의) 정박지
+고등영어	bay	(작은) 만(바다가 육지 속으로 파고들어 와 있는 곳)
+고등영어	bead	구슬
+고등영어	bear	"곰
+참다, 견디다
+낳다
+(태도 · 감정 · 특징 등을) 품다, 지니다"
+고등영어	beard	턱수염
+고등영어	beast	짐승, 야수
+고등영어	become	~이 되다, 어울리다
+고등영어	beep	삐 소리를 내다, 삐 하는 소리
+고등영어	befall	(~에게 어떤 일이) 일어나다
+고등영어	beforehand	미리, 벌써
+고등영어	behalf	이익
+고등영어	behold	보다, 바라보다
+고등영어	belly	배, 복부
+고등영어	belong	(~에) 속하다
+고등영어	beloved	사랑하는, 소중한
+고등영어	belt	혁대, 지대, 지역
+고등영어	bend	구부리다
+고등영어	beneath	아래에, ~밑에
+고등영어	beneficial	이로운, 이익을 주는
+고등영어	benign	(기후 · 성격 등이) 온화한, 상냥한
+고등영어	betray	"배반하다
+(정보 · 감정 등을) 드러내다"
+고등영어	beverage	음료, 마실 것
+고등영어	beware	경계하다, 조심하다
+고등영어	bewilder	당황하게 하다
+고등영어	bias	"편견, 치우침
+치우치게 하다"
+고등영어	bible	성서, 성경
+고등영어	bid	"입찰, 입찰가, 입찰하다
+명령하다"
+고등영어	bilateral	양측의, 쌍방의
+고등영어	bilingual	2개 언어를 사용하는
+고등영어	bill	"계산서, 청구서
+법안, 지폐"
+고등영어	billion	10억
+고등영어	bin	쓰레기통, 통, (짐 등을 위한) 칸
+고등영어	bind	묶다, 매다
+고등영어	biochemistry	생화학
+고등영어	biography	전기, 일대기
+고등영어	biology	생물학
+고등영어	biosphere	생물권(생물이 살 수 있는 지구 표면과 대기권)
+고등영어	bizarre	기괴한, 특이한
+고등영어	blackmail	협박하다, 갈취하다, 협박, 갈취
+고등영어	blackout	등화관제, 정전, (정부 · 경찰에 의한) 보도 통제
+고등영어	blacksmith	대장장이
+고등영어	blast	폭발하다, 폭발, 돌풍
+고등영어	blaze	불꽃, 화재, 타오르다
+고등영어	bleed	피를 흘리다
+고등영어	blend	섞다, 혼합하다, 혼합(물)
+고등영어	blink	(눈 등을) 깜박이다, (불빛 등이) 깜박거리다
+고등영어	bliss	더없는 행복
+고등영어	blizzard	눈보라
+고등영어	block	"사각형 덩어리, (도로로 나뉘는) 블록
+방해물, 막다, 방해하다"
+고등영어	bloom	꽃, 꽃이 피다
+고등영어	blossom	꽃, 꽃을 피우다
+고등영어	blow	"(바람이)불다, 강풍
+강타, 구타"
+고등영어	blunder	실수
+고등영어	blunt	"무딘, 뭉툭한, 무디게 하다
+퉁명스러운, 직설적인"
+고등영어	blur	희미해지다, 흐릿하게 하다, 희미한 것
+고등영어	blush	얼굴을 붉히다, 빨개지다, 홍조
+고등영어	board	"판자, 게시판
+(차 · 배 · 비행기 등을) 타다
+위원회"
+고등영어	boast	자랑하다
+고등영어	bold	대담한, 용감한
+고등영어	bond	결합, 유대, 속박
+고등영어	book	책, 예약하다
+고등영어	boost	"증가시키다, 북돋우다
+상승, 부양책"
+고등영어	booth	(칸막이를 한) 작은 공간, 부스, 매점
+고등영어	border	국경, 경계선
+고등영어	botany	식물학
+고등영어	bother	괴롭히다, 신경 쓰이게 하다, 신경 쓰다
+고등영어	bounce	(공 따위가) 튀다, (사람이) 펄쩍 뛰다
+고등영어	bound	"튀어오르다
+경계를 두다, 한정하다
+~로 향하는, ~행의(for)
+~하게 되어 있다"
+고등영어	boundary	경계선, 경계
+고등영어	bow	"활, 활처럼 휘다
+(인사 · 예배 등을 위해) 머리를 숙이다, 경례"
+고등영어	boycott	"구매를 거부하다, 참가를 거부하다
+(참가 · 구매) 거부 운동"
+고등영어	brag	자랑, 자랑하다
+고등영어	branch	나뭇가지, (회사나 프랜차이즈의) 지점
+고등영어	bravery	용기, 용감
+고등영어	breakdown	고장, 파손, 붕괴
+고등영어	breakthrough	돌파구
+고등영어	breast	유방, 가슴
+고등영어	breathtaking	숨이 멎을 정도의, 깜짝 놀랄 만한
+고등영어	breed	"(새끼를) 낳다, 기르다
+(동물의) 품종"
+고등영어	breeze	산들바람, 산들바람이 불다
+고등영어	brew	(차를) 끓이다, (맥주 등을) 양조하다
+고등영어	bribe	뇌물, 뇌물로 매수하다
+고등영어	bride	신부
+고등영어	bridegroom	신랑
+고등영어	bridge	"다리
+잇다, (간격 따위를) 메우다"
+고등영어	brief	(시간 · 글 등이) 짧은, 간결한, 간단한
+고등영어	brilliant	빛나는, 눈부신, 훌륭한
+고등영어	brink	가장자리, 직전
+고등영어	broadcast	방송하다
+고등영어	brochure	팸플릿, (안내 · 광고용) 책자
+고등영어	bronze	청동, 청동제의
+고등영어	broom	빗자루
+고등영어	broth	수프, 죽
+고등영어	browse	(가게 안의 물건을) 둘러보다, (책을) 여기저기 훑어보다
+고등영어	bruise	멍, 멍들게 하다
+고등영어	brutal	잔인한, 잔혹한
+고등영어	bucket	물통, 양동이
+고등영어	bud	싹, 싹을 틔우다
+고등영어	buddhist	불교도, 불교의
+고등영어	buddy	여보게, 친구
+고등영어	budget	예산, 예산을 세우다
+고등영어	buildup	증강, 강화, 발전
+고등영어	bulb	전구
+고등영어	bulk	"부피, 크기, 거대함
+대량, 대부분"
+고등영어	bullet	총알
+고등영어	bulletin	게시, 뉴스 단신
+고등영어	bully	"괴롭히다, 겁주다
+괴롭히는 사람"
+고등영어	bump	부딪치다, 혹
+고등영어	bunch	다발, 송이
+고등영어	bundle	묶음, 다발
+고등영어	burden	"무거운 짐, 부담
+~에게 짐[부담]을 지우다"
+고등영어	burglary	도둑질
+고등영어	burrow	굴, 굴(땅)을 파다
+고등영어	burst	폭발하다, 터지다, 터트리다
+고등영어	bush	관목, 덤불
+고등영어	bustle	북적대다, 서두르다, 혼잡
+고등영어	butcher	정육점 주인, 도살하다
+고등영어	by-product	부산물
+고등영어	bygone	"과거의, 지나간
+(pl.) 과거, 과거의 일"
+고등영어	bypass	우회로, 우회하다
+고등영어	bystander	구경꾼
+고등영어	cabin	오두막집, (배나 항공기의) 선실
+고등영어	calamity	재앙, 재난
+고등영어	calculate	계산하다
+고등영어	calf	송아지
+고등영어	canal	운하, 수로
+고등영어	candid	솔직한
+고등영어	candidate	후보자, 지원자
+고등영어	cannon	대포, 대포를 쏘다
+고등영어	canyon	깊은 협곡, 골짜기
+고등영어	capacity	능력, 용량, 수용력
+고등영어	capital	"수도
+대문자
+중요한, 주요한
+자본, 자본의"
+고등영어	capricious	변덕스러운
+고등영어	cardinal	기본적인, 중요한
+고등영어	career	직업, (직업상의) 경력
+고등영어	carefree	근심 없는
+고등영어	cargo	화물
+고등영어	carve	새기다, 조각하다
+고등영어	cast	"던지다, 내던지다
+(역을) 배정하다, 캐스팅하다
+출연자들"
+고등영어	casual	"평상복의, 평상시의
+대충의, 신경 쓰지 않는"
+고등영어	casualty	사상자, 피해자
+고등영어	catastrophe	재난, 재앙
+고등영어	categorize	분류하다
+고등영어	cater	음식을 공급하다
+고등영어	caterpillar	애벌레
+고등영어	cattle	소
+고등영어	cause	"원인, 이유
+초래하다, ···로 하여금 ~하게 하다"
+고등영어	caution	조심, 경고
+고등영어	cavity	충치, 빈 구멍
+고등영어	cease	중지하다, 중단되다
+고등영어	ceiling	천장
+고등영어	celebrity	유명인사, 명성
+고등영어	cell	"전지
+세포, 작은 방, 감방"
+고등영어	cellular	무선전화의, 휴대전화의, 세포의
+고등영어	cemetery	공동묘지
+고등영어	censor	검열하다, 검열하여 삭제하다
+고등영어	centennial	100년마다의, 100년간의
+고등영어	certificate	증명서, 면허증
+고등영어	certify	증명하다, 보증하다
+고등영어	challenging	도전해볼 만한, 도전적인, 힘든
+고등영어	chamber	방, 회의실
+고등영어	channel	수로, 해협, (방송) 채널
+고등영어	chant	"노래, 성가, 슬로건
+(노래 · 성가를) 부르다, 슬로건을 외치다"
+고등영어	chaos	혼돈, 무질서
+고등영어	chapel	예배당
+고등영어	character	"성격, 특징
+등장인물, 문자"
+고등영어	charge	"책임, 요금, 청구하다
+고소, 비난, 고소하다, 비난하다
+충전하다, 가득 채우다"
+고등영어	charity	자선, 자선단체
+고등영어	charter	"현장, 선언문
+(버스 · 비행기 등의) 전세"
+고등영어	chase	쫓다, 추적하다
+고등영어	cheat	속이다, 속임수
+고등영어	check	"조사하다
+꼬리표, (수하물에) 꼬리표를 달다
+수표, 계산서"
+고등영어	chemical	화학의, 화학적인
+고등영어	cherish	소중히 여기다, 소중히 간직하다
+고등영어	chew	씹다
+고등영어	chief	"최고의, 주요한
+우두머리, 최고위자의"
+고등영어	childish	(부정적인 뜻으로) 어린애 같은, 유치한
+고등영어	childlike	(좋은 뜻으로) 어린애다운, 천진난만한
+고등영어	chill	냉기, 한기, 차갑게 하다
+고등영어	chivalry	기사도(정신)
+고등영어	choir	합창단, 성가대
+고등영어	choke	질식시키다
+고등영어	chop	(음식 재료를) 썰다, 팍팍 찍다
+고등영어	chore	(가정의) 허드렛일, 잡일
+고등영어	chronic	만성적인, 고질적인
+고등영어	chronological	연대순의, 연대기의
+고등영어	chubby	통통한, 토실토실한
+고등영어	chunk	덩어리
+고등영어	circulate	돌다, 순환하다, 유포하다
+고등영어	civilization	문명, 개화
+고등영어	claim	(당연한 권리로서) 요구하다, 청구하다, 주장하다
+고등영어	clap	손뼉을 치다, 박수, 탁(쿵) 소리
+고등영어	clarity	명료, 명확, 맑음
+고등영어	clash	충돌, 분쟁
+고등영어	classify	분류하다
+고등영어	clatter	덜거덕(털커덕)하는 소리, 덜거덕 소리를 내다
+고등영어	claw	발톱
+고등영어	cleanse	깨끗이 하다, 닦다
+고등영어	client	(소송) 의뢰인, 고객
+고등영어	cliff	절벽, 낭떠러지
+고등영어	climate	기후
+고등영어	cling	매달리다, 달라붙다, 고수하다
+고등영어	clinic	병원, 치료소
+고등영어	clone	복제 생물, 복제품
+고등영어	closely	"바싹, 가까이
+면밀히, 주의 깊게"
+고등영어	closet	벽장
+고등영어	clue	실마리, 단서
+고등영어	clumsy	어설픈, 서투른
+고등영어	cluster	무리, 떼, (과실 · 꽃 등의) 송이
+고등영어	clutch	붙들다, 꽉 잡다
+고등영어	coal	석탄
+고등영어	coalition	연합제, 연합
+고등영어	coerce	강요하다, 강제하다
+고등영어	coexistence	공존
+고등영어	coffin	관
+고등영어	cognition	깨달음, 인식
+고등영어	cohere	일관성 있다
+고등영어	cohesion	결합, 화합
+고등영어	coincide	일치하다, 동시에 일어나다
+고등영어	collaborate	공동으로 작업하다, 협력하다
+고등영어	collapse	무너지다, 쓰러지다, 붕괴
+고등영어	collate	대조하다, (정보 등을) 분석하다
+고등영어	colleague	(같은 직장이나 직종의) 동료
+고등영어	collect	모으다, 수집하다
+고등영어	collective	집단의, 공동의
+고등영어	collision	충돌
+고등영어	colony	"식민지, 거주지
+(곤충 · 동물 등의) 집단, 무리"
+고등영어	comb	"빗, 빗질하다
+샅샅이 찾다(뒤지다)"
+고등영어	combat	전투, 싸움, 싸우다
+고등영어	combustible	불에 타기 쉬운
+고등영어	comet	혜성
+고등영어	commemorate	기념하다
+고등영어	commence	시작하다, 시작되다
+고등영어	commercial	상업의, 상업적인
+고등영어	commission	"위원회, 위탁, 위임
+수수료, 커미션"
+고등영어	commit	(죄 등을) 저지르다, 범하다
+고등영어	commitment	약속, 헌신, 전념
+고등영어	committee	위원회
+고등영어	commodity	상품, 물품
+고등영어	commonplace	평범한, 아주 흔한
+고등영어	communal	공동의, 집단의
+고등영어	communism	공산주의
+고등영어	commute	통근, 통근하다
+고등영어	compact	소형의
+고등영어	companion	친구, 동료
+고등영어	company	"회사, 일행, 동료
+함께 있음"
+고등영어	comparable	비교할 만한, 필적하는, 비슷한
+고등영어	comparative	비교의, 비교적인
+고등영어	compartment	(짐)칸, 칸막이한 객실
+고등영어	compass	"나침반, 컴퍼스
+범위"
+고등영어	compassion	연민, 동정심
+고등영어	compatible	양립할 수 있는, 호환이 되는
+고등영어	compel	강제로 ~하게 하다
+고등영어	compensation	보상, 배상
+고등영어	competence	능숙함, 능숙
+고등영어	competition	경쟁, 시합
+고등영어	compile	편집하다, 수집하다
+고등영어	complacent	현실에 안주하는, 자기만족의
+고등영어	complement	"보완, 보충, 보완하다, 보충하다
+보어"
+고등영어	completion	완성, 완료
+고등영어	complicate	복잡하게 만들다
+고등영어	complimentary	칭찬하는, 무료의
+고등영어	comply	따르다, 순응하다
+고등영어	component	구성요소, 성분
+고등영어	compose	"구성하다
+작곡하다, 작문하다"
+고등영어	composite	합성의, 혼합된
+고등영어	compound	혼합한, 혼합물
+고등영어	comprehend	포함하다, 이해하다
+고등영어	compress	압축하다
+고등영어	comprise	포함하다, ~으로 구성되다, 구성하다
+고등영어	compromise	타협, 타협하다
+고등영어	compulsory	강제적인, 의무적인
+고등영어	compute	계산하다, 산출하다
+고등영어	conceal	숨기다, 감추다
+고등영어	conceited	자부심이 강한, 자만하는
+고등영어	conceive	생각하다, 상상하다
+고등영어	concentration	집중
+고등영어	concise	간결한, 명료한
+고등영어	conclude	끝내다, 결론을 내리다
+고등영어	concrete	콘크리트, 구체적인
+고등영어	condemn	비난하다, (~에게 형을) 선고하다, 운명짓다
+고등영어	condense	압축하다, 응축시키다, 요약하다
+고등영어	conduce	도움이 되다, 공헌하다
+고등영어	conduct	"~을 하다, 행동하다, 행동
+지도하다, 지휘하다, 지도
+(열 · 전기 등을) 전도하다"
+고등영어	cone	원뿔, (아이스크림의) 콘
+고등영어	confederate	동맹하다, 동맹의, 연합한
+고등영어	confer	수여하다, 협의하다
+고등영어	confess	자백하다, 고백하다
+고등영어	confidential	비밀의
+고등영어	confine	한정하다, 제한하다, 감금하다
+고등영어	confirm	확실하게 하다, 확인해 주다
+고등영어	conflict	싸우다, 상충하다, 싸움, 갈등
+고등영어	conform	따르다, 순응하다
+고등영어	confront	직면하다, 맞서다
+고등영어	Confucius	공자
+고등영어	congestion	(교통)정체, 혼잡
+고등영어	congregate	모이다
+고등영어	congress	국회, 의회
+고등영어	conquer	정복하다
+고등영어	conscience	양심
+고등영어	conscious	의식이 있는, 의식하고 있는
+고등영어	consensus	의견 일치, 합의
+고등영어	consent	동의, 동의하다
+고등영어	consequence	결과, 중요성
+고등영어	conserve	"보존하다, 보호하다
+아끼다, 절약하다"
+고등영어	consider	숙고하다, 고려하다
+고등영어	considerable	중요한, 상당한
+고등영어	consist	구성되다, 일치하다
+고등영어	console	위로하다
+고등영어	consolidate	"합병하다, 통합하다
+공고히 하다, 강화하다"
+고등영어	consonant	자음, 자음의
+고등영어	conspire	공모하다, 음모를 꾸미다
+고등영어	constitution	"구성, 형성
+헌법"
+고등영어	constrain	강제하다, 제약하다
+고등영어	consume	"(돈 · 에너지 등을) 쓰다, 소비하다
+먹다, 마시다"
+고등영어	contagion	전염병, 전염
+고등영어	contaminate	오염시키다, 더럽히다
+고등영어	contemplate	심사숙고하다
+고등영어	contemporary	현대의, 동시대의
+고등영어	contemptuous	경멸하는, 경멸적인
+고등영어	contend	싸우다, 논쟁하다, 주장하다
+고등영어	context	문맥, 전후 사정, 배경
+고등영어	continent	대륙
+고등영어	contour	윤곽, 등고선
+고등영어	contract	"계약, 계약하다
+줄어들다, 수축시키다
+(질병 등이) 걸리다"
+고등영어	contradict	반박하다, 부인하다, 모순되다
+고등영어	contrary	반대의, 정반대
+고등영어	contrast	대조, 대조하다
+고등영어	contribution	공헌, 기부, 기부금
+고등영어	contrive	"고안하다
+어떻게든 ~하다, 용케 ~하다"
+고등영어	controversy	논쟁, 논의
+고등영어	convention	모임, 회의, 조약 협약, 관습, 전통
+고등영어	converge	한 점에 모이다, 모여들다
+고등영어	converter	변환시키는 것[사람]
+고등영어	convey	운반하다, 전달하다
+고등영어	convict	죄인, 유죄를 선고하다
+고등영어	convince	납득시키다, 설득하다, 확신시키다
+고등영어	cooperation	협력, 협동
+고등영어	coordinate	"좌표
+조화시키다, 조정하다"
+고등영어	cope	맞서다, 대처하다
+고등영어	copper	구리, 동전
+고등영어	copyright	저작권, 판권
+고등영어	coral	산호
+고등영어	cordial	진심에서 우러난, 우호적인
+고등영어	core	"중심, 핵심
+중심적인, 핵심적인"
+고등영어	cornerstone	초석, 토대
+고등영어	corporation	기업, 법인
+고등영어	corps	군단, 부대
+고등영어	corpse	시체, 송장
+고등영어	correct	정정하다, 바로잡다, 올바른
+고등영어	correlate	연관성이 있다
+고등영어	correspond	"일치하다
+교신하다, 서신 왕래하다"
+고등영어	corrupt	부패한, 타락한
+고등영어	cosmetic	화장품, 성형의
+고등영어	cosmopolitan	국제적인, 범세계적인
+고등영어	cosmos	우주, 코스모스
+고등영어	costly	값이 비싼, 희생이 큰
+고등영어	costume	의상, 복장
+고등영어	cottage	오두막
+고등영어	cotton	목화, 솜
+고등영어	couch	소파, 긴 의자
+고등영어	council	의회, 위원회
+고등영어	counsel	"상담하다, 조언하다, 상담, 조언
+변호인"
+고등영어	count	세다, 계산하다, 중요하다
+고등영어	counteract	대항하다, 상쇄하다, 중화시키다
+고등영어	counterclockwise	시계 반대 방향으로
+고등영어	counterpart	짝의 한 쪽, 상대물, 대응물
+고등영어	county	(행정 구역상) 주, 군
+고등영어	coup	쿠데타
+고등영어	courteous	공손한, 예의 바른
+고등영어	coverage	(신문 · TV의) 보도, (보상 · 적용 등의) 범위
+고등영어	coward	겁쟁이, 비겁지
+고등영어	coworker	직장 동료
+고등영어	cozy	아늑한, 안락한
+고등영어	crack	"갈라진 틈, 날카로운 소리
+금이 가다, 깨지다"
+고등영어	cradle	요람, 발상지
+고등영어	craft	"기술, 기능, 술수
+우주선, 항공기"
+고등영어	cramped	비좁은, 갑갑한
+고등영어	crane	"학, 왜가리
+크레인, 기중기"
+고등영어	crash	충돌하다, (항공기가) 추락하다, 굉음, 충돌
+고등영어	crater	분화구, (폭탄 · 운석 등에 의해 생긴) 큰 구멍
+고등영어	crave	간청하다, 갈망하다
+고등영어	crawl	기어가다, 기어가기
+고등영어	credible	믿을 수 있는, 신뢰할 수 있는
+고등영어	creditable	칭찬할 만한, 훌륭한
+고등영어	creep	기다, 살금살금 움직이다
+고등영어	cripple	"불구자, 장애자
+불구가 되게 하다"
+고등영어	crisis	위기
+고등영어	criterion	(평가의) 기준
+고등영어	critique	비평, 평론, 비평하다
+고등영어	crosswalk	횡단보도
+고등영어	crucial	결정적인, 중대한
+고등영어	crude	천연 그대로의, 조잡한
+고등영어	crunchy	바삭바삭한, 아삭아삭한
+고등영어	crusade	십자군 전쟁, 개혁 운동
+고등영어	crush	"으스러뜨리다, 부수다
+홀딱 반함"
+고등영어	crust	빵 껍질, 껍질, 표면
+고등영어	cube	정육면체
+고등영어	cue	신호, ~에게 신호를 보내다
+고등영어	cuisine	요리, 요리법
+고등영어	cultivate	경작하다, 재배하다, 기르다
+고등영어	cunning	교활한
+고등영어	curator	감독, 관리자, 큐레이터(박물관 · 미술관 등의 전시 책임자)
+고등영어	curb	"억제하다
+연석(차도와 인도 사이의 경계가 되는 돌)"
+고등영어	curly	곱슬곱슬한
+고등영어	currency	통화, 화폐
+고등영어	curriculum	교과과정
+고등영어	curse	"욕설을 퍼붓다, 저주하다
+저주, 욕설"
+고등영어	custody	감금, 보호 (관리), 양육권
+고등영어	customize	사용자의 요구에 맞추다, 주문 제작하다
+고등영어	customs	세관
+고등영어	cutting-edge	최첨단의
+고등영어	cynic	냉소적인 사람, 비꼬는 사람
+고등영어	dairy	낙농장, 낙농의, 우유로 만든
+고등영어	damp	축축한, 습기 찬, 습기
+고등영어	dare	감히 ~하다
+고등영어	dash	"황급히 가다, 돌진하다
+돌진, 질주"
+고등영어	deadlock	교착 상태, 막다른 골목
+고등영어	deadly	"치명적인
+몹시, 대단히"
+고등영어	deaf	청각 장애가 있는, 귀가 먹은
+고등영어	debris	잔해, 부스러기
+고등영어	debt	빚, 채무
+고등영어	decade	10년
+고등영어	decay	썩다, 부패하다, 부패
+고등영어	decease	사망, 사망하다
+고등영어	deceive	속이다
+고등영어	decent	"품위 있는
+(수준이) 괜찮은, (상황에) 적절한"
+고등영어	decisive	결정적인, 결단력 있는
+고등영어	deck	갑판
+고등영어	declare	"선언하다, 공표하다
+(세관에서 과세품을) 신고하다"
+고등영어	decline	"쇠퇴, 감소, 하락, 쇠퇴하다
+거절하다"
+고등영어	decorate	장식하다, 꾸미다
+고등영어	dedicate	헌신하다, 전념하다
+고등영어	deed	행위, 행동, 증서
+고등영어	deem	~으로 생각하다, 간주하다
+고등영어	default	(채무 · 약속 등의) 불이행, 실행하지 않다
+고등영어	defect	결점, 결합
+고등영어	deficient	부족한, 불충분한
+고등영어	define	정의하다, 분명히 하다
+고등영어	definite	한정된, 명확한, 확실한
+고등영어	deforest	삼림을 벌채하다
+고등영어	defy	반항하다, 거역하다
+고등영어	degenerate	"퇴보하다, 악화되다
+퇴보한, 타락한"
+고등영어	degrade	(가치 · 품위 등을) 떨어뜨리다
+고등영어	degree	"등급, 정도, 학위
+(각도 · 온도의 단위인) 도"
+고등영어	delegate	대표, 대리인, 위임하다
+고등영어	delete	삭제하다, 지우다
+고등영어	deliberately	신중히, 고의로
+고등영어	delicate	섬세한, 민감한, 연약한
+고등영어	delinquent	비행의, 과실 있는, 채무 불이행의
+고등영어	delude	속이다, 현혹하다
+고등영어	demanding	요구가 많은, (일이) 힘든
+고등영어	demolish	파괴하다, 철거하다
+고등영어	demon	악마, 귀신
+고등영어	demonstrate	"시범을 보이다, 입증하다
+데모하다, 시위하다"
+고등영어	dense	밀집한, 빽빽한
+고등영어	department	부서, 매장, 학과
+고등영어	depict	그리다, 묘사하다
+고등영어	deplete	고갈시키다, 감소시키다
+고등영어	deplore	개탄하다
+고등영어	deploy	(군대 · 무기를) 배치하다, 활용하다
+고등영어	deposit	(돈 · 물품 등을) 맡기다, 두다
+고등영어	depress	"우울하게 만들다
+(경기 · 사업 등을) 부진하게 하다"
+고등영어	deprive	빼앗다, 박탈하다
+고등영어	deputy	"(최고 계급 다음 가는 직급인) 부-(부대표, 부사장··)
+대리인"
+고등영어	derive	이끌어내다, 얻다, 유래되다
+고등영어	descend	내려가다, 계통을 잇다
+고등영어	describe	묘사하다, 서술하다
+고등영어	desert	"사막
+버리다, 저버리다"
+고등영어	deserve	~할 만하다, ~을 받을 만하다
+고등영어	designate	가리키다, 지정하다, 임명하다
+고등영어	despair	절망, 절망하다
+고등영어	desperate	절망적인, 필사적인
+고등영어	despise	경멸하다
+고등영어	despite	~에도 불구하고
+고등영어	destination	목적지, 목표
+고등영어	destiny	운명
+고등영어	detach	떼어내다
+고등영어	detect	발견하다, 탐지하다
+고등영어	deter	방해하다, 저지시키다
+고등영어	detergent	세제
+고등영어	deteriorate	악화되다, 나빠지다
+고등영어	detract	(가치 · 명성 등을) 손상시키다
+고등영어	devastate	엄청난 충격을 주다, 완전히 파괴하다
+고등영어	device	장치, 방법
+고등영어	devoid	~이 빠진, ~이 없는
+고등영어	devote	헌신하다, (노력 · 시간 등을) 쏟다
+고등영어	dew	이슬
+고등영어	diabetes	당뇨병
+고등영어	diagnose	진단하다
+고등영어	diagram	도표, 도형
+고등영어	dialect	방언, 사투리
+고등영어	diameter	지름, 직경
+고등영어	diaper	기저귀
+고등영어	diarrhea	설사
+고등영어	dictation	말함, 받아쓰기, 명령, 지시
+고등영어	dictator	독재자
+고등영어	differentiate	구별하다, 차별하다
+고등영어	diffuse	"퍼지다, 분산시키다
+널리 퍼진, 분산된"
+고등영어	digestion	소화
+고등영어	dignity	근엄, 존엄, 품위
+고등영어	dilute	묽게 하다, 희석시키다, 약화시키다
+고등영어	dim	어둑한, 흐릿한
+고등영어	dime	10센트짜리의 동전
+고등영어	dimension	치수, 차원, (pl.) 넓이, 규모
+고등영어	diminish	줄어들다, 감소하다
+고등영어	dine	식사하다
+고등영어	dinosaur	공룡
+고등영어	dioxide	이산화물
+고등영어	dip	담그다, 적시다
+고등영어	diploma	졸업장, 수료증
+고등영어	diplomat	외교관
+고등영어	direction	방향, 지시
+고등영어	disabled	불구가 된, 무능력해진
+고등영어	disapprove	찬성하지 않다, 못마땅해 하다
+고등영어	disaster	재앙, 재난
+고등영어	discard	버리다, 폐기하다
+고등영어	discern	식별하다, 알아차리다
+고등영어	discharge	"(회사 · 형무소 · 군대 · 병원등에서) 내보내다, 방출하다
+해고, 석방, 제대"
+고등영어	discipline	규율, 훈련, 벌하다
+고등영어	disclose	드러내다, 폭로하다
+고등영어	discontinue	중지하다
+고등영어	discourse	강연, 담화
+고등영어	discreet	신중한, 조심스러운
+고등영어	discrepancy	불일치, 차이
+고등영어	discrete	분리된, 별개의
+고등영어	discretion	자유재량, 신중함
+고등영어	discriminate	식별하다, 차별하다
+고등영어	disgrace	불명예, 망신
+고등영어	disguise	변장하다, 숨기다, 변장
+고등영어	disgust	역겨움, 역겹게 하다
+고등영어	dish	접시, 요리, 음식
+고등영어	disharmony	부조화, 불협화음
+고등영어	dishonest	부정직한
+고등영어	disinterested	무관심한, 사심 없는, 공정한
+고등영어	dislike	싫어하다
+고등영어	dismal	우울하게 하는, 음울한
+고등영어	dismantle	해체하다, 철거하다
+고등영어	dismay	놀람, 당황, 실망, 당황시키다
+고등영어	dismiss	"해고하다, 해산시키다
+묵살하다, 일축하다"
+고등영어	disorder	무질서, 혼란
+고등영어	dispatch	급파하다, 발송하다, 빨리 해치우다
+고등영어	dispel	(근심 · 의심 등을) 떨쳐 버리다, 없애다
+고등영어	dispense	"나누어주다, 제공하다
+(~with) ~없이 지내다, 없애다, 생략하다"
+고등영어	disperse	해산시키다, 흩어지다
+고등영어	displace	대체하다, 쫓아내다
+고등영어	disposable	일회용의
+고등영어	disposal	배치, 처리, 처분
+고등영어	disposition	기질, 성향, 배치
+고등영어	disrespectful	무례한, 실례되는
+고등영어	disrupt	방해하다, 지장을 주다
+고등영어	dissent	반대하다, 불찬성
+고등영어	dissolve	녹이다, 용해되다
+고등영어	distinction	구별, 차이, 뛰어남
+고등영어	distinguish	구별하다, 두드러지게 하다
+고등영어	distort	일그러뜨리다, 왜곡하다
+고등영어	distract	(주의를) 딴 데로 돌리다, 산만하게 하다
+고등영어	distress	괴롭히다, 고통
+고등영어	distribution	분배, 분포
+고등영어	disturb	방해하다, 불안하게 하다
+고등영어	ditch	도랑, 배수구
+고등영어	diverse	다양한, 가지각색의
+고등영어	divert	(방향 · 생각 · 기분 등을) 바꾸게 하다
+고등영어	divide	나누다, 쪼개다
+고등영어	divine	신의, 신성한
+고등영어	divorce	이혼, 이혼하다
+고등영어	dizzy	어지러운, 현기증 나는
+고등영어	do	"(일 · 행위 등을) 하다
+(will과 함께 쓰여) 충분하다"
+고등영어	dock	부두, 선착장
+고등영어	doctrine	정책, 주의, (종교의) 교리
+고등영어	dodge	(재빨리) 홱 몸을 피하다, 회피하다
+고등영어	dogged	완강한, 고집 센
+고등영어	domain	영토, 영역, 범위, (인터넷) 도메인
+고등영어	dominant	우세한, 지배적인
+고등영어	donation	기부, 기증
+고등영어	doom	(나쁜) 운명, 파멸, 운명짓다
+고등영어	dormant	잠자고 있는, 활동을 중단한
+고등영어	dormitory	기숙사
+고등영어	dose	1회 분량, 복용량
+고등영어	dot	점, 점을 찍다
+고등영어	dough	밀가루 반죽
+고등영어	downplay	~을 경시하다
+고등영어	downward	아래쪽으로, 아래로 향한
+고등영어	draft	"원고, 초안, 초안을 잡다
+선발, 선발하다"
+고등영어	drag	끌다, 끌고 가다
+고등영어	dragonfly	잠자리
+고등영어	drain	배수하다, 배수로, 배수관
+고등영어	dramatic	극적인, 연극의
+고등영어	drastic	과감한, 철저한
+고등영어	drawback	문제점, 결점
+고등영어	dreadful	무시무시한, 끔찍한
+고등영어	dreary	음울한, 따분한
+고등영어	drench	흠뻑 젖게 하다
+고등영어	drift	떠가다, 이동, 흐름
+고등영어	drill	"송곳, 드릴로 구멍을 뚫다
+훈련, 연습, 훈련하다"
+고등영어	drip	(액체가) 뚝뚝 떨어지다, 물방울
+고등영어	drizzle	이슬비, 이슬비가 내리다
+고등영어	drought	가뭄
+고등영어	drown	익사하다, 익사시키다
+고등영어	drudgery	고된 일, 지겨운 일
+고등영어	dual	둘의, 이중의
+고등영어	dubious	의심스러운
+고등영어	due	"지급 기일이 된
+정당한, 적절한
+~때문에(to), ~하기로 되어 있는(be ~ to)"
+고등영어	dull	"둔한, 멍청한, 무딘
+따분한, 재미없는"
+고등영어	dumb	언어 장애인의, 우둔한
+고등영어	dump	(쓰레기를) 내버리다
+고등영어	dunk	덩크슛 하다, 담그다, 적시다
+고등영어	duplicate	복사, 사본, 복사하다
+고등영어	durable	오래가는, 내구력이 있는
+고등영어	duration	지속, 지속 기간
+고등영어	dusky	어둑어둑한
+고등영어	dust	먼지
+고등영어	duty	의무, 업무, 세금
+고등영어	dwell	"살다, 거주하다
+~을 곰곰이 생각하다"
+고등영어	dye	염료, 염색하다
+고등영어	dynamics	역학, 힘, 활력
+고등영어	dynasty	왕조, 왕가
+고등영어	eager	간절히 바라는
+고등영어	eardrum	고막
+고등영어	earthquake	지진
+고등영어	ease	"쉬움, 편안함
+(마음을)편하게 하다, (고통 · 걱정 등을) 덜어주다"
+고등영어	Easter	부활절
+고등영어	eccentric	별난, 괴상한
+고등영어	echo	메아리, 울리다
+고등영어	eclipse	(해 · 달의) 식, (빛을) 가리다
+고등영어	eco-friendly	친환경적인
+고등영어	ecology	생태학, 생태
+고등영어	ecosystem	생태계
+고등영어	ecstasy	황홀, 무아지경
+고등영어	edge	모서리, 가장자리
+고등영어	edit	편집하다, 수정하다
+고등영어	edition	(초판 · 재판 등과 같은) 판, 호
+고등영어	efficient	효율적인, 능률적인
+고등영어	ego	자아, 자존심
+고등영어	elaborate	"공들인, 정교한
+상세히 설명하다"
+고등영어	elastic	탄력 있는, 신축성 있는, 고무로 된
+고등영어	election	선거, 당선
+고등영어	element	요소, 성분
+고등영어	elementary	기초의, 초보의, 초등학교의
+고등영어	elevate	올리다, 높이다, 승진시키다
+고등영어	eligible	적격의, 자격이 있는
+고등영어	eliminate	제거하다
+고등영어	eloquent	웅변의, 달변의
+고등영어	elusive	"파악하기 힘든, 찾기 힘든
+달아나기 쉬운"
+고등영어	embargo	(수출 · 수입) 금지, 통상 금지
+고등영어	embark	"시작하다, 착수하다
+승선시키다"
+고등영어	embarrass	당황하게 하다
+고등영어	embed	깊숙이 박다, 끼워 넣다
+고등영어	embody	"구체화하다, 구현하다
+포함하다"
+고등영어	embrace	포옹하다, 포용하다, 포옹
+고등영어	embryo	태아, 배아, 싹
+고등영어	emerge	(물속 · 어둠 속 등에서) 나오다, 나타나다
+고등영어	emergency	비상사태, 위급
+고등영어	emigrate	(다른 나라로) 이주하다
+고등영어	eminent	저명한, 뛰어난
+고등영어	emit	(소리 · 빛 · 열 등을) 내다, 발산하다
+고등영어	empathy	감정 이입, 공감
+고등영어	emphasize	강조하다
+고등영어	empire	제국, 왕국
+고등영어	empirical	경험에 의거한, 실증적인
+고등영어	empower	권력을 주다, 능력을 주다
+고등영어	enable	~할 수 있게 하다
+고등영어	enact	"행하다
+(법을) 제정하다"
+고등영어	enchant	매혹하다
+고등영어	enclose	에워싸다, 동봉하다
+고등영어	encompass	둘러싸다, 포함하다
+고등영어	encounter	"(우연히)만나다, 마주치다
+(위험 · 곤란 등에) 직면하다"
+고등영어	encyclopedia	백과사전
+고등영어	end	"끝, 끝나다, 끝내다
+목표, 목적"
+고등영어	endanger	위태롭게 하다
+고등영어	endeavor	노력, 노력하다
+고등영어	endow	기부하다, 부여하다
+고등영어	endure	견디다, 참다
+고등영어	energetic	에너지가 넘치는, 기운찬
+고등영어	enforce	강요하다, (법률 등을) 집행하다
+고등영어	engage	"관여하다, 참여하다, 종사하다
+약혼하다, 약속하다"
+고등영어	enhance	(질 · 능력 등을) 높이다, 향상시키다
+고등영어	enlarge	확대하다
+고등영어	enlighten	계몽하다, 이해시키다
+고등영어	enormous	거대한, 엄청난
+고등영어	enroll	등록하다, 입학시키다
+고등영어	ensue	(일 · 결과가) 뒤따르다
+고등영어	ensure	보장하다, 반드시 ~하게(이게) 하다
+고등영어	entail	수반하다
+고등영어	enterprise	기업, 회사, 사업
+고등영어	entertain	즐겁게 해 주다, 대접하다
+고등영어	enthusiasm	열정, 열의, 열광
+고등영어	entitle	"자격을 주다, 권리를 주다
+제목을 붙이다"
+고등영어	entity	실체, 존재, 독립체
+고등영어	entrant	들어오는 사람, 신입 회원, 참가자
+고등영어	entrepreneur	사업가, 기업가
+고등영어	entry	입장, 참가, 참가작, 출품작
+고등영어	envelope	봉투
+고등영어	epic	서사시
+고등영어	epidemic	유행병, 전염병
+고등영어	epoch	신기원, 신시대
+고등영어	equality	평등, 균등
+고등영어	equalize	평등하게 하다, 균등하게 하다
+고등영어	equate	동일시하다
+고등영어	equation	방정식, 등식
+고등영어	equator	적도
+고등영어	equilibrate	균형 잡다, 평형이 되다
+고등영어	equipment	장비, 용품, 장비 설치
+고등영어	equivalent	동등한, 대등한
+고등영어	era	시대, 시기
+고등영어	eradicate	뿌리 뽑다, 근절하다
+고등영어	eraser	지우개
+고등영어	erect	(똑바로)세우다, 똑바로 선
+고등영어	erode	침식시키다, 서서히 약화시키다
+고등영어	err	실수하다, 잘못하다
+고등영어	errand	심부름
+고등영어	erroneous	잘못된, 틀린
+고등영어	erupt	(화산 등이) 분출하다, 폭발하다
+고등영어	escalate	오르다, 증가하다, 확대되다
+고등영어	essence	본질, 핵심
+고등영어	essential	필수의, 본질적인
+고등영어	establish	설립하다, 확립하다
+고등영어	estate	재산, 부동산
+고등영어	esteem	존경하다, 존경
+고등영어	estimation	평가, 판단
+고등영어	eternal	영원한, 변함없는
+고등영어	ethics	윤리학, 윤리
+고등영어	ethnic	민족의
+고등영어	euthanasia	안락사
+고등영어	evacuate	피신시키다, (건물 등을) 비우다
+고등영어	evade	피하다, 회피하다
+고등영어	evaluate	평가하다
+고등영어	evaporate	증발시키다, 증발하다
+고등영어	even	"심지어 ~조차도
+(비교급을 강조하여) 더욱, 훨씬
+짝수의
+고른, 평평한, 균등한"
+고등영어	evergreen	상록수
+고등영어	everlasting	영원한, 변치 않는
+고등영어	evidence	증거
+고등영어	evolve	발전하다, 진화하다
+고등영어	exaggerate	과장하다
+고등영어	exceed	초과하다, 넘다
+고등영어	excel	능가하다, 뛰어나다
+고등영어	exclaim	소리치다, 외치다
+고등영어	exclude	제외시키다, 배제하다
+고등영어	execute	"(직무 등을) 실행하다
+처형하다"
+고등영어	exemplary	모범적인, 본보기의
+고등영어	exempt	면제되는, 면제하다
+고등영어	exert	노력하다
+고등영어	exhaust	"다 써버리다, 기진맥진하게 만들다
+배기가스"
+고등영어	exhibit	전시하다, 보이다
+고등영어	exigency	긴급사태, 위급함
+고등영어	exotic	이국적인
+고등영어	expedition	탐험, 탐험대
+고등영어	expel	내쫓다, 방출하다
+고등영어	expert	전문가, 전문가의
+고등영어	expire	만료되다, 숨을 거두다
+고등영어	explanation	설명
+고등영어	explicit	숨김없는, 명백한
+고등영어	explode	폭발하다, 터지다
+고등영어	exploit	"개척하다, 개발하다
+착취하다, (부당하게) 이용하다"
+고등영어	export	수출하다, 수출
+고등영어	exposure	드러냄, 폭로
+고등영어	exquisite	정교한, 섬세한, 아름다운
+고등영어	extent	범위, 정도, 넓이
+고등영어	exterior	외부의, 외부
+고등영어	exterminate	근절하다, 박멸하다
+고등영어	external	외부의, 밖의
+고등영어	extinct	(생명 · 생물이) 멸종된
+고등영어	extinguish	(불 · 빛 등을) 끄다
+고등영어	extract	추출하다, 추출, 발췌
+고등영어	extraordinary	보통이 아닌, 보기 드문
+고등영어	extreme	극도의, 지나친
+고등영어	extrovert	외향적인 사람
+고등영어	eyebrow	눈썹
+고등영어	fable	우화, 전설
+고등영어	fabric	"직물, 천
+구조, 조직"
+고등영어	fabulous	매우 멋진, 훌륭한
+고등영어	face	"얼굴, 정면
+~을 마주보다, 향하다
+~에 직면하다"
+고등영어	facile	손쉬운, 편리한
+고등영어	fade	시들다(빛깔 · 소리 등이), 희미해지다
+고등영어	faint	"희미한, 약한
+기절하다"
+고등영어	fair	"공평한, 공정한
+전시회, 박람회"
+고등영어	fairy	요정, 요정의
+고등영어	fake	위조품, 모조의, 가짜의
+고등영어	falcon	매
+고등영어	fallacy	오류, 잘못
+고등영어	fallout	(핵폭발물의) 낙진, (좋지 못한) 결과, 여파
+고등영어	falter	(마음 · 안정성 · 말 등이) 흔들리다
+고등영어	fame	명성
+고등영어	familiar	친근한, 잘 알고 있는
+고등영어	famine	기아, 굶주림
+고등영어	fancy	"공상, 상상하다, 원하다
+화려한, 고급의"
+고등영어	fare	(교통) 요금
+고등영어	farewell	작별, 작별인사
+고등영어	fascinate	넋을 빼앗다, 매혹하다
+고등영어	fasten	묶다, 채우다
+고등영어	fatal	치명적인, 죽음을 초래하는
+고등영어	fatigue	피로, 지치게 하다
+고등영어	feasible	실현 가능한
+고등영어	feast	축제, 향연
+고등영어	feat	업적, 제주, 묘기
+고등영어	feature	"얼굴 생김새, 모양
+특징, ~을 특징으로 삼다, 특별히 포함하다"
+고등영어	feed	"먹이, 사료
+먹이를 주다, 먹이를 먹다"
+고등영어	feminine	여성의
+고등영어	fertile	비옥한, 다산의
+고등영어	festive	축제의, 즐거운
+고등영어	fetch	(가서) 가지고 오다, 데리고 오다
+고등영어	fever	열, 열병
+고등영어	fiber	섬유, 섬유질
+고등영어	fierce	(동물 · 폭풍우 등이) 사나운
+고등영어	finale	대단원, 피날레
+고등영어	finalize	마무리짓다, 완성하다
+고등영어	finance	재정, 자금
+고등영어	fine	"좋은, 괜찮은, 훌륭하게
+벌금, 벌금을 과하다"
+고등영어	fingerprint	지문
+고등영어	fire	"불, 불을 붙이다
+발사하다, 해고하다"
+고등영어	fireplace	벽난로
+고등영어	firm	"굳은, 단단한
+확실한, 확고한
+회사"
+고등영어	firsthand	직접의, 직접적으로
+고등영어	fiscal	재정적인, 회계의
+고등영어	fishery	어업, 수산업, 어장
+고등영어	fix	"고정시키다, (일시 · 가격 등을) 정하다
+수리하다"
+고등영어	flake	얇은 조각
+고등영어	flame	불꽃, 화염, 타오르다
+고등영어	flare	불길, 불꽃, 확 타오르다
+고등영어	flatter	아첨하다, 추켜세우다
+고등영어	flaw	흠, (갈라진) 금, 결점
+고등영어	flea	벼룩
+고등영어	flee	달아나다, 도망치다
+고등영어	flesh	육체, 살, 피부
+고등영어	flexible	구부리기 쉬운, 융통성 있는
+고등영어	flick	"잽싸게 움직이다, 휙 누르다, 휙 털다
+영화"
+고등영어	fling	내던지다
+고등영어	flip	홱 뒤집다, 휙 젖히다, 톡 치다
+고등영어	float	(물위나 공중에) 뜨다, 띄우다
+고등영어	flock	떼, 무리, 떼 지어 모이다
+고등영어	flood	홍수, 넘치다, 쇄도하다
+고등영어	flop	쿵 떨어지다, 털썩 주저앉다, 완전 실패하다
+고등영어	florist	꽃집 주인
+고등영어	flour	밀가루
+고등영어	flourish	(동물 · 식물 등이) 잘 자라다, 번창하다
+고등영어	fluctuate	오르내리다, 변동하다
+고등영어	fluent	유창한
+고등영어	fluid	액체, 유동체, 유동적인
+고등영어	flush	"얼굴이 붉어지다
+(변기의) 물을 내리다, 씻어내다"
+고등영어	foam	거품, 거품이 일다
+고등영어	foe	적, 원수
+고등영어	folk	일반 대중, 민속의
+고등영어	footwear	(신발 · 양말 등과 같이) 신는 것
+고등영어	forbear	~을 삼가다, 참다
+고등영어	forbid	못하게 하다, 금지하다
+고등영어	forearm	전박
+고등영어	forecast	"예측, 예보
+예측하다, 예보하다"
+고등영어	forefather	선조, 조상
+고등영어	foremost	맨 앞의, 최고의, 가장 중요한
+고등영어	foresee	예견하다, 예측하다
+고등영어	foretell	예고하다, 예언하다
+고등영어	forge	"위조하다
+만들어내다, 구축하다"
+고등영어	form	"형태, 모양, 형성하다
+서식, 기입용지"
+고등영어	formal	격식을 차린, 공식적인
+고등영어	formation	형성, 대형(편대)
+고등영어	former	예전의, (둘 중) 전자의
+고등영어	formidable	무시무시한, 엄청난
+고등영어	formula	공식, 식
+고등영어	forthcoming	다가오는, 곧 있을
+고등영어	forthwith	당장, 곧
+고등영어	fortress	요새
+고등영어	forward	앞으로, 전방으로
+고등영어	fossil	화석, 화석의
+고등영어	foster	"조성하다
+기르다, 양육하다"
+고등영어	foul	"파울, 반칙
+더러운, 아주 나쁜, 더럽히다"
+고등영어	found	설립하다, 창립하다
+고등영어	foundation	설립, 창립, 기초, 토대
+고등영어	fraction	일부분, (수학)분수
+고등영어	fracture	골절, 파손
+고등영어	fragile	부서지기 쉬운, 깨지기 쉬운
+고등영어	fragment	파편, 조각
+고등영어	fragrant	향기 나는, 향기로운
+고등영어	frank	솔직한
+고등영어	fraud	사기, 사기꾼
+고등영어	freak	"별난 사람(것), 괴짜, 별난, 기이한
+기겁하다"
+고등영어	free	자유로운, ~가 없는, 무료의
+고등영어	freezing	몹시 추운
+고등영어	freight	화물, 화물 운송
+고등영어	frenzy	광분, 광란
+고등영어	frequent	자주 일어나는, 빈번한
+고등영어	freshman	(대학교) 신입생
+고등영어	friction	마찰, (사람 사이의) 마찰
+고등영어	frigid	몹시 추운, 냉랭한
+고등영어	frontier	국경
+고등영어	frost	서리, 성에
+고등영어	frowning	얼굴을 찌푸린
+고등영어	frugal	절약하는, 검소한
+고등영어	fruitless	결실 없는, 무익한
+고등영어	frustrate	좌절시키다
+고등영어	fulfill	이행하다, 달성하다
+고등영어	fumble	손으로 더듬다, 더듬으며 찾다
+고등영어	fume	연기, 증기, 연기가 나다
+고등영어	function	기능, (제대로) 기능하다
+고등영어	fund	자금, 기금, 투자하다
+고등영어	fundamental	기본적인, 근본적인, 핵심적인
+고등영어	funeral	장례의, 장례식
+고등영어	fur	모피, 모피의
+고등영어	furnish	"제공하다, 주다
+(필수품 · 가구 등을) 비치하다"
+고등영어	further	그 이상의, 더욱, 더 멀리
+고등영어	fusion	융합, 결합, 퓨전(음악, 음식)
+고등영어	fuss	소란, 야단법석
+고등영어	futile	효과 없는, 헛된
+고등영어	fuzzy	희미한, 불명확한
+고등영어	gadget	기계장치, 도구
+고등영어	gain	얻다, 벌다, 이익
+고등영어	gale	강풍, 돌풍
+고등영어	gallery	미술관
+고등영어	garage	(자동차) 차고
+고등영어	garment	의복, 옷
+고등영어	gasp	헐떡거리다, 숨이 차다
+고등영어	gather	모으다, 모이다
+고등영어	gauge	계량기, 측정기
+고등영어	gaze	뚫어지게 보다, 응시하다
+고등영어	gear	"복장, 옷
+기어, 장치, 장비"
+고등영어	gender	성, 성별
+고등영어	gene	유전자
+고등영어	generalize	일반화하다
+고등영어	generate	발생시키다, 일으키다
+고등영어	genetics	유전학
+고등영어	genius	천재, 천재적 재능
+고등영어	genuine	진짜의, 진실한
+고등영어	geography	지리, 지리학
+고등영어	geology	지질학
+고등영어	geometry	기하학
+고등영어	germ	세균
+고등영어	gifted	타고난 재능이 있는
+고등영어	gigantic	거인 같은, 거대한
+고등영어	gill	(보통 pl.) 아가미
+고등영어	glacier	빙하
+고등영어	glance	흘긋 보다, 흘긋 봄
+고등영어	glare	"눈부신 빛
+노려보다, 노려봄"
+고등영어	glide	미끄러지듯 가다, 활강하다
+고등영어	glimpse	흘끗 보다, 흘끗 봄
+고등영어	gloomy	음울한, 우울한
+고등영어	glow	불빛, 빛나다
+고등영어	glue	접착제
+고등영어	goods	물건, 물품
+고등영어	gorgeous	아주 멋진, 아주 아름다운
+고등영어	gossip	험담, 잡담, 잡담하다
+고등영어	gourmet	미식가, 미식가용의
+고등영어	grab	붙들다, 움켜쥐다
+고등영어	gradual	점진적인, 서서히 일어나는
+고등영어	grant	"승인하다, 허가하다, 승인, 허가
+보조금"
+고등영어	grasp	"꽉 잡다
+완전히 이해하다"
+고등영어	grasshopper	메뚜기
+고등영어	grateful	감사하는
+고등영어	gratify	만족시키다, 기쁘게 하다
+고등영어	grave	무덤, 심각한
+고등영어	gravity	중력, 인력
+고등영어	graze	(가축을) 방목하다, 풀을 뜯어먹다
+고등영어	greed	탐욕, 욕심
+고등영어	greenery	녹색 잎, 화초
+고등영어	greenhouse	온실, 비닐하우스
+고등영어	greet	인사하다, 환영하다
+고등영어	grid	격자무늬, 바둑판 모양
+고등영어	grief	슬픔, 비탄
+고등영어	grin	(이를 드러내고) 히죽 웃다, 활짝 웃다
+고등영어	grip	"꽉 잡다, 꽉 잡음, 손잡이
+파악, 이해"
+고등영어	groan	신음, 신음하다
+고등영어	gross	"모두 합해, 총-
+심한, 엄청난"
+고등영어	groundless	근거 없는
+고등영어	growl	으르렁거리다
+고등영어	grumble	투덜거리다, 불평하다
+고등영어	guilty	유죄의, 죄책감이 드는
+고등영어	gulf	만
+고등영어	gull	갈매기
+고등영어	gust	질풍, 돌풍
+고등영어	habitat	서식지, 주거지
+고등영어	habitual	습관적인, 상습적인
+고등영어	hail	우박, 빗발침, 빗발치다
+고등영어	halt	멈춤, 멈추다
+고등영어	hamper	방해하다
+고등영어	handful	(한) 줌, 소량
+고등영어	hands-on	직접 해보는
+고등영어	handy	"편리한, 유용한, 능숙한
+(손에 닿을 정도로) 가까이 있는"
+고등영어	harassment	괴롭힘, (성적) 추행
+고등영어	harm	손해, 해, 해를 끼치다
+고등영어	harness	"마구, 마구를 채우다
+이용하다"
+고등영어	harsh	"(행동 · 성격 · 목소리 등이) 거친
+가혹한, 혹독한"
+고등영어	harvest	수확, 추수, 수확하다
+고등영어	hasty	서두르는, 성급한
+고등영어	hatch	부화하다
+고등영어	haul	끌어당기다
+고등영어	haunt	"(유령 등이) 출몰하다
+(나쁜 생각 · 문제 등이) 늘 따라다니다, 괴롭히다"
+고등영어	hawk	매
+고등영어	hay	건초, 건초를 만들다
+고등영어	hazard	위험
+고등영어	haze	연무, 안개
+고등영어	head	머리, 이끌다, 향하다
+고등영어	headquarters	본부, 본사
+고등영어	heap	(쌓아 올린) 더미, 쌓아 올리다
+고등영어	heartfelt	진심에서 우러난
+고등영어	hedge	울타리
+고등영어	heedless	조심성 없는, 부주의한
+고등영어	heir	상속인, 후계자
+고등영어	helpless	무력한, 감당할 수 없는
+고등영어	hemisphere	반구, 반구체
+고등영어	hence	그러므로, 그래서
+고등영어	herald	알리다, 전령
+고등영어	herd	(가축 등의) 떼, 무리
+고등영어	heredity	유전
+고등영어	heritable	물려줄 수 있는, 유전성의
+고등영어	heritage	(국가 · 문화의) 유산
+고등영어	hesitation	망설임, 주저
+고등영어	heyday	전성기
+고등영어	hibernate	동면하다
+고등영어	hideous	무시무시한, 끔찍한
+고등영어	hierarchy	계급제도, 계층
+고등영어	highlight	가장 중요한 부분, 강조하다
+고등영어	hijack	(비행기 · 차량을) 납치하다
+고등영어	hilarious	재미있는, 즐거운
+고등영어	hindrance	방해, 장애물
+고등영어	hive	벌집, 북새통을 이루는 곳
+고등영어	hold	"붙들다, 유지하다
+(모임 등을) 개최하다, 열다"
+고등영어	hollow	속이 빈, 움푹 들어간
+고등영어	holy	성스러운, 신성한
+고등영어	homage	경의, 존경
+고등영어	hoop	둥근 테, (농구의) 링
+고등영어	hop	(깡충) 뛰다
+고등영어	horizon	수평선, 지평선
+고등영어	horn	호른, 뿔, 뿔피리, 경적
+고등영어	hospitality	환대, 후한 대접
+고등영어	host	"(연회 등의) 주최자, 진행자, 주최하다, 진행하다
+많은 사람, 많은 것"
+고등영어	hostage	인질
+고등영어	hostile	적대적인
+고등영어	housekeeper	주부, 가정부
+고등영어	hover	(새 · 헬리콥터 등이) 떠다니다, 맴돌다
+고등영어	howl	울부짖다, 울부짖음
+고등영어	hub	중심지, (바퀴 등의) 중심
+고등영어	hum	흥얼거리다, 윙윙거리다
+고등영어	humane	인도적인, 자비로운
+고등영어	humanitarian	인도주의적인
+고등영어	humble	초라한, 겸손한
+고등영어	humid	습한
+고등영어	humiliate	창피를 주다
+고등영어	hummingbird	벌새
+고등영어	hurl	"세게 던지다
+(모욕 · 비난 등을) 퍼붓다"
+고등영어	hybrid	잡종, 혼성체
+고등영어	hydrogen	수소
+고등영어	hygiene	위생
+고등영어	hypocrisy	위선, 위선 행위
+고등영어	hypothesis	가설, 가정
+고등영어	icon	"우상
+(컴퓨터 화면의) 아이콘, 상징"
+고등영어	ideal	이상, 이상적인
+고등영어	identity	"신원, 정체, 정체성
+일치, 동일함"
+고등영어	ideology	이념, 이데올로기
+고등영어	idiot	바보, 천치
+고등영어	idol	우상
+고등영어	ignoble	비열한, 비천한
+고등영어	illegal	불법적인
+고등영어	illumination	조명, 조도
+고등영어	illusion	환영, 망상
+고등영어	illustrate	설명하다, 삽화를 넣다
+고등영어	imitate	모방하다, 모조하다
+고등영어	immediate	즉시의, 당장의
+고등영어	immense	엄청난, 막대한
+고등영어	immigrate	(외국으로부터) 이주해 오다
+고등영어	imminent	임박한
+고등영어	immoral	비도덕적인
+고등영어	immune	면역의, 면역이 된, 면제된
+고등영어	impair	손상시키다, 해치다
+고등영어	impel	(강제로) ~하게 하다
+고등영어	imperial	황제의, 제국의
+고등영어	implement	"도구, 기구
+이행하다"
+고등영어	implicit	암시된, 내포된
+고등영어	implore	애원하다, 간청하다
+고등영어	imply	암시하다, 의미하다
+고등영어	import	수입하다, 수입
+고등영어	impose	(의무 · 세금 등을) 부과하다, 강요하다
+고등영어	impoverish	가난하게 하다
+고등영어	imprint	자국, 각인, 새기다
+고등영어	imprison	감옥에 넣다
+고등영어	improvise	(음악 · 연설 등을) 즉흥적으로 하다
+고등영어	impulse	충동, 자극
+고등영어	impure	순수하지 않은, 불순물이 섞인
+고등영어	inactive	비활동적인
+고등영어	inalienable	양도할 수 없는, 빼앗을 수 없는
+고등영어	inaudible	들을 수 없는, 들리지 않는
+고등영어	inaugurate	취임시키다, 개시하다
+고등영어	inborn	타고난, 선천적인
+고등영어	incident	사건, 일
+고등영어	incline	~하고 싶다, ~의 경향이 생기게 하다
+고등영어	include	포함하다, 포함시키다
+고등영어	incorporate	통합하다, 포함하다
+고등영어	incredible	믿어지지 않는, 놀라운
+고등영어	incurable	치료할 수 없는
+고등영어	independence	독립, 자주
+고등영어	index	찾아보기, 색인, 지표, 지수
+고등영어	indicate	나타내다, 가리키다
+고등영어	indifferent	무관심한
+고등영어	indigenous	토착의, 고유의
+고등영어	indispensable	없어서는 안되는, 절대 필요한
+고등영어	indoors	실내에서, 실내로
+고등영어	indubitable	의심할 여지없는, 확실한
+고등영어	induce	권유하다, 유도하다
+고등영어	indulge	(환락 · 욕망 등에) 빠지다, 탐닉하다, 제멋대로 하게 하다
+고등영어	industry	산업, 근면
+고등영어	inevitable	피할 수 없는
+고등영어	infamous	악명 높은
+고등영어	infancy	유아기, (발달의) 초창기
+고등영어	infect	감염시키다, 전염시키다
+고등영어	infer	추론하다, 추정하다
+고등영어	inferior	열등한, ~보다 못한
+고등영어	infest	들끓다, 우글거리다
+고등영어	infinite	무한한, 끝없는
+고등영어	inflame	격분시키다, 악화시키다
+고등영어	inflation	통화 팽창, 물가 폭등, 부풀림
+고등영어	inflict	(괴로움 · 상처 등을) 가하다, 괴롭히다
+고등영어	influence	영향, 영향을 미치다
+고등영어	influenza	독감
+고등영어	infrastructure	하부구조, 사회 기반 시설(인프라)
+고등영어	ingredient	성분, 재료
+고등영어	inhabit	~에 살다, 거주하다
+고등영어	inherent	내재하는, 타고난
+고등영어	inherit	물려받다, 상속받다
+고등영어	inhibit	억제하다, 막다, 금지하다
+고등영어	initial	처음의, 최초의, 머리글자
+고등영어	initiate	시작하다, 착수하다
+고등영어	inject	주사하다, 주입하다
+고등영어	inn	여인숙, 여관
+고등영어	innate	타고난, 선천적인
+고등영어	innocent	순진한, 아무 잘못(죄)이 없는
+고등영어	innovation	혁신, 쇄신
+고등영어	innumerable	무수한, 헤아릴 수 없는
+고등영어	inordinate	과도한, 지나친
+고등영어	inquire	묻다, 질문하다
+고등영어	insane	제정신이 아닌, 미친
+고등영어	inscribe	새기다, 쓰다
+고등영어	insect	벌레, 곤충
+고등영어	insert	삽입하다, 끼워넣다
+고등영어	insight	통찰력
+고등영어	insist	주장하다, 고집하다
+고등영어	insolent	건방진, 버릇없는
+고등영어	inspect	점검하다, 조사하다
+고등영어	inspire	영감을 불어넣다
+고등영어	install	(장비 · 장치 등을) 설치하다
+고등영어	installment	할부, 할부금
+고등영어	instantaneous	순간적인, 즉석의
+고등영어	instinct	본능
+고등영어	institution	기관, 시설, 제도
+고등영어	instruct	가르치다, 지시하다
+고등영어	instrument	기계, 기구, 악기
+고등영어	insulate	"(보호) 격리하다
+절연하다, 단열하다"
+고등영어	insult	모욕, 모욕하다
+고등영어	insure	보장하다, 보험에 들다
+고등영어	intact	손대지 않은, 손상되지 않은
+고등영어	intake	섭취, 받아들임
+고등영어	integral	(전체 구성을 위해) 필수적인
+고등영어	integrate	통합시키다, 통합되다
+고등영어	integrity	진실함, (나뉘지 않고) 완전한 상태
+고등영어	intellect	지성, 지능, 지식인
+고등영어	intense	강렬한, 극심한, 열정적인
+고등영어	intensive	집중적인, 철저한
+고등영어	interaction	상호 작용
+고등영어	intercept	가로막다, 가로채다
+고등영어	interest	"흥미, ~에 흥미를 갖게 하다
+이익, 이자"
+고등영어	interface	접속, 접속기, 접속하다
+고등영어	interfere	방해하다, 간섭하다
+고등영어	interior	내부의, 안쪽의
+고등영어	intermediate	중간의, 중급의
+고등영어	intermission	중간 휴식 시간
+고등영어	internal	내부의
+고등영어	interplay	상호 작용
+고등영어	interpret	통역하다, 해석하다
+고등영어	interrogate	심문하다, 질문하다
+고등영어	interrupt	(말 · 행동을) 방해하다, 중단시키다
+고등영어	intersect	가로지르다, 교차하다
+고등영어	interval	(시간의) 간격
+고등영어	intervene	끼어들다, 간섭하다
+고등영어	intimate	친밀한, 친숙한
+고등영어	intimidate	겁주다, 위협하다
+고등영어	intricate	얽힌, 복잡한
+고등영어	intrigue	"(호기심 · 흥미를) 끌다, 흥미
+음모를 꾸미다, 음모"
+고등영어	intrinsic	고유의, 본질적인
+고등영어	introspective	내성적인, 자기 성찰의
+고등영어	intrude	침범하다, 방해하다
+고등영어	intuition	직관, 직감
+고등영어	invade	침략하다, 침입히다
+고등영어	invaluable	매우 귀중한
+고등영어	inventory	재고조사, 물품 목록
+고등영어	investigate	조사하다, 수사하다
+고등영어	involve	포함시키다, (사건 등에) 연루시키다
+고등영어	inward	마음속의, 안으로
+고등영어	irregular	불규칙한
+고등영어	irrelevant	관계없는, 부적절한
+고등영어	irresistible	저항할 수 없는, (유혹 · 욕구 등에) 억누를 수 없는
+고등영어	irrespective	상관없는, 관계없는
+고등영어	irrigate	물을 끌어 대다
+고등영어	irritable	화를 잘 내는
+고등영어	isolate	고립시키다, 격리시키다
+고등영어	issue	"문제, 논점
+발행하다, 발표하다"
+고등영어	itch	가려움, 가렵다, (~하고 싶어) 근질거리다
+고등영어	jam	"쑤셔 넣다
+(막혀서) 꼼짝 못하다, 막힘, 교통 체증"
+고등영어	jar	항아리, 단지
+고등영어	jealous	시기하는, 질투심 많은
+고등영어	jellyfish	해파리
+고등영어	Jew	유대인, 유대교 신자
+고등영어	jewel	보석
+고등영어	joint	"공동의
+관절, 연결 부위"
+고등영어	journey	여행, 여정, 여행하다
+고등영어	junction	교차로, 연결 지점
+고등영어	junk	쓰레기, 잡동사니
+고등영어	jury	배심원
+고등영어	justice	정의, 공정
+고등영어	justify	정당화하다
+고등영어	juvenile	청소년, 청소년의, 어린애 같은
+고등영어	keen	"날카로운, 예리한
+~을 열망하는"
+고등영어	kidnap	유괴하다 , 남치하다
+고등영어	kin	친족, 친척
+고등영어	kindergarten	유치원
+고등영어	kindle	불을 붙이다, (감정을) 불붙이다
+고등영어	kneel	무릎을 꿇다
+고등영어	knight	(중세의) 기사, 무사
+고등영어	label	상표, 라벨, 꼬리표를 달다
+고등영어	laboratory	실험실, 연구소
+고등영어	lad	소년, 젊은이
+고등영어	ladder	사다리
+고등영어	laden	(~을) 잔뜩 실은, (~이) 가득한
+고등영어	lag	뒤처지다, 뒤처짐, 지연
+고등영어	lament	슬퍼하다, 슬픔
+고등영어	landmark	"주요 지형지물, 랜드마크
+획기적인 사건"
+고등영어	landscape	풍경, 경치
+고등영어	larvae	애벌레들
+고등영어	last	"마지막의, 지난
+지속되다, 계속되다"
+고등영어	late	늦은, 늦게, 작고한
+고등영어	latest	최근의, 최신의
+고등영어	latitude	위도
+고등영어	launch	"(로켓을) 쏘아 올리다, 발사
+(사업 등을) 시작하다, 시작"
+고등영어	laundry	세탁물, 세탁
+고등영어	lawn	잔디, 잔디밭
+고등영어	layout	배치도, 배치
+고등영어	lead	납, 이끌다, 인도하다
+고등영어	leak	(기체 · 액체 · 비밀 등의) 누출, 새다
+고등영어	lean	기대다, 기울이다
+고등영어	leap	껑충 뛰다, (높이, 멀리) 뛰기
+고등영어	lease	임차하다, 임대하다, (집 등의) 임대차 계약
+고등영어	leather	가죽, 가죽의
+고등영어	legacy	유산
+고등영어	legislation	입법, 법률제정, 제정법
+고등영어	legitimate	합법적인, 정당한
+고등영어	leisurely	한가로운, 느긋하게
+고등영어	lengthen	길어지다, 길게 하다
+고등영어	leopard	표범
+고등영어	lessen	줄이다, 줄다
+고등영어	lethal	죽음을 초래할, 치명적인
+고등영어	lettuce	양상추
+고등영어	lever	지레, (기계를 조작하는) 레버
+고등영어	liability	책임, 골칫거리
+고등영어	liable	~하기 쉬운, ~할 것 같은, 책임져야 할
+고등영어	liberal	자유주의의, 자유로운
+고등영어	liberty	자유
+고등영어	lick	핥다
+고등영어	lid	뚜껑, 덮개
+고등영어	lifelong	일생의, 평생의
+고등영어	lift	"들어 올리다, 승강기, (차 등을) 태워주기
+(제재를) 해제하다"
+고등영어	likewise	마찬가지로
+고등영어	limp	"기운 없는, 축 처진
+절뚝거리다"
+고등영어	linear	직선의, 선형의, 1차의
+고등영어	linger	오래 남다, 오래 머물다
+고등영어	lingual	말의, 언어의
+고등영어	literacy	읽고 쓸 줄 아는 능력
+고등영어	literal	글자 그대로의
+고등영어	literary	문학의
+고등영어	livelihood	살림, 생계
+고등영어	liven	활기를 띠게 하다
+고등영어	liver	간
+고등영어	livestock	가축
+고등영어	lizard	도마뱀
+고등영어	loan	빌려주다, 대부, 대부금
+고등영어	locate	~에 위치시키다, 위치를 찾아내다
+고등영어	lodge	오두막, 숙소
+고등영어	lofty	매우 높은, 숭고한
+고등영어	log	통나무
+고등영어	logic	논리, 논리학
+고등영어	long	긴, 오래, 간절히 바라다
+고등영어	longevity	장수
+고등영어	longitude	경도
+고등영어	loom	~처럼 보이다, 어렴풋이 나타나다
+고등영어	loop	(올가미나 동그라미 모양의) 고리
+고등영어	loosen	풀다, 느슨하게 하다
+고등영어	lord	지배자, 주인
+고등영어	lore	구전 지식, 민간전승
+고등영어	lotus	(식물) 연
+고등영어	lousy	아주 안 좋은, 형편없는
+고등영어	loyal	충성스러운, 충실한
+고등영어	ludicrous	바보 같은, 터무니없는
+고등영어	lumber	목재
+고등영어	lure	유혹하다, 유혹, 미끼
+고등영어	lurk	숨다, 잠복하다
+고등영어	lyric	서정시, 노래 가사
+고등영어	macroeconomics	거시 경제학
+고등영어	magnet	자석
+고등영어	magnificent	웅장한, 멋진, 훌륭한
+고등영어	magnify	확대하다
+고등영어	magnitude	크기, 규모
+고등영어	maid	하녀, 가정부
+고등영어	maiden	"소녀, 처녀
+처녀-, 최초의"
+고등영어	maintain	유지하다, 주장하다
+고등영어	majesty	위엄, 장엄, 폐하
+고등영어	majority	대다수, 대부분
+고등영어	malicious	악의 있는
+고등영어	mammal	포유동물
+고등영어	manage	"경영하다, 관리하다
+헤쳐나가다, 그럭저럭 살아가다"
+고등영어	mandate	"지시, 명령, 명령하다
+권한, 권한을 주다"
+고등영어	mandatory	의무적인, 강제적인
+고등영어	manifest	분명한, 드러내다, 나타나다
+고등영어	manipulate	(교묘히, 부정하게) 조종하다, 다루다
+고등영어	manual	손으로 하는, 안내서
+고등영어	manufacture	제조, 제조하다
+고등영어	manuscript	(책 등의) 원고
+고등영어	marble	대리석, 대리석으로 된
+고등영어	margin	"(점수 · 득표) 차이
+여유, 여백
+판매 수익, 이문"
+고등영어	marine	바다의, 해양의, 해병대
+고등영어	martial	전쟁의, 군대의
+고등영어	marvel	놀라움, 경이로움, 경탄하다
+고등영어	mash	으깨다, 짓이기다, 으깬 음식
+고등영어	mass	"많은 양, 큰 덩어리, 대량의
+일반 대중"
+고등영어	massacre	대량 학살, 학살하다
+고등영어	masterpiece	걸작, 명작
+고등영어	match	"경기, 칠적하다, 맞먹다
+짝, 조화, 맞춰주다, 어울리다
+성냥"
+고등영어	mature	성숙한, 성숙하다
+고등영어	maxim	격언, 금언
+고등영어	mayor	시장
+고등영어	maze	미로
+고등영어	meadow	목초지, 초원
+고등영어	meal	식사, 끼니
+고등영어	mean	"~을 의미하다
+비열한, 못된, 인색한"
+고등영어	means	수단, 방법, 재산, 부
+고등영어	meantime	그동안, 그동안에, 그 사이에
+고등영어	meanwhile	그러는 동안에, 한편
+고등영어	measles	홍역
+고등영어	measure	"재다, 측정하다, 측정, 치수
+조치"
+고등영어	mechanical	기계의, 기계적인
+고등영어	median	중앙의, 평균치의
+고등영어	mediate	중재하다, 조정하다
+고등영어	medieval	중세의
+고등영어	meditate	숙고하다, 명상하다
+고등영어	Mediterranean	지중해, 지중해의
+고등영어	medium	"중간의
+매개물, 매체"
+고등영어	meet	만나다, 충족시키다
+고등영어	melancholy	우울, 우울한, 구슬픈
+고등영어	membrane	(세포 · 조직 등의) 막, 얇은 막
+고등영어	menace	협박, 위협
+고등영어	mentor	스승, 멘토
+고등영어	merchandise	상품, 제품
+고등영어	merchant	상인
+고등영어	mercury	수은
+고등영어	mercy	자비, 고마운 일
+고등영어	merely	단지, 그저
+고등영어	merge	합병하다, 합치다
+고등영어	messy	어질러진, 엉망인
+고등영어	metabolism	신진대사
+고등영어	metaphor	은유, 비유
+고등영어	meteor	유성, 별똥별, 운석
+고등영어	metro	지하철, 대도시
+고등영어	metropolis	수도, 중심지
+고등영어	micro	아주 작은 것, 극소의
+고등영어	micro-organism	미생물
+고등영어	microeconomics	미시경제학
+고등영어	microphone	마이크
+고등영어	microscope	현미경
+고등영어	microwave	극초단파, 전자레인지
+고등영어	midwife	산파, 조산사
+고등영어	mighty	강력한, 힘센
+고등영어	migrate	이주하다, 이동하다
+고등영어	milestone	이정표, (역사 · 인생 등의) 중요한 단계(사건)
+고등영어	mill	방앗간
+고등영어	mimic	흉내를 내다, 모방하다
+고등영어	mindful	~을 염두에 두는, 마음에 두는
+고등영어	mindless	아무 생각이 벗는
+고등영어	mindset	사고방식
+고등영어	mine	"나의 것(소유대명사)
+광산, 채굴하다"
+고등영어	minimize	최소화하다, 축소하다
+고등영어	minister	장관, 목사
+고등영어	minute	분, 미세한, 아주 작은
+고등영어	mirage	신기루, 망상
+고등영어	mischance	불운
+고등영어	mischievous	말썽꾸러기의, 짓궂은
+고등영어	misdeed	잘못된 행위
+고등영어	miser	구두쇠
+고등영어	misery	고통, 비참함
+고등영어	misfire	"불발되다, 실패하다
+불발, 실패"
+고등영어	misfortune	불행, 불운
+고등영어	mislead	오도하다, 오해시키다
+고등영어	misplace	잘못 놓다, 잘못 두다
+고등영어	misspell	철자를 잘못 쓰다
+고등영어	mistress	여주인
+고등영어	mistrust	불신하다, 불신
+고등영어	misty	안개 낀
+고등영어	misunderstand	오해하다
+고등영어	misuse	오용, 남용, 오용하다
+고등영어	mitigate	누그러뜨리다, 완화시키다
+고등영어	moan	"신음하다, 불평하다
+신음 (소리), 불평"
+고등영어	mob	군중, 폭도
+고등영어	mobilize	동원하다, 집결시키다
+고등영어	mock	흉내 내며 놀리다, 조롱하다
+고등영어	mode	"방법, 방식
+유행"
+고등영어	moderately	적당히, 알맞게
+고등영어	modesty	겸손, 수수함, 평범함
+고등영어	modify	수정하다, 변경하다
+고등영어	moisture	습기, 수분
+고등영어	mold	틀에 넣어 만들다, 틀 곰팡이
+고등영어	mole	"사마귀, (피부의) 검은 점
+두더지"
+고등영어	molecule	분자
+고등영어	momentous	중대한, 중요한
+고등영어	momentum	추진력, 가속도
+고등영어	monarchy	군주 정치
+고등영어	monastery	수도원
+고등영어	monetary	화폐의, 금전상의
+고등영어	monitor	"모니터
+감시하다, 관찰하다"
+고등영어	monk	수도승
+고등영어	monolingual	1개 국어를 사용하는
+고등영어	monologue	독백
+고등영어	monopoly	독점
+고등영어	monotonous	단조로운, 지루한
+고등영어	monumental	기념비적인
+고등영어	mop	자루걸레, 자루걸레로 닦다
+고등영어	moral	도덕적인
+고등영어	morale	사기, 의욕
+고등영어	mortal	죽어야 할 운명의, 치명적인
+고등영어	mortgage	저당, 담보 대출
+고등영어	moss	이끼
+고등영어	moth	나방
+고등영어	motivate	동기를 부여하다
+고등영어	mount	(산 · 말 등에) 오르다, 올라타다, 산
+고등영어	mourn	슬퍼하다, 애도하다
+고등영어	mud	진흙
+고등영어	multilateral	다자간의, 다각적인
+고등영어	multilingual	여러 언어를 사용하는
+고등영어	multiple	많은, 다수의, 다양한
+고등영어	multiply	증가시키다, 번식하다, 곱하다
+고등영어	multitude	다수, 군중
+고등영어	mummy	미라
+고등영어	municipal	시의, 지방자치의
+고등영어	murder	살인, 살해하다
+고등영어	murmur	"속삭이다, 중얼거리다
+속삭임, 중얼거림"
+고등영어	mushroom	버섯
+고등영어	Muslim	무슬림, 이슬람교도, 이슬람교의
+고등영어	mustache	콧수염
+고등영어	mutable	변하기 쉬운, 변덕스러운
+고등영어	mutual	서로의 공동의
+고등영어	myriad	무수히 많음, 무수한
+고등영어	mysterious	이해하기 힘든, 불가사의한
+고등영어	mystical	신비로운, 신령스러운
+고등영어	myth	신화, (근거 없는) 이야기
+고등영어	naive	순진한
+고등영어	naked	나체의, 벌거벗은
+고등영어	namely	즉, 다시 말하면
+고등영어	nap	낮잠, 잠깐 잠
+고등영어	narrate	이야기하다, 설명하다
+고등영어	nasty	고약한, 끔찍한, 더러운
+고등영어	nationality	국적
+고등영어	nationwide	전국적인
+고등영어	native	출생지의, 토착의
+고등영어	naughty	버릇없는, 말썽쟁이의
+고등영어	nautical	선박의, 해상의, 항해의
+고등영어	navigation	(배 · 항공기의) 항해, 운항
+고등영어	navy	해군
+고등영어	neat	산뜻한, 깔끔한
+고등영어	nectar	과즙(음료), 꿀
+고등영어	needle	바늘
+고등영어	negative	부정적인, (테스트 결과가) 음성인
+고등영어	neglect	태만히 하다, 방치하다, 태만, 방치
+고등영어	negligent	태만한, 부주의한
+고등영어	negotiate	협상하다, 교섭하다
+고등영어	nerve	신경, 배짱, 용기, 뻔뻔함
+고등영어	nervous	불안해하는, 신경과민의, 신경의
+고등영어	neuron	뉴런, 신경세포
+고등영어	neutral	중립적인, 중간의, 중성의
+고등영어	nevertheless	그럼에도 불구하고
+고등영어	nibble	야금야금 먹다
+고등영어	nightmare	악몽
+고등영어	nitrogen	질소
+고등영어	noble	고귀한, 양반의, 귀족의
+고등영어	nod	(머리를) 끄덕이다
+고등영어	nominate	(후보자로) 지명하다, 임명하다
+고등영어	nonsense	터무니없는 말, 허튼 소리
+고등영어	norm	기준, 표준
+고등영어	notable	주목할 만한, 눈에 띄는, 유명한
+고등영어	note	"메모, 쪽지, 필기
+언급하다, 주목하다
+음, 음표, 어조, 분위기"
+고등영어	notice	"통지, 통보
+주목, 알아챔, 알아차리다"
+고등영어	notion	개념, 생각
+고등영어	notorious	악명 높은
+고등영어	nourish	영양분을 주다, 키우다
+고등영어	novel	소설, 진기한, 새로운
+고등영어	nowadays	오늘날, 요즘
+고등영어	nuisance	성가신 사람(것), 골칫거리
+고등영어	numb	마비된, 감각이 없는
+고등영어	numerous	수많은, 무수한
+고등영어	nursery	유아원의, 유치원의
+고등영어	nurture	양육하다, 키우다
+고등영어	nutrition	영양, 영양분
+고등영어	oak	오크(떡갈나무 · 참나무 등의 총칭)
+고등영어	oath	맹세, 서약
+고등영어	obese	뚱뚱한, 비만인
+고등영어	obey	복종하다, 따르다
+고등영어	object	"물건, 물체, 목표, 대상
+반대하다"
+고등영어	objective	객관적인, 목표, 목적
+고등영어	oblige	의무를 지우다, 억지로 시키다
+고등영어	obscure	분명치 않은, 모호한
+고등영어	observe	관찰하다, (규칙 등을) 준수하다
+고등영어	obsession	강박관념, 집착
+고등영어	obsolete	더 이상 쓸모가 없는, 구식의
+고등영어	obstacle	방해, 장애(물)
+고등영어	obstruct	방해하다, 가로막다
+고등영어	obtain	얻다, 획득하다
+고등영어	obvious	명백한, 분명한
+고등영어	occupation	직업, 점령
+고등영어	occupy	차지하다, 점령하다
+고등영어	occur	발생하다, 머리에 떠오르다
+고등영어	odd	"이상한, 기묘한
+홀수의"
+고등영어	offer	제공하다, 제안하다, 제공, 제안
+고등영어	official	공적인, 공식적인, 공무원
+고등영어	offset	상쇄하다, 보충하다
+고등영어	offspring	자식, (동물의) 새끼
+고등영어	ointment	연고
+고등영어	omen	징조, 조짐
+고등영어	ominous	불길한
+고등영어	omit	생략하다, 빼다, ~을 빠뜨리다
+고등영어	ongoing	계속 진행 중인
+고등영어	onlooker	구경꾼
+고등영어	onset	습격, (질병 등의) 시작
+고등영어	onward	앞으로, 앞으로 계속, 향후의
+고등영어	operate	"수술하다, (기계 · 장치 등을) 조종하다, 작동되다
+경영하다, 관리하다"
+고등영어	oppose	반대하다, 대항하다
+고등영어	oppress	억압하다, 탄압하다
+고등영어	optician	안경사, 안경점
+고등영어	optimal	최상의, 최적의
+고등영어	optimist	낙관론자, 낙천주의자
+고등영어	option	선택권, 선택사항
+고등영어	oral	구두의, 입의
+고등영어	orbit	(천체의) 궤도
+고등영어	orchard	과수원
+고등영어	ordeal	시련
+고등영어	ordinary	보통의, 평범한
+고등영어	organ	(생물의) 기관, 장기, 오르간(악기)
+고등영어	organic	"유기농의, 화학비료를 쓰지 않는
+(인체) 장기의"
+고등영어	orient	"~로 향하게 하다, 지향하다
+동양, 동양의"
+고등영어	orphan	고아
+고등영어	ounce	온스(1/16파운드)
+고등영어	outbreak	(전쟁 · 질병 등의) 발생, 발발
+고등영어	outburst	(감정의) 폭발, 분출, 급격한 증가
+고등영어	outcast	쫓겨난 사람, 따돌림 받는 사람
+고등영어	outcome	결과, 성과
+고등영어	outdated	시대에 뒤진, 구식의
+고등영어	outer	바깥쪽의, 외부의
+고등영어	outfit	옷, 복장
+고등영어	outgrow	"~보다 더 커지다
+나이가 들면서 ~에서 벗어나다
+(옷 따위가) 몸이 커져서 못 입게 되다"
+고등영어	outing	소풍, 여행
+고등영어	outlandish	이국적인, 기이한
+고등영어	outlast	~보다 더 오래가다
+고등영어	outlet	"배출구
+할인점, 아울렛"
+고등영어	outline	윤곽, 개요
+고등영어	outlive	~보다 더 오래 살다
+고등영어	outlook	전망, (미래에 대한) 전망, 관점
+고등영어	outmoded	유행에 뒤진, 구식의
+고등영어	outpace	앞지르다
+고등영어	output	생산, 출력, 생산량
+고등영어	outrage	격분, 격노, 난폭한 행위
+고등영어	outrun	뛰어 앞지르다
+고등영어	outspoken	솔직한, 꾸밈없이 말하는
+고등영어	outstanding	눈에 확 띄는, 뛰어난
+고등영어	outward	밖으로 향하는, 바깥쪽으로
+고등영어	outweigh	~보다 무게가 더 나가다, ~보다 중요하다
+고등영어	oval	타원형의
+고등영어	overall	전체적으로, 전체적인
+고등영어	overbearing	거만한, 남을 지배하려 드는
+고등영어	overcome	극복하다
+고등영어	overdue	(지불 · 반납 등의) 기한이 지난, 지체된
+고등영어	overhead	머리 위의, 머리 위에
+고등영어	overlap	겹치다, 겹치게 하다
+고등영어	overlook	"못 보고 지나치다, 못 본체하다
+내려다보다"
+고등영어	overseas	해외의, 해외로
+고등영어	oversee	감독하다
+고등영어	overstate	과장하다
+고등영어	overtake	"~을 따라잡다, 앞지르다
+(폭풍우 · 불행 등이) 덮치다"
+고등영어	overthrow	뒤집어엎다, 전복시키다
+고등영어	overview	요약, 개요
+고등영어	overweight	과체중의, 비만의
+고등영어	overwhelm	압도하다
+고등영어	owe	···에게 ~을 빚지고 있다, 신세를 지고 있다
+고등영어	oyster	굴
+고등영어	paddle	노, 노를 젓다
+고등영어	pale	창백한, (색깔이) 옅은, 흐릿한
+고등영어	panel	"(목재 · 유리 · 금속으로 된 사각형) 판
+패널, (방송) 토론자단"
+고등영어	pang	심한 고통
+고등영어	parachute	낙하산
+고등영어	paradigm	전형적인 예, 패러다임
+고등영어	paradoxical	모순된, 역설적인
+고등영어	paragraph	(문장의) 절, 단락
+고등영어	parallel	"평행한, ~에 평행하다
+유사한, ~에 필적하다"
+고등영어	paralyze	마비시키다, 무력하게 만들다
+고등영어	parasite	기생충, 기생동물
+고등영어	parcel	소포, 꾸러미
+고등영어	parliament	의회, 국회
+고등영어	parrot	앵무새
+고등영어	partial	부분적인, 편파적인
+고등영어	participate	참여하다, 참가하다
+고등영어	particle	입자, 티끌
+고등영어	partition	분할, 칸막이, 분할하다
+고등영어	party	"파티, 모임
+정당, 단체, 당사자"
+고등영어	passage	구절, 통행, 통과, 통로
+고등영어	passion	열정
+고등영어	passive	수동적인, 활기 없는, 소극적인
+고등영어	paste	풀, 밀가루 반죽, 풀로 붙이다
+고등영어	pastime	오락, 기분전환
+고등영어	pastor	목사
+고등영어	pasture	목장, 목초지
+고등영어	pat	토닥거리다, 쓰다듬다
+고등영어	patch	헝겊조각, 조각, 부분
+고등영어	patent	특허의, 특허권
+고등영어	pathetic	불쌍한, 애처로운
+고등영어	patriot	애국자
+고등영어	patrol	순찰, 순찰하다
+고등영어	patron	후원자, 고객
+고등영어	pause	잠시 멈추다, 중단하다
+고등영어	pave	(길을) 포장하다
+고등영어	paw	(동물의) 발
+고등영어	pay	"지불하다, 급료
+이득이 되다, 대가를 치르다"
+고등영어	paycheck	급료(지불 수표)
+고등영어	pearl	진주
+고등영어	peculiar	기묘한, 독특한
+고등영어	pedestrian	보행자
+고등영어	peel	"(과일 등의) 껍질
+(껍질 · 가죽 등을) 벗기다"
+고등영어	peer	동료, 응시하다
+고등영어	penalty	벌칙, 형벌, 벌금
+고등영어	pending	"미결의, 계류 중인
+임박한, 곧 있을
+(어떤 일이) 있을 때까지"
+고등영어	pendulum	(시계 등의) 진자, 추
+고등영어	penetrate	(탄알 · 창 등이) 관통하다, 꿰뚫다
+고등영어	peninsula	반도
+고등영어	pension	연금
+고등영어	per	~당, ~마다
+고등영어	perceive	감지하다, 인지하다
+고등영어	perfume	향수, 향기, 향기를 풍기다
+고등영어	peril	위험
+고등영어	periodic	정기적인, 주기적인
+고등영어	periscope	잠망경
+고등영어	perish	죽다, 썩다, 소멸하다
+고등영어	permanent	영구적인
+고등영어	perplex	당황하게 하다
+고등영어	persecution	(특히 종교상의) 박해, 괴롭힘
+고등영어	persevere	안내하다
+고등영어	persist	고집하다, 지속하다
+고등영어	personality	개성, 성격
+고등영어	perspective	"시각, 관점
+원근법"
+고등영어	perspire	땀을 흘리다, 땀이 나다
+고등영어	pertinent	관계있는, 적절한
+고등영어	pessimist	비관주의자
+고등영어	pest	해충
+고등영어	petition	탄원, 탄원서
+고등영어	petroleum	석유
+고등영어	petty	보잘것없는, 작은, 사소한
+고등영어	pharmaceutical	제약의, 약학의
+고등영어	pharmacy	약국
+고등영어	phase	시기, 단계, 국면
+고등영어	phenomenal	놀랄만한, 경이적인
+고등영어	philosopher	철학자
+고등영어	phrase	구, 구절
+고등영어	physician	의사, 내과 의사
+고등영어	pier	부두, 방파제
+고등영어	pierce	꿰뚫다, 관통하다
+고등영어	pile	쌓다, 쌓이다, 쌓아올린 더미
+고등영어	pill	알약
+고등영어	pimple	여드름, 뾰루지
+고등영어	pinch	꼭 집다, 꽉 죄다, 꼬집다
+고등영어	pine	소나무
+고등영어	pinpoint	정확히 집어내다, 정확한
+고등영어	pioneer	개척자, 선구자, 개척하다
+고등영어	pious	신앙심이 깊은, 독실한
+고등영어	pirate	해적
+고등영어	pistol	권총
+고등영어	pit	구멍, 구덩이
+고등영어	pitch	던지다, 음의 높낮이
+고등영어	pitfall	함정, 위험
+고등영어	pity	불쌍히 여김, 애석한 일
+고등영어	plague	전염병
+고등영어	plain	"평범한, 쉬운, 명백한
+평원, 벌판"
+고등영어	planet	행성
+고등영어	plasticity	가소성(다른 형태로 쉽게 만들어지는 성질)
+고등영어	plausible	(이유 · 논리 등이) 그럴듯한, 정말 같은
+고등영어	play	"경기를 하다
+(악기를) 연주하다
+희곡, 연극, 상연하다"
+고등영어	plea	애원, 간청, 변호
+고등영어	pledge	맹세, 맹세하다
+고등영어	plenty	"많음, 풍부함
+많은, 많이"
+고등영어	plight	곤경, 궁지
+고등영어	plot	"음모, 음모를 꾸미다
+줄거리
+작은 땅, 구획"
+고등영어	plow	(밭을) 갈다, 쟁기질하다, 쟁기
+고등영어	plumber	배관공
+고등영어	plunge	"빠지게 하다
+뛰어들다, 급락하다"
+고등영어	plural	복수, 복수형(약어로 pl.)
+고등영어	pneumonia	폐렴
+고등영어	poisonous	유독한, 독이 있는
+고등영어	poke	쿡 찌르다
+고등영어	polar	극지방의, 남(북)극의, (자석의) 양극의
+고등영어	policy	정책, 방침
+고등영어	polish	닦다, 윤내다
+고등영어	politely	공손히, 예의바르게
+고등영어	poll	투표, 여론 조사
+고등영어	pollination	수분, 꽃가루받이
+고등영어	ponder	곰곰이 생각하다
+고등영어	pony	조랑말
+고등영어	populous	인구가 많은
+고등영어	pork	돼지고기
+고등영어	portable	휴대할 수 있는, 휴대용의
+고등영어	portal	대문, 입구
+고등영어	porter	짐꾼, 운반기
+고등영어	portion	일부, 부분, 몫
+고등영어	portray	(인물 · 풍경을) 그리다, 묘사하다
+고등영어	pose	"자세, 포즈, 자세를 취하다
+(질문 · 문제 등을) 제기하다"
+고등영어	positive	긍정적인, 확신하고 있는
+고등영어	possess	소유하다, 지니다
+고등영어	posterior	나중의, 이후의, 뒤쪽의
+고등영어	postpone	연기하다
+고등영어	postscript	추신(P.S.), 후기
+고등영어	posture	자세
+고등영어	postwar	전후의
+고등영어	pot	통, 병, 냄비
+고등영어	potable	마시기에 적합한
+고등영어	potent	강력한
+고등영어	potential	"가능성이 있는, 잠재하는
+가능성, 잠재력"
+고등영어	poultry	(닭 · 오리 등의) 가금류
+고등영어	pound	"사정없이 치다
+(화폐 · 중량) 파운드"
+고등영어	pour	붓다, 퍼붓다
+고등영어	poverty	가난, 빈곤
+고등영어	practicable	실행 가능한
+고등영어	pragmatic	실용적인
+고등영어	prairie	대초원
+고등영어	pray	기원하다, 기도하다
+고등영어	pre-school	미취학의, 유치원
+고등영어	preach	설교하다, 전도하다
+고등영어	precede	~에 앞서다, 선행하다
+고등영어	precious	귀중한, 값비싼
+고등영어	precipitation	강수, 강수량
+고등영어	precise	정확한, 정밀한
+고등영어	preconceive	선입견을 갖다, 예상하다
+고등영어	predator	포식자, 포식동물
+고등영어	predecessor	전임자, 선배, 이전 모델
+고등영어	predetermine	미리 결정하다
+고등영어	predicament	곤경, 궁지
+고등영어	predict	예언하다, 예측하다
+고등영어	preface	머리말, 서문
+고등영어	prefix	접두사
+고등영어	pregnant	임신한
+고등영어	prehistoric	선사 시대의
+고등영어	prejudice	선입관, 편견
+고등영어	preliminary	예비의, 서두의
+고등영어	premature	예정보다 이른, 시기상조의
+고등영어	premier	수상, 최고의, 제1의
+고등영어	preoccupied	(생각 · 걱정에) 사로잡힌, 몰두한
+고등영어	prescribe	"(약 · 치료법 등을) 처방하다
+규정하다"
+고등영어	present	"선물
+현재의, 참석한
+제출하다, 발표하다, 주다"
+고등영어	preserve	보존하다, 유지하다
+고등영어	preside	주재하다, 사회를 보다
+고등영어	press	"누르다, 압박하다
+인쇄(기), 신문"
+고등영어	pressure	압력, 압박
+고등영어	prestige	명성, 위신
+고등영어	presume	추정하다, 추측하다
+고등영어	pretend	~인 체하다, 가장하다
+고등영어	prevail	"이기다, 우세하다
+만연하다, 널리 퍼지다"
+고등영어	prevalent	만연하는, 널리 퍼진, 우세한
+고등영어	prevent	막다, 방해하다, 예방하다
+고등영어	preview	미리 보기, 시사회, 미리 보여주다
+고등영어	previous	이전의, 앞의
+고등영어	prey	먹이, 희생자
+고등영어	priceless	값을 매길 수 없는, 매우 귀중한
+고등영어	priest	성직자
+고등영어	primate	영장류
+고등영어	prime	주요한, 최고의
+고등영어	primitive	원시의
+고등영어	principal	주요한, 교장
+고등영어	principle	원리, 원칙, 주의
+고등영어	privilege	특권, 특혜, 특권을 주다
+고등영어	probable	있음직한, 가능성 있는
+고등영어	probe	조사, 조사하다, 탐사하다
+고등영어	procedure	과정, 방법
+고등영어	proceed	진행하다, 나아가다, 계속하다
+고등영어	process	과정, 처리
+고등영어	proclaim	선언하다, 선포하다
+고등영어	procure	얻다, 획득하다
+고등영어	profess	주장하다, 고백하다
+고등영어	profession	직업
+고등영어	proficient	숙달된, 능숙한
+고등영어	profound	심오한, 깊은
+고등영어	progress	"진전, 진행
+진전하다, 진행하다"
+고등영어	prohibit	금지하다, 막다
+고등영어	project	"프로젝트, 계획, 계획하다, 예상하다
+(빛 · 영상 등을) 투영하다"
+고등영어	prominent	두드러진, 유망한
+고등영어	promising	유망한, 좋을 것 같은
+고등영어	promotion	"승진, 진급
+홍보, (판매) 촉진"
+고등영어	prompt	"신속한
+자극하다, 촉발하다"
+고등영어	prone	~하기 쉬운, ~하는 경향이 있는
+고등영어	pronounce	"발음하다
+선언하다, 단언하다"
+고등영어	propagate	"선전하다, 전파하다
+번식하다"
+고등영어	propel	추진하다, 나아가게 하다
+고등영어	property	재산, 자산, 특성
+고등영어	prophecy	예언
+고등영어	proponent	제안자, 지지자
+고등영어	proportion	비율, 부분, 균형
+고등영어	prose	산문, 산문체
+고등영어	prosecute	기소하다, 고소하다
+고등영어	prospect	가망, 전망
+고등영어	prosper	번영하다
+고등영어	protein	단백질
+고등영어	protest	항의하다, 주장하다, 항의, 시위
+고등영어	prototype	원형, 견본
+고등영어	prove	입증하다, ~으로 판명되다
+고등영어	proverb	속담
+고등영어	province	지역, 지방, 영역, 분야
+고등영어	provision	"대비, 준비
+(-s) 식량
+공급, 제공"
+고등영어	provoke	"(특정한 반응을) 유발하다
+화나게 하다"
+고등영어	prudent	신중한, 조심성 있는
+고등영어	psychiatry	정신의학
+고등영어	psychology	심리학
+고등영어	pub	술집
+고등영어	pulse	맥박, 파동, 진동
+고등영어	punctual	시간을 엄수하는
+고등영어	punctuate	구두점을 찍다, 중단시키다
+고등영어	pupil	"학생, 제자
+눈동자, 동공"
+고등영어	purchase	사다, 구입하다, 구입
+고등영어	purple	자주색의, 자주색
+고등영어	pursue	뒤쫓다, 추구하다
+고등영어	puzzle	"수수께끼
+당황, 당황하게 하다"
+고등영어	qualify	자격을 주다, 자격을 얻다
+고등영어	quantity	양, 수량
+고등영어	quarantine	(전염병 때문에) 격리, 격리하다
+고등영어	quarters	거처, 숙소
+고등영어	queer	기묘한, 괴상한
+고등영어	quest	탐색, 추구
+고등영어	questionnaire	질문서, 설문지
+고등영어	queue	"줄, 대기 행렬
+줄을 서서 기다리다"
+고등영어	quit	그만두다, 중지하다
+고등영어	quota	혈당량, (허용되는) 한도
+고등영어	quote	인용하다, 예로 들다
+고등영어	radiate	(빛 · 열 등을) 방사하다, 방출하다
+고등영어	radical	급진적인, 근본적인
+고등영어	raft	"뗏목, 고무보트
+뗏목으로 건너다"
+고등영어	rag	누더기, 걸레
+고등영어	rage	분노, 분노하다
+고등영어	raid	공습, 급습, 공습하다, 급습하다
+고등영어	rainforest	열대 우림
+고등영어	raise	"(위로) 올리다
+기르다, 재배하다
+(돈을) 마련하다, 모금하다
+(문제 · 이의 등을) 제기하다"
+고등영어	raisin	건포도
+고등영어	ranch	대목장
+고등영어	rapid	빠른, 신속한
+고등영어	rapture	황홀, 황홀감
+고등영어	rare	"드문, 진귀한
+(고기를) 살짝 익힌"
+고등영어	rash	성급한, 경솔한
+고등영어	rat	쥐
+고등영어	rate	"속도, 비율
+요금, 가격"
+고등영어	ratify	승인하다, 비준하다
+고등영어	rational	합리적인, 이성적인
+고등영어	rationale	이유, 근거
+고등영어	raw	가공하지 않은, 날것의
+고등영어	ray	광선, 빛
+고등영어	razor	면도칼, 면도기
+고등영어	readily	기꺼이, 선뜻
+고등영어	realm	영역, 왕국
+고등영어	reap	수확하다
+고등영어	rear	"뒤, 후방의
+기르다, 사육하다"
+고등영어	reason	"이유
+추론하다, 추리하다
+이성, 사고력"
+고등영어	reasonable	합리적인, 타당한, (가격 따위가) 바싸지 않은
+고등영어	reassure	안심시키다
+고등영어	rebel	반역자, 반역의, 반역하다
+고등영어	rebuild	다시 짓다, 재건하다
+고등영어	recall	"상기시키다, 생각나게 하다
+리콜(결함 있는 물건의 회수), 회수하다"
+고등영어	recede	물러나다, 약해지다
+고등영어	receipt	받기, 수령, 영수증
+고등영어	recess	휴식, 휴회
+고등영어	recession	경기 후퇴, 불경기
+고등영어	rechargeable	재충전할 수 있는
+고등영어	recipe	조리법, 요리법
+고등영어	recipient	받는 사람, 수령인
+고등영어	reciprocal	상호간의, 서로간의
+고등영어	recite	암송하다, 낭독하다
+고등영어	reckless	앞뒤를 가리지 않는, 무모한
+고등영어	reckon	(~라고) 생각하다, 예상하다
+고등영어	recollect	기억해 내다, 생각해 내다
+고등영어	reconcile	화해시키다, 조화시키다
+고등영어	recount	"다시 세다, 재검표하다
+이야기하다, 말하다"
+고등영어	recruit	(신입사원 등을) 모집하다
+고등영어	rectangle	직사각형
+고등영어	rectify	바로잡다, 수정하다
+고등영어	recur	재발하다, 되돌아가다, 반복되다
+고등영어	recycle	재활용하다
+고등영어	reddish	불그스름한
+고등영어	reed	갈대, 갈대밭
+고등영어	reef	암초
+고등영어	refer	"말하다, 언급하다
+참고하다, 참조하다"
+고등영어	referee	심판원, 심판하다
+고등영어	refine	정제하다, 개선하다
+고등영어	reflect	반사하다, 반영하다, 숙고하다
+고등영어	reform	개혁하다, 개선하다
+고등영어	refrain	그만두다, 삼가다
+고등영어	refresh	상쾌하게 하다, 새롭게 하다
+고등영어	refreshments	다과, 음식물
+고등영어	refuge	피난처, 피신
+고등영어	refund	환불, 환불하다
+고등영어	refute	반박하다
+고등영어	regard	"주목하다, 주의하다
+점, 사항
+관계, 관계하다
+~우로 여기다"
+고등영어	regarding	~에 관계하여, ~에 관하여
+고등영어	regenerate	재건하다, 재생시키다
+고등영어	regime	정권, 통치
+고등영어	register	등록하다, 등록부
+고등영어	regress	퇴보하다
+고등영어	regulation	규율, 규칙
+고등영어	rehabilitate	재활시키다, 원상태로 회복시키다
+고등영어	reign	통치, 통치 기간, 통치하다
+고등영어	rein	"고삐, 고삐를 죄다
+억제하다"
+고등영어	reindeer	순록
+고등영어	reinforce	강화하다, 보강하다
+고등영어	rejoice	기뻐하다
+고등영어	relevant	관계있는, 적절한
+고등영어	relieve	구제하다, (고통 등을) 덜어주다
+고등영어	reluctance	싫음, 꺼림
+고등영어	rely	의지하다, 믿다
+고등영어	remainder	나머지
+고등영어	remark	말, 논평, 말하다, 논평하다
+고등영어	remarkable	주목할 만한, 놀라운
+고등영어	remedy	치료, 해결책
+고등영어	remote	먼, 멀리 떨어진
+고등영어	render	"···을 ~하게 하다
+주다, 제공하다
+표현하다"
+고등영어	renew	갱신하다, 다시 시작하다
+고등영어	renovation	혁신, 쇄신, 수리
+고등영어	renowned	유명한, 명성 있는
+고등영어	repel	밀어내다, 물리치다
+고등영어	repent	후회하다, 뉘우치다
+고등영어	rephrase	(뜻을 더 분명히 하기 위해) 바꾸어 말하다
+고등영어	replace	"~에 대신하다, 대체하다
+다시 놓다, 제자리에 놓다"
+고등영어	replica	복제품, 복제, 복사
+고등영어	reply	"대답하다, 답장하다
+대답, 답장"
+고등영어	reproduce	복제하다, 번식하다
+고등영어	reprove	꾸짖다
+고등영어	reptile	파충류
+고등영어	requisite	필요한, 필수의, 필요조건
+고등영어	rescue	구출하다, 구조하다, 구조, 구출
+고등영어	resemblance	닮음, 유사
+고등영어	resent	분개하다
+고등영어	reserve	예약하다, 따로 남겨 두다
+고등영어	reservoir	저수지
+고등영어	reside	살다, 거주하다
+고등영어	resign	사직하다, 사임하다
+고등영어	resilient	탄력 있는, (부상 등에) 회복력 있는
+고등영어	resistance	저항, 반대, 레지스탕스
+고등영어	resolution	"결심, 결의안, 해결
+해상도"
+고등영어	resolve	결심하다, 해결하다
+고등영어	resort	"휴양지, 리조트
+의존(to), 수단, 의존하다"
+고등영어	resourceful	지략이 뛰어난
+고등영어	respective	제각각의, 각자의
+고등영어	respire	호흡하다, 숨쉬다
+고등영어	restore	회복시키다, 복구하다
+고등영어	restrain	제지하다, 억누르다
+고등영어	restrict	제한하다, 금지하다
+고등영어	resume	다시 시작하다, 이력서
+고등영어	retail	소매, 소매의, 소매하다
+고등영어	retain	보유하다, 계속 유지하다
+고등영어	retreat	후퇴하다, 후퇴
+고등영어	retrieve	되찾다, 회복하다
+고등영어	retrospect	회고, 회고하다
+고등영어	reunion	재회, 모임, 동창회
+고등영어	reveal	밝히다, 폭로하다
+고등영어	revenue	수입, 수익
+고등영어	revere	존경하다, 숭배하다
+고등영어	reverse	반대의, 반대, 반대로 하다
+고등영어	revise	개정하다, 수정하다
+고등영어	revival	소생, 부활, 회복
+고등영어	revolt	반란을 일으키다, 반란, 폭동
+고등영어	revolve	(~의 주위를) 돌다, 회전하다
+고등영어	rhetoric	미사여구, 수사학
+고등영어	rhinoceros	코뿔소
+고등영어	rhyme	운, 운율
+고등영어	rib	갈비뼈
+고등영어	rid	제거하다, 없애다
+고등영어	riddle	수수께끼
+고등영어	rifle	소총
+고등영어	right	옳은, 오른쪽의, 권리
+고등영어	righteous	올바른, 정당한
+고등영어	rigid	"엄격한, 융통성 없는
+뻣뻣한, 단단한"
+고등영어	rigorous	엄격한
+고등영어	riot	폭동, 폭동을 일으키다
+고등영어	ripe	익은, 숙성한
+고등영어	ritual	의식의, (종교적) 의식
+고등영어	roam	돌아다니다, 거닐다
+고등영어	roar	"함성을 지르다, 으르렁거리다
+함성, 으르렁 소리"
+고등영어	robust	튼튼한
+고등영어	rod	막대, 지팡이
+고등영어	role	역할
+고등영어	room	"방, 공간, 자리
+여지, 기회"
+고등영어	root	뿌리, 근원
+고등영어	rot	썩다, 부패하다
+고등영어	rote	(반복에 의한 기계적) 암기
+고등영어	routine	일상적인, 틀에 박힌 일상
+고등영어	rove	헤매다, 방랑하다
+고등영어	row	"열, 줄
+노를 젓다"
+고등영어	rub	비비다, 문지르다
+고등영어	rubber	천연고무, 고무제품
+고등영어	ruin	파멸시키다, 망치다, 파멸
+고등영어	run	"달리다, 흐르다
+(기계를) 작동시키다, (회사 등을) 운영하다"
+고등영어	runway	활주로
+고등영어	rural	시골의
+고등영어	rush	서두르다, 돌진하다, 쇄도하다
+고등영어	rust	녹, 녹슬다
+고등영어	ruthless	무자비한
+고등영어	sabotage	"(공장 설비 따위의) 파괴, 방해
+파괴하다, 방해하다"
+고등영어	sack	"큰 자루, 봉지
+해고, 해고하다"
+고등영어	sacred	신성한, 종교적인
+고등영어	sacrifice	희생, 희생시키다, 제물로 바치다
+고등영어	saddle	(말 · 자전거 등의) 안장, 안장을 얹다
+고등영어	safeguard	보호하다, 보호장치, 안전장치
+고등영어	sagacious	현명한, 영리한, 슬기로운
+고등영어	sage	현인, 현명한
+고등영어	saint	덕이 높은 사람, 성인, 성-
+고등영어	sake	이익, 목적
+고등영어	salmon	연어
+고등영어	salute	경례하다, 인사하다
+고등영어	salvage	구조, 구조하다
+고등영어	salvation	구원, 구조
+고등영어	sanitary	위생적인, 위생의
+고등영어	satellite	인공위성, 위성
+고등영어	satire	풍자
+고등영어	savage	야만적인, 사나운
+고등영어	saw	톱, 톱질하다
+고등영어	scan	"자세히 살피다, 훑어보다
+정밀 검사"
+고등영어	scant	부족한, 빈약한
+고등영어	scar	상처, 흉터
+고등영어	scarce	부족한, 드문
+고등영어	scatter	흩뿌리다, 흩어지다
+고등영어	scenery	풍경, 경치
+고등영어	scent	냄새, 향기
+고등영어	scheme	계획, 책략
+고등영어	scholar	학자
+고등영어	scoop	국자, (국자로) 뜨다
+고등영어	scope	범위, 여지, 기회
+고등영어	score	"스코어, 득점
+20, 스무 개, (pl.) 다수"
+고등영어	scorn	경멸, 경멸하다
+고등영어	scorpion	전갈
+고등영어	scratch	긁다, 긁힌 자국
+고등영어	scream	비명을 지르다, 비명
+고등영어	script	대본, 원고
+고등영어	scrub	북북 문지르다, 문질러 씻기
+고등영어	sculpture	조각, 조각품
+고등영어	seal	"봉하다, 밀봉하다, 봉인
+바다표범"
+고등영어	seascape	바다경치, 바다풍경
+고등영어	seasoned	"조미한, 양념한
+경험 많은, 숙련된"
+고등영어	seaweed	해초
+고등영어	secondhand	"간접적인, 간접적으로
+중고의"
+고등영어	section	(나누어진) 한 부분, 부문
+고등영어	sector	분야, 부분
+고등영어	secure	안전한, 얻다, 획득하다
+고등영어	seed	씨, 씨앗
+고등영어	seemingly	외견상으로, 겉보기에는
+고등영어	segment	한 조각, 부분
+고등영어	segregate	격리하다, 분리하다, 차별하다
+고등영어	seizure	압수, 장악, 붙잡음, 발작
+고등영어	seldom	거의 ~않다
+고등영어	selection	선택, 선발
+고등영어	selfish	이기적인
+고등영어	selfless	사심 없는, 이타적인
+고등영어	sellout	매진
+고등영어	semester	한 학기
+고등영어	semicircle	반원
+고등영어	semifinal	준결승
+고등영어	sensation	"감각, 느낌
+센세이션, 세상을 떠들썩하게 하는 것"
+고등영어	sensible	분별 있는, 현명한, 느낄 수 있는
+고등영어	sensitive	민감한, 섬세한
+고등영어	sensory	감각의
+고등영어	sentence	"문장
+형벌, 선고, 선고하다"
+고등영어	sentimental	감상적인
+고등영어	sequence	연속, 순서
+고등영어	sermon	설교, 훈계
+고등영어	session	(특정한) 기간, 회기, 학기
+고등영어	settle	"정착하다, 해결하다
+(마음을) 진정시키다"
+고등영어	sew	바느질하다, 꿰매다
+고등영어	sewage	하수, 오물
+고등영어	shabby	낡아빠진
+고등영어	shallow	얕은
+고등영어	share	몫, 분배하다, 공유하다
+고등영어	shatter	산산이 부수다, 산산조각 나다
+고등영어	shave	면도하다
+고등영어	shed	"(눈물 · 빛 · 냄새 등을) 흘리다
+저장소, 헛간"
+고등영어	sheer	순전한, 순전히
+고등영어	shelf	선반
+고등영어	shellfish	조개, 갑각류
+고등영어	shelter	은신처, 피난처, 주거지
+고등영어	shepherd	양치기
+고등영어	shield	방패, 방패로 막다
+고등영어	shift	"이동시키다, 바꾸다
+이동, 변화"
+고등영어	shoal	"(물고기) 떼, 무리
+(보통 pl.) 다수, 다량"
+고등영어	shortage	부족
+고등영어	shortcoming	단점, 결함
+고등영어	shortcut	지름길
+고등영어	shorthand	속기
+고등영어	shovel	삽, 삽질하다
+고등영어	showcase	진열장, 공개행사
+고등영어	shrink	움츠러들다, 오그라들다
+고등영어	shrub	관목(키가 작고 덤불을 이루는 나무)
+고등영어	shrug	어깨를 으쓱하다
+고등영어	shudder	떨다, 몸서리치다
+고등영어	sibling	형제자매
+고등영어	sideboard	찬장, 식기대
+고등영어	sidestep	피하다, 회피하다
+고등영어	sidewalk	보도, 인도
+고등영어	siege	포위 공격, 포위
+고등영어	sigh	한숨 쉬다, 한숨
+고등영어	significant	중요한
+고등영어	signify	의미하다, 뜻하다
+고등영어	simplify	단순화하다
+고등영어	simultaneous	동시의
+고등영어	sin	죄, 죄악
+고등영어	singular	특이한, 유일한
+고등영어	sinister	불길한, 사악한
+고등영어	sink	가라앉다, 침몰시키다
+고등영어	sip	찔끔찔끔 마시다
+고등영어	skeleton	해골, 뼈대
+고등영어	skeptical	의심 많은, 회의적인
+고등영어	skid	미끄러지다, 미끄러짐
+고등영어	skip	깡충 뛰다, 건너뛰다, (식사를) 거르다, (수업을) 빼먹다
+고등영어	skylark	종달새
+고등영어	slam	(문 등을) 쾅 닫다, 털썩 내려놓다
+고등영어	slang	슬랭, 속어, 은어
+고등영어	slaughter	"도살하다, 학살하다
+도살, 학살"
+고등영어	slavery	노예, 노예제도
+고등영어	sled	썰매
+고등영어	sleepover	(아이들의) 밤샘 파티
+고등영어	slender	호리호리한, 날씬한, 빈약한
+고등영어	slice	얇게 썰다, 얇게 썬 조각
+고등영어	slight	약간의, 경미한
+고등영어	slip	미끄러지다, 미끄러짐
+고등영어	slogan	(기업 · 단체 등의) 구호, 슬로건
+고등영어	slope	비탈, 경사면
+고등영어	sly	교활한, 음흉한
+고등영어	smallpox	천연두, 마마
+고등영어	smash	힘껏 치다, 박살내다
+고등영어	smear	"더럽히다, 얼룩
+중상모략
+(기름 등을) 바르다"
+고등영어	smother	숨막히게 하다, 질식시키다
+고등영어	smudge	"자국, 얼룩
+번지다, 번지게 하다"
+고등영어	snail	달팽이
+고등영어	snap	덥석 물다, 딱 부러뜨리다, (찰칵, 탁) 소리 내다
+고등영어	snatch	낚아채다, 납치하다
+고등영어	sneak	몰래 움직이다, 몰래하다
+고등영어	sneer	비웃다, 조롱하다
+고등영어	sneeze	재채기하다
+고등영어	sniff	코를 킁킁거리다, 냄새를 맡다
+고등영어	soak	담그다, 흠뻑 젖다
+고등영어	soar	높이 치솟다, (물가 등이) 치솟다
+고등영어	sob	흐느껴 울다
+고등영어	sociology	사회학
+고등영어	soil	흙, 땅
+고등영어	solar	태양의, 태양열을 이용한
+고등영어	sole	유일한, 단독의
+고등영어	solemn	엄숙한, 근엄한
+고등영어	solid	고체의, 단단한, 고체
+고등영어	solitary	혼자 있는, 고독한
+고등영어	solution	해결, 해답, 녹임, 용액
+고등영어	somehow	어떻게든, 왠지, 왠지 모르게
+고등영어	somewhat	어느 정도, 다소, 그동안
+고등영어	soothe	달래다, 진정시키다
+고등영어	sophisticated	"세련된, 교양 있는
+정교한, 복잡한"
+고등영어	sore	아픈, 쓰린
+고등영어	sorrow	슬픔, 슬퍼하다
+고등영어	sound	"소리, ~처럼 들리다
+건전한
+(잠이) 깊은"
+고등영어	sour	신맛이 나는, 시큼한
+고등영어	source	원천, 출처
+고등영어	souvenir	기념품
+고등영어	sovereign	"군주, 국왕, 최고 권력을 가진
+자주적인, 독립된"
+고등영어	sow	(씨를) 뿌리다
+고등영어	span	지속 기간, 거리, 폭 범위
+고등영어	spank	(체벌로 엉덩이를) 찰싹 때리다
+고등영어	spare	"예비의, 여분의
+아끼다, (시간 · 돈 등을) 할애하다"
+고등영어	sparkle	불꽃, 번쩍임, 번쩍이다
+고등영어	sparrow	참새
+고등영어	spatial	공간의, 장소의
+고등영어	spawn	(물고기 · 개구리 따위가) 알을 낳다, (어떤 결과를) 낳다
+고등영어	spear	창, 투창
+고등영어	specialize	전문으로 하다, 전공하다
+고등영어	species	(분류상의) 종, 종류
+고등영어	specific	구체적인, 명확한, 특정한
+고등영어	specification	(자세한) 설명서
+고등영어	specimen	견본, 표본
+고등영어	spectacle	광경, 구경거리
+고등영어	spectacles	안경
+고등영어	speculate	추측하다
+고등영어	speedometer	속도계
+고등영어	sphere	구, 구형, 천체, 범위, 영역
+고등영어	spice	양념
+고등영어	spill	흘리다, 쏟다, 쏟음, 유출
+고등영어	spine	척추, 등뼈
+고등영어	splash	(물 · 흙탕 등을) 튀기다, 첨벙거리다
+고등영어	splendid	빛나는, 화려한, 훌륭한
+고등영어	split	나뉘다, 쪼개다, 찢다
+고등영어	spoil	망치다
+고등영어	spontaneous	자발적인, 자연적인
+고등영어	spot	"장소, 지점, 얼룩, 반점
+발견하다"
+고등영어	sprain	(손목 · 발목 등을) 삐다
+고등영어	sprinkle	(흩)뿌리다, 보슬비
+고등영어	sprint	(단거리를) 전력질주하다, 단거리 경기
+고등영어	sprout	싹트다, 생기다, 싹
+고등영어	spur	박차, 자극제, 박차를 가하다
+고등영어	squash	"짓누르다, 으깨다
+과즙, 음료"
+고등영어	squeeze	꽉 쥐다, 쥐어 짜내다
+고등영어	stab	찌르다
+고등영어	stable	안정적인
+고등영어	stack	더미, 많음, 쌓다, 쌓이다
+고등영어	staff	직원
+고등영어	staggering	비틀거리는, 깜짝 놀라게 하는
+고등영어	stain	"얼룩, 때
+얼룩지게 하다, 더럽히다"
+고등영어	stake	말뚝, 화형대, 지분
+고등영어	stale	신선하지 않은, 퀴퀴한
+고등영어	stalk	"살그머니 접근하다
+줄기"
+고등영어	stall	"(시장의) 가판대
+멈추다, 지연시키다"
+고등영어	stance	자세, 태도, 입장
+고등영어	stand	"서 있다, 일어서다
+견디다, 참다"
+고등영어	standpoint	관점, 견해
+고등영어	staple	중요한, 주요한, 주요 부분
+고등영어	stare	응시하다, 바라보다
+고등영어	starfish	불가사리
+고등영어	startup	신생 벤처기업
+고등영어	starvation	굶주림, 기아
+고등영어	state	"진술하다, 말하다
+국가, 나라, 주
+상태, 상황"
+고등영어	statesman	정치가
+고등영어	static	정지 상태의, 고정된
+고등영어	stationary	움직이지 않는, 고정시켜 놓은
+고등영어	statistics	통계, 통계학
+고등영어	statue	동상, 조각상
+고등영어	status	지위, 상황
+고등영어	steady	안정된, 꾸준한
+고등영어	steep	가파른, 비탈진
+고등영어	steer	(차 · 보트 등을) 조종하다
+고등영어	stem	유래하다, 생기다, (초목의) 줄기
+고등영어	stern	엄격한, 단호한
+고등영어	stew	(음식을) 끓이다, 끓인 요리
+고등영어	stick	"붙이다
+막대기, 찌르다"
+고등영어	stiff	뻣뻣한
+고등영어	stifle	숨을 막다, 억누르다
+고등영어	stigma	수치, 오명
+고등영어	still	"아직도, 여전히
+고요한, 정지한"
+고등영어	stimulate	자극하다
+고등영어	sting	"쏘다, 찌르다
+침, 가시"
+고등영어	stink	악취, 악취를 풍기다
+고등영어	stir	"휘젓다, (마음을) 휘젓다, 동요하다, 동요
+유발하다"
+고등영어	stitch	한 땀, 꿰매다, 수를 놓다
+고등영어	stock	"주식, 비축, 재고
+가축"
+고등영어	stockpile	비축, 비축량, 비축하다
+고등영어	store	가게, 저장, 저장하다
+고등영어	stout	뚱뚱한, 튼튼한
+고등영어	straightforward	"정직한
+간단한, 쉬운"
+고등영어	strain	긴장, 큰 부담, 긴장시키다
+고등영어	strategy	전술, 전략
+고등영어	straw	스트로, 빨대, 지푸라기, 짚
+고등영어	streamline	간소화하다, 능률화하다
+고등영어	strenuous	"(일 · 운동 등이) 힘든, 격렬한
+분투적인"
+고등영어	stress	"압박, 스트레스
+강조, 강세, 강조하다"
+고등영어	stricken	"~에 시달리는, ~당한
+(질병 등에) 걸린"
+고등영어	strict	엄격한
+고등영어	stride	걸음, 성큼성큼 걷다
+고등영어	strife	싸움, 투쟁
+고등영어	striking	눈에 띄는, 두드러진
+고등영어	string	"끈, 줄
+일련, 연속"
+고등영어	strip	(옷 · 껍질 등을) 벗기다, 뜯어내다
+고등영어	stripe	줄무늬, 줄
+고등영어	strive	분투하다, 노력하다
+고등영어	stroke	치기, 타격
+고등영어	stroll	거닐다, 산책하다, 산책
+고등영어	struggle	투쟁, 싸움, 분투하다
+고등영어	stubborn	끈질긴, 고집 센
+고등영어	stuff	"물건, 재료
+~에 채우다, 채워 넣다"
+고등영어	stumble	걸려 넘어지다, 비틀거리다
+고등영어	stun	기절시키다, 깜짝 놀라게 하다
+고등영어	sturdy	튼튼한, 견고한
+고등영어	subconscious	잠재의식의, 잠재의식
+고등영어	subject	"(실험) 대상, 피실험자
+과목, 주제, 화제
+국민, 신하"
+고등영어	subjective	주관적인
+고등영어	submarine	잠수함, 해저의
+고등영어	submerge	잠수하다, 물에 담그다, 물에 잠기다
+고등영어	submit	"제출하다
+항복하다, 굴복하다"
+고등영어	subordinate	종속된, 부하
+고등영어	subscriber	구독자, 기입자
+고등영어	subsequently	그 뒤에, 나중에
+고등영어	subside	가라앉다, 진정되다
+고등영어	substance	물질, 본질, 실체
+고등영어	substitution	대체, 대용
+고등영어	subtle	미묘한, 섬세한
+고등영어	subtract	빼다
+고등영어	suburban	교외의
+고등영어	succeed	"성공하다
+뒤를 잇다, 계승하다"
+고등영어	suck	빨아들이다, 빨다
+고등영어	sue	고소하다
+고등영어	sufficient	충분한
+고등영어	suffix	접미사
+고등영어	suicide	자살, 자살하다
+고등영어	suit	"수트, 신사복 한 벌
+어울리다, 적합하다"
+고등영어	summit	"(산의) 정상, 꼭대기
+정상회담"
+고등영어	summon	(증인 등을) 소환하다, 호출하다, 소집하다
+고등영어	sumptuous	고가의, 호화로운
+고등영어	superficial	표면상의, 피상적인
+고등영어	superior	뛰어난, ~보다 나은
+고등영어	supernatural	초자연적인
+고등영어	superstition	미신
+고등영어	supervise	감독하다, 지휘하다
+고등영어	supplement	보충, 보충하다, 추가하다
+고등영어	suppress	진압하다, 억누르다
+고등영어	supreme	최고의, 최상의
+고등영어	surface	표면, 수면
+고등영어	surge	"밀려오다, 솟구치다
+파도, 급증"
+고등영어	surgery	수술
+고등영어	surmise	추측하다, 추측
+고등영어	surmount	극복하다
+고등영어	surpass	~보다 낫다, ~을 능가하다
+고등영어	surplus	과잉, 흑자, 과잉의
+고등영어	surrender	항복하다, 포기하다, 항복, 포기
+고등영어	susceptible	민감한, 영향 받기 쉬운
+고등영어	suspend	"매달다
+중지시키다, 미루다"
+고등영어	suspicious	의심스러운
+고등영어	sustain	떠받치다, 유지하다
+고등영어	swallow	(꿀꺽) 삼키다, 제비
+고등영어	swamp	늪, 습지
+고등영어	swan	백조
+고등영어	swap	(서로) 교환하다, 교대로 하다
+고등영어	swarm	"(별 · 개미 등의) 떼, 무리
+들끓다"
+고등영어	sway	흔들리다, 흔들림
+고등영어	sweat	땀, 땀을 흘리다
+고등영어	sweep	쓸다, 휩쓸다
+고등영어	sweeping	광범위한, 전면적인
+고등영어	swell	부풀다, 팽창하다
+고등영어	swift	신속한, 빠른
+고등영어	swoop	급강하하다, 급습하다
+고등영어	sword	(긴) 칼, 검
+고등영어	symmetry	(좌우의) 대칭, 균형
+고등영어	sympathy	동정심, 공감
+고등영어	symptom	증상, 징후
+고등영어	synchronous	동시에 일어나는
+고등영어	synonym	동의어
+고등영어	synthetic	합성한, 인조의
+고등영어	systematic	체계적인, 유기적인
+고등영어	tablet	"알약
+현판, 액자"
+고등영어	taboo	터부, 금기
+고등영어	tackle	(스포츠) 태클, (문제와) 맞붙어 싸우다
+고등영어	tactic	전술, 전략
+고등영어	tag	꼬리표, 가격표
+고등영어	tailored	(옷이) 잘 맞도록 만든, 맞춤의
+고등영어	talkative	수다스러운, 말이 많은
+고등영어	tame	길들여진, 말을 잘 듣는, 길들이다
+고등영어	tan	(피부를)햇볕에 태우다, 그을리다
+고등영어	tangle	얽히다, 얽힘
+고등영어	tap	"(가볍게) 두드리다, 두드리는 소리
+이용하다
+(병 등의) 주둥이, (수도)꼭지"
+고등영어	task	해야 할 일, 직무
+고등영어	tease	집적거리다, 괴롭히다
+고등영어	telegraph	전보, 전보를 보내다
+고등영어	telescope	망원경
+고등영어	temper	"기질, 성질
+누그러뜨리다, 완화시키다"
+고등영어	temperate	온화한, 차분한, 절제된
+고등영어	tempo	속도, 박자, 템포
+고등영어	temporal	시간의, 일시적인
+고등영어	temporary	일시적인, 임시의
+고등영어	tempt	유혹하다, 꾀다
+고등영어	tenant	세입자, 임차인
+고등영어	tender	"(고기 따위가) 부드러운, 연한
+다정다감한"
+고등영어	tension	긴장, 긴장감, 팽팽한, 장력
+고등영어	tentative	임시의, 잠정적인
+고등영어	term	기간, 학기, 말, 용어, (친한) 사이
+고등영어	terminal	"끝의, 종말의
+종점, 터미널"
+고등영어	terrain	지역, 지형
+고등영어	terrific	굉장한, 무시무시한, 아주 멋진
+고등영어	territory	영토, 지역, 영역
+고등영어	testify	증언하다, 증명하다
+고등영어	testimony	증거, 증인
+고등영어	textile	직물, 섬유
+고등영어	texture	감촉, 질감
+고등영어	theft	도둑질, 도둑
+고등영어	theme	주제, 제목
+고등영어	theory	이론
+고등영어	therapy	치료, 치료법
+고등영어	thereafter	그 후, 그 이래
+고등영어	thereby	그것에 의하여, 그것 때문에
+고등영어	therefore	그런 까닭에, 따라서
+고등영어	thermal	열의, 뜨거운
+고등영어	thermometer	온도계
+고등영어	thesis	(학위) 논문, 논지
+고등영어	thieve	훔치다
+고등영어	thigh	허벅지
+고등영어	thorn	(식물의) 가시
+고등영어	thread	실
+고등영어	threat	위험, 협박, 위협하다
+고등영어	threshold	문지방, 문턱, 한계점
+고등영어	thrift	검소, 절약
+고등영어	thrive	번영하다, 무성해지다
+고등영어	throne	왕위, 왕좌
+고등영어	throng	군중, 떼, 떼지어 모이다
+고등영어	throughout	"도처에, 온통
+~동안 쭉, ~내내"
+고등영어	thrust	밀어 넣다, 밀치다, 찌르다
+고등영어	thump	"탁, 쿵
+탁 치다, 쿵 떨어지다"
+고등영어	tickle	간지럽게 하다
+고등영어	tide	밀물과 썰물, 조수
+고등영어	tidy	단정한, 깔끔한
+고등영어	tilt	경사, 기울어짐, 기울다
+고등영어	timber	목재
+고등영어	timely	시기적절한
+고등영어	timid	겁 많은, 소심한
+고등영어	tint	색깔, 색조, (머리의) 염색, 염색하다
+고등영어	tiny	작은, 조그마한
+고등영어	tip	"팁, 봉사료
+팁, 조언
+끝, 끝부분"
+고등영어	tissue	"티슈
+(근육이나 신경 등의) 조직"
+고등영어	titanic	매우 거대한, 엄청난
+고등영어	toad	두꺼비
+고등영어	tobacco	담배
+고등영어	tolerate	참다, 견디다
+고등영어	toll	(유료 도로 · 다리 등의) 통행료
+고등영어	tomb	묘지
+고등영어	torch	횃불
+고등영어	torment	고통, 고뇌, 고통을 주다
+고등영어	torrent	급류, (pl.) 억수
+고등영어	torture	고문, 고통
+고등영어	toss	"(가볍게) 던지다, (공을) 토스하다
+뒹굴다, 뒤척이다"
+고등영어	touch	"접촉하다
+마음을 움직이다, 감동시키다"
+고등영어	tow	끌다, 견인
+고등영어	toward	~쪽으로, ~을 향하여
+고등영어	toxic	유독한, 유독성의
+고등영어	trace	자취, 발자국, 추적하다
+고등영어	tragic	비참한, 비극적인
+고등영어	trail	흔적, 자취, 끌다
+고등영어	trait	특성, 특징
+고등영어	traitor	반역자, 배신자
+고등영어	tranquil	조용한, 고요한
+고등영어	transaction	거래, 매매, (업무의) 처리
+고등영어	transcribe	기록하다, 옮겨 적다
+고등영어	transfer	옮기다, 이동하다, 갈아타다
+고등영어	transform	변형시키다, 바꾸다
+고등영어	transient	잠시 머무르는, 일시적인
+고등영어	transition	변천, 변화
+고등영어	translate	번역하다, 통역하다
+고등영어	transmit	보내다, 전송하다
+고등영어	transparent	투명한, 비치는
+고등영어	transplant	이식, 이식하다, 옮겨 심다
+고등영어	transport	운송, 운송하다
+고등영어	traumatic	정신적 쇼크의, 대단히 충격적인
+고등영어	treaty	조약, 협정
+고등영어	trek	길고 고된 여행, 트레킹, 오래 걷다
+고등영어	tremble	떨다, 떨림
+고등영어	tremendous	엄청난, 굉장한
+고등영어	trepidation	공포, 두려움
+고등영어	trespass	침입하다, 침해하다
+고등영어	trial	시도, 재판
+고등영어	tribe	부족, 종족
+고등영어	tribute	경의, 찬사
+고등영어	tricky	까다로운
+고등영어	trifle	약간, 하찮은 것, 사소한 일
+고등영어	trigger	방아쇠, 발사하다, 촉발시키다
+고등영어	trim	다듬다, 손질하다
+고등영어	triple	3배, 3배로 하다, 3중의
+고등영어	triumph	승리, 대성공
+고등영어	trivial	쓸데없는, 하찮은
+고등영어	troop	군대, 부대, 무리
+고등영어	tropic	열대 지방
+고등영어	trunk	"여행용 큰 가방
+(코끼리) 코, 나무의 몸통"
+고등영어	tub	욕조, 통
+고등영어	tuition	수업, 수업료
+고등영어	tumble	굴러 떨어지다, 폭락하다
+고등영어	tune	멜로디, 곡조, 조율하다, 튜닝하다
+고등영어	turmoil	소란, 소동
+고등영어	turnip	순무
+고등영어	twig	작은 가지
+고등영어	twilight	황혼, 쇠퇴기
+고등영어	twin	쌍둥이의 한 사람
+고등영어	twinkle	반짝반짝 빛나다
+고등영어	twofold	2배의, 2중의, 2배로
+고등영어	typhoon	태풍
+고등영어	tyrannical	독재적인, 포악한
+고등영어	ubiquitous	어디에나 존재하는
+고등영어	ultimate	궁극적인, 최후의
+고등영어	ultraviolet	자외선의, 자외선
+고등영어	unanimous	만장일치의
+고등영어	uncertain	불확실한
+고등영어	unchangeable	변경할 수 없는
+고등영어	uncover	알아내다, 폭로하다, 덮개를 벗기다
+고등영어	undercover	비밀의, 첩보활동의
+고등영어	undergo	(안 좋은 일 등을) 겪다, (수술 등을) 받다
+고등영어	undergraduate	대학생
+고등영어	underlie	~의 밑에 있다, ~의 기초가 되다
+고등영어	underline	밑줄을 긋다, 강조하다
+고등영어	undermine	(기반 · 권위 등을) 약화시키다
+고등영어	underpin	뒷받침하다, 버팀목을 대다
+고등영어	undertake	떠맡다, 착수하다
+고등영어	underway	(계획 따위가) 진행 중인, 항해 중인
+고등영어	uneasy	불안한, 우려되는
+고등영어	unfold	펴다, 펼치다
+고등영어	uniform	"유니폼, 제복
+한결같은, 동일한"
+고등영어	unify	통합하다, 통일하다
+고등영어	unilateral	일방적인, 단독의
+고등영어	union	연합, 조합, 동맹
+고등영어	unite	연합하다, 통합시키다.
+고등영어	unjust	부당한, 불공평한
+고등영어	unlikely	있음직하지 않은, ~일 것 같지 않은
+고등영어	unlock	열다, 자물쇠를 열다
+고등영어	unseemly	(행동 등이) 어울리지 않는, 부적당한
+고등영어	unsettling	불안하게 하는
+고등영어	upcoming	다가오는, 앞으로 곧 생길
+고등영어	uphold	유지시키다, 지지하다
+고등영어	upright	"똑바른, 수직의
+올바른, 정직한"
+고등영어	upset	"화가 난, 속상한
+화나게 하다, 혼란, 속상함
+뒤엎다, 전복"
+고등영어	upward	위로, 위로 향한
+고등영어	urban	도시의
+고등영어	urge	충동, 욕구, 촉구하다
+고등영어	urgent	긴급한
+고등영어	usher	(극장 · 교회 등의) 안내인, 안내하다
+고등영어	utensil	(가정이나 주방의) 가구, 도구, 가정용품
+고등영어	utility	"유용성, 쓸모 있는 것
+(수도 · 전기 등의) 공익 시설"
+고등영어	utmost	"최대의, 최고의
+최대한도"
+고등영어	utter	완전한, 말하다
+고등영어	utterly	완전히
+고등영어	vacant	(자리 · 방 · 일자리 등이) 비어 있는
+고등영어	vacuum	진공, 진공청소기로 청소하다
+고등영어	vague	모호한, 희미한
+고등영어	vain	헛된, 허영심이 많은
+고등영어	valid	유효한, 효과 있는, 타당한
+고등영어	validate	입증하다, 인정하다
+고등영어	value	"가치
+높이 평가하다, 소중히 하다"
+고등영어	vanguard	(군대 공격이나 사회운동의) 선봉, 선구자
+고등영어	vanish	사라지다, 없어지다
+고등영어	vanity	허영심, 자만심, 헛됨
+고등영어	vapor	증기
+고등영어	variety	다양성, 변화
+고등영어	vary	각기 다르다, 달라지다
+고등영어	vast	엄청난, 거대한
+고등영어	vegetarian	채식주의자, 채식주의의
+고등영어	vegetation	식물, 초목
+고등영어	vehicle	차량, (운송, 전달) 수단
+고등영어	vein	정맥, (식물의) 잎맥
+고등영어	velocity	속도, 속력
+고등영어	vendor	판매인, 행상인
+고등영어	ventilation	환기, 통풍
+고등영어	venture	"모험, 모험적 사업
+(위험을 무릅쓰고 모험하듯) 가다[하다]"
+고등영어	verb	동사
+고등영어	verbal	말의, 구두의
+고등영어	verdict	(배심의) 평결, 판단
+고등영어	verge	가장자리, 직전
+고등영어	verify	진실을 입증하다, 확인하다
+고등영어	verse	운문, 시
+고등영어	version	~판, 버전
+고등영어	versus	~대(vs.)
+고등영어	vertical	수직의, 세로의
+고등영어	vessel	(큰) 배, 그릇
+고등영어	veterinarian	수의사
+고등영어	vex	괴롭히다, 화나게 하다
+고등영어	via	~을 경유하여, ~를 통하여
+고등영어	viable	실행 가능한, 생존 가능한
+고등영어	vibrant	"(소리 · 음성이) 떨리는
+활기찬, 힘찬"
+고등영어	vicious	사악한, 사나운
+고등영어	victim	희생자, 피해자
+고등영어	view	"봄, 경치, 바라보다
+견해, ~라고 생각하다"
+고등영어	vigor	활기, 정력
+고등영어	villain	악당
+고등영어	vine	포도 덩굴, 덩굴 식물
+고등영어	vinegar	식초
+고등영어	violation	위반, 침해
+고등영어	violence	폭력, 폭행
+고등영어	virtually	실제로, (컴퓨터를 이용한) 가상으로
+고등영어	virtue	미덕, 선행
+고등영어	visible	(눈에) 보이는, 뚜렷한
+고등영어	vision	시력, 환상, 전망
+고등영어	visual	시각의, 시각적인
+고등영어	vital	"생명의, 생기 넘치는
+필수적인, 중요한"
+고등영어	vivid	생생한, 선명한
+고등영어	vocation	천직, 직업
+고등영어	vogue	유행
+고등영어	volatile	"변덕스러운, 불안정한
+휘발성의"
+고등영어	volcano	화산
+고등영어	volume	"양, 부피, 음량(볼륨)
+책, 권"
+고등영어	vomit	구토하다
+고등영어	voucher	상품권, 할인권, 쿠폰
+고등영어	vow	"맹세, 서약
+맹세하다, 서약하다"
+고등영어	vowel	모음, 모음의
+고등영어	voyage	항해, 항해하다
+고등영어	vulgar	저속한, 상스러운
+고등영어	vulnerable	상처받기 쉬운, 피해를 입기 쉬운
+고등영어	wag	(꼬리 등을) 흔들다
+고등영어	waggle	흔들다, 흔들리다
+고등영어	wagon	4륜마차
+고등영어	wail	울부짖다, 통곡
+고등영어	wander	헤매다, 떠돌아다니다
+고등영어	wane	"작아지다, 약해지다
+작아짐, 약해짐"
+고등영어	ware	제품, 상품
+고등영어	warehouse	창고
+고등영어	warlike	호전적인, 전쟁의
+고등영어	warrant	보증, (수색 · 체포 등을 위한) 영장, 보증하다
+고등영어	warrior	전사, 용사
+고등영어	wary	경계하는, 조심하는
+고등영어	wastebasket	휴지통
+고등영어	wasteland	황무지, 불모지
+고등영어	watchful	주의깊은, 경계하는
+고등영어	wax	"왁스, 밀랍
+(달이) 차오르다, 점차 커지다"
+고등영어	weary	피곤한, 지친, 싫증난
+고등영어	weave	짜다, 엮어 만들다
+고등영어	web	거미줄, (복잡하게 연결된) ~망
+고등영어	weep	울다, 눈물을 흘리다
+고등영어	weigh	무게가 나가다, 무게를 재다, 저울질하다
+고등영어	weird	신비스러운, 기묘한, 이상한
+고등영어	welfare	복지, 복지의
+고등영어	wetland	습지, 습지대
+고등영어	wheat	밀
+고등영어	whereas	그에 반하여, 반면에
+고등영어	whim	변덕, 일시적 기분
+고등영어	whip	"채찍질하다, 채찍
+휘젓다, 휙 움직이게 하다"
+고등영어	whirl	빙빙 돌다, 빙빙 돌기
+고등영어	whisper	속삭이다, 속삭임
+고등영어	wholesale	도매, 도매의
+고등영어	wholesome	건강에 좋은, 유익한
+고등영어	wicked	못된, 사악한
+고등영어	widespread	넓게 펼쳐진, 광범위한
+고등영어	widow	미망인, 홀어미
+고등영어	wilderness	황야, 황무지
+고등영어	will	의지, 의지력
+고등영어	wind	"바람
+감다, 돌리다"
+고등영어	wipe	닦다, 씻다
+고등영어	witch	마녀
+고등영어	withdraw	"물러나다, 철수하다
+(돈을) 인출하다"
+고등영어	withhold	(정보 등을) 주지 않다, 보류하다
+고등영어	withstand	저항하다, 견뎌내다
+고등영어	witness	목격하다, 목격자, 증인
+고등영어	wizard	(남자) 마법사
+고등영어	woe	비통, 불행
+고등영어	work	"일, 일하다, 연구하다, 공부하다
+작동하다, 효과가 있다
+작품"
+고등영어	workforce	전 종업원, 노동 인구
+고등영어	workload	업무량, 작업량
+고등영어	workout	운동
+고등영어	worn-out	닳아 해진, 낡은
+고등영어	worship	"숭배, 예배
+숭배하다, 예배하다"
+고등영어	worthwhile	가치 있는, 보람 있는
+고등영어	wrap	싸다, 포장하다, 싸개
+고등영어	wreck	난파선, 파괴된 차, 파괴하다
+고등영어	wretched	비참한, 불쌍한
+고등영어	wrinkle	주름
+고등영어	yawn	하품하다
+고등영어	yearn	그리워하다, 동경하다, 갈망하다
+고등영어	yell	소리치다, 고함치다, 고함, 외침
+고등영어	yield	"생산하다, (결과 등을) 만들어내다, 생산량
+양보하다, 항복하다"
+고등영어	zeal	열정, 열의
+고등영어	zealot	광신자, 열성적인 사람
+고등영어	zip	"(총알 · 차 등이) 지입! 소리 내며 나아가다
+지퍼, 지퍼를 잠그다
+우편번호"
+고등영어	zoology	동물학
+초등영어	judge	판사, 판단하다
+초등영어	peak	꼭대기, 최고점
+초등영어	hook	갈고리
+초등영어	dig	파다
+초등영어	tomb	묘지
+초등영어	soil	흙, 땅
+초등영어	separate	분리하다
+초등영어	grammar	문법
+초등영어	bud	싹
+초등영어	fairy	요정, 요정의
+초등영어	chase	쫓다, 추적하다
+초등영어	bruise	멍
+초등영어	jail	교도소
+초등영어	loosen	느슨하게 하다, 풀다
+초등영어	direction	방향, 지시
+초등영어	ax	도끼
+초등영어	string	끈, 실
+초등영어	slip	미끄러지다
+초등영어	lunar	달의, 음력의
+초등영어	beverage	음료, 마실 것
+초등영어	calm	고요한, 평온한
+초등영어	earn	(돈을)벌다
+초등영어	chimney	굴뚝
+초등영어	palm	손바닥
+초등영어	eager	간절히 바라는, 열망하는
+초등영어	equal	같은, 동등한
+초등영어	wrinkle	주름
+초등영어	tickle	간지럽게 하다
+초등영어	unique	유일한, 독특한
+초등영어	aware	~을 알고 있는
+초등영어	cottage	오두막
+초등영어	male	남자, 수컷;남자의
+초등영어	female	여성, 암컷;여성의
+초등영어	tune	곡조, 멜로디
+초등영어	examination	시험, 조사[검사]
+초등영어	amount	양, 총액
+초등영어	freezing	몹시 추운
+초등영어	flame	불꽃, 화염
+초등영어	injure	상처를 입히다, 해를 주다
+초등영어	global	지구의, 세계적인
+초등영어	add	더하다, 추가하다
+초등영어	effort	노력
+초등영어	approach	접근하다, 접근
+초등영어	mean	의미하다
+초등영어	fellow	친구
+초등영어	seek	찾다
+초등영어	thermometer	온도계
+초등영어	knowledge	지식
+초등영어	bomb	폭탄
+초등영어	hut	오두막
+초등영어	pork	돼지고기
+초등영어	join	참여하다
+초등영어	insect	곤충
+초등영어	clap	손뼉을 치다
+초등영어	 fuel	연료
+초등영어	recognize	알아차리다
+초등영어	spread	퍼뜨리다
+초등영어	sled	썰매
+초등영어	trend	유행
+초등영어	sour	신맛이 나는
+초등영어	deaf	귀가 먹은, 청각 장애가 있는
+초등영어	construct	건설하다
+초등영어	appear	"나타나다.
+~처럼 보이다"
+초등영어	disease	병, 질병
+초등영어	nickname	별명, 애칭
+초등영어	recommend	추천하다, ~을 권하다
+초등영어	pregnant	임신한
+초등영어	medical	의학의
+초등영어	medicine	약간, 하찮은 것, 사소한 일
+초등영어	anniversary	기념일
+초등영어	harvest	수확, 추수
+초등영어	sprain	(손목,발목 등을)삐다
+초등영어	chill	"쌀쌀한
+냉기"
+초등영어	limit	"한계
+한정하다"
+초등영어	tradition	전통
+초등영어	baggage	수하물, 짐
+초등영어	indoor	실내의
+초등영어	outdoor	집 밖의, 야외의
+초등영어	proper	적당한, 적절한
+초등영어	glue	접착제, 풀
+초등영어	fan	"(가수, 영화 등의)팬
+부채, 선풍기"
+초등영어	pardon	뭐라고요?(다시 말해달라는 뜻으로 쓰는 말)
+초등영어	increase	"증가하다
+증가"
+초등영어	job	직업, 일
+초등영어	ignore	무시하다
+초등영어	mild	부드러운, 온화한
+초등영어	discover	발견하다
+초등영어	deceive	속이다
+초등영어	change	"변하다, 바꾸다
+잔돈"
+초등영어	actually	실제로, 사실은
+초등영어	source	근원, 원천
+초등영어	achieve	성취하다
+초등영어	mostly	대부분
+초등영어	value	가치
+초등영어	lie	"거짓말
+거짓말하다"
+초등영어	dot	"점
+점을 찍다"
+초등영어	view	경치
+초등영어	election	선거
+초등영어	major	주요한
+초등영어	minor	중요치 않은, 작은
+초등영어	majority	대부분
+초등영어	contain	(속에)담고 있다
+초등영어	liberty	자유
+초등영어	feed	음식을 먹이다
+초등영어	vote	"투표하다
+투표"
+초등영어	lift	들어 올리다
+초등영어	charge	요금, 수수료
+초등영어	coward	겁쟁이
+초등영어	purchase	사다, 구입하다
+초등영어	patient	"1. 인내심이 강한
+2. 환자"
+초등영어	crop	농작물
+초등영어	regulation	규칙, 규정
+초등영어	physical	육체의
+초등영어	vehicle	차량
+초등영어	agriculture	농업
+초등영어	aid	"돕다
+도움"
+초등영어	attach	붙이다
+초등영어	tear	눈물
+초등영어	university	대학교
+초등영어	copper	"구리
+동전"
+초등영어	beast	짐승
+초등영어	complain	불평하다
+초등영어	huge	거대한
+초등영어	graduation	졸업
+초등영어	metal	금속
+초등영어	industry	산업
+초등영어	exit	출구
+초등영어	search	찾다, 수색하다
+초등영어	temperature	온도
+초등영어	joy	기쁨
+초등영어	sunset	일몰
+초등영어	devil	악마
+초등영어	accept	받아들이다
+초등영어	bottom	밑바닥, 맨 아래
+초등영어	suppose	추측하다, 생각하다
+초등영어	few	거의 없는, 소수의
+초등영어	allow	허락하다
+초등영어	pity	불쌍히 여김, 애석한 일
+초등영어	bless	축복하다
+초등영어	education	교육
+초등영어	region	지역
+초등영어	jellyfish	해파리
+초등영어	starfish	불가사리
+초등영어	robbery	강도질, 강탈
+초등영어	district	구역, 지역
+초등영어	background	배경
+초등영어	particular	특별한, 특이한
+초등영어	lend	빌려주다
+초등영어	exactly	정확하게
+초등영어	emergency	비상사태
+초등영어	depend	의존하다
+초등영어	elder	손위의, 나이가 더 많은
+초등영어	terrible	끔찍한, 심한
+초등영어	cheek	뺨, 볼
+초등영어	necessary	필요한
+초등영어	avoid	피하다
+초등영어	favorite	마음에 드는, 매우 좋아하는
+초등영어	desire	"바라다
+바람"
+초등영어	general	일반적인
+초등영어	destroy	파괴하다
+초등영어	destruction	파괴
+초등영어	frightful	무서운
+초등영어	doubt	"의심
+의심하다"
+초등영어	among	~의 사이에
+초등영어	punish	벌을 주다
+초등영어	handle	"손잡이
+다루다, 처리하다"
+초등영어	opportunity	기회
+초등영어	ditch	도랑
+초등영어	arrange	가지런히 배열하다
+초등영어	severe	엄격한
+초등영어	sink	가라앉다
+초등영어	continent	대륙
+초등영어	typical	전형적인, 대표하는
+초등영어	range	범위, 구역
+초등영어	evolve	발전하다, 진화하다
+초등영어	genius	천재, 천재적 재능
+초등영어	invade	침략하다, 침입하다
+초등영어	downtown	중심가, 도심지, 상가
+초등영어	uptown	도시의 주택가
+초등영어	evil	사악한
+초등영어	aim	"겨누다
+목표"
+초등영어	arrow	화살
+초등영어	public	"대중
+일반인의"
+초등영어	hire	고용하다
+초등영어	trap	덫, 함정
+초등영어	scent	향기, 냄새
+초등영어	textbook	교과서
+초등영어	jealous	질투심 많은, 시기하는
+초등영어	adult	성인
+초등영어	content	내용물
+초등영어	volunteer	자원봉사자
+초등영어	grief	(큰)슬픔
+초등영어	row	열, 줄
+초등영어	slight	약간의, 경미한
+초등영어	flat	평평한, 납작한
+초등영어	swear	맹세하다
+초등영어	persuade	설득하다
+초등영어	belong	~에 속하다
+초등영어	divide	나누다, 쪼개다
+초등영어	feature	얼굴의 생김새, 용모
+초등영어	port	항구
+초등영어	concerned	"걱정스러운, 염려하는
+관계 있는, 관심 있는"
+초등영어	divorce	이혼
+초등영어	tap	가볍게 두드리다
+초등영어	fit	(치수.타입 등이)들어맞다
+초등영어	ashamed	창피한, 부끄러운
+초등영어	oppose	반대하다
+초등영어	opponent	(경기. 대회 등의)상대, 반대자
+초등영어	wipe	닦다
+초등영어	grocery	식료품류, 식품점
+초등영어	task	일, 임무
+초등영어	slope	경사면, 비탈
+초등영어	pot	병, 통, 단지
+초등영어	outline	윤곽
+초등영어	tidy	단정한, 깔끔한
+초등영어	route	길, 노선
+초등영어	narration	이야기, 서술
+초등영어	footprint	발자국
+초등영어	conflict	"싸움, 대립
+싸우다"
+초등영어	offer	"제공하다
+제안하다, 제안"
+초등영어	acid	신, 신맛의
+초등영어	false	그릇된, 틀린
+초등영어	fat	살찐, 지방
+초등영어	combination	결합, 조합
+초등영어	solution	해결, 해답, 녹임, 용액
+초등영어	holy	신성한, 성스러운
+초등영어	edge	모서리, 끝
+초등영어	pray	빌다, 기원하다
+초등영어	overcome	극복하다
+초등영어	devote	헌신하다
+초등영어	settle	"정착하다
+해결하다"
+초등영어	block	"막다, 봉쇄하다
+건물 한 덩어리"
+초등영어	bravery	용기
+초등영어	extent	범위, 넓이
+초등영어	instruct	가르치다, 교육하다
+초등영어	neat	산뜻한, 깔끔한
+초등영어	dull	따분한, 재미없는
+초등영어	apart	따로, 떨어져서
+초등영어	fasten	묶다, 채우다
+초등영어	satellite	위성, 인공위성
+초등영어	detail	"세부사항
+상세히 설명하다"
+초등영어	clue	실마리, 단서
+초등영어	pour	따르다, 붓다
+초등영어	measure	측정하다
+초등영어	wander	헤매다, 떠돌아다니다
+초등영어	spoil	망치다
+초등영어	negative	부정적인
+초등영어	evidence	증거
+초등영어	journey	여행
+초등영어	annoy	괴롭히다, 성가시게 굴다
+초등영어	sigh	"한숨 쉬다
+한숨"
+초등영어	pulse	맥박, 진동
+초등영어	scream	소리치다, 비명을 지르다
+초등영어	locate	~에 위치시키다, 위치를 찾아내다
+초등영어	defense	방어, 수비
+초등영어	conduct	"행동하다
+지도하다"
+초등영어	peninsula	반도
+초등영어	endure	견디다, 참다
+초등영어	scene	장면
+초등영어	violence	폭력, 폭행
+초등영어	buddhist	불교도, 불교신자
+초등영어	eraser	지우개
+초등영어	decorate	장식하다
+초등영어	frequent	자주 일어나는, 빈번한
+초등영어	otherwise	그렇지 않으면
+초등영어	contaminate	오염시키다, 더럽히다
+초등영어	cemetery	공동묘지
+초등영어	circumstance	환경
+초등영어	urgent	긴급한
+초등영어	raft	똇목, 고무보트
+초등영어	guility	유죄의, 최책감이 드는
+초등영어	blossom	"꽃
+꽃을 피우다"
+초등영어	ruler	자
+초등영어	immediate	즉시의, 당장의
+초등영어	destination	목적지, 목표
+초등영어	trace	"자취
+추적하다"
+초등영어	author	저자, 작가
+초등영어	permanent	영구적인, 불변의
+초등영어	original	최초의, 본래의
+초등영어	share	"몫
+나눠 갖다"
+초등영어	diameter	지름
+초등영어	critical	비판적인
+초등영어	prosper	번영하다
+초등영어	mission	임무, 직무
+초등영어	impossible	불가능한
+초등영어	threat	위협, 협박
+초등영어	property	재산
+초등영어	according to	"~에 따라
+~에 의하면"
+초등영어	murder	"살인
+살해하다"
+초등영어	appeal	간청하다
+초등영어	atmosphere	분위기, 공기
+초등영어	voyage	항해, 여행
+초등영어	suspicious	의심스러운
+초등영어	leap 	뛰어오르다
+초등영어	leak	새다, 누출
+초등영어	merchandise	상품, 제품
+초등영어	merchant	상인
+초등영어	gravity	중력, 인력
+초등영어	crosswalk	횡단보도
+초등영어	ethnic	민족의
+초등영어	curriculum	교과과정
+초등영어	navigation	항해, 운항
+초등영어	burst	폭발하다, 터지다
+초등영어	sweep	쓸다, 청소하다
+초등영어	contrary	"반대의
+정반대"
+초등영어	disgust	역겨움, 혐오감
+초등영어	greed	욕심, 탐욕
+초등영어	desert	사막
+초등영어	suck	빨다, 빨아들이다
+초등영어	canyon	깊은 협곡, 골짜기
+초등영어	fume	"연기
+연기나다"
+초등영어	terrific	굉장한, 무시무시한
+초등영어	ray	광선, 빛
+초등영어	drip	뚝뚝 떨어지다
+초등영어	rage	"분노
+분노하다"
+초등영어	soak	담그다, 흠뻑 젖다
+초등영어	attorney	변호사
+초등영어	donation	기부
+초등영어	flaw	흠, 결점
+초등영어	drag	끌다, 끌고 가다
+초등영어	eternal	영원한, 변함없는
+초등영어	witch	마녀
+초등영어	frost	서리, 성에
+초등영어	flee	달아나다
+초등영어	scar	상처, 흉터
+초등영어	woe	고통, 비통
+초등영어	reap	수확하다
+초등영어	store	"가게
+저장하다"
+초등영어	tend	~하는 경향이 있다
+초등영어	connect	연결하다, 연결되다
+초등영어	delete	삭제하다, 지우다
+초등영어	commercial	상업의
+초등영어	nod	(머리를)끄덕이다
+초등영어	physician	의사
+초등영어	domestic	국내의, 집안의
+초등영어	nervous	불안해하는
+초등영어	board	"판자
+(차, 배, 비행기 등을)타다"
+초등영어	avoard	(배, 비행기, 기차 등에)타고, 탑승하여
+초등영어	arms	무기
+초등영어	idol	우상
+초등영어	rural	시골의
+초등영어	cease	중지하다
+초등영어	outstanding	눈에 띄는, 뛰어난
+초등영어	fascinate	매혹하다, 넋을 빼앗다
+초등영어	obstacle	방해, 장애물
+초등영어	neither	(둘 중에서)~쪽도 아니다
+초등영어	meadow	목초지, 초원
+초등영어	split	쪼개다, 나누다
+초등영어	metro	"지하철
+수도, 대도시"
+초등영어	bay	(작은)만 (바다가 육지 속으로 쑥 들어온 곳)
+초등영어	drought	가뭄
+초등영어	candidate	후보자, 지원자
+초등영어	pub	술집
+초등영어	escalate	증가하다, 오르다
+초등영어	comet	혜성
+초등영어	offend	화나게 하다
+초등영어	oyster	굴
+초등영어	avenge	복수하다
+초등영어	breakdown	고장, 파손
+초등영어	emerge	(물속, 어둠 속 등에서)나오다
+초등영어	politician	정치가
+초등영어	myth	신화
+초등영어	drift	떠가다
+초등영어	core	핵심, 중심
+초등영어	adore	숭배하다, 동경하다
+초등영어	thorn	(식물의)가시
+초등영어	caution	조심, 경고
+초등영어	sculpture	조각품
+초등영어	germ	세균
+초등영어	liberal	자유주의의
+초등영어	oval	타원형의
+초등영어	apron	앞치마
+초등영어	demon	악마, 귀신
+초등영어	protein	단백질
+초등영어	ceiling	천장
+초등영어	surface	표면, 표층
+초등영어	cannon	대포
+초등영어	barley	보리
+초등영어	detach	떼어내다
+초등영어	surrender	항복하다
+초등영어	gender	성, 성별
+초등영어	dare	감히~하다
+초등영어	hoop	둥근 테, 링
+초등영어	razor	면도칼, 면도기
+초등영어	prove	입증하다, 인정하다
+초등영어	bump	부딛히다
+초등영어	mummy	미라
+초등영어	territory	영토, 지역, 영역
+초등영어	familiar	친근한
+초등영어	conceited	자부심이 강한, 자만하는
+초등영어	device	장치
+초등영어	bother	괴롭히다, 신경 쓰이게 하다
+초등영어	broom	빗자루
+초등영어	shovel	삽
+초등영어	assume	추정하다
+초등영어	buddy	친구, 여보게
+초등영어	belly	배, 복부
+초등영어	gain	얻다, 획득하다
+초등영어	obey	복종하다
+초등영어	mass	큰 덩어리, 많은 양
+초등영어	mount	"(산, 말 등에) 오르다
+산"
+초등영어	howl	울부짖다, 통곡
+초등영어	burden	무거운 짐, 부담
+초등영어	diverse	다양한, 가지각색의
+초등영어	chat	잡담하다
+초등영어	mirror	거울
+초등영어	guard	"지키다
+경비원"
+초등영어	stretch	뻗치다, 늘이다
+초등영어	roll	회전하다
+초등영어	fin	지느러미
+초등영어	contact	접촉, 연락
+초등영어	rent	빌리다, 빌려주다
+초등영어	boil	끓이다
+초등영어	manage	경영하다, 관리하다
+초등영어	fair	"공정한
+정정당당히"
+초등영어	dive	잠수하다, 물에 담그다, 물에 잠기다
+초등영어	wrap	싸다, 포장하다
+초등영어	pack	꾸러미, 포장
+초등영어	dump	(쓰레기 따위를) 내버리다
+초등영어	talent	재주, 재능 있는 사람
+초등영어	report	"보고하다
+보고서"
+초등영어	propose	제안하다, 청혼하다
+초등영어	extra	"여분의
+여분으로"
+초등영어	classic	고전적인
+초등영어	tie	"묶다
+묶는 끈"
+초등영어	law	법, 법률
+초등영어	heel	뒤꿈치, 뒤축
+초등영어	survive	생존하다, 살아남다
+초등영어	 chick	병아리
+초등영어	sparrow	참새
+초등영어	shark	상어
+초등영어	bull	황소
+초등영어	snake	뱀
+초등영어	duck	오리
+초등영어	lamb	어린 양,양고기
+초등영어	turtle	거북이
+초등영어	spider	거미
+초등영어	leopard	표범
+초등영어	dolphin	돌고래
+초등영어	eel	뱀장어
+초등영어	hawk	매
+초등영어	bee	벌
+초등영어	camel	낙타
+초등영어	cock	수탉
+초등영어	bat	박쥐,(야구)배트
+초등영어	snail	달팽이
+초등영어	bug	곤충,벌레
+초등영어	gull	갈매기
+초등영어	turkey	칠면조
+초등영어	owl	올빼미
+초등영어	mouse	생쥐
+초등영어	deer	사슴
+초등영어	fruit	과일
+초등영어	soap	비누
+초등영어	ocean	바다
+초등영어	fog	안개
+초등영어	foggy	안개 낀
+초등영어	grow	자라다
+초등영어	garlic	마늘
+초등영어	claw	발톱
+초등영어	quarrel	싸움;싸우다
+초등영어	gun	총
+초등영어	pull	끌어당기다
+초등영어	easy	쉬운
+초등영어	beggar	거지
+초등영어	warn	경고하다
+초등영어	heaven	천국,하늘
+초등영어	bubble	거품,비눗방울
+초등영어	wall	벽, 담장
+초등영어	problem	문제
+초등영어	dark	어두운
+초등영어	triangle 	삼각형, 트라이앵글(악기)
+초등영어	doll	인형
+초등영어	force	힘,무력
+초등영어	magical	마술적인,신비한
+초등영어	choose	선택하다
+초등영어	military	군대의
+초등영어	tooth	이,치아
+초등영어	hurt	다치게 하다, 아프게 하다
+초등영어	throw	던지다
+초등영어	soldier	군인
+초등영어	kindergarten	유치원
+초등영어	noisy	시끄러운
+초등영어	courage	용기
+초등영어	pond	연못
+초등영어	laugh	웃다
+초등영어	wallet	지갑
+초등영어	exercise	운동;운동하다
+초등영어	breathe	호흡하다, 숨쉬다
+초등영어	floor	바닥,층
+초등영어	hurry	서두르다;서두름
+초등영어	spring	"봄, 경치, 바라보다
+견해, ~라고 생각하다"
+초등영어	fall	떨어지다,가을
+초등영어	winter	겨울
+초등영어	autumn	가을
+초등영어	steal	훔치다
+초등영어	farm	농장
+초등영어	mad	화가 난,미친
+초등영어	aloud	큰 소리로
+초등영어	between	~의 사이에
+초등영어	leave	떠나다,남겨두다
+초등영어	clothes	옷
+초등영어	watermelon	수박
+초등영어	wise	현명한,똑똑한
+초등영어	daughter	딸
+초등영어	shy	수줍어하는
+초등영어	branch	나뭇가지
+초등영어	travel	여행하다;여행
+초등영어	rough	거친,험한
+초등영어	danger	위험
+초등영어	break	깨뜨리다,부서지다
+초등영어	bridge	다리
+초등영어	shout	소리치다
+초등영어	China	중국
+초등영어	begin	시작하다
+초등영어	carry	나르다,운반하다
+초등영어	promise	약속;약속하다
+초등영어	age	나이,시대
+초등영어	pear	배
+초등영어	country	시골,나라
+초등영어	cxchange	교환하다,바꾸다
+초등영어	agree	동의하다
+초등영어	carrot	당근
+초등영어	bottle	병
+초등영어	along	~을 따라
+초등영어	full	가득한
+초등영어	math	수학
+초등영어	fear	두려움;두려워하다
+초등영어	sudden	갑작스러운
+초등영어	beat	때리다,이기다
+초등영어	hate	미워하다
+초등영어	traffic	교통
+초등영어	purse	지갑
+초등영어	hug	껴안다,포옹하다
+초등영어	imagine	상상하다
+초등영어	enough	충분한;충분히
+초등영어	fill	채우다
+초등영어	guess	추측하다
+초등영어	mix	섞다,혼합하다
+초등영어	hell	지옥
+초등영어	scissors	가위
+초등영어	angry	화가 난
+초등영어	stair	계단
+초등영어	downstairs	아래층; 아래층에
+초등영어	upstairs	위층; 위층에
+초등영어	vinegar	식초
+초등영어	seed	씨,씨앗
+초등영어	delicious	맛있는
+초등영어	apologize	사과하다
+초등영어	remember	기억하다
+초등영어	battle	전투,싸움
+초등영어	valley	계곡
+초등영어	different	서로 다른
+초등영어	light	빛나는, 화려한, 훌륭한
+초등영어	taste	맛보다
+초등영어	prison	감옥에 넣다
+초등영어	hobby	취미
+초등영어	harmony	조화, 조화로움
+초등영어	cabbage	양배추
+초등영어	celebrate	축하하다
+초등영어	build	건축하다
+초등영어	decide	결심하다,결정하다
+초등영어	foreign	외국의
+초등영어	cook	요리하다;요리사
+초등영어	garbage	쓰레기, 잡동사니
+초등영어	trouble	문제,곤란함
+초등영어	homework	숙제
+초등영어	whole	전부;전부의
+초등영어	sharp	날카로운,뾰족한
+초등영어	barber	이발사
+초등영어	circle	원
+초등영어	wet	젖은
+초등영어	supper	저녁식사
+초등영어	thin	가늘다
+초등영어	thick	두꺼운
+초등영어	fortune	행운,운
+초등영어	basketball	농구
+초등영어	volleyball	배구
+초등영어	foolish	어리석은,바보 같은
+초등영어	voice	목소리
+초등영어	believe	믿다
+초등영어	emotion	감정
+초등영어	position	위치
+초등영어	dozen	12개, 10여 개
+초등영어	damage	손상,피해
+초등영어	strike	치다
+초등영어	hungry	배고픈
+초등영어	tray	쟁반
+초등영어	sunlight	햇빛
+초등영어	once	한 번
+초등영어	tired	피곤한
+초등영어	shower	샤워(하기),소나기
+초등영어	cave	굴,동굴
+초등영어	orchard	과수원
+초등영어	goal	골,목표
+초등영어	dental	이의,치과의
+초등영어	habit	습관,버릇
+초등영어	other	다른;다른 것
+초등영어	another	다른 하나의;다른 것
+초등영어	charm	매력
+초등영어	piece	한 장,한 조각
+초등영어	future	미래
+초등영어	grand	웅장한
+초등영어	grandfather	할아버지
+초등영어	grandmother	할머니
+초등영어	beer	맥주
+초등영어	kid	아이
+초등영어	goldfish	금붕어
+초등영어	beach	해변
+초등영어	earth	지구,땅
+초등영어	pass	건네주다,통과하다
+초등영어	reason	이유
+초등영어	playground	운동장,놀이터
+초등영어	follow	따라가다
+초등영어	free	자유로운
+초등영어	hang	매달다,매달리다
+초등영어	leaf	잎(복수.leaves)
+초등영어	order	명령;명령하다, 주문하다
+초등영어	lonely	외로운
+초등영어	grace	우아함
+초등영어	dirty	더러운
+초등영어	plant	식물; 심다
+초등영어	greenhouse	온실
+초등영어	pleasure	기쁨, 즐거움
+초등영어	tour	여행;여행하다
+초등영어	coin	동전
+초등영어	sheep	양
+초등영어	pain	아픔,고통
+초등영어	drug	약,마약
+초등영어	hop	뛰다,깡충 뛰다
+초등영어	bring	가져오다,데려오다
+초등영어	theater	극장
+초등영어	ghost	유령
+초등영어	meal	식사
+초등영어	arrive	도착하다
+초등영어	cotton	솜,목화
+초등영어	drop	떨어지다,떨어뜨리다
+초등영어	drop	골라잡다,뜯다
+초등영어	horror	공포
+초등영어	fury	격분
+초등영어	silence	침묵,고요
+초등영어	cage	우리,새장
+초등영어	then	그때,그 다음에
+초등영어	goat	염소
+초등영어	fix	고정시키다,수리하다
+초등영어	goose	거위(복수.geese)
+초등영어	bean	콩
+초등영어	die	죽다,사망하다
+초등영어	althlete	운동선수
+초등영어	sweat	땀; 땀을 흘리다
+초등영어	still	아직,여전히
+초등영어	hard	열심히
+초등영어	miss	(기회,버스,목표한 것 등을)놓치다, 그리워하다
+초등영어	itch	가려움;가렵다
+초등영어	symbol	상징
+초등영어	able	~할 수 있는
+초등영어	forgive	용서하다
+초등영어	several	몇 사람의, 몇몇의
+초등영어	cost	가격;~의 비용이 들다
+초등영어	often	자주 일어나는, 빈번한
+초등영어	engineer	기술자,엔지니어
+초등영어	mushroom	버섯
+초등영어	bark	짖다
+초등영어	lawn	잔디,잔디밭
+초등영어	provide	공급하다,주다
+초등영어	riddle	수수께끼
+초등영어	heal	치료하다,고치다
+초등영어	wealth	부,재산
+초등영어	stomach	위
+초등영어	subway	지하철,지하도
+초등영어	ill	병든
+초등영어	bath	목욕
+초등영어	bathroom	화장실,욕실
+초등영어	tail	꼬리
+초등영어	chop	자르다,팍팍찍다
+초등영어	degree	정도,등급
+초등영어	company	회사
+초등영어	flow	흐르다
+초등영어	float	뜨다,띄우다
+초등영어	weather	날씨,기후
+초등영어	popular	인기 있는
+초등영어	because	~때문에
+초등영어	create	창조하다,만들어내다
+초등영어	wound	상처;상처를 입히다
+초등영어	(swimming)pool	수영장
+초등영어	frog	개구리
+초등영어	audience	청중
+초등영어	weapon	무기
+초등영어	early	일찍;이른
+초등영어	sore	아픈, 쓰린
+초등영어	lazy	게으른
+초등영어	candle	초
+초등영어	glory	영광
+초등영어	set	놓다
+초등영어	bored	지루한
+초등영어	smell	냄새;냄새가 나다,냄새를 맡다
+초등영어	send	보내다
+초등영어	weak	약한, 힘이 없는
+초등영어	cousin	사촌,친척
+초등영어	lip	입술
+초등영어	stick	붙이다,막대기
+초등영어	scare	겁주다
+초등영어	windy	바람이 많이 부는
+초등영어	cough	기침
+초등영어	even	(심지어)~조차도
+초등영어	cheap	값이 싼
+초등영어	convenience	편의,편리
+초등영어	dead	죽은
+초등영어	handkerchief	손수건
+초등영어	fail	실패
+초등영어	excite	흥분시키다
+초등영어	clear	맑은, 깨끗한;깨끗이 치우다
+초등영어	clock	(벽걸이)시계
+초등영어	hasty	서두르는
+초등영어	gym	체육관
+초등영어	pillow	베개
+초등영어	village	마을
+초등영어	trip	(짧은)여행
+초등영어	fireman	소방관
+초등영어	culture	문화
+초등영어	trousers	바지
+초등영어	pair	한 쌍, 한 벌
+초등영어	pumpkin	호박
+초등영어	prize	상,상품
+초등영어	enemy	적,원수
+초등영어	museum	박물관
+초등영어	elbow	팔꿈치
+초등영어	hornor	영광
+초등영어	amaxing	놀랄만한,굉장한
+초등영어	giant	거인;거대한
+초등영어	vegetable	야채,채소
+초등영어	board	판자
+초등영어	blackboard	칠판
+초등영어	own	자기 자신의;소유하다
+초등영어	loser	(경쟁에서)패자,패배자
+초등영어	discuss	토론하다
+초등영어	finish	마치다,끝나다
+초등영어	muscle	근육
+초등영어	moment	순간
+초등영어	honesty	정직
+초등영어	South	남쪽
+초등영어	southern	남쪽의
+초등영어	North	북쪽
+초등영어	northern	북쪽의
+초등영어	borrow	빌리다
+초등영어	departure	출발
+초등영어	history	역사
+초등영어	mill	방앗간
+초등영어	windmill	풍차
+초등영어	both	양쪽의, 둘 다의
+초등영어	senior	손위의;연장자
+초등영어	donkey	당나귀
+초등영어	laundry	세탁,세탁물
+초등영어	woodpecker	딱따구리
+초등영어	throat	목구멍
+초등영어	cancel	취소하다
+초등영어	underground	지하의;지하
+초등영어	than	~에 비하여, ~와 비교하여
+초등영어	mate	친구,동료
+초등영어	classmate	학급친구
+초등영어	roommate	한 방 사람, 같이 방을 쓰는 친구
+초등영어	twinkle	반짝반짝 빛나다
+초등영어	draw	끌어당기다
+초등영어	teen	십대;십대의
+초등영어	iron	철
+초등영어	behind	뒤에
+초등영어	untill(=till)	~까지, ~할 때까지
+초등영어	care	조심, 돌보아 줌, 걱정;걱정하다
+초등영어	each	각각의, 각자의;각자
+초등영어	dawn	새벽녘
+초등영어	climb	오르다,기어오르다
+초등영어	sad	슬픈
+초등영어	catch	잡다
+초등영어	merry	즐거운
+초등영어	sand	모래
+초등영어	crab	게
+초등영어	filter	여과기; 거르다
+초등영어	heat	열;가열하다
+초등영어	shut	닫다
+초등영어	castle	성
+초등영어	knock	치다
+초등영어	self	자기,자신
+초등영어	flash	번쩍이다, 빛나다;번쩍빛남
+초등영어	weight	무게,중량
+초등영어	enter	들어가다
+초등영어	hole	구멍
+초등영어	cash	현금
+초등영어	palace	궁전
+초등영어	wedding	결혼,결혼식
+초등영어	march	행진
+초등영어	cheer	응원,격려
+초등영어	straight	똑바른, 쭉 뻗은
+초등영어	guide	안내자;안내하다
+초등영어	slide	미끄러지다;미끄럼틀,미끄러짐
+초등영어	receive	받다
+초등영어	lock	자물쇠;잠그다
+초등영어	lead	이끌다
+초등영어	fry	튀김;튀기다
+초등영어	sail	항해하다
+초등영어	bakery	빵집,제과점
+초등영어	adventure	모험
+초등영어	wide	넓은
+초등영어	burn	타다,불태우다
+초등영어	alarm	놀람,경보;놀라게하다
+초등영어	wave	파도,물결
+초등영어	wheel	수레바퀴,(자동차의)핸들
+초등영어	assist	돕다
+초등영어	shake	흔들다,흔들리다
+초등영어	quick	빠른
+초등영어	shuttle	왕복의;왕복운행
+초등영어	meat	고기
+초등영어	lesson	수업, 수업료
+초등영어	cart	손수레
+초등영어	safe	안전한
+초등영어	ready 	준비가 된
+초등영어	action	행동,연기
+초등영어	January	1월
+초등영어	Februauy	2월
+초등영어	March	3월
+초등영어	April	4월
+초등영어	May	5월
+초등영어	June	6월
+초등영어	July	7월
+초등영어	August	8월
+초등영어	September	9월
+초등영어	October	10월
+초등영어	November	11월
+초등영어	December	12월
+초등영어	sometime	언젠가
+초등영어	sometimes	때때로
+초등영어	somewhere	어딘가에
+초등영어	somebody	어떤사람,누군가
+초등영어	someone	어떤사람,누군가
+초등영어	anytime	언제든지,언제나
+초등영어	anybody	어떤사람,어떤사람도
+초등영어	anyone	어떤사람,어떤사람도
+초등영어	anywhere	어디에도
+초등영어	unhappy	불행한
+초등영어	unkind	불친절한
+초등영어	unbelievable	믿을 수 없는, 믿겨지지 않는
+초등영어	underwater	물속의;물속에서
+초등영어	beside	~와 나란히,곁에
+초등영어	inside	안쪽; 안쪽의
+초등영어	outside	바깥쪽; 바깥쪽의
+초등영어	golden	금빛의, 황금 같은
+초등영어	sunny	화창한, 햇볕이 내리쬐는
+초등영어	musician	음악가
+초등영어	speech	연설,말
+초등영어	lovely	사랑스러운
+초등영어	flight	비행,항공편
+초등영어	strength	힘
+초등영어	length	길이
+초등영어	height	높이
+초등영어	national	국민의,국가의
+초등영어	daily	매일의;매일
+초등영어	friendship	우정
