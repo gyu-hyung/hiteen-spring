@@ -34,9 +34,7 @@ class AdminAcceptController(
         val startDate = startDate?.atStartOfDay()
         val endDate = endDate?.plusDays(1)?.atStartOfDay()
 
-        val data = acceptService.friendList(
-            status, type, startDate, endDate, searchType, search, sort, page, perPage
-        )
+        val data = acceptService.friendList(status, type, startDate, endDate, searchType, search, sort, page, perPage)
 
         return success(data)
     }
