@@ -77,6 +77,7 @@ class AdminChatService(
                 roomUid = row.roomUid,
                 roomName = row.roomName,
                 userId = row.userId,
+                userUid = row.userUid,
                 userName = row.userName,
                 userPhone = row.userPhone,
                 kind = row.kind,
