@@ -118,6 +118,7 @@ data class PollSummaryRow(
     val allowComment: Int = 0,
     val createdId: Long,
     val createdAt: OffsetDateTime,
+    val deletedAt: OffsetDateTime? = null,
 )
 
 
@@ -166,6 +167,10 @@ data class PollResponse(
     @param:Schema(description = "생성 일시", example = "2025.09.18 10:15")
     @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm")
     val createdAt: OffsetDateTime,
+
+    @param:Schema(description = "삭제 일시", example = "2025.09.18 10:15")
+    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm")
+    val deletedAt: OffsetDateTime? = null,
 
     val user: UserResponse?,
 )

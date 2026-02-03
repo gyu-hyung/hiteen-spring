@@ -78,7 +78,7 @@ class GameManageService(
 
 
     /**
-     * 1. 종료된 시즌 처리 및 랭킹 이력 저장 TODO : Reward
+     * 1. 종료된 시즌 처리 및 랭킹 이력 저장
      */
     suspend fun closeSeasons(today: LocalDate = LocalDate.now()) {
 
@@ -91,30 +91,24 @@ class GameManageService(
             return
         }
 
-        // 3️⃣ 해당 시즌 + ACTIVE 인 시즌만 조회
+        // 3️⃣ 종료일이 today 인 ACTIVE 시즌만 종료 처리
         val seasonsToClose = seasonRepository
-            .findByStartDateAndStatus(startDate, "ACTIVE").toList()
+            .findAllByEndDateOrderById(today)
+            .filter { it.status == "ACTIVE" }
+            .toList()
 
         if (seasonsToClose.isEmpty()) {
-            log.info("ℹ️ 종료할 ACTIVE 시즌이 없습니다. ($startDate ~ $endDate)")
+            log.info("ℹ️ 종료일이 $today 인 ACTIVE 시즌이 없습니다. ($startDate ~ $endDate)")
             return
         }
 
-        // 4️⃣ 시즌 종료 처리
+        // 4️⃣ 시즌 종료 처리 (순차 실행: close → saveRankings → awards)
         seasonsToClose.forEach { season ->
-            coroutineScope {
-                launch {
-                    seasonRepository.close(season.id)
-                }
-                launch {
-                    saveSeasonRankings(season.id)
-                }
-                launch {
-                    awards(season.id)
-                }
-            }
+//            seasonRepository.close(season.id)
+//            saveSeasonRankings(season.id)
+//            awards(season.id)
 
-            println("🏁 시즌 종료 처리 완료: ${season.seasonNo} (${season.startDate} ~ ${season.endDate})")
+            log.info("🏁 시즌 종료 처리 완료: {} ({} ~ {})", season.seasonNo, season.startDate, season.endDate)
         }
     }
 

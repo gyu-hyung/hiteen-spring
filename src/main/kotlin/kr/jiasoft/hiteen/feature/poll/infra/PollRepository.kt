@@ -30,11 +30,24 @@ interface PollRepository : CoroutineCrudRepository<PollEntity, Long> {
             p.color_start,
             p.color_end,
             p.vote_count,
-            p.comment_count,
+            (
+                SELECT COUNT(*)::bigint
+                FROM poll_comments pc
+                LEFT JOIN poll_comments pp ON pp.id = pc.parent_id
+                WHERE pc.poll_id = p.id
+                  AND pc.deleted_at IS NULL
+                  AND (pc.parent_id IS NULL OR pp.deleted_at IS NULL)
+            ) AS comment_count,
             p.allow_comment,
             p.created_id,
-            p.created_at
+            p.created_at,
+            p.deleted_at
         FROM polls p
+        LEFT JOIN (
+            SELECT poll_id, COUNT(*)::bigint AS like_count
+            FROM poll_likes
+            GROUP BY poll_id
+        ) pl_cnt ON pl_cnt.poll_id = p.id
         WHERE p.deleted_at IS NULL
           AND p.status = 'ACTIVE'
           AND (
@@ -47,7 +60,21 @@ interface PollRepository : CoroutineCrudRepository<PollEntity, Long> {
           )
           AND (:cursor IS NULL OR p.id < :cursor)
           AND (:authorUid IS NULL OR p.created_id = (SELECT id FROM users WHERE uid = :authorUid))
-        ORDER BY p.id DESC
+        ORDER BY
+          /* orderType: LATEST(default)/POPULAR/LIKE/COMMENT */
+          CASE WHEN :orderType = 'POPULAR' THEN p.vote_count END DESC NULLS LAST,
+          CASE WHEN :orderType = 'COMMENT' THEN (
+            SELECT COUNT(*)::bigint
+            FROM poll_comments pc
+            LEFT JOIN poll_comments pp ON pp.id = pc.parent_id
+            WHERE pc.poll_id = p.id
+              AND pc.deleted_at IS NULL
+              AND (pc.parent_id IS NULL OR pp.deleted_at IS NULL)
+          ) END DESC NULLS LAST,
+          CASE WHEN :orderType = 'LIKE' THEN COALESCE(pl_cnt.like_count, 0) END DESC NULLS LAST,
+          CASE WHEN :orderType = 'LATEST' OR :orderType IS NULL OR :orderType = '' THEN p.id END DESC NULLS LAST,
+          /* fallback tie-breaker */
+          p.id DESC
         LIMIT :size
     """)
     fun findSummariesByCursor(
@@ -55,7 +82,8 @@ interface PollRepository : CoroutineCrudRepository<PollEntity, Long> {
         size: Int,
         currentUserId: Long?,
         type: String,
-        authorUid: UUID?
+        authorUid: UUID?,
+        orderType: String?
     ): Flow<PollSummaryRow>
 
 
@@ -82,40 +110,15 @@ interface PollRepository : CoroutineCrudRepository<PollEntity, Long> {
             (SELECT seq FROM poll_users pu WHERE pu.poll_id = p.id AND pu.user_id = :currentUserId) AS voted_seq,
             p.allow_comment,
             p.created_id,
-            p.created_at
+            p.created_at,
+            p.deleted_at
         FROM polls p
         JOIN users u ON u.id = p.created_id
-        WHERE p.deleted_at IS NULL
-          AND p.id = :pollId
+        WHERE p.id = :pollId
         LIMIT 1
     """)
     suspend fun findSummaryById(
         pollId: Long,
         currentUserId: Long
     ): PollSummaryRow?
-
-
-
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

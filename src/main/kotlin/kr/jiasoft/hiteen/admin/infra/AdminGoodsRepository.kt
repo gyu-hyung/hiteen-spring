@@ -59,6 +59,15 @@ interface AdminGoodsRepository : CoroutineCrudRepository<GoodsGiftishowEntity, L
     """)
     suspend fun findMaxHGoodsCode(): String?
 
+    @Query("""
+        SELECT goods_code
+        FROM goods_giftishow
+        WHERE goods_code LIKE 'D%'
+        ORDER BY goods_code DESC
+        LIMIT 1
+    """)
+    suspend fun findMaxDGoodsCode(): String?
+
 
     /**
      * 🔹 전체 개수 조회
@@ -98,6 +107,11 @@ interface AdminGoodsRepository : CoroutineCrudRepository<GoodsGiftishowEntity, L
             AND (:categorySeq IS NULL OR g.category1_seq = :categorySeq)
             AND (:goodsTypeCd IS NULL OR g.goods_type_cd = :goodsTypeCd)
             
+            AND (
+                :goodsCodeType IS NULL OR :goodsCodeType = 'ALL'
+                OR g.goods_code LIKE CONCAT(:goodsCodeType, '%')
+            )
+            
     """)
     suspend fun totalCount(
         search: String?,
@@ -105,6 +119,7 @@ interface AdminGoodsRepository : CoroutineCrudRepository<GoodsGiftishowEntity, L
         status: String?,
         categorySeq: Int?,
         goodsTypeCd: String?,
+        goodsCodeType: String?,
         ): Int
 
 
@@ -146,6 +161,11 @@ interface AdminGoodsRepository : CoroutineCrudRepository<GoodsGiftishowEntity, L
             
             AND (:categorySeq IS NULL OR g.category1_seq = :categorySeq)
             AND (:goodsTypeCd IS NULL OR g.goods_type_cd = :goodsTypeCd)
+            
+            AND (
+                :goodsCodeType IS NULL OR :goodsCodeType = 'ALL'
+                OR g.goods_code LIKE CONCAT(:goodsCodeType, '%')
+            )
 
         ORDER BY g.status DESC, 
             CASE WHEN :order = 'DESC' THEN g.created_at END DESC,
@@ -162,6 +182,7 @@ interface AdminGoodsRepository : CoroutineCrudRepository<GoodsGiftishowEntity, L
         status: String?,
         categorySeq: Int?,
         goodsTypeCd: String?,
+        goodsCodeType: String?,
         ): Flow<GoodsGiftishowEntity>
 
     @Query("""

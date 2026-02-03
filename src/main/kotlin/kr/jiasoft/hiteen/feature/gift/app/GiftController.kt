@@ -1,25 +1,34 @@
 package kr.jiasoft.hiteen.feature.gift.app
 
+import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import kotlinx.coroutines.flow.toList
 import kr.jiasoft.hiteen.admin.dto.GoodsCategoryDto
 import kr.jiasoft.hiteen.admin.dto.GoodsTypeDto
 import kr.jiasoft.hiteen.common.dto.ApiPageCursor
 import kr.jiasoft.hiteen.common.dto.ApiResult
+import kr.jiasoft.hiteen.feature.asset.app.AssetService
 import kr.jiasoft.hiteen.feature.gift.dto.GiftBuyRequest
 import kr.jiasoft.hiteen.feature.gift.dto.GiftIssueRequest
 import kr.jiasoft.hiteen.feature.gift.dto.GiftResponse
 import kr.jiasoft.hiteen.feature.gift.dto.GiftUseRequest
+import kr.jiasoft.hiteen.feature.gift.infra.GiftRepository
+import kr.jiasoft.hiteen.feature.gift.infra.GiftUserRepository
 import kr.jiasoft.hiteen.feature.giftishow.domain.GoodsGiftishowEntity
 import kr.jiasoft.hiteen.feature.giftishow.infra.GiftishowGoodsRepository
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
+import org.springframework.core.io.FileSystemResource
+import org.springframework.http.HttpHeaders
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import java.util.UUID
 
 
 @RestController
@@ -28,6 +37,9 @@ import org.springframework.web.bind.annotation.RestController
 class GiftController (
     private val giftAppService: GiftAppService,
     private val giftishowGoodsRepository: GiftishowGoodsRepository,
+    private val giftRepository: GiftRepository,
+    private val giftUserRepository: GiftUserRepository,
+    private val assetService: AssetService,
 ){
 
 
@@ -146,6 +158,7 @@ class GiftController (
         @RequestParam categorySeq: Int? = null,
         @RequestParam goodsTypeCd: String? = null,
         @RequestParam(required = false) brandCode: String? = null,
+        @RequestParam(required = false) goodsCodeType: String? = null,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ): ResponseEntity<ApiResult<ApiPageCursor<GoodsGiftishowEntity>>> {
 
@@ -157,6 +170,7 @@ class GiftController (
             categorySeq = categorySeq,
             goodsTypeCd = goodsTypeCd,
             brandCode = brandCode,
+            goodsCodeType = goodsCodeType,
         ).toList()
 
         // 다음 커서 (마지막 id)
@@ -174,6 +188,62 @@ class GiftController (
     }
 
 
+    /**
+     * 바코드 이미지 보안 조회
+     * - gift uid와 로그인 사용자 ID로 본인 소유의 giftUser를 조회
+     * - couponImg(바코드 asset uid)가 본인 소유인지 검증
+     */
+    @Operation(
+        summary = "바코드 이미지 조회",
+        description = "본인 소유의 기프티쇼 바코드 이미지만 조회할 수 있습니다."
+    )
+    @GetMapping("/barcode/{giftUid}")
+    suspend fun getBarcodeImage(
+        @PathVariable giftUid: UUID,
+        @AuthenticationPrincipal(expression = "user") user: UserEntity
+    ): ResponseEntity<FileSystemResource> {
+        // 1 gift 조회
+        val gift = giftRepository.findByUid(giftUid)
+            ?: return ResponseEntity.notFound().build()
+
+        // 2 giftUser 조회 (gift.id + user.id 조합)
+        val giftUser = giftUserRepository.findByGiftIdAndUserId(gift.id, user.id)
+            ?: return ResponseEntity.notFound().build()
+
+        // 3 couponImg(바코드 asset uid) 확인
+        val barcodeUidStr = giftUser.couponImg
+            ?: return ResponseEntity.notFound().build()
+
+        val barcodeUid = try {
+            UUID.fromString(barcodeUidStr)
+        } catch (e: IllegalArgumentException) {
+            return ResponseEntity.notFound().build()
+        }
+
+        // 4 Asset 조회
+        val asset = assetService.findByUid(barcodeUid)
+            ?: return ResponseEntity.notFound().build()
+
+        // 5 파일 경로 확인
+        val path = assetService.resolveFilePath(asset.filePath + asset.storeFileName)
+        if (!assetService.existsFile(path)) {
+            return ResponseEntity.notFound().build()
+        }
+
+        // 6 파일 반환
+        val resource = FileSystemResource(path)
+        val mime = asset.type ?: MediaType.IMAGE_PNG_VALUE
+
+        val headers = HttpHeaders().apply {
+            contentType = MediaType.parseMediaType(mime)
+            contentLength = resource.contentLength()
+            add(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"${asset.originFileName}\"")
+        }
+
+        return ResponseEntity.ok()
+            .headers(headers)
+            .body(resource)
+    }
 
 
 }

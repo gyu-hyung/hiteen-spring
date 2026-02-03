@@ -216,7 +216,6 @@ interface UserRepository : CoroutineCrudRepository<UserEntity, Long> {
             AND fr.friend_id = u.id 
             AND fr.status = 'PENDING'
         WHERE u.phone IN (:phones)
-          AND COALESCE(u.role, '') <> 'ADMIN'
     """)
     fun findAllUserSummaryByPhoneIn(
         phones: Set<String>,

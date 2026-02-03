@@ -1,8 +1,6 @@
 package kr.jiasoft.hiteen.feature.terms.app
 
 import kr.jiasoft.hiteen.common.dto.ApiResult
-import kr.jiasoft.hiteen.feature.terms.app.TermsService
-import kr.jiasoft.hiteen.feature.terms.dto.TermsCreateRequest
 import kr.jiasoft.hiteen.feature.terms.dto.TermsResponse
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -13,11 +11,6 @@ import java.util.UUID
 class TermsController(
     private val service: TermsService
 ) {
-
-    /** 약관 등록 */
-    @PostMapping
-    suspend fun create(@RequestBody req: TermsCreateRequest): ResponseEntity<ApiResult<TermsResponse>> =
-        ResponseEntity.ok(ApiResult.success(service.create(req)))
 
     /**
      * 약관 목록 조회 (기본 Agreement 카테고리)

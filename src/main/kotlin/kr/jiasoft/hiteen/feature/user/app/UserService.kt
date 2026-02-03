@@ -4,6 +4,7 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.toList
 import kr.jiasoft.hiteen.common.exception.BusinessValidationException
 import kr.jiasoft.hiteen.feature.asset.app.AssetService
+import kr.jiasoft.hiteen.feature.asset.app.event.AssetThumbnailPrecreateRequestedEvent
 import kr.jiasoft.hiteen.feature.asset.domain.AssetCategory
 import kr.jiasoft.hiteen.feature.auth.dto.JwtResponse
 import kr.jiasoft.hiteen.feature.auth.infra.JwtProvider
@@ -26,7 +27,6 @@ import kr.jiasoft.hiteen.feature.relationship.domain.FriendStatus
 import kr.jiasoft.hiteen.feature.relationship.dto.RelationshipCounts
 import kr.jiasoft.hiteen.feature.relationship.infra.FollowRepository
 import kr.jiasoft.hiteen.feature.relationship.infra.FriendRepository
-import kr.jiasoft.hiteen.feature.school.dto.SchoolDto
 import kr.jiasoft.hiteen.feature.school.infra.SchoolClassesRepository
 import kr.jiasoft.hiteen.feature.school.infra.SchoolRepository
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
@@ -49,6 +49,9 @@ import org.springframework.stereotype.Service
 import org.springframework.context.ApplicationEventPublisher
 import java.time.OffsetDateTime
 import java.util.UUID
+import org.slf4j.LoggerFactory
+import kr.jiasoft.hiteen.feature.asset.domain.ThumbnailMode
+import kr.jiasoft.hiteen.feature.asset.dto.AssetResponse
 
 @Service
 class UserService (
@@ -75,6 +78,7 @@ class UserService (
     private val eventPublisher: ApplicationEventPublisher,
 ) {
 
+    private val log = LoggerFactory.getLogger(javaClass)
 
     @Value("\${app.join.rejoin-days:30}")
     private val rejoinDays: Int = 30
@@ -446,8 +450,8 @@ class UserService (
             inviteService.registerInviteCode(updated)
             // 초대코드로 가입 처리
             if (!inviteCode.isNullOrBlank()) {
-                val inviterId = inviteService.handleInviteJoin(updated, inviteCode)
-                if (inviterId == null) throw BusinessValidationException(mapOf("inviteCode" to "유효하지 않은 초대코드입니다."))
+                val inviterId = inviteService.handleInviteJoin(updated, inviteCode.trim())
+                    ?: throw BusinessValidationException(mapOf("inviteCode" to "유효하지 않은 초대코드입니다."))
 
                 // ✅ 초대자에게 푸시 알림 (중복 조회 없음)
                 eventPublisher.publishEvent(
@@ -519,7 +523,11 @@ class UserService (
         val newMood         = param.mood ?: existing.mood
         val newMoodEmoji    = param.moodEmoji ?: existing.moodEmoji
         val newSchoolId     = param.schoolId ?: existing.schoolId
-        val newClassId      = param.classId ?: existing.classId
+        // 학교가 바뀌면 기존 학급 정보는 무효이므로 classId 초기화
+        // - param.classId가 명시되면 그 값을 사용
+        // - param.classId가 없고 schoolId가 변경되면 null로 초기화
+        // - 그 외에는 기존값 유지
+        val newClassId      = param.classId ?: if (existing.schoolId != newSchoolId) null else existing.classId
         val newGrade        = param.grade ?: existing.grade
         val newGender       = param.gender ?: existing.gender
         val newBirthday     = param.birthday ?: existing.birthday
@@ -614,6 +622,8 @@ class UserService (
 
 
     suspend fun registerPhotos(user: UserEntity, files: List<FilePart>?) : UserResponse {
+        val t0 = System.nanoTime()
+
         if (files.isNullOrEmpty()) {
             throw BusinessValidationException(mapOf("file" to "이미지가 필요합니다."))
         }
@@ -629,22 +639,131 @@ class UserService (
             throw BusinessValidationException(mapOf("file" to "사진은 최대 6장까지 등록할 수 있어"))
         }
 
-        files.forEach { file ->
-            // 1) 에셋 업로드
-            val asset = assetService.uploadImage(file, user.id, AssetCategory.USER_PHOTO)
+        log.debug(
+            "✅✅ [registerPhotos] start userId={} existingCount={} uploadCount={} filenames={}",
+            user.id,
+            existingCount,
+            files.size,
+            files.map { it.filename() }
+        )
 
-            // 2) user_photos row 생성
+        val tUploadStart = System.nanoTime()
+        val uploaded = mutableListOf<AssetResponse>()
+        val tThumbStart = System.nanoTime()
+
+        // ✅ 파일 1개 업로드(DB 저장) 완료될 때마다 즉시 썸네일 이벤트 발행
+        for (f in files) {
+            val a = assetService.uploadImage(f, user.id, AssetCategory.USER_PHOTO)
+            uploaded.add(a)
+            eventPublisher.publishEvent(
+                AssetThumbnailPrecreateRequestedEvent(
+                    assetUids = listOf(a.uid),
+                    width = 780,
+                    height = 966,
+                    mode = ThumbnailMode.COVER,
+                    requestedByUserId = user.id,
+                )
+            )
+        }
+
+        val tUploadMs = (System.nanoTime() - tUploadStart) / 1_000_000
+        val tThumbMs = (System.nanoTime() - tThumbStart) / 1_000_000
+
+        log.debug(
+            "✅✅ [registerPhotos] upload done userId={} uploadedCount={} elapsedMs={} assetUids={}",
+            user.id,
+            uploaded.size,
+            tUploadMs,
+            uploaded.map { it.uid }
+        )
+
+        val tDbStart = System.nanoTime()
+        uploaded.forEach { asset ->
             val photoEntity = UserPhotosEntity(
                 userId = user.id,
                 uid = asset.uid
             )
-
             userPhotosRepository.save(photoEntity)
         }
+        val tDbMs = (System.nanoTime() - tDbStart) / 1_000_000
+
+        val totalMs = (System.nanoTime() - t0) / 1_000_000
+        log.debug(
+            "✅✅ [registerPhotos] done userId={} uploadMs={} dbMs={} thumbMs={} totalMs={}",
+            user.id,
+            tUploadMs,
+            tDbMs,
+            tThumbMs,
+            totalMs
+        )
 
         return toUserResponse(user)
     }
 
+
+    /** 프로필 이미지 단건 등록 */
+    suspend fun registerPhotoSingle(user: UserEntity, file: FilePart?): UserResponse {
+        if (file == null) {
+            throw BusinessValidationException(mapOf("file" to "이미지가 필요합니다."))
+        }
+
+        val existingCount = userPhotosRepository.countByUserId(user.id).toInt()
+        val imageCount = existingCount + 1
+
+        // 정책 유지: 최소 3장 / 최대 6장
+        if (imageCount < 3) {
+            throw BusinessValidationException(mapOf("file" to "최소 사진 3장은 꼭 등록해야 돼"))
+        }
+        if (imageCount > 6) {
+            throw BusinessValidationException(mapOf("file" to "사진은 최대 6장ㅌ까지 등록할 수 있어"))
+        }
+
+        val t0 = System.nanoTime()
+        log.debug(
+            "✅ [registerPhotoSingle] start userId={} existingCount={} filename={}",
+            user.id,
+            existingCount,
+            file.filename()
+        )
+
+        val tUploadStart = System.nanoTime()
+        val uploaded = assetService.uploadImage(file, user.id, AssetCategory.USER_PHOTO)
+        val uploadMs = (System.nanoTime() - tUploadStart) / 1_000_000
+
+        val tDbStart = System.nanoTime()
+        userPhotosRepository.save(
+            UserPhotosEntity(
+                userId = user.id,
+                uid = uploaded.uid
+            )
+        )
+        val dbMs = (System.nanoTime() - tDbStart) / 1_000_000
+
+        val tThumbStart = System.nanoTime()
+        eventPublisher.publishEvent(
+            AssetThumbnailPrecreateRequestedEvent(
+                assetUids = listOf(uploaded.uid),
+                width = 780,
+                height = 966,
+                mode = ThumbnailMode.COVER,
+                requestedByUserId = user.id,
+            )
+        )
+        val thumbMs = (System.nanoTime() - tThumbStart) / 1_000_000
+
+        val totalMs = (System.nanoTime() - t0) / 1_000_000
+        log.debug(
+            "✅ [registerPhotoSingle] done userId={} uploadMs={} dbMs={} thumbMs={} totalMs={} assetUid={}",
+            user.id,
+            uploadMs,
+            dbMs,
+            thumbMs,
+            totalMs,
+            uploaded.uid
+        )
+
+        return toUserResponse(user)
+    }
 
     suspend fun deletePhoto(user: UserEntity, photoId: Long) {
         val exist = userPhotosRepository.findByIdAndUserId(photoId, user.id)
@@ -694,7 +813,7 @@ class UserService (
     /** 틴프로필 삭제 (사진, 관심사 전체 삭제) */
     suspend fun deleteTeenProfile(user: UserEntity) {
         // 1) 추가 사진 삭제
-        val photos = userPhotosRepository.findByUserId(user.id)?.toList() ?: emptyList()
+        val photos = userPhotosRepository.findByUserId(user.id).toList() ?: emptyList()
         photos.forEach { photo ->
             try {
                 assetService.softDelete(photo.uid, user.id)
