@@ -99,7 +99,7 @@ class PointService(
         pointPolicy: PointPolicy,
         refId: Long? = null,
         dynamicPoint: Int? = null
-    ): PointEntity {
+    ): PointEntity? {
 
         // 1. 정책 조회
         val rule = pointRuleRepository.findActiveByActionCode(pointPolicy.code)
@@ -111,10 +111,12 @@ class PointService(
         // 2. 일일 제한
         rule.dailyCap?.let { cap ->
             val todayCount =
-                pointRepository.countByUserAndPolicyAndDate(userId, pointPolicy.code, LocalDate.now())
-            if (todayCount >= cap)
+                pointRepository.countByUserAndPolicyAndDate(userId, rule.actionCode, LocalDate.now())
+            if (todayCount >= cap) {
                 println("오늘은 더 이상 '${rule.actionCode}' 포인트를 받을 수 없습니다. (일일 제한: $cap)")
-//                throw IllegalStateException("일일 포인트 제한 초과 ($pointPolicy)")
+                //                throw IllegalStateException("일일 포인트 제한 초과 ($pointPolicy)")
+                return null
+            }
         }
 
         // 3. 차감이면 잔액 확인

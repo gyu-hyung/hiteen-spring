@@ -158,6 +158,15 @@ class UserDetailService(
         userDetails.deleteByUid(userUid)
     }
 
+    /**
+     * 로그아웃 시 FCM 토큰(device_token) 삭제
+     */
+    suspend fun clearDeviceToken(userUid: UUID) {
+        val existing = userDetails.findByUid(userUid) ?: return
+        val updated = existing.copy(deviceToken = null)
+        userDetails.save(updated)
+    }
+
     private fun UserDetailEntity.toResponse() = UserDetailResponse(
         userId = this.userId,
         deviceId = this.deviceId,

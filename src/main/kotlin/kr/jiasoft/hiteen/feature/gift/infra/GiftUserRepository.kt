@@ -10,7 +10,8 @@ interface GiftUserRepository: CoroutineCrudRepository<GiftUsersEntity, Long> {
 
     suspend fun findByUserId(userId: Long): Flow<GiftUsersEntity>
     suspend fun findByUserIdOrderByIdDesc(userId: Long): List<GiftUsersEntity>
-    suspend fun findByGiftIdAndUserId(giftId: Long, userId: Long): GiftUsersEntity
+    suspend fun findByGiftIdAndUserId(giftId: Long, userId: Long): GiftUsersEntity?
+    suspend fun findByGiftId(giftId: Long): GiftUsersEntity?
 
 //    @Query("""
 //        SELECT

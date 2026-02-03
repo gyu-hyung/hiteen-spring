@@ -17,11 +17,11 @@ interface GiftishowGoodsRepository : CoroutineCrudRepository<GoodsGiftishowEntit
     fun findAllByGoodsCodeIn(goodsCodes: List<String>): Flow<GoodsGiftishowEntity>
 
     @Modifying
-    @Query("UPDATE goods_giftishow SET del_yn = 1 WHERE goods_code NOT LIKE 'H%'")
+    @Query("UPDATE goods_giftishow SET del_yn = 1 WHERE goods_code LIKE 'G%'")
     suspend fun markAllDeleted()
 
     @Modifying
-    @Query("UPDATE goods_giftishow SET del_yn = 1, deleted_at = NOW() WHERE goods_code NOT LIKE 'H%' AND (updated_at IS NULL OR updated_at < :since)")
+    @Query("UPDATE goods_giftishow SET del_yn = 1, deleted_at = NOW() WHERE goods_code LIKE 'G%' AND (updated_at IS NULL OR updated_at < :since)")
     suspend fun markDeletedNotUpdatedSince(since: OffsetDateTime)
 
     suspend fun findAllByOrderByCreatedAtDesc(): List<GoodsGiftishowEntity>
@@ -103,6 +103,10 @@ interface GiftishowGoodsRepository : CoroutineCrudRepository<GoodsGiftishowEntit
             AND (:categorySeq IS NULL OR g.category1_seq = :categorySeq)
             AND (:goodsTypeCd IS NULL OR g.goods_type_cd = :goodsTypeCd)
             AND (:brandCode IS NULL OR g.brand_code = :brandCode)
+            AND (
+                :goodsCodeType IS NULL OR :goodsCodeType = 'ALL'
+                OR g.goods_code LIKE CONCAT(:goodsCodeType, '%')
+            )
             AND (:lastId IS NULL OR g.id < :lastId)
         ORDER BY g.id DESC
         LIMIT :size
@@ -115,6 +119,7 @@ interface GiftishowGoodsRepository : CoroutineCrudRepository<GoodsGiftishowEntit
         categorySeq: Int?,
         goodsTypeCd: String?,
         brandCode: String?,
+        goodsCodeType: String?,
     ): Flow<GoodsGiftishowEntity>
 
 

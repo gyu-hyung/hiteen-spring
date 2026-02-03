@@ -53,7 +53,6 @@ interface GameRankingRepository : CoroutineCrudRepository<GameRankingEntity, Lon
         WHERE season_id = :seasonId
           AND game_id   = :gameId
           AND league    = :league
-          AND COALESCE(u.role, '') <> 'ADMIN'
         ORDER BY rank ASC
     """)
     fun findAllBySeasonIdAndGameIdAndLeague(

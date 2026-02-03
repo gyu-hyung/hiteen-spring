@@ -11,28 +11,21 @@ import java.util.UUID
 
 interface AdminGiftRepository : CoroutineCrudRepository<GiftEntity, Long> {
 
-
-
     @Query("""
         SELECT
             g.id                 AS gift_id,
             g.uid                AS gift_uid,
             gu.id                AS gift_user_id,
-    
             g.category           AS gift_category,
             g.type               AS gift_type,
             g.memo               AS memo,
-    
             giver.nickname       AS giver_nickname,
             g.user_id            AS giver_user_id,
-    
             receiver.nickname    AS receiver_nickname,
             gu.user_id           AS receiver_user_id,
-    
             gu.status            AS status,
             gu.receive_date      AS receive_date,
             g.created_at         AS created_at,
-    
             gu.coupon_no         AS coupon_no,
             gu.coupon_img        AS coupon_img,
             gu.request_date      AS request_date,
@@ -40,14 +33,59 @@ interface AdminGiftRepository : CoroutineCrudRepository<GiftEntity, Long> {
             gu.use_date          AS use_date,
             gu.pub_expired_date  AS pub_expired_date,
             gu.use_expired_date  AS use_expired_date,
-    
             gu.goods_code        AS goods_code,
             (SELECT goods_name FROM goods_giftishow WHERE goods_code = gu.goods_code) AS goods_name,
+            (SELECT goods_img_s FROM goods_giftishow WHERE goods_code = gu.goods_code) AS goods_img_s,
+            (SELECT goods_img_b FROM goods_giftishow WHERE goods_code = gu.goods_code) AS goods_img_b,
+            (SELECT brand_icon_img FROM goods_giftishow WHERE goods_code = gu.goods_code) AS brand_icon_img,
             gu.game_id           AS game_id,
             gu.season_id         AS season_id,
             gu.season_rank       AS season_rank,
             gu.point             AS point,
-    
+            gu.delivery_name     AS delivery_name,
+            gu.delivery_phone    AS delivery_phone,
+            gu.delivery_address1 AS delivery_address1,
+            gu.delivery_address2 AS delivery_address2
+        FROM gift g
+        LEFT JOIN gift_users gu ON g.id = gu.gift_id
+        LEFT JOIN users giver ON g.user_id = giver.id
+        LEFT JOIN users receiver ON gu.user_id = receiver.id
+        WHERE g.uid = :uid
+        LIMIT 1
+    """)
+    suspend fun findByUid(uid: UUID): AdminGiftResponse?
+
+    @Query("""
+        SELECT
+            g.id                 AS gift_id,
+            g.uid                AS gift_uid,
+            gu.id                AS gift_user_id,
+            g.category           AS gift_category,
+            g.type               AS gift_type,
+            g.memo               AS memo,
+            giver.nickname       AS giver_nickname,
+            g.user_id            AS giver_user_id,
+            receiver.nickname    AS receiver_nickname,
+            gu.user_id           AS receiver_user_id,
+            gu.status            AS status,
+            gu.receive_date      AS receive_date,
+            g.created_at         AS created_at,
+            gu.coupon_no         AS coupon_no,
+            gu.coupon_img        AS coupon_img,
+            gu.request_date      AS request_date,
+            gu.pub_date          AS pub_date,
+            gu.use_date          AS use_date,
+            gu.pub_expired_date  AS pub_expired_date,
+            gu.use_expired_date  AS use_expired_date,
+            gu.goods_code        AS goods_code,
+            (SELECT goods_name FROM goods_giftishow WHERE goods_code = gu.goods_code) AS goods_name,
+            (SELECT goods_img_s FROM goods_giftishow WHERE goods_code = gu.goods_code) AS goods_img_s,
+            (SELECT goods_img_b FROM goods_giftishow WHERE goods_code = gu.goods_code) AS goods_img_b,
+            (SELECT brand_icon_img FROM goods_giftishow WHERE goods_code = gu.goods_code) AS brand_icon_img,
+            gu.game_id           AS game_id,
+            gu.season_id         AS season_id,
+            gu.season_rank       AS season_rank,
+            gu.point             AS point,
             gu.delivery_name     AS delivery_name,
             gu.delivery_phone    AS delivery_phone,
             gu.delivery_address1 AS delivery_address1,

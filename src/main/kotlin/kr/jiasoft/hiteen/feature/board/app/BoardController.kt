@@ -55,9 +55,9 @@ class BoardController(
     @GetMapping("/{boardUid}")
     suspend fun get(
         @Parameter(description = "게시글 UID") @PathVariable boardUid: UUID,
-        @AuthenticationPrincipal(expression = "user") user: UserEntity?
+        @AuthenticationPrincipal(expression = "user") user: UserEntity
     ): ResponseEntity<ApiResult<BoardResponse>> {
-        val board = service.getBoard(boardUid, user?.id)
+        val board = service.getBoard(boardUid, user.id)
         return ResponseEntity.ok(ApiResult.success(board))
     }
 
@@ -69,6 +69,7 @@ class BoardController(
         @Parameter(description = "첨부 파일들") @RequestPart(name = "files", required = false) filesFlux: Flux<FilePart>?,
         request: ServerHttpRequest
     ): ResponseEntity<ApiResult<Map<String, Any>>> {
+        println("✅✅ ✅✅ ✅✅ ✅✅ ✅✅ ✅✅ ✅✅ ✅✅ ✅✅ ✅✅ ")
         val ip = request.remoteAddress?.address?.hostAddress
         val files: List<FilePart> = filesFlux?.collectList()?.awaitSingle().orEmpty()
         val uid = service.create(boardCreateRequest, user, files, ip)

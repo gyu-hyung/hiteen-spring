@@ -14,4 +14,12 @@ interface QuestionItemsRepository : CoroutineCrudRepository<QuestionItemsEntity,
         ORDER BY id ASC
     """)
     fun findAllBySeasonIdAndType(seasonId: Long, type: Int): Flow<QuestionItemsEntity>
+
+    @Query("""
+        SELECT * FROM question_items 
+        WHERE season_id = :seasonId 
+        ORDER BY id ASC
+    """)
+    fun findAllBySeasonId(seasonId: Long): Flow<QuestionItemsEntity>
+
 }

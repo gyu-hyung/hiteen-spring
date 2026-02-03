@@ -15,10 +15,13 @@ import java.time.LocalDate
 import java.util.*
 import javax.imageio.ImageIO
 import javax.imageio.ImageReader
+import org.slf4j.LoggerFactory
 
 class AssetStorage(
     private val root: Path
 ) {
+
+    private val log = LoggerFactory.getLogger(javaClass)
 
     private fun normalizeExt(formatName: String?): String? = when (formatName?.lowercase()) {
         null -> null
@@ -103,6 +106,8 @@ class AssetStorage(
         maxSizeBytes: Long,
         category: AssetCategory = AssetCategory.COMMON
     ): StoredFile {
+        val t0 = System.nanoTime()
+
         val orig = filePart.filename()
         val extFromName = orig.substringAfterLast('.', "").lowercase().ifBlank { null }
 
@@ -113,14 +118,19 @@ class AssetStorage(
         // 파일을 임시로 받아 사이즈 검사
         val tmp = Files.createTempFile("upload-", ".${extFromName ?: "tmp"}")
         try {
+            val tTransferStart = System.nanoTime()
             // transferTo는 non-blocking 처리가 되어 있음
             filePart.transferTo(tmp).awaitSingleOrNull()
+            val tTransferMs = (System.nanoTime() - tTransferStart) / 1_000_000
+
             val size = Files.size(tmp)
             if (size > maxSizeBytes) throw IllegalArgumentException("파일 용량 초과: ${size}bytes")
 
+            val tDetectStart = System.nanoTime()
             // ✅ 실제 이미지 포맷 기반으로 확장자 정정 (ex: webp인데 jpg로 들어오는 케이스)
             val detectedExt = detectImageFormat(tmp)
             val finalExt = detectedExt ?: extFromName
+            val tDetectMs = (System.nanoTime() - tDetectStart) / 1_000_000
 
             if (finalExt != null && allowedExts.isNotEmpty() && !allowedExts.contains(finalExt)) {
                 throw IllegalArgumentException("허용되지 않은 확장자(실제 포맷 기준): .$finalExt")
@@ -136,18 +146,42 @@ class AssetStorage(
             val storedName = if (finalExt != null) "$randomName.$finalExt" else randomName
             val dest = dir.resolve(storedName)
 
+            val tMoveStart = System.nanoTime()
             // 이동
             withContext(Dispatchers.IO) {
                 Files.move(tmp, dest)
             }
+            val tMoveMs = (System.nanoTime() - tMoveStart) / 1_000_000
 
+            val tDimStart = System.nanoTime()
             // 이미지면 크기 추출 (✅ 전체 디코드 대신 메타데이터 기반)
             val (w, h) = readImageDimensions(dest)
+            val tDimMs = (System.nanoTime() - tDimStart) / 1_000_000
 
+            val tMimeStart = System.nanoTime()
             val mime = guessMimeByExt(finalExt)
                 ?: try { Files.probeContentType(dest) } catch (_: Throwable) { null }
+            val tMimeMs = (System.nanoTime() - tMimeStart) / 1_000_000
 
             val relDir = root.relativize(dir).toString().replace('\\', '/') + "/"
+
+            val totalMs = (System.nanoTime() - t0) / 1_000_000
+            log.debug(
+                "[asset.save] file={} category={} size={} extName={} extDetected={} finalExt={} transferMs={} detectMs={} moveMs={} dimMs={} mimeMs={} totalMs={} dest={}",
+                orig,
+                category,
+                size,
+                extFromName,
+                detectedExt,
+                finalExt,
+                tTransferMs,
+                tDetectMs,
+                tMoveMs,
+                tDimMs,
+                tMimeMs,
+                totalMs,
+                relDir + dest.fileName.toString(),
+            )
 
             return StoredFile(
                 relativePath = relDir,
@@ -181,6 +215,12 @@ class AssetStorage(
         return os.contains("mac") && (arch.contains("aarch64") || arch.contains("arm64"))
     }
 
+    // ✅ 메모리 스파이크 방지:
+    // - BufferedImage로 전체 디코드(reader.read(0))하면 원본 해상도만큼 픽셀 버퍼를 통째로 잡아
+    //   썸네일 1건당 수십~수백MB까지 피크가 튈 수 있습니다.
+    // - Thumbnailator가 파일 기반으로 읽도록 해서(내부에서 스트리밍/필요 크기 기반 처리) 피크를 낮춥니다.
+    // - readImageDimensions()는 메타데이터 기반이라 안전하게 유지합니다.
+
     suspend fun createThumbnail(
         sourcePath: Path,
         ext: String,
@@ -189,12 +229,14 @@ class AssetStorage(
         mode: ThumbnailMode = ThumbnailMode.COVER,
     ): StoredFile = withContext(Dispatchers.IO) {
 
+        val t0 = System.nanoTime()
+
         val srcExt = ext.lowercase()
         if (srcExt == "gif" || srcExt == "svg") {
             throw IllegalArgumentException("GIF, SVG는 리사이즈 불가")
         }
 
-        // ✅ 기본은 webp로 생성하되, 로컬 mac arm64에서 네이티브 로딩 이슈가 있으면 jpg로 폴백
+        // ✅ 기본은 webp로 생성하되, writer가 없으면 jpg로 폴백
         var outExt = "webp"
         try {
             ensureWebpWriterAvailable()
@@ -211,10 +253,8 @@ class AssetStorage(
         val newName = "${UUID.randomUUID()}.$outExt"
         val dest = dir.resolve(newName)
 
-        val srcImage = readImage(sourcePath)
-            ?: throw IllegalArgumentException("지원되지 않는 이미지 포맷입니다.")
-
-        val builder = Thumbnails.of(srcImage)
+        val tBuildStart = System.nanoTime()
+        val builder = Thumbnails.of(sourcePath.toFile())
             .useExifOrientation(true)
             .outputFormat(outExt)
             .outputQuality(0.9)
@@ -223,15 +263,37 @@ class AssetStorage(
             ThumbnailMode.COVER -> builder.crop(Positions.CENTER).size(width, height)
             ThumbnailMode.CONTAIN -> builder.size(width, height).keepAspectRatio(true)
         }
+        val tBuildMs = (System.nanoTime() - tBuildStart) / 1_000_000
 
         try {
+            val tWriteStart = System.nanoTime()
             builder.toFile(dest.toFile())
+            val tWriteMs = (System.nanoTime() - tWriteStart) / 1_000_000
+
+            val stored = finalizeThumb(dest, outExt, width, height)
+            val totalMs = (System.nanoTime() - t0) / 1_000_000
+            log.debug(
+                "[asset.thumb] src={} srcExt={} outExt={} mode={} size={}x{} buildMs={} writeMs={} totalMs={} dest={}",
+                sourcePath.fileName.toString(),
+                srcExt,
+                outExt,
+                mode,
+                width,
+                height,
+                tBuildMs,
+                tWriteMs,
+                totalMs,
+                stored.relativePath + stored.absolutePath.fileName.toString(),
+            )
+            stored
         } catch (e: UnsatisfiedLinkError) {
             // mac arm64에서 x86_64 dylib 로딩 실패 케이스
             if (outExt == "webp" && isMacArm64()) {
                 outExt = "jpg"
                 val dest2 = dest.parent.resolve(dest.fileName.toString().replaceAfterLast('.', outExt))
-                Thumbnails.of(srcImage)
+
+                val tWriteStart = System.nanoTime()
+                Thumbnails.of(sourcePath.toFile())
                     .useExifOrientation(true)
                     .outputFormat(outExt)
                     .outputQuality(0.9)
@@ -242,12 +304,28 @@ class AssetStorage(
                         }
                     }
                     .toFile(dest2.toFile())
-                return@withContext finalizeThumb(dest2, outExt, width, height)
+                val tWriteMs = (System.nanoTime() - tWriteStart) / 1_000_000
+
+                val stored = finalizeThumb(dest2, outExt, width, height)
+                val totalMs = (System.nanoTime() - t0) / 1_000_000
+                log.debug(
+                    "[asset.thumb:fallback] src={} srcExt={} outExt={} mode={} size={}x{} buildMs={} writeMs={} totalMs={} dest={}",
+                    sourcePath.fileName.toString(),
+                    srcExt,
+                    outExt,
+                    mode,
+                    width,
+                    height,
+                    tBuildMs,
+                    tWriteMs,
+                    totalMs,
+                    stored.relativePath + stored.absolutePath.fileName.toString(),
+                )
+
+                return@withContext stored
             }
             throw e
         }
-
-        finalizeThumb(dest, outExt, width, height)
     }
 
     private fun finalizeThumb(dest: Path, outExt: String, width: Int, height: Int): StoredFile {

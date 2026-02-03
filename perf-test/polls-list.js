@@ -10,7 +10,7 @@ if (!TOKEN) {
 }
 
 export const options = {
-  vus: 100,
+  vus: 150,
   duration: '5m',
   thresholds: {
     http_req_failed: ['rate<0.01'],

@@ -51,6 +51,25 @@ class AdminGoodsController (
         return "H" + nextNumber.toString().padStart(11, '0')
     }
 
+    private suspend fun generateNextDGoodsCode(): String {
+        val maxCode = adminGoodsRepository.findMaxDGoodsCode()
+
+        val nextNumber = maxCode
+            ?.substring(1)            // "00000000001"
+            ?.toLongOrNull()
+            ?.plus(1)
+            ?: 1L                     // 최초 생성 시
+
+        return "D" + nextNumber.toString().padStart(11, '0')
+    }
+
+    private suspend fun generateGoodsCode(type: String?): String {
+        return when (type?.uppercase()) {
+            "D" -> generateNextDGoodsCode()
+            else -> generateNextGoodsCode() // 기본값 H
+        }
+    }
+
 
     @PostMapping(consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     suspend fun saveGoods(
@@ -69,7 +88,7 @@ class AdminGoodsController (
 
             val entity = GoodsGiftishowEntity(
                 goodsNo = req.goodsNo,
-                goodsCode = generateNextGoodsCode(),
+                goodsCode = generateGoodsCode(req.goodsCodeType),
                 goodsName = req.goodsName,
                 brandCode = req.brandCode,
                 brandName = req.brandName,
@@ -178,6 +197,7 @@ class AdminGoodsController (
         // ⭐ 추가
         @RequestParam categorySeq: Int? = null,
         @RequestParam goodsTypeCd: String? = null,
+        @RequestParam goodsCodeType: String? = null, // G: 기프티쇼, H: 기프트카드, D: 배송상품
 
 
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
@@ -193,6 +213,7 @@ class AdminGoodsController (
             status = status,
             categorySeq = categorySeq,
             goodsTypeCd = goodsTypeCd,
+            goodsCodeType = goodsCodeType,
         ).toList()
 
         // 2) 전체 개수 조회
@@ -203,6 +224,7 @@ class AdminGoodsController (
 
             categorySeq = categorySeq,
             goodsTypeCd = goodsTypeCd,
+            goodsCodeType = goodsCodeType,
         )
 
         return ResponseEntity.ok(ApiResult.success(PageUtil.of(list, totalCount, page, size)))

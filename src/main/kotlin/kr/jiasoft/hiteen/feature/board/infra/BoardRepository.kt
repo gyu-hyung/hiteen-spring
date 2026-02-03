@@ -321,6 +321,7 @@ interface BoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
             b.created_at     AS created_at,
             b.created_id     AS created_id,
             b.updated_at     AS updated_at,
+            b.deleted_at     AS deleted_at,
             (SELECT COUNT(*)::bigint FROM board_likes bl WHERE bl.board_id = b.id) AS like_count,
             (
                 SELECT COUNT(*)::bigint
@@ -346,8 +347,7 @@ interface BoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
         FROM boards b
         LEFT JOIN users u ON b.created_id = u.id
         LEFT JOIN schools s ON s.id = u.school_id
-        WHERE b.deleted_at IS NULL
-          AND b.uid = :uid
+        WHERE b.uid = :uid
         LIMIT 1
     """)
     suspend fun findDetailByUid(uid: UUID, userId: Long): BoardResponse?

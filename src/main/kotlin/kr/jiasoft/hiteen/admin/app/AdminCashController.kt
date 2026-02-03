@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
@@ -67,7 +68,7 @@ class AdminCashController(
         @RequestParam keyword: String? = null,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ): ResponseEntity<ApiResult<List<AdminUserSearchResponse>>> {
-        val data = userRepository.listSearchUsers("USER", keyword).toList()
+        val data = userRepository.listSearchUsers(keyword).toList()
 
         return success(data)
     }
@@ -75,7 +76,7 @@ class AdminCashController(
     // 캐시 지급/차감 처리
     @PostMapping("/give")
     suspend fun give(
-        @Parameter request: AdminCashGiveRequest,
+        @Parameter @RequestBody request: AdminCashGiveRequest,
     ) : ResponseEntity<ApiResult<Any>> {
         val type: CashType = request.type?.uppercase()?.let {
             try { CashType.valueOf(it) } catch (e: Exception) { CashType.CREDIT }

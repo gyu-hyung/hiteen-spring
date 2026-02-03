@@ -13,6 +13,7 @@ enum class PushTemplate(
     val title: String,
     val message: String,
     val itemType: PushItemType? = null,
+    val group: PushTemplateGroup? = null,
 ) {
     /**
      * 관리자 발송(커스텀)
@@ -24,6 +25,7 @@ enum class PushTemplate(
         title = "관리자 알림",
         message = "관리자 발송 알림",
         itemType = PushItemType.ALL,
+        group = PushTemplateGroup.ETC,
     ),
 
     /**
@@ -34,6 +36,7 @@ enum class PushTemplate(
         title = "친구 요청 💌",
         message = "{nickname_iga} 너랑 친구가 되고 싶어해 😊",
         itemType = PushItemType.FRIEND,
+        group = PushTemplateGroup.FRIEND,
     ),
 
     /**
@@ -44,6 +47,7 @@ enum class PushTemplate(
         title = "친구 요청 승인 💌",
         message = "{nickname_iga} 친구 요청을 수락했어 🤭",
         itemType = PushItemType.FRIEND,
+        group = PushTemplateGroup.FRIEND,
     ),
 
 
@@ -55,6 +59,7 @@ enum class PushTemplate(
         title = "새로운 팔로우 👀",
         message = "{nickname_iga} 나를 팔로우하려고 해 😚",
         itemType = PushItemType.FOLLOW,
+        group = PushTemplateGroup.FOLLOW,
     ),
 
     /**
@@ -65,6 +70,7 @@ enum class PushTemplate(
         title = "팔로우 수락 🥰",
         message = "{nickname_iga} 내 팔로우를 수락했어 🥰",
         itemType = PushItemType.FOLLOW,
+        group = PushTemplateGroup.FOLLOW,
     ),
 
 
@@ -76,7 +82,8 @@ enum class PushTemplate(
         code = "NEW_POST",
         title = "새 글 등록 알림 🔔",
         message = "방금 새로운 글이 올라왔어 🔔",
-        itemType = PushItemType.NEW_POST
+        itemType = PushItemType.NEW_POST,
+        group = PushTemplateGroup.TEEN_STORY,
     ),
 
 
@@ -88,7 +95,8 @@ enum class PushTemplate(
         code = "NEW_VOTE",
         title = "새 투표 등록 알림 🔔",
         message = "방금 새로운 투표가 올라왔어 🔔",
-        itemType = PushItemType.NEW_POST
+        itemType = PushItemType.NEW_POST,
+        group = PushTemplateGroup.TEEN_VOTE,
     ),
 
 
@@ -100,6 +108,7 @@ enum class PushTemplate(
         title = "핀 등록 알림 📍",
         message = "{nickname_iga} 지금 핀을 등록했어 📍",
         PushItemType.PIN_ALERT,
+        group = PushTemplateGroup.PIN,
     ),
 
 
@@ -110,8 +119,8 @@ enum class PushTemplate(
         code = "BOARD_COMMENT",
         title = "틴스토리 댓글 👀",
         message = "{nickname_iga} 내 게시글에 새로운 댓글을 남겼어 👀",
-//        message = "내 게시글에 댓글이 달렸어 👀",
-        itemType = PushItemType.COMMENT_ALERT
+        itemType = PushItemType.COMMENT_ALERT,
+        group = PushTemplateGroup.COMMENT,
     ),
 
     /**
@@ -121,8 +130,8 @@ enum class PushTemplate(
         code = "BOARD_REPLY",
         title = "틴스토리 대댓글 👀",
         message = "{nickname_iga} 내 댓글에 새로운 댓글을 남겼어 👀",
-//        message = "내 댓글에 답글이 달렸어 👀",
-        itemType = PushItemType.COMMENT_ALERT
+        itemType = PushItemType.COMMENT_ALERT,
+        group = PushTemplateGroup.COMMENT,
     ),
 
     /**
@@ -132,8 +141,8 @@ enum class PushTemplate(
         code = "VOTE_COMMENT",
         title = "틴투표 댓글 알림 💬",
         message = "{nickname_iga} 내 투표에 새로운 댓글을 남겼어 👀",
-//        message = "내 투표에 댓글이 달렸어 👀",
-        itemType = PushItemType.COMMENT_ALERT
+        itemType = PushItemType.COMMENT_ALERT,
+        group = PushTemplateGroup.COMMENT,
     ),
 
     /**
@@ -143,8 +152,8 @@ enum class PushTemplate(
         code = "VOTE_REPLY",
         title = "틴투표 답글 알림 💬",
         message = "{nickname_iga} 내 댓글에 새로운 댓글을 남겼어 👀",
-//        message = "내 댓글에 답글이 달렸어 👀",
-        itemType = PushItemType.COMMENT_ALERT
+        itemType = PushItemType.COMMENT_ALERT,
+        group = PushTemplateGroup.COMMENT,
     ),
 
 
@@ -168,7 +177,8 @@ enum class PushTemplate(
     GIFT_MESSAGE(
         code = "GIFT_MESSAGE",
         title = "새로운 선물 도착! 🎁",
-        message = "새로운 선물 도착! 🎁"
+        message = "새로운 선물 도착! 🎁",
+        group = PushTemplateGroup.GIFT_SHOP,
     ),
 
 
@@ -178,7 +188,8 @@ enum class PushTemplate(
     SEASON_CREATE(
         code = "SEASON_CREATE",
         title = "새로운 시즌이 시작되었어요! 🌟",
-        message = "새로운 시즌이 시작되었어요! 지난 시즌 결과를 확인해보세요! 🌟"
+        message = "새로운 시즌이 시작되었어요! 지난 시즌 결과를 확인해보세요! 🌟",
+        group = PushTemplateGroup.GAME,
     ),
 
 
@@ -189,7 +200,8 @@ enum class PushTemplate(
     RANKING_DOWN(
         code = "RANKING_DOWN",
         title = "랭킹이 하락했어요! 📉",
-        message = "누군가 당신의 랭킹을 추월했어요! 신기록에 도전해보세요!📉"
+        message = "누군가 당신의 랭킹을 추월했어요! 신기록에 도전해보세요!📉",
+        group = PushTemplateGroup.GAME,
     ),
 
 
@@ -199,7 +211,8 @@ enum class PushTemplate(
     RANKING_REWARD(
         code = "RANKING_REWARD",
         title = "랭킹 보상이 도착했어요! 🎉",
-        message = "이번 시즌 랭킹 보상이 도착했어요! 확인해보세요! 🎉"
+        message = "이번 시즌 랭킹 보상이 도착했어요! 확인해보세요! 🎉",
+        group = PushTemplateGroup.GAME,
     ),
 
 
@@ -210,7 +223,8 @@ enum class PushTemplate(
     EVENT_NOTIFICATION(
         code = "EVENT_NOTIFICATION",
         title = "새로운 이벤트 소식! 🎊",
-        message = "{event_name} 이벤트가 시작되었어요! 놓치지 마세요! 🎊"
+        message = "{event_name} 이벤트가 시작되었어요! 놓치지 마세요! 🎊",
+        group = PushTemplateGroup.ETC,
     ),
 
 
@@ -220,7 +234,8 @@ enum class PushTemplate(
     DAILY_FRIEND_SUGGESTION(
         code = "DAILY_FRIEND_SUGGESTION",
         title = "오늘의 친구 추천 시간이 왔어요! 🤝",
-        message = "새로운 친구를 만나보세요! 오늘의 친구 추천 시간이 시작되었어요! 🤝"
+        message = "새로운 친구를 만나보세요! 오늘의 친구 추천 시간이 시작되었어요! 🤝",
+        group = PushTemplateGroup.FRIEND,
     ),
 
     /**
@@ -231,6 +246,7 @@ enum class PushTemplate(
         title = "친구 랭킹 변동 📈",
         message = "{nickname_iga} 게임 친구 랭킹이 {beforeRank}위 → {afterRank}위로 변했어!",
         itemType = PushItemType.GAME,
+        group = PushTemplateGroup.GAME,
     ),
 
     /**
@@ -241,6 +257,7 @@ enum class PushTemplate(
         title = "랭킹 추월 알림 🏃",
         message = "{nickname_iga} {gameName}에서 너를 추월했어! 📉",
         itemType = PushItemType.GAME,
+        group = PushTemplateGroup.GAME,
     ),
 
 
@@ -252,6 +269,7 @@ enum class PushTemplate(
         title = "초대코드 가입 🎉",
         message = "{nickname_iga} 내 초대코드로 가입했어!",
         itemType = PushItemType.ALL,
+        group = PushTemplateGroup.ETC,
     ),
 
     /**
@@ -263,6 +281,7 @@ enum class PushTemplate(
         title = "보상 리그 시작 알림 🏆",
         message = "지금 보상 리그가 시작됐어. 친구들 보다 먼저 달리고 보상 챙기자!",
         itemType = PushItemType.GAME,
+        group = PushTemplateGroup.GAME,
     ),
 
     ;

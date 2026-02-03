@@ -42,12 +42,17 @@ class SecurityConfig(
             .formLogin { it.disable() }
             .addFilterAt(filter, SecurityWebFiltersOrder.AUTHENTICATION)
             .authorizeExchange {
+                // CORS preflight
+                it.pathMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
                 //it.pathMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 it.pathMatchers(
                     HttpMethod.POST,
                     "/api/auth/**",
                     "/broadcasting/auth",
                     "/api/user",
+                    // Android deferred token issue
+                    "/api/invite/deferred/issue",
                 ).permitAll()
 
                 // 다운로드는 GET 허용
@@ -69,7 +74,14 @@ class SecurityConfig(
                     "/api/health",
                     "/api/terms/**",
                     "/api/user/profile/ss/{id}",
+                    // Android deferred token resolve (auth optional)
+                    "/api/invite/deferred/resolve",
+                    "/api/app/map/keys",
+                    "/.well-known/assetlinks.json"
                 ).permitAll()
+
+                // 초대 공유 링크(랜딩)
+                it.pathMatchers(HttpMethod.GET, "/r/**").permitAll()
 
                 it.pathMatchers("/api/admin/**").hasRole("ADMIN")
 

@@ -1475,3 +1475,35 @@ CREATE TABLE dashboard_statistics (
     created_at        timestamptz DEFAULT now()
 );
 
+
+-- ========================
+-- 초대 디퍼드 딥링크 토큰(Install Referrer용)
+-- ========================
+CREATE TABLE invite_link_tokens (
+    id          BIGSERIAL PRIMARY KEY,
+    token       VARCHAR(80) NOT NULL UNIQUE,
+    code        VARCHAR(100) NOT NULL,
+    expires_at  TIMESTAMPTZ NOT NULL,
+    used_at     TIMESTAMPTZ,
+    used_by     BIGINT,
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+
+-- ========================
+-- API 키 관리
+-- ========================
+CREATE TABLE public.api_keys (
+    id            BIGSERIAL PRIMARY KEY,
+    type          VARCHAR(100) NOT NULL,
+    api_key_id    VARCHAR(50)  NOT NULL,
+    api_key       VARCHAR(200) NOT NULL,
+    max_count     BIGINT       DEFAULT 0,
+    use_count     BIGINT       DEFAULT 0,
+    month_count   BIGINT       DEFAULT 0,
+    response_code VARCHAR(20),
+    status        VARCHAR(50) NOT NULL DEFAULT 'ACTIVE',
+    created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at    TIMESTAMPTZ,
+    deleted_at    TIMESTAMPTZ
+);

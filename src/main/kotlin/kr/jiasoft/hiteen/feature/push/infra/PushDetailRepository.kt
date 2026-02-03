@@ -44,6 +44,36 @@ interface PushDetailRepository : CoroutineCrudRepository<PushDetailEntity, Long>
         code: String?
     ): List<PushNotificationResponse>
 
-
+    @Query("""
+        SELECT
+            d.id,
+            d.push_id,
+            p.code,
+            p.title,
+            p.message,
+            d.success,
+            u.nickname AS nickname,
+            u.asset_uid AS asset_uid,
+            d.created_at
+        FROM push_detail d
+        JOIN push p ON p.id = d.push_id
+        LEFT JOIN users u ON u.id = p.created_id
+        WHERE d.deleted_at IS NULL
+          AND d.user_id = :userId
+          AND (:cursor IS NULL OR d.id < :cursor)
+          AND (
+            :codes IS NULL
+            OR cardinality(:codes) = 0
+            OR p.code = ANY(:codes)
+          )
+        ORDER BY d.id DESC
+        LIMIT :limit
+    """)
+    suspend fun findByUserIdWithCursorAndCodes(
+        userId: Long,
+        cursor: Long?,
+        limit: Int,
+        codes: Array<String>?
+    ): List<PushNotificationResponse>
 
 }

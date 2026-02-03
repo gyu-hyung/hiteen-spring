@@ -45,7 +45,8 @@ app:
 
     # 🔥 JVM 메모리 명시 (중요)
     - name: JAVA_TOOL_OPTIONS
-      value: "-Xms512m -Xmx1536m -XX:+UseG1GC"
+      # 컨테이너 메모리 limit(3Gi) 기준으로 힙 2Gi + 네이티브/메타스페이스 여유 확보
+      value: "-Xms512m -Xmx2048m -XX:+UseG1GC -XX:+ExitOnOutOfMemoryError -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp"
 
   # 🔥 리소스 상향 (OOM 방지)
   resources:
@@ -54,7 +55,7 @@ app:
       memory: 1Gi
     limits:
       cpu: 1
-      memory: 2Gi
+      memory: 3Gi
 
   # ============================================
   # Health Probes (안정화 핵심)
@@ -189,4 +190,3 @@ metrics:
     path: /actuator/prometheus
 
     honorLabels: true
-

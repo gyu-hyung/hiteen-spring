@@ -105,7 +105,7 @@ interface ChatRoomRepository : CoroutineCrudRepository<ChatRoomEntity, Long> {
                 JOIN users u_other ON u_other.id = cu_other.user_id 
                 WHERE cu_other.chat_room_id = r.id 
                   AND cu_other.user_id != :userId 
-                  AND cu_other.deleted_at IS NULL 
+                  /*AND cu_other.deleted_at IS NULL*/ 
                 LIMIT 1
             )) as asset_uid,
             COALESCE(r.updated_at, r.created_at) as updated_at,

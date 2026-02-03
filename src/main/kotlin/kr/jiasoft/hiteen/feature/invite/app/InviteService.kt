@@ -26,7 +26,7 @@ class InviteService(
     /** 내 초대코드로 등록한 친구 목록 */
     suspend fun findMyReferralList(userId: Long): List<Pair<Long, OffsetDateTime>> {
         return inviteRepository.findAllByUserId(userId)
-            .map { it.userId to it.joinDate }
+            .map { it.joinId to it.joinDate }
             .toList()
     }
 
@@ -49,9 +49,10 @@ class InviteService(
 
         // 이미 초대코드 이벤트에 참여한 휴대폰인지 체크 (중복 지급 방지)
         val invitedCount = inviteRepository.countByPhone(newUser.phone)
-        var invitePoint = 0
-        if (invitedCount < 1) {
-            invitePoint = PointPolicy.FRIEND_INVITE.amount
+        val invitePoint = if (invitedCount < 1) {
+            PointPolicy.FRIEND_INVITE.amount
+        }else {
+            0
         }
 
         // 초대한 회원 찾기
@@ -76,6 +77,8 @@ class InviteService(
 
         // point +1000
         pointService.applyPolicy(inviter.id, PointPolicy.FRIEND_INVITE, newUser.id)
+        // exp +30
+        expService.grantExp(inviter.id, "FRIEND_INVITE", newUser.id)
 
         return inviter.id
     }

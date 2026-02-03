@@ -113,7 +113,8 @@ interface ChatUserRepository : CoroutineCrudRepository<ChatUserEntity, Long> {
         SELECT cu.*, u.nickname as nickname
         FROM chat_users cu
         JOIN users u ON u.id = cu.user_id
-        WHERE cu.chat_room_id IN (:roomIds) AND cu.deleted_at IS NULL
+        WHERE cu.chat_room_id IN (:roomIds) 
+        /* AND cu.deleted_at IS NULL */
     """)
     fun findAllDetailedByRoomIds(roomIds: List<Long>): Flow<ChatUserNicknameProjection>
 

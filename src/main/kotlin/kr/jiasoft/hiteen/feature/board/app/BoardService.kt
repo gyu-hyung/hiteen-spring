@@ -1,12 +1,13 @@
 package kr.jiasoft.hiteen.feature.board.app
 
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kr.jiasoft.hiteen.common.dto.ApiPage
 import kr.jiasoft.hiteen.common.dto.ApiPageCursor
 import kr.jiasoft.hiteen.feature.asset.app.AssetService
 import kr.jiasoft.hiteen.feature.asset.domain.AssetCategory
 import kr.jiasoft.hiteen.feature.asset.dto.AssetResponse
+import kr.jiasoft.hiteen.feature.asset.app.event.AssetThumbnailPrecreateRequestedEvent
+import kr.jiasoft.hiteen.feature.asset.domain.ThumbnailMode
 import kr.jiasoft.hiteen.feature.board.domain.BoardAssetEntity
 import kr.jiasoft.hiteen.feature.board.domain.BoardBannerType
 import kr.jiasoft.hiteen.feature.board.domain.BoardCategory
@@ -62,16 +63,27 @@ class BoardService(
     private val txOperator: TransactionalOperator,
 ) {
 
+    private fun requestPostThumb800(uid: UUID, currentUserId: Long) {
+        eventPublisher.publishEvent(
+            AssetThumbnailPrecreateRequestedEvent(
+                assetUids = listOf(uid),
+                width = 800,
+                height = 800,
+                mode = kr.jiasoft.hiteen.feature.asset.domain.ThumbnailMode.COVER,
+                requestedByUserId = currentUserId,
+            )
+        )
+    }
 
-//    @Cacheable(cacheNames = ["boardDetail"], key = "#uid")
-    suspend fun getBoard(uid: UUID, currentUserId: Long?): BoardResponse {
-
-        val userId = currentUserId ?: -1L
-        val b = boards.findDetailByUid(uid, userId) ?: throw IllegalArgumentException("해당 글을 찾을 수 없어 😥")
+    suspend fun getBoard(uid: UUID, currentUserId: Long): BoardResponse {
+        val b = boards.findDetailByUid(uid, currentUserId) ?: throw IllegalArgumentException("해당 글을 찾을 수 없어 😢")
+        b.deletedAt?.let {
+            throw IllegalArgumentException("이미 삭제된 글이야 😢")
+        }
         val userSummary = userService.findUserSummary(b.createdId)
 
         val perPage = 15
-        val rawComments = comments.findComments(b.uid, null, userId, null, perPage + 1).toList()
+        val rawComments = comments.findComments(b.uid, null, currentUserId, null, perPage + 1).toList()
 
         // 댓글 작성자 정보 일괄 조회
         val commentAuthorIds = rawComments.map { it.createdId }.distinct()
@@ -93,7 +105,7 @@ class BoardService(
 
         // 공지사항/이벤트 확인 시 경험치 부여
         if(b.category == "NOTICE" || b.category == "EVENT") {
-            expService.grantExp(userId, "NOTICE_READ", b.id)
+            expService.grantExp(currentUserId, "NOTICE_READ", b.id)
         }
 
         val withBanners = if (b.category == BoardCategory.EVENT.name || b.category == BoardCategory.EVENT_WINNING.name) {
@@ -246,13 +258,18 @@ class BoardService(
         files: List<FilePart>,
         ip: String?
     ): UUID {
-        return txOperator.executeAndAwait {
-            // 1) 파일이 있다면 먼저 업로드 → 첫 번째 파일을 대표이미지 후보로
-            val uploaded: List<AssetResponse> =
-                if (files.isNotEmpty()) assetService.uploadImages(files, user.id, AssetCategory.POST) else emptyList()
-            val representativeUid: UUID? = uploaded.firstOrNull()?.uid
+        // 1) ✅ 트랜잭션 밖에서 업로드 + (파일 1개 완료마다) 썸네일 이벤트 발행
+        // - assets 저장은 개별 트랜잭션/커밋로 처리되므로, 리스너에서 UID 조회 시 '커밋 전 미노출' 레이스가 사라짐
+        val uploaded: MutableList<AssetResponse> = mutableListOf()
+        for (f in files) {
+            val a = assetService.uploadImage(f, user.id, AssetCategory.POST)
+            uploaded.add(a)
+            requestPostThumb800(a.uid, user.id)
+        }
+        val representativeUid: UUID? = uploaded.firstOrNull()?.uid
 
-            // 2) 대표이미지(assetUid)를 반영해 게시글 생성
+        // 2) ✅ 게시글/매핑/경험치/포인트는 원자적으로 처리
+        return txOperator.executeAndAwait {
             val saved = boards.save(
                 BoardEntity(
                     category = req.category.name,
@@ -273,7 +290,6 @@ class BoardService(
                 )
             )
 
-            // 3) 업로드된 모든 파일을 board_assets 매핑에 저장
             if (uploaded.isNotEmpty()) {
                 uploaded.forEach { a ->
                     boardAssetRepository.save(
@@ -285,12 +301,9 @@ class BoardService(
                 }
             }
 
-            //경험치
             expService.grantExp(user.id, "CREATE_BOARD", saved.id)
-            //포인트
             pointService.applyPolicy(user.id, PointPolicy.STORY_POST, saved.id)
 
-            //포스팅 알림 (비동기 처리)
             val followerIds = followRepository.findAllFollowerIds(user.id).toList()
             if (followerIds.isNotEmpty()) {
                 eventPublisher.publishEvent(
@@ -343,8 +356,14 @@ class BoardService(
 
         // 2) 파일 업로드 -> 매핑 추가 + 대표이미지 후보(첫 번째 업로드)
         val uploadedUids: List<UUID> = if (files.isNotEmpty()) {
-            val uploadedFiles = assetService.uploadImages(files, currentUserId, AssetCategory.POST)
-            val uids = uploadedFiles.map { it.uid }.toList()
+            val uploadedFiles: MutableList<AssetResponse> = mutableListOf()
+            for (f in files) {
+                val a = assetService.uploadImage(f, currentUserId, AssetCategory.POST)
+                uploadedFiles.add(a)
+                requestPostThumb800(a.uid, currentUserId)
+            }
+            val uids = uploadedFiles.map { it.uid }
+
             uploadedFiles.forEach { a ->
                 boardAssetRepository.save(
                     BoardAssetEntity(
