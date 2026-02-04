@@ -69,9 +69,9 @@ interface PollRepository : CoroutineCrudRepository<PollEntity, Long> {
                OR p.lat IS NULL OR p.lng IS NULL
                OR earth_distance(ll_to_earth(:userLat, :userLng), ll_to_earth(p.lat, p.lng)) <= :maxDistance)
           AND (
-              :sortByDistance = false 
+              :orderType != 'DISTANCE' 
               AND (:cursor IS NULL OR p.id < :cursor)
-              OR :sortByDistance = true 
+              OR :orderType = 'DISTANCE' 
               AND (:lastDistance IS NULL OR :lastId IS NULL 
                    OR earth_distance(ll_to_earth(:userLat, :userLng), ll_to_earth(p.lat, p.lng)) > :lastDistance 
                    OR (earth_distance(ll_to_earth(:userLat, :userLng), ll_to_earth(p.lat, p.lng)) = :lastDistance AND p.id < :lastId))
@@ -81,7 +81,7 @@ interface PollRepository : CoroutineCrudRepository<PollEntity, Long> {
           /* 1달 이내 데이터 우선 */
           CASE WHEN p.created_at >= NOW() - INTERVAL '1 month' THEN 0 ELSE 1 END ASC,
           /* 거리순 정렬 */
-          CASE WHEN :sortByDistance = true AND :userLat IS NOT NULL AND :userLng IS NOT NULL 
+          CASE WHEN :orderType = 'DISTANCE' AND :userLat IS NOT NULL AND :userLng IS NOT NULL 
                THEN earth_distance(ll_to_earth(:userLat, :userLng), ll_to_earth(p.lat, p.lng)) END ASC NULLS LAST,
           /* orderType: LATEST(default)/POPULAR/LIKE/COMMENT */
           CASE WHEN :orderType = 'POPULAR' THEN p.vote_count END DESC NULLS LAST,
@@ -109,7 +109,6 @@ interface PollRepository : CoroutineCrudRepository<PollEntity, Long> {
         userLat: Double?,
         userLng: Double?,
         maxDistance: Double?,
-        sortByDistance: Boolean,
         lastDistance: Double?,
         lastId: Long?,
     ): Flow<PollSummaryRow>

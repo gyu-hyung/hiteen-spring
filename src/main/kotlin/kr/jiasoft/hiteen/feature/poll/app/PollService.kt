@@ -63,14 +63,13 @@ class PollService(
         userLat: Double? = null,
         userLng: Double? = null,
         maxDistance: Double? = null,
-        sortByDistance: Boolean = false,
         lastDistance: Double? = null,
         lastId: Long? = null,
     ): List<PollResponse> {
         val order = PollOrderType.from(orderType)
         val rows = polls.findSummariesByCursor(
             cursor, size, currentUserId, type, author, order.name,
-            userLat, userLng, maxDistance, sortByDistance, lastDistance, lastId
+            userLat, userLng, maxDistance, lastDistance, lastId
         ).toList()
         if (rows.isEmpty()) return emptyList()
 
