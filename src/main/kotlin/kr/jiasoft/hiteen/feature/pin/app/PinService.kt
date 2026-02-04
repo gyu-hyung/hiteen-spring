@@ -186,7 +186,7 @@ class PinService(
                     friendRepository.findAllFriendship(user.id).toList()
                 }
 
-            if (friendIds.isNotEmpty()) {
+            if (dto.visibility != "PRIVATE" && friendIds.isNotEmpty()) {
                 eventPublisher.publishEvent(
                     PushSendRequestedEvent(
                         userIds = friendIds,
