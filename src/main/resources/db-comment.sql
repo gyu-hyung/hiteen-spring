@@ -317,6 +317,8 @@ COMMENT ON COLUMN boards.report_count IS '신고 수';
 COMMENT ON COLUMN boards.status IS '상태';
 COMMENT ON COLUMN boards.address IS '주소';
 COMMENT ON COLUMN boards.detail_address IS '상세 주소';
+COMMENT ON COLUMN boards.lat IS '위도';
+COMMENT ON COLUMN boards.lng IS '경도';
 COMMENT ON COLUMN boards.created_id IS '작성자 사용자 ID';
 COMMENT ON COLUMN boards.created_at IS '작성 일시';
 COMMENT ON COLUMN boards.updated_id IS '수정자 사용자 ID';

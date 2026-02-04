@@ -71,6 +71,9 @@ data class BoardResponse(
     @param:Schema(description = "경도", example = "")
     val lng: Double? = null,
 
+    @param:Schema(description = "거리 (미터)", example = "1500.5")
+    val distance: Double? = null,
+
     @field:Schema(description = "학년", example = "3")
     val grade: String? = null,
 
