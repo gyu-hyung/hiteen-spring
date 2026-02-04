@@ -30,7 +30,7 @@ data class BoardResponse(
     val subject: String? = null,
 
     @param:Schema(description = "내용", example = "이번 주 금요일에 체육대회가 열립니다.")
-    val content: String,
+    val content: String? = null,
 
     @param:Schema(description = "외부 링크", example = "https://example.com")
     val link: String? = null,

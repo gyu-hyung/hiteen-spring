@@ -154,7 +154,7 @@ class BoardService(
 
         val mapped = rows.map { row ->
             row.copy(
-                content = row.content.take(160),
+                content = row.content?.take(160),
                 user = userMap[row.createdId]
             )
         }
@@ -218,7 +218,7 @@ class BoardService(
 
         val mapped = items.map { row ->
             row.copy(
-                content = row.content.take(160),
+                content = row.content?.take(160),
                 user = userMap[row.createdId]
             )
         }
