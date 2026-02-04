@@ -202,6 +202,9 @@ interface BoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
                OR b.lat IS NULL OR b.lng IS NULL
                OR earth_distance(ll_to_earth(:userLat, :userLng), ll_to_earth(b.lat, b.lng)) <= :maxDistance)
         ORDER BY 
+            /* 1달 이내 데이터 우선 */
+            CASE WHEN b.created_at >= NOW() - INTERVAL '1 month' THEN 0 ELSE 1 END ASC,
+            /* 거리순 정렬 */
             CASE WHEN :sortByDistance = true AND :userLat IS NOT NULL AND :userLng IS NOT NULL 
                  THEN earth_distance(ll_to_earth(:userLat, :userLng), ll_to_earth(b.lat, b.lng)) END ASC NULLS LAST,
             b.id DESC
@@ -316,6 +319,9 @@ interface BoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
           )
           AND (:authorUid IS NULL OR b.created_id = (SELECT id FROM users WHERE uid = :authorUid))
         ORDER BY 
+            /* 1달 이내 데이터 우선 */
+            CASE WHEN b.created_at >= NOW() - INTERVAL '1 month' THEN 0 ELSE 1 END ASC,
+            /* 거리순 정렬 */
             CASE WHEN :sortByDistance = true AND :userLat IS NOT NULL AND :userLng IS NOT NULL 
                  THEN earth_distance(ll_to_earth(:userLat, :userLng), ll_to_earth(b.lat, b.lng)) END ASC NULLS LAST,
             b.id DESC

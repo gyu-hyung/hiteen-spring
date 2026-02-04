@@ -60,9 +60,18 @@ class PollService(
         type: String = "all",
         author: UUID?,
         orderType: String? = null,
+        userLat: Double? = null,
+        userLng: Double? = null,
+        maxDistance: Double? = null,
+        sortByDistance: Boolean = false,
+        lastDistance: Double? = null,
+        lastId: Long? = null,
     ): List<PollResponse> {
         val order = PollOrderType.from(orderType)
-        val rows = polls.findSummariesByCursor(cursor, size, currentUserId, type, author, order.name).toList()
+        val rows = polls.findSummariesByCursor(
+            cursor, size, currentUserId, type, author, order.name,
+            userLat, userLng, maxDistance, sortByDistance, lastDistance, lastId
+        ).toList()
         if (rows.isEmpty()) return emptyList()
 
         val pollIds = rows.map { it.id }.toTypedArray()
@@ -126,6 +135,11 @@ class PollService(
                 colorEnd = row.colorEnd,
                 voteCount = totalVotes,
                 commentCount = row.commentCount,
+                address = row.address,
+                detailAddress = row.detailAddress,
+                lat = row.lat,
+                lng = row.lng,
+                distance = row.distance,
                 likeCount = likeCountMap[row.id] ?: 0,
                 likedByMe = likedByMeSet.contains(row.id),
                 votedByMe = voted != null,
@@ -293,6 +307,10 @@ class PollService(
             colorStart = req.colorStart,
             colorEnd = req.colorEnd,
             allowComment = req.allowComment,
+            address = req.address,
+            detailAddress = req.detailAddress,
+            lat = req.lat,
+            lng = req.lng,
             status = PollStatus.ACTIVE.name,
             createdId = user.id,
             createdAt = OffsetDateTime.now()
@@ -341,6 +359,10 @@ class PollService(
             colorStart = req.colorStart ?: poll.colorStart,
             colorEnd = req.colorEnd ?: poll.colorEnd,
             allowComment = req.allowComment?.let { if (it) 1 else 0 } ?: poll.allowComment,
+            address = req.address ?: poll.address,
+            detailAddress = req.detailAddress ?: poll.detailAddress,
+            lat = req.lat ?: poll.lat,
+            lng = req.lng ?: poll.lng,
             updatedAt = OffsetDateTime.now()
         )
 
@@ -375,6 +397,10 @@ class PollService(
             colorStart = req.colorStart ?: poll.colorStart,
             colorEnd = req.colorEnd ?: poll.colorEnd,
             allowComment = req.allowComment?.let { if (it) 1 else 0 } ?: poll.allowComment,
+            address = req.address ?: poll.address,
+            detailAddress = req.detailAddress ?: poll.detailAddress,
+            lat = req.lat ?: poll.lat,
+            lng = req.lng ?: poll.lng,
             updatedAt = OffsetDateTime.now()
         )
 

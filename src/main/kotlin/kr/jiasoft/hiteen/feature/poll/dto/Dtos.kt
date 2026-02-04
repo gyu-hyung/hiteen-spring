@@ -24,7 +24,19 @@ data class PollCreateRequest(
     val colorEnd: String? = null,
 
     @param:Schema(description = "댓글 허용 여부 (0=불가,1=가능)")
-    val allowComment: Int
+    val allowComment: Int,
+
+    @param:Schema(description = "주소", example = "서울특별시 강남구 테헤란로 123")
+    val address: String? = null,
+
+    @param:Schema(description = "상세 주소", example = "2층 강당")
+    val detailAddress: String? = null,
+
+    @param:Schema(description = "위도", example = "37.5666")
+    val lat: Double? = null,
+
+    @param:Schema(description = "경도", example = "127.0000")
+    val lng: Double? = null,
 
     //    val onlyComment: Int = 0        // 1=댓글로 투표, 0=일반투표
 )
@@ -53,6 +65,18 @@ data class PollUpdateRequest(
 
     @param:Schema(description = "댓글 허용 여부", example = "true")
     val allowComment: Boolean?,
+
+    @param:Schema(description = "주소", example = "서울특별시 강남구 테헤란로 123")
+    val address: String? = null,
+
+    @param:Schema(description = "상세 주소", example = "2층 강당")
+    val detailAddress: String? = null,
+
+    @param:Schema(description = "위도", example = "37.5666")
+    val lat: Double? = null,
+
+    @param:Schema(description = "경도", example = "127.0000")
+    val lng: Double? = null,
 )
 
 
@@ -116,6 +140,11 @@ data class PollSummaryRow(
     val votedByMe: Boolean = false,
     val votedSeq: Int? = null,
     val allowComment: Int = 0,
+    val address: String? = null,
+    val detailAddress: String? = null,
+    val lat: Double? = null,
+    val lng: Double? = null,
+    val distance: Double? = null,
     val createdId: Long,
     val createdAt: OffsetDateTime,
     val deletedAt: OffsetDateTime? = null,
@@ -148,6 +177,21 @@ data class PollResponse(
 
     @param:Schema(description = "댓글 수", example = "15")
     val commentCount: Int = 0,
+
+    @param:Schema(description = "주소", example = "서울특별시 강남구 테헤란로 123")
+    val address: String? = null,
+
+    @param:Schema(description = "상세 주소", example = "2층 강당")
+    val detailAddress: String? = null,
+
+    @param:Schema(description = "위도", example = "37.5666")
+    val lat: Double? = null,
+
+    @param:Schema(description = "경도", example = "127.0000")
+    val lng: Double? = null,
+
+    @param:Schema(description = "거리 (미터)", example = "1500.5")
+    val distance: Double? = null,
 
     @param:Schema(description = "좋아요 수", example = "20")
     val likeCount: Int = 0,

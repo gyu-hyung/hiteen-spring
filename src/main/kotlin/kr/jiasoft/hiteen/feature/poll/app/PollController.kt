@@ -26,22 +26,46 @@ class PollController(
 
     @Operation(
         summary = "투표 목록",
-        description = "커서 기반 페이지네이션 방식으로 투표 목록을 조회합니다. type 파라미터로 mine(내가 등록한), participated(내가 참여한) 필터링 가능."
+        description = "커서 기반 페이지네이션 방식으로 투표 목록을 조회합니다. type 파라미터로 mine(내가 등록한), participated(내가 참여한) 필터링 가능. 거리순 정렬도 지원합니다."
     )
     @GetMapping
     suspend fun list(
-        @Parameter(description = "이전 페이지의 마지막 ID") @RequestParam(required = false) cursor: Long?,
+        @Parameter(description = "커서 (기본: ID, 거리순: 거리:ID 형식)") @RequestParam(required = false) cursor: String?,
         @Parameter(description = "가져올 개수 (기본값 20)") @RequestParam(defaultValue = "20") size: Int,
         @Parameter(description = "목록 타입: all, mine, participated") @RequestParam(defaultValue = "all") type: String,
         @Parameter(description = "정렬 타입: LATEST(기본), POPULAR, LIKE, COMMENT") @RequestParam(required = false) orderType: String?,
         @Parameter(description = "작성자 UUID") @RequestParam(required = false) author: UUID?,
+        @Parameter(description = "사용자 위도 (거리순 정렬 시 필수)") @RequestParam(required = false) lat: Double?,
+        @Parameter(description = "사용자 경도 (거리순 정렬 시 필수)") @RequestParam(required = false) lng: Double?,
+        @Parameter(description = "최대 거리 (미터)") @RequestParam(required = false) maxDistance: Double?,
+        @Parameter(description = "거리순 정렬 여부") @RequestParam(defaultValue = "false") sortByDistance: Boolean,
         @AuthenticationPrincipal(expression = "user") user: UserEntity?
     ): ResponseEntity<ApiResult<ApiPageCursor<PollResponse>>> {
-        val list = service.listPollsByCursor(cursor, size + 1, user?.id, type, author, orderType)
+        // 거리순 정렬 시 커서 파싱 (거리:ID 형식)
+        val (lastDistance, lastId) = if (sortByDistance && cursor != null) {
+            cursor.split(":").let {
+                if (it.size == 2) it[0].toDoubleOrNull() to it[1].toLongOrNull() else null to null
+            }
+        } else null to null
+
+        // 기본 정렬 시 커서는 Long ID
+        val cursorId = if (!sortByDistance && cursor != null) cursor.toLongOrNull() else null
+
+        val list = service.listPollsByCursor(
+            cursorId, size + 1, user?.id, type, author, orderType,
+            lat, lng, maxDistance, sortByDistance, lastDistance, lastId
+        )
 
         val hasMore = list.size > size
         val items = if (hasMore) list.dropLast(1) else list
-        val nextCursor = if (hasMore) items.lastOrNull()?.id?.toString() else null
+        val nextCursor = if (hasMore) {
+            if (sortByDistance) {
+                val lastItem = items.lastOrNull()
+                "${lastItem?.distance ?: 0.0}:${lastItem?.id}"
+            } else {
+                items.lastOrNull()?.id?.toString()
+            }
+        } else null
 
         return ResponseEntity.ok(
             ApiResult.success(
