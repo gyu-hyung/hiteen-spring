@@ -9,7 +9,7 @@ spring:
   r2dbc:
     url: r2dbc:postgresql://10.8.3.89:5432/hiteen
     username: hiteen
-    password: xxxxxxxx
+    password: hiteen@2025
     pool:
       enabled: true
       initial-size: 10
@@ -24,7 +24,7 @@ spring:
 #    enabled: true
     url: jdbc:postgresql://10.8.3.89:5432/hiteen
     user: hiteen
-    password: xxxxxxxx
+    password: hiteen@2025
     change-log: classpath:db/changelog/db.changelog-master.yaml
 
   data:
@@ -33,7 +33,7 @@ spring:
     redis:
       repositories:
         enabled: false
-      password: xxxxxxxx
+      password: hiteen1234
       timeout: 5s
       client-type: lettuce
 

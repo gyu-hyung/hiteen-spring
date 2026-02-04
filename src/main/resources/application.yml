@@ -11,7 +11,7 @@ spring:
     url: r2dbc:postgresql://49.247.175.76:5432/hiteen
     username: hiteen
 #    password: 1234
-    password: xxxxxxxx
+    password: hiteen@2025
     pool:
       enabled: true
       initial-size: 2         # 서버 시작 시 커넥션 미리 확보
@@ -27,7 +27,7 @@ spring:
     url: jdbc:postgresql://49.247.175.76:5432/hiteen
     user: hiteen
 #    password: 1234
-    password: xxxxxxxx
+    password: hiteen@2025
     change-log: classpath:db/changelog/db.changelog-master.yaml
 
   data:
@@ -39,7 +39,7 @@ spring:
         enabled: false
       host: 127.0.0.1
       port: 6379
-      password: xxxxxxxx
+      password: hiteen1234
 #      password:
       timeout: 5s
       client-type: lettuce
