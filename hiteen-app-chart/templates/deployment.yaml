@@ -1,0 +1,111 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.app.name }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.app.name }}
+spec:
+  replicas: {{ .Values.app.replicaCount }}
+
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+
+  minReadySeconds: 10
+
+  selector:
+    matchLabels:
+      app: {{ .Values.app.name }}
+
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.app.name }}
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/actuator/prometheus"
+
+    spec:
+      terminationGracePeriodSeconds: 60
+
+      nodeSelector:
+        {{- toYaml .Values.nodeSelector | nindent 8 }}
+
+      imagePullSecrets:
+        {{- toYaml .Values.imagePullSecrets | nindent 8 }}
+
+      # Pod Anti-Affinity (고가용성)
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app: {{ .Values.app.name }}
+                topologyKey: kubernetes.io/hostname
+
+      containers:
+        - name: {{ .Values.app.name }}
+          image: "{{ .Values.app.image.repository }}:{{ .Values.app.image.tag }}"
+          imagePullPolicy: {{ .Values.app.image.pullPolicy }}
+
+          ports:
+            - containerPort: {{ .Values.app.service.port }}
+
+          env:
+            {{- toYaml .Values.app.env | nindent 12 }}
+
+          volumeMounts:
+            - name: firebase-credentials
+              mountPath: /app/firebase/firebase-key.json
+              subPath: firebase-key.json
+            - name: nfs-assets
+              mountPath: /app/assets
+
+          resources:
+            {{- toYaml .Values.app.resources | nindent 12 }}
+
+          startupProbe:
+            httpGet:
+              path: {{ .Values.app.startupProbe.httpGet.path }}
+              port: {{ .Values.app.startupProbe.httpGet.port }}
+            failureThreshold: {{ .Values.app.startupProbe.failureThreshold }}
+            periodSeconds: {{ .Values.app.startupProbe.periodSeconds }}
+
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.app.readinessProbe.httpGet.path }}
+              port: {{ .Values.app.readinessProbe.httpGet.port }}
+            initialDelaySeconds: {{ .Values.app.readinessProbe.initialDelaySeconds }}
+            timeoutSeconds: {{ .Values.app.readinessProbe.timeoutSeconds }}
+            periodSeconds: {{ .Values.app.readinessProbe.periodSeconds }}
+            failureThreshold: {{ .Values.app.readinessProbe.failureThreshold }}
+
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.app.livenessProbe.httpGet.path }}
+              port: {{ .Values.app.livenessProbe.httpGet.port }}
+            initialDelaySeconds: {{ .Values.app.livenessProbe.initialDelaySeconds }}
+            timeoutSeconds: {{ .Values.app.livenessProbe.timeoutSeconds }}
+            periodSeconds: {{ .Values.app.livenessProbe.periodSeconds }}
+            failureThreshold: {{ .Values.app.livenessProbe.failureThreshold }}
+
+          lifecycle:
+            preStop:
+              exec:
+                command: ["sh", "-c", "sleep 20"]
+
+      volumes:
+        - name: firebase-credentials
+          secret:
+            secretName: firebase-secret
+
+        - name: nfs-assets
+          persistentVolumeClaim:
+            claimName: nfs-pvc-images
+

@@ -1,51 +1,165 @@
+# ============================================
+# GitLab CI/CD Pipeline for Hiteen
+# GitLab Container Registry 사용
+# gitlab.barunsoft.net:5005/jiasoft/hiteen2-server
+# ============================================
 stages:
-  - build
-  - push
-  - deploy
+  - build-jar
+  - build-image
+  - deploy-prod
 
-# =========================
-# 1️⃣ 공통 변수 설정
-# =========================
 variables:
-  DOCKER_IMAGE: $CI_REGISTRY_IMAGE       # GitLab Container Registry 주소 (자동 제공됨)
-  IMAGE_TAG: $CI_COMMIT_SHORT_SHA        # 커밋 SHA로 버전 관리
-  CHART_PATH: ./hiteen-chart             # Helm 차트 경로
-  NAMESPACE: hiteen                      # 배포 네임스페이스
-  KUBECONFIG_FILE: /tmp/kubeconfig       # K8S 접속용 config 경로
+  DOCKER_DRIVER: overlay2
+  DOCKER_TLS_CERTDIR: ""
+  GRADLE_OPTS: "-Dorg.gradle.daemon=false"
 
-# =========================
-# 2️⃣ Docker 이미지 빌드 & 푸시
-# =========================
-build-and-push:
-  stage: push
-  image: docker:25.0.3
+  # Container Registry (GitLab Registry)
+  REGISTRY_IMAGE: gitlab.barunsoft.net:5005/jiasoft/hiteen2-server
+
+  # Kubernetes
+  KUBE_NAMESPACE_PROD: hiteen-prod
+
+# ============================================
+# Cache Configuration
+# ============================================
+.gradle-cache: &gradle-cache
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - .gradle/
+      - build/
+
+# ============================================
+# 1. Gradle Build Stage (JAR 생성)
+# ============================================
+build-jar:
+  stage: build-jar
+  image: eclipse-temurin:21-jdk
+  <<: *gradle-cache
+  script:
+    - chmod +x ./gradlew
+    - ./gradlew clean build -x test --no-daemon
+    - ls -la build/libs/
+  artifacts:
+    paths:
+      - build/libs/*.jar
+    expire_in: 1 hour
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+
+# ============================================
+# 2. Docker Build & Push Stage
+# ============================================
+build-image:
+  stage: build-image
+  image: docker:24-dind
   services:
-    - docker:dind
+    - docker:24-dind
+  needs:
+    - job: build-jar
+      artifacts: true
   before_script:
-    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" "$CI_REGISTRY" --password-stdin
+    # GitLab Registry 로그인
+    - echo "$CI_DEPLOY_PASSWORD" | docker login -u "$CI_DEPLOY_USER" --password-stdin gitlab.barunsoft.net:5005
   script:
-    - docker build -t $DOCKER_IMAGE:$IMAGE_TAG .
-    - docker push $DOCKER_IMAGE:$IMAGE_TAG
-  only:
-    - main   # main 브랜치 푸시 시만 자동 빌드/배포
+    - |
+      # JAR 파일 확인
+      ls -la build/libs/
+      
+      TAG="prod-${CI_COMMIT_SHORT_SHA}"
+      echo "Building image with tag: $TAG"
+      
+      docker build \
+        -t $REGISTRY_IMAGE:$TAG \
+        -t $REGISTRY_IMAGE:latest \
+        .
+      
+      docker push $REGISTRY_IMAGE:$TAG
+      docker push $REGISTRY_IMAGE:latest
+      
+      echo "IMAGE_TAG=$TAG" >> build.env
+  artifacts:
+    reports:
+      dotenv: build.env
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
 
-# =========================
-# 3️⃣ Helm 배포 (K8S 자동 배포)
-# =========================
-deploy:
-  stage: deploy
+# ============================================
+# Deploy to Production (main 브랜치)
+# ============================================
+deploy-prod:
+  stage: deploy-prod
   image:
-    name: alpine/helm:3.14.3
+    name: alpine/helm:3.14.0
     entrypoint: [""]
+  needs:
+    - job: build-image
+      artifacts: true
   before_script:
-    # base64로 인코딩된 KUBECONFIG 환경변수를 파일로 복원
-    - echo "$KUBECONFIG_BASE64" | base64 -d > $KUBECONFIG_FILE
-    - export KUBECONFIG=$KUBECONFIG_FILE
+    - apk add --no-cache kubectl curl bash
+    - mkdir -p ~/.kube
+    - echo "$KUBE_CONFIG_PROD" | base64 -d > ~/.kube/config
+    - chmod 600 ~/.kube/config
+    # TLS 검증 스킵 (내부망)
+    - kubectl config set-cluster kubernetes --insecure-skip-tls-verify=true
   script:
-    - echo "🚀 Helm Deploying version $IMAGE_TAG ..."
-    - helm upgrade --install hiteen-api $CHART_PATH -n $NAMESPACE \
-      --set image.repository=$DOCKER_IMAGE \
-      --set image.tag=$IMAGE_TAG \
-      --set image.pullPolicy=Always
-  only:
-    - main
+    - |
+      echo "🚀 Deploying to Production environment"
+      echo "Image tag: $IMAGE_TAG"
+      echo "Registry: $REGISTRY_IMAGE"
+      
+      # 클러스터 연결 확인
+      kubectl get nodes
+      
+      # Namespace 생성
+      kubectl get ns $KUBE_NAMESPACE_PROD || kubectl create ns $KUBE_NAMESPACE_PROD
+      
+      # GitLab Registry Secret 생성
+      kubectl delete secret gitlab-registry -n $KUBE_NAMESPACE_PROD --ignore-not-found
+      kubectl create secret docker-registry gitlab-registry \
+        --docker-server=gitlab.barunsoft.net:5005 \
+        --docker-username=$CI_DEPLOY_USER \
+        --docker-password=$CI_DEPLOY_PASSWORD \
+        -n $KUBE_NAMESPACE_PROD
+      
+      # Firebase Secret 생성
+      echo "$FIREBASE_KEY_JSON" | base64 -d > firebase-key.json
+      kubectl delete secret firebase-secret -n $KUBE_NAMESPACE_PROD --ignore-not-found
+      kubectl create secret generic firebase-secret \
+        --from-file=firebase-key.json=firebase-key.json \
+        -n $KUBE_NAMESPACE_PROD
+      rm -f firebase-key.json
+      
+      # Redis Secret 생성
+      kubectl delete secret redis-secret -n $KUBE_NAMESPACE_PROD --ignore-not-found
+      kubectl create secret generic redis-secret \
+        --from-literal=redis-password=$REDIS_PASSWORD_PROD \
+        -n $KUBE_NAMESPACE_PROD
+      kubectl label secret redis-secret -n $KUBE_NAMESPACE_PROD app.kubernetes.io/managed-by=Helm --overwrite
+      kubectl annotate secret redis-secret -n $KUBE_NAMESPACE_PROD meta.helm.sh/release-name=hiteen --overwrite
+      kubectl annotate secret redis-secret -n $KUBE_NAMESPACE_PROD meta.helm.sh/release-namespace=$KUBE_NAMESPACE_PROD --overwrite
+      
+      # Helm 배포
+      helm upgrade --install hiteen ./hiteen-chart \
+        -n $KUBE_NAMESPACE_PROD \
+        --set app.image.repository=$REGISTRY_IMAGE \
+        --set app.image.tag=$IMAGE_TAG \
+        --set app.image.pullSecrets[0].name=gitlab-registry \
+        --set app.env=prod \
+        --set ingress.enabled=true \
+        --set redis.enabled=true \
+        --set redis.password=$REDIS_PASSWORD_PROD \
+        --set redis.storageClass=local-path \
+        --set redis.cluster.enabled=true \
+        --wait --timeout 10m
+      
+      # 배포 확인
+      kubectl get pods -n $KUBE_NAMESPACE_PROD -o wide
+      
+      echo "✅ Production deployment completed"
+  environment:
+    name: production
+    url: https://api.hiteen.co.kr
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+

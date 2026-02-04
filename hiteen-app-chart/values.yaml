@@ -1,0 +1,210 @@
+# ============================================
+# Global Settings - Production
+# ============================================
+namespace: hiteen-prod
+
+nodeSelector:
+  node-type: private
+
+imagePullSecrets:
+  - name: gitlab-registry-secret
+
+# ============================================
+# Backend Application (Spring Boot)
+# ============================================
+app:
+  name: hiteen-api
+  replicaCount: 2  # 운영환경은 최소 2개
+
+  image:
+    repository: gitlab.barunsoft.net:5050/jiasoft/hiteen2-server  # GitLab Registry
+    tag: latest
+    pullPolicy: Always
+
+  service:
+    type: ClusterIP
+    port: 8080
+
+  env:
+    - name: SPRING_PROFILES_ACTIVE
+      value: prod
+
+    # Database
+    - name: DB_HOST
+      valueFrom:
+        secretKeyRef:
+          name: hiteen-app-secret
+          key: db-host
+    - name: DB_NAME
+      valueFrom:
+        secretKeyRef:
+          name: hiteen-app-secret
+          key: db-name
+    - name: DB_USER
+      valueFrom:
+        secretKeyRef:
+          name: hiteen-app-secret
+          key: db-user
+    - name: DB_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: hiteen-app-secret
+          key: db-password
+
+    # MongoDB
+    - name: MONGO_HOST
+      valueFrom:
+        secretKeyRef:
+          name: hiteen-app-secret
+          key: mongo-host
+    - name: MONGO_USER
+      valueFrom:
+        secretKeyRef:
+          name: hiteen-app-secret
+          key: mongo-user
+    - name: MONGO_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: hiteen-app-secret
+          key: mongo-password
+    - name: MONGO_DB
+      valueFrom:
+        secretKeyRef:
+          name: hiteen-app-secret
+          key: mongo-db
+
+    # Redis
+    - name: REDIS_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: redis-secret
+          key: redis-password
+
+    # JWT
+    - name: JWT_SECRET
+      valueFrom:
+        secretKeyRef:
+          name: hiteen-app-secret
+          key: jwt-secret
+
+    - name: FIREBASE_CREDENTIAL_PATH
+      value: /app/firebase/firebase-key.json
+
+    # Production JVM Settings
+    - name: JAVA_TOOL_OPTIONS
+      value: "-Xms1g -Xmx3g -XX:+UseG1GC -XX:+ExitOnOutOfMemoryError -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp -Duser.timezone=Asia/Seoul"
+
+  # Production resources (상향 조정)
+  resources:
+    requests:
+      cpu: 500m
+      memory: 2Gi
+    limits:
+      cpu: 2
+      memory: 4Gi
+
+  # Health Probes
+  startupProbe:
+    httpGet:
+      path: /actuator/health
+      port: 8080
+    failureThreshold: 30
+    periodSeconds: 5
+
+  livenessProbe:
+    httpGet:
+      path: /actuator/health/liveness
+      port: 8080
+    initialDelaySeconds: 60
+    timeoutSeconds: 5
+    periodSeconds: 10
+    failureThreshold: 3
+
+  readinessProbe:
+    httpGet:
+      path: /actuator/health/readiness
+      port: 8080
+    initialDelaySeconds: 30
+    timeoutSeconds: 5
+    periodSeconds: 5
+    failureThreshold: 3
+
+  # Pod Disruption Budget
+  pdb:
+    enabled: true
+    minAvailable: 1
+
+  # Horizontal Pod Autoscaler
+  hpa:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 5
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+
+# ============================================
+# Ingress (Nginx) - Production
+# ============================================
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    nginx.ingress.kubernetes.io/client-max-body-size: "50m"
+    nginx.ingress.kubernetes.io/websocket-services: "hiteen-api"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"  # TLS 인증서 자동 발급
+
+  hosts:
+    - host: api.hiteen.co.kr  # 운영 도메인
+      paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            serviceName: hiteen-api
+            servicePort: 8080
+
+  tls:
+    - secretName: hiteen-api-tls
+      hosts:
+        - api.hiteen.co.kr
+
+# ============================================
+# Metrics (Prometheus)
+# ============================================
+metrics:
+  enabled: true
+  serviceMonitor:
+    enabled: true
+    namespace: monitoring
+    releaseLabel: monitoring
+    interval: 15s
+    scrapeTimeout: 10s
+    path: /actuator/prometheus
+    honorLabels: true
+
+# ============================================
+# Secrets (운영 배포 시 --set으로 주입)
+# ============================================
+secrets:
+  db:
+    host: "10.8.0.200"
+    name: "hiteen-prod"
+    user: "hiteen"
+    password: ""  # --set secrets.db.password=<PASSWORD>
+  mongo:
+    host: "10.8.0.200"
+    user: "hiteen"
+    password: ""  # --set secrets.mongo.password=<PASSWORD>
+    db: "hiteen"
+  jwt:
+    secret: ""  # --set secrets.jwt.secret=<SECRET>
+  sms:
+    apiKey: ""
+    kakaoSenderKey: ""
+  giftishow:
+    authKey: ""
+    tokenKey: ""
+  external:
+    neisApiKey: ""
+    kakaoApiKey: ""
