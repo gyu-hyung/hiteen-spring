@@ -32,6 +32,7 @@ import kr.jiasoft.hiteen.feature.point.domain.PointPolicy
 import kr.jiasoft.hiteen.feature.push.app.event.PushSendRequestedEvent
 import kr.jiasoft.hiteen.feature.push.domain.PushTemplate
 import kr.jiasoft.hiteen.feature.relationship.infra.FollowRepository
+import kr.jiasoft.hiteen.feature.relationship.infra.FriendRepository
 import kr.jiasoft.hiteen.feature.user.app.UserService
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import org.springframework.context.ApplicationEventPublisher
@@ -60,6 +61,7 @@ class BoardService(
     private val eventPublisher: ApplicationEventPublisher,
 
     private val followRepository: FollowRepository,
+    private val friendRepository: FriendRepository,
     private val txOperator: TransactionalOperator,
 ) {
 
@@ -324,10 +326,12 @@ class BoardService(
             pointService.applyPolicy(user.id, PointPolicy.STORY_POST, saved.id)
 
             val followerIds = followRepository.findAllFollowerIds(user.id).toList()
-            if (followerIds.isNotEmpty()) {
+            val friendIds = friendRepository.findAllFriendship(user.id).toList()
+            val targetIds = (followerIds + friendIds).distinct()
+            if (targetIds.isNotEmpty()) {
                 eventPublisher.publishEvent(
                     PushSendRequestedEvent(
-                        userIds = followerIds,
+                        userIds = targetIds,
                         actorUserId = user.id,
                         templateData = PushTemplate.NEW_POST.buildPushData(
                             "nickname" to user.nickname,

@@ -14,6 +14,7 @@ import kr.jiasoft.hiteen.feature.poll.dto.*
 import kr.jiasoft.hiteen.feature.poll.infra.*
 import kr.jiasoft.hiteen.feature.push.app.event.PushSendRequestedEvent
 import kr.jiasoft.hiteen.feature.push.domain.PushTemplate
+import kr.jiasoft.hiteen.feature.relationship.infra.FollowRepository
 import kr.jiasoft.hiteen.feature.relationship.infra.FriendRepository
 import kr.jiasoft.hiteen.feature.user.app.UserService
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
@@ -39,6 +40,7 @@ class PollService(
     private val pollSelects: PollSelectRepository,
     private val pollSelectPhotos: PollSelectPhotoRepository,
     private val friendRepository: FriendRepository,
+    private val followRepository: FollowRepository,
 
     private val userService: UserService,
     private val assetService: AssetService,
@@ -321,14 +323,18 @@ class PollService(
         pointService.applyPolicy(user.id, PointPolicy.VOTE_QUESTION, id)
         //포스팅 알림
         val friendIds = friendRepository.findAllFriendship(user.id).toList()
-        eventPublisher.publishEvent(
-            PushSendRequestedEvent(
-                userIds = friendIds,
-                actorUserId = user.id,
-                templateData = PushTemplate.NEW_VOTE.buildPushData("nickname" to user.nickname),
-                extraData = mapOf("pollId" to id.toString()),
+        val followerIds = followRepository.findAllFollowerIds(user.id).toList()
+        val targetIds = (friendIds + followerIds).distinct()
+        if (targetIds.isNotEmpty()) {
+            eventPublisher.publishEvent(
+                PushSendRequestedEvent(
+                    userIds = targetIds,
+                    actorUserId = user.id,
+                    templateData = PushTemplate.NEW_VOTE.buildPushData("nickname" to user.nickname),
+                    extraData = mapOf("pollId" to id.toString()),
+                )
             )
-        )
+        }
         return id
     }
 
