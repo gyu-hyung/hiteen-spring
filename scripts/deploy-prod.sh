@@ -14,11 +14,11 @@ IMAGE="gitlab.barunsoft.net:6005/jiasoft/hiteen2-server"
 TAG="${1:-prod-0.0.1}"
 
 # GitLab Registry 인증 정보
-GITLAB_USER="gud5603@gmail.com"
-GITLAB_TOKEN="glpat-xxxxxxxxxxxxxxxxxxxx"
+GITLAB_USER="${GITLAB_USER:-gud5603@gmail.com}"
+GITLAB_TOKEN="${GITLAB_TOKEN:?GITLAB_TOKEN 환경변수를 설정해주세요}"
 
 # Redis 비밀번호
-REDIS_PASSWORD="xxxxxxxx"
+REDIS_PASSWORD="${REDIS_PASSWORD:?REDIS_PASSWORD 환경변수를 설정해주세요}"
 
 # NFS 설정
 NFS_SERVER="10.8.0.159"

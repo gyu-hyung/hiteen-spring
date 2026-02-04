@@ -159,9 +159,8 @@ ingress:
     nginx.ingress.kubernetes.io/proxy-body-size: "50m"
     nginx.ingress.kubernetes.io/client-max-body-size: "50m"
     nginx.ingress.kubernetes.io/websocket-services: "hiteen-api"
-    # TLS는 나중에 활성화
-    # nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    # cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
 
   hosts:
     - host: api.hiteen.kr  # 운영 도메인
@@ -172,11 +171,11 @@ ingress:
             serviceName: hiteen-api
             servicePort: 8080
 
-  # TLS는 나중에 활성화
-  # tls:
-  #   - secretName: hiteen-api-tls
-  #     hosts:
-  #       - api.hiteen.kr
+  tls:
+    - secretName: hiteen-api-tls
+      hosts:
+        - api.hiteen.kr
+        - "*.hiteen.kr"
 
 # ============================================
 # Metrics (Prometheus) - 나중에 활성화
