@@ -1,26 +1,28 @@
 # ============================================
 # Global Settings - Production
 # ============================================
-namespace: hiteen-prod
+namespace: hiteen
 
-nodeSelector:
-  node-type: private
+# nodeSelector 비활성화 (단일 노드 운영)
+# nodeSelector:
+#   node-type: private
 
 # ============================================
-# NFS (Assets Storage)
+# NFS (Assets Storage) - 개발서버와 동일
 # ============================================
 nfs:
   enabled: true
-  server: "10.8.0.200"  # 운영 NFS 서버 IP
+  server: "10.8.0.159"  # 개발서버와 동일한 NFS 서버
   path: "/srv/nfs/assets"
-  storage: "200Gi"
+  storage: "100Gi"
+  pvcName: nfs-pvc-images
 
 # ============================================
-# NFS (Backup Storage)
+# NFS (Backup Storage) - 나중에 구성
 # ============================================
 backupNfs:
-  enabled: true
-  server: "10.8.0.200"  # 운영 NFS 서버 IP
+  enabled: false
+  server: "10.8.0.159"
   path: "/srv/nfs/backup"
   storage: "100Gi"
 
@@ -62,10 +64,10 @@ redis:
     pingInterval: 3
 
 # ============================================
-# Database Backup CronJob
+# Database Backup CronJob - 나중에 구성
 # ============================================
 dbBackup:
-  enabled: true
+  enabled: false
   schedule: "0 3 * * *"  # 매일 새벽 3시
   postgres:
     host: "10.8.0.200"  # 운영 DB 서버 IP

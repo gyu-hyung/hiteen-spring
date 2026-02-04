@@ -1,24 +1,31 @@
 # ============================================
 # Global Settings - Production
 # ============================================
-namespace: hiteen-prod
+namespace: hiteen
 
-nodeSelector:
-  node-type: private
+# nodeSelector 비활성화 (단일 노드 운영)
+# nodeSelector:
+#   node-type: private
 
 imagePullSecrets:
-  - name: gitlab-registry-secret
+  - name: gitlab-registry
+
+# NFS Storage (hiteen-infra-chart에서 PV/PVC 생성, 여기서는 참조만)
+nfs:
+  enabled: true  # Pod에서 NFS 마운트 활성화
+  createPV: false  # PV/PVC는 infra-chart에서 생성
+  pvcName: nfs-pvc-images  # 참조할 PVC 이름
 
 # ============================================
 # Backend Application (Spring Boot)
 # ============================================
 app:
   name: hiteen-api
-  replicaCount: 2  # 운영환경은 최소 2개
+  replicaCount: 1  # 초기 배포는 1개로 시작
 
   image:
-    repository: gitlab.barunsoft.net:5050/jiasoft/hiteen2-server  # GitLab Registry
-    tag: latest
+    repository: gitlab.barunsoft.net:6005/jiasoft/hiteen2-server  # GitLab Registry (HTTPS)
+    tag: prod-0.0.1
     pullPolicy: Always
 
   service:
@@ -90,18 +97,18 @@ app:
     - name: FIREBASE_CREDENTIAL_PATH
       value: /app/firebase/firebase-key.json
 
-    # Production JVM Settings
+    # JVM Settings (리소스에 맞게 조정)
     - name: JAVA_TOOL_OPTIONS
-      value: "-Xms1g -Xmx3g -XX:+UseG1GC -XX:+ExitOnOutOfMemoryError -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp -Duser.timezone=Asia/Seoul"
+      value: "-Xms512m -Xmx2g -XX:+UseG1GC -XX:+ExitOnOutOfMemoryError -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp -Duser.timezone=Asia/Seoul"
 
-  # Production resources (상향 조정)
+  # Resources (개발서버와 동일하게 낮춤)
   resources:
     requests:
-      cpu: 500m
-      memory: 2Gi
+      cpu: 300m
+      memory: 1Gi
     limits:
-      cpu: 2
-      memory: 4Gi
+      cpu: 1
+      memory: 3Gi
 
   # Health Probes
   startupProbe:
@@ -131,12 +138,12 @@ app:
 
   # Pod Disruption Budget
   pdb:
-    enabled: true
+    enabled: false
     minAvailable: 1
 
-  # Horizontal Pod Autoscaler
+  # Horizontal Pod Autoscaler - 나중에 활성화
   hpa:
-    enabled: true
+    enabled: false
     minReplicas: 2
     maxReplicas: 5
     targetCPUUtilizationPercentage: 70
@@ -152,8 +159,9 @@ ingress:
     nginx.ingress.kubernetes.io/proxy-body-size: "50m"
     nginx.ingress.kubernetes.io/client-max-body-size: "50m"
     nginx.ingress.kubernetes.io/websocket-services: "hiteen-api"
-    nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    cert-manager.io/cluster-issuer: "letsencrypt-prod"  # TLS 인증서 자동 발급
+    # TLS는 나중에 활성화
+    # nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    # cert-manager.io/cluster-issuer: "letsencrypt-prod"
 
   hosts:
     - host: api.hiteen.co.kr  # 운영 도메인
@@ -164,18 +172,19 @@ ingress:
             serviceName: hiteen-api
             servicePort: 8080
 
-  tls:
-    - secretName: hiteen-api-tls
-      hosts:
-        - api.hiteen.co.kr
+  # TLS는 나중에 활성화
+  # tls:
+  #   - secretName: hiteen-api-tls
+  #     hosts:
+  #       - api.hiteen.co.kr
 
 # ============================================
-# Metrics (Prometheus)
+# Metrics (Prometheus) - 나중에 활성화
 # ============================================
 metrics:
-  enabled: true
+  enabled: false
   serviceMonitor:
-    enabled: true
+    enabled: false
     namespace: monitoring
     releaseLabel: monitoring
     interval: 15s
@@ -184,27 +193,16 @@ metrics:
     honorLabels: true
 
 # ============================================
-# Secrets (운영 배포 시 --set으로 주입)
+# Secrets 관리 방법
 # ============================================
-secrets:
-  db:
-    host: "10.8.0.200"
-    name: "hiteen-prod"
-    user: "hiteen"
-    password: ""  # --set secrets.db.password=<PASSWORD>
-  mongo:
-    host: "10.8.0.200"
-    user: "hiteen"
-    password: ""  # --set secrets.mongo.password=<PASSWORD>
-    db: "hiteen"
-  jwt:
-    secret: ""  # --set secrets.jwt.secret=<SECRET>
-  sms:
-    apiKey: ""
-    kakaoSenderKey: ""
-  giftishow:
-    authKey: ""
-    tokenKey: ""
-  external:
-    neisApiKey: ""
-    kakaoApiKey: ""
+# Secret은 deploy-prod.sh에서 kubectl로 별도 생성합니다.
+# Helm chart에서는 secretKeyRef로 참조만 합니다.
+#
+# 생성된 Secret:
+#   - hiteen-app-secret: DB, Mongo, JWT 등 앱 설정
+#   - redis-secret: Redis 비밀번호
+#   - firebase-secret: Firebase 인증 키
+#   - gitlab-registry: GitLab Container Registry 인증
+#
+# Secret 수정 방법:
+#   kubectl edit secret hiteen-app-secret -n hiteen-prod

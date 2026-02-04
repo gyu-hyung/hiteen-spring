@@ -41,12 +41,12 @@ spring:
         enabled: true
         max-redirects: 5
         nodes:
-          - redis-0.redis.hiteen-prod.svc.cluster.local:6379
-          - redis-1.redis.hiteen-prod.svc.cluster.local:6379
-          - redis-2.redis.hiteen-prod.svc.cluster.local:6379
-          - redis-3.redis.hiteen-prod.svc.cluster.local:6379
-          - redis-4.redis.hiteen-prod.svc.cluster.local:6379
-          - redis-5.redis.hiteen-prod.svc.cluster.local:6379
+          - redis-0.redis.hiteen.svc.cluster.local:6379
+          - redis-1.redis.hiteen.svc.cluster.local:6379
+          - redis-2.redis.hiteen.svc.cluster.local:6379
+          - redis-3.redis.hiteen.svc.cluster.local:6379
+          - redis-4.redis.hiteen.svc.cluster.local:6379
+          - redis-5.redis.hiteen.svc.cluster.local:6379
 
       lettuce:
         pool:
@@ -119,7 +119,7 @@ springdoc:
   # swagger-ui.enabled: false
 
 soketi:
-  host: soketi-svc.hiteen-prod.svc.cluster.local
+  host: soketi-svc.hiteen.svc.cluster.local
   port: 6001
   app-id: ${SOKETI_APP_ID:hiteen-app}
   app-key: ${SOKETI_APP_KEY:hiteen-key}

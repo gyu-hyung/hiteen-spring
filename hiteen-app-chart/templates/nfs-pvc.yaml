@@ -1,0 +1,16 @@
+{{- if and .Values.nfs.enabled .Values.nfs.createPV }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.nfs.pvcName | default "nfs-pvc-images" }}
+  namespace: {{ .Values.namespace }}
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: {{ .Values.nfs.storage }}
+  volumeName: nfs-pv-images
+  storageClassName: ""
+{{- end }}
+

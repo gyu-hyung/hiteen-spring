@@ -96,8 +96,8 @@ kubectl exec -n hiteen-prod redis-0 -- redis-cli -a <REDIS_PASSWORD> cluster nod
 GitLab 프로젝트 → Settings → CI/CD → Variables에서 추가:
 Variable  설명  예시
 
-KUBE_CONFIG_DEV     개발 K8s kubeconfig (base64)       cat ~/.kube/config | base64
-KUBE_CONFIG_PROD    운영 K8s kubeconfig (base64)       cat ~/.kube/config | base64
+KUBE_CONFIG_DEV     개발 K8s kubeconfig (base64)       cat ~/.kube/config | base64 -w 0
+KUBE_CONFIG_PROD    운영 K8s kubeconfig (base64)       cat ~/.kube/config | base64 -w 0
 CI_DEPLOY_USER      GitLab 사용자명                     gud5603@gmail.com
 CI_DEPLOY_PASSWORD  GitLab 비밀번호 or Access Token     glpat-xxx
 FIREBASE_KEY_JSON   Firebase 키 (base64)              cat firebase-key.json | base64

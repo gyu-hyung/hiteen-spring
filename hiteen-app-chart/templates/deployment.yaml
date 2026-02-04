@@ -32,8 +32,10 @@ spec:
     spec:
       terminationGracePeriodSeconds: 60
 
+      {{- with .Values.nodeSelector }}
       nodeSelector:
-        {{- toYaml .Values.nodeSelector | nindent 8 }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
 
       imagePullSecrets:
         {{- toYaml .Values.imagePullSecrets | nindent 8 }}
@@ -64,7 +66,7 @@ spec:
             - name: firebase-credentials
               mountPath: /app/firebase/firebase-key.json
               subPath: firebase-key.json
-            - name: nfs-assets
+            - name: app-assets
               mountPath: /app/assets
 
           resources:
@@ -105,7 +107,11 @@ spec:
           secret:
             secretName: firebase-secret
 
-        - name: nfs-assets
+        - name: app-assets
+          {{- if and .Values.nfs .Values.nfs.enabled }}
           persistentVolumeClaim:
-            claimName: nfs-pvc-images
+            claimName: {{ .Values.nfs.pvcName | default "nfs-pvc-images" }}
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
 
