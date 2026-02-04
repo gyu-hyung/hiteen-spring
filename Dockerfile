@@ -14,8 +14,8 @@ RUN useradd -m -u 10001 -d /home/spring spring && \
     chown -R spring:spring /app && \
     chmod -R 755 /app
 
-# ✅ CI에서 빌드된 JAR만 복사
-COPY build/libs/*.jar app.jar
+# 빌드 시점에 생성된 실행 가능한 JAR만 복사
+COPY build/libs/hiteen-0.0.1-SNAPSHOT.jar app.jar
 
 USER spring
 

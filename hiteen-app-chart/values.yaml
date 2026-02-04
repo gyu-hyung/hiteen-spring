@@ -164,7 +164,7 @@ ingress:
     # cert-manager.io/cluster-issuer: "letsencrypt-prod"
 
   hosts:
-    - host: api.hiteen.co.kr  # 운영 도메인
+    - host: api.hiteen.kr  # 운영 도메인
       paths:
         - path: /
           pathType: Prefix
@@ -176,7 +176,7 @@ ingress:
   # tls:
   #   - secretName: hiteen-api-tls
   #     hosts:
-  #       - api.hiteen.co.kr
+  #       - api.hiteen.kr
 
 # ============================================
 # Metrics (Prometheus) - 나중에 활성화

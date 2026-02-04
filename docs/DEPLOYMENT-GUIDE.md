@@ -210,9 +210,16 @@ kubectl get events -n hiteen-prod --sort-by='.lastTimestamp'
 
 ```bash
 # 1. 새 이미지 빌드 & 푸시 (로컬에서)
-TAG=0.0.2
-docker build -t gitlab.barunsoft.net:5050/jiasoft/hiteen2-server:$TAG .
-docker push gitlab.barunsoft.net:5050/jiasoft/hiteen2-server:$TAG
+TAG=0.0.1
+
+docker build \
+  --platform linux/amd64 \
+  -t gitlab.barunsoft.net:5005/jiasoft/hiteen2-server:prod-$TAG .
+  -t gitlab.barunsoft.net:5005/jiasoft/hiteen2-server:latest . \
+  -- push .
+
+#docker build -t gitlab.barunsoft.net:5050/jiasoft/hiteen2-server:$TAG .
+#docker push gitlab.barunsoft.net:5050/jiasoft/hiteen2-server:$TAG
 
 # 2. Helm으로 업데이트
 helm upgrade hiteen-app ./hiteen-app-chart \

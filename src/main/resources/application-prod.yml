@@ -29,7 +29,12 @@ spring:
 
   data:
     mongodb:
-      uri: mongodb://${MONGO_USER:hiteen}:${MONGO_PASSWORD}@${MONGO_HOST:10.8.0.200}:27017/${MONGO_DB:hiteen}?authSource=admin
+      host: ${MONGO_HOST:10.8.0.200}
+      port: 27017
+      database: ${MONGO_DB:hiteen}
+      username: ${MONGO_USER:hiteen}
+      password: ${MONGO_PASSWORD}
+      authentication-database: admin
     redis:
       repositories:
         enabled: false
