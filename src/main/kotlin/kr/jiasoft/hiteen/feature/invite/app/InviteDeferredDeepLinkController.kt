@@ -335,9 +335,9 @@ class InviteDeferredDeepLinkController(
                      // - iOS: 자동 이동하면 사용자가 "복사"를 누를 시간을 잃는다.
                      //        또한 클립보드 접근은 사용자 제스처가 필요하므로, 버튼으로 이동 유도.
                      if (!isIOS) {
-                       setTimeout(function () {
-                         window.location.href = storeUrl;
-                       }, 3000);
+//                       setTimeout(function () {
+//                         window.location.href = storeUrl;
+//                       }, 3000);
                      }
                    })();
                 </script>

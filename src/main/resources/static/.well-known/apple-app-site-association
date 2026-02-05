@@ -1,0 +1,19 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "PFP833P28Z.kr.jiasoft.hi-teen",
+        "paths": [
+          "/r/*"
+        ],
+        "components": [
+          {
+            "/": "/r/*",
+            "comment": "Matches any URL whose path starts with /r/"
+          }
+        ]
+      }
+    ]
+  }
+}
