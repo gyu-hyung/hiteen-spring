@@ -52,8 +52,8 @@ kubectl get ns $NAMESPACE 2>/dev/null || kubectl create ns $NAMESPACE
 # 2. GitLab Registry Secret 생성
 # ============================================
 echo "[2/12] GitLab Registry Secret 생성..."
-kubectl delete secret gitlab-registry-secret -n $NAMESPACE --ignore-not-found
-kubectl create secret docker-registry gitlab-registry-secret \
+kubectl delete secret gitlab-registry -n $NAMESPACE --ignore-not-found
+kubectl create secret docker-registry gitlab-registry \
   --docker-server=$REGISTRY \
   --docker-username=$GITLAB_USER \
   --docker-password=$GITLAB_TOKEN \

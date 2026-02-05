@@ -7,7 +7,7 @@ nodeSelector:
   node-type: private
 
 imagePullSecrets:
-  - name: gitlab-registry-secret
+  - name: gitlab-registry
 
 app:
   name: hiteen-api
