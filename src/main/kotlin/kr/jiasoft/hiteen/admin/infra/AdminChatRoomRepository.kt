@@ -1,13 +1,9 @@
 package kr.jiasoft.hiteen.admin.infra
 
-import kotlinx.coroutines.flow.Flow
+import kr.jiasoft.hiteen.admin.dto.AdminChatRoomResponse
 import kr.jiasoft.hiteen.feature.chat.domain.ChatRoomEntity
-import kr.jiasoft.hiteen.feature.chat.dto.ChatRoomMemberResponse
-import kr.jiasoft.hiteen.feature.chat.dto.ChatRoomResponse
-import kr.jiasoft.hiteen.feature.chat.dto.RoomSummaryProjection
 import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
-import java.util.UUID
 
 interface AdminChatRoomRepository : CoroutineCrudRepository<ChatRoomEntity, Long> {
     // 활성화된 채팅방수
@@ -15,127 +11,23 @@ interface AdminChatRoomRepository : CoroutineCrudRepository<ChatRoomEntity, Long
     // 삭제된 채팅방수
     suspend fun countByDeletedAtIsNotNull() : Long
 
-    suspend fun findByUid(uid: UUID): ChatRoomEntity?
-    suspend fun findByUidAndDeletedAtIsNull(uid: UUID): ChatRoomEntity?
-
-    @Query(" UPDATE chat_rooms SET deleted_at = now() WHERE id = :id ")
-    suspend fun softDeleteById(id: Long)
-
-    /** 두 유저로 구성된 1:1 방이 이미 있는지 검색 */
-    @Query("""
-        SELECT r.* FROM chat_rooms r
-        JOIN chat_users u1 ON u1.chat_room_id = r.id AND u1.user_id = :userId1 AND u1.deleted_at IS NULL
-        JOIN chat_users u2 ON u2.chat_room_id = r.id AND u2.user_id = :userId2 AND u2.deleted_at IS NULL
-        WHERE r.deleted_at IS NULL
-        and (select COUNT(*) from chat_users cu where cu.chat_room_id = r.id) = 2
-    """)
-    suspend fun findDirectRoom(userId1: Long, userId2: Long): ChatRoomEntity?
-
-
-    /** 내가 속한 방 목록 (최근 메시지 시간순) */
+    // 채팅방 정보
     @Query("""
         SELECT 
-            CASE 
-                WHEN r.room_name is null THEN (select string_agg((select nickname from users where id = user_id), ',') from chat_users where chat_room_id = r.id and user_id != :userId)
-                WHEN r.room_name is not null THEN r.room_name
-            END room_name,
-			r.* 
-        FROM chat_rooms r
-        JOIN chat_users cu ON cu.chat_room_id = r.id
-        WHERE cu.user_id = :userId
-        AND r.last_message_id IS NOT NULL
-        AND cu.deleted_at IS NULL 
-        AND r.deleted_at IS NULL
-        ORDER BY COALESCE(r.updated_at, r.created_at) DESC NULLS LAST
-        LIMIT :limit OFFSET :offset
-    """)
-    fun listRooms(userId: Long, limit: Int, offset: Int): Flow<ChatRoomResponse>
-
-    /** 내가 속한 방 목록 (최근 메시지 시간순) */
-    @Query("""
-        SELECT
-			r.uid 
-        FROM chat_rooms r
-        JOIN chat_users cu ON cu.chat_room_id = r.id
-        WHERE cu.user_id = :userId
-        AND r.last_message_id IS NOT NULL
-        AND cu.deleted_at IS NULL 
-        AND r.deleted_at IS NULL
-    """)
-    suspend fun listRoomUids(userId: Long): Flow<UUID>?
-
-
-    /** 동일 멤버셋(정확히 일치)인 방 한 개 찾기 (활성 멤버 기준) */
-    @Query("""
-        SELECT r.* 
-        FROM chat_rooms r
-        JOIN chat_users cu ON cu.chat_room_id = r.id AND cu.deleted_at IS NULL
-        WHERE r.deleted_at IS NULL
-        GROUP BY r.id
-        HAVING COUNT(*) = :size
-           AND COUNT(*) FILTER (WHERE cu.user_id IN (:memberIds)) = :size
+            cr.*,
+            (
+                SELECT COUNT(*) 
+                FROM chat_users 
+                WHERE chat_room_id = :roomId AND deleted_at IS NULL
+            ) AS user_active_count,
+            (
+                SELECT COUNT(*) 
+                FROM chat_users
+                WHERE chat_room_id = :roomId AND deleted_at IS NOT NULL
+            ) AS user_deleted_count
+        FROM chat_rooms AS cr
+        WHERE cr.id = :roomId
         LIMIT 1
     """)
-    suspend fun findRoomByExactActiveMembers(memberIds: List<Long>, size: Int): ChatRoomEntity?
-
-    /** 방 참여중인 멤버 목록(나간사람 제외) - user_id, user_uid, chat_user_id, asset_uid, nickname */
-    @Query("""
-        SELECT 
-            cu.user_id AS user_id,
-            u.uid      AS user_uid,
-            cu.id      AS chat_user_id,
-            u.asset_uid AS asset_uid,
-            u.nickname AS nickname,
-            CASE WHEN cu.user_id = r.created_id THEN true ELSE false END AS is_owner
-        FROM chat_users cu
-        JOIN chat_rooms r ON r.id = cu.chat_room_id
-        JOIN users u ON u.id = cu.user_id
-        WHERE r.uid = :roomUid
-          AND r.deleted_at IS NULL
-          AND cu.deleted_at IS NULL
-          AND u.deleted_at IS NULL
-        ORDER BY cu.id ASC
-    """)
-    fun listActiveMembersByRoomUid(roomUid: UUID): Flow<ChatRoomMemberResponse>
-
-    /** 내가 속한 방 목록 (최적화 버전) */
-    @Query("""
-        SELECT 
-            r.id,
-            r.uid as room_uid,
-            r.room_name as room_title,
-            COALESCE(r.asset_uid::text, (
-                SELECT u_other.asset_uid::text 
-                FROM chat_users cu_other 
-                JOIN users u_other ON u_other.id = cu_other.user_id 
-                WHERE cu_other.chat_room_id = r.id 
-                  AND cu_other.user_id != :userId 
-                  AND cu_other.deleted_at IS NULL 
-                LIMIT 1
-            )) as asset_uid,
-            COALESCE(r.updated_at, r.created_at) as updated_at,
-            m.id as last_message_id,
-            m.uid as last_message_uid,
-            m.content as last_content,
-            m.kind as last_kind,
-            m.emoji_code as last_emoji_code,
-            m.emoji_count as last_emoji_count,
-            m.created_at as last_created_at,
-            su.id as last_sender_id,
-            su.uid as last_sender_uid,
-            su.username as last_sender_username,
-            su.nickname as last_sender_nickname,
-            su.asset_uid::text as last_sender_asset_uid
-        FROM chat_rooms r
-        JOIN chat_users cu ON cu.chat_room_id = r.id
-        LEFT JOIN chat_messages m ON m.id = r.last_message_id
-        LEFT JOIN users su ON su.id = m.user_id
-        WHERE cu.user_id = :userId
-          AND r.last_message_id IS NOT NULL
-          AND cu.deleted_at IS NULL 
-          AND r.deleted_at IS NULL
-        ORDER BY COALESCE(r.updated_at, r.created_at) DESC NULLS LAST
-        LIMIT :limit OFFSET :offset
-    """)
-    fun listRoomSummaries(userId: Long, limit: Int, offset: Int): Flow<RoomSummaryProjection>
+    suspend fun detailById(roomId: Long): AdminChatRoomResponse
 }
