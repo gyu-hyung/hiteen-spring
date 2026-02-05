@@ -102,7 +102,7 @@ interface BoardCommentRepository : CoroutineCrudRepository<BoardCommentEntity, L
                 (:parentUid IS NULL AND c.parent_id IS NULL)
              OR (:parentUid IS NOT NULL AND p.uid = :parentUid)
           )
-          AND (:cursor IS NULL OR c.id <= (SELECT id FROM board_comments WHERE uid = :cursor))
+          AND (:cursor IS NULL OR c.id > (SELECT id FROM board_comments WHERE uid = :cursor))
         ORDER BY c.id ASC
         LIMIT :perPage
     """)
