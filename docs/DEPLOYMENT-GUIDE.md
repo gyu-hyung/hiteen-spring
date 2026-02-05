@@ -122,7 +122,7 @@ kubectl create ns hiteen-prod
 
 ```bash
 # GitLab Registry Secret
-kubectl create secret docker-registry gitlab-registry-secret \
+kubectl create secret docker-registry gitlab-registry \
   --docker-server=gitlab.barunsoft.net:5050 \
   --docker-username=<DEPLOY_TOKEN_USERNAME> \
   --docker-password=<DEPLOY_TOKEN> \

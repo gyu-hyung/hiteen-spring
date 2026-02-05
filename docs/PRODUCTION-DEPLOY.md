@@ -41,7 +41,7 @@
 kubectl create ns hiteen-prod
 
 # GitLab Registry Secret 생성
-kubectl create secret docker-registry gitlab-registry-secret \
+kubectl create secret docker-registry gitlab-registry \
   --docker-server=registry.gitlab.com \
   --docker-username=<GITLAB_USERNAME> \
   --docker-password=<GITLAB_TOKEN> \
