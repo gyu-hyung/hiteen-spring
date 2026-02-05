@@ -17,6 +17,7 @@ import kr.jiasoft.hiteen.feature.interest.infra.InterestUserRepository
 import kr.jiasoft.hiteen.feature.level.app.ExpService
 import kr.jiasoft.hiteen.feature.location.infra.cache.LocationCacheRedisService
 import kr.jiasoft.hiteen.feature.relationship.infra.RelationHistoryRepository
+import kr.jiasoft.hiteen.feature.school.infra.SchoolRepository
 import kr.jiasoft.hiteen.feature.user.app.UserService
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import kr.jiasoft.hiteen.feature.user.infra.UserPhotosRepository
@@ -30,7 +31,7 @@ class InterestUserService(
     private val interestMatchHistoryRepository: InterestMatchHistoryRepository,
     private val userPhotosRepository: UserPhotosRepository,
     private val userRepository: UserRepository,
-//    private val schoolRepository: SchoolRepository,
+    private val schoolRepository: SchoolRepository,
     private val userContactRepository: UserContactRepository,
     private val userService: UserService,
 
@@ -222,8 +223,12 @@ class InterestUserService(
         // 추천옵션 처리 (AND + OR 혼합)
         val userGrade = user.grade?.toIntOrNull() ?: 0
 
+        // 내 학교 타입 조회 (1=초등, 2=중등, 3=고등, 9=특수)
+        val mySchoolType = user.schoolId?.let { schoolRepository.findById(it)?.type }
+
         candidateUsers = candidateUsers.filter { target ->
             val targetGrade = target.grade?.toIntOrNull() ?: 0
+            val targetSchoolType = target.schoolType
 
             // ✅ 성별 조건 (OR)
             val genderOk =
@@ -234,15 +239,27 @@ class InterestUserService(
                     else -> true // 성별 조건 선택 안했으면 무시
                 }
 
-            // ✅ 학년 조건 (OR)
+// ✅ 학년 조건 (OR) - 선배/후배는 같은 학교급 내에서만 (특수학교 제외)
             val gradeOk =
                 when {
                     listOf("동급생", "선배", "후배").none { recommendOptions.contains(it) } -> true // 학년 필터 미선택
                     else -> {
                         var ok = false
-                        if (recommendOptions.contains("동급생") && targetGrade == userGrade) ok = true
-                        if (recommendOptions.contains("선배") && targetGrade > userGrade) ok = true
-                        if (recommendOptions.contains("후배") && targetGrade < userGrade) ok = true
+
+                        // 같은 학교급 여부 (특수학교(9)는 학교급 제한 없음)
+                        val isSameSchoolLevel = mySchoolType == null ||
+                                                mySchoolType == 9 ||
+                                                targetSchoolType == 9 ||
+                                                mySchoolType == targetSchoolType
+
+                        // 동급생: 같은 학교급 내에서 같은 학년
+                        if (recommendOptions.contains("동급생") && targetGrade == userGrade && isSameSchoolLevel) ok = true
+
+                        // 선배: 같은 학교급 내에서 나보다 높은 학년
+                        if (recommendOptions.contains("선배") && targetGrade > userGrade && isSameSchoolLevel) ok = true
+
+                        // 후배: 같은 학교급 내에서 나보다 낮은 학년
+                        if (recommendOptions.contains("후배") && targetGrade < userGrade && isSameSchoolLevel) ok = true
                         ok
                     }
                 }

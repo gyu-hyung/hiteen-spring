@@ -104,9 +104,11 @@ interface InterestUserRepository : CoroutineCrudRepository<InterestUserEntity, L
             u.id AS id,
             u.gender AS gender,
             u.grade AS grade,
-            u.school_id AS school_id
+            u.school_id AS school_id,
+            s.type AS school_type
         FROM interest_user iu
         JOIN users u ON u.id = iu.user_id
+        LEFT JOIN schools s ON s.id = u.school_id
         WHERE iu.interest_id IN (:interestIds)
           AND iu.user_id <> :currentUserId
           AND iu.user_id IN (
