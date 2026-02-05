@@ -12,6 +12,7 @@ import kr.jiasoft.hiteen.common.dto.ApiPage
 import kr.jiasoft.hiteen.common.dto.ApiResult
 import kr.jiasoft.hiteen.common.extensions.failure
 import kr.jiasoft.hiteen.common.extensions.success
+import kr.jiasoft.hiteen.common.helpers.SchoolYearHelper
 import kr.jiasoft.hiteen.feature.school.domain.SchoolEntity
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import org.springframework.http.ResponseEntity
@@ -23,7 +24,6 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
-import java.time.LocalDate
 import java.time.LocalDateTime
 
 @RestController
@@ -61,7 +61,7 @@ class AdminSchoolController(
 
         var schoolYear = year
         if (year < 2025) {
-            schoolYear = getSchoolYear()
+            schoolYear = SchoolYearHelper.getCurrentSchoolYear()
         }
 
         val data = schoolService.listClasses(schoolId, schoolYear)
@@ -163,16 +163,5 @@ class AdminSchoolController(
         adminSchoolRepository.save(data)
 
         return success(school, "학교정보가 삭제되었습니다.")
-    }
-
-    // 현재 학년도
-    fun getSchoolYear(today: LocalDate = LocalDate.now()): Int {
-        val startDate = LocalDate.of(today.year, 3, 1)
-
-        return if (today.isBefore(startDate)) {
-            today.year - 1
-        } else {
-            today.year
-        }
     }
 }

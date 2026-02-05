@@ -11,9 +11,9 @@ import kr.jiasoft.hiteen.feature.school.dto.SchoolGradeResponse
 import kr.jiasoft.hiteen.feature.school.dto.SchoolDto
 import kr.jiasoft.hiteen.feature.school.infra.SchoolClassesRepository
 import kr.jiasoft.hiteen.feature.school.infra.SchoolRepository
+import kr.jiasoft.hiteen.common.helpers.SchoolYearHelper
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import java.time.LocalDateTime
 
 @Tag(name = "School", description = "학교 정보 조회 API")
 @RestController
@@ -75,7 +75,7 @@ class SchoolController(
         @PathVariable year: Int? = null
     ): ResponseEntity<ApiResult<List<SchoolClassResponse>>> {
 
-        val schoolYear = year ?: getSchoolYear()
+        val schoolYear = year ?: SchoolYearHelper.getCurrentSchoolYear()
         val classes = schoolClassesRepository
             .findBySchoolIdAndGrade(schoolId, grade, schoolYear)
             .map {
@@ -94,26 +94,7 @@ class SchoolController(
     @Operation(summary = "현재 학년도 조회", description = "UserEntity.year 과 비교하여 학교 변경")
     @GetMapping("/school-year")
     suspend fun getCurrentSchoolYear(): ResponseEntity<ApiResult<Int>> {
-        val schoolYear = getSchoolYear()
+        val schoolYear = SchoolYearHelper.getCurrentSchoolYear()
         return ResponseEntity.ok(ApiResult.success(schoolYear))
-    }
-
-    fun getSchoolYear(date: LocalDateTime? = null): Int {
-        val now = date ?: LocalDateTime.now()
-
-        // 기준일: 올해 3월 1일 00:00:00 - 1초
-        val baseDate = LocalDateTime.now()
-            .withMonth(3)
-            .withDayOfMonth(1)
-            .withHour(0)
-            .withMinute(0)
-            .withSecond(0)
-            .minusSeconds(1)
-
-        return if (now.isAfter(baseDate)) {
-            baseDate.year
-        } else {
-            baseDate.year - 1
-        }
     }
 }

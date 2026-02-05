@@ -2,7 +2,9 @@ package kr.jiasoft.hiteen.feature.user.app
 
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.toList
+import kr.jiasoft.hiteen.admin.services.AdminSchoolService
 import kr.jiasoft.hiteen.common.exception.BusinessValidationException
+import kr.jiasoft.hiteen.common.helpers.SchoolYearHelper
 import kr.jiasoft.hiteen.feature.asset.app.AssetService
 import kr.jiasoft.hiteen.feature.asset.app.event.AssetThumbnailPrecreateRequestedEvent
 import kr.jiasoft.hiteen.feature.asset.domain.AssetCategory
@@ -52,6 +54,7 @@ import java.util.UUID
 import org.slf4j.LoggerFactory
 import kr.jiasoft.hiteen.feature.asset.domain.ThumbnailMode
 import kr.jiasoft.hiteen.feature.asset.dto.AssetResponse
+import java.time.LocalDateTime
 
 @Service
 class UserService (
@@ -553,7 +556,9 @@ class UserService (
 
         // ✅ 학교 변경 30일 제한 정책
         val schoolChanged = existing.schoolId != newSchoolId
-        val schoolUpdatedAtToSave = if (schoolChanged) {
+        val newYear = if(schoolChanged) SchoolYearHelper.getCurrentSchoolYear() else existing.year
+
+        val newSchoolUpdatedAt = if (schoolChanged) {
             val lastChangedAt = existing.schoolUpdatedAt
             if (lastChangedAt != null) {
                 val nextAllowedAt = lastChangedAt.plusDays(30)
@@ -583,13 +588,14 @@ class UserService (
             moodEmoji     = newMoodEmoji,
             assetUid      = newAssetUid,
             schoolId      = newSchoolId,
-            schoolUpdatedAt = schoolUpdatedAtToSave,
+            schoolUpdatedAt = newSchoolUpdatedAt,
             classId       = newClassId,
             grade         = newGrade,
             gender        = newGender,
             birthday      = newBirthday,
             profileDecorationCode = newProfileDecorationCode,
             locationMode  = newLocationMode,
+            year          = newYear,
             updatedId     = current.id,
             updatedAt     = OffsetDateTime.now(),
         )

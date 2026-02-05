@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Size
+import kr.jiasoft.hiteen.common.helpers.SchoolYearHelper
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import kr.jiasoft.hiteen.validation.ValidPassword
 import java.time.LocalDate
@@ -103,6 +104,7 @@ data class UserRegisterForm(
         gender = gender,
         birthday = birthday,
         inviteCode = inviteCode,
+        year = if (schoolId != null) SchoolYearHelper.getCurrentSchoolYear() else null,
 //        inviteJoins = inviteJoins,
     )
 }
