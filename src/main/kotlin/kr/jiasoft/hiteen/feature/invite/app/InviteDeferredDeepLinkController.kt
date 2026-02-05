@@ -365,6 +365,7 @@ class InviteDeferredDeepLinkController(
     private fun buildAndroidStoreUrl(base: String, token: String): String {
         // Play Install Referrer는 referrer 파라미터에 URL-encoded 문자열을 넣는다.
         // 여기서는 "t=<token>" 형태로 전달.
+        // ex) https://play.google.com/store/apps/details?id=kr.jiasoft.hiteen&referrer=t=abcdefg12345
         val referrerValue = encode("t=$token")
         val glue = if (base.contains("?")) "&" else "?"
         return "$base${glue}referrer=$referrerValue"

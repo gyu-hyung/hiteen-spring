@@ -14,7 +14,7 @@ app:
   replicaCount: 1  # 개발환경은 1개
 
   image:
-    repository: gitlab.barunsoft.net:5050/jiasoft/hiteen2-server  # GitLab Registry
+    repository: gitlab.barunsoft.net:5005/jiasoft/hiteen2-server  # GitLab Registry
     tag: latest
     pullPolicy: Always
 
@@ -88,9 +88,10 @@ ingress:
     nginx.ingress.kubernetes.io/proxy-body-size: "50m"
     nginx.ingress.kubernetes.io/client-max-body-size: "50m"
     nginx.ingress.kubernetes.io/websocket-services: "hiteen-api"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
 
   hosts:
-    - host: dev.hiteen.co.kr
+    - host: beta-api.hiteen.kr
       paths:
         - path: /
           pathType: Prefix
@@ -98,16 +99,13 @@ ingress:
             serviceName: hiteen-api
             servicePort: 8080
 
-  tls: []
+  tls:
+    - hosts:
+        - beta-api.hiteen.kr
+      secretName: hiteen-beta-tls
 
 metrics:
-  enabled: true
+  enabled: false  # 개발 서버에서는 모니터링 비활성화
   serviceMonitor:
-    enabled: true
-    namespace: monitoring
-    releaseLabel: monitoring
-    interval: 15s
-    scrapeTimeout: 10s
-    path: /actuator/prometheus
-    honorLabels: true
+    enabled: false  # Prometheus CRD 없음
 

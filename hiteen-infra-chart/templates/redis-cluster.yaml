@@ -82,8 +82,10 @@ spec:
       labels:
         app: redis
     spec:
+      {{- if .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml .Values.nodeSelector | nindent 8 }}
+      {{- end }}
 
       containers:
         - name: redis
@@ -181,8 +183,10 @@ spec:
   template:
     spec:
       restartPolicy: Never
+      {{- if .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml .Values.nodeSelector | nindent 8 }}
+      {{- end }}
       containers:
         - name: redis-cluster-create
           image: redis:7.2

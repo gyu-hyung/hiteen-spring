@@ -320,7 +320,7 @@ class PushService(
                 }
                 "NEW_VOTE", "VOTE_COMMENT", "VOTE_REPLY", "VOTE_LIKE" -> {
                     targetType = "VOTE"
-                    targetId = data["boardUid"]?.toString()
+                    targetId = data["pollId"]?.toString()
                 }
                 "CHAT_MESSAGE" -> {
                     targetType = "CHAT"

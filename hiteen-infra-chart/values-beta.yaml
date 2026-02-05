@@ -1,0 +1,28 @@
+# ============================================
+# Beta Server Spec: 2 CPU, 8GB RAM, 50GB Disk
+# ============================================
+
+# ============================================
+# Redis Cluster - Beta (리소스 절약)
+# ============================================
+redis:
+  enabled: true
+  replicas: 3  # Master 3개 (최소 클러스터)
+  clusterReplicas: 0  # Replica 없음
+
+  resources:
+    requests:
+      cpu: 50m      # 3개 = 총 150m (2000m 중 7.5%)
+      memory: 64Mi  # 3개 = 총 192Mi (8GB 중 2.4%)
+    limits:
+      cpu: 150m     # 3개 = 최대 450m
+      memory: 128Mi # 3개 = 최대 384Mi
+
+  storageSize: 1Gi  # 50GB 디스크, 3개 = 총 3Gi
+
+# ============================================
+# Database Backup - 비활성화
+# ============================================
+dbBackup:
+  enabled: false
+

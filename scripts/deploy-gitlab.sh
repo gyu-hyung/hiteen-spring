@@ -18,7 +18,7 @@ log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
 # ============================================
 # 설정
 # ============================================
-GITLAB_REGISTRY="gitlab.barunsoft.net:5050"
+GITLAB_REGISTRY="gitlab.barunsoft.net:5005"
 GITLAB_IMAGE="${GITLAB_REGISTRY}/jiasoft/hiteen2-server"
 DEFAULT_TAG="0.0.1"
 
