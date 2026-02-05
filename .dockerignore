@@ -1,0 +1,10 @@
+# /Users/jogyuhyeong/Documents/dev/hiteen2-server/.dockerignore 수정
+**/.git
+**/.gradle
+**/build
+!**/build/libs/*.jar
+*.dump
+*.log
+*.sql
+.DS_Store
+!**/build/libs/hiteen-0.0.1-SNAPSHOT.jar

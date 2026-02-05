@@ -1,0 +1,30 @@
+{{- if .Values.backupNfs.enabled }}
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nfs-pv-backup-prod
+spec:
+  capacity:
+    storage: {{ .Values.backupNfs.storage }}
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  nfs:
+    path: {{ .Values.backupNfs.path }}
+    server: {{ .Values.backupNfs.server }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nfs-pvc-backup
+  namespace: {{ .Values.namespace }}
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: {{ .Values.backupNfs.storage }}
+  volumeName: nfs-pv-backup-prod
+  storageClassName: ""
+{{- end }}
+

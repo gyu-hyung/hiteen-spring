@@ -41,6 +41,8 @@ class NotificationService(
                 success = it.success,
                 nickname = it.nickname,
                 assetUid = it.assetUid,
+                targetType = it.targetType,
+                targetId = it.targetId,
                 createdAt = it.createdAt
             )
         }

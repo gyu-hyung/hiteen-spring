@@ -81,7 +81,7 @@ enum class PushTemplate(
     NEW_POST(
         code = "NEW_POST",
         title = "새 글 등록 알림 🔔",
-        message = "방금 새로운 글이 올라왔어 🔔",
+        message = "{nickname_iga} 새로운 틴스토리를 등록했어 🔔",
         itemType = PushItemType.NEW_POST,
         group = PushTemplateGroup.TEEN_STORY,
     ),
@@ -93,8 +93,8 @@ enum class PushTemplate(
      */
     NEW_VOTE(
         code = "NEW_VOTE",
-        title = "새 투표 등록 알림 🔔",
-        message = "방금 새로운 투표가 올라왔어 🔔",
+        title = "틴투표 등록 알림 🔔",
+        message = "{nickname_iga} 새로운 틴투표를 등록했어 🔔",
         itemType = PushItemType.NEW_POST,
         group = PushTemplateGroup.TEEN_VOTE,
     ),

@@ -39,8 +39,8 @@ spring:
         enabled: false
       host: 127.0.0.1
       port: 6379
-#      password: hiteen1234
-      password:
+      password: hiteen1234
+#      password:
       timeout: 5s
       client-type: lettuce
 
@@ -78,8 +78,8 @@ server:
 
 app:
   asset:
-#    storage-root: ${HOME}/assets
-    storage-root: D:/Project/Hiteen2/assets
+    storage-root: ${HOME}/assets
+#    storage-root: D:/Project/Hiteen2/assets
     static-locations: classpath:/assets/
     allowed-exts: jpg,jpeg,png,gif,webp,bmp,svg,mp4,mov,avi,mkv,pdf,txt,csv,zip,rar,gz
     max-size-bytes: 5242880 # 50MB

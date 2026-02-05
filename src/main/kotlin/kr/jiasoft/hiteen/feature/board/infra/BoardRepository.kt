@@ -116,6 +116,8 @@ interface BoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
             b.status,
             b.address,
             b.detail_address,
+            b.lat,
+            b.lng,
             b.created_at     AS created_at,
             b.created_id     AS created_id,
             (SELECT COUNT(*)::bigint FROM board_likes bl WHERE bl.board_id = b.id) AS like_count,
@@ -139,7 +141,10 @@ interface BoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
                         SELECT array_agg(ba.uid) FROM board_assets ba WHERE ba.board_id = b.id
                     )
                 END
-            ), ARRAY[]::uuid[]) AS attachments
+            ), ARRAY[]::uuid[]) AS attachments,
+            CASE WHEN :userLat IS NOT NULL AND :userLng IS NOT NULL AND b.lat IS NOT NULL AND b.lng IS NOT NULL
+                 THEN earth_distance(ll_to_earth(:userLat, :userLng), ll_to_earth(b.lat, b.lng))
+                 ELSE NULL END AS distance
         FROM boards b
         WHERE b.deleted_at IS NULL
           AND (
@@ -193,7 +198,16 @@ interface BoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
                   )
               )
           )
-        ORDER BY b.id DESC
+          AND (:maxDistance IS NULL OR :userLat IS NULL OR :userLng IS NULL 
+               OR b.lat IS NULL OR b.lng IS NULL
+               OR earth_distance(ll_to_earth(:userLat, :userLng), ll_to_earth(b.lat, b.lng)) <= :maxDistance)
+        ORDER BY 
+            /* 1달 이내 데이터 우선 */
+            CASE WHEN b.created_at >= NOW() - INTERVAL '1 month' THEN 0 ELSE 1 END ASC,
+            /* 거리순 정렬 */
+            CASE WHEN :sortByDistance = true AND :userLat IS NOT NULL AND :userLng IS NOT NULL 
+                 THEN earth_distance(ll_to_earth(:userLat, :userLng), ll_to_earth(b.lat, b.lng)) END ASC NULLS LAST,
+            b.id DESC
         LIMIT :limit OFFSET :offset
     """)
     fun searchSummariesByPage(
@@ -207,6 +221,10 @@ interface BoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
         sameSchoolOnly: Boolean,
         status: String?,
         displayStatus: String?,
+        userLat: Double?,
+        userLng: Double?,
+        maxDistance: Double?,
+        sortByDistance: Boolean,
     ): Flow<BoardResponse>
 
 
@@ -254,7 +272,10 @@ interface BoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
                         SELECT array_agg(ba.uid) FROM board_assets ba WHERE ba.board_id = b.id
                     )
                 END
-            ), ARRAY[]::uuid[]) AS attachments
+            ), ARRAY[]::uuid[]) AS attachments,
+            CASE WHEN :userLat IS NOT NULL AND :userLng IS NOT NULL AND b.lat IS NOT NULL AND b.lng IS NOT NULL
+                 THEN earth_distance(ll_to_earth(:userLat, :userLng), ll_to_earth(b.lat, b.lng))
+                 ELSE NULL END AS distance
         FROM boards b
         LEFT JOIN users u ON b.created_id = u.id
         LEFT JOIN schools s ON s.id = u.school_id
@@ -284,9 +305,26 @@ interface BoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
                 SELECT u.id FROM users u 
                 WHERE u.school_id = (SELECT school_id FROM users WHERE id = :userId)
           ) OR b.created_id = :userId)
-          AND (:lastUid IS NULL OR b.id <= (SELECT id FROM boards WHERE uid = :lastUid))
+          AND (:maxDistance IS NULL OR :userLat IS NULL OR :userLng IS NULL 
+               OR b.lat IS NULL OR b.lng IS NULL
+               OR earth_distance(ll_to_earth(:userLat, :userLng), ll_to_earth(b.lat, b.lng)) <= :maxDistance
+          )
+          AND (
+              :sortByDistance = false 
+              AND (:lastUid IS NULL OR b.id <= (SELECT id FROM boards WHERE uid = :lastUid))
+              OR :sortByDistance = true 
+              AND (:lastDistance IS NULL OR :lastId IS NULL 
+                   OR earth_distance(ll_to_earth(:userLat, :userLng), ll_to_earth(b.lat, b.lng)) > :lastDistance 
+                   OR (earth_distance(ll_to_earth(:userLat, :userLng), ll_to_earth(b.lat, b.lng)) = :lastDistance AND b.id < :lastId))
+          )
           AND (:authorUid IS NULL OR b.created_id = (SELECT id FROM users WHERE uid = :authorUid))
-        ORDER BY b.id DESC
+        ORDER BY 
+            /* 1달 이내 데이터 우선 */
+            CASE WHEN b.created_at >= NOW() - INTERVAL '1 month' THEN 0 ELSE 1 END ASC,
+            /* 거리순 정렬 */
+            CASE WHEN :sortByDistance = true AND :userLat IS NOT NULL AND :userLng IS NOT NULL 
+                 THEN earth_distance(ll_to_earth(:userLat, :userLng), ll_to_earth(b.lat, b.lng)) END ASC NULLS LAST,
+            b.id DESC
         LIMIT :limit
     """)
     fun searchSummariesByCursor(
@@ -298,7 +336,13 @@ interface BoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
         friendOnly: Boolean,
         sameSchoolOnly: Boolean,
         lastUid: UUID?,
-        authorUid: UUID?
+        authorUid: UUID?,
+        userLat: Double?,
+        userLng: Double?,
+        maxDistance: Double?,
+        sortByDistance: Boolean,
+        lastDistance: Double?,
+        lastId: Long?,
     ): Flow<BoardResponse>
 
 
@@ -351,7 +395,5 @@ interface BoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
         LIMIT 1
     """)
     suspend fun findDetailByUid(uid: UUID, userId: Long): BoardResponse?
-
-
 
 }

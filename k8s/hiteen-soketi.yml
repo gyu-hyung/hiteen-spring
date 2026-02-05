@@ -44,7 +44,7 @@ spec:
             - name: SOKETI_REDIS_PORT
               value: "6379"
             - name: SOKETI_REDIS_PASSWORD
-              value: "hiteen1234"
+              value: "xxxxxxxx"
             - name: SOKETI_REDIS_DB
               value: "0"
           resources:

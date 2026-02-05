@@ -1,0 +1,79 @@
+# ============================================
+# Global Settings - Production
+# ============================================
+namespace: hiteen
+
+# nodeSelector 비활성화 (단일 노드 운영)
+# nodeSelector:
+#   node-type: private
+
+# ============================================
+# NFS (Assets Storage) - 개발서버와 동일
+# ============================================
+nfs:
+  enabled: true
+  server: "10.8.0.159"  # 개발서버와 동일한 NFS 서버
+  path: "/srv/nfs/assets"
+  storage: "100Gi"
+  pvcName: nfs-pvc-images
+
+# ============================================
+# NFS (Backup Storage) - 나중에 구성
+# ============================================
+backupNfs:
+  enabled: false
+  server: "10.8.0.159"
+  path: "/srv/nfs/backup"
+  storage: "100Gi"
+
+# ============================================
+# Redis Cluster - Production
+# ============================================
+redis:
+  enabled: true
+  replicas: 6
+  clusterReplicas: 1
+  password: ""  # Secret으로 관리, helm install 시 --set으로 주입
+
+  image:
+    repository: redis
+    tag: "7.2"
+    pullPolicy: IfNotPresent
+
+  service:
+    name: redis
+    port: 6379
+    clusterPort: 16379
+
+  resources:
+    requests:
+      cpu: 200m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+  storageClass: local-path
+  storageSize: 5Gi
+  accessModes:
+    - ReadWriteOnce
+
+  clusterInit:
+    enabled: true
+    waitTimeout: 120
+    pingInterval: 3
+
+# ============================================
+# Database Backup CronJob - 나중에 구성
+# ============================================
+dbBackup:
+  enabled: false
+  schedule: "0 3 * * *"  # 매일 새벽 3시
+  postgres:
+    host: "10.8.0.200"  # 운영 DB 서버 IP
+    database: "hiteen-prod"
+    user: "hiteen"
+    password: ""  # Secret으로 관리
+  retention:
+    days: 30  # 백업 보관 일수
+

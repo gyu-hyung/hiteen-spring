@@ -1,0 +1,7 @@
+apiVersion: v2
+name: hiteen-app
+description: Helm chart for Hiteen Application (Backend API)
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+

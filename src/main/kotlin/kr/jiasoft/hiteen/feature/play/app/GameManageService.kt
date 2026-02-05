@@ -19,9 +19,13 @@ import kr.jiasoft.hiteen.feature.study.domain.QuestionItemsEntity
 import kr.jiasoft.hiteen.feature.play.domain.SeasonEntity
 import kr.jiasoft.hiteen.feature.play.dto.RankingRow
 import kr.jiasoft.hiteen.feature.play.infra.*
+import kr.jiasoft.hiteen.feature.push.app.event.PushSendRequestedEvent
+import kr.jiasoft.hiteen.feature.push.domain.PushTemplate
 import kr.jiasoft.hiteen.feature.study.infra.QuestionItemsRepository
 import kr.jiasoft.hiteen.feature.study.infra.QuestionRepository
+import kr.jiasoft.hiteen.feature.user.domain.PushItemType
 import org.slf4j.LoggerFactory
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 
@@ -39,6 +43,9 @@ class GameManageService(
     private val giftAppService: GiftAppService,
     private val challengeRewardPolicyRepository: ChallengeRewardPolicyRepository,
     private val cashService: CashService,
+
+    // 푸시 알림
+    private val eventPublisher: ApplicationEventPublisher,
 
     ) {
 
@@ -104,9 +111,9 @@ class GameManageService(
 
         // 4️⃣ 시즌 종료 처리 (순차 실행: close → saveRankings → awards)
         seasonsToClose.forEach { season ->
-//            seasonRepository.close(season.id)
-//            saveSeasonRankings(season.id)
-//            awards(season.id)
+            seasonRepository.close(season.id)
+            saveSeasonRankings(season.id)
+            awards(season.id)
 
             log.info("🏁 시즌 종료 처리 완료: {} ({} ~ {})", season.seasonNo, season.startDate, season.endDate)
         }
@@ -158,6 +165,16 @@ class GameManageService(
 
         // 5️⃣ 문제 세트 생성
         generateQuestionItems(saved.id)
+
+        // 6️⃣ 시즌 생성 푸시 알림 발송 (전체 사용자 대상, GAME 토픽)
+        eventPublisher.publishEvent(
+            PushSendRequestedEvent(
+                topic = PushItemType.GAME,
+                templateData = PushTemplate.SEASON_CREATE.buildPushData(),
+                extraData = mapOf("seasonId" to saved.id.toString())
+            )
+        )
+        log.info("📢 시즌 생성 푸시 알림 발송: $seasonNoFormatted")
     }
 
 

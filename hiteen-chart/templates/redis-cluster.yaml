@@ -19,8 +19,8 @@ data:
     dir /data
     protected-mode no
 
-    requirepass hiteen1234
-    masterauth hiteen1234
+    requirepass xxxxxxxx
+    masterauth xxxxxxxx
 
 
 

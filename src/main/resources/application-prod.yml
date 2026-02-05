@@ -1,0 +1,175 @@
+spring:
+  main:
+    lazy-initialization: false  # 운영 환경에서는 빠른 실패를 위해 비활성화
+  jackson:
+    time-zone: Asia/Seoul
+  application:
+    name: hiteen
+
+  r2dbc:
+    url: r2dbc:postgresql://${DB_HOST:10.8.0.200}:5432/${DB_NAME:hiteen-prod}
+    username: ${DB_USER:hiteen}
+    password: ${DB_PASSWORD:}
+    pool:
+      enabled: true
+      initial-size: 20
+      max-size: 100
+      max-idle-time: 60s
+      max-life-time: 30m
+      validation-query: "SELECT 1"
+      acquire-timeout: 10s
+      max-create-connection-time: 10s
+
+  liquibase:
+    enabled: false  # 운영에서는 수동 마이그레이션
+    url: jdbc:postgresql://${DB_HOST:10.8.0.200}:5432/${DB_NAME:hiteen-prod}
+    user: ${DB_USER:hiteen}
+    password: ${DB_PASSWORD:}
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+
+  data:
+    mongodb:
+      host: ${MONGO_HOST:10.8.0.200}
+      port: 27017
+      database: ${MONGO_DB:hiteen}
+      username: ${MONGO_USER:hiteen}
+      password: ${MONGO_PASSWORD}
+      authentication-database: admin
+    redis:
+      repositories:
+        enabled: false
+      password: ${REDIS_PASSWORD:}
+      timeout: 5s
+      client-type: lettuce
+
+      cluster:
+        enabled: true
+        max-redirects: 5
+        nodes:
+          - redis-0.redis.hiteen.svc.cluster.local:6379
+          - redis-1.redis.hiteen.svc.cluster.local:6379
+          - redis-2.redis.hiteen.svc.cluster.local:6379
+          - redis-3.redis.hiteen.svc.cluster.local:6379
+          - redis-4.redis.hiteen.svc.cluster.local:6379
+          - redis-5.redis.hiteen.svc.cluster.local:6379
+
+      lettuce:
+        pool:
+          max-active: 32
+          max-idle: 16
+          min-idle: 4
+          time-between-eviction-runs: 60s
+
+  config:
+    import:
+      - "classpath:mbti.yml"
+      - "classpath:exp.yml"
+
+  devtools:
+    livereload.enabled: false
+    restart.enabled: false
+
+server:
+  port: 8080
+  shutdown: graceful
+
+management:
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  health:
+    redis:
+      enabled: true
+    mongo:
+      enabled: true
+    r2dbc:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  metrics:
+    tags:
+      application: hiteen
+      environment: production
+
+# --------------------
+# Custom Application Settings
+# --------------------
+app:
+  asset:
+    storage-root: /app/assets
+    allowed-exts: jpg,jpeg,png,gif,webp,bmp,svg,mp4,mov,avi,mkv,pdf,txt,csv,zip,rar,gz,mp3
+    max-size-bytes: 52428800  # 50MB
+  join:
+    rejoin-days: 30
+    dev-allow-always: false
+
+# --------------------
+# External Integrations
+# --------------------
+admob:
+  key-url: https://www.gstatic.com/admob/reward/verifier-keys.json
+
+jwt:
+  secret: ${JWT_SECRET:}
+  access-expiration: 864000000
+  refresh-expiration: 315360000000  # 10년
+
+springdoc:
+  api-docs.path: /api-docs
+  swagger-ui.path: /swagger-ui
+  # 운영에서는 Swagger UI 비활성화 고려
+  # swagger-ui.enabled: false
+
+soketi:
+  host: soketi-svc.hiteen.svc.cluster.local
+  port: 6001
+  app-id: ${SOKETI_APP_ID:hiteen-app}
+  app-key: ${SOKETI_APP_KEY:hiteen-key}
+  app-secret: ${SOKETI_APP_SECRET:hiteen-secret}
+
+sms:
+  callback: "1577-5993"
+  api-key: ${SMS_API_KEY:}
+  api-url: https://apis.aligo.in/send/
+  user-id: ${SMS_USER_ID:jiasoft}
+  kakao:
+    sender-key: ${KAKAO_SENDER_KEY:}
+    token-url: https://kakaoapi.aligo.in/akv10/token/create/30/s/
+    alimtalk-url: https://kakaoapi.aligo.in/akv10/alimtalk/send/
+    detail-url: https://kakaoapi.aligo.in/akv10/history/detail/
+
+batch:
+  enabled: true
+
+giftishow:
+  url: "https://bizapi.giftishow.com/bizApi"
+  auth-key: ${GIFTISHOW_AUTH_KEY:}
+  token-key: ${GIFTISHOW_TOKEN_KEY:}
+  template-id: ${GIFTISHOW_TEMPLATE_ID:}
+  banner-id: ${GIFTISHOW_BANNER_ID:}
+  callback: "15775993"
+  user-id: ${GIFTISHOW_USER_ID:}
+  admin-phone: ${GIFTISHOW_ADMIN_PHONE:}
+
+neis:
+  base-url: "https://open.neis.go.kr/hub"
+  api-key: ${NEIS_API_KEY:}
+
+kakao:
+  base-url: "https://dapi.kakao.com/v2/local"
+  api-key: ${KAKAO_API_KEY:}
+
+logging:
+  level:
+    root: INFO
+    kr.jiasoft.hiteen: INFO
+    io.r2dbc.postgresql.QUERY: WARN
+    io.r2dbc.postgresql.PARAM: WARN
+    org.springframework.r2dbc.core: WARN
+    org.mongodb.driver: WARN
+    org.springframework.security: WARN
+    org.springframework.cache: WARN
+

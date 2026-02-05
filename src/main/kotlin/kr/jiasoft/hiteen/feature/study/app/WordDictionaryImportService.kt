@@ -148,6 +148,147 @@ class WordDictionaryImportService(
     }
 
 
+    /**
+     * 같은 type 내에서만 중복 체크하고, 없으면 새로 생성하는 메서드
+     * (다른 type에 있어도 해당 type에 없으면 생성)
+     */
+    suspend fun importWordsForceInsert(
+        words: List<String>,
+        type: Int = 1,
+        category: String? = "초등영어",
+        status: Int = 1
+    ) {
+        for (raw in words) {
+            val word = raw.trim().lowercase()
+            if (word.isBlank()) continue
+
+            try {
+                importSingleWordForceInsert(word, null, type, category, status)
+                kotlinx.coroutines.delay(500)   // API 보호
+
+            } catch (e: Exception) {
+                println("❌ [$word] 단어 처리 중 오류: ${e.message}")
+                e.printStackTrace()
+            }
+        }
+    }
+
+    private suspend fun importSingleWordForceInsert(
+        word: String,
+        meaning: String?,
+        type: Int,
+        category: String?,
+        status: Int
+    ) {
+        // ✅ 같은 type 내에서만 중복 체크
+        val existingInSameType = questionRepository
+            .findByLowCaseQuestionAndDeletedAtIsNull(word, type)
+            .toList()
+
+        if (existingInSameType.isNotEmpty()) {
+            println("⏭ [$word] type=$type 에 이미 존재하여 스킵")
+            return
+        }
+
+        // 1) 사전 API 호출
+        val entry = fetchDictionaryEntry(word) ?: run {
+            println("⚠ [$word] dictionaryapi.dev 결과 없음")
+            return
+        }
+
+        val bestPhonetic = chooseBestPhonetic(entry)
+        val symbol = resolvePhoneticSymbol(entry, bestPhonetic)
+        val audioUrl = bestPhonetic?.audio
+
+        val soundPath = downloadAndResolveSound(word, audioUrl)
+        val imagePath = resolveImagePath(word)
+
+        val now = OffsetDateTime.now()
+
+        // ✅ 신규 INSERT
+        val entity = QuestionEntity(
+            type = type,
+            category = category,
+            question = word,
+            symbol = symbol,
+            sound = soundPath,
+            image = imagePath,
+            answer = word,
+            content = meaning,
+            status = status,
+            createdAt = now,
+            updatedAt = now,
+            deletedAt = null
+        )
+
+        questionRepository.save(entity)
+        println("✅ [$word] type=$type 신규 단어 저장 완료")
+    }
+
+
+    /**
+     * words.txt 파일을 읽어서 초등영어 단어들의 content(뜻)를 업데이트하는 메서드
+     * 형식: 분류\t단어\t뜻
+     */
+    suspend fun updateElementaryWordMeanings(wordsFilePath: String, type: Int = 1) {
+        val wordsFile = java.io.File(wordsFilePath)
+        if (!wordsFile.exists()) {
+            println("❌ 파일이 존재하지 않습니다: $wordsFilePath")
+            return
+        }
+
+        // 초등영어만 필터링하여 단어-뜻 맵 생성
+        val wordMeaningMap = wordsFile.readLines()
+            .filter { it.startsWith("초등영어") }
+            .mapNotNull { line ->
+                val parts = line.split("\t")
+                if (parts.size >= 3) {
+                    val word = parts[1].trim().lowercase()
+                    val meaning = parts[2].trim()
+                    word to meaning
+                } else null
+            }
+            .toMap()
+
+        println("✅ words.txt에서 초등영어 단어-뜻 ${wordMeaningMap.size}개 로드 완료")
+
+        var updatedCount = 0
+        var skippedCount = 0
+
+        for ((word, meaning) in wordMeaningMap) {
+            try {
+                val existingList = questionRepository
+                    .findByLowCaseQuestionAndDeletedAtIsNull(word, type)
+                    .toList()
+
+                if (existingList.isEmpty()) {
+                    skippedCount++
+                    continue
+                }
+
+                for (existing in existingList) {
+                    // content가 비어있거나 단어와 동일한 경우에만 업데이트
+                    if (existing.content.isNullOrBlank() || existing.content == existing.question) {
+                        val updated = existing.copy(
+                            content = meaning,
+                            updatedAt = OffsetDateTime.now()
+                        )
+                        questionRepository.save(updated)
+                        println("✅ [$word] 뜻 업데이트 완료: $meaning")
+                        updatedCount++
+                    } else {
+                        println("⏭ [$word] 이미 뜻이 있어서 스킵: ${existing.content}")
+                        skippedCount++
+                    }
+                }
+            } catch (e: Exception) {
+                println("❌ [$word] 업데이트 중 오류: ${e.message}")
+            }
+        }
+
+        println("✅ 완료! 업데이트: ${updatedCount}개, 스킵: ${skippedCount}개")
+    }
+
 
     // ==========================
     //  사전 API 호출 & 파싱
@@ -246,20 +387,93 @@ class WordDictionaryImportService(
     }
 
     /**
-     * /app/assets/word_img/{word}.webp 존재 여부 확인 후
-     * 있으면 /assets/word_img/{word}.webp 반환
+     * /app/assets/word_img/{word}.webp 또는 .jpg 존재 여부 확인 후
+     * 있으면 /assets/word_img/{word}.webp (또는 .jpg) 반환
      */
     private fun resolveImagePath(word: String): String? {
-        val fileName = "${word.lowercase()}.webp"
-        val imgFile = Paths.get(assetStorageRoot, "word_img", fileName).toFile()
+        val wordLower = word.lowercase()
+        val imgDir = Paths.get(assetStorageRoot, "word_img")
 
-        return if (imgFile.exists()) {
-            println("🌄 사진 존재함: $fileName")
-            "/assets/word_img/$fileName"
-        } else {
-            null
+        // webp 우선 확인
+        val webpFile = imgDir.resolve("${wordLower}.webp").toFile()
+        if (webpFile.exists()) {
+            println("🌄 사진 존재함: ${wordLower}.webp")
+            return "/assets/word_img/${wordLower}.webp"
         }
+
+        // jpg 확인
+        val jpgFile = imgDir.resolve("${wordLower}.jpg").toFile()
+        if (jpgFile.exists()) {
+            println("🌄 사진 존재함: ${wordLower}.jpg")
+            return "/assets/word_img/${wordLower}.jpg"
+        }
+
+        return null
     }
+
+
+    /**
+     * word_img 폴더의 이미지 파일들을 스캔하여
+     * question_2 테이블의 image 컬럼을 업데이트하는 메서드
+     */
+    suspend fun updateImagePathsFromFolder(type: Int? = null) {
+        val imgDir = Paths.get(assetStorageRoot, "word_img").toFile()
+
+        if (!imgDir.exists() || !imgDir.isDirectory) {
+            println("❌ word_img 폴더가 존재하지 않습니다: ${imgDir.absolutePath}")
+            return
+        }
+
+        // webp, jpg 파일 목록 가져오기
+        val imageFiles = imgDir.listFiles { file ->
+            file.isFile && (file.extension.lowercase() == "webp" || file.extension.lowercase() == "jpg")
+        } ?: emptyArray()
+
+        println("✅ word_img 폴더에서 ${imageFiles.size}개 이미지 파일 발견")
+
+        var updatedCount = 0
+        var skippedCount = 0
+        var notFoundCount = 0
+
+        for (imageFile in imageFiles) {
+            val word = imageFile.nameWithoutExtension.lowercase()
+            val imagePath = "/assets/word_img/${imageFile.name}"
+
+            try {
+                // type이 지정되면 해당 type만, 아니면 모든 type
+                val existingList = if (type != null) {
+                    questionRepository.findByLowCaseQuestionAndDeletedAtIsNull(word, type).toList()
+                } else {
+                    questionRepository.findByQuestionIgnoreCaseAndDeletedAtIsNull(word).toList()
+                }
+
+                if (existingList.isEmpty()) {
+                    notFoundCount++
+                    continue
+                }
+
+                for (existing in existingList) {
+                    // image가 비어있거나 null인 경우에만 업데이트
+                    if (existing.image.isNullOrBlank()) {
+                        val updated = existing.copy(
+                            image = imagePath,
+                            updatedAt = OffsetDateTime.now()
+                        )
+                        questionRepository.save(updated)
+                        println("✅ [$word] 이미지 경로 업데이트: $imagePath")
+                        updatedCount++
+                    } else {
+                        skippedCount++
+                    }
+                }
+            } catch (e: Exception) {
+                println("❌ [$word] 이미지 업데이트 중 오류: ${e.message}")
+            }
+        }
+
+        println("✅ 완료! 업데이트: ${updatedCount}개, 스킵(이미 있음): ${skippedCount}개, DB에 없음: ${notFoundCount}개")
+    }
+
 
     /**
      * id 생성 로직은 실제 사용 중인 방식에 맞춰 수정

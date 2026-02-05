@@ -76,8 +76,8 @@ interface AdminGoodsRepository : CoroutineCrudRepository<GoodsGiftishowEntity, L
         SELECT COUNT(*)
         FROM goods_giftishow g
         WHERE
-        
-            (
+            (g.del_yn IS NULL OR g.del_yn = 0)
+            AND (
                 :search IS NULL
                 OR (
                     :searchType = 'ALL' AND (
@@ -120,7 +120,7 @@ interface AdminGoodsRepository : CoroutineCrudRepository<GoodsGiftishowEntity, L
         categorySeq: Int?,
         goodsTypeCd: String?,
         goodsCodeType: String?,
-        ): Int
+    ): Int
 
 
 
@@ -131,8 +131,8 @@ interface AdminGoodsRepository : CoroutineCrudRepository<GoodsGiftishowEntity, L
         SELECT g.*
         FROM goods_giftishow g
         WHERE
-        
-            (
+            (g.del_yn IS NULL OR g.del_yn = 0)
+            AND (
                 :search IS NULL
                 OR (
                     :searchType = 'ALL' AND (
@@ -190,7 +190,6 @@ interface AdminGoodsRepository : CoroutineCrudRepository<GoodsGiftishowEntity, L
         SET status = :status,
             updated_at = NOW()
         WHERE id IN (:ids)
-          AND deleted_at IS NULL
     """)
     suspend fun updateStatusByIds(ids: List<Long>, status: Int): Int?
 

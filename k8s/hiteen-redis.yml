@@ -46,7 +46,7 @@ spec:
             - containerPort: 6379
           env:
             - name: REDIS_PASSWORD
-              value: "hiteen1234"
+              value: "xxxxxxxx"
           args:
             - sh
             - -c

@@ -14,6 +14,7 @@ import kr.jiasoft.hiteen.feature.poll.dto.*
 import kr.jiasoft.hiteen.feature.poll.infra.*
 import kr.jiasoft.hiteen.feature.push.app.event.PushSendRequestedEvent
 import kr.jiasoft.hiteen.feature.push.domain.PushTemplate
+import kr.jiasoft.hiteen.feature.relationship.infra.FollowRepository
 import kr.jiasoft.hiteen.feature.relationship.infra.FriendRepository
 import kr.jiasoft.hiteen.feature.user.app.UserService
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
@@ -39,6 +40,7 @@ class PollService(
     private val pollSelects: PollSelectRepository,
     private val pollSelectPhotos: PollSelectPhotoRepository,
     private val friendRepository: FriendRepository,
+    private val followRepository: FollowRepository,
 
     private val userService: UserService,
     private val assetService: AssetService,
@@ -60,9 +62,17 @@ class PollService(
         type: String = "all",
         author: UUID?,
         orderType: String? = null,
+        userLat: Double? = null,
+        userLng: Double? = null,
+        maxDistance: Double? = null,
+        lastDistance: Double? = null,
+        lastId: Long? = null,
     ): List<PollResponse> {
         val order = PollOrderType.from(orderType)
-        val rows = polls.findSummariesByCursor(cursor, size, currentUserId, type, author, order.name).toList()
+        val rows = polls.findSummariesByCursor(
+            cursor, size, currentUserId, type, author, order.name,
+            userLat, userLng, maxDistance, lastDistance, lastId
+        ).toList()
         if (rows.isEmpty()) return emptyList()
 
         val pollIds = rows.map { it.id }.toTypedArray()
@@ -126,6 +136,11 @@ class PollService(
                 colorEnd = row.colorEnd,
                 voteCount = totalVotes,
                 commentCount = row.commentCount,
+                address = row.address,
+                detailAddress = row.detailAddress,
+                lat = row.lat,
+                lng = row.lng,
+                distance = row.distance,
                 likeCount = likeCountMap[row.id] ?: 0,
                 likedByMe = likedByMeSet.contains(row.id),
                 votedByMe = voted != null,
@@ -293,6 +308,10 @@ class PollService(
             colorStart = req.colorStart,
             colorEnd = req.colorEnd,
             allowComment = req.allowComment,
+            address = req.address,
+            detailAddress = req.detailAddress,
+            lat = req.lat,
+            lng = req.lng,
             status = PollStatus.ACTIVE.name,
             createdId = user.id,
             createdAt = OffsetDateTime.now()
@@ -304,14 +323,18 @@ class PollService(
         pointService.applyPolicy(user.id, PointPolicy.VOTE_QUESTION, id)
         //포스팅 알림
         val friendIds = friendRepository.findAllFriendship(user.id).toList()
-        eventPublisher.publishEvent(
-            PushSendRequestedEvent(
-                userIds = friendIds,
-                actorUserId = user.id,
-                templateData = PushTemplate.NEW_VOTE.buildPushData("nickname" to user.nickname),
-                extraData = mapOf("pollId" to id.toString()),
+        val followerIds = followRepository.findAllFollowerIds(user.id).toList()
+        val targetIds = (friendIds + followerIds).distinct()
+        if (targetIds.isNotEmpty()) {
+            eventPublisher.publishEvent(
+                PushSendRequestedEvent(
+                    userIds = targetIds,
+                    actorUserId = user.id,
+                    templateData = PushTemplate.NEW_VOTE.buildPushData("nickname" to user.nickname),
+                    extraData = mapOf("pollId" to id.toString()),
+                )
             )
-        )
+        }
         return id
     }
 
@@ -341,6 +364,10 @@ class PollService(
             colorStart = req.colorStart ?: poll.colorStart,
             colorEnd = req.colorEnd ?: poll.colorEnd,
             allowComment = req.allowComment?.let { if (it) 1 else 0 } ?: poll.allowComment,
+            address = req.address ?: poll.address,
+            detailAddress = req.detailAddress ?: poll.detailAddress,
+            lat = req.lat ?: poll.lat,
+            lng = req.lng ?: poll.lng,
             updatedAt = OffsetDateTime.now()
         )
 
@@ -375,6 +402,10 @@ class PollService(
             colorStart = req.colorStart ?: poll.colorStart,
             colorEnd = req.colorEnd ?: poll.colorEnd,
             allowComment = req.allowComment?.let { if (it) 1 else 0 } ?: poll.allowComment,
+            address = req.address ?: poll.address,
+            detailAddress = req.detailAddress ?: poll.detailAddress,
+            lat = req.lat ?: poll.lat,
+            lng = req.lng ?: poll.lng,
             updatedAt = OffsetDateTime.now()
         )
 

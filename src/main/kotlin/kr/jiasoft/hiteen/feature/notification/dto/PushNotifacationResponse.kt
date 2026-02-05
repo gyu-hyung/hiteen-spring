@@ -20,6 +20,10 @@ data class PushNotificationResponse(
     val nickname: String? = null,
     @field:Schema(description = "첨부파일 uid")
     val assetUid: String? = null,
+    @field:Schema(description = "타겟 타입")
+    val targetType: String? = null,
+    @field:Schema(description = "타겟 ID")
+    val targetId: String? = null,
     @param:Schema(description = "생성 일시", example = "2025.09.18 10:15")
     @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm")
     val createdAt: OffsetDateTime?

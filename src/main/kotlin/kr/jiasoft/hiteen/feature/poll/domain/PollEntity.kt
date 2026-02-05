@@ -19,6 +19,10 @@ data class PollEntity (
     val reportCount: Int = 0,
     val allowComment: Int = 0,
     val status: String = "ACTIVE",//PollStatus.ACTIVE
+    val address: String? = null,
+    val detailAddress: String? = null,
+    val lat: Double? = null,
+    val lng: Double? = null,
     val createdId: Long,
     val createdAt: OffsetDateTime = OffsetDateTime.now(),
     val updatedAt: OffsetDateTime? = null,

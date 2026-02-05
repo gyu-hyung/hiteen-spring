@@ -36,14 +36,20 @@ class PushService(
         if (userIds.isEmpty()) return SendResult(0, 0, 0)
 
         val finalData = templateData + extraData
+        val code = finalData["code"]?.toString()
+
+        // 🔹 targetType, targetId 자동 매핑
+        val (autoTargetType, autoTargetId) = resolveTargetInfo(code, finalData, userId)
 
         // ① push 요약 저장
         val push = pushRepository.save(
             PushEntity(
                 type = if (finalData["silent"] == true) "silent" else "notification",
-                code = finalData["code"]?.toString(),
+                code = code,
                 title = finalData["title"]?.toString(),
                 message = finalData["message"]?.toString(),
+                targetType = autoTargetType,
+                targetId = autoTargetId,
                 total = userIds.size.toLong(),
                 createdId = userId,
             )
@@ -217,14 +223,20 @@ class PushService(
         extraData: Map<String, Any> = emptyMap(),
     ): SendResult {
         val finalData = templateData + extraData
+        val code = finalData["code"]?.toString()
+
+        // 🔹 targetType, targetId 자동 매핑
+        val (autoTargetType, autoTargetId) = resolveTargetInfo(code, finalData, userId)
 
         // ① push 요약 저장 (토픽 전송은 대상 수를 알 수 없어 total=0)
         val push = pushRepository.save(
             PushEntity(
                 type = if (finalData["silent"] == true) "silent" else "notification",
-                code = finalData["code"]?.toString(),
+                code = code,
                 title = finalData["title"]?.toString(),
                 message = finalData["message"]?.toString(),
+                targetType = autoTargetType,
+                targetId = autoTargetId,
                 total = 0L,
                 createdId = userId,
             )
@@ -287,6 +299,48 @@ class PushService(
         }
 
         return SendResult(push.id, if (sendSucceeded) 1 else 0, if (sendSucceeded) 0 else 1)
+    }
+
+    /**
+     * 알림 코드에 따라 targetType과 targetId를 자동으로 매핑
+     */
+    private fun resolveTargetInfo(
+        code: String?,
+        data: Map<String, Any>,
+        actorUserId: Long?
+    ): Pair<String?, String?> {
+        var targetType = data["targetType"]?.toString()
+        var targetId = data["targetId"]?.toString()
+
+        if (targetType == null && code != null) {
+            when (code) {
+                "NEW_POST", "BOARD_COMMENT", "BOARD_REPLY", "POST_LIKE" -> {
+                    targetType = "POST"
+                    targetId = data["boardUid"]?.toString()
+                }
+                "NEW_VOTE", "VOTE_COMMENT", "VOTE_REPLY", "VOTE_LIKE" -> {
+                    targetType = "VOTE"
+                    targetId = data["boardUid"]?.toString()
+                }
+                "CHAT_MESSAGE" -> {
+                    targetType = "CHAT"
+                    targetId = data["roomUid"]?.toString()
+                }
+                "GIFT_MESSAGE" -> {
+                    targetType = "GIFT"
+                    targetId = data["giftUid"]?.toString()
+                }
+                "FRIEND_REQUEST", "FRIEND_ACCEPT", "FOLLOW_REQUEST", "FOLLOW_ACCEPT" -> {
+                    targetType = "USER"
+                    targetId = actorUserId?.toString()
+                }
+                "PIN_REGISTER" -> {
+                    targetType = "PIN"
+                    targetId = data["pinId"]?.toString()
+                }
+            }
+        }
+        return targetType to targetId
     }
 
     data class SendResult(

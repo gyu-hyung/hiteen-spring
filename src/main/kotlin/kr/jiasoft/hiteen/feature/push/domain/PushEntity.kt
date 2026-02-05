@@ -15,6 +15,10 @@ data class PushEntity(
     val title: String? = null,
     val message: String? = null,
 
+    // 알림 클릭 시 이동할 대상 정보
+    val targetType: String? = null,  // POST, COMMENT, CHAT, GIFT, USER, PIN 등
+    val targetId: String? = null,    // 대상 ID 또는 UID (문자열로 통일)
+
     val total: Long = 0,
     val success: Long = 0,
     val failure: Long = 0,

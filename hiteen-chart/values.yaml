@@ -7,7 +7,7 @@ nodeSelector:
   node-type: private
 
 imagePullSecrets:
-  - name: ghcr-secret
+  - name: gitlab-registry-secret
 
 # ============================================
 # Backend (Spring Boot)
@@ -18,7 +18,7 @@ app:
   replicaCount: 1
 
   image:
-    repository: ghcr.io/gyu-hyung/hiteen-api
+    repository: gitlab.barunsoft.net:5050/jiasoft/hiteen2-server
     tag: latest
     pullPolicy: Always
 
@@ -119,7 +119,7 @@ backupNfs:
 redis:
   replicas: 6
   clusterReplicas: 1
-  password: "hiteen1234"
+  password: "xxxxxxxx"
 
   image:
     repository: redis

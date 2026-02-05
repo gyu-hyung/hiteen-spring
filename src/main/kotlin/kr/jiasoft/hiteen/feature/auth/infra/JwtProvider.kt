@@ -13,6 +13,7 @@ import org.springframework.security.core.authority.AuthorityUtils
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Component
 import java.util.Date
+import java.util.UUID
 import javax.crypto.SecretKey
 
 
@@ -59,12 +60,14 @@ class JwtProvider (
         return parser.parseSignedClaims(token.value)
     }
 
-    /** username으로 Access/Refresh 동시 발급 */
-    fun generateTokens(username: String): Pair<BearerToken, BearerToken> {
+    /** username으로 Access/Refresh 동시 발급 (동일한 jti 사용) */
+    fun generateTokens(username: String): Triple<BearerToken, BearerToken, String> {
         val now = Date()
+        val jti = UUID.randomUUID().toString()
 
         val access = Jwts.builder()
             .subject(username)
+            .id(jti)
             .issuedAt(now)
             .expiration(Date(now.time + accessExpiration))
             .signWith(key)
@@ -72,16 +75,17 @@ class JwtProvider (
 
         val refresh = Jwts.builder()
             .subject(username)
+            .id(jti)
             .issuedAt(now)
             .expiration(Date(now.time + refreshExpiration))
             .signWith(key)
             .compact()
 
-        return BearerToken(access) to BearerToken(refresh)
+        return Triple(BearerToken(access), BearerToken(refresh), jti)
     }
 
 
-    fun refreshTokens(refreshToken: BearerToken): Pair<BearerToken, BearerToken> {
+    fun refreshTokens(refreshToken: BearerToken): Triple<BearerToken, BearerToken, String> {
         val claims = parser.parseSignedClaims(refreshToken.value).payload
 
         if (claims.expiration.before(Date())) {
@@ -92,6 +96,24 @@ class JwtProvider (
 
         // 새 Access & Refresh 발급 (자동 연장)
         return generateTokens(username)
+    }
+
+    /** 토큰에서 jti 추출 */
+    fun extractJti(token: BearerToken): String? {
+        return try {
+            parser.parseSignedClaims(token.value).payload.id
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    /** 토큰에서 username 추출 */
+    fun extractUsername(token: BearerToken): String? {
+        return try {
+            parser.parseSignedClaims(token.value).payload.subject
+        } catch (e: Exception) {
+            null
+        }
     }
 
 

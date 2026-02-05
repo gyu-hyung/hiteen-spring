@@ -59,7 +59,7 @@ jobs:
 
       - name: 🔐 Create Redis Secret (Helm ownership 라벨/어노테이션 부여)
         run: |
-          REDIS_PASS="hiteen1234"
+          REDIS_PASS="xxxxxxxx"
           kubectl delete secret redis-secret -n $NAMESPACE --ignore-not-found
           kubectl create secret generic redis-secret \
             --from-literal=redis-password=$REDIS_PASS \
@@ -89,7 +89,7 @@ jobs:
             --set app.image.tag=$TAG \
             --set ingress.enabled=true \
             --set redis.enabled=true \
-            --set redis.password=hiteen1234 \
+            --set redis.password=xxxxxxxx \
             --set redis.storageClass=local-path \
             --set redis.cluster.enabled=true \
             --wait --timeout 100s

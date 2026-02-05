@@ -17,7 +17,7 @@ spec:
               image: postgres:16
               env:
                 - name: PGPASSWORD
-                  value: "hiteen@2025"
+                  value: "xxxxxxxx"
               command:
                 - /bin/bash
                 - -c

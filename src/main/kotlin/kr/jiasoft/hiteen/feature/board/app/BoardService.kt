@@ -32,6 +32,7 @@ import kr.jiasoft.hiteen.feature.point.domain.PointPolicy
 import kr.jiasoft.hiteen.feature.push.app.event.PushSendRequestedEvent
 import kr.jiasoft.hiteen.feature.push.domain.PushTemplate
 import kr.jiasoft.hiteen.feature.relationship.infra.FollowRepository
+import kr.jiasoft.hiteen.feature.relationship.infra.FriendRepository
 import kr.jiasoft.hiteen.feature.user.app.UserService
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import org.springframework.context.ApplicationEventPublisher
@@ -60,6 +61,7 @@ class BoardService(
     private val eventPublisher: ApplicationEventPublisher,
 
     private val followRepository: FollowRepository,
+    private val friendRepository: FriendRepository,
     private val txOperator: TransactionalOperator,
 ) {
 
@@ -135,6 +137,10 @@ class BoardService(
         followOnly: Boolean, friendOnly: Boolean, sameSchoolOnly: Boolean,
         status: String?,
         displayStatus: String?,
+        userLat: Double? = null,
+        userLng: Double? = null,
+        maxDistance: Double? = null,
+        sortByDistance: Boolean = false,
     ): ApiPage<BoardResponse> {
         val p = page.coerceAtLeast(0)
         val s = size.coerceIn(1, 100)
@@ -145,8 +151,10 @@ class BoardService(
         val total = boards.countSearchResults(category, q, uid, followOnly, friendOnly, sameSchoolOnly, status, displayStatus)
         val lastPage = if (total == 0) 0 else (total - 1) / s
 
-        val rows = boards.searchSummariesByPage(category, q, s, offset, uid, followOnly, friendOnly, sameSchoolOnly, status, displayStatus)
-            .toList()
+        val rows = boards.searchSummariesByPage(
+            category, q, s, offset, uid, followOnly, friendOnly, sameSchoolOnly, status, displayStatus,
+            userLat, userLng, maxDistance, sortByDistance
+        ).toList()
 
         // 유저 정보 일괄 조회 (N+1 방지)
         val authorIds = rows.map { it.createdId }.distinct()
@@ -154,7 +162,7 @@ class BoardService(
 
         val mapped = rows.map { row ->
             row.copy(
-                content = row.content.take(160),
+                content = row.content?.take(160),
                 user = userMap[row.createdId]
             )
         }
@@ -193,17 +201,31 @@ class BoardService(
     suspend fun listBoardsByCursor(
         category: BoardCategory, q: String?, size: Int, userId: Long,
         followOnly: Boolean, friendOnly: Boolean, sameSchoolOnly: Boolean,
-        cursorUid: UUID?, authorUid: UUID?
+        cursorUid: UUID?, authorUid: UUID?,
+        userLat: Double? = null,
+        userLng: Double? = null,
+        maxDistance: Double? = null,
+        sortByDistance: Boolean = false,
+        lastDistance: Double? = null,
+        lastId: Long? = null,
     ): ApiPageCursor<BoardResponse> {
         val s = size.coerceIn(1, 100)
 
         val rows = boards.searchSummariesByCursor(
-            category.name, q, s + 1, userId, followOnly, friendOnly, sameSchoolOnly, cursorUid, authorUid
+            category.name, q, s + 1, userId, followOnly, friendOnly, sameSchoolOnly, cursorUid, authorUid,
+            userLat, userLng, maxDistance, sortByDistance, lastDistance, lastId
         ).toList()
 
         val hasMore = rows.size > s
         val items = if (hasMore) rows.take(s) else rows
-        val nextCursor = if (hasMore) rows[s].uid.toString() else null
+        val nextCursor = if (hasMore) {
+            if (sortByDistance) {
+                val lastItem = rows[s - 1]
+                "${lastItem.distance ?: 0.0}:${lastItem.id}"
+            } else {
+                rows[s].uid.toString()
+            }
+        } else null
 
         // 특정 회원의 게시글 조회 시 경험치++(프로필 조회 화면)
         authorUid?.let {
@@ -218,7 +240,7 @@ class BoardService(
 
         val mapped = items.map { row ->
             row.copy(
-                content = row.content.take(160),
+                content = row.content?.take(160),
                 user = userMap[row.createdId]
             )
         }
@@ -249,7 +271,6 @@ class BoardService(
             perPage = s
         )
     }
-
 
 
     suspend fun create(
@@ -305,10 +326,12 @@ class BoardService(
             pointService.applyPolicy(user.id, PointPolicy.STORY_POST, saved.id)
 
             val followerIds = followRepository.findAllFollowerIds(user.id).toList()
-            if (followerIds.isNotEmpty()) {
+            val friendIds = friendRepository.findAllFriendship(user.id).toList()
+            val targetIds = (followerIds + friendIds).distinct()
+            if (targetIds.isNotEmpty()) {
                 eventPublisher.publishEvent(
                     PushSendRequestedEvent(
-                        userIds = followerIds,
+                        userIds = targetIds,
                         actorUserId = user.id,
                         templateData = PushTemplate.NEW_POST.buildPushData(
                             "nickname" to user.nickname,

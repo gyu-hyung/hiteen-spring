@@ -707,22 +707,22 @@ class UserService (
             throw BusinessValidationException(mapOf("file" to "이미지가 필요합니다."))
         }
 
-        val existingCount = userPhotosRepository.countByUserId(user.id).toInt()
-        val imageCount = existingCount + 1
+//        val existingCount = userPhotosRepository.countByUserId(user.id).toInt()
+//        val imageCount = existingCount + 1
 
         // 정책 유지: 최소 3장 / 최대 6장
-        if (imageCount < 3) {
-            throw BusinessValidationException(mapOf("file" to "최소 사진 3장은 꼭 등록해야 돼"))
-        }
-        if (imageCount > 6) {
-            throw BusinessValidationException(mapOf("file" to "사진은 최대 6장ㅌ까지 등록할 수 있어"))
-        }
+//        if (imageCount > 3) {
+//            throw BusinessValidationException(mapOf("file" to "최소 사진 3장은 꼭 등록해야 돼"))
+//        }
+//        if (imageCount > 6) {
+//            throw BusinessValidationException(mapOf("file" to "사진은 최대 6장 까지 등록할 수 있어"))
+//        }
 
         val t0 = System.nanoTime()
         log.debug(
             "✅ [registerPhotoSingle] start userId={} existingCount={} filename={}",
             user.id,
-            existingCount,
+//            existingCount,
             file.filename()
         )
 

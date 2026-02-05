@@ -39,6 +39,13 @@ interface PollRepository : CoroutineCrudRepository<PollEntity, Long> {
                   AND (pc.parent_id IS NULL OR pp.deleted_at IS NULL)
             ) AS comment_count,
             p.allow_comment,
+            p.address,
+            p.detail_address,
+            p.lat,
+            p.lng,
+            CASE WHEN :userLat IS NOT NULL AND :userLng IS NOT NULL AND p.lat IS NOT NULL AND p.lng IS NOT NULL
+                 THEN earth_distance(ll_to_earth(:userLat, :userLng), ll_to_earth(p.lat, p.lng))
+                 ELSE NULL END AS distance,
             p.created_id,
             p.created_at,
             p.deleted_at
@@ -58,9 +65,24 @@ interface PollRepository : CoroutineCrudRepository<PollEntity, Long> {
                     OR p.id IN (SELECT poll_id FROM poll_comments WHERE created_id = :currentUserId AND deleted_at IS NULL)
               ))
           )
-          AND (:cursor IS NULL OR p.id < :cursor)
+          AND (:maxDistance IS NULL OR :userLat IS NULL OR :userLng IS NULL 
+               OR p.lat IS NULL OR p.lng IS NULL
+               OR earth_distance(ll_to_earth(:userLat, :userLng), ll_to_earth(p.lat, p.lng)) <= :maxDistance)
+          AND (
+              :orderType != 'DISTANCE' 
+              AND (:cursor IS NULL OR p.id < :cursor)
+              OR :orderType = 'DISTANCE' 
+              AND (:lastDistance IS NULL OR :lastId IS NULL 
+                   OR earth_distance(ll_to_earth(:userLat, :userLng), ll_to_earth(p.lat, p.lng)) > :lastDistance 
+                   OR (earth_distance(ll_to_earth(:userLat, :userLng), ll_to_earth(p.lat, p.lng)) = :lastDistance AND p.id < :lastId))
+          )
           AND (:authorUid IS NULL OR p.created_id = (SELECT id FROM users WHERE uid = :authorUid))
         ORDER BY
+          /* 1달 이내 데이터 우선 */
+          CASE WHEN p.created_at >= NOW() - INTERVAL '1 month' THEN 0 ELSE 1 END ASC,
+          /* 거리순 정렬 */
+          CASE WHEN :orderType = 'DISTANCE' AND :userLat IS NOT NULL AND :userLng IS NOT NULL 
+               THEN earth_distance(ll_to_earth(:userLat, :userLng), ll_to_earth(p.lat, p.lng)) END ASC NULLS LAST,
           /* orderType: LATEST(default)/POPULAR/LIKE/COMMENT */
           CASE WHEN :orderType = 'POPULAR' THEN p.vote_count END DESC NULLS LAST,
           CASE WHEN :orderType = 'COMMENT' THEN (
@@ -83,7 +105,12 @@ interface PollRepository : CoroutineCrudRepository<PollEntity, Long> {
         currentUserId: Long?,
         type: String,
         authorUid: UUID?,
-        orderType: String?
+        orderType: String?,
+        userLat: Double?,
+        userLng: Double?,
+        maxDistance: Double?,
+        lastDistance: Double?,
+        lastId: Long?,
     ): Flow<PollSummaryRow>
 
 

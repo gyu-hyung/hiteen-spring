@@ -50,11 +50,11 @@ services:
     ports:
       - "6379:6379"
     environment:
-      REDIS_PASSWORD: "hiteen1234"
+      REDIS_PASSWORD: "xxxxxxxx"
     command: >
       sh -c "redis-server
       --appendonly yes
-      --requirepass hiteen1234
+      --requirepass xxxxxxxx
       --bind 0.0.0.0 ::"
 
     volumes:

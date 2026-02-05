@@ -16,6 +16,7 @@ import reactor.core.publisher.Mono
 @Component
 class JwtAuthenticationManager(
     private val jwtProvider: JwtProvider,
+    private val jwtSessionService: JwtSessionService,
     private val reactiveUserDetailsService: ReactiveUserDetailsService
 ) : ReactiveAuthenticationManager {
 
@@ -48,6 +49,21 @@ class JwtAuthenticationManager(
         val jws = jwtProvider.parseAndValidateOrThrow(token)
 
         val username = jws.payload.subject
+        val jti = jws.payload.id
+
+        // 🔒 Redis 세션 검증 (중복 로그인 방지)
+        // - jti가 있는 토큰만 검증
+        // - Redis에 세션이 없으면 허용 (Redis 데이터 유실 대비)
+        if (jti != null) {
+            val isValid = jwtSessionService.isValidSession(username, jti)
+            val hasSession = jwtSessionService.hasSession(username)
+
+            // Redis에 세션이 있고, jti가 일치하지 않으면 거부
+            if (hasSession && !isValid) {
+                log.info("Session invalid for user={}, jti={}", username, jti)
+                throw InvalidBearerToken("session_invalid")
+            }
+        }
 
         // TODO Redis 캐시
         val userDetails = reactiveUserDetailsService.findByUsername(username).awaitFirstOrNull()

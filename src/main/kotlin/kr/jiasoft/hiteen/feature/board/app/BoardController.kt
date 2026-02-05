@@ -30,23 +30,41 @@ class BoardController(
 
     @Operation(
         summary = "게시글 목록 조회",
-        description = "카테고리, 검색어, 작성자, 커서 기반 페이지네이션 옵션을 이용해 게시글 목록을 조회합니다."
+        description = "카테고리, 검색어, 작성자, 커서 기반 페이지네이션 옵션을 이용해 게시글 목록을 조회합니다. 거리순 정렬도 지원합니다." +
+                "/api/boards?size=5&sortByDistance=true&lat=35.152500&lng=129.117374&maxDistance=1500000"
     )
     @GetMapping
     suspend fun list(
         @Parameter(description = "카테고리") @RequestParam(required = false) category: BoardCategory = BoardCategory.POST,
         @Parameter(description = "검색어") @RequestParam(required = false) q: String?,
         @Parameter(description = "조회 개수 (기본 20)") @RequestParam(defaultValue = "20") size: Int,
-        @Parameter(description = "커서 UUID") @RequestParam(required = false) cursor: UUID?,
+        @Parameter(description = "커서 (기본: UUID, 거리순: 거리:ID 형식)") @RequestParam(required = false) cursor: String?,
         @Parameter(description = "작성자 UUID") @RequestParam(required = false) author: UUID?,
         @Parameter(description = "팔로우한 사용자만") @RequestParam(defaultValue = "false") followOnly: Boolean,
         @Parameter(description = "친구만") @RequestParam(defaultValue = "false") friendOnly: Boolean,
         @Parameter(description = "같은 학교만") @RequestParam(defaultValue = "false") sameSchoolOnly: Boolean,
+        @Parameter(description = "사용자 위도 (거리순 정렬 시 필수)") @RequestParam(required = false) lat: Double?,
+        @Parameter(description = "사용자 경도 (거리순 정렬 시 필수)") @RequestParam(required = false) lng: Double?,
+        @Parameter(description = "최대 거리 (미터)") @RequestParam(required = false) maxDistance: Double?,
+        @Parameter(description = "거리순 정렬 여부") @RequestParam(defaultValue = "false") sortByDistance: Boolean,
         @AuthenticationPrincipal(expression = "user") user: UserEntity
     ): ResponseEntity<ApiResult<ApiPageCursor<BoardResponse>>> {
+        // 거리순 정렬 시 커서 파싱 (거리:ID 형식)
+        val (lastDistance, lastId) = if (sortByDistance && cursor != null) {
+            cursor.split(":").let {
+                if (it.size == 2) it[0].toDoubleOrNull() to it[1].toLongOrNull() else null to null
+            }
+        } else null to null
+
+        // 기본 정렬 시 커서는 UUID
+        val cursorUid = if (!sortByDistance && cursor != null) {
+            runCatching { UUID.fromString(cursor) }.getOrNull()
+        } else null
+
         val boards = service.listBoardsByCursor(
             category, q, size, user.id,
-            followOnly, friendOnly, sameSchoolOnly, cursor, author
+            followOnly, friendOnly, sameSchoolOnly, cursorUid, author,
+            lat, lng, maxDistance, sortByDistance, lastDistance, lastId
         )
         return ResponseEntity.ok(ApiResult.success(boards))
     }

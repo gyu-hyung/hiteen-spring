@@ -1,0 +1,30 @@
+{{- if .Values.nfs.enabled }}
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nfs-pv-images-prod
+spec:
+  capacity:
+    storage: {{ .Values.nfs.storage }}
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  nfs:
+    path: {{ .Values.nfs.path }}
+    server: {{ .Values.nfs.server }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nfs-pvc-images
+  namespace: {{ .Values.namespace }}
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: {{ .Values.nfs.storage }}
+  volumeName: nfs-pv-images-prod
+  storageClassName: ""
+{{- end }}
+

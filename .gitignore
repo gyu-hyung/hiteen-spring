@@ -48,3 +48,6 @@ src/main/resources/assets/
 src/main/resources/firebase/*.json
 /assets/
 
+
+# SSL 인증서 (보안)
+ssl/

@@ -26,6 +26,15 @@ interface QuestionRepository : CoroutineCrudRepository<QuestionEntity, Long> {
     fun findByLowCaseQuestionAndDeletedAtIsNull(question: String, type: Int): Flow<QuestionEntity>
 
 
+    @Query("""
+        SELECT *
+        FROM question_2
+        WHERE LOWER(question) = LOWER(:question)
+          AND deleted_at IS NULL
+    """)
+    fun findByQuestionIgnoreCaseAndDeletedAtIsNull(question: String): Flow<QuestionEntity>
+
+
     @Query("select * from question_2 where sound is null")
     fun findBySoundIsNull(): Flow<QuestionEntity>
 

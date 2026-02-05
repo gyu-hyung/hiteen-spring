@@ -7,12 +7,14 @@ package kr.jiasoft.hiteen.feature.poll.domain
  * - POPULAR: 인기순(투표수)
  * - LIKE: 좋아요순
  * - COMMENT: 댓글순
+ * - DISTANCE: 거리순
  */
 enum class PollOrderType {
     LATEST,
     POPULAR,
     LIKE,
-    COMMENT;
+    COMMENT,
+    DISTANCE;
 
     companion object {
         fun from(value: String?): PollOrderType {
