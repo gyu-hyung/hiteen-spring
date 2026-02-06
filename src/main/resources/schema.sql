@@ -105,6 +105,11 @@ CREATE UNIQUE INDEX users_username_key
     ON users (lower(username))
     WHERE deleted_at IS NULL;
 
+-- 전화번호: 연락처 조회 성능 개선용
+CREATE INDEX IF NOT EXISTS idx_users_phone
+    ON users (phone)
+    WHERE deleted_at IS NULL;
+
 
 -- ========================
 -- 사용자 상세정보
@@ -1507,3 +1512,69 @@ CREATE TABLE public.api_keys (
     updated_at    TIMESTAMPTZ,
     deleted_at    TIMESTAMPTZ
 );
+
+
+
+-- ========================
+-- 공지사항, 이벤트 Board 테이블 분리함
+-- ========================
+CREATE TABLE public.articles (
+	id serial4 NOT NULL,
+	category varchar(50) NULL,
+	subject varchar(200) NULL,
+	"content" text NULL,
+	link varchar(500) NULL,
+	ip varchar(100) NULL,
+	hits int4 DEFAULT 0 NULL,
+	start_date date NULL,
+	end_date date NULL,
+	status varchar(20) NULL,
+	created_id int8 NULL,
+	created_at timestamptz DEFAULT now() NULL,
+	updated_id int8 NULL,
+	updated_at timestamptz NULL,
+	deleted_id int8 NULL,
+	deleted_at timestamptz NULL,
+	CONSTRAINT articles_pkey PRIMARY KEY (id)
+);
+CREATE INDEX ix_articles_category ON public.articles USING btree (category);
+CREATE INDEX ix_articles_created_at ON public.articles USING btree (created_at);
+
+
+-- ========================
+-- 공지사항, 이벤트 Assets 연결 테이블
+-- ========================
+CREATE TABLE public.article_assets (
+	id serial4 NOT NULL,
+	article_id int8 NOT NULL,
+	uid uuid NOT NULL,
+	asset_type varchar(20) DEFAULT 'ATTACHMENT' NOT NULL,
+	seq int4 DEFAULT 0 NOT NULL,
+	CONSTRAINT article_assets_article_id_uid_key UNIQUE (article_id, uid),
+	CONSTRAINT article_assets_pkey PRIMARY KEY (id),
+	CONSTRAINT "FK_article_assets_articles" FOREIGN KEY (article_id) REFERENCES public.articles(id) ON DELETE CASCADE ON UPDATE CASCADE,
+	CONSTRAINT "FK_article_assets_assets" FOREIGN KEY (uid) REFERENCES public.assets(uid) ON DELETE CASCADE ON UPDATE CASCADE
+);
+CREATE INDEX ix_article_assets_type ON public.article_assets USING btree (article_id, asset_type);
+
+
+-- ========================
+-- 문의하기 테이블
+-- ========================
+CREATE TABLE public.inquiries (
+	id serial4 NOT NULL,
+	name varchar(100) NOT NULL,
+	phone varchar(20) NOT NULL,
+	email varchar(200) NULL,
+	content text NOT NULL,
+	ip varchar(100) NULL,
+	status varchar(20) DEFAULT 'PENDING' NOT NULL,
+	reply_content text NULL,
+	reply_at timestamptz NULL,
+	reply_by int8 NULL,
+	created_at timestamptz DEFAULT now() NOT NULL,
+	updated_at timestamptz NULL,
+	CONSTRAINT inquiries_pkey PRIMARY KEY (id)
+);
+CREATE INDEX ix_inquiries_status ON public.inquiries USING btree (status);
+CREATE INDEX ix_inquiries_created_at ON public.inquiries USING btree (created_at);

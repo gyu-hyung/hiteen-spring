@@ -4,7 +4,7 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.flow.toSet
 import kr.jiasoft.hiteen.common.exception.BusinessValidationException
-import kr.jiasoft.hiteen.feature.contact.infra.UserContactBulkRepository
+import kr.jiasoft.hiteen.feature.contact.app.event.ContactSaveRequestedEvent
 import kr.jiasoft.hiteen.feature.level.app.ExpService
 import kr.jiasoft.hiteen.feature.location.domain.LocationHistory
 import kr.jiasoft.hiteen.feature.location.infra.cache.LocationCacheRedisService
@@ -34,8 +34,6 @@ class FriendService(
     private val relationHistoryService: RelationHistoryService,
 
     private val userRepository: UserRepository,
-//    private val userContactRepository: UserContactRepository,
-    private val userContactBulkRepository: UserContactBulkRepository,
 
     private val userService: UserService,
     private val locationCacheRedisService: LocationCacheRedisService,
@@ -43,6 +41,7 @@ class FriendService(
 
     private val eventPublisher: ApplicationEventPublisher,
 ) {
+    private val logger = org.slf4j.LoggerFactory.getLogger(this::class.java)
     private val now: OffsetDateTime get() = OffsetDateTime.now(ZoneOffset.UTC)
 
     private suspend fun requireUserIdByUid(uid: String): Long {
@@ -87,6 +86,8 @@ class FriendService(
      * 동기/비동기(잡) 공용 로직
      */
     internal suspend fun getContactsInternal(userId: Long, rawContacts: String): ContactResponse {
+        val totalStart = System.currentTimeMillis()
+
         // 1) 연락처 문자열 -> 전화번호 dedupe
         // split은 1천~수만 라인에서도 충분히 동작하지만, 긴 문자열에서 trim/필터를 최소화
         val phones = rawContacts
@@ -104,20 +105,28 @@ class FriendService(
             throw BusinessValidationException(mapOf("message" to "연락처 정보가 없습니다."))
         }
 
-        // 2) DB에 연락처 저장 (bulk upsert)
-        // per-row upsert(1000번 왕복) 대신 1번 쿼리로 처리
-        userContactBulkRepository.upsertAllPhones(userId, phones.toList())
+        logger.info("[Contact] userId=$userId, phoneCount=${phones.size}")
+
+        // 2) DB에 연락처 저장 (비동기 이벤트로 처리)
+        eventPublisher.publishEvent(ContactSaveRequestedEvent(userId, phones.toList()))
+        logger.info("[Contact] ContactSaveRequestedEvent published (async)")
 
         // 3) 가입 사용자 조회
+        val queryStart = System.currentTimeMillis()
         val registeredUsers = userRepository.findAllUserSummaryByPhoneIn(phones, userId).toList()
+        logger.info("[Contact] findAllUserSummaryByPhoneIn took ${System.currentTimeMillis() - queryStart}ms, found=${registeredUsers.size}")
 
         // 4) 친구 관계 조회
+        val friendStart = System.currentTimeMillis()
         val friendIds = friendRepository.findAllFriendship(userId).toSet()
+        logger.info("[Contact] findAllFriendship took ${System.currentTimeMillis() - friendStart}ms, friendCount=${friendIds.size}")
 
         // 5) 그룹 분류
         val friendList = registeredUsers.filter { it.id in friendIds }
         val registeredAndNotFriend = registeredUsers.filter { it.id !in friendIds && it.id != userId }
         val notRegistered = phones.filter { phone -> registeredUsers.none { it.phone == phone } }
+
+        logger.info("[Contact] Total time: ${System.currentTimeMillis() - totalStart}ms")
 
         return ContactResponse(registeredAndNotFriend, friendList, notRegistered)
     }

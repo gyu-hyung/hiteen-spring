@@ -23,6 +23,7 @@ enum class AssetCategory(
     WORD("word_img"),
     SOUND("sound"),
     BARCODE("barcode"),
+    ARTICLE("article"),
     ;
 
     fun fullPath(): String =

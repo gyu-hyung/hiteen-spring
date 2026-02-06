@@ -119,7 +119,7 @@ soketi:
   app-secret: hiteen-secret
 
 sms:
-  callback: "1577-5993"
+  callback: "1551-4993"
   api-key: 0rsw46blu616mp6geidaldsy9z6o0pgi
   api-url: https://apis.aligo.in/send/
   user-id: jiasoft

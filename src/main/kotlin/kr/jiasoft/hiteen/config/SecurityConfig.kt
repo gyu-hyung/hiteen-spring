@@ -51,6 +51,7 @@ class SecurityConfig(
                     "/api/auth/**",
                     "/broadcasting/auth",
                     "/api/user",
+                    "/api/inquiry",
                     // Android deferred token issue
                     "/api/invite/deferred/issue",
                 ).permitAll()
