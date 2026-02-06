@@ -20,16 +20,16 @@
 |------|--------|
 | 소스 코드 관리 | GitLab (gitlab.barunsoft.net) |
 | CI/CD 파이프라인 | GitLab CI/CD |
-| 컨테이너 이미지 저장 | GitLab Registry (gitlab.barunsoft.net:5050) |
+| 컨테이너 이미지 저장 | GitLab Registry (gitlab.barunsoft.net:6005) |
 
 ### 이미지 주소
 ```
-gitlab.barunsoft.net:5050/<group>/<project>:<태그>
+gitlab.barunsoft.net:6005/<group>/<project>:<태그>
 
 # 예시
-gitlab.barunsoft.net:5050/jiasoft/hiteen2-server:prod-abc1234
-gitlab.barunsoft.net:5050/jiasoft/hiteen2-server:0.0.1
-gitlab.barunsoft.net:5050/jiasoft/hiteen2-server:latest
+gitlab.barunsoft.net:6005/jiasoft/hiteen2-server:prod-abc1234
+gitlab.barunsoft.net:6005/jiasoft/hiteen2-server:0.0.1
+gitlab.barunsoft.net:6005/jiasoft/hiteen2-server:latest
 ```
 
 ---
@@ -50,15 +50,15 @@ gitlab.barunsoft.net:5050/jiasoft/hiteen2-server:latest
 # 마스터 노드에서 실행
 
 # 개발 클러스터
-kubectl create secret docker-registry gitlab-registry-secret \
-  --docker-server=gitlab.barunsoft.net:5050 \
+kubectl create secret docker-registry gitlab-registry \
+  --docker-server=gitlab.barunsoft.net:6005 \
   --docker-username=<DEPLOY_TOKEN_USERNAME> \
   --docker-password=<DEPLOY_TOKEN> \
   -n hiteen
 
 # 운영 클러스터
-kubectl create secret docker-registry gitlab-registry-secret \
-  --docker-server=gitlab.barunsoft.net:5050 \
+kubectl create secret docker-registry gitlab-registry \
+  --docker-server=gitlab.barunsoft.net:6005 \
   --docker-username=<DEPLOY_TOKEN_USERNAME> \
   --docker-password=<DEPLOY_TOKEN> \
   -n hiteen-prod
@@ -78,7 +78,7 @@ GitLab 프로젝트 → **Settings** → **CI/CD** → **Variables**:
 ### Step 4: 로컬에서 GitLab Registry 로그인 (수동 배포 시)
 
 ```bash
-docker login gitlab.barunsoft.net:5050
+docker login gitlab.barunsoft.net:6005
 # Username: <GitLab 사용자명>
 # Password: <GitLab 비밀번호 또는 Personal Access Token>
 ```
@@ -96,10 +96,9 @@ cd /path/to/hiteen2-server
 # 2. 스크립트 사용 (권장)
 ./scripts/deploy-gitlab.sh
 
-# 또는 직접 실행
+# 또는 직접 실행 (플랫폼 지정 및 푸시 동시 수행)
 TAG=0.0.1
-docker build -t gitlab.barunsoft.net:5050/jiasoft/hiteen2-server:$TAG .
-docker push gitlab.barunsoft.net:5050/jiasoft/hiteen2-server:$TAG
+docker build --no-cache --platform linux/amd64 -t gitlab.barunsoft.net:6005/jiasoft/hiteen2-server:prod-$TAG . --push
 ```
 
 ### 방법 B: GitLab CI/CD 자동 빌드 (권장)
@@ -123,7 +122,7 @@ kubectl create ns hiteen-prod
 ```bash
 # GitLab Registry Secret
 kubectl create secret docker-registry gitlab-registry \
-  --docker-server=gitlab.barunsoft.net:5050 \
+  --docker-server=gitlab.barunsoft.net:6005 \
   --docker-username=<DEPLOY_TOKEN_USERNAME> \
   --docker-password=<DEPLOY_TOKEN> \
   -n hiteen-prod
@@ -212,17 +211,14 @@ kubectl get events -n hiteen-prod --sort-by='.lastTimestamp'
 # 1. 새 이미지 빌드 & 푸시 (로컬에서)
 TAG=0.0.1
 
+# 플랫폼 지정 및 푸시까지 한번에 수행
 docker build \
   --platform linux/amd64 \
-  -t gitlab.barunsoft.net:5005/jiasoft/hiteen2-server:prod-$TAG .
-  -t gitlab.barunsoft.net:5005/jiasoft/hiteen2-server:latest . \
-  -- push .
-
-#docker build -t gitlab.barunsoft.net:5050/jiasoft/hiteen2-server:$TAG .
-#docker push gitlab.barunsoft.net:5050/jiasoft/hiteen2-server:$TAG
+  -t gitlab.barunsoft.net:6005/jiasoft/hiteen2-server:prod-$TAG \
+  . --push
 
 # 2. Helm으로 업데이트
-helm upgrade hiteen-app ./hiteen-app-chart \
+helm upgrade --install hiteen-app ./hiteen-app-chart \
   -n hiteen-prod \
   -f ./hiteen-app-chart/values.yaml \
   -f ./secrets-prod.yaml \
@@ -254,7 +250,7 @@ kubectl rollout undo deployment/hiteen-api -n hiteen-prod
 │ 1. 최초 설정 (1회)                                           │
 ├─────────────────────────────────────────────────────────────┤
 │  □ GitLab Access Token 생성                                 │
-│  □ K8s에 gitlab-registry-secret 생성                        │
+│  □ K8s에 gitlab-registry 생성                               │
 │  □ K8s에 firebase-secret 생성                               │
 │  □ K8s에 redis-secret 생성                                  │
 │  □ secrets-prod.yaml 파일 작성                              │
@@ -284,8 +280,8 @@ kubectl rollout undo deployment/hiteen-api -n hiteen-prod
 
 ```bash
 # 이미지 Pull 테스트
-kubectl run test-pull --image=gitlab.barunsoft.net:5050/jiasoft/hiteen2-server:latest \
-  --overrides='{"spec":{"imagePullSecrets":[{"name":"gitlab-registry-secret"}]}}' \
+kubectl run test-pull --image=gitlab.barunsoft.net:6005/jiasoft/hiteen2-server:latest \
+  --overrides='{"spec":{"imagePullSecrets":[{"name":"gitlab-registry"}]}}' \
   -n hiteen-prod --rm -it --restart=Never -- echo "Pull Success!"
 
 # Pod 접속
@@ -314,9 +310,9 @@ kubectl get configmap -n hiteen-prod
 kubectl describe pod <POD_NAME> -n hiteen-prod
 
 # 해결: Secret 재생성
-kubectl delete secret gitlab-registry-secret -n hiteen-prod
-kubectl create secret docker-registry gitlab-registry-secret \
-  --docker-server=gitlab.barunsoft.net:5050 \
+kubectl delete secret gitlab-registry -n hiteen-prod
+kubectl create secret docker-registry gitlab-registry \
+  --docker-server=gitlab.barunsoft.net:6005 \
   --docker-username=<DEPLOY_TOKEN_USERNAME> \
   --docker-password=<DEPLOY_TOKEN> \
   -n hiteen-prod
@@ -337,4 +333,3 @@ kubectl describe pod <POD_NAME> -n hiteen-prod
 kubectl describe pod <POD_NAME> -n hiteen-prod
 kubectl get pvc -n hiteen-prod
 ```
-

@@ -14,8 +14,8 @@ app:
   replicaCount: 1  # 개발환경은 1개
 
   image:
-    repository: gitlab.barunsoft.net:5005/jiasoft/hiteen2-server  # GitLab Registry
-    tag: latest
+    repository: gitlab.barunsoft.net:6005/jiasoft/hiteen2-server  # 6005로 수정
+    tag: prod-0.0.1
     pullPolicy: Always
 
   service:
@@ -44,8 +44,8 @@ app:
 
   resources:
     requests:
-      cpu: 300m
-      memory: 1Gi
+      cpu: 50m       # 하향 조정
+      memory: 512Mi  # 하향 조정
     limits:
       cpu: 1
       memory: 3Gi
@@ -88,7 +88,13 @@ ingress:
     nginx.ingress.kubernetes.io/proxy-body-size: "50m"
     nginx.ingress.kubernetes.io/client-max-body-size: "50m"
     nginx.ingress.kubernetes.io/websocket-services: "hiteen-api"
-    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    # cert-manager.io/cluster-issuer: "letsencrypt-prod" # Rate Limit 문제로 주석 처리
+
+    # 임시
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"        # HTTP 허용
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "false"  # SSL 강제 해제
+    nginx.ingress.kubernetes.io/hsts: "false"               # HSTS 비활성화 (브라우저 강제 전환 방지)
+
 
   hosts:
     - host: beta-api.hiteen.kr
@@ -99,13 +105,15 @@ ingress:
             serviceName: hiteen-api
             servicePort: 8080
 
-  tls:
-    - hosts:
-        - beta-api.hiteen.kr
-      secretName: hiteen-beta-tls
+    # 임시
+#  tls:
+#    - hosts:
+#        - beta-api.hiteen.kr
+#      secretName: hiteen-beta-tls
+  # [] 로 설정해야 values.yaml의 설정을 완전히 덮어씁니다(제거합니다).
+  tls: []
 
 metrics:
   enabled: false  # 개발 서버에서는 모니터링 비활성화
   serviceMonitor:
     enabled: false  # Prometheus CRD 없음
-
