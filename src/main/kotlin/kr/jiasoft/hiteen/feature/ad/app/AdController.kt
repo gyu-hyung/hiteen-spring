@@ -44,7 +44,7 @@ class AdController(
 
         val available = pointService.validateDailyCap(user.id, PointPolicy.AD_REWARD)
         if (!available) {
-            return ResponseEntity.badRequest().body(ApiResult.failure("오늘은 더 이상 광고 포인트를 받을 수 없습니다."))
+            return ResponseEntity.badRequest().body(ApiResult.failure("오늘은 광고를 모두 시청했어!"))
         }
 
         pointService.applyPolicy(user.id, PointPolicy.AD_REWARD)

@@ -192,6 +192,7 @@ class PinService(
                         userIds = friendIds,
                         actorUserId = user.id,
                         templateData = PushTemplate.PIN_REGISTER.buildPushData("nickname" to user.nickname),
+                        extraData = mapOf("pinId" to pin.id.toString())
                     )
                 )
             }
