@@ -13,7 +13,7 @@ interface AdminPushRepository : CoroutineCrudRepository<PushEntity, Long> {
         SELECT COUNT(*)
         FROM push p
         WHERE (
-                :type IS NULL
+                :type IS NULL OR :type = 'ALL'
                 OR p.code ILIKE ('%' || :type || '%')
             )
             AND (
@@ -25,49 +25,45 @@ interface AdminPushRepository : CoroutineCrudRepository<PushEntity, Long> {
                 OR p.created_at < :endDate
             )
             AND (
-                :search IS NULL
-                OR (
-                    :searchType = 'ALL' AND (
+                COALESCE(TRIM(:search), '') = ''
+                OR CASE
+                    WHEN :searchType = 'ALL' THEN
+                        (
+                            COALESCE(p.title, '') ILIKE ('%' || :search || '%')
+                            OR COALESCE(p.message, '') ILIKE ('%' || :search || '%')
+                            OR EXISTS (
+                                SELECT 1
+                                FROM push_detail pd
+                                JOIN users u ON u.id = pd.user_id
+                                WHERE pd.push_id = p.id
+                                    AND (
+                                        COALESCE(u.nickname, '') ILIKE ('%' || :search || '%')
+                                        OR COALESCE(u.phone, '') ILIKE ('%' || :search || '%')
+                                    )
+                            )
+                        )
+                    WHEN :searchType = 'TITLE' THEN
                         COALESCE(p.title, '') ILIKE ('%' || :search || '%')
-                        OR COALESCE(p.message, '') ILIKE ('%' || :search || '%')
-                        OR EXISTS (
+                    WHEN :searchType = 'MESSAGE' THEN
+                        COALESCE(p.message, '') ILIKE ('%' || :search || '%')
+                    WHEN :searchType = 'NICKNAME' THEN
+                        EXISTS (
                             SELECT 1
                             FROM push_detail pd
                             JOIN users u ON u.id = pd.user_id
                             WHERE pd.push_id = p.id
-                                AND (
-                                    COALESCE(u.nickname, '') ILIKE ('%' || :search || '%')
-                                    OR COALESCE(u.phone, '') ILIKE ('%' || :search || '%')
-                                )
+                                AND COALESCE(u.nickname, '') ILIKE ('%' || :search || '%')
                         )
-                    )
-                )
-                OR (
-                    :searchType = 'TITLE'
-                     AND COALESCE(p.title, '') ILIKE ('%' || :search || '%')
-                )
-                OR (
-                    :searchType = 'MESSAGE'
-                    AND COALESCE(p.message, '') ILIKE ('%' || :search || '%')
-                )
-                OR (
-                    :searchType = 'NICKNAME'
-                    AND EXISTS (
-                        SELECT 1
-                        FROM push_detail pd
-                        JOIN users u ON u.id = pd.user_id
-                        WHERE pd.push_id = p.id AND COALESCE(u.nickname, '') ILIKE ('%' || :search || '%')
-                    )
-                )
-                OR (
-                    :searchType = 'PHONE'
-                    AND EXISTS (
-                        SELECT 1
-                        FROM push_detail pd
-                        JOIN users u ON u.id = pd.user_id
-                        WHERE pd.push_id = p.id AND COALESCE(u.phone, '') ILIKE ('%' || :search || '%')
-                    )
-                )
+                    WHEN :searchType = 'PHONE' THEN
+                        EXISTS (
+                            SELECT 1
+                            FROM push_detail pd
+                            JOIN users u ON u.id = pd.user_id
+                            WHERE pd.push_id = p.id
+                                AND COALESCE(u.phone, '') ILIKE ('%' || :search || '%')
+                        )
+                    ELSE TRUE
+                END
             )
         """
     )
@@ -84,7 +80,7 @@ interface AdminPushRepository : CoroutineCrudRepository<PushEntity, Long> {
         SELECT p.*
         FROM push p
         WHERE (
-                :type IS NULL
+                :type IS NULL OR :type = 'ALL'
                 OR p.code ILIKE ('%' || :type || '%')
             )
             AND (
@@ -96,49 +92,45 @@ interface AdminPushRepository : CoroutineCrudRepository<PushEntity, Long> {
                 OR p.created_at < :endDate
             )
             AND (
-                :search IS NULL
-                OR (
-                    :searchType = 'ALL' AND (
+                COALESCE(TRIM(:search), '') = ''
+                OR CASE
+                    WHEN :searchType = 'ALL' THEN
+                        (
+                            COALESCE(p.title, '') ILIKE ('%' || :search || '%')
+                            OR COALESCE(p.message, '') ILIKE ('%' || :search || '%')
+                            OR EXISTS (
+                                SELECT 1
+                                FROM push_detail pd
+                                JOIN users u ON u.id = pd.user_id
+                                WHERE pd.push_id = p.id
+                                    AND (
+                                        COALESCE(u.nickname, '') ILIKE ('%' || :search || '%')
+                                        OR COALESCE(u.phone, '') ILIKE ('%' || :search || '%')
+                                    )
+                            )
+                        )
+                    WHEN :searchType = 'TITLE' THEN
                         COALESCE(p.title, '') ILIKE ('%' || :search || '%')
-                        OR COALESCE(p.message, '') ILIKE ('%' || :search || '%')
-                        OR EXISTS (
+                    WHEN :searchType = 'MESSAGE' THEN
+                        COALESCE(p.message, '') ILIKE ('%' || :search || '%')
+                    WHEN :searchType = 'NICKNAME' THEN
+                        EXISTS (
                             SELECT 1
                             FROM push_detail pd
                             JOIN users u ON u.id = pd.user_id
                             WHERE pd.push_id = p.id
-                                AND (
-                                    COALESCE(u.nickname, '') ILIKE ('%' || :search || '%')
-                                    OR COALESCE(u.phone, '') ILIKE ('%' || :search || '%')
-                                )
+                                AND COALESCE(u.nickname, '') ILIKE ('%' || :search || '%')
                         )
-                    )
-                )
-                OR (
-                    :searchType = 'TITLE'
-                     AND COALESCE(p.title, '') ILIKE ('%' || :search || '%')
-                )
-                OR (
-                    :searchType = 'MESSAGE'
-                    AND COALESCE(p.message, '') ILIKE ('%' || :search || '%')
-                )
-                OR (
-                    :searchType = 'NICKNAME'
-                    AND EXISTS (
-                        SELECT 1
-                        FROM push_detail pd
-                        JOIN users u ON u.id = pd.user_id
-                        WHERE pd.push_id = p.id AND COALESCE(u.nickname, '') ILIKE ('%' || :search || '%')
-                    )
-                )
-                OR (
-                    :searchType = 'PHONE'
-                    AND EXISTS (
-                        SELECT 1
-                        FROM push_detail pd
-                        JOIN users u ON u.id = pd.user_id
-                        WHERE pd.push_id = p.id AND COALESCE(u.phone, '') ILIKE ('%' || :search || '%')
-                    )
-                )
+                    WHEN :searchType = 'PHONE' THEN
+                        EXISTS (
+                            SELECT 1
+                            FROM push_detail pd
+                            JOIN users u ON u.id = pd.user_id
+                            WHERE pd.push_id = p.id
+                                AND COALESCE(u.phone, '') ILIKE ('%' || :search || '%')
+                        )
+                    ELSE TRUE
+                END
             )
         ORDER BY
             CASE WHEN :order = 'ASC' THEN p.id END ASC,

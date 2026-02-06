@@ -10,8 +10,6 @@ import java.util.UUID
 
 interface AdminPollRepository : CoroutineCrudRepository<PollEntity, Long> {
 
-
-
     @Query("""
         SELECT
             p.id,
@@ -35,15 +33,17 @@ interface AdminPollRepository : CoroutineCrudRepository<PollEntity, Long> {
         LEFT JOIN users u ON u.id = p.created_id
         WHERE
             (
-                :search IS NULL
-                OR (
-                    :searchType = 'ALL' AND (
-                        p.question ILIKE CONCAT('%', :search, '%')
-                        OR u.nickname ILIKE CONCAT('%', :search, '%')
-                    )
-                )
-                OR (:searchType = 'question' AND p.question ILIKE CONCAT('%', :search, '%'))
-                OR (:searchType = 'nickname' AND u.nickname ILIKE CONCAT('%', :search, '%'))
+                COALESCE(TRIM(:search), '') = ''
+                OR CASE
+                    WHEN :searchType = 'ALL' THEN
+                        (p.question ILIKE ('%' || :search || '%')
+                         OR u.nickname ILIKE ('%' || :search || '%'))
+                    WHEN :searchType = 'question' THEN
+                        p.question ILIKE ('%' || :search || '%')
+                    WHEN :searchType = 'nickname' THEN
+                        u.nickname ILIKE ('%' || :search || '%')
+                    ELSE TRUE
+                END
             )
     
             AND (
@@ -53,7 +53,7 @@ interface AdminPollRepository : CoroutineCrudRepository<PollEntity, Long> {
     
             AND (
                 :uid IS NULL
-                OR ( SELECT u.uid FROM users u WHERE u.id = p.created_id ) = :uid
+                OR u.uid = :uid
             )
     
         ORDER BY
@@ -72,24 +72,23 @@ interface AdminPollRepository : CoroutineCrudRepository<PollEntity, Long> {
         uid: UUID?,
     ): Flow<AdminPollResponse>
 
-
-
-
     @Query("""
         SELECT COUNT(*)
         FROM polls p
         LEFT JOIN users u ON u.id = p.created_id
         WHERE
             (
-                :search IS NULL
-                OR (
-                    :searchType = 'ALL' AND (
-                        p.question ILIKE CONCAT('%', :search, '%')
-                        OR u.nickname ILIKE CONCAT('%', :search, '%')
-                    )
-                )
-                OR (:searchType = 'question' AND p.question ILIKE CONCAT('%', :search, '%'))
-                OR (:searchType = 'nickname' AND u.nickname ILIKE CONCAT('%', :search, '%'))
+                COALESCE(TRIM(:search), '') = ''
+                OR CASE
+                    WHEN :searchType = 'ALL' THEN
+                        (p.question ILIKE ('%' || :search || '%')
+                         OR u.nickname ILIKE ('%' || :search || '%'))
+                    WHEN :searchType = 'question' THEN
+                        p.question ILIKE ('%' || :search || '%')
+                    WHEN :searchType = 'nickname' THEN
+                        u.nickname ILIKE ('%' || :search || '%')
+                    ELSE TRUE
+                END
             )
     
             AND (
@@ -99,7 +98,7 @@ interface AdminPollRepository : CoroutineCrudRepository<PollEntity, Long> {
     
             AND (
                 :uid IS NULL
-                OR ( SELECT u.uid FROM users u WHERE u.id = p.created_id ) = :uid
+                OR u.uid = :uid
             )
     """)
     suspend fun totalCount(

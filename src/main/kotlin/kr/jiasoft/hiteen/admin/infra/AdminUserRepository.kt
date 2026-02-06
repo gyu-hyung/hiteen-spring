@@ -19,15 +19,17 @@ interface AdminUserRepository : CoroutineCrudRepository<UserEntity, Long> {
         FROM users u
         WHERE
             (
-                :search IS NULL
-                OR (
-                    :searchType = 'ALL' AND (
-                        u.nickname LIKE CONCAT('%', :search, '%')
-                        OR u.phone LIKE CONCAT('%', :search, '%')
-                    )
-                )
-                OR (:searchType = 'nickname' AND u.nickname LIKE CONCAT('%', :search, '%'))
-                OR (:searchType = 'phone' AND u.phone LIKE CONCAT('%', :search, '%'))
+                COALESCE(TRIM(:search), '') = ''
+                OR CASE
+                    WHEN :searchType = 'ALL' THEN
+                        (u.nickname ILIKE ('%' || :search || '%')
+                         OR u.phone ILIKE ('%' || :search || '%'))
+                    WHEN :searchType = 'nickname' THEN
+                        u.nickname ILIKE ('%' || :search || '%')
+                    WHEN :searchType = 'phone' THEN
+                        u.phone ILIKE ('%' || :search || '%')
+                    ELSE TRUE
+                END
             )
             AND (
                 :status IS NULL OR :status = 'ALL'
@@ -55,15 +57,17 @@ interface AdminUserRepository : CoroutineCrudRepository<UserEntity, Long> {
         FROM users u
         WHERE
             (
-                :search IS NULL
-                OR (
-                    :searchType = 'ALL' AND (
-                        u.nickname LIKE CONCAT('%', :search, '%')
-                        OR u.phone LIKE CONCAT('%', :search, '%')
-                    )
-                )
-                OR (:searchType = 'nickname' AND u.nickname LIKE CONCAT('%', :search, '%'))
-                OR (:searchType = 'phone' AND u.phone LIKE CONCAT('%', :search, '%'))
+                COALESCE(TRIM(:search), '') = ''
+                OR CASE
+                    WHEN :searchType = 'ALL' THEN
+                        (u.nickname ILIKE ('%' || :search || '%')
+                         OR u.phone ILIKE ('%' || :search || '%'))
+                    WHEN :searchType = 'nickname' THEN
+                        u.nickname ILIKE ('%' || :search || '%')
+                    WHEN :searchType = 'phone' THEN
+                        u.phone ILIKE ('%' || :search || '%')
+                    ELSE TRUE
+                END
             )
             AND (
                 :status IS NULL OR :status = 'ALL'
@@ -169,15 +173,17 @@ interface AdminUserRepository : CoroutineCrudRepository<UserEntity, Long> {
         FROM users u
         WHERE
             (
-                :search IS NULL
-                OR (
-                    :searchType = 'ALL' AND (
-                        u.nickname LIKE CONCAT('%', :search, '%')
-                        OR u.phone LIKE CONCAT('%', :search, '%')
-                    )
-                )
-                OR (:searchType = 'nickname' AND u.nickname LIKE CONCAT('%', :search, '%'))
-                OR (:searchType = 'phone' AND u.phone LIKE CONCAT('%', :search, '%'))
+                COALESCE(TRIM(:search), '') = ''
+                OR CASE
+                    WHEN :searchType = 'ALL' THEN
+                        (u.nickname ILIKE ('%' || :search || '%')
+                         OR u.phone ILIKE ('%' || :search || '%'))
+                    WHEN :searchType = 'nickname' THEN
+                        u.nickname ILIKE ('%' || :search || '%')
+                    WHEN :searchType = 'phone' THEN
+                        u.phone ILIKE ('%' || :search || '%')
+                    ELSE TRUE
+                END
             )
             AND (
                 :status IS NULL OR :status = 'ALL'

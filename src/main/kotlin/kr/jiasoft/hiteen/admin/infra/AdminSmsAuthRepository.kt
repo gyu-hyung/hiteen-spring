@@ -13,7 +13,7 @@ interface AdminSmsAuthRepository : CoroutineCrudRepository<SmsAuthEntity, Long> 
         WHERE a.sms_id = :smsId
           AND (:includeDeleted = TRUE OR a.deleted_at IS NULL)
           AND (
-            :status = 'ALL'
+            :status IS NULL OR :status = 'ALL'
             OR a.status = :status
           )
         ORDER BY a.created_at DESC
@@ -35,7 +35,7 @@ interface AdminSmsAuthRepository : CoroutineCrudRepository<SmsAuthEntity, Long> 
         WHERE a.sms_id = :smsId
           AND (:includeDeleted = TRUE OR a.deleted_at IS NULL)
           AND (
-            :status = 'ALL'
+            :status IS NULL OR :status = 'ALL'
             OR a.status = :status
           )
         """

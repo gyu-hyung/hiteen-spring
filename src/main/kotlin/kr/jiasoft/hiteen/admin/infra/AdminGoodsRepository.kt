@@ -78,32 +78,32 @@ interface AdminGoodsRepository : CoroutineCrudRepository<GoodsGiftishowEntity, L
         WHERE
             (g.del_yn IS NULL OR g.del_yn = 0)
             AND (
-                :search IS NULL
-                OR (
-                    CASE
-                        WHEN :searchType = 'ALL' THEN
-                            g.goods_name ILIKE '%' || :search || '%'
-                            OR g.brand_name ILIKE '%' || :search || '%'
-                            OR g.category1_name ILIKE '%' || :search || '%'
-                            OR g.goods_type_nm ILIKE '%' || :search || '%'
-                            OR g.goods_type_dtl_nm ILIKE '%' || :search || '%'
-                            OR g.srch_keyword ILIKE '%' || :search || '%'
+                COALESCE(TRIM(:search), '') = ''
+                OR CASE
+                    WHEN :searchType = 'ALL' THEN
+                        g.goods_name ILIKE '%' || :search || '%'
+                        OR g.brand_name ILIKE '%' || :search || '%'
+                        OR g.category1_name ILIKE '%' || :search || '%'
+                        OR g.goods_type_nm ILIKE '%' || :search || '%'
+                        OR g.goods_type_dtl_nm ILIKE '%' || :search || '%'
+                        OR g.srch_keyword ILIKE '%' || :search || '%'
             
-                        WHEN :searchType = 'goodsName' THEN
-                            g.goods_name ILIKE '%' || :search || '%'
+                    WHEN :searchType = 'goodsName' THEN
+                        g.goods_name ILIKE '%' || :search || '%'
             
-                        WHEN :searchType = 'brandName' THEN
-                            g.brand_name ILIKE '%' || :search || '%'
+                    WHEN :searchType = 'brandName' THEN
+                        g.brand_name ILIKE '%' || :search || '%'
             
-                        WHEN :searchType = 'category1Name' THEN
-                            g.category1_name ILIKE '%' || :search || '%'
+                    WHEN :searchType = 'category1Name' THEN
+                        g.category1_name ILIKE '%' || :search || '%'
             
-                        WHEN :searchType = 'goodsTypeName' THEN
-                            g.goods_type_nm ILIKE '%' || :search || '%'
-                            OR g.goods_type_dtl_nm ILIKE '%' || :search || '%'
-                    END
-                )
-            )            
+                    WHEN :searchType = 'goodsTypeName' THEN
+                        g.goods_type_nm ILIKE '%' || :search || '%'
+                        OR g.goods_type_dtl_nm ILIKE '%' || :search || '%'
+            
+                    ELSE TRUE
+                END
+            )
             AND (
                 :status IS NULL OR :status = 'ALL'
                 OR (:status = 'ACTIVE' AND g.status = 1)
@@ -139,32 +139,32 @@ interface AdminGoodsRepository : CoroutineCrudRepository<GoodsGiftishowEntity, L
         WHERE
             (g.del_yn IS NULL OR g.del_yn = 0)
             AND (
-                :search IS NULL
-                OR (
-                    CASE
-                        WHEN :searchType = 'ALL' THEN
-                            g.goods_name ILIKE '%' || :search || '%'
-                            OR g.brand_name ILIKE '%' || :search || '%'
-                            OR g.category1_name ILIKE '%' || :search || '%'
-                            OR g.goods_type_nm ILIKE '%' || :search || '%'
-                            OR g.goods_type_dtl_nm ILIKE '%' || :search || '%'
-                            OR g.srch_keyword ILIKE '%' || :search || '%'
+                COALESCE(TRIM(:search), '') = ''
+                OR CASE
+                    WHEN :searchType = 'ALL' THEN
+                        g.goods_name ILIKE '%' || :search || '%'
+                        OR g.brand_name ILIKE '%' || :search || '%'
+                        OR g.category1_name ILIKE '%' || :search || '%'
+                        OR g.goods_type_nm ILIKE '%' || :search || '%'
+                        OR g.goods_type_dtl_nm ILIKE '%' || :search || '%'
+                        OR g.srch_keyword ILIKE '%' || :search || '%'
             
-                        WHEN :searchType = 'goodsName' THEN
-                            g.goods_name ILIKE '%' || :search || '%'
+                    WHEN :searchType = 'goodsName' THEN
+                        g.goods_name ILIKE '%' || :search || '%'
             
-                        WHEN :searchType = 'brandName' THEN
-                            g.brand_name ILIKE '%' || :search || '%'
+                    WHEN :searchType = 'brandName' THEN
+                        g.brand_name ILIKE '%' || :search || '%'
             
-                        WHEN :searchType = 'category1Name' THEN
-                            g.category1_name ILIKE '%' || :search || '%'
+                    WHEN :searchType = 'category1Name' THEN
+                        g.category1_name ILIKE '%' || :search || '%'
             
-                        WHEN :searchType = 'goodsTypeName' THEN
-                            g.goods_type_nm ILIKE '%' || :search || '%'
-                            OR g.goods_type_dtl_nm ILIKE '%' || :search || '%'
-                    END
-                )
-            )            
+                    WHEN :searchType = 'goodsTypeName' THEN
+                        g.goods_type_nm ILIKE '%' || :search || '%'
+                        OR g.goods_type_dtl_nm ILIKE '%' || :search || '%'
+            
+                    ELSE TRUE
+                END
+            )
             
             AND (
                 :status IS NULL OR :status = 'ALL'

@@ -22,20 +22,20 @@ interface AdminFriendRepository : CoroutineCrudRepository<FriendEntity, Long> {
         )
         WHERE
             (
-                :search IS NULL
-                OR (
-                    CASE
-                        WHEN :searchType = 'ALL' THEN
-                            u.nickname ILIKE '%' || :search || '%'
-                            OR u.phone ILIKE '%' || :search || '%'
-            
-                        WHEN :searchType = 'nickname' THEN
-                            u.nickname ILIKE '%' || :search || '%'
-            
-                        WHEN :searchType = 'phone' THEN
-                            u.phone ILIKE '%' || :search || '%'
-                    END
-                )
+                COALESCE(TRIM(:search), '') = ''
+                OR CASE
+                    WHEN :searchType = 'ALL' THEN
+                        u.nickname ILIKE '%' || :search || '%'
+                        OR u.phone ILIKE '%' || :search || '%'
+                    
+                    WHEN :searchType = 'nickname' THEN
+                        u.nickname ILIKE '%' || :search || '%'
+                    
+                    WHEN :searchType = 'phone' THEN
+                        u.phone ILIKE '%' || :search || '%'
+                    
+                    ELSE TRUE
+                END
             )
             AND (
                 :status IS NULL OR :status = 'ALL'
@@ -82,20 +82,20 @@ interface AdminFriendRepository : CoroutineCrudRepository<FriendEntity, Long> {
         LEFT JOIN schools s ON u.school_id = s.id
         WHERE
             (
-                :search IS NULL
-                OR (
-                    CASE
-                        WHEN :searchType = 'ALL' THEN
-                            u.nickname ILIKE '%' || :search || '%'
-                            OR u.phone ILIKE '%' || :search || '%'
-            
-                        WHEN :searchType = 'nickname' THEN
-                            u.nickname ILIKE '%' || :search || '%'
-            
-                        WHEN :searchType = 'phone' THEN
-                            u.phone ILIKE '%' || :search || '%'
-                    END
-                )
+                COALESCE(TRIM(:search), '') = ''
+                OR CASE
+                    WHEN :searchType = 'ALL' THEN
+                        u.nickname ILIKE '%' || :search || '%'
+                        OR u.phone ILIKE '%' || :search || '%'
+                    
+                    WHEN :searchType = 'nickname' THEN
+                        u.nickname ILIKE '%' || :search || '%'
+                    
+                    WHEN :searchType = 'phone' THEN
+                        u.phone ILIKE '%' || :search || '%'
+                    
+                    ELSE TRUE
+                END
             )
             AND (
                 :status IS NULL OR :status = 'ALL'

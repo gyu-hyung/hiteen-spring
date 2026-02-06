@@ -19,22 +19,24 @@ interface AdminFollowRepository : CoroutineCrudRepository<FollowEntity, Long> {
         JOIN users u_to   ON u_to.id   = f.follow_id
         WHERE
             (
-                :search IS NULL
-                OR (
-                    CASE
-                        WHEN :searchType = 'ALL' THEN
-                            u_from.nickname ILIKE '%' || :search || '%'
-                            OR u_from.phone ILIKE '%' || :search || '%'
-                            OR u_to.nickname ILIKE '%' || :search || '%'
-                            OR u_to.phone ILIKE '%' || :search || '%'
-            
-                        WHEN :searchType = 'nickname' THEN
-                            u_from.nickname ILIKE '%' || :search || '%'
-            
-                        WHEN :searchType = 'phone' THEN
-                            u_from.phone ILIKE '%' || :search || '%'
-                    END
-                )
+                COALESCE(TRIM(:search), '') = ''
+                OR CASE
+                    WHEN :searchType = 'ALL' THEN
+                        u_from.nickname ILIKE '%' || :search || '%'
+                        OR u_from.phone ILIKE '%' || :search || '%'
+                        OR u_to.nickname ILIKE '%' || :search || '%'
+                        OR u_to.phone ILIKE '%' || :search || '%'
+                    
+                    WHEN :searchType = 'nickname' THEN
+                        u_from.nickname ILIKE '%' || :search || '%'
+                        OR u_to.nickname ILIKE '%' || :search || '%'
+                    
+                    WHEN :searchType = 'phone' THEN
+                        u_from.phone ILIKE '%' || :search || '%'
+                        OR u_to.phone ILIKE '%' || :search || '%'
+                    
+                    ELSE TRUE
+                END
             )
             AND (
                 :status IS NULL OR :status = 'ALL'
@@ -81,22 +83,24 @@ interface AdminFollowRepository : CoroutineCrudRepository<FollowEntity, Long> {
         JOIN users u_to   ON u_to.id   = f.follow_id
         WHERE
             (
-                :search IS NULL
-                OR (
-                    CASE
-                        WHEN :searchType = 'ALL' THEN
-                            u_from.nickname ILIKE '%' || :search || '%'
-                            OR u_from.phone ILIKE '%' || :search || '%'
-                            OR u_to.nickname ILIKE '%' || :search || '%'
-                            OR u_to.phone ILIKE '%' || :search || '%'
-            
-                        WHEN :searchType = 'nickname' THEN
-                            u_from.nickname ILIKE '%' || :search || '%'
-            
-                        WHEN :searchType = 'phone' THEN
-                            u_from.phone ILIKE '%' || :search || '%'
-                    END
-                )
+                COALESCE(TRIM(:search), '') = ''
+                OR CASE
+                    WHEN :searchType = 'ALL' THEN
+                        u_from.nickname ILIKE '%' || :search || '%'
+                        OR u_from.phone ILIKE '%' || :search || '%'
+                        OR u_to.nickname ILIKE '%' || :search || '%'
+                        OR u_to.phone ILIKE '%' || :search || '%'
+                    
+                    WHEN :searchType = 'nickname' THEN
+                        u_from.nickname ILIKE '%' || :search || '%'
+                        OR u_to.nickname ILIKE '%' || :search || '%'
+                    
+                    WHEN :searchType = 'phone' THEN
+                        u_from.phone ILIKE '%' || :search || '%'
+                        OR u_to.phone ILIKE '%' || :search || '%'
+                    
+                    ELSE TRUE
+                END
             )
             AND (
                 :status IS NULL OR :status = 'ALL'

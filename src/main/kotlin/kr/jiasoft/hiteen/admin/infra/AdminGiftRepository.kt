@@ -96,20 +96,20 @@ interface AdminGiftRepository : CoroutineCrudRepository<GiftEntity, Long> {
         LEFT JOIN users receiver ON receiver.id = gu.user_id
         WHERE g.deleted_at IS NULL
             AND (
-                :search IS NULL
-                OR (
-                    CASE
-                        WHEN :searchType = 'ALL' THEN
-                            giver.nickname ILIKE '%' || :search || '%'
-                            OR receiver.nickname ILIKE '%' || :search || '%'
-            
-                        WHEN :searchType = 'giver' THEN
-                            giver.nickname ILIKE '%' || :search || '%'
-            
-                        WHEN :searchType = 'receiver' THEN
-                            receiver.nickname ILIKE '%' || :search || '%'
-                    END
-                )
+                COALESCE(TRIM(:search), '') = ''
+                OR CASE
+                    WHEN :searchType = 'ALL' THEN
+                        giver.nickname ILIKE '%' || :search || '%'
+                        OR receiver.nickname ILIKE '%' || :search || '%'
+                    
+                    WHEN :searchType = 'giver' THEN
+                        giver.nickname ILIKE '%' || :search || '%'
+                    
+                    WHEN :searchType = 'receiver' THEN
+                        receiver.nickname ILIKE '%' || :search || '%'
+                    
+                    ELSE TRUE
+                END
             )
             AND (
                 :category IS NULL OR g.category = :category
@@ -158,20 +158,20 @@ interface AdminGiftRepository : CoroutineCrudRepository<GiftEntity, Long> {
         LEFT JOIN users receiver ON receiver.id = gu.user_id
         WHERE g.deleted_at IS NULL
             AND (
-                :search IS NULL
-                OR (
-                    CASE
-                        WHEN :searchType = 'ALL' THEN
-                            giver.nickname ILIKE '%' || :search || '%'
-                            OR receiver.nickname ILIKE '%' || :search || '%'
-            
-                        WHEN :searchType = 'giver' THEN
-                            giver.nickname ILIKE '%' || :search || '%'
-            
-                        WHEN :searchType = 'receiver' THEN
-                            receiver.nickname ILIKE '%' || :search || '%'
-                    END
-                )
+                COALESCE(TRIM(:search), '') = ''
+                OR CASE
+                    WHEN :searchType = 'ALL' THEN
+                        giver.nickname ILIKE '%' || :search || '%'
+                        OR receiver.nickname ILIKE '%' || :search || '%'
+                    
+                    WHEN :searchType = 'giver' THEN
+                        giver.nickname ILIKE '%' || :search || '%'
+                    
+                    WHEN :searchType = 'receiver' THEN
+                        receiver.nickname ILIKE '%' || :search || '%'
+                    
+                    ELSE TRUE
+                END
             )
             AND (
                 :category IS NULL OR g.category = :category

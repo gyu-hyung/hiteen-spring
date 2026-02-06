@@ -9,35 +9,26 @@ import java.util.UUID
 
 interface AdminPlayRepository : CoroutineCrudRepository<GameHistoryEntity, Long> {
 
-
-
     @Query("""
         SELECT 
             gh.*,
-            (SELECT nickname FROM users u WHERE u.id = sp.user_id) AS nickname,
-            (SELECT (year % 100)::text || '-' || month::text || '-' || round::text FROM seasons s WHERE s.id = gh.season_id) AS season_no,
-            (SELECT name FROM games g WHERE g.id = gh.game_id) AS game_name
+            u.nickname,
+            g.name AS game_name,
+            (SELECT (year % 100)::text || '-' || month::text || '-' || round::text FROM seasons s WHERE s.id = gh.season_id) AS season_no
         FROM game_history gh
         LEFT JOIN season_participants sp ON sp.id = gh.participant_id 
-        LEFT JOIN users u ON sp.user_id = u.id
+        LEFT JOIN users u ON u.id = sp.user_id
+        LEFT JOIN games g ON g.id = gh.game_id
         WHERE
             (
-                :search IS NULL
-                OR (
-                    :searchType = 'ALL' AND (
-                        SELECT u.nickname
-                        FROM users u
-                        WHERE u.id = sp.user_id
-                    ) ILIKE CONCAT('%', :search, '%')
-                )
-                OR (
-                    :searchType = 'nickname'
-                    AND (
-                        SELECT u.nickname
-                        FROM users u
-                        WHERE u.id = sp.user_id
-                    ) ILIKE CONCAT('%', :search, '%')
-                )
+                COALESCE(TRIM(:search), '') = ''
+                OR CASE
+                    WHEN :searchType = 'ALL' THEN
+                        u.nickname ILIKE CONCAT('%', :search, '%')
+                    WHEN :searchType = 'nickname' THEN
+                        u.nickname ILIKE CONCAT('%', :search, '%')
+                    ELSE TRUE
+                END
             )
     
             AND (
@@ -78,32 +69,21 @@ interface AdminPlayRepository : CoroutineCrudRepository<GameHistoryEntity, Long>
         gameId: Long?,
     ): Flow<AdminPlayResponse>
 
-
-
-
     @Query("""
         SELECT COUNT(*)
         FROM game_history gh
         LEFT JOIN season_participants sp ON sp.id = gh.participant_id 
-        LEFT JOIN users u ON sp.user_id = u.id
+        LEFT JOIN users u ON u.id = sp.user_id
         WHERE
             (
-                :search IS NULL
-                OR (
-                    :searchType = 'ALL' AND (
-                        SELECT u.nickname
-                        FROM users u
-                        WHERE u.id = sp.user_id
-                    ) ILIKE CONCAT('%', :search, '%')
-                )
-                OR (
-                    :searchType = 'nickname'
-                    AND (
-                        SELECT u.nickname
-                        FROM users u
-                        WHERE u.id = sp.user_id
-                    ) ILIKE CONCAT('%', :search, '%')
-                )
+                COALESCE(TRIM(:search), '') = ''
+                OR CASE
+                    WHEN :searchType = 'ALL' THEN
+                        u.nickname ILIKE CONCAT('%', :search, '%')
+                    WHEN :searchType = 'nickname' THEN
+                        u.nickname ILIKE CONCAT('%', :search, '%')
+                    ELSE TRUE
+                END
             )
     
             AND (

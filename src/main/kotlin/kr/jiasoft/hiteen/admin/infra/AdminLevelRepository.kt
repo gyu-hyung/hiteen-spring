@@ -16,20 +16,20 @@ interface AdminLevelRepository : CoroutineCrudRepository<TierEntity, Long> {
         FROM tiers t
         WHERE t.deleted_at IS NULL
             AND (
-                :search IS NULL
-                OR (
-                    CASE
-                        WHEN :searchType = 'ALL' THEN
-                            t.tier_code ILIKE '%' || :search || '%'
-                            OR t.tier_name_kr ILIKE '%' || :search || '%'
+                COALESCE(TRIM(:search), '') = ''
+                OR CASE
+                    WHEN :searchType = 'ALL' THEN
+                        t.tier_code ILIKE '%' || :search || '%'
+                        OR t.tier_name_kr ILIKE '%' || :search || '%'
             
-                        WHEN :searchType = 'code' THEN
-                            t.tier_code ILIKE '%' || :search || '%'
+                    WHEN :searchType = 'code' THEN
+                        t.tier_code ILIKE '%' || :search || '%'
             
-                        WHEN :searchType = 'name' THEN
-                            t.tier_name_kr ILIKE '%' || :search || '%'
-                    END
-                )
+                    WHEN :searchType = 'name' THEN
+                        t.tier_name_kr ILIKE '%' || :search || '%'
+            
+                    ELSE TRUE
+                END
             )
         ORDER BY
             t.level ASC,

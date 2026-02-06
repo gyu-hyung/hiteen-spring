@@ -35,28 +35,34 @@ interface AdminRankingListRepository : CoroutineCrudRepository<GameRankingEntity
         JOIN users u ON sp.user_id = u.id
         WHERE
             (:seasonId IS NULL OR gs.season_id = :seasonId)
-          AND (:gameId IS NULL OR gs.game_id = :gameId)
-          AND (:league IS NULL OR :league = 'ALL' OR sp.league = :league)
-          AND (
+            AND (:gameId IS NULL OR gs.game_id = :gameId)
+            AND (:league IS NULL OR :league = 'ALL' OR sp.league = :league)
+            AND (
                 :status IS NULL OR :status = 'ALL'
                 OR (:status = 'ACTIVE' AND gs.deleted_at IS NULL)
                 OR (:status = 'DELETED' AND gs.deleted_at IS NOT NULL)
-          )
-          AND (
-                :search IS NULL
-                OR (
-                    :searchType = 'ALL' AND (
-                        u.nickname ILIKE CONCAT('%', :search, '%')
-                        OR CAST(u.id AS TEXT) ILIKE CONCAT('%', :search, '%')
-                        OR CAST(u.uid AS TEXT) ILIKE CONCAT('%', :search, '%')
-                    )
-                )
-                OR (:searchType = 'nickname' AND u.nickname ILIKE CONCAT('%', :search, '%'))
-                OR (:searchType = 'userId' AND CAST(u.id AS TEXT) ILIKE CONCAT('%', :search, '%'))
-          )
-          AND (
+            )
+            AND (
+                COALESCE(TRIM(:search), '') = ''
+                OR CASE
+                    WHEN :searchType = 'ALL' THEN
+                        (
+                            u.nickname ILIKE ('%' || :search || '%')
+                            OR CAST(u.id AS TEXT) ILIKE ('%' || :search || '%')
+                            OR CAST(u.uid AS TEXT) ILIKE ('%' || :search || '%')
+                        )
+                    WHEN :searchType = 'nickname' THEN
+                        u.nickname ILIKE ('%' || :search || '%')
+                    WHEN :searchType = 'userId' THEN
+                        CAST(u.id AS TEXT) ILIKE ('%' || :search || '%')
+                    WHEN :searchType = 'userUid' THEN
+                        CAST(u.uid AS TEXT) ILIKE ('%' || :search || '%')
+                    ELSE TRUE
+                END
+            )
+            AND (
                 :uid IS NULL OR u.uid = :uid
-          )
+            )
         ORDER BY
             CASE WHEN :order = 'DESC' THEN gs.score END DESC,
             CASE WHEN :order = 'ASC' THEN gs.score END ASC,
@@ -84,28 +90,34 @@ interface AdminRankingListRepository : CoroutineCrudRepository<GameRankingEntity
         JOIN users u ON sp.user_id = u.id
         WHERE
             (:seasonId IS NULL OR gs.season_id = :seasonId)
-          AND (:gameId IS NULL OR gs.game_id = :gameId)
-          AND (:league IS NULL OR :league = 'ALL' OR sp.league = :league)
-          AND (
+            AND (:gameId IS NULL OR gs.game_id = :gameId)
+            AND (:league IS NULL OR :league = 'ALL' OR sp.league = :league)
+            AND (
                 :status IS NULL OR :status = 'ALL'
                 OR (:status = 'ACTIVE' AND gs.deleted_at IS NULL)
                 OR (:status = 'DELETED' AND gs.deleted_at IS NOT NULL)
-          )
-          AND (
-                :search IS NULL
-                OR (
-                    :searchType = 'ALL' AND (
-                        u.nickname ILIKE CONCAT('%', :search, '%')
-                        OR CAST(u.id AS TEXT) ILIKE CONCAT('%', :search, '%')
-                        OR CAST(u.uid AS TEXT) ILIKE CONCAT('%', :search, '%')
-                    )
-                )
-                OR (:searchType = 'nickname' AND u.nickname ILIKE CONCAT('%', :search, '%'))
-                OR (:searchType = 'userId' AND CAST(u.id AS TEXT) ILIKE CONCAT('%', :search, '%'))
-          )
-          AND (
-                :uid IS NULL OR u.uid = :uid
-          )
+            )
+            AND (
+                COALESCE(TRIM(:search), '') = ''
+                OR CASE
+                    WHEN :searchType = 'ALL' THEN
+                        (
+                            u.nickname ILIKE ('%' || :search || '%')
+                            OR CAST(u.id AS TEXT) ILIKE ('%' || :search || '%')
+                            OR CAST(u.uid AS TEXT) ILIKE ('%' || :search || '%')
+                        )
+                    WHEN :searchType = 'nickname' THEN
+                        u.nickname ILIKE ('%' || :search || '%')
+                    WHEN :searchType = 'userId' THEN
+                        CAST(u.id AS TEXT) ILIKE ('%' || :search || '%')
+                    WHEN :searchType = 'userUid' THEN
+                        CAST(u.uid AS TEXT) ILIKE ('%' || :search || '%')
+                    ELSE TRUE
+                END
+            )
+            AND (
+              :uid IS NULL OR u.uid = :uid
+            )
     """)
     suspend fun realtimeTotalCount(
         search: String?,
@@ -143,27 +155,32 @@ interface AdminRankingListRepository : CoroutineCrudRepository<GameRankingEntity
         FROM game_rankings gr
         LEFT JOIN users u ON gr.user_id = u.id
         LEFT JOIN seasons s ON s.id = gr.season_id 
-        WHERE (:seasonId IS NULL OR gr.season_id = :seasonId)
-          AND (:gameId IS NULL OR gr.game_id = :gameId)
-          AND (:league IS NULL OR :league = 'ALL' OR gr.league = :league)
-          AND (
-                :status IS NULL OR :status = 'ALL'
-          )
-          AND (
-                :search IS NULL
-                OR (
-                    :searchType = 'ALL' AND (
-                        gr.nickname ILIKE CONCAT('%', :search, '%')
-                        OR CAST(gr.user_id AS TEXT) ILIKE CONCAT('%', :search, '%')
-                        OR CAST(u.uid AS TEXT) ILIKE CONCAT('%', :search, '%')
-                    )
-                )
-                OR (:searchType = 'nickname' AND gr.nickname ILIKE CONCAT('%', :search, '%'))
-                OR (:searchType = 'userId' AND CAST(gr.user_id AS TEXT) ILIKE CONCAT('%', :search, '%'))
-          )
-          AND (
+        WHERE
+            (:seasonId IS NULL OR gr.season_id = :seasonId)
+            AND (:gameId IS NULL OR gr.game_id = :gameId)
+            AND (:league IS NULL OR :league = 'ALL' OR gr.league = :league)
+            AND (:status IS NULL OR :status = 'ALL')
+            AND (
+                COALESCE(TRIM(:search), '') = ''
+                OR CASE
+                    WHEN :searchType = 'ALL' THEN
+                        (
+                            gr.nickname ILIKE ('%' || :search || '%')
+                            OR CAST(gr.user_id AS TEXT) ILIKE ('%' || :search || '%')
+                            OR CAST(u.uid AS TEXT) ILIKE ('%' || :search || '%')
+                        )
+                    WHEN :searchType = 'nickname' THEN
+                        gr.nickname ILIKE ('%' || :search || '%')
+                    WHEN :searchType = 'userId' THEN
+                        CAST(gr.user_id AS TEXT) ILIKE ('%' || :search || '%')
+                    WHEN :searchType = 'userUid' THEN
+                        CAST(u.uid AS TEXT) ILIKE ('%' || :search || '%')
+                    ELSE TRUE
+                END
+            )
+            AND (
                 :uid IS NULL OR u.uid = :uid
-          )
+            )
         ORDER BY
             CASE WHEN :order = 'DESC' THEN gr.season_id END DESC,
             CASE WHEN :order = 'ASC' THEN gr.season_id END ASC,
@@ -191,26 +208,30 @@ interface AdminRankingListRepository : CoroutineCrudRepository<GameRankingEntity
         LEFT JOIN seasons s ON s.id = gr.season_id 
         WHERE
             (:seasonId IS NULL OR gr.season_id = :seasonId)
-          AND (:gameId IS NULL OR gr.game_id = :gameId)
-          AND (:league IS NULL OR :league = 'ALL' OR gr.league = :league)
-          AND (
-                :status IS NULL OR :status = 'ALL'
-          )
-          AND (
-                :search IS NULL
-                OR (
-                    :searchType = 'ALL' AND (
-                        gr.nickname ILIKE CONCAT('%', :search, '%')
-                        OR CAST(gr.user_id AS TEXT) ILIKE CONCAT('%', :search, '%')
-                        OR CAST(u.uid AS TEXT) ILIKE CONCAT('%', :search, '%')
-                    )
-                )
-                OR (:searchType = 'nickname' AND gr.nickname ILIKE CONCAT('%', :search, '%'))
-                OR (:searchType = 'userId' AND CAST(gr.user_id AS TEXT) ILIKE CONCAT('%', :search, '%'))
-          )
-          AND (
+            AND (:gameId IS NULL OR gr.game_id = :gameId)
+            AND (:league IS NULL OR :league = 'ALL' OR gr.league = :league)
+            AND (:status IS NULL OR :status = 'ALL')
+            AND (
+                COALESCE(TRIM(:search), '') = ''
+                OR CASE
+                    WHEN :searchType = 'ALL' THEN
+                        (
+                            gr.nickname ILIKE ('%' || :search || '%')
+                            OR CAST(gr.user_id AS TEXT) ILIKE ('%' || :search || '%')
+                            OR CAST(u.uid AS TEXT) ILIKE ('%' || :search || '%')
+                        )
+                    WHEN :searchType = 'nickname' THEN
+                        gr.nickname ILIKE ('%' || :search || '%')
+                    WHEN :searchType = 'userId' THEN
+                        CAST(gr.user_id AS TEXT) ILIKE ('%' || :search || '%')
+                    WHEN :searchType = 'userUid' THEN
+                        CAST(u.uid AS TEXT) ILIKE ('%' || :search || '%')
+                    ELSE TRUE
+                END
+            )
+            AND (
                 :uid IS NULL OR u.uid = :uid
-          )
+            )
     """)
     suspend fun seasonTotalCount(
         search: String?,

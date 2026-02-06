@@ -21,25 +21,25 @@ interface AdminBoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
         WHERE
             b.deleted_at IS NULL
             AND (
-                :search IS NULL
-                OR (
-                    CASE
-                        WHEN :searchType = 'ALL' THEN
-                            b.subject ILIKE '%' || :search || '%'
-                            OR b.content ILIKE '%' || :search || '%'
-                            OR u.nickname ILIKE '%' || :search || '%'
+                COALESCE(TRIM(:search), '') = ''
+                OR CASE
+                    WHEN :searchType = 'ALL' THEN
+                        b.subject ILIKE '%' || :search || '%'
+                        OR b.content ILIKE '%' || :search || '%'
+                        OR u.nickname ILIKE '%' || :search || '%'
             
-                        WHEN :searchType = 'subject' THEN
-                            b.subject ILIKE '%' || :search || '%'
+                    WHEN :searchType = 'subject' THEN
+                        b.subject ILIKE '%' || :search || '%'
             
-                        WHEN :searchType = 'content' THEN
-                            b.content ILIKE '%' || :search || '%'
+                    WHEN :searchType = 'content' THEN
+                        b.content ILIKE '%' || :search || '%'
             
-                        WHEN :searchType = 'nickname' THEN
-                            u.nickname ILIKE '%' || :search || '%'
-                    END
-                )
-            )    
+                    WHEN :searchType = 'nickname' THEN
+                        u.nickname ILIKE '%' || :search || '%'
+            
+                    ELSE TRUE
+                END
+            ) 
 
             AND (
                 :status IS NULL OR :status = 'ALL'
@@ -103,25 +103,25 @@ interface AdminBoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
         WHERE
             b.deleted_at IS NULL
             AND (
-                :search IS NULL
-                OR (
-                    CASE
-                        WHEN :searchType = 'ALL' THEN
-                            b.subject ILIKE '%' || :search || '%'
-                            OR b.content ILIKE '%' || :search || '%'
-                            OR u.nickname ILIKE '%' || :search || '%'
+                COALESCE(TRIM(:search), '') = ''
+                OR CASE
+                    WHEN :searchType = 'ALL' THEN
+                        b.subject ILIKE '%' || :search || '%'
+                        OR b.content ILIKE '%' || :search || '%'
+                        OR u.nickname ILIKE '%' || :search || '%'
             
-                        WHEN :searchType = 'subject' THEN
-                            b.subject ILIKE '%' || :search || '%'
+                    WHEN :searchType = 'subject' THEN
+                        b.subject ILIKE '%' || :search || '%'
             
-                        WHEN :searchType = 'content' THEN
-                            b.content ILIKE '%' || :search || '%'
+                    WHEN :searchType = 'content' THEN
+                        b.content ILIKE '%' || :search || '%'
             
-                        WHEN :searchType = 'nickname' THEN
-                            u.nickname ILIKE '%' || :search || '%'
-                    END
-                )
-            )    
+                    WHEN :searchType = 'nickname' THEN
+                        u.nickname ILIKE '%' || :search || '%'
+            
+                    ELSE TRUE
+                END
+            ) 
     
             AND (
                 :status IS NULL OR :status = 'ALL'

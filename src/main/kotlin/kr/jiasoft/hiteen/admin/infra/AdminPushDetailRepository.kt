@@ -17,7 +17,7 @@ interface AdminPushDetailRepository : CoroutineCrudRepository<PushDetailEntity, 
         WHERE d.push_id = :pushId
           AND d.deleted_at IS NULL
           AND (
-            :success = 'ALL'
+            :success IS NULL OR :success = 'ALL'
             OR (:success = 'SUCCESS' AND d.success = 1)
             OR (:success = 'FAIL' AND d.success = 0)
           )

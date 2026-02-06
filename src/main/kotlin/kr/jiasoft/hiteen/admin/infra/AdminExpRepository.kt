@@ -34,24 +34,24 @@ interface AdminExpRepository : CoroutineCrudRepository<UserExpHistoryEntity, Lon
                 OR e.created_at < :endDate
             )
             AND (
-                :search IS NULL
-                OR (
-                    CASE
-                        WHEN :searchType = 'ALL' THEN
-                            u.nickname ILIKE '%' || :search || '%'
-                            OR u.phone ILIKE '%' || :search || '%'
-                            OR e.reason ILIKE '%' || :search || '%'
+                COALESCE(TRIM(:search), '') = ''
+                OR CASE
+                    WHEN :searchType = 'ALL' THEN
+                        u.nickname ILIKE '%' || :search || '%'
+                        OR u.phone ILIKE '%' || :search || '%'
+                        OR e.reason ILIKE '%' || :search || '%'
             
-                        WHEN :searchType = 'NAME' THEN
-                            u.nickname ILIKE '%' || :search || '%'
+                    WHEN :searchType = 'NAME' THEN
+                        u.nickname ILIKE '%' || :search || '%'
             
-                        WHEN :searchType = 'PHONE' THEN
-                            u.phone ILIKE '%' || :search || '%'
+                    WHEN :searchType = 'PHONE' THEN
+                        u.phone ILIKE '%' || :search || '%'
             
-                        WHEN :searchType = 'MEMO' THEN
-                            e.reason ILIKE '%' || :search || '%'
-                    END
-                )
+                    WHEN :searchType = 'MEMO' THEN
+                        e.reason ILIKE '%' || :search || '%'
+            
+                    ELSE TRUE
+                END
             )
             AND (
                 :uid IS NULL OR u.uid = :uid
@@ -94,24 +94,24 @@ interface AdminExpRepository : CoroutineCrudRepository<UserExpHistoryEntity, Lon
                 OR e.created_at < :endDate
             )
             AND (
-                :search IS NULL
-                OR (
-                    CASE
-                        WHEN :searchType = 'ALL' THEN
-                            u.nickname ILIKE '%' || :search || '%'
-                            OR u.phone ILIKE '%' || :search || '%'
-                            OR e.reason ILIKE '%' || :search || '%'
+                COALESCE(TRIM(:search), '') = ''
+                OR CASE
+                    WHEN :searchType = 'ALL' THEN
+                        u.nickname ILIKE '%' || :search || '%'
+                        OR u.phone ILIKE '%' || :search || '%'
+                        OR e.reason ILIKE '%' || :search || '%'
             
-                        WHEN :searchType = 'NAME' THEN
-                            u.nickname ILIKE '%' || :search || '%'
+                    WHEN :searchType = 'NAME' THEN
+                        u.nickname ILIKE '%' || :search || '%'
             
-                        WHEN :searchType = 'PHONE' THEN
-                            u.phone ILIKE '%' || :search || '%'
+                    WHEN :searchType = 'PHONE' THEN
+                        u.phone ILIKE '%' || :search || '%'
             
-                        WHEN :searchType = 'MEMO' THEN
-                            e.reason ILIKE '%' || :search || '%'
-                    END
-                )
+                    WHEN :searchType = 'MEMO' THEN
+                        e.reason ILIKE '%' || :search || '%'
+            
+                    ELSE TRUE
+                END
             )
             AND (
                 :uid IS NULL OR u.uid = :uid

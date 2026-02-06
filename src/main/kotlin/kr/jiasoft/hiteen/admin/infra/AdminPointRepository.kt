@@ -17,7 +17,7 @@ interface AdminPointRepository : CoroutineCrudRepository<PointEntity, Long> {
         LEFT JOIN users u ON p.user_id = u.id
         WHERE p.deleted_at IS NULL
             AND (
-                :type IS NULL
+                :type IS NULL OR :type = 'ALL'
                 OR p.pointable_type LIKE CONCAT(:type, '%')
             )
             AND (
@@ -29,17 +29,20 @@ interface AdminPointRepository : CoroutineCrudRepository<PointEntity, Long> {
                 OR p.created_at < :endDate
             )
             AND (
-                :search IS NULL
-                OR (
-                    :searchType = 'ALL' AND (
-                        u.nickname LIKE CONCAT('%', :search, '%')
-                        OR u.phone LIKE CONCAT('%', :search, '%')
-                        OR p.memo LIKE CONCAT('%', :search, '%')
-                    )
-                )
-                OR (:searchType = 'nickname' AND u.nickname LIKE CONCAT('%', :search, '%'))
-                OR (:searchType = 'phone' AND u.phone LIKE CONCAT('%', :search, '%'))
-                OR (:searchType = 'memo' AND p.memo LIKE CONCAT('%', :search, '%'))
+                COALESCE(TRIM(:search), '') = ''
+                OR CASE
+                    WHEN :searchType = 'ALL' THEN
+                        (u.nickname ILIKE CONCAT('%', :search, '%')
+                        OR u.phone ILIKE CONCAT('%', :search, '%')
+                        OR p.memo ILIKE CONCAT('%', :search, '%'))
+                    WHEN :searchType = 'nickname' THEN
+                        u.nickname ILIKE CONCAT('%', :search, '%')
+                    WHEN :searchType = 'phone' THEN
+                        u.phone ILIKE CONCAT('%', :search, '%')
+                    WHEN :searchType = 'memo' THEN
+                        p.memo ILIKE CONCAT('%', :search, '%')
+                    ELSE TRUE
+                END
             )
             AND (
                 :uid IS NULL
@@ -65,7 +68,7 @@ interface AdminPointRepository : CoroutineCrudRepository<PointEntity, Long> {
         LEFT JOIN users u ON p.user_id = u.id
         WHERE p.deleted_at IS NULL
             AND (
-                :type IS NULL
+                :type IS NULL OR :type = 'ALL'
                 OR p.pointable_type LIKE CONCAT(:type, '%')
             )
             AND (
@@ -77,17 +80,20 @@ interface AdminPointRepository : CoroutineCrudRepository<PointEntity, Long> {
                 OR p.created_at < :endDate
             )
             AND (
-                :search IS NULL
-                OR (
-                    :searchType = 'ALL' AND (
-                        u.nickname LIKE CONCAT('%', :search, '%')
-                        OR u.phone LIKE CONCAT('%', :search, '%')
-                        OR p.memo LIKE CONCAT('%', :search, '%')
-                    )
-                    OR (:searchType = 'nickname' AND u.nickname LIKE CONCAT('%', :search, '%'))
-                    OR (:searchType = 'phone' AND u.phone LIKE CONCAT('%', :search, '%'))
-                    OR (:searchType = 'memo' AND p.memo LIKE CONCAT('%', :search, '%'))
-                )
+                COALESCE(TRIM(:search), '') = ''
+                OR CASE
+                    WHEN :searchType = 'ALL' THEN
+                        (u.nickname ILIKE CONCAT('%', :search, '%')
+                        OR u.phone ILIKE CONCAT('%', :search, '%')
+                        OR p.memo ILIKE CONCAT('%', :search, '%'))
+                    WHEN :searchType = 'nickname' THEN
+                        u.nickname ILIKE CONCAT('%', :search, '%')
+                    WHEN :searchType = 'phone' THEN
+                        u.phone ILIKE CONCAT('%', :search, '%')
+                    WHEN :searchType = 'memo' THEN
+                        p.memo ILIKE CONCAT('%', :search, '%')
+                    ELSE TRUE
+                END
             )
             AND (
                 :uid IS NULL

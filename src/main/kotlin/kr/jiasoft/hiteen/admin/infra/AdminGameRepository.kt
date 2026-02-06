@@ -17,16 +17,16 @@ interface AdminGameRepository : CoroutineCrudRepository<GameEntity, Long> {
         FROM games g
         WHERE
             (
-                :search IS NULL
-                OR (
-                    CASE
-                        WHEN :searchType = 'ALL' THEN
-                            g.name ILIKE '%' || :search || '%'
-            
-                        WHEN :searchType = 'name' THEN
-                            g.name ILIKE '%' || :search || '%'
-                    END
-                )
+                COALESCE(TRIM(:search), '') = ''
+                OR CASE
+                    WHEN :searchType = 'ALL' THEN
+                        g.name ILIKE '%' || :search || '%'
+                    
+                    WHEN :searchType = 'name' THEN
+                        g.name ILIKE '%' || :search || '%'
+                    
+                    ELSE TRUE
+                END
             )
             AND (
                 :status IS NULL OR :status = 'ALL'
@@ -51,16 +51,16 @@ interface AdminGameRepository : CoroutineCrudRepository<GameEntity, Long> {
         FROM games g
         WHERE
             (
-                :search IS NULL
-                OR (
-                    CASE
-                        WHEN :searchType = 'ALL' THEN
-                            g.name ILIKE '%' || :search || '%'
-            
-                        WHEN :searchType = 'name' THEN
-                            g.name ILIKE '%' || :search || '%'
-                    END
-                )
+                COALESCE(TRIM(:search), '') = ''
+                OR CASE
+                    WHEN :searchType = 'ALL' THEN
+                        g.name ILIKE '%' || :search || '%'
+                    
+                    WHEN :searchType = 'name' THEN
+                        g.name ILIKE '%' || :search || '%'
+                    
+                    ELSE TRUE
+                END
             )
             AND (
                 :status IS NULL OR :status = 'ALL'

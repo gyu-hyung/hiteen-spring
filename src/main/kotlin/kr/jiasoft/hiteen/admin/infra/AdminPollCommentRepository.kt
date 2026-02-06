@@ -9,11 +9,10 @@ import java.util.UUID
 
 interface AdminPollCommentRepository : CoroutineCrudRepository<PollCommentEntity, Long> {
 
-
     @Query("""
         SELECT
             c.id,
-            c.poll_id         AS fk_id,
+            c.poll_id AS fk_id,
             c.uid,
             c.parent_id,
             c.reply_count,
@@ -33,16 +32,19 @@ interface AdminPollCommentRepository : CoroutineCrudRepository<PollCommentEntity
         JOIN users u ON u.id = c.created_id
         WHERE
             (
-                :search IS NULL
-                OR (
-                    :searchType = 'ALL' AND (
-                        c.content ILIKE CONCAT('%', :search, '%')
-                        OR u.nickname ILIKE CONCAT('%', :search, '%')
-                    )
-                )
-                OR (:searchType = 'content' AND c.content ILIKE CONCAT('%', :search, '%'))
-                OR (:searchType = 'boardContent' AND p.question ILIKE CONCAT('%', :search, '%'))
-                OR (:searchType = 'nickname' AND u.nickname ILIKE CONCAT('%', :search, '%'))
+                COALESCE(TRIM(:search), '') = ''
+                OR CASE
+                    WHEN :searchType = 'ALL' THEN
+                        (c.content ILIKE ('%' || :search || '%') 
+                         OR u.nickname ILIKE ('%' || :search || '%'))
+                    WHEN :searchType = 'content' THEN
+                        c.content ILIKE ('%' || :search || '%')
+                    WHEN :searchType = 'boardContent' THEN
+                        p.question ILIKE ('%' || :search || '%')
+                    WHEN :searchType = 'nickname' THEN
+                        u.nickname ILIKE ('%' || :search || '%')
+                    ELSE TRUE
+                END
             )
             
             AND (
@@ -53,7 +55,7 @@ interface AdminPollCommentRepository : CoroutineCrudRepository<PollCommentEntity
     
             AND (
                 :uid IS NULL
-                OR ( SELECT u.uid FROM users u WHERE u.id = c.created_id ) = :uid
+                OR u.uid = :uid
             )
     
         ORDER BY
@@ -72,10 +74,6 @@ interface AdminPollCommentRepository : CoroutineCrudRepository<PollCommentEntity
         uid: UUID?,
     ): Flow<AdminCommentResponse>
 
-
-
-
-
     @Query("""
         SELECT COUNT(*)
         FROM poll_comments c
@@ -83,16 +81,19 @@ interface AdminPollCommentRepository : CoroutineCrudRepository<PollCommentEntity
         JOIN users u ON u.id = c.created_id
         WHERE
             (
-                :search IS NULL
-                OR (
-                    :searchType = 'ALL' AND (
-                        c.content ILIKE CONCAT('%', :search, '%')
-                        OR u.nickname ILIKE CONCAT('%', :search, '%')
-                    )
-                )
-                OR (:searchType = 'content' AND c.content ILIKE CONCAT('%', :search, '%'))
-                OR (:searchType = 'boardContent' AND p.question ILIKE CONCAT('%', :search, '%'))
-                OR (:searchType = 'nickname' AND u.nickname ILIKE CONCAT('%', :search, '%'))
+                COALESCE(TRIM(:search), '') = ''
+                OR CASE
+                    WHEN :searchType = 'ALL' THEN
+                        (c.content ILIKE ('%' || :search || '%') 
+                         OR u.nickname ILIKE ('%' || :search || '%'))
+                    WHEN :searchType = 'content' THEN
+                        c.content ILIKE ('%' || :search || '%')
+                    WHEN :searchType = 'boardContent' THEN
+                        p.question ILIKE ('%' || :search || '%')
+                    WHEN :searchType = 'nickname' THEN
+                        u.nickname ILIKE ('%' || :search || '%')
+                    ELSE TRUE
+                END
             )
             
             AND (
@@ -103,7 +104,7 @@ interface AdminPollCommentRepository : CoroutineCrudRepository<PollCommentEntity
     
             AND (
                 :uid IS NULL
-                OR ( SELECT u.uid FROM users u WHERE u.id = c.created_id ) = :uid
+                OR u.uid = :uid
             )
     """)
     suspend fun totalCount(

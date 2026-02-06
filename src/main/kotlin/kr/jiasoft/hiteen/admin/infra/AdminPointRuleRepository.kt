@@ -11,19 +11,22 @@ interface AdminPointRuleRepository : CoroutineCrudRepository<PointRuleEntity, Lo
         """
         SELECT COUNT(*)
         FROM point_rules
-        WHERE (
-            :status = 'ALL'
-            OR (:status = 'ACTIVE' AND deleted_at IS NULL)
-            OR (:status = 'DELETED' AND deleted_at IS NOT NULL)
-        )
-          AND (
-            :search IS NULL
-            OR (
-                :searchType = 'ALL'
-                OR (:searchType = 'ACTION_CODE' AND action_code ILIKE ('%' || :search || '%'))
-                OR (:searchType = 'DESCRIPTION' AND COALESCE(description, '') ILIKE ('%' || :search || '%'))
+        WHERE
+            (
+                :status IS NULL OR :status = 'ALL'
+                OR (:status = 'ACTIVE' AND deleted_at IS NULL)
+                OR (:status = 'DELETED' AND deleted_at IS NOT NULL)
             )
-          )
+            AND (
+                COALESCE(TRIM(:search), '') = ''
+                OR CASE
+                    WHEN :searchType = 'ACTION_CODE' THEN
+                        action_code ILIKE ('%' || :search || '%')
+                    WHEN :searchType = 'DESCRIPTION' THEN
+                        COALESCE(description, '') ILIKE ('%' || :search || '%')
+                    ELSE TRUE
+                END
+            )
         """
     )
     suspend fun countList(
@@ -36,19 +39,22 @@ interface AdminPointRuleRepository : CoroutineCrudRepository<PointRuleEntity, Lo
         """
         SELECT *
         FROM point_rules
-        WHERE (
-            :status = 'ALL'
-            OR (:status = 'ACTIVE' AND deleted_at IS NULL)
-            OR (:status = 'DELETED' AND deleted_at IS NOT NULL)
-        )
-          AND (
-            :search IS NULL
-            OR (
-                :searchType = 'ALL'
-                OR (:searchType = 'ACTION_CODE' AND action_code ILIKE ('%' || :search || '%'))
-                OR (:searchType = 'DESCRIPTION' AND COALESCE(description, '') ILIKE ('%' || :search || '%'))
+        WHERE
+            (
+                :status IS NULL OR :status = 'ALL'
+                OR (:status = 'ACTIVE' AND deleted_at IS NULL)
+                OR (:status = 'DELETED' AND deleted_at IS NOT NULL)
             )
-          )
+            AND (
+                COALESCE(TRIM(:search), '') = ''
+                OR CASE
+                    WHEN :searchType = 'ACTION_CODE' THEN
+                        action_code ILIKE ('%' || :search || '%')
+                    WHEN :searchType = 'DESCRIPTION' THEN
+                        COALESCE(description, '') ILIKE ('%' || :search || '%')
+                    ELSE TRUE
+                END
+            )
         ORDER BY
             CASE WHEN :order = 'ASC' THEN id END ASC,
             CASE WHEN :order = 'DESC' THEN id END DESC

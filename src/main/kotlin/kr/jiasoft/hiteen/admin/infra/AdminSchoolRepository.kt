@@ -13,18 +13,20 @@ interface AdminSchoolRepository : CoroutineCrudRepository<SchoolEntity, Long> {
         SELECT COUNT(*)
         FROM schools s
         WHERE s.deleted_at IS NULL
-            AND (:sido IS NULL OR s.sido = :sido)
+            AND (:sido IS NULL OR :sido = 'ALL' OR s.sido = :sido)
             AND (:type IS NULL OR s.type = :type)
             AND (
-                :search IS NULL
-                OR (
-                    :searchType = 'ALL' AND (
-                        s.name LIKE CONCAT('%', :search, '%')
-                        OR s.address LIKE CONCAT('%', :search, '%')
-                    )
-                )
-                OR (:searchType = 'name' AND s.name LIKE CONCAT('%', :search, '%'))
-                OR (:searchType = 'address' AND s.address LIKE CONCAT('%', :search, '%'))
+                COALESCE(TRIM(:search), '') = ''
+                OR CASE
+                    WHEN :searchType = 'ALL' THEN
+                        (s.name ILIKE ('%' || :search || '%')
+                         OR s.address ILIKE ('%' || :search || '%'))
+                    WHEN :searchType = 'name' THEN
+                        s.name ILIKE ('%' || :search || '%')
+                    WHEN :searchType = 'address' THEN
+                        s.address ILIKE ('%' || :search || '%')
+                    ELSE TRUE
+                END
             )
     """)
     suspend fun countSearchResults(
@@ -41,18 +43,20 @@ interface AdminSchoolRepository : CoroutineCrudRepository<SchoolEntity, Long> {
             (SELECT COUNT(*) FROM school_classes WHERE school_id = s.id AND deleted_at IS NULL) class_count
         FROM schools s
         WHERE s.deleted_at IS NULL
-            AND (:sido IS NULL OR s.sido = :sido)
+            AND (:sido IS NULL OR :sido = 'ALL' OR s.sido = :sido)
             AND (:type IS NULL OR s.type = :type)
             AND (
-                :search IS NULL
-                OR (
-                    :searchType = 'ALL' AND (
-                        s.name LIKE CONCAT('%', :search, '%')
-                        OR s.address LIKE CONCAT('%', :search, '%')
-                    )
-                )
-                OR (:searchType = 'name' AND s.name LIKE CONCAT('%', :search, '%'))
-                OR (:searchType = 'address' AND s.address LIKE CONCAT('%', :search, '%'))
+                COALESCE(TRIM(:search), '') = ''
+                OR CASE
+                    WHEN :searchType = 'ALL' THEN
+                        (s.name ILIKE ('%' || :search || '%')
+                         OR s.address ILIKE ('%' || :search || '%'))
+                    WHEN :searchType = 'name' THEN
+                        s.name ILIKE ('%' || :search || '%')
+                    WHEN :searchType = 'address' THEN
+                        s.address ILIKE ('%' || :search || '%')
+                    ELSE TRUE
+                END
             )
         ORDER BY sido ASC, type ASC, name ASC
         LIMIT :limit OFFSET :offset

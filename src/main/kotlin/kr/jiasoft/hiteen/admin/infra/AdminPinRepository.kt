@@ -9,8 +9,6 @@ import java.util.UUID
 
 interface AdminPinRepository : CoroutineCrudRepository<PinEntity, Long> {
 
-
-
     @Query("""
         SELECT
             p.id,
@@ -33,15 +31,17 @@ interface AdminPinRepository : CoroutineCrudRepository<PinEntity, Long> {
         JOIN users u ON u.id = p.user_id
         WHERE
             (
-                :search IS NULL
-                OR (
-                    :searchType = 'ALL' AND (
+                COALESCE(TRIM(:search), '') = ''
+                OR CASE
+                    WHEN :searchType = 'ALL' THEN
                         p.description ILIKE CONCAT('%', :search, '%')
                         OR u.nickname ILIKE CONCAT('%', :search, '%')
-                    )
-                )
-                OR (:searchType = 'description' AND p.description ILIKE CONCAT('%', :search, '%'))
-                OR (:searchType = 'nickname' AND u.nickname ILIKE CONCAT('%', :search, '%'))
+                    WHEN :searchType = 'description' THEN
+                        p.description ILIKE CONCAT('%', :search, '%')
+                    WHEN :searchType = 'nickname' THEN
+                        u.nickname ILIKE CONCAT('%', :search, '%')
+                    ELSE TRUE
+                END
             )
     
             AND (
@@ -59,10 +59,9 @@ interface AdminPinRepository : CoroutineCrudRepository<PinEntity, Long> {
     
             AND (
                 :uid IS NULL
-                OR ( SELECT u.uid FROM users u WHERE u.id = p.created_id ) = :uid
+                OR u.uid = :uid
             )
-    
-    
+        
         ORDER BY
             CASE WHEN :order = 'DESC' THEN p.created_at END DESC,
             CASE WHEN :order = 'ASC' THEN p.created_at END ASC
@@ -82,26 +81,24 @@ interface AdminPinRepository : CoroutineCrudRepository<PinEntity, Long> {
     ): Flow<AdminPinResponse>
 
 
-
-
-
     @Query("""
         SELECT COUNT(*)
         FROM pin p
         JOIN users u ON u.id = p.user_id
         WHERE
             (
-                :search IS NULL
-                OR (
-                    :searchType = 'ALL' AND (
+                COALESCE(TRIM(:search), '') = ''
+                OR CASE
+                    WHEN :searchType = 'ALL' THEN
                         p.description ILIKE CONCAT('%', :search, '%')
                         OR u.nickname ILIKE CONCAT('%', :search, '%')
-                    )
-                )
-                OR (:searchType = 'description' AND p.description ILIKE CONCAT('%', :search, '%'))
-                OR (:searchType = 'nickname' AND u.nickname ILIKE CONCAT('%', :search, '%'))
+                    WHEN :searchType = 'description' THEN
+                        p.description ILIKE CONCAT('%', :search, '%')
+                    WHEN :searchType = 'nickname' THEN
+                        u.nickname ILIKE CONCAT('%', :search, '%')
+                    ELSE TRUE
+                END
             )
-    
             AND (
                 :status IS NULL OR :status = 'ALL'
                 OR (:status = 'ACTIVE' AND p.created_at >= NOW() - INTERVAL '24 HOURS')
@@ -117,7 +114,7 @@ interface AdminPinRepository : CoroutineCrudRepository<PinEntity, Long> {
     
             AND (
                 :uid IS NULL
-                OR ( SELECT u.uid FROM users u WHERE u.id = p.created_id ) = :uid
+                OR u.uid = :uid
             )
     
     """)

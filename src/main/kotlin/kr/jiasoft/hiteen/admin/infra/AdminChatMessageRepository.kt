@@ -32,32 +32,32 @@ interface AdminChatMessageRepository : CoroutineCrudRepository<ChatMessageEntity
                 OR cm.created_at < :endDate
             )
             AND (
-                :search IS NULL
-                OR (
-                    CASE
-                        WHEN :searchType = 'ALL' THEN
-                            COALESCE(cr.uid::text, '') ILIKE '%' || :search || '%'
-                            OR COALESCE(cr.room_name, '') ILIKE '%' || :search || '%'
-                            OR COALESCE(cm.content, '') ILIKE '%' || :search || '%'
-                            OR COALESCE(cu.nickname, '') ILIKE '%' || :search || '%'
-                            OR COALESCE(cu.phone, '') ILIKE '%' || :search || '%'
+                COALESCE(TRIM(:search), '') = ''
+                OR CASE
+                    WHEN :searchType = 'ALL' THEN
+                        CAST(cr.uid AS TEXT) ILIKE ('%' || :search || '%')
+                        OR COALESCE(cr.room_name, '') ILIKE '%' || :search || '%'
+                        OR COALESCE(cm.content, '') ILIKE '%' || :search || '%'
+                        OR COALESCE(cu.nickname, '') ILIKE '%' || :search || '%'
+                        OR COALESCE(cu.phone, '') ILIKE '%' || :search || '%'
             
-                        WHEN :searchType = 'CODE' THEN
-                            COALESCE(cr.uid::text, '') ILIKE '%' || :search || '%'
+                    WHEN :searchType = 'CODE' THEN
+                        CCAST(cr.uid AS TEXT) ILIKE ('%' || :search || '%')
             
-                        WHEN :searchType = 'ROOM' THEN
-                            COALESCE(cr.room_name, '') ILIKE '%' || :search || '%'
+                    WHEN :searchType = 'ROOM' THEN
+                        COALESCE(cr.room_name, '') ILIKE '%' || :search || '%'
             
-                        WHEN :searchType = 'CONTENT' THEN
-                            COALESCE(cm.content, '') ILIKE '%' || :search || '%'
+                    WHEN :searchType = 'CONTENT' THEN
+                        COALESCE(cm.content, '') ILIKE '%' || :search || '%'
             
-                        WHEN :searchType = 'NAME' THEN
-                            COALESCE(cu.nickname, '') ILIKE '%' || :search || '%'
+                    WHEN :searchType = 'NAME' THEN
+                        COALESCE(cu.nickname, '') ILIKE '%' || :search || '%'
             
-                        WHEN :searchType = 'PHONE' THEN
-                            COALESCE(cu.phone, '') ILIKE '%' || :search || '%'
-                    END
-                )
+                    WHEN :searchType = 'PHONE' THEN
+                        COALESCE(cu.phone, '') ILIKE '%' || :search || '%'
+            
+                    ELSE TRUE
+                END
             )
     """)
     suspend fun countBySearch(
@@ -118,32 +118,32 @@ interface AdminChatMessageRepository : CoroutineCrudRepository<ChatMessageEntity
                 OR cm.created_at < :endDate
             )
             AND (
-                :search IS NULL
-                OR (
-                    CASE
-                        WHEN :searchType = 'ALL' THEN
-                            COALESCE(cr.uid::text, '') ILIKE '%' || :search || '%'
-                            OR COALESCE(cr.room_name, '') ILIKE '%' || :search || '%'
-                            OR COALESCE(cm.content, '') ILIKE '%' || :search || '%'
-                            OR COALESCE(cu.nickname, '') ILIKE '%' || :search || '%'
-                            OR COALESCE(cu.phone, '') ILIKE '%' || :search || '%'
+                COALESCE(TRIM(:search), '') = ''
+                OR CASE
+                    WHEN :searchType = 'ALL' THEN
+                        CAST(cr.uid AS TEXT) ILIKE ('%' || :search || '%')
+                        OR COALESCE(cr.room_name, '') ILIKE '%' || :search || '%'
+                        OR COALESCE(cm.content, '') ILIKE '%' || :search || '%'
+                        OR COALESCE(cu.nickname, '') ILIKE '%' || :search || '%'
+                        OR COALESCE(cu.phone, '') ILIKE '%' || :search || '%'
             
-                        WHEN :searchType = 'CODE' THEN
-                            COALESCE(cr.uid::text, '') ILIKE '%' || :search || '%'
+                    WHEN :searchType = 'CODE' THEN
+                        CAST(cr.uid AS TEXT) ILIKE ('%' || :search || '%')
             
-                        WHEN :searchType = 'ROOM' THEN
-                            COALESCE(cr.room_name, '') ILIKE '%' || :search || '%'
+                    WHEN :searchType = 'ROOM' THEN
+                        COALESCE(cr.room_name, '') ILIKE '%' || :search || '%'
             
-                        WHEN :searchType = 'CONTENT' THEN
-                            COALESCE(cm.content, '') ILIKE '%' || :search || '%'
+                    WHEN :searchType = 'CONTENT' THEN
+                        COALESCE(cm.content, '') ILIKE '%' || :search || '%'
             
-                        WHEN :searchType = 'NAME' THEN
-                            COALESCE(cu.nickname, '') ILIKE '%' || :search || '%'
+                    WHEN :searchType = 'NAME' THEN
+                        COALESCE(cu.nickname, '') ILIKE '%' || :search || '%'
             
-                        WHEN :searchType = 'PHONE' THEN
-                            COALESCE(cu.phone, '') ILIKE '%' || :search || '%'
-                    END
-                )
+                    WHEN :searchType = 'PHONE' THEN
+                        COALESCE(cu.phone, '') ILIKE '%' || :search || '%'
+            
+                    ELSE TRUE
+                END
             )
         ORDER BY cm.id DESC
         LIMIT :limit OFFSET :offset

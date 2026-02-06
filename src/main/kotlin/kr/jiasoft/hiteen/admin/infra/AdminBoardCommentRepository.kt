@@ -85,23 +85,23 @@ interface AdminBoardCommentRepository : CoroutineCrudRepository<BoardCommentEnti
         JOIN users u ON u.id = c.created_id
         WHERE
             (
-                :search IS NULL
-                OR (
-                    CASE
-                        WHEN :searchType = 'ALL' THEN
-                            c.content ILIKE '%' || :search || '%'
-                            OR u.nickname ILIKE '%' || :search || '%'
+                COALESCE(TRIM(:search), '') = ''
+                OR CASE
+                    WHEN :searchType = 'ALL' THEN
+                        c.content ILIKE '%' || :search || '%'
+                        OR u.nickname ILIKE '%' || :search || '%'
             
-                        WHEN :searchType = 'content' THEN
-                            c.content ILIKE '%' || :search || '%'
+                    WHEN :searchType = 'content' THEN
+                        c.content ILIKE '%' || :search || '%'
             
-                        WHEN :searchType = 'boardContent' THEN
-                            b.content ILIKE '%' || :search || '%'
+                    WHEN :searchType = 'boardContent' THEN
+                        b.content ILIKE '%' || :search || '%'
             
-                        WHEN :searchType = 'nickname' THEN
-                            u.nickname ILIKE '%' || :search || '%'
-                    END
-                )
+                    WHEN :searchType = 'nickname' THEN
+                        u.nickname ILIKE '%' || :search || '%'
+            
+                    ELSE TRUE
+                END
             )
             
             AND (

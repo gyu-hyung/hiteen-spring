@@ -33,24 +33,24 @@ interface AdminAcceptFriendRepository : CoroutineCrudRepository<FriendEntity, Lo
                 OR f.created_at < :endDate
             )
             AND (
-                :search IS NULL
-                OR (
-                    CASE
-                        WHEN :searchType = 'ALL' THEN
-                            COALESCE(req.nickname, '') ILIKE '%' || :search || '%'
-                            OR COALESCE(req.phone, '') ILIKE '%' || :search || '%'
-                            OR COALESCE(res.nickname, '') ILIKE '%' || :search || '%'
-                            OR COALESCE(res.phone, '') ILIKE '%' || :search || '%'
+                COALESCE(TRIM(:search), '') = ''
+                OR CASE
+                    WHEN :searchType = 'ALL' THEN
+                        COALESCE(req.nickname, '') ILIKE '%' || :search || '%'
+                        OR COALESCE(req.phone, '') ILIKE '%' || :search || '%'
+                        OR COALESCE(res.nickname, '') ILIKE '%' || :search || '%'
+                        OR COALESCE(res.phone, '') ILIKE '%' || :search || '%'
             
-                        WHEN :searchType = 'SENDER' THEN
-                            COALESCE(req.nickname, '') ILIKE '%' || :search || '%'
-                            OR COALESCE(req.phone, '') ILIKE '%' || :search || '%'
+                    WHEN :searchType = 'SENDER' THEN
+                        COALESCE(req.nickname, '') ILIKE '%' || :search || '%'
+                        OR COALESCE(req.phone, '') ILIKE '%' || :search || '%'
             
-                        WHEN :searchType = 'RECEIVER' THEN
-                            COALESCE(res.nickname, '') ILIKE '%' || :search || '%'
-                            OR COALESCE(res.phone, '') ILIKE '%' || :search || '%'
-                    END
-                )
+                    WHEN :searchType = 'RECEIVER' THEN
+                        COALESCE(res.nickname, '') ILIKE '%' || :search || '%'
+                        OR COALESCE(res.phone, '') ILIKE '%' || :search || '%'
+            
+                    ELSE TRUE
+                END
             )
     """)
     suspend fun countBySearch(
@@ -106,24 +106,24 @@ interface AdminAcceptFriendRepository : CoroutineCrudRepository<FriendEntity, Lo
                 OR f.created_at < :endDate
             )
             AND (
-                :search IS NULL
-                OR (
-                    CASE
-                        WHEN :searchType = 'ALL' THEN
-                            COALESCE(req.nickname, '') ILIKE '%' || :search || '%'
-                            OR COALESCE(req.phone, '') ILIKE '%' || :search || '%'
-                            OR COALESCE(res.nickname, '') ILIKE '%' || :search || '%'
-                            OR COALESCE(res.phone, '') ILIKE '%' || :search || '%'
+                COALESCE(TRIM(:search), '') = ''
+                OR CASE
+                    WHEN :searchType = 'ALL' THEN
+                        COALESCE(req.nickname, '') ILIKE '%' || :search || '%'
+                        OR COALESCE(req.phone, '') ILIKE '%' || :search || '%'
+                        OR COALESCE(res.nickname, '') ILIKE '%' || :search || '%'
+                        OR COALESCE(res.phone, '') ILIKE '%' || :search || '%'
             
-                        WHEN :searchType = 'SENDER' THEN
-                            COALESCE(req.nickname, '') ILIKE '%' || :search || '%'
-                            OR COALESCE(req.phone, '') ILIKE '%' || :search || '%'
+                    WHEN :searchType = 'SENDER' THEN
+                        COALESCE(req.nickname, '') ILIKE '%' || :search || '%'
+                        OR COALESCE(req.phone, '') ILIKE '%' || :search || '%'
             
-                        WHEN :searchType = 'RECEIVER' THEN
-                            COALESCE(res.nickname, '') ILIKE '%' || :search || '%'
-                            OR COALESCE(res.phone, '') ILIKE '%' || :search || '%'
-                    END
-                )
+                    WHEN :searchType = 'RECEIVER' THEN
+                        COALESCE(res.nickname, '') ILIKE '%' || :search || '%'
+                        OR COALESCE(res.phone, '') ILIKE '%' || :search || '%'
+            
+                    ELSE TRUE
+                END
             )
         ORDER BY
             CASE WHEN :sort = 'ASC' THEN f.id END ASC,

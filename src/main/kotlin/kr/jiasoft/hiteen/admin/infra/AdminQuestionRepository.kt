@@ -63,15 +63,17 @@ interface AdminQuestionRepository : CoroutineCrudRepository<QuestionEntity, Long
         FROM question_2 q
         WHERE
             (
-                :search IS NULL
-                OR (
-                    :searchType = 'ALL' AND (
-                        q.question ILIKE CONCAT('%', :search, '%')
-                        OR q.answer ILIKE CONCAT('%', :search, '%')
-                    )
-                )
-                OR (:searchType = 'question' AND q.question ILIKE CONCAT('%', :search, '%'))
-                OR (:searchType = 'answer' AND q.answer ILIKE CONCAT('%', :search, '%'))
+                COALESCE(TRIM(:search), '') = ''
+                OR CASE
+                    WHEN :searchType = 'ALL' THEN
+                        (q.question ILIKE ('%' || :search || '%')
+                         OR q.answer ILIKE ('%' || :search || '%'))
+                    WHEN :searchType = 'question' THEN
+                        q.question ILIKE ('%' || :search || '%')
+                    WHEN :searchType = 'answer' THEN
+                        q.answer ILIKE ('%' || :search || '%')
+                    ELSE TRUE
+                END
             )
             AND (
                 :status IS NULL OR :status = 'ALL'
@@ -102,9 +104,6 @@ interface AdminQuestionRepository : CoroutineCrudRepository<QuestionEntity, Long
         hasAsset: Boolean?,
     ): Int
 
-
-
-
     /**
      * 🔹 페이징 조회 (AdminFriendResponse)
      */
@@ -113,15 +112,17 @@ interface AdminQuestionRepository : CoroutineCrudRepository<QuestionEntity, Long
         FROM question_2 q
         WHERE
             (
-                :search IS NULL
-                OR (
-                    :searchType = 'ALL' AND (
-                        q.question ILIKE CONCAT('%', :search, '%')
-                        OR q.answer ILIKE CONCAT('%', :search, '%')
-                    )
-                )
-                OR (:searchType = 'question' AND q.question ILIKE CONCAT('%', :search, '%'))
-                OR (:searchType = 'answer' AND q.answer ILIKE CONCAT('%', :search, '%'))
+                COALESCE(TRIM(:search), '') = ''
+                OR CASE
+                    WHEN :searchType = 'ALL' THEN
+                        (q.question ILIKE ('%' || :search || '%')
+                         OR q.answer ILIKE ('%' || :search || '%'))
+                    WHEN :searchType = 'question' THEN
+                        q.question ILIKE ('%' || :search || '%')
+                    WHEN :searchType = 'answer' THEN
+                        q.answer ILIKE ('%' || :search || '%')
+                    ELSE TRUE
+                END
             )
             AND (
                 :status IS NULL OR :status = 'ALL'

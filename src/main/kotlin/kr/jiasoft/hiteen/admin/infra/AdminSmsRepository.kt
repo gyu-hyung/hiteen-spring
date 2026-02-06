@@ -7,59 +7,64 @@ import java.time.LocalDateTime
 
 interface AdminSmsRepository : CoroutineCrudRepository<SmsEntity, Long> {
 
-    @Query(
-        """
+    @Query("""
         SELECT COUNT(*)
         FROM sms s
-        WHERE (:startDate IS NULL OR s.created_at >= :startDate)
-            AND (:endDate IS NULL OR s.created_at < :endDate)
-            AND (
-                :search IS NULL
-                OR (
-                    (:searchType = 'ALL' AND (
-                        COALESCE(s.callback, '') ILIKE ('%' || :search || '%')
-                        OR COALESCE(s.title, '') ILIKE ('%' || :search || '%')
-                        OR COALESCE(s.content, '') ILIKE ('%' || :search || '%')
-                        OR EXISTS (
-                            SELECT 1
-                            FROM sms_auth sa
-                            WHERE sa.sms_id = s.id
-                                AND COALESCE(sa.phone, '') ILIKE ('%' || :search || '%')
-                        )
-                        OR EXISTS (
-                            SELECT 1
-                            FROM sms_details sd
-                            WHERE sd.sms_id = s.id
-                                AND COALESCE(sd.phone, '') ILIKE ('%' || :search || '%')
-                        )
-                    ))
-                    OR (:searchType = 'CALLBACK'
-                        AND COALESCE(s.callback, '') ILIKE ('%' || :search || '%')
-                    )
-                    OR (:searchType = 'TITLE'
-                         AND COALESCE(s.title, '') ILIKE ('%' || :search || '%')
-                    )
-                    OR (:searchType = 'MESSAGE'
-                        AND COALESCE(s.content, '') ILIKE ('%' || :search || '%')
-                    )
-                    OR (:searchType = 'PHONE' AND (
-                        EXISTS (
-                            SELECT 1
-                            FROM sms_auth sa
-                            WHERE sa.sms_id = s.id
-                                AND COALESCE(sa.phone, '') ILIKE ('%' || :search || '%')
-                        )
-                        OR EXISTS (
-                            SELECT 1
-                            FROM sms_details sd
-                            WHERE sd.sms_id = s.id
-                                AND COALESCE(sd.phone, '') ILIKE ('%' || :search || '%')
-                        )
-                    ))
-                )
+        WHERE
+            (
+                :startDate IS NULL
+                OR s.created_at >= :startDate
             )
-        """
-    )
+            AND (
+                :endDate IS NULL
+                OR s.created_at < :endDate
+            )
+            AND (
+                COALESCE(TRIM(:search), '') = ''
+                OR CASE
+                    WHEN :searchType = 'ALL' THEN
+                        (
+                            COALESCE(s.callback, '') ILIKE ('%' || :search || '%')
+                            OR COALESCE(s.title, '') ILIKE ('%' || :search || '%')
+                            OR COALESCE(s.content, '') ILIKE ('%' || :search || '%')
+                            OR EXISTS (
+                                SELECT 1
+                                FROM sms_auth sa
+                                WHERE sa.sms_id = s.id
+                                    AND COALESCE(sa.phone, '') ILIKE ('%' || :search || '%')
+                            )
+                            OR EXISTS (
+                                SELECT 1
+                                FROM sms_details sd
+                                WHERE sd.sms_id = s.id
+                                    AND COALESCE(sd.phone, '') ILIKE ('%' || :search || '%')
+                            )
+                        )
+                    WHEN :searchType = 'CALLBACK' THEN
+                        COALESCE(s.callback, '') ILIKE ('%' || :search || '%')
+                    WHEN :searchType = 'TITLE' THEN
+                        COALESCE(s.title, '') ILIKE ('%' || :search || '%')
+                    WHEN :searchType = 'MESSAGE' THEN
+                        COALESCE(s.content, '') ILIKE ('%' || :search || '%')
+                    WHEN :searchType = 'PHONE' THEN
+                        (
+                            EXISTS (
+                                SELECT 1
+                                FROM sms_auth sa
+                                WHERE sa.sms_id = s.id
+                                    AND COALESCE(sa.phone, '') ILIKE ('%' || :search || '%')
+                            )
+                            OR EXISTS (
+                                SELECT 1
+                                FROM sms_details sd
+                                WHERE sd.sms_id = s.id
+                                    AND COALESCE(sd.phone, '') ILIKE ('%' || :search || '%')
+                            )
+                        )
+                    ELSE TRUE
+                END
+            )
+    """)
     suspend fun countList(
         startDate: LocalDateTime?,
         endDate: LocalDateTime?,
@@ -67,63 +72,68 @@ interface AdminSmsRepository : CoroutineCrudRepository<SmsEntity, Long> {
         search: String?,
     ): Int
 
-    @Query(
-        """
+    @Query("""
         SELECT *
         FROM sms s
-        WHERE (:startDate IS NULL OR s.created_at >= :startDate)
-            AND (:endDate IS NULL OR s.created_at < :endDate)
+        WHERE
+            (
+                :startDate IS NULL
+                OR s.created_at >= :startDate
+            )
             AND (
-                :search IS NULL
-                OR (
-                    (:searchType = 'ALL' AND (
+                :endDate IS NULL
+                OR s.created_at < :endDate
+            )
+            AND (
+                COALESCE(TRIM(:search), '') = ''
+                OR CASE
+                    WHEN :searchType = 'ALL' THEN
+                        (
+                            COALESCE(s.callback, '') ILIKE ('%' || :search || '%')
+                            OR COALESCE(s.title, '') ILIKE ('%' || :search || '%')
+                            OR COALESCE(s.content, '') ILIKE ('%' || :search || '%')
+                            OR EXISTS (
+                                SELECT 1
+                                FROM sms_auth sa
+                                WHERE sa.sms_id = s.id
+                                    AND COALESCE(sa.phone, '') ILIKE ('%' || :search || '%')
+                            )
+                            OR EXISTS (
+                                SELECT 1
+                                FROM sms_details sd
+                                WHERE sd.sms_id = s.id
+                                    AND COALESCE(sd.phone, '') ILIKE ('%' || :search || '%')
+                            )
+                        )
+                    WHEN :searchType = 'CALLBACK' THEN
                         COALESCE(s.callback, '') ILIKE ('%' || :search || '%')
-                        OR COALESCE(s.title, '') ILIKE ('%' || :search || '%')
-                        OR COALESCE(s.content, '') ILIKE ('%' || :search || '%')
-                        OR EXISTS (
-                            SELECT 1
-                            FROM sms_auth sa
-                            WHERE sa.sms_id = s.id
-                                AND COALESCE(sa.phone, '') ILIKE ('%' || :search || '%')
+                    WHEN :searchType = 'TITLE' THEN
+                        COALESCE(s.title, '') ILIKE ('%' || :search || '%')
+                    WHEN :searchType = 'MESSAGE' THEN
+                        COALESCE(s.content, '') ILIKE ('%' || :search || '%')
+                    WHEN :searchType = 'PHONE' THEN
+                        (
+                            EXISTS (
+                                SELECT 1
+                                FROM sms_auth sa
+                                WHERE sa.sms_id = s.id
+                                    AND COALESCE(sa.phone, '') ILIKE ('%' || :search || '%')
+                            )
+                            OR EXISTS (
+                                SELECT 1
+                                FROM sms_details sd
+                                WHERE sd.sms_id = s.id
+                                    AND COALESCE(sd.phone, '') ILIKE ('%' || :search || '%')
+                            )
                         )
-                        OR EXISTS (
-                            SELECT 1
-                            FROM sms_details sd
-                            WHERE sd.sms_id = s.id
-                                AND COALESCE(sd.phone, '') ILIKE ('%' || :search || '%')
-                        )
-                    ))
-                    OR (:searchType = 'CALLBACK'
-                        AND COALESCE(s.callback, '') ILIKE ('%' || :search || '%')
-                    )
-                    OR (:searchType = 'TITLE'
-                         AND COALESCE(s.title, '') ILIKE ('%' || :search || '%')
-                    )
-                    OR (:searchType = 'MESSAGE'
-                        AND COALESCE(s.content, '') ILIKE ('%' || :search || '%')
-                    )
-                    OR (:searchType = 'PHONE' AND (
-                        EXISTS (
-                            SELECT 1
-                            FROM sms_auth sa
-                            WHERE sa.sms_id = s.id
-                                AND COALESCE(sa.phone, '') ILIKE ('%' || :search || '%')
-                        )
-                        OR EXISTS (
-                            SELECT 1
-                            FROM sms_details sd
-                            WHERE sd.sms_id = s.id
-                                AND COALESCE(sd.phone, '') ILIKE ('%' || :search || '%')
-                        )
-                    ))
-                )
+                    ELSE TRUE
+                END
             )
         ORDER BY
             CASE WHEN :order = 'ASC' THEN s.id END ASC,
             CASE WHEN :order = 'DESC' THEN s.id END DESC
         LIMIT :limit OFFSET :offset
-        """
-    )
+    """)
     suspend fun list(
         startDate: LocalDateTime?,
         endDate: LocalDateTime?,
