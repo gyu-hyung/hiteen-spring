@@ -72,13 +72,13 @@ fi
 echo "[5/8] App Secret 생성..."
 kubectl delete secret hiteen-app-secret -n $NAMESPACE --ignore-not-found
 kubectl create secret generic hiteen-app-secret \
-  --from-literal=db-host=49.247.175.76 \
+  --from-literal=db-host=10.8.3.89 \
   --from-literal=db-name=hiteen \
   --from-literal=db-user=hiteen \
-  --from-literal=db-password='xxxxxxxx' \
-  --from-literal=mongo-host=49.247.170.182 \
+  --from-literal=db-password='hiteen@2025' \
+  --from-literal=mongo-host=10.8.2.156 \
   --from-literal=mongo-user=hiteen \
-  --from-literal=mongo-password='xxxxxxxx' \
+  --from-literal=mongo-password='hiteen@2025' \
   --from-literal=mongo-db=hiteen \
   --from-literal=jwt-secret=ac0da6c32199d5d4829ca62b05f2a353ab926e2855de718e28286ca64bc2f9df \
   -n $NAMESPACE

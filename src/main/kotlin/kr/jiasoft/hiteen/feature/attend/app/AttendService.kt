@@ -161,8 +161,8 @@ class AttendService(
         pointService.applyPolicy(userId, policy, refId = saved.id)
 
         when (dayIndex) {
-            7 -> expService.grantExp(userId, "ATTENDANCE", saved.id, 20)
-            else -> expService.grantExp(userId, "ATTENDANCE", saved.id, 3)
+            7 -> expService.grantExp(userId, "ATTENDANCE", saved.id, null, 20)
+            else -> expService.grantExp(userId, "ATTENDANCE", saved.id, null, 3)
         }
 
         return Result.success(saved)

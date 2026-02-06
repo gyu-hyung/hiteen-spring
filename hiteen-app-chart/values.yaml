@@ -42,21 +42,25 @@ app:
         secretKeyRef:
           name: hiteen-app-secret
           key: db-host
+
     - name: DB_NAME
       valueFrom:
         secretKeyRef:
           name: hiteen-app-secret
           key: db-name
+
     - name: DB_USER
       valueFrom:
         secretKeyRef:
           name: hiteen-app-secret
           key: db-user
+
     - name: DB_PASSWORD
       valueFrom:
         secretKeyRef:
           name: hiteen-app-secret
           key: db-password
+
 
     # MongoDB
     - name: MONGO_HOST
@@ -64,21 +68,25 @@ app:
         secretKeyRef:
           name: hiteen-app-secret
           key: mongo-host
+
     - name: MONGO_USER
       valueFrom:
         secretKeyRef:
           name: hiteen-app-secret
           key: mongo-user
+
     - name: MONGO_PASSWORD
       valueFrom:
         secretKeyRef:
           name: hiteen-app-secret
           key: mongo-password
+
     - name: MONGO_DB
       valueFrom:
         secretKeyRef:
           name: hiteen-app-secret
           key: mongo-db
+
 
     # Redis
     - name: REDIS_PASSWORD
@@ -87,6 +95,7 @@ app:
           name: redis-secret
           key: redis-password
 
+
     # JWT
     - name: JWT_SECRET
       valueFrom:
@@ -94,20 +103,25 @@ app:
           name: hiteen-app-secret
           key: jwt-secret
 
+
     - name: FIREBASE_CREDENTIAL_PATH
       value: /app/firebase/firebase-key.json
 
-    # JVM Settings (리소스에 맞게 조정)
+    # JVM Settings (Memory Limit 3Gi 기준, 힙은 약 60-70% 할당)
+    # -Xms: 초기 힙 (빠른 시작을 위해 낮게 설정)
+    # -Xmx: 최대 힙 (Limit의 약 66%, 나머지는 Metaspace/Native용)
+    # -XX:MaxMetaspaceSize: Metaspace 제한으로 OOM 방지
+    # -XX:MaxDirectMemorySize: Direct Buffer 제한
     - name: JAVA_TOOL_OPTIONS
-      value: "-Xms512m -Xmx2g -XX:+UseG1GC -XX:+ExitOnOutOfMemoryError -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp -Duser.timezone=Asia/Seoul"
+      value: "-Xms512m -Xmx2g -XX:MaxMetaspaceSize=256m -XX:MaxDirectMemorySize=256m -XX:+UseG1GC -XX:+ExitOnOutOfMemoryError -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp -Duser.timezone=Asia/Seoul"
 
-  # Resources (개발서버와 동일하게 낮춤)
+  # Resources
   resources:
     requests:
-      cpu: 300m
+      cpu: 1
       memory: 1Gi
     limits:
-      cpu: 1
+      cpu: 2
       memory: 3Gi
 
   # Health Probes
