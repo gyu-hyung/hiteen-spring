@@ -2,18 +2,12 @@ package kr.jiasoft.hiteen.admin.infra
 
 import kotlinx.coroutines.flow.Flow
 import kr.jiasoft.hiteen.admin.dto.AdminCommentResponse
-import kr.jiasoft.hiteen.admin.dto.AdminPollResponse
 import kr.jiasoft.hiteen.feature.board.domain.BoardCommentEntity
-import kr.jiasoft.hiteen.feature.board.domain.BoardEntity
-import kr.jiasoft.hiteen.feature.poll.domain.PollEntity
 import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 import java.util.UUID
 
 interface AdminBoardCommentRepository : CoroutineCrudRepository<BoardCommentEntity, Long> {
-
-
-
     @Query("""
         SELECT
             c.id,
@@ -39,14 +33,21 @@ interface AdminBoardCommentRepository : CoroutineCrudRepository<BoardCommentEnti
             (
                 :search IS NULL
                 OR (
-                    :searchType = 'ALL' AND (
-                        c.content ILIKE CONCAT('%', :search, '%')
-                        OR u.nickname ILIKE CONCAT('%', :search, '%')
-                    )
+                    CASE
+                        WHEN :searchType = 'ALL' THEN
+                            c.content ILIKE '%' || :search || '%'
+                            OR u.nickname ILIKE '%' || :search || '%'
+            
+                        WHEN :searchType = 'content' THEN
+                            c.content ILIKE '%' || :search || '%'
+            
+                        WHEN :searchType = 'boardContent' THEN
+                            b.content ILIKE '%' || :search || '%'
+            
+                        WHEN :searchType = 'nickname' THEN
+                            u.nickname ILIKE '%' || :search || '%'
+                    END
                 )
-                OR (:searchType = 'content' AND c.content ILIKE CONCAT('%', :search, '%'))
-                OR (:searchType = 'boardContent' AND b.content ILIKE CONCAT('%', :search, '%'))
-                OR (:searchType = 'nickname' AND u.nickname ILIKE CONCAT('%', :search, '%'))
             )
             
             AND (
@@ -77,12 +78,6 @@ interface AdminBoardCommentRepository : CoroutineCrudRepository<BoardCommentEnti
         uid: UUID?,
     ): Flow<AdminCommentResponse>
 
-
-
-
-
-
-
     @Query("""
         SELECT COUNT(*)
         FROM board_comments c
@@ -92,14 +87,21 @@ interface AdminBoardCommentRepository : CoroutineCrudRepository<BoardCommentEnti
             (
                 :search IS NULL
                 OR (
-                    :searchType = 'ALL' AND (
-                        c.content ILIKE CONCAT('%', :search, '%')
-                        OR u.nickname ILIKE CONCAT('%', :search, '%')
-                    )
+                    CASE
+                        WHEN :searchType = 'ALL' THEN
+                            c.content ILIKE '%' || :search || '%'
+                            OR u.nickname ILIKE '%' || :search || '%'
+            
+                        WHEN :searchType = 'content' THEN
+                            c.content ILIKE '%' || :search || '%'
+            
+                        WHEN :searchType = 'boardContent' THEN
+                            b.content ILIKE '%' || :search || '%'
+            
+                        WHEN :searchType = 'nickname' THEN
+                            u.nickname ILIKE '%' || :search || '%'
+                    END
                 )
-                OR (:searchType = 'content' AND c.content ILIKE CONCAT('%', :search, '%'))
-                OR (:searchType = 'boardContent' AND b.content ILIKE CONCAT('%', :search, '%'))
-                OR (:searchType = 'nickname' AND u.nickname ILIKE CONCAT('%', :search, '%'))
             )
             
             AND (
@@ -120,10 +122,5 @@ interface AdminBoardCommentRepository : CoroutineCrudRepository<BoardCommentEnti
 //        fkId: Long?,
         uid: UUID?,
     ): Int
-
-
-
-
-
 }
 

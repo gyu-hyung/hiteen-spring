@@ -18,13 +18,18 @@ interface AdminLevelRepository : CoroutineCrudRepository<TierEntity, Long> {
             AND (
                 :search IS NULL
                 OR (
-                    :searchType = 'ALL' AND (
-                        t.tier_code ILIKE '%' || :search || '%'
-                        OR t.tier_name_kr ILIKE '%' || :search || '%'
-                    )
+                    CASE
+                        WHEN :searchType = 'ALL' THEN
+                            t.tier_code ILIKE '%' || :search || '%'
+                            OR t.tier_name_kr ILIKE '%' || :search || '%'
+            
+                        WHEN :searchType = 'code' THEN
+                            t.tier_code ILIKE '%' || :search || '%'
+            
+                        WHEN :searchType = 'name' THEN
+                            t.tier_name_kr ILIKE '%' || :search || '%'
+                    END
                 )
-                OR (:searchType = 'code' AND t.tier_code ILIKE '%' || :search || '%')
-                OR (:searchType = 'name' AND t.tier_name_kr ILIKE '%' || :search || '%')
             )
         ORDER BY
             t.level ASC,

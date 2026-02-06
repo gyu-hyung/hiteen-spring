@@ -1,8 +1,8 @@
 package kr.jiasoft.hiteen.admin.infra
 
 import kotlinx.coroutines.flow.Flow
-import kr.jiasoft.hiteen.admin.dto.AdminCashResponse
-import kr.jiasoft.hiteen.feature.cash.domain.CashEntity
+import kr.jiasoft.hiteen.admin.dto.AdminExpResponse
+import kr.jiasoft.hiteen.feature.level.domain.UserExpHistoryEntity
 import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 import org.springframework.stereotype.Repository
@@ -10,23 +10,28 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 @Repository
-interface AdminCashRepository : CoroutineCrudRepository<CashEntity, Long> {
+interface AdminExpRepository : CoroutineCrudRepository<UserExpHistoryEntity, Long> {
     @Query("""
         SELECT COUNT(*)
-        FROM cash c
-        LEFT JOIN users u ON c.user_id = u.id
-        WHERE c.deleted_at IS NULL
+        FROM user_exp_history e
+        LEFT JOIN users u ON e.user_id = u.id
+        WHERE
+            (
+                :status IS NULL OR :status = 'ALL'
+                OR (:status = 'CREDIT' AND e.points > 0)
+                OR (:status = 'DEBIT' AND e.points < 0)
+            )
             AND (
-                :type IS NULL OR :type = 'ALL'
-                OR c.cashable_type LIKE CONCAT(:type, '%')
+                :type IS NULL OR :status = 'ALL'
+                OR e.action_code LIKE CONCAT(:type, '%')
             )
             AND (
                 :startDate IS NULL
-                OR c.created_at >= :startDate
+                OR e.created_at >= :startDate
             )
             AND (
                 :endDate IS NULL
-                OR c.created_at < :endDate
+                OR e.created_at < :endDate
             )
             AND (
                 :search IS NULL
@@ -35,25 +40,25 @@ interface AdminCashRepository : CoroutineCrudRepository<CashEntity, Long> {
                         WHEN :searchType = 'ALL' THEN
                             u.nickname ILIKE '%' || :search || '%'
                             OR u.phone ILIKE '%' || :search || '%'
-                            OR c.memo ILIKE '%' || :search || '%'
+                            OR e.reason ILIKE '%' || :search || '%'
             
-                        WHEN :searchType = 'nickname' THEN
+                        WHEN :searchType = 'NAME' THEN
                             u.nickname ILIKE '%' || :search || '%'
             
-                        WHEN :searchType = 'phone' THEN
+                        WHEN :searchType = 'PHONE' THEN
                             u.phone ILIKE '%' || :search || '%'
             
-                        WHEN :searchType = 'memo' THEN
-                            c.memo ILIKE '%' || :search || '%'
+                        WHEN :searchType = 'MEMO' THEN
+                            e.reason ILIKE '%' || :search || '%'
                     END
                 )
             )
             AND (
-                :uid IS NULL
-                OR u.uid = :uid
+                :uid IS NULL OR u.uid = :uid
             )
     """)
-    suspend fun countSearchResults(
+    suspend fun countSearch(
+        status: String?,
         type: String?,
         startDate: LocalDateTime?,
         endDate: LocalDateTime?,
@@ -64,24 +69,29 @@ interface AdminCashRepository : CoroutineCrudRepository<CashEntity, Long> {
 
     @Query("""
         SELECT 
-            c.*,
+            e.*,
             u.uid AS user_uid,
-            u.nickname AS nickname,
-            u.phone AS phone
-        FROM cash c
-        LEFT JOIN users u ON c.user_id = u.id
-        WHERE c.deleted_at IS NULL
+            u.nickname AS user_name,
+            u.phone AS user_phone
+        FROM user_exp_history e
+        LEFT JOIN users u ON e.user_id = u.id
+        WHERE
+            (
+                :status IS NULL OR :status = 'ALL'
+                OR (:status = 'CREDIT' AND e.points > 0)
+                OR (:status = 'DEBIT' AND e.points < 0)
+            )
             AND (
-                :type IS NULL
-                OR c.cashable_type LIKE CONCAT(:type, '%')
+                :type IS NULL OR :type = 'ALL'
+                OR e.action_code LIKE CONCAT(:type, '%')
             )
             AND (
                 :startDate IS NULL
-                OR c.created_at >= :startDate
+                OR e.created_at >= :startDate
             )
             AND (
                 :endDate IS NULL
-                OR c.created_at < :endDate
+                OR e.created_at < :endDate
             )
             AND (
                 :search IS NULL
@@ -90,35 +100,35 @@ interface AdminCashRepository : CoroutineCrudRepository<CashEntity, Long> {
                         WHEN :searchType = 'ALL' THEN
                             u.nickname ILIKE '%' || :search || '%'
                             OR u.phone ILIKE '%' || :search || '%'
-                            OR c.memo ILIKE '%' || :search || '%'
+                            OR e.reason ILIKE '%' || :search || '%'
             
-                        WHEN :searchType = 'nickname' THEN
+                        WHEN :searchType = 'NAME' THEN
                             u.nickname ILIKE '%' || :search || '%'
             
-                        WHEN :searchType = 'phone' THEN
+                        WHEN :searchType = 'PHONE' THEN
                             u.phone ILIKE '%' || :search || '%'
             
-                        WHEN :searchType = 'memo' THEN
-                            c.memo ILIKE '%' || :search || '%'
+                        WHEN :searchType = 'MEMO' THEN
+                            e.reason ILIKE '%' || :search || '%'
                     END
                 )
             )
             AND (
-                :uid IS NULL
-                OR u.uid = :uid
+                :uid IS NULL OR u.uid = :uid
             )
         ORDER BY id DESC
         LIMIT :limit OFFSET :offset
     """)
-    fun listSearchResults(
+    suspend fun listSearch(
+        status: String?,
         type: String?,
         startDate: LocalDateTime?,
         endDate: LocalDateTime?,
         searchType: String?,
         search: String?,
         uid: UUID?,
+        sort: String?,
         limit: Int,
         offset: Int,
-    ): Flow<AdminCashResponse>
+    ): Flow<AdminExpResponse>
 }
-

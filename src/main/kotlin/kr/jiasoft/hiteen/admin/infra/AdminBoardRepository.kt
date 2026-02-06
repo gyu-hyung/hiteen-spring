@@ -12,39 +12,35 @@ interface AdminBoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
     @Query("""
         SELECT 
             b.*,
+            u.uid AS created_uid, 
+            u.nickname AS nickname,
             (SELECT COUNT(*) FROM board_comments bc WHERE bc.board_id = b.id AND bc.deleted_at IS NULL) AS comment_count,
-            (SELECT COUNT(*) FROM board_likes bl WHERE bl.board_id = b.id) AS like_count,
-            ( SELECT u.uid FROM users u WHERE u.id = b.created_id ) AS created_uid, 
-            ( SELECT u.nickname FROM users u WHERE u.id = b.created_id ) AS nickname
+            (SELECT COUNT(*) FROM board_likes bl WHERE bl.board_id = b.id) AS like_count
         FROM boards b
+        LEFT JOIN users u ON u.id = b.created_id
         WHERE
-           b.deleted_at IS NULL
-           AND
-            (
+            b.deleted_at IS NULL
+            AND (
                 :search IS NULL
                 OR (
-                    :searchType = 'ALL' AND (
-                        b.subject ILIKE CONCAT('%', :search, '%')
-                        OR b.content ILIKE CONCAT('%', :search, '%')
-                        OR (
-                            SELECT u.nickname
-                            FROM users u
-                            WHERE u.id = b.created_id
-                        ) ILIKE CONCAT('%', :search, '%')
-                    )
+                    CASE
+                        WHEN :searchType = 'ALL' THEN
+                            b.subject ILIKE '%' || :search || '%'
+                            OR b.content ILIKE '%' || :search || '%'
+                            OR u.nickname ILIKE '%' || :search || '%'
+            
+                        WHEN :searchType = 'subject' THEN
+                            b.subject ILIKE '%' || :search || '%'
+            
+                        WHEN :searchType = 'content' THEN
+                            b.content ILIKE '%' || :search || '%'
+            
+                        WHEN :searchType = 'nickname' THEN
+                            u.nickname ILIKE '%' || :search || '%'
+                    END
                 )
-                OR (:searchType = 'subject' AND b.subject ILIKE CONCAT('%', :search, '%'))
-                OR (:searchType = 'content' AND b.content ILIKE CONCAT('%', :search, '%'))
-                OR (
-                    :searchType = 'nickname'
-                    AND (
-                        SELECT u.nickname
-                        FROM users u
-                        WHERE u.id = b.created_id
-                    ) ILIKE CONCAT('%', :search, '%')
-                )
-            )
-    
+            )    
+
             AND (
                 :status IS NULL OR :status = 'ALL'
                 OR (:status = 'ACTIVE' AND b.status = 'ACTIVE')
@@ -80,10 +76,8 @@ interface AdminBoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
     
             AND (
                 :uid IS NULL
-                OR ( SELECT u.uid FROM users u WHERE u.id = b.created_id ) = :uid
+                OR u.uid = :uid
             )
-
-    
         ORDER BY
             CASE WHEN :order = 'DESC' THEN b.created_at END DESC,
             CASE WHEN :order = 'ASC' THEN b.created_at END ASC
@@ -102,39 +96,32 @@ interface AdminBoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
         category: String?,
     ): Flow<AdminBoardListResponse>
 
-
-
-
     @Query("""
         SELECT COUNT(*)
         FROM boards b
+        LEFT JOIN users u ON u.id = b.created_id
         WHERE
-           b.deleted_at IS NULL
-           AND
-            (
+            b.deleted_at IS NULL
+            AND (
                 :search IS NULL
                 OR (
-                    :searchType = 'ALL' AND (
-                        b.subject ILIKE CONCAT('%', :search, '%')
-                        OR b.content ILIKE CONCAT('%', :search, '%')
-                        OR (
-                            SELECT u.nickname
-                            FROM users u
-                            WHERE u.id = b.created_id
-                        ) ILIKE CONCAT('%', :search, '%')
-                    )
+                    CASE
+                        WHEN :searchType = 'ALL' THEN
+                            b.subject ILIKE '%' || :search || '%'
+                            OR b.content ILIKE '%' || :search || '%'
+                            OR u.nickname ILIKE '%' || :search || '%'
+            
+                        WHEN :searchType = 'subject' THEN
+                            b.subject ILIKE '%' || :search || '%'
+            
+                        WHEN :searchType = 'content' THEN
+                            b.content ILIKE '%' || :search || '%'
+            
+                        WHEN :searchType = 'nickname' THEN
+                            u.nickname ILIKE '%' || :search || '%'
+                    END
                 )
-                OR (:searchType = 'subject' AND b.subject ILIKE CONCAT('%', :search, '%'))
-                OR (:searchType = 'content' AND b.content ILIKE CONCAT('%', :search, '%'))
-                OR (
-                    :searchType = 'nickname'
-                    AND (
-                        SELECT u.nickname
-                        FROM users u
-                        WHERE u.id = b.created_id
-                    ) ILIKE CONCAT('%', :search, '%')
-                )
-            )
+            )    
     
             AND (
                 :status IS NULL OR :status = 'ALL'
@@ -171,7 +158,7 @@ interface AdminBoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
     
             AND (
                 :uid IS NULL
-                OR ( SELECT u.uid FROM users u WHERE u.id = b.created_id ) = :uid
+                OR u.uid = :uid
             )
     """)
     suspend fun totalCount(

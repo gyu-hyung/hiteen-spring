@@ -80,24 +80,30 @@ interface AdminGoodsRepository : CoroutineCrudRepository<GoodsGiftishowEntity, L
             AND (
                 :search IS NULL
                 OR (
-                    :searchType = 'ALL' AND (
-                        g.goods_name ILIKE CONCAT('%', :search, '%')
-                        OR g.brand_name ILIKE CONCAT('%', :search, '%')
-                        OR g.category1_name ILIKE CONCAT('%', :search, '%')
-                        OR g.goods_type_nm ILIKE CONCAT('%', :search, '%')
-                        OR g.goods_type_dtl_nm ILIKE CONCAT('%', :search, '%')
-                        OR g.srch_keyword ILIKE CONCAT('%', :search, '%')
-                    )
-                )
-                OR (:searchType = 'goodsName' AND g.goods_name ILIKE CONCAT('%', :search, '%'))
-                OR (:searchType = 'brandName' AND g.brand_name ILIKE CONCAT('%', :search, '%'))
-                OR (:searchType = 'category1Name' AND g.category1_name ILIKE CONCAT('%', :search, '%'))
-                OR (:searchType = 'goodsTypeName' AND (
-                      g.goods_type_nm ILIKE CONCAT('%', :search, '%')
-                      OR g.goods_type_dtl_nm ILIKE CONCAT('%', :search, '%')
-                ))
-            )
+                    CASE
+                        WHEN :searchType = 'ALL' THEN
+                            g.goods_name ILIKE '%' || :search || '%'
+                            OR g.brand_name ILIKE '%' || :search || '%'
+                            OR g.category1_name ILIKE '%' || :search || '%'
+                            OR g.goods_type_nm ILIKE '%' || :search || '%'
+                            OR g.goods_type_dtl_nm ILIKE '%' || :search || '%'
+                            OR g.srch_keyword ILIKE '%' || :search || '%'
             
+                        WHEN :searchType = 'goodsName' THEN
+                            g.goods_name ILIKE '%' || :search || '%'
+            
+                        WHEN :searchType = 'brandName' THEN
+                            g.brand_name ILIKE '%' || :search || '%'
+            
+                        WHEN :searchType = 'category1Name' THEN
+                            g.category1_name ILIKE '%' || :search || '%'
+            
+                        WHEN :searchType = 'goodsTypeName' THEN
+                            g.goods_type_nm ILIKE '%' || :search || '%'
+                            OR g.goods_type_dtl_nm ILIKE '%' || :search || '%'
+                    END
+                )
+            )            
             AND (
                 :status IS NULL OR :status = 'ALL'
                 OR (:status = 'ACTIVE' AND g.status = 1)
@@ -135,23 +141,30 @@ interface AdminGoodsRepository : CoroutineCrudRepository<GoodsGiftishowEntity, L
             AND (
                 :search IS NULL
                 OR (
-                    :searchType = 'ALL' AND (
-                        g.goods_name ILIKE CONCAT('%', :search, '%')
-                        OR g.brand_name ILIKE CONCAT('%', :search, '%')
-                        OR g.category1_name ILIKE CONCAT('%', :search, '%')
-                        OR g.goods_type_nm ILIKE CONCAT('%', :search, '%')
-                        OR g.goods_type_dtl_nm ILIKE CONCAT('%', :search, '%')
-                        OR g.srch_keyword ILIKE CONCAT('%', :search, '%')
-                    )
+                    CASE
+                        WHEN :searchType = 'ALL' THEN
+                            g.goods_name ILIKE '%' || :search || '%'
+                            OR g.brand_name ILIKE '%' || :search || '%'
+                            OR g.category1_name ILIKE '%' || :search || '%'
+                            OR g.goods_type_nm ILIKE '%' || :search || '%'
+                            OR g.goods_type_dtl_nm ILIKE '%' || :search || '%'
+                            OR g.srch_keyword ILIKE '%' || :search || '%'
+            
+                        WHEN :searchType = 'goodsName' THEN
+                            g.goods_name ILIKE '%' || :search || '%'
+            
+                        WHEN :searchType = 'brandName' THEN
+                            g.brand_name ILIKE '%' || :search || '%'
+            
+                        WHEN :searchType = 'category1Name' THEN
+                            g.category1_name ILIKE '%' || :search || '%'
+            
+                        WHEN :searchType = 'goodsTypeName' THEN
+                            g.goods_type_nm ILIKE '%' || :search || '%'
+                            OR g.goods_type_dtl_nm ILIKE '%' || :search || '%'
+                    END
                 )
-                OR (:searchType = 'goodsName' AND g.goods_name ILIKE CONCAT('%', :search, '%'))
-                OR (:searchType = 'brandName' AND g.brand_name ILIKE CONCAT('%', :search, '%'))
-                OR (:searchType = 'category1Name' AND g.category1_name ILIKE CONCAT('%', :search, '%'))
-                OR (:searchType = 'goodsTypeName' AND (
-                      g.goods_type_nm ILIKE CONCAT('%', :search, '%')
-                      OR g.goods_type_dtl_nm ILIKE CONCAT('%', :search, '%')
-                ))
-            )
+            )            
             
             AND (
                 :status IS NULL OR :status = 'ALL'

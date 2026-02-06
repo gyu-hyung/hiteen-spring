@@ -31,26 +31,24 @@ interface AdminAcceptFollowRepository : CoroutineCrudRepository<FollowEntity, Lo
             AND (
                 :search IS NULL
                 OR (
-                    :searchType = 'ALL' AND (
-                        COALESCE(req.nickname, '') ILIKE ('%' || :search || '%')
-                        OR COALESCE(req.phone, '') ILIKE ('%' || :search || '%')
-                        OR COALESCE(res.nickname, '') ILIKE ('%' || :search || '%')
-                        OR COALESCE(res.phone, '') ILIKE ('%' || :search || '%')
-                    )
-                )
-                OR (
-                    :searchType = 'SENDER'
-                     AND (
-                        COALESCE(req.nickname, '') ILIKE ('%' || :search || '%')
-                        OR COALESCE(req.phone, '') ILIKE ('%' || :search || '%')
-                     )
-                )
-                OR (
-                    :searchType = 'RECEIVER'
-                    AND (
-                        COALESCE(res.nickname, '') ILIKE ('%' || :search || '%')
-                        OR COALESCE(res.phone, '') ILIKE ('%' || :search || '%')
-                    )
+                    CASE
+                        WHEN :searchType = 'ALL' THEN (
+                            COALESCE(req.nickname, '') ILIKE '%' || :search || '%'
+                            OR COALESCE(req.phone, '') ILIKE '%' || :search || '%'
+                            OR COALESCE(res.nickname, '') ILIKE '%' || :search || '%'
+                            OR COALESCE(res.phone, '') ILIKE '%' || :search || '%'
+                        )
+            
+                        WHEN :searchType = 'SENDER' THEN (
+                            COALESCE(req.nickname, '') ILIKE '%' || :search || '%'
+                            OR COALESCE(req.phone, '') ILIKE '%' || :search || '%'
+                        )
+            
+                        WHEN :searchType = 'RECEIVER' THEN (
+                            COALESCE(res.nickname, '') ILIKE '%' || :search || '%'
+                            OR COALESCE(res.phone, '') ILIKE '%' || :search || '%'
+                        )
+                    END
                 )
             )
     """)
@@ -101,26 +99,24 @@ interface AdminAcceptFollowRepository : CoroutineCrudRepository<FollowEntity, Lo
             AND (
                 :search IS NULL
                 OR (
-                    :searchType = 'ALL' AND (
-                        COALESCE(req.nickname, '') ILIKE ('%' || :search || '%')
-                        OR COALESCE(req.phone, '') ILIKE ('%' || :search || '%')
-                        OR COALESCE(res.nickname, '') ILIKE ('%' || :search || '%')
-                        OR COALESCE(res.phone, '') ILIKE ('%' || :search || '%')
-                    )
-                )
-                OR (
-                    :searchType = 'SENDER'
-                     AND (
-                        COALESCE(req.nickname, '') ILIKE ('%' || :search || '%')
-                        OR COALESCE(req.phone, '') ILIKE ('%' || :search || '%')
-                     )
-                )
-                OR (
-                    :searchType = 'RECEIVER'
-                    AND (
-                        COALESCE(res.nickname, '') ILIKE ('%' || :search || '%')
-                        OR COALESCE(res.phone, '') ILIKE ('%' || :search || '%')
-                     )
+                    CASE
+                        WHEN :searchType = 'ALL' THEN (
+                            COALESCE(req.nickname, '') ILIKE '%' || :search || '%'
+                            OR COALESCE(req.phone, '') ILIKE '%' || :search || '%'
+                            OR COALESCE(res.nickname, '') ILIKE '%' || :search || '%'
+                            OR COALESCE(res.phone, '') ILIKE '%' || :search || '%'
+                        )
+            
+                        WHEN :searchType = 'SENDER' THEN (
+                            COALESCE(req.nickname, '') ILIKE '%' || :search || '%'
+                            OR COALESCE(req.phone, '') ILIKE '%' || :search || '%'
+                        )
+            
+                        WHEN :searchType = 'RECEIVER' THEN (
+                            COALESCE(res.nickname, '') ILIKE '%' || :search || '%'
+                            OR COALESCE(res.phone, '') ILIKE '%' || :search || '%'
+                        )
+                    END
                 )
             )
         ORDER BY

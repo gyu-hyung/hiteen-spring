@@ -95,46 +95,44 @@ interface AdminGiftRepository : CoroutineCrudRepository<GiftEntity, Long> {
         LEFT JOIN users giver ON giver.id = g.user_id
         LEFT JOIN users receiver ON receiver.id = gu.user_id
         WHERE g.deleted_at IS NULL
-          AND (
-              :search IS NULL
-              OR (
-                  :searchType = 'ALL'
-                  AND (
-                      giver.nickname ILIKE CONCAT('%', :search, '%')
-                      OR receiver.nickname ILIKE CONCAT('%', :search, '%')
-                  )
-              )
-              OR (
-                  :searchType = 'giver'
-                  AND giver.nickname ILIKE CONCAT('%', :search, '%')
-              )
-              OR (
-                  :searchType = 'receiver'
-                  AND receiver.nickname ILIKE CONCAT('%', :search, '%')
-              )
-          )
-          AND (
-              :category IS NULL OR g.category = :category
-          )
-          AND (
-              :type IS NULL OR g.type = :type
-          )
-          AND (
-              :status IS NULL OR :status = 'ALL'
-              OR (:status = 'WAIT' AND gu.status = 0)
-              OR (:status = 'SENT' AND gu.status = 1)
-              OR (:status = 'USED' AND gu.status = 2)
-              OR (:status = 'EXPIRED' AND gu.status = 3)
-              OR (:status = 'DELIVERY_REQUESTED' AND gu.status = 4)
-              OR (:status = 'DELIVERY_DONE' AND gu.status = 5)
-              OR (:status = 'GRANT_REQUESTED' AND gu.status = 6)
-              OR (:status = 'GRANTED' AND gu.status = 7)
-              OR (:status = 'CANCELLED' AND gu.status = -1)
-          )
-          AND (
+            AND (
+                :search IS NULL
+                OR (
+                    CASE
+                        WHEN :searchType = 'ALL' THEN
+                            giver.nickname ILIKE '%' || :search || '%'
+                            OR receiver.nickname ILIKE '%' || :search || '%'
+            
+                        WHEN :searchType = 'giver' THEN
+                            giver.nickname ILIKE '%' || :search || '%'
+            
+                        WHEN :searchType = 'receiver' THEN
+                            receiver.nickname ILIKE '%' || :search || '%'
+                    END
+                )
+            )
+            AND (
+                :category IS NULL OR g.category = :category
+            )
+            AND (
+                :type IS NULL OR g.type = :type
+            )
+            AND (
+                :status IS NULL OR :status = 'ALL'
+                OR (:status = 'WAIT' AND gu.status = 0)
+                OR (:status = 'SENT' AND gu.status = 1)
+                OR (:status = 'USED' AND gu.status = 2)
+                OR (:status = 'EXPIRED' AND gu.status = 3)
+                OR (:status = 'DELIVERY_REQUESTED' AND gu.status = 4)
+                OR (:status = 'DELIVERY_DONE' AND gu.status = 5)
+                OR (:status = 'GRANT_REQUESTED' AND gu.status = 6)
+                OR (:status = 'GRANTED' AND gu.status = 7)
+                OR (:status = 'CANCELLED' AND gu.status = -1)
+            )
+            AND (
                 :uid IS NULL
                 OR ( receiver.uid = :uid )
-          )
+            )
         ORDER BY
             CASE WHEN :order = 'DESC' THEN g.created_at END DESC,
             CASE WHEN :order = 'ASC' THEN g.created_at END ASC
@@ -152,10 +150,6 @@ interface AdminGiftRepository : CoroutineCrudRepository<GiftEntity, Long> {
         type: GiftType?,
     ): Flow<AdminGiftResponse>
 
-
-
-
-
     @Query("""
         SELECT COUNT(*)
         FROM gift_users gu
@@ -163,46 +157,44 @@ interface AdminGiftRepository : CoroutineCrudRepository<GiftEntity, Long> {
         LEFT JOIN users giver ON giver.id = g.user_id
         LEFT JOIN users receiver ON receiver.id = gu.user_id
         WHERE g.deleted_at IS NULL
-          AND (
-              :search IS NULL
-              OR (
-                  :searchType = 'ALL'
-                  AND (
-                      giver.nickname ILIKE CONCAT('%', :search, '%')
-                      OR receiver.nickname ILIKE CONCAT('%', :search, '%')
-                  )
-              )
-              OR (
-                  :searchType = 'giver'
-                  AND giver.nickname ILIKE CONCAT('%', :search, '%')
-              )
-              OR (
-                  :searchType = 'receiver'
-                  AND receiver.nickname ILIKE CONCAT('%', :search, '%')
-              )
-          )
-          AND (
-              :category IS NULL OR g.category = :category
-          )
-          AND (
-              :type IS NULL OR g.type = :type
-          )
-          AND (
-              :status IS NULL OR :status = 'ALL'
-              OR (:status = 'WAIT' AND gu.status = 0)
-              OR (:status = 'SENT' AND gu.status = 1)
-              OR (:status = 'USED' AND gu.status = 2)
-              OR (:status = 'EXPIRED' AND gu.status = 3)
-              OR (:status = 'DELIVERY_REQUESTED' AND gu.status = 4)
-              OR (:status = 'DELIVERY_DONE' AND gu.status = 5)
-              OR (:status = 'GRANT_REQUESTED' AND gu.status = 6)
-              OR (:status = 'GRANTED' AND gu.status = 7)
-              OR (:status = 'CANCELLED' AND gu.status = -1)
-          )
-          AND (
+            AND (
+                :search IS NULL
+                OR (
+                    CASE
+                        WHEN :searchType = 'ALL' THEN
+                            giver.nickname ILIKE '%' || :search || '%'
+                            OR receiver.nickname ILIKE '%' || :search || '%'
+            
+                        WHEN :searchType = 'giver' THEN
+                            giver.nickname ILIKE '%' || :search || '%'
+            
+                        WHEN :searchType = 'receiver' THEN
+                            receiver.nickname ILIKE '%' || :search || '%'
+                    END
+                )
+            )
+            AND (
+                :category IS NULL OR g.category = :category
+            )
+            AND (
+                :type IS NULL OR g.type = :type
+            )
+            AND (
+                :status IS NULL OR :status = 'ALL'
+                OR (:status = 'WAIT' AND gu.status = 0)
+                OR (:status = 'SENT' AND gu.status = 1)
+                OR (:status = 'USED' AND gu.status = 2)
+                OR (:status = 'EXPIRED' AND gu.status = 3)
+                OR (:status = 'DELIVERY_REQUESTED' AND gu.status = 4)
+                OR (:status = 'DELIVERY_DONE' AND gu.status = 5)
+                OR (:status = 'GRANT_REQUESTED' AND gu.status = 6)
+                OR (:status = 'GRANTED' AND gu.status = 7)
+                OR (:status = 'CANCELLED' AND gu.status = -1)
+            )
+            AND (
                 :uid IS NULL
                 OR ( receiver.uid = :uid ) 
-          )
+            )
     """)
     suspend fun totalCount(
         search: String?,

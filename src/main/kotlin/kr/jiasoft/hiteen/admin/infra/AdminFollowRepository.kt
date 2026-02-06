@@ -21,15 +21,20 @@ interface AdminFollowRepository : CoroutineCrudRepository<FollowEntity, Long> {
             (
                 :search IS NULL
                 OR (
-                    :searchType = 'ALL' AND (
-                        u_from.nickname LIKE CONCAT('%', :search, '%')
-                        OR u_from.phone LIKE CONCAT('%', :search, '%')
-                        OR u_to.nickname LIKE CONCAT('%', :search, '%')
-                        OR u_to.phone LIKE CONCAT('%', :search, '%')
-                    )
+                    CASE
+                        WHEN :searchType = 'ALL' THEN
+                            u_from.nickname ILIKE '%' || :search || '%'
+                            OR u_from.phone ILIKE '%' || :search || '%'
+                            OR u_to.nickname ILIKE '%' || :search || '%'
+                            OR u_to.phone ILIKE '%' || :search || '%'
+            
+                        WHEN :searchType = 'nickname' THEN
+                            u_from.nickname ILIKE '%' || :search || '%'
+            
+                        WHEN :searchType = 'phone' THEN
+                            u_from.phone ILIKE '%' || :search || '%'
+                    END
                 )
-                OR (:searchType = 'nickname' AND u_from.nickname LIKE CONCAT('%', :search, '%'))
-                OR (:searchType = 'phone' AND u_from.phone LIKE CONCAT('%', :search, '%'))
             )
             AND (
                 :status IS NULL OR :status = 'ALL'
@@ -78,15 +83,20 @@ interface AdminFollowRepository : CoroutineCrudRepository<FollowEntity, Long> {
             (
                 :search IS NULL
                 OR (
-                    :searchType = 'ALL' AND (
-                        u_from.nickname LIKE CONCAT('%', :search, '%')
-                        OR u_from.phone LIKE CONCAT('%', :search, '%')
-                        OR u_to.nickname LIKE CONCAT('%', :search, '%')
-                        OR u_to.phone LIKE CONCAT('%', :search, '%')
-                    )
+                    CASE
+                        WHEN :searchType = 'ALL' THEN
+                            u_from.nickname ILIKE '%' || :search || '%'
+                            OR u_from.phone ILIKE '%' || :search || '%'
+                            OR u_to.nickname ILIKE '%' || :search || '%'
+                            OR u_to.phone ILIKE '%' || :search || '%'
+            
+                        WHEN :searchType = 'nickname' THEN
+                            u_from.nickname ILIKE '%' || :search || '%'
+            
+                        WHEN :searchType = 'phone' THEN
+                            u_from.phone ILIKE '%' || :search || '%'
+                    END
                 )
-                OR (:searchType = 'nickname' AND u_from.nickname LIKE CONCAT('%', :search, '%'))
-                OR (:searchType = 'phone' AND u_from.phone LIKE CONCAT('%', :search, '%'))
             )
             AND (
                 :status IS NULL OR :status = 'ALL'

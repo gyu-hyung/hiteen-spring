@@ -24,13 +24,18 @@ interface AdminFriendRepository : CoroutineCrudRepository<FriendEntity, Long> {
             (
                 :search IS NULL
                 OR (
-                    :searchType = 'ALL' AND (
-                        u.nickname LIKE CONCAT('%', :search, '%')
-                        OR u.phone LIKE CONCAT('%', :search, '%')
-                    )
+                    CASE
+                        WHEN :searchType = 'ALL' THEN
+                            u.nickname ILIKE '%' || :search || '%'
+                            OR u.phone ILIKE '%' || :search || '%'
+            
+                        WHEN :searchType = 'nickname' THEN
+                            u.nickname ILIKE '%' || :search || '%'
+            
+                        WHEN :searchType = 'phone' THEN
+                            u.phone ILIKE '%' || :search || '%'
+                    END
                 )
-                OR (:searchType = 'nickname' AND u.nickname LIKE CONCAT('%', :search, '%'))
-                OR (:searchType = 'phone' AND u.phone LIKE CONCAT('%', :search, '%'))
             )
             AND (
                 :status IS NULL OR :status = 'ALL'
@@ -75,24 +80,27 @@ interface AdminFriendRepository : CoroutineCrudRepository<FriendEntity, Long> {
          OR (f.friend_id = me.id AND u.id = f.user_id)
         )
         LEFT JOIN schools s ON u.school_id = s.id
-        
         WHERE
             (
                 :search IS NULL
                 OR (
-                    :searchType = 'ALL' AND (
-                        u.nickname LIKE CONCAT('%', :search, '%')
-                        OR u.phone LIKE CONCAT('%', :search, '%')
-                    )
+                    CASE
+                        WHEN :searchType = 'ALL' THEN
+                            u.nickname ILIKE '%' || :search || '%'
+                            OR u.phone ILIKE '%' || :search || '%'
+            
+                        WHEN :searchType = 'nickname' THEN
+                            u.nickname ILIKE '%' || :search || '%'
+            
+                        WHEN :searchType = 'phone' THEN
+                            u.phone ILIKE '%' || :search || '%'
+                    END
                 )
-                OR (:searchType = 'nickname' AND u.nickname LIKE CONCAT('%', :search, '%'))
-                OR (:searchType = 'phone' AND u.phone LIKE CONCAT('%', :search, '%'))
             )
             AND (
                 :status IS NULL OR :status = 'ALL'
                 OR (f.status = :status)
             )
-        
         ORDER BY 
             CASE WHEN :order = 'DESC' THEN f.created_at END DESC,
             CASE WHEN :order = 'ASC' THEN f.created_at END ASC

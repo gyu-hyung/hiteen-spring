@@ -16,17 +16,18 @@ interface AdminGameRepository : CoroutineCrudRepository<GameEntity, Long> {
         SELECT COUNT(*)
         FROM games g
         WHERE
-        
             (
                 :search IS NULL
                 OR (
-                    :searchType = 'ALL' AND (
-                        g.name ILIKE CONCAT('%', :search, '%')
-                    )
-                )
-                OR (:searchType = 'name' AND g.name ILIKE CONCAT('%', :search, '%'))
-            )
+                    CASE
+                        WHEN :searchType = 'ALL' THEN
+                            g.name ILIKE '%' || :search || '%'
             
+                        WHEN :searchType = 'name' THEN
+                            g.name ILIKE '%' || :search || '%'
+                    END
+                )
+            )
             AND (
                 :status IS NULL OR :status = 'ALL'
                 OR (:status = 'ACTIVE' AND g.status = 'ACTIVE')
@@ -49,17 +50,18 @@ interface AdminGameRepository : CoroutineCrudRepository<GameEntity, Long> {
         SELECT g.*
         FROM games g
         WHERE
-        
             (
                 :search IS NULL
                 OR (
-                    :searchType = 'ALL' AND (
-                        g.name ILIKE CONCAT('%', :search, '%')
-                    )
-                )
-                OR (:searchType = 'name' AND g.name ILIKE CONCAT('%', :search, '%'))
-            )
+                    CASE
+                        WHEN :searchType = 'ALL' THEN
+                            g.name ILIKE '%' || :search || '%'
             
+                        WHEN :searchType = 'name' THEN
+                            g.name ILIKE '%' || :search || '%'
+                    END
+                )
+            )
             AND (
                 :status IS NULL OR :status = 'ALL'
                 OR (:status = 'ACTIVE' AND g.status = 'ACTIVE')
