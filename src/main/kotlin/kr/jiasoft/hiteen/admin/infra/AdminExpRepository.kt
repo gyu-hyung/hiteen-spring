@@ -14,7 +14,7 @@ interface AdminExpRepository : CoroutineCrudRepository<UserExpHistoryEntity, Lon
     @Query("""
         SELECT COUNT(*)
         FROM user_exp_history e
-        LEFT JOIN users u ON e.user_id = u.id
+        LEFT JOIN users u ON u.id = e.user_id
         WHERE
             (
                 :status IS NULL OR :status = 'ALL'
@@ -40,16 +40,12 @@ interface AdminExpRepository : CoroutineCrudRepository<UserExpHistoryEntity, Lon
                         u.nickname ILIKE '%' || :search || '%'
                         OR u.phone ILIKE '%' || :search || '%'
                         OR e.reason ILIKE '%' || :search || '%'
-            
                     WHEN :searchType = 'NAME' THEN
                         u.nickname ILIKE '%' || :search || '%'
-            
                     WHEN :searchType = 'PHONE' THEN
                         u.phone ILIKE '%' || :search || '%'
-            
                     WHEN :searchType = 'MEMO' THEN
                         e.reason ILIKE '%' || :search || '%'
-            
                     ELSE TRUE
                 END
             )
@@ -74,7 +70,7 @@ interface AdminExpRepository : CoroutineCrudRepository<UserExpHistoryEntity, Lon
             u.nickname AS user_name,
             u.phone AS user_phone
         FROM user_exp_history e
-        LEFT JOIN users u ON e.user_id = u.id
+        LEFT JOIN users u ON u.id = e.user_id
         WHERE
             (
                 :status IS NULL OR :status = 'ALL'
@@ -82,7 +78,7 @@ interface AdminExpRepository : CoroutineCrudRepository<UserExpHistoryEntity, Lon
                 OR (:status = 'DEBIT' AND e.points < 0)
             )
             AND (
-                :type IS NULL OR :type = 'ALL'
+                :type IS NULL OR :status = 'ALL'
                 OR e.action_code LIKE CONCAT(:type, '%')
             )
             AND (
@@ -100,16 +96,12 @@ interface AdminExpRepository : CoroutineCrudRepository<UserExpHistoryEntity, Lon
                         u.nickname ILIKE '%' || :search || '%'
                         OR u.phone ILIKE '%' || :search || '%'
                         OR e.reason ILIKE '%' || :search || '%'
-            
                     WHEN :searchType = 'NAME' THEN
                         u.nickname ILIKE '%' || :search || '%'
-            
                     WHEN :searchType = 'PHONE' THEN
                         u.phone ILIKE '%' || :search || '%'
-            
                     WHEN :searchType = 'MEMO' THEN
                         e.reason ILIKE '%' || :search || '%'
-            
                     ELSE TRUE
                 END
             )
@@ -117,7 +109,7 @@ interface AdminExpRepository : CoroutineCrudRepository<UserExpHistoryEntity, Lon
                 :uid IS NULL OR u.uid = :uid
             )
         ORDER BY id DESC
-        LIMIT :limit OFFSET :offset
+        LIMIT :perPage OFFSET :offset
     """)
     suspend fun listSearch(
         status: String?,
@@ -127,8 +119,7 @@ interface AdminExpRepository : CoroutineCrudRepository<UserExpHistoryEntity, Lon
         searchType: String?,
         search: String?,
         uid: UUID?,
-        sort: String?,
-        limit: Int,
+        perPage: Int,
         offset: Int,
     ): Flow<AdminExpResponse>
 }

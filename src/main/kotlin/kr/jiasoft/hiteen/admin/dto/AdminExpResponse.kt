@@ -5,7 +5,7 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 data class AdminExpResponse(
-    val id: Long? = null,
+    val id: Long = 0,
 
     val userId: Long? = null,
     var userUid: String? = null,
@@ -14,10 +14,10 @@ data class AdminExpResponse(
 
     val targetId: Long? = null,
     val actionCode: String,
-    val points: Int,
+    val points: Int = 0,
     val reason: String? = null,
 
-    val statusName: String? = if (points < 0) "차감" else "적립",
+    val statusName: String = if (points < 0) "차감" else "적립",
 
     @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm:ss")
     val createdAt: LocalDateTime? = null,

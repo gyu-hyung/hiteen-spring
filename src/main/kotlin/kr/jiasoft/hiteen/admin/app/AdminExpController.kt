@@ -40,14 +40,13 @@ class AdminExpController(
         @RequestParam searchType: String? = null,
         @RequestParam search: String? = null,
         @RequestParam uid: UUID? = null,
-        @RequestParam sort: String = "DESC",
         @RequestParam page: Int = 1,
         @RequestParam perPage: Int = 10,
     ): ResponseEntity<ApiResult<ApiPage<AdminExpResponse>>> {
         val startDate = startDate?.atStartOfDay()
         val endDate = endDate?.plusDays(1)?.atStartOfDay()
 
-        val data = adminExpService.expHistory(status, type, startDate, endDate, searchType, search, uid, sort, page, perPage)
+        val data = adminExpService.expHistory(status, type, startDate, endDate, searchType, search, uid, page, perPage)
 
         return success(data)
     }

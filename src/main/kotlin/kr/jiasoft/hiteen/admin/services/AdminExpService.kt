@@ -24,7 +24,6 @@ class AdminExpService(
         searchType: String?,
         search: String?,
         uid: UUID?,
-        sort: String = "DESC",
         page: Int,
         perPage: Int,
     ): ApiPage<AdminExpResponse> {
@@ -35,7 +34,7 @@ class AdminExpService(
 
         // 총 레코드수
         val total = adminExpRepository.countSearch(status, type, startDate, endDate, searchType, search, uid)
-        val rows = adminExpRepository.listSearch(status, type, startDate, endDate, searchType, search, uid, sort, perPage, offset).toList()
+        val rows = adminExpRepository.listSearch(status, type, startDate, endDate, searchType, search, uid, perPage, offset).toList()
 
         return PageUtil.of(
             items = rows,
