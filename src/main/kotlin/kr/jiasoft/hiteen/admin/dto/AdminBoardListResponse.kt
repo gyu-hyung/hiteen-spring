@@ -10,7 +10,7 @@ data class AdminBoardListResponse (
     val uid: String,
     val category: String,
     val subject: String?,
-    val content: String,
+    val content: String?,
     val link: String?,
     val ip: String?,
     val hits: Int,

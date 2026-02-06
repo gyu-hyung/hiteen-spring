@@ -27,16 +27,12 @@ interface AdminBoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
                         b.subject ILIKE '%' || :search || '%'
                         OR b.content ILIKE '%' || :search || '%'
                         OR u.nickname ILIKE '%' || :search || '%'
-            
                     WHEN :searchType = 'subject' THEN
                         b.subject ILIKE '%' || :search || '%'
-            
                     WHEN :searchType = 'content' THEN
                         b.content ILIKE '%' || :search || '%'
-            
                     WHEN :searchType = 'nickname' THEN
                         u.nickname ILIKE '%' || :search || '%'
-            
                     ELSE TRUE
                 END
             ) 
@@ -109,16 +105,12 @@ interface AdminBoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
                         b.subject ILIKE '%' || :search || '%'
                         OR b.content ILIKE '%' || :search || '%'
                         OR u.nickname ILIKE '%' || :search || '%'
-            
                     WHEN :searchType = 'subject' THEN
                         b.subject ILIKE '%' || :search || '%'
-            
                     WHEN :searchType = 'content' THEN
                         b.content ILIKE '%' || :search || '%'
-            
                     WHEN :searchType = 'nickname' THEN
                         u.nickname ILIKE '%' || :search || '%'
-            
                     ELSE TRUE
                 END
             ) 

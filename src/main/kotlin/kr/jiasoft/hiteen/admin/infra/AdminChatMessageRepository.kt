@@ -18,7 +18,8 @@ interface AdminChatMessageRepository : CoroutineCrudRepository<ChatMessageEntity
         FROM chat_messages cm
         LEFT JOIN chat_rooms cr ON cr.id = cm.chat_room_id
         LEFT JOIN users cu ON cu.id = cm.user_id
-        WHERE (
+        WHERE
+            (
                 :status IS NULL OR :status = 'ALL'
                 OR (:status = 'ACTIVE' AND cm.deleted_at IS NULL)
                 OR (:status = 'DELETED' AND cm.deleted_at IS NOT NULL)
@@ -40,22 +41,16 @@ interface AdminChatMessageRepository : CoroutineCrudRepository<ChatMessageEntity
                         OR COALESCE(cm.content, '') ILIKE '%' || :search || '%'
                         OR COALESCE(cu.nickname, '') ILIKE '%' || :search || '%'
                         OR COALESCE(cu.phone, '') ILIKE '%' || :search || '%'
-            
                     WHEN :searchType = 'CODE' THEN
-                        CCAST(cr.uid AS TEXT) ILIKE ('%' || :search || '%')
-            
+                        CAST(cr.uid AS TEXT) ILIKE ('%' || :search || '%')
                     WHEN :searchType = 'ROOM' THEN
                         COALESCE(cr.room_name, '') ILIKE '%' || :search || '%'
-            
                     WHEN :searchType = 'CONTENT' THEN
                         COALESCE(cm.content, '') ILIKE '%' || :search || '%'
-            
                     WHEN :searchType = 'NAME' THEN
                         COALESCE(cu.nickname, '') ILIKE '%' || :search || '%'
-            
                     WHEN :searchType = 'PHONE' THEN
                         COALESCE(cu.phone, '') ILIKE '%' || :search || '%'
-            
                     ELSE TRUE
                 END
             )
@@ -104,7 +99,8 @@ interface AdminChatMessageRepository : CoroutineCrudRepository<ChatMessageEntity
         FROM chat_messages cm
         LEFT JOIN chat_rooms cr ON cr.id = cm.chat_room_id
         LEFT JOIN users cu ON cu.id = cm.user_id
-        WHERE (
+        WHERE
+            (
                 :status IS NULL OR :status = 'ALL'
                 OR (:status = 'ACTIVE' AND cm.deleted_at IS NULL)
                 OR (:status = 'DELETED' AND cm.deleted_at IS NOT NULL)
@@ -126,22 +122,16 @@ interface AdminChatMessageRepository : CoroutineCrudRepository<ChatMessageEntity
                         OR COALESCE(cm.content, '') ILIKE '%' || :search || '%'
                         OR COALESCE(cu.nickname, '') ILIKE '%' || :search || '%'
                         OR COALESCE(cu.phone, '') ILIKE '%' || :search || '%'
-            
                     WHEN :searchType = 'CODE' THEN
                         CAST(cr.uid AS TEXT) ILIKE ('%' || :search || '%')
-            
                     WHEN :searchType = 'ROOM' THEN
                         COALESCE(cr.room_name, '') ILIKE '%' || :search || '%'
-            
                     WHEN :searchType = 'CONTENT' THEN
                         COALESCE(cm.content, '') ILIKE '%' || :search || '%'
-            
                     WHEN :searchType = 'NAME' THEN
                         COALESCE(cu.nickname, '') ILIKE '%' || :search || '%'
-            
                     WHEN :searchType = 'PHONE' THEN
                         COALESCE(cu.phone, '') ILIKE '%' || :search || '%'
-            
                     ELSE TRUE
                 END
             )
