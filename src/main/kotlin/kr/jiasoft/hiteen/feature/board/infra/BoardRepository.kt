@@ -356,6 +356,8 @@ interface BoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
             b.link,
             b.hits,
             b.status,
+            b.address,
+            b.detail_address,
             b.asset_uid      AS asset_uid,
             b.lat,
             b.lng,
