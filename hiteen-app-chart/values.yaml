@@ -201,7 +201,7 @@ metrics:
 #   - hiteen-app-secret: DB, Mongo, JWT 등 앱 설정
 #   - redis-secret: Redis 비밀번호
 #   - firebase-secret: Firebase 인증 키
-#   - gitlab-registry-secret: GitLab Container Registry 인증
+#   - gitlab-registry: GitLab Container Registry 인증
 #
 # Secret 수정 방법:
 #   kubectl edit secret hiteen-app-secret -n hiteen-prod
