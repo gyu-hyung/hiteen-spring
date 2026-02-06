@@ -23,8 +23,8 @@ data class AdminCashResponse(
     @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm:ss")
     val deletedAt: LocalDateTime? = null,
 
-    @get:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd")
-    val createdDate: String? = createdAt?.format(DateTimeFormatter.ofPattern("yyyy.MM.dd")),
+    @get:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yy.MM.dd HH:mm")
+    val createdDate: String? = createdAt?.format(DateTimeFormatter.ofPattern("yy.MM.dd HH:mm")),
 
     @param:Schema(description = "적립/차감 구분명", example = "적립")
     val typeName: String? = if (type === "DEBIT") "차감" else "적립",
