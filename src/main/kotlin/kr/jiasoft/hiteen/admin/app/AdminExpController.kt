@@ -2,8 +2,8 @@ package kr.jiasoft.hiteen.admin.app
 
 import io.swagger.v3.oas.annotations.Parameter
 import kotlinx.coroutines.flow.toList
+import kr.jiasoft.hiteen.admin.dto.AdminExpGiveRequest
 import kr.jiasoft.hiteen.admin.dto.AdminExpResponse
-import kr.jiasoft.hiteen.admin.dto.AdminPointGiveRequest
 import kr.jiasoft.hiteen.admin.dto.AdminUserSearchResponse
 import kr.jiasoft.hiteen.admin.infra.AdminUserRepository
 import kr.jiasoft.hiteen.admin.services.AdminExpService
@@ -11,6 +11,7 @@ import kr.jiasoft.hiteen.common.extensions.failure
 import kr.jiasoft.hiteen.common.extensions.success
 import kr.jiasoft.hiteen.common.dto.ApiPage
 import kr.jiasoft.hiteen.common.dto.ApiResult
+import kr.jiasoft.hiteen.feature.level.app.ExpService
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
@@ -27,6 +28,7 @@ enum class ExpType { CREDIT, DEBIT }
 @RestController
 @RequestMapping("/api/admin/exp")
 class AdminExpController(
+    private val appExpService: ExpService,
     private val adminExpService: AdminExpService,
     private val adminUserRepository: AdminUserRepository,
 ) {
@@ -71,19 +73,21 @@ class AdminExpController(
         return success(data)
     }
 
-    // 포인트 지급/차감 처리
+    // 경험치 지급/차감
     @PostMapping("/give")
     suspend fun give(
-        @Parameter request: AdminPointGiveRequest,
+        @Parameter req: AdminExpGiveRequest,
     ) : ResponseEntity<ApiResult<Any>> {
-        val type: ExpType = request.type?.uppercase()?.let(ExpType::valueOf) ?: ExpType.CREDIT
-        var point = request.point ?: 0
-        var memo = request.memo ?: ""
-        val receivers = request.receivers ?: emptyList()
-        var targetType: String? = null
+        val type: ExpType = req.type?.uppercase()?.let {
+            try { ExpType.valueOf(it) } catch (e: Exception) { ExpType.CREDIT }
+        } ?: ExpType.CREDIT
 
-        if (point == 0) {
-            return failure("포인트를 입력해 주세요.")
+        var amount = req.amount ?: 0
+        var memo = req.memo ?: ""
+        val receivers = req.receivers ?: emptyList()
+
+        if (amount == 0) {
+            return failure("경험치를 입력해 주세요.")
         }
         if (receivers.isEmpty()) {
             return failure("회원을 한 명 이상 선택해 주세요.")
@@ -91,15 +95,16 @@ class AdminExpController(
 
         when (type) {
             ExpType.DEBIT -> {
-                if (point > 0) point *= -1
+                if (amount > 0) amount *= -1
                 if (memo.isBlank()) memo = "운영자 차감"
             }
             ExpType.CREDIT -> {
-                if (point < 0) point *= -1
+                if (amount < 0) amount *= -1
                 if (memo.isBlank()) memo = "운영자 지급"
             }
         }
 
+        var targetType: String? = null
         for (phone in receivers) {
             if (phone == "all") {
                 targetType = phone
@@ -109,12 +114,7 @@ class AdminExpController(
 
         val users: List<UserEntity> = when (targetType) {
             "all" -> adminUserRepository.findByRole("USER")
-            else -> {
-                adminUserRepository.findUsersByPhones(
-                    role = "USER",
-                    phones = receivers
-                )
-            }
+            else -> adminUserRepository.findUsersByPhones(role = "USER", phones = receivers)
         }
 
         val total = users.size
@@ -122,26 +122,25 @@ class AdminExpController(
             return failure("회원을 한 명 이상 선택해 주세요.")
         }
 
-        /*
         users.forEach { user ->
-            adminExpService.givePoint(
-                user.id,
-                "ADMIN",
-                null,
-                type.name,
-                point,
-                memo
+            appExpService.grantExp(
+                userId = user.id,
+                actionCode = "ADMIN",
+                targetId = null,
+                requestId = null,
+                dynamicPoints = amount,
+                dynamicMemo = memo,
+                giveAdmin = true
             )
         }
-        */
 
         val message = if (type == ExpType.DEBIT) {
-            "${total}명 회원의 포인트를 차감했습니다."
+            "포인트를 차감했습니다."
         } else {
-            "${total}명 회원에게 포인트를 지급했습니다."
+            "포인트를 지급했습니다."
         }
 
-        val data = mapOf("receivers" to total)
+        val data = mapOf("total" to total)
 
         return success(data, message)
     }

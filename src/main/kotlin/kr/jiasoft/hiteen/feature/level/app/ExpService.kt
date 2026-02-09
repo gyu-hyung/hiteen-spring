@@ -27,6 +27,7 @@ class ExpService(
         requestId: Long? = null,
         dynamicPoints: Int? = null,
         dynamicMemo: String? = null,
+        giveAdmin: Boolean? = false,
     ) {
         val action = expActionProvider.get(actionCode)?: return
 
@@ -73,17 +74,18 @@ class ExpService(
             )
         )
 
-        // tier delta 기록
-        if (newTier != null && newTier.id != prevTier) {
-            addDeltaTier(
-                prevTier = tierRepository.findById(prevTier)?.rankOrder ?: 0,
-                newTier = newTier.rankOrder
-            ).awaitSingleOrNull()
+        if (giveAdmin == false) {
+            // tier delta 기록
+            if (newTier != null && newTier.id != prevTier) {
+                addDeltaTier(
+                    prevTier = tierRepository.findById(prevTier)?.rankOrder ?: 0,
+                    newTier = newTier.rankOrder
+                ).awaitSingleOrNull()
+            }
+
+            //userId 가 requestId 와 같을때에만 경험치 delta 기록
+            if(requestId == null || userId == requestId) addDeltaExp(points).awaitSingleOrNull()
         }
-
-        //userId 가 requestId 와 같을때에만 경험치 delta 기록
-        if(requestId == null || userId == requestId) addDeltaExp(points).awaitSingleOrNull()
-
     }
 
 
