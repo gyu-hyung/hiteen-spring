@@ -30,7 +30,7 @@ data class AdminArticleSaveRequest(
     @field:Schema(description = "종료일", example = "2025-12-31")
     val endDate: LocalDate? = null,
 
-    @field:Schema(description = "상태 (ACTIVE: 진행중, INACTIVE: 비활성, ENDED: 종료, WINNER_ANNOUNCED: 당첨자발표)", example = "ACTIVE")
+    @field:Schema(description = "상태 (ACTIVE: 진행중, INACTIVE: 비활성, ENDED: 종료, WINNING: 당첨자발표)", example = "ACTIVE")
     val status: String,
 
     // 일반 첨부파일 (NOTICE용)

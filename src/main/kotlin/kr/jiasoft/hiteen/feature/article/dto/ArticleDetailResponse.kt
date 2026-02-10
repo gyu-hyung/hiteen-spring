@@ -8,6 +8,10 @@ import java.util.UUID
 
 @Schema(description = "공지사항/이벤트 상세 응답 DTO")
 data class ArticleDetailResponse(
+
+    @param:Schema(description = "게시글 PK (내부 관리용)", example = "1", hidden = true)
+    val id: Long,
+
     @param:Schema(description = "카테고리 (NOTICE / EVENT)", example = "NOTICE")
     val category: String,
 

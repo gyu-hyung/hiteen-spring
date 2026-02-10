@@ -9,7 +9,7 @@ import java.util.UUID
 
 @Schema(description = "공지사항/이벤트 응답 DTO")
 data class ArticleResponse(
-    @JsonIgnore
+//    @JsonIgnore
     @param:Schema(description = "게시글 PK (내부 관리용)", example = "1", hidden = true)
     val id: Long,
 

@@ -26,12 +26,12 @@ class ArticleController(
 
     @Operation(
         summary = "공지사항/이벤트 목록 조회 (페이지 기반)",
-        description = "카테고리(NOTICE/EVENT), 상태(ACTIVE/ENDED/WINNER_ANNOUNCED), 검색어, 페이지 기반 페이지네이션으로 목록을 조회합니다."
+        description = "카테고리(NOTICE/EVENT), 상태(ACTIVE/ENDED/WINNING), 검색어, 페이지 기반 페이지네이션으로 목록을 조회합니다."
     )
     @GetMapping
     suspend fun listByPage(
         @Parameter(description = "카테고리 (NOTICE/EVENT)") @RequestParam(required = false) category: ArticleCategory?,
-        @Parameter(description = "상태 (ACTIVE: 진행중, ENDED: 종료, WINNER_ANNOUNCED: 당첨자발표)") @RequestParam(required = false) status: ArticleStatus?,
+        @Parameter(description = "상태 (ACTIVE: 진행중, ENDED: 종료, WINNING: 당첨자발표)") @RequestParam(required = false) status: ArticleStatus?,
         @Parameter(description = "검색어") @RequestParam(required = false) q: String?,
         @Parameter(description = "페이지 번호 (0부터 시작)") @RequestParam(defaultValue = "0") page: Int,
         @Parameter(description = "페이지당 개수") @RequestParam(defaultValue = "20") size: Int,
@@ -43,12 +43,12 @@ class ArticleController(
 
     @Operation(
         summary = "공지사항/이벤트 목록 조회 (커서 기반)",
-        description = "카테고리(NOTICE/EVENT), 상태(ACTIVE/ENDED/WINNER_ANNOUNCED), 검색어, 커서 기반 페이지네이션으로 목록을 조회합니다."
+        description = "카테고리(NOTICE/EVENT), 상태(ACTIVE/ENDED/WINNING), 검색어, 커서 기반 페이지네이션으로 목록을 조회합니다."
     )
     @GetMapping("/cursor")
     suspend fun listByCursor(
         @Parameter(description = "카테고리 (NOTICE/EVENT)") @RequestParam(required = false) category: ArticleCategory?,
-        @Parameter(description = "상태 (ACTIVE: 진행중, ENDED: 종료, WINNER_ANNOUNCED: 당첨자발표)") @RequestParam(required = false) status: ArticleStatus?,
+        @Parameter(description = "상태 (ACTIVE: 진행중, ENDED: 종료, WINNING: 당첨자발표)") @RequestParam(required = false) status: ArticleStatus?,
         @Parameter(description = "검색어") @RequestParam(required = false) q: String?,
         @Parameter(description = "조회 개수 (기본 20)") @RequestParam(defaultValue = "20") size: Int,
         @Parameter(description = "커서 (마지막 article id)") @RequestParam(required = false) cursor: Long?,

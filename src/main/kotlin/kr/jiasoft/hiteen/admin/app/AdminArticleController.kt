@@ -525,7 +525,7 @@ class AdminArticleController(
      */
     @Operation(
         summary = "공지사항/이벤트 상태 변경",
-        description = "게시글의 상태만 변경합니다. (ACTIVE: 진행중, INACTIVE: 비활성, ENDED: 종료, WINNER_ANNOUNCED: 당첨자발표)"
+        description = "게시글의 상태만 변경합니다. (ACTIVE: 진행중, INACTIVE: 비활성, ENDED: 종료, WINNING: 당첨자발표)"
     )
     @PatchMapping("/{id}/status")
     suspend fun updateStatus(
@@ -533,7 +533,7 @@ class AdminArticleController(
         @Parameter(description = "변경할 상태") @RequestParam status: String,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ): ResponseEntity<ApiResult<Any>> {
-        val validStatuses = listOf("ACTIVE", "INACTIVE", "ENDED", "WINNER_ANNOUNCED")
+        val validStatuses = listOf("ACTIVE", "INACTIVE", "ENDED", "WINNING")
         if (status !in validStatuses) {
             throw IllegalArgumentException("유효하지 않은 상태입니다. 가능한 값: $validStatuses")
         }

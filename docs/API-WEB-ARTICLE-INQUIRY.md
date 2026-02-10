@@ -44,7 +44,7 @@
 |----|------|
 | `ACTIVE` | 진행중 |
 | `ENDED` | 종료됨 |
-| `WINNER_ANNOUNCED` | 당첨자 발표 |
+| `WINNING` | 당첨자 발표 |
 
 ---
 
@@ -57,7 +57,7 @@
 | 파라미터 | 타입 | 필수 | 기본값 | 설명 |
 |----------|------|------|--------|------|
 | `category` | String | ❌ | - | 카테고리 (`NOTICE` / `EVENT`) |
-| `status` | String | ❌ | - | 상태 (`ACTIVE` / `ENDED` / `WINNER_ANNOUNCED`) |
+| `status` | String | ❌ | - | 상태 (`ACTIVE` / `ENDED` / `WINNING`) |
 | `q` | String | ❌ | - | 검색어 (제목, 내용 검색) |
 | `page` | Integer | ❌ | 0 | 페이지 번호 (0부터 시작) |
 | `size` | Integer | ❌ | 20 | 페이지당 개수 |
@@ -117,7 +117,7 @@ Authorization: Bearer {token}
 | 파라미터 | 타입 | 필수 | 기본값 | 설명 |
 |----------|------|------|--------|------|
 | `category` | String | ❌ | - | 카테고리 (`NOTICE` / `EVENT`) |
-| `status` | String | ❌ | - | 상태 (`ACTIVE` / `ENDED` / `WINNER_ANNOUNCED`) |
+| `status` | String | ❌ | - | 상태 (`ACTIVE` / `ENDED` / `WINNING`) |
 | `q` | String | ❌ | - | 검색어 (제목, 내용 검색) |
 | `size` | Integer | ❌ | 20 | 조회 개수 |
 | `cursor` | Long | ❌ | - | 마지막 article id (다음 페이지 조회용) |
@@ -125,7 +125,7 @@ Authorization: Bearer {token}
 #### Request Example
 
 ```http
-GET /api/articles/cursor?category=EVENT&status=WINNER_ANNOUNCED&size=20&cursor=100
+GET /api/articles/cursor?category=EVENT&status=WINNING&size=20&cursor=100
 Authorization: Bearer {token}
 ```
 

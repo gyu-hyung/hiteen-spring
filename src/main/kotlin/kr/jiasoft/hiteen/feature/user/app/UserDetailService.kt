@@ -78,7 +78,7 @@ class UserDetailService(
             agreeMarketing = req.agreeMarketing,
             pushService = req.pushService,
             pushMarketing = req.pushMarketing,
-            pushItems = pushItemsJson?: "[]",
+            pushItems = pushItemsJson?: """["ALL"]""",
             memo = req.memo,
         )
 

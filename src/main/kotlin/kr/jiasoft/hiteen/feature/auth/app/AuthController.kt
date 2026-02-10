@@ -115,6 +115,11 @@ class AuthController(
         val minute = 5
         val phone = req.phone.filter { it.isDigit() }
 
+        //특정 사용자 인증 완료처리
+        if(phone == "01000009999") {
+            return ResponseEntity.ok(ApiResult.success(true))
+        }
+
         //TODO: 회원가입 휴대폰 인증목적으로 요청한 코드인지 확인해야하나?
         val data = smsAuthRepository.findValidAuthCode(phone, minute) ?:
             throw IllegalStateException("인증번호가 만료되었거나 유효하지 않아~")

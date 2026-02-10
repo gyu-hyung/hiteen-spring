@@ -35,10 +35,10 @@ interface ArticleRepository : CoroutineCrudRepository<ArticleEntity, Long> {
           AND (:search IS NULL OR a.subject ILIKE CONCAT('%', :search, '%') OR a.content ILIKE CONCAT('%', :search, '%'))
           AND (
             CASE 
-              WHEN :status IS NULL THEN a.status IN ('ACTIVE', 'ENDED', 'WINNER_ANNOUNCED')
+              WHEN :status IS NULL THEN a.status IN ('ACTIVE', 'ENDED', 'WINNING')
               WHEN :status = 'ACTIVE' THEN a.status = 'ACTIVE' AND (a.end_date IS NULL OR a.end_date >= CURRENT_DATE)
               WHEN :status = 'ENDED' THEN a.status = 'ENDED' OR (a.status = 'ACTIVE' AND a.end_date IS NOT NULL AND a.end_date < CURRENT_DATE)
-              WHEN :status = 'WINNER_ANNOUNCED' THEN a.status = 'WINNER_ANNOUNCED'
+              WHEN :status = 'WINNING' THEN a.status = 'WINNING'
               ELSE a.status = :status
             END
           )
@@ -62,10 +62,10 @@ interface ArticleRepository : CoroutineCrudRepository<ArticleEntity, Long> {
           AND (:search IS NULL OR a.subject ILIKE CONCAT('%', :search, '%') OR a.content ILIKE CONCAT('%', :search, '%'))
           AND (
             CASE 
-              WHEN :status IS NULL THEN a.status IN ('ACTIVE', 'ENDED', 'WINNER_ANNOUNCED')
+              WHEN :status IS NULL THEN a.status IN ('ACTIVE', 'ENDED', 'WINNING')
               WHEN :status = 'ACTIVE' THEN a.status = 'ACTIVE' AND (a.end_date IS NULL OR a.end_date >= CURRENT_DATE)
               WHEN :status = 'ENDED' THEN a.status = 'ENDED' OR (a.status = 'ACTIVE' AND a.end_date IS NOT NULL AND a.end_date < CURRENT_DATE)
-              WHEN :status = 'WINNER_ANNOUNCED' THEN a.status = 'WINNER_ANNOUNCED'
+              WHEN :status = 'WINNING' THEN a.status = 'WINNING'
               ELSE a.status = :status
             END
           )
@@ -85,10 +85,10 @@ interface ArticleRepository : CoroutineCrudRepository<ArticleEntity, Long> {
           AND (:search IS NULL OR a.subject ILIKE CONCAT('%', :search, '%') OR a.content ILIKE CONCAT('%', :search, '%'))
           AND (
             CASE 
-              WHEN :status IS NULL THEN a.status IN ('ACTIVE', 'ENDED', 'WINNER_ANNOUNCED')
+              WHEN :status IS NULL THEN a.status IN ('ACTIVE', 'ENDED', 'WINNING')
               WHEN :status = 'ACTIVE' THEN a.status = 'ACTIVE' AND (a.end_date IS NULL OR a.end_date >= CURRENT_DATE)
               WHEN :status = 'ENDED' THEN a.status = 'ENDED' OR (a.status = 'ACTIVE' AND a.end_date IS NOT NULL AND a.end_date < CURRENT_DATE)
-              WHEN :status = 'WINNER_ANNOUNCED' THEN a.status = 'WINNER_ANNOUNCED'
+              WHEN :status = 'WINNING' THEN a.status = 'WINNING'
               ELSE a.status = :status
             END
           )

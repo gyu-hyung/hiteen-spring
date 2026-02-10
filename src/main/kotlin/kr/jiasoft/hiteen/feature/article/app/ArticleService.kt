@@ -60,6 +60,7 @@ class ArticleService(
             val large = allAssets.filter { it.assetType == ArticleAssetType.LARGE_BANNER.name }.map { it.uid }
             val small = allAssets.filter { it.assetType == ArticleAssetType.SMALL_BANNER.name }.map { it.uid }
             ArticleDetailResponse(
+                id = article.id,
                 category = article.category,
                 subject = article.subject,
                 content = article.content,
@@ -78,6 +79,7 @@ class ArticleService(
         } else {
             val attachments = allAssets.filter { it.assetType == ArticleAssetType.ATTACHMENT.name }.map { it.uid }
             ArticleDetailResponse(
+                id = article.id,
                 category = article.category,
                 subject = article.subject,
                 content = article.content,
