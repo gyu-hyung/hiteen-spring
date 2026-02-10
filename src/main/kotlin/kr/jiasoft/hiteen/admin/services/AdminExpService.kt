@@ -5,9 +5,7 @@ import kr.jiasoft.hiteen.admin.dto.AdminExpResponse
 import kr.jiasoft.hiteen.admin.infra.AdminExpRepository
 import kr.jiasoft.hiteen.common.dto.ApiPage
 import kr.jiasoft.hiteen.common.dto.PageUtil
-import kr.jiasoft.hiteen.feature.point.domain.PointEntity
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -43,33 +41,4 @@ class AdminExpService(
             size = perPage,
         )
     }
-
-    /*
-    @Transactional
-    suspend fun givePoint(
-        userId: Long,
-        pointableType: String? = null,
-        pointableId: Long? = null,
-        type: String = "CREDIT",
-        point: Int = 0,
-        memo: String? = "-"
-    ): PointEntity {
-        val entity = PointEntity(
-            userId = userId,
-            pointableType = pointableType,
-            pointableId = pointableId,
-            type = type,
-            point = point,
-            memo = memo
-        )
-
-        // 포인트 내역 저장
-        val saved = adminExpRepository.save(entity)
-
-        // 회원 총 포인트 저장
-        //pointSummaryRepository.upsertAddPoint(userId, point)
-
-        return saved
-    }
-    */
 }

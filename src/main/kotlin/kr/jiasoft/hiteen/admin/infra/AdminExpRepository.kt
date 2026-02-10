@@ -22,8 +22,8 @@ interface AdminExpRepository : CoroutineCrudRepository<UserExpHistoryEntity, Lon
                 OR (:status = 'DEBIT' AND e.points < 0)
             )
             AND (
-                :type IS NULL OR :status = 'ALL'
-                OR e.action_code LIKE CONCAT(:type, '%')
+                :type IS NULL OR :type = 'ALL'
+                OR e.action_code ILIKE '%' || :type || '%'
             )
             AND (
                 :startDate IS NULL
@@ -78,8 +78,8 @@ interface AdminExpRepository : CoroutineCrudRepository<UserExpHistoryEntity, Lon
                 OR (:status = 'DEBIT' AND e.points < 0)
             )
             AND (
-                :type IS NULL OR :status = 'ALL'
-                OR e.action_code LIKE CONCAT(:type, '%')
+                :type IS NULL OR :type = 'ALL'
+                OR e.action_code ILIKE '%' || :type || '%'
             )
             AND (
                 :startDate IS NULL
