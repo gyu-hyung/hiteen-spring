@@ -528,12 +528,37 @@ class GameService(
             val tier = tierRepository.findById(tierId)
                 ?: throw IllegalStateException("유저의 리그를 확인할 수 없습니다.")
 
+
+            //리그는 BRONZE, PLATINUM, CHALLENGER 3단계로 나뉘며
+            //티어 레벨 1~3 : BRONZE
+            //티어 레벨 4~6 : PLATINUM
+            //티어 레벨 7 이상 : CHALLENGER
+            // PLATINUM 리그 참여가능 유저가 1000명 이하인경우에는 브론즈 리그로 자동참여 처리
+            // CHALLENGER 리그 참여가능 유저가 1000명 이하인경우에는 플래티넘 리그로 자동참여 처리
+            val finalLeague = when {
+                tier.level >= 7 -> {
+                    val challengerCount = userRepository.countActiveChallengerUsers()
+                    if (challengerCount >= 1000) {
+                        "CHALLENGER"
+                    } else {
+                        val platinumCount = userRepository.countActivePlatinumUsers()
+                        if (platinumCount >= 1000) "PLATINUM" else "BRONZE"
+                    }
+                }
+                tier.level in 4..6 -> {
+                    val platinumCount = userRepository.countActivePlatinumUsers()
+                    if (platinumCount > 1000) "PLATINUM" else "BRONZE"
+                }
+                else -> "BRONZE"
+            }
+
+
             seasonParticipantRepository.save(
                 SeasonParticipantEntity(
                     seasonId = season.id,
                     userId = userId,
                     tierId = tierId,
-                    league = getLeague(tier.level),
+                    league = finalLeague,
                     joinedType = "AUTO_JOIN"
                 )
             )

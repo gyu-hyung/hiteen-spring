@@ -21,6 +21,24 @@ interface UserRepository : CoroutineCrudRepository<UserEntity, Long> {
     suspend fun findByInviteCode(inviteCode: String): UserEntity?
 
 
+    //플래티넘 리그 참여가능 유저 수 조회 10~18
+    @Query("""
+        SELECT COUNT(*)
+        FROM users
+        WHERE tier_id BETWEEN 10 AND 18
+          AND deleted_at IS NULL
+    """)
+    suspend fun countActivePlatinumUsers(): Long
+
+    //챌린저 리그 참여가능 유저 수 조회 19~22
+    @Query("""
+        SELECT COUNT(*)
+        FROM users
+        WHERE tier_id BETWEEN 19 AND 22
+          AND deleted_at IS NULL
+    """)
+    suspend fun countActiveChallengerUsers(): Long
+
     // ✅ 활성(미삭제) 사용자 - username(=phone)로 조회
     @Query("""SELECT * FROM users WHERE username = :username AND deleted_at IS NULL ORDER BY id DESC LIMIT 1""")
     suspend fun findActiveByUsername(username: String): UserEntity?
