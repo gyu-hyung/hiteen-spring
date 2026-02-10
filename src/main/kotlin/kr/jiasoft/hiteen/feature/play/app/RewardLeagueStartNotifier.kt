@@ -53,7 +53,7 @@ class RewardLeagueStartNotifier(
         // ✅ 푸시 발송 (비동기 이벤트 발행)
         eventPublisher.publishEvent(
             PushSendRequestedEvent(
-                topic = PushItemType.EVENT,
+                topic = PushItemType.GAME,
                 templateData = PushTemplate.REWARD_LEAGUE_START.buildPushData(
                     "gameName" to (repo.findGameName(gameId) ?: "게임")
                 ),

@@ -35,7 +35,10 @@ interface PushDetailRepository : CoroutineCrudRepository<PushDetailEntity, Long>
         WHERE d.deleted_at IS NULL 
         AND d.user_id = :userId
         AND (:cursor IS NULL OR d.id < :cursor)
-        AND (:code IS NULL OR p.code = :code)        
+        AND (
+            (:code IS NULL AND p.code <> 'CHAT_MESSAGE')
+            OR p.code = :code
+        )
         ORDER BY d.id DESC
         LIMIT :limit
     """)

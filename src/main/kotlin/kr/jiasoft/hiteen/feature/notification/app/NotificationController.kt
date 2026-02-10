@@ -26,16 +26,17 @@ class NotificationController(
     @Operation(
         summary = "푸시 알림 내역 조회",
         description = """
-            푸시, 채팅, 공지, 이벤트, 친구 요청 등 앱 내 알림 내역을 조회합니다.
+            앱 내 알림 내역(친구 요청, 팔로우, 새 글 등록, 댓글 등)을 조회합니다.
+            채팅 메시지(CHAT_MESSAGE)는 기본 목록에서 제외됩니다.
+            특정 코드나 그룹을 지정하여 필터링 조회가 가능합니다.
         | FRIEND_REQUEST | 친구 요청 💌
         | FRIEND_ACCEPT  | 친구 요청 승인 💌
         | FOLLOW_REQUEST | 새로운 팔로우 👀
-        | FOLLOW_ACCEPT  | 새로운 팔로우 👀
+        | FOLLOW_ACCEPT  | 팔로우 수락 🥰
         | NEW_POST       | 새 글 등록 ✍️
         | PIN_REGISTER   | 핀 등록 알림 📍
         | BOARD_COMMENT  | 틴스토리 댓글 알림 💬
         | VOTE_COMMENT   | 틴투표 댓글 알림 💬
-        | CHAT_MESSAGE   | 새로운 채팅 💬
         """
     )
     @GetMapping("/push")
