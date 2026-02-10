@@ -113,6 +113,7 @@ interface AdminUserRepository : CoroutineCrudRepository<UserEntity, Long> {
         SELECT u.*
         FROM users u
         WHERE u.deleted_at IS NULL
+            AND u.role = 'USER'
             AND (
                 :keyword IS NULL
                 OR (

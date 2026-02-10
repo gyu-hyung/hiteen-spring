@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
@@ -76,7 +77,7 @@ class AdminExpController(
     // 경험치 지급/차감
     @PostMapping("/give")
     suspend fun give(
-        @Parameter req: AdminExpGiveRequest,
+        @Parameter @RequestBody req: AdminExpGiveRequest,
     ) : ResponseEntity<ApiResult<Any>> {
         val type: ExpType = req.type?.uppercase()?.let {
             try { ExpType.valueOf(it) } catch (e: Exception) { ExpType.CREDIT }
@@ -135,9 +136,9 @@ class AdminExpController(
         }
 
         val message = if (type == ExpType.DEBIT) {
-            "포인트를 차감했습니다."
+            "경험치를 차감했습니다."
         } else {
-            "포인트를 지급했습니다."
+            "경험치를 지급했습니다."
         }
 
         val data = mapOf("total" to total)
