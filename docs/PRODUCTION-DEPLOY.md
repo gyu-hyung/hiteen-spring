@@ -38,19 +38,19 @@
 
 ```bash
 # 운영 네임스페이스 생성
-kubectl create ns hiteen-prod
+kubectl create ns hiteen
 
 # GitLab Registry Secret 생성
 kubectl create secret docker-registry gitlab-registry \
   --docker-server=registry.gitlab.com \
   --docker-username=<GITLAB_USERNAME> \
   --docker-password=<GITLAB_TOKEN> \
-  -n hiteen-prod
+  -n hiteen
 
 # Firebase Secret 생성
 kubectl create secret generic firebase-secret \
   --from-file=firebase-key.json=/path/to/firebase-key.json \
-  -n hiteen-prod
+  -n hiteen
 ```
 
 ### 2. local-path-provisioner 설치 (Redis PVC용)
@@ -79,7 +79,7 @@ kubectl get svc -n ingress-nginx
 ```bash
 # values.yaml의 실제 값들을 설정 후 배포
 helm upgrade --install hiteen-infra ./hiteen-infra-chart \
-  -n hiteen-prod \
+  -n hiteen \
   --set redis.password=<REDIS_PASSWORD> \
   --set dbBackup.postgres.password=<DB_PASSWORD> \
   --set nfs.server=<NFS_SERVER_IP> \
@@ -87,8 +87,8 @@ helm upgrade --install hiteen-infra ./hiteen-infra-chart \
   --set dbBackup.postgres.host=<DB_HOST>
 
 # Redis 클러스터 상태 확인
-kubectl exec -n hiteen-prod redis-0 -- redis-cli -a <REDIS_PASSWORD> cluster info
-kubectl exec -n hiteen-prod redis-0 -- redis-cli -a <REDIS_PASSWORD> cluster nodes
+kubectl exec -n hiteen redis-0 -- redis-cli -a <REDIS_PASSWORD> cluster info
+kubectl exec -n hiteen redis-0 -- redis-cli -a <REDIS_PASSWORD> cluster nodes
 ```
 
 
@@ -112,7 +112,7 @@ REDIS_PASSWORD_PROD 운영 Redis 비밀번호                  새로운_강력�
 ```bash
 # 시크릿과 함께 배포
 helm upgrade --install hiteen-app ./hiteen-app-chart \
-  -n hiteen-prod \
+  -n hiteen \
   --set app.image.repository=registry.gitlab.com/your-group/hiteen-api \
   --set app.image.tag=prod-<COMMIT_SHA> \
   --set secrets.db.password=<DB_PASSWORD> \
@@ -121,9 +121,9 @@ helm upgrade --install hiteen-app ./hiteen-app-chart \
   -f ./hiteen-app-chart/values.yaml
 
 # 배포 상태 확인
-kubectl get pods -n hiteen-prod
-kubectl get svc -n hiteen-prod
-kubectl get ingress -n hiteen-prod
+kubectl get pods -n hiteen
+kubectl get svc -n hiteen
+kubectl get ingress -n hiteen
 ```
 
 ### 6. 시크릿 파일로 관리 (권장)
@@ -136,7 +136,7 @@ cat > secrets-prod.yaml << 'EOF'
 secrets:
   db:
     host: "10.8.0.200"
-    name: "hiteen-prod"
+    name: "hiteen"
     user: "hiteen"
     password: "your-db-password"
   mongo:
@@ -159,7 +159,7 @@ EOF
 
 # 시크릿 파일과 함께 배포
 helm upgrade --install hiteen-app ./hiteen-app-chart \
-  -n hiteen-prod \
+  -n hiteen \
   -f ./hiteen-app-chart/values.yaml \
   -f ./secrets-prod.yaml \
   --set app.image.tag=prod-<COMMIT_SHA>
@@ -207,7 +207,7 @@ pg_dump -h <DEV_DB_HOST> -U hiteen -d hiteen2-dev \
   -F c -f hiteen-init-data.dump
 
 # 운영 DB로 복원
-pg_restore -h <PROD_DB_HOST> -U hiteen -d hiteen-prod \
+pg_restore -h <PROD_DB_HOST> -U hiteen -d hiteen \
   --clean --if-exists \
   hiteen-init-data.dump
 ```
@@ -246,30 +246,30 @@ helm install monitoring prometheus-community/kube-prometheus-stack -n monitoring
 1. **클러스터 초기화**: 첫 배포 시 Helm hook으로 자동 초기화됨
 2. **수동 초기화 필요시**:
 ```bash
-kubectl exec -it -n hiteen-prod redis-0 -- redis-cli -a <PASSWORD> --cluster create \
-  redis-0.redis.hiteen-prod.svc.cluster.local:6379 \
-  redis-1.redis.hiteen-prod.svc.cluster.local:6379 \
-  redis-2.redis.hiteen-prod.svc.cluster.local:6379 \
-  redis-3.redis.hiteen-prod.svc.cluster.local:6379 \
-  redis-4.redis.hiteen-prod.svc.cluster.local:6379 \
-  redis-5.redis.hiteen-prod.svc.cluster.local:6379 \
+kubectl exec -it -n hiteen redis-0 -- redis-cli -a <PASSWORD> --cluster create \
+  redis-0.redis.hiteen.svc.cluster.local:6379 \
+  redis-1.redis.hiteen.svc.cluster.local:6379 \
+  redis-2.redis.hiteen.svc.cluster.local:6379 \
+  redis-3.redis.hiteen.svc.cluster.local:6379 \
+  redis-4.redis.hiteen.svc.cluster.local:6379 \
+  redis-5.redis.hiteen.svc.cluster.local:6379 \
   --cluster-replicas 1
 ```
 
 3. **클러스터 리셋**:
 ```bash
-kubectl delete statefulset redis -n hiteen-prod
-kubectl delete pvc -n hiteen-prod -l app=redis
+kubectl delete statefulset redis -n hiteen
+kubectl delete pvc -n hiteen -l app=redis
 ```
 
 ## 🔄 롤백
 
 ```bash
 # 이전 버전으로 롤백
-helm rollback hiteen-app <REVISION> -n hiteen-prod
+helm rollback hiteen-app <REVISION> -n hiteen
 
 # 히스토리 확인
-helm history hiteen-app -n hiteen-prod
+helm history hiteen-app -n hiteen
 ```
 
 ## 📝 체크리스트

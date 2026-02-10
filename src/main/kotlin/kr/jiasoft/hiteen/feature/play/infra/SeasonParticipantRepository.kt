@@ -14,6 +14,15 @@ interface SeasonParticipantRepository : CoroutineCrudRepository<SeasonParticipan
 
     suspend fun findBySeasonIdAndUserId(seasonId: Long, userId: Long): SeasonParticipantEntity?
 
+
+    @Query("""
+        SELECT COUNT(*) 
+        FROM season_participants 
+        WHERE season_id = :seasonId 
+          AND league = :league
+    """)
+    suspend fun countBySeasonIdAndLeague(seasonId: Long, league: String): Long
+
     @Query(
         """
         SELECT sp.*

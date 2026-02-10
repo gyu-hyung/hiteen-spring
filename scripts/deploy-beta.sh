@@ -225,7 +225,7 @@ fi
 
 helm upgrade --install hiteen-app $APP_CHART_PATH \
   -n $NAMESPACE \
-  -f $APP_CHART_PATH/values-dev.yaml \
+  -f $APP_CHART_PATH/values-beta.yaml \
   --set app.image.repository=$IMAGE \
   --set app.image.tag=$TAG \
   --set nfs.enabled=true \

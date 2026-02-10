@@ -1,15 +1,14 @@
 package kr.jiasoft.hiteen.feature.article.dto
 
 import com.fasterxml.jackson.annotation.JsonFormat
-import com.fasterxml.jackson.annotation.JsonIgnore
 import io.swagger.v3.oas.annotations.media.Schema
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.util.UUID
 
-@Schema(description = "공지사항/이벤트 응답 DTO")
-data class ArticleResponse(
-//    @JsonIgnore
+@Schema(description = "공지사항/이벤트 상세 응답 DTO")
+data class ArticleDetailResponse(
+
     @param:Schema(description = "게시글 PK (내부 관리용)", example = "1", hidden = true)
     val id: Long,
 
@@ -53,5 +52,11 @@ data class ArticleResponse(
     @param:Schema(description = "수정 일시", example = "2025.09.18 10:15")
     @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm")
     val updatedAt: OffsetDateTime? = null,
+
+    @param:Schema(description = "이전글 정보 (없으면 null)")
+    val prevArticle: ArticleNavigation? = null,
+
+    @param:Schema(description = "다음글 정보 (없으면 null)")
+    val nextArticle: ArticleNavigation? = null,
 )
 

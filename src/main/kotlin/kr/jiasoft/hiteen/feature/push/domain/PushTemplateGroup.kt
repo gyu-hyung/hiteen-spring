@@ -19,4 +19,5 @@ enum class PushTemplateGroup(
     GIFT_SHOP(code = "GIFT_SHOP", title = "선물샵"),
     PIN(code = "PIN", title = "핀"),
     ETC(code = "ETC", title = "기타"),
+    MARKETING(code = "MARKETING", title = "마케팅"),
 }

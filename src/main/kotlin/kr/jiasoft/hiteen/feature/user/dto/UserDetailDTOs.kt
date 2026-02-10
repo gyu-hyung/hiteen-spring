@@ -55,7 +55,7 @@ data class UserDetailRequest(
     val pushMarketing: String? = null,
 
     @field:Schema(description = "푸시 수신 항목", example = """
-        ["ALL","FRIEND_REQUEST","FRIEND_ACCEPT","FOLLOW","NEW_POST","PIN_ALERT","COMMENT_ALERT","CHAT_MESSAGE"]
+        ["ALL","FRIEND_REQUEST","FRIEND_ACCEPT","FOLLOW","NEW_POST","PIN_ALERT","COMMENT_ALERT","CHAT_MESSAGE","MARKETING"]
     """)
     val pushItems: List<PushItemType>? = null,
 

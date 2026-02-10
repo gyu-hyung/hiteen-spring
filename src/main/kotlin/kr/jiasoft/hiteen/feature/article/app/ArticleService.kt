@@ -5,12 +5,13 @@ import kr.jiasoft.hiteen.common.dto.ApiPage
 import kr.jiasoft.hiteen.common.dto.ApiPageCursor
 import kr.jiasoft.hiteen.feature.article.domain.ArticleAssetType
 import kr.jiasoft.hiteen.feature.article.domain.ArticleCategory
+import kr.jiasoft.hiteen.feature.article.dto.ArticleDetailResponse
+import kr.jiasoft.hiteen.feature.article.dto.ArticleNavigation
 import kr.jiasoft.hiteen.feature.article.dto.ArticleResponse
 import kr.jiasoft.hiteen.feature.article.infra.ArticleAssetRepository
 import kr.jiasoft.hiteen.feature.article.infra.ArticleRepository
 import kr.jiasoft.hiteen.feature.level.app.ExpService
 import org.springframework.stereotype.Service
-import java.util.UUID
 
 @Service
 class ArticleService(
@@ -21,9 +22,9 @@ class ArticleService(
 
     private fun isEvent(category: String) = category == ArticleCategory.EVENT.name
 
-    suspend fun getArticle(id: Long, currentUserId: Long?): ArticleResponse {
+    suspend fun getArticle(id: Long, currentUserId: Long?): ArticleDetailResponse {
         val article = articles.findByIdAndNotDeleted(id)
-            ?: throw IllegalArgumentException("해당 글을 찾을 수 없어 😢")
+            ?: throw IllegalArgumentException("해당 글을 찾을 수 없습니다.")
 
         // 조회수 증가
         articles.increaseHits(id)
@@ -36,10 +37,29 @@ class ArticleService(
         // 첨부파일 조회
         val allAssets = articleAssetRepository.findAllByArticleId(article.id).toList()
 
+        // 이전글/다음글 조회
+        val prev = articles.findPreviousArticle(id, article.category)
+        val next = articles.findNextArticle(id, article.category)
+
+        val prevArticle = prev?.let {
+            ArticleNavigation(
+                id = prev.id,
+                subject = prev.subject,
+                createdAt = prev.createdAt
+            )
+        }
+        val nextArticle = next?.let {
+            ArticleNavigation(
+                id = next.id,
+                subject = next.subject,
+                createdAt = next.createdAt
+            )
+        }
+
         return if (isEvent(article.category)) {
             val large = allAssets.filter { it.assetType == ArticleAssetType.LARGE_BANNER.name }.map { it.uid }
             val small = allAssets.filter { it.assetType == ArticleAssetType.SMALL_BANNER.name }.map { it.uid }
-            ArticleResponse(
+            ArticleDetailResponse(
                 id = article.id,
                 category = article.category,
                 subject = article.subject,
@@ -53,10 +73,12 @@ class ArticleService(
                 status = article.status,
                 createdAt = article.createdAt,
                 updatedAt = article.updatedAt,
+                prevArticle = prevArticle,
+                nextArticle = nextArticle,
             )
         } else {
             val attachments = allAssets.filter { it.assetType == ArticleAssetType.ATTACHMENT.name }.map { it.uid }
-            ArticleResponse(
+            ArticleDetailResponse(
                 id = article.id,
                 category = article.category,
                 subject = article.subject,
@@ -69,6 +91,8 @@ class ArticleService(
                 status = article.status,
                 createdAt = article.createdAt,
                 updatedAt = article.updatedAt,
+                prevArticle = prevArticle,
+                nextArticle = nextArticle,
             )
         }
     }
@@ -76,6 +100,7 @@ class ArticleService(
     suspend fun listArticlesByPage(
         category: String?,
         search: String?,
+        status: String?,
         page: Int,
         size: Int,
     ): ApiPage<ArticleResponse> {
@@ -83,10 +108,10 @@ class ArticleService(
         val s = size.coerceIn(1, 100)
         val offset = p * s
 
-        val total = articles.countByCategory(category, search)
+        val total = articles.countByCategory(category, search, status)
         val lastPage = if (total == 0) 0 else (total - 1) / s
 
-        val rows = articles.searchByPage(category, search, s, offset).toList()
+        val rows = articles.searchByPage(category, search, status, s, offset).toList()
 
         // 첨부파일 일괄 조회
         val articleIds = rows.map { it.id }
@@ -154,12 +179,13 @@ class ArticleService(
     suspend fun listArticlesByCursor(
         category: String?,
         search: String?,
+        status: String?,
         size: Int,
         cursorId: Long?,
     ): ApiPageCursor<ArticleResponse> {
         val s = size.coerceIn(1, 100)
 
-        val rows = articles.searchByCursor(category, search, s + 1, cursorId).toList()
+        val rows = articles.searchByCursor(category, search, status, s + 1, cursorId).toList()
 
         val hasMore = rows.size > s
         val items = if (hasMore) rows.dropLast(1) else rows

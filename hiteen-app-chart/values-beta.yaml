@@ -1,5 +1,5 @@
 # ============================================
-# Development Environment Override
+# Beta Environment Override
 # ============================================
 namespace: hiteen
 
@@ -117,3 +117,4 @@ metrics:
   enabled: false  # 개발 서버에서는 모니터링 비활성화
   serviceMonitor:
     enabled: false  # Prometheus CRD 없음
+

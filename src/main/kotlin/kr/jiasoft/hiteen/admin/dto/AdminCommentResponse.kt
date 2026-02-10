@@ -14,7 +14,7 @@ data class AdminCommentResponse (
     val likeCount: Int,
     val nickname: String,
     val content: String,
-    val boardContent: String,
+    val boardContent: String? = null,
     val status: String,
     val type: String,
     @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm:ss")

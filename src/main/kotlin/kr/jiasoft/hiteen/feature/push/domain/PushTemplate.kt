@@ -24,8 +24,8 @@ enum class PushTemplate(
         code = "ADMIN_SEND",
         title = "관리자 알림",
         message = "관리자 발송 알림",
-        itemType = PushItemType.ALL,
-        group = PushTemplateGroup.ETC,
+//        itemType = PushItemType.ALL,
+        group = PushTemplateGroup.MARKETING,
     ),
 
     /**
@@ -189,6 +189,7 @@ enum class PushTemplate(
         code = "SEASON_CREATE",
         title = "새로운 시즌이 시작되었어요! 🌟",
         message = "새로운 시즌이 시작되었어요! 지난 시즌 결과를 확인해보세요! 🌟",
+        itemType = PushItemType.GAME,
         group = PushTemplateGroup.GAME,
     ),
 
@@ -201,6 +202,7 @@ enum class PushTemplate(
         code = "RANKING_DOWN",
         title = "랭킹이 하락했어요! 📉",
         message = "누군가 당신의 랭킹을 추월했어요! 신기록에 도전해보세요!📉",
+        itemType = PushItemType.GAME,
         group = PushTemplateGroup.GAME,
     ),
 
@@ -212,7 +214,7 @@ enum class PushTemplate(
         code = "RANKING_REWARD",
         title = "랭킹 보상이 도착했어요! 🎉",
         message = "이번 시즌 랭킹 보상이 도착했어요! 확인해보세요! 🎉",
-        group = PushTemplateGroup.GAME,
+        group = PushTemplateGroup.GIFT_SHOP,
     ),
 
 
@@ -224,7 +226,8 @@ enum class PushTemplate(
         code = "EVENT_NOTIFICATION",
         title = "새로운 이벤트 소식! 🎊",
         message = "{event_name} 이벤트가 시작되었어요! 놓치지 마세요! 🎊",
-        group = PushTemplateGroup.ETC,
+        itemType = PushItemType.MARKETING,
+        group = PushTemplateGroup.MARKETING,
     ),
 
 
