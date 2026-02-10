@@ -521,6 +521,38 @@ class AdminArticleController(
     }
 
     /**
+     * 공지사항/이벤트 상태 변경
+     */
+    @Operation(
+        summary = "공지사항/이벤트 상태 변경",
+        description = "게시글의 상태만 변경합니다. (ACTIVE: 진행중, INACTIVE: 비활성, ENDED: 종료, WINNER_ANNOUNCED: 당첨자발표)"
+    )
+    @PatchMapping("/{id}/status")
+    suspend fun updateStatus(
+        @Parameter(description = "게시글 ID") @PathVariable id: Long,
+        @Parameter(description = "변경할 상태") @RequestParam status: String,
+        @AuthenticationPrincipal(expression = "user") user: UserEntity,
+    ): ResponseEntity<ApiResult<Any>> {
+        val validStatuses = listOf("ACTIVE", "INACTIVE", "ENDED", "WINNER_ANNOUNCED")
+        if (status !in validStatuses) {
+            throw IllegalArgumentException("유효하지 않은 상태입니다. 가능한 값: $validStatuses")
+        }
+
+        val origin = adminArticleRepository.findById(id)
+            ?: throw IllegalArgumentException("존재하지 않는 게시글입니다. id=$id")
+
+        adminArticleRepository.save(
+            origin.copy(
+                status = status,
+                updatedId = user.id,
+                updatedAt = OffsetDateTime.now(),
+            )
+        )
+
+        return ResponseEntity.ok(ApiResult.success(mapOf("id" to id, "status" to status)))
+    }
+
+    /**
      * 공지사항/이벤트 삭제 (Soft Delete)
      */
     @Operation(summary = "공지사항/이벤트 삭제", description = "관리자용 공지사항/이벤트를 삭제합니다 (Soft Delete).")

@@ -75,6 +75,8 @@ class SecurityConfig(
                     "/api/health",
                     "/api/terms/**",
                     "/api/user/profile/ss/{id}",
+                    "/api/articles/**",
+
                     // Android deferred token resolve (auth optional)
                     "/api/invite/deferred/resolve",
                     "/api/app/map/keys",
@@ -109,7 +111,14 @@ class SecurityConfig(
     @Bean
     fun corsConfigurationSource(): CorsConfigurationSource {
         val config = CorsConfiguration().apply {
-            allowedOriginPatterns = listOf("http://localhost", "http://localhost:3000", "http://localhost:8080", "http://cms.hiteen.co.kr")
+            allowedOriginPatterns = listOf(
+                "http://localhost",
+                "http://localhost:3000",
+                "http://localhost:8080",
+                "http://cms.hiteen.co.kr",
+                "https://cms.hiteen.kr",
+                "https://hiteen.kr",
+            )
             allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "OPTIONS")
             allowedHeaders = listOf("*")
             allowCredentials = true

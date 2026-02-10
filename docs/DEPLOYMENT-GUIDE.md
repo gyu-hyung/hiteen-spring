@@ -61,7 +61,7 @@ kubectl create secret docker-registry gitlab-registry \
   --docker-server=gitlab.barunsoft.net:6005 \
   --docker-username=<DEPLOY_TOKEN_USERNAME> \
   --docker-password=<DEPLOY_TOKEN> \
-  -n hiteen-prod
+  -n hiteen
 ```
 
 ### Step 3: GitLab CI/CD Variables 설정
@@ -114,7 +114,7 @@ docker build --no-cache --platform linux/amd64 -t gitlab.barunsoft.net:6005/jias
 ### Step 1: 네임스페이스 생성 (최초 1회)
 
 ```bash
-kubectl create ns hiteen-prod
+kubectl create ns hiteen
 ```
 
 ### Step 2: Secrets 생성 (최초 1회)
@@ -125,17 +125,17 @@ kubectl create secret docker-registry gitlab-registry \
   --docker-server=gitlab.barunsoft.net:6005 \
   --docker-username=<DEPLOY_TOKEN_USERNAME> \
   --docker-password=<DEPLOY_TOKEN> \
-  -n hiteen-prod
+  -n hiteen
 
 # Firebase Credentials
 kubectl create secret generic firebase-secret \
   --from-file=firebase-key.json=/path/to/firebase-key.json \
-  -n hiteen-prod
+  -n hiteen
 
 # Redis Secret
 kubectl create secret generic redis-secret \
   --from-literal=redis-password=<REDIS_PASSWORD> \
-  -n hiteen-prod
+  -n hiteen
 ```
 
 ### Step 3: secrets-prod.yaml 파일 작성
@@ -145,7 +145,7 @@ cat > secrets-prod.yaml << 'EOF'
 secrets:
   db:
     host: "10.8.0.200"
-    name: "hiteen-prod"
+    name: "hiteen"
     user: "hiteen"
     password: "your-db-password"
   mongo:
@@ -162,7 +162,7 @@ EOF
 
 ```bash
 helm upgrade --install hiteen-infra ./hiteen-infra-chart \
-  -n hiteen-prod \
+  -n hiteen \
   --set redis.password=<REDIS_PASSWORD> \
   --set nfs.server=<NFS_SERVER_IP> \
   --set backupNfs.server=<NFS_SERVER_IP> \
@@ -174,7 +174,7 @@ helm upgrade --install hiteen-infra ./hiteen-infra-chart \
 
 ```bash
 helm upgrade --install hiteen-app ./hiteen-app-chart \
-  -n hiteen-prod \
+  -n hiteen \
   -f ./hiteen-app-chart/values.yaml \
   -f ./secrets-prod.yaml \
   --set app.image.tag=0.0.1
@@ -186,19 +186,19 @@ helm upgrade --install hiteen-app ./hiteen-app-chart \
 
 ```bash
 # Pod 상태 확인
-kubectl get pods -n hiteen-prod
+kubectl get pods -n hiteen
 
 # 로그 확인
-kubectl logs -f deployment/hiteen-api -n hiteen-prod
+kubectl logs -f deployment/hiteen-api -n hiteen
 
 # 서비스 확인
-kubectl get svc -n hiteen-prod
+kubectl get svc -n hiteen
 
 # Ingress 확인
-kubectl get ingress -n hiteen-prod
+kubectl get ingress -n hiteen
 
 # 이벤트 확인 (문제 발생 시)
-kubectl get events -n hiteen-prod --sort-by='.lastTimestamp'
+kubectl get events -n hiteen --sort-by='.lastTimestamp'
 ```
 
 ---
@@ -212,33 +212,36 @@ kubectl get events -n hiteen-prod --sort-by='.lastTimestamp'
 TAG=0.0.1
 
 # 플랫폼 지정 및 푸시까지 한번에 수행
-docker build \
+./gradlew clean bootJar && docker build \
   --platform linux/amd64 \
-  -t gitlab.barunsoft.net:6005/jiasoft/hiteen2-server:prod-$TAG \
+  -t gitlab.barunsoft.net:5005/jiasoft/hiteen2-server:prod-$TAG \
   . --push
 
 # 2. Helm으로 업데이트
 helm upgrade --install hiteen-app ./hiteen-app-chart \
-  -n hiteen-prod \
+  -n hiteen \
   -f ./hiteen-app-chart/values.yaml \
   -f ./secrets-prod.yaml \
   --set app.image.tag=$TAG
 
+# 또는 kubectl로 롤아웃 재시작 (이미지 태그 변경 없이 동일 태그 재배포 시)
+kubectl rollout restart deployment/hiteen-api -n hiteen
+
 # 3. 롤아웃 상태 확인
-kubectl rollout status deployment/hiteen-api -n hiteen-prod
+kubectl rollout status deployment/hiteen-api -n hiteen
 ```
 
 ### 롤백 (문제 발생 시)
 
 ```bash
 # Helm 히스토리 확인
-helm history hiteen-app -n hiteen-prod
+helm history hiteen-app -n hiteen
 
 # 이전 버전으로 롤백
-helm rollback hiteen-app <REVISION> -n hiteen-prod
+helm rollback hiteen-app <REVISION> -n hiteen
 
 # 또는 kubectl로 롤백
-kubectl rollout undo deployment/hiteen-api -n hiteen-prod
+kubectl rollout undo deployment/hiteen-api -n hiteen
 ```
 
 ---
@@ -269,7 +272,7 @@ kubectl rollout undo deployment/hiteen-api -n hiteen-prod
 ├─────────────────────────────────────────────────────────────┤
 │  □ docker build & push (또는 GitLab CI 자동)                │
 │  □ helm upgrade --install hiteen-app ...                    │
-│  □ kubectl get pods -n hiteen-prod (Running 확인)           │
+│  □ kubectl get pods -n hiteen (Running 확인)           │
 │  □ API 헬스체크 확인                                        │
 └─────────────────────────────────────────────────────────────┘
 ```
@@ -282,22 +285,22 @@ kubectl rollout undo deployment/hiteen-api -n hiteen-prod
 # 이미지 Pull 테스트
 kubectl run test-pull --image=gitlab.barunsoft.net:6005/jiasoft/hiteen2-server:latest \
   --overrides='{"spec":{"imagePullSecrets":[{"name":"gitlab-registry"}]}}' \
-  -n hiteen-prod --rm -it --restart=Never -- echo "Pull Success!"
+  -n hiteen --rm -it --restart=Never -- echo "Pull Success!"
 
 # Pod 접속
-kubectl exec -it deployment/hiteen-api -n hiteen-prod -- /bin/sh
+kubectl exec -it deployment/hiteen-api -n hiteen -- /bin/sh
 
 # 실시간 로그
-kubectl logs -f deployment/hiteen-api -n hiteen-prod
+kubectl logs -f deployment/hiteen-api -n hiteen
 
 # 리소스 사용량
-kubectl top pods -n hiteen-prod
+kubectl top pods -n hiteen
 
 # 시크릿 확인
-kubectl get secrets -n hiteen-prod
+kubectl get secrets -n hiteen
 
 # ConfigMap 확인
-kubectl get configmap -n hiteen-prod
+kubectl get configmap -n hiteen
 ```
 
 ---
@@ -307,29 +310,29 @@ kubectl get configmap -n hiteen-prod
 ### ImagePullBackOff 에러
 ```bash
 # 원인: Registry 인증 실패
-kubectl describe pod <POD_NAME> -n hiteen-prod
+kubectl describe pod <POD_NAME> -n hiteen
 
 # 해결: Secret 재생성
-kubectl delete secret gitlab-registry -n hiteen-prod
+kubectl delete secret gitlab-registry -n hiteen
 kubectl create secret docker-registry gitlab-registry \
   --docker-server=gitlab.barunsoft.net:6005 \
   --docker-username=<DEPLOY_TOKEN_USERNAME> \
   --docker-password=<DEPLOY_TOKEN> \
-  -n hiteen-prod
+  -n hiteen
 ```
 
 ### CrashLoopBackOff 에러
 ```bash
 # 원인: 앱 시작 실패
-kubectl logs <POD_NAME> -n hiteen-prod --previous
+kubectl logs <POD_NAME> -n hiteen --previous
 
 # 환경변수/설정 확인
-kubectl describe pod <POD_NAME> -n hiteen-prod
+kubectl describe pod <POD_NAME> -n hiteen
 ```
 
 ### Pending 상태
 ```bash
 # 원인: 리소스 부족 또는 PVC 미연결
-kubectl describe pod <POD_NAME> -n hiteen-prod
-kubectl get pvc -n hiteen-prod
+kubectl describe pod <POD_NAME> -n hiteen
+kubectl get pvc -n hiteen
 ```
