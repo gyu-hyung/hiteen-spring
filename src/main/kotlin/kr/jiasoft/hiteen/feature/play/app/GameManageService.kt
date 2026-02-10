@@ -68,8 +68,6 @@ class GameManageService(
 
 
     private fun calculateSeasonRange(today: LocalDate): Pair<LocalDate, LocalDate> {
-        val lastDayOfMonth = today.withDayOfMonth(today.lengthOfMonth())
-
         val startDay = when {
             today.dayOfMonth <= 10 -> 1
             today.dayOfMonth <= 20 -> 11
@@ -77,7 +75,11 @@ class GameManageService(
         }
 
         val startDate = today.withDayOfMonth(startDay)
-        val endDate = if (startDay == 21) lastDayOfMonth else startDate.plusDays(9)
+        val endDate = if (startDay == 21) {
+            today.withDayOfMonth(today.lengthOfMonth())
+        } else {
+            startDate.plusDays(9)
+        }
 
         return startDate to endDate
     }

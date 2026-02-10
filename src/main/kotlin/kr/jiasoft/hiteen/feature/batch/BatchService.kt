@@ -18,7 +18,7 @@ import java.time.LocalDate
 import java.time.OffsetDateTime
 
 @Component
-@Profile("dev-k8s")
+@Profile(value = ["prod"])
 class BatchService(
     private val schoolImportService: SchoolImportService,
     private val schoolFoodImportService: SchoolFoodImportService,
