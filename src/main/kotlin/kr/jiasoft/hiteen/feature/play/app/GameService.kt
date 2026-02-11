@@ -78,7 +78,7 @@ class GameService(
 
 
     /**
-     * 게임 목록 조회
+     * 게임 리그 조회
      * */
     suspend fun getLeague (
         user: UserEntity,
@@ -86,9 +86,37 @@ class GameService(
         val season = seasonRepository.findActiveSeason() ?: throw NoSuchElementException("현재 진행 중인 시즌이 없습니다. 관리자 문의")
         return seasonParticipantRepository.findBySeasonIdAndUserId(season.id, user.id)?.league
             //없으면 현재 티어 기준으로 리그 반환
-            ?: tierRepository.findById(user.tierId) ?.let {
-                getLeague(it.level)
+            ?: tierRepository.findById(user.tierId)?.let {
+                calculateLeague(it.level)
             } ?: "BRONZE"
+    }
+
+    /**
+     * 티어 레벨 기반 리그 계산
+     * - 리그는 BRONZE, PLATINUM, CHALLENGER 3단계로 나뉨
+     * - 티어 레벨 1~3 : BRONZE
+     * - 티어 레벨 4~6 : PLATINUM
+     * - 티어 레벨 7 이상 : CHALLENGER
+     * - PLATINUM 리그 참여가능 유저가 1000명 이하인 경우 브론즈 리그로 자동참여 처리
+     * - CHALLENGER 리그 참여가능 유저가 1000명 이하인 경우 플래티넘 리그로 자동참여 처리
+     */
+    private suspend fun calculateLeague(tierLevel: Int): String {
+        return when {
+            tierLevel >= 7 -> {
+                val challengerCount = userRepository.countActiveChallengerUsers()
+                if (challengerCount >= 1000) {
+                    "CHALLENGER"
+                } else {
+                    val platinumCount = userRepository.countActivePlatinumUsers()
+                    if (platinumCount >= 1000) "PLATINUM" else "BRONZE"
+                }
+            }
+            tierLevel in 4..6 -> {
+                val platinumCount = userRepository.countActivePlatinumUsers()
+                if (platinumCount > 1000) "PLATINUM" else "BRONZE"
+            }
+            else -> "BRONZE"
+        }
     }
 
 
@@ -497,21 +525,6 @@ class GameService(
         return SeasonRankingResponse(filtered, myRanking)
     }
 
-
-    private suspend fun getLeague(tierLevel: Int): String {
-        return when (tierLevel) {
-            1 -> "BRONZE"
-            2 -> "BRONZE"
-            3 -> "BRONZE"
-            4 -> "PLATINUM"
-            5 -> "PLATINUM"
-            6 -> "PLATINUM"
-            7 -> "CHALLENGER"
-            8 -> "CHALLENGER"
-            else -> "BRONZE"
-        }
-    }
-
     // ====== helpers (recordScore에서 사용하는 함수들) ======
 
     private suspend fun grantExp(userId: Long, gameId: Long, wordChallengeGameId: Long?) {
@@ -528,30 +541,7 @@ class GameService(
             val tier = tierRepository.findById(tierId)
                 ?: throw IllegalStateException("유저의 리그를 확인할 수 없습니다.")
 
-
-            //리그는 BRONZE, PLATINUM, CHALLENGER 3단계로 나뉘며
-            //티어 레벨 1~3 : BRONZE
-            //티어 레벨 4~6 : PLATINUM
-            //티어 레벨 7 이상 : CHALLENGER
-            // PLATINUM 리그 참여가능 유저가 1000명 이하인경우에는 브론즈 리그로 자동참여 처리
-            // CHALLENGER 리그 참여가능 유저가 1000명 이하인경우에는 플래티넘 리그로 자동참여 처리
-            val finalLeague = when {
-                tier.level >= 7 -> {
-                    val challengerCount = userRepository.countActiveChallengerUsers()
-                    if (challengerCount >= 1000) {
-                        "CHALLENGER"
-                    } else {
-                        val platinumCount = userRepository.countActivePlatinumUsers()
-                        if (platinumCount >= 1000) "PLATINUM" else "BRONZE"
-                    }
-                }
-                tier.level in 4..6 -> {
-                    val platinumCount = userRepository.countActivePlatinumUsers()
-                    if (platinumCount > 1000) "PLATINUM" else "BRONZE"
-                }
-                else -> "BRONZE"
-            }
-
+            val finalLeague = calculateLeague(tier.level)
 
             seasonParticipantRepository.save(
                 SeasonParticipantEntity(
