@@ -17,7 +17,7 @@ variables:
   REGISTRY_IMAGE: gitlab.barunsoft.net:5005/jiasoft/hiteen2-server
 
   # Kubernetes
-  KUBE_NAMESPACE_PROD: hiteen-prod
+  KUBE_NAMESPACE_PROD: hiteen
 
 # ============================================
 # Cache Configuration

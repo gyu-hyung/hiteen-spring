@@ -121,8 +121,8 @@ echo "  2. 인프라 배포:"
 
 
 
-echo "     helm upgrade --install hiteen-infra ./hiteen-infra-chart -n hiteen-prod --create-namespace"
+echo "     helm upgrade --install hiteen-infra ./hiteen-infra-chart -n hiteen --create-namespace"
 echo ""
 echo "  3. 앱 배포:"
-echo "     helm upgrade --install hiteen-app ./hiteen-app-chart -n hiteen-prod"
+echo "     helm upgrade --install hiteen-app ./hiteen-app-chart -n hiteen"
 echo ""

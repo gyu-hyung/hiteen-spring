@@ -7,7 +7,7 @@ spring:
     name: hiteen
 
   r2dbc:
-    url: r2dbc:postgresql://${DB_HOST:10.8.0.200}:5432/${DB_NAME:hiteen-prod}
+    url: r2dbc:postgresql://${DB_HOST:10.8.0.200}:5432/${DB_NAME:hiteen}
     username: ${DB_USER:hiteen}
     password: ${DB_PASSWORD:}
     pool:
@@ -22,7 +22,7 @@ spring:
 
   liquibase:
     enabled: false  # 운영에서는 수동 마이그레이션
-    url: jdbc:postgresql://${DB_HOST:10.8.0.200}:5432/${DB_NAME:hiteen-prod}
+    url: jdbc:postgresql://${DB_HOST:10.8.0.200}:5432/${DB_NAME:hiteen}
     user: ${DB_USER:hiteen}
     password: ${DB_PASSWORD:}
     change-log: classpath:db/changelog/db.changelog-master.yaml

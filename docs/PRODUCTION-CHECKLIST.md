@@ -73,14 +73,14 @@
 ## 📋 Phase 4: 인프라 배포 (hiteen-infra-chart)
 
 ### 사전 준비
-- [ ] 네임스페이스 생성 (kubectl create ns hiteen-prod)
+- [ ] 네임스페이스 생성 (kubectl create ns hiteen)
 - [ ] Redis 비밀번호 결정
 - [ ] DB 백업용 PostgreSQL 접속 정보 확인
 
 ### Helm 배포
 ```bash
 helm upgrade --install hiteen-infra ./hiteen-infra-chart \
-  -n hiteen-prod \
+  -n hiteen \
   --set redis.password=<REDIS_PASSWORD> \
   --set dbBackup.postgres.password=<DB_PASSWORD> \
   --set nfs.server=<NFS_IP> \
@@ -92,8 +92,8 @@ helm upgrade --install hiteen-infra ./hiteen-infra-chart \
 - [ ] Redis StatefulSet 6개 Pod Running
 - [ ] Redis 클러스터 초기화 확인
   ```bash
-  kubectl exec -n hiteen-prod redis-0 -- redis-cli -a <PASSWORD> cluster info
-  kubectl exec -n hiteen-prod redis-0 -- redis-cli -a <PASSWORD> cluster nodes
+  kubectl exec -n hiteen redis-0 -- redis-cli -a <PASSWORD> cluster info
+  kubectl exec -n hiteen redis-0 -- redis-cli -a <PASSWORD> cluster nodes
   ```
 - [ ] DB 백업 CronJob 생성 확인
 
@@ -108,13 +108,13 @@ helm upgrade --install hiteen-infra ./hiteen-infra-chart \
     --docker-server=registry.gitlab.com \
     --docker-username=<USER> \
     --docker-password=<TOKEN> \
-    -n hiteen-prod
+    -n hiteen
   ```
 - [ ] Firebase Secret 생성
   ```bash
   kubectl create secret generic firebase-secret \
     --from-file=firebase-key.json=/path/to/key.json \
-    -n hiteen-prod
+    -n hiteen
   ```
 - [ ] secrets-prod.yaml 파일 준비
 - [ ] Docker 이미지 빌드 및 Registry 푸시
@@ -122,7 +122,7 @@ helm upgrade --install hiteen-infra ./hiteen-infra-chart \
 ### Helm 배포
 ```bash
 helm upgrade --install hiteen-app ./hiteen-app-chart \
-  -n hiteen-prod \
+  -n hiteen \
   -f ./hiteen-app-chart/values.yaml \
   -f ./secrets-prod.yaml \
   --set app.image.tag=<TAG>
@@ -136,7 +136,7 @@ helm upgrade --install hiteen-app ./hiteen-app-chart \
 - [ ] PDB 생성 확인
 - [ ] Health Check 응답 확인
   ```bash
-  kubectl exec -n hiteen-prod <POD> -- curl -s localhost:8080/actuator/health
+  kubectl exec -n hiteen <POD> -- curl -s localhost:8080/actuator/health
   ```
 
 ---
@@ -172,7 +172,7 @@ helm upgrade --install hiteen-app ./hiteen-app-chart \
   ```
 - [ ] 운영 DB로 복원
   ```bash
-  pg_restore -h <PROD_HOST> -U hiteen -d hiteen-prod \
+  pg_restore -h <PROD_HOST> -U hiteen -d hiteen \
     --clean --if-exists hiteen-init-data.dump
   ```
 - [ ] 데이터 정합성 확인
@@ -231,13 +231,13 @@ helm upgrade --install hiteen-app ./hiteen-app-chart \
 - [ ] Rolling Update 테스트
 - [ ] Rollback 테스트
   ```bash
-  helm rollback hiteen-app <REVISION> -n hiteen-prod
+  helm rollback hiteen-app <REVISION> -n hiteen
   ```
 
 ### 백업 테스트
 - [ ] DB 백업 CronJob 수동 실행
   ```bash
-  kubectl create job --from=cronjob/postgres-backup manual-backup -n hiteen-prod
+  kubectl create job --from=cronjob/postgres-backup manual-backup -n hiteen
   ```
 - [ ] 백업 파일 확인
 - [ ] 복원 테스트
@@ -265,7 +265,7 @@ nfs:
 database:
   host: 10.8.0.xxx
   port: 5432
-  name: hiteen-prod
+  name: hiteen
 
 ingress:
   nodePort:
