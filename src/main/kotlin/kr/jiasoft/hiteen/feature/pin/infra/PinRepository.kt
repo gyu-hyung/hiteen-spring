@@ -33,4 +33,25 @@ interface PinRepository : CoroutineCrudRepository<PinEntity, Long> {
         radiusMeters: Double
     ): Flow<PinEntity>
 
+    /** 반경(KM) 안의 친구들의 전체 공개 핀 24시간 내의 데이터만 조회 */
+    @Query("""
+        SELECT * FROM pin
+        WHERE visibility = :visibility
+          AND user_id IN (:friendIds)
+          AND deleted_at IS NULL
+          AND created_at > now() - interval '24 hours'
+          AND earth_distance(
+                ll_to_earth(:lat, :lng),
+                ll_to_earth(lat, lng)
+              ) <= :radiusMeters
+        ORDER BY id DESC
+    """)
+    fun findNearbyFriendsPublicPins(
+        visibility: String,
+        friendIds: List<Long>,
+        lat: Double,
+        lng: Double,
+        radiusMeters: Double
+    ): Flow<PinEntity>
+
 }
