@@ -207,7 +207,6 @@ class AdminGoodsController (
         val list = adminGoodsRepository.listByPage(
             page = page,
             size = size,
-            order = order,
             search = search,
             searchType = searchType,
             status = status,

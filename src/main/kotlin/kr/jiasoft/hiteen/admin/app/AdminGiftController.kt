@@ -206,12 +206,16 @@ class AdminGiftController(
         @RequestParam goodsTypeCd: String? = null,
         @RequestParam(required = false) brandCode: String? = null,
         @RequestParam(required = false) goodsCodeType: String? = null, // G: 기프티쇼, H: 기프트카드, D: 배송상품
+        @RequestParam(required = false) lastBrandName: String? = null,
+        @RequestParam(required = false) lastSalePrice: Int? = null,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ): ResponseEntity<ApiResult<ApiPageCursor<GoodsGiftishowEntity>>> {
 
         val list = giftishowGoodsRepository.listByCursorId(
             size = size,
             lastId = lastId,
+            lastBrandName = lastBrandName,
+            lastSalePrice = lastSalePrice,
             search = search,
             searchType = searchType,
             categorySeq = categorySeq,
@@ -220,7 +224,8 @@ class AdminGiftController(
             goodsCodeType = goodsCodeType,
         ).toList()
 
-        val nextCursor = list.lastOrNull()?.id?.toString()
+        val lastItem = list.lastOrNull()
+        val nextCursor = lastItem?.let { "${it.brandName}:${it.salePrice}:${it.id}" }
 
         return ResponseEntity.ok(
             ApiResult.success(

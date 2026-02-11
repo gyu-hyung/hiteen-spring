@@ -180,16 +180,13 @@ interface AdminGoodsRepository : CoroutineCrudRepository<GoodsGiftishowEntity, L
                 OR g.goods_code LIKE CONCAT(:goodsCodeType, '%')
             )
 
-        ORDER BY g.status DESC, 
-            CASE WHEN :order = 'DESC' THEN g.created_at END DESC,
-            CASE WHEN :order = 'ASC' THEN g.created_at END ASC
+        ORDER BY g.status DESC, g.brand_name ASC, g.sale_price ASC, g.id ASC
             
         LIMIT :size OFFSET (:page - 1) * :size
     """)
     fun listByPage(
         page: Int,
         size: Int,
-        order: String,
         search: String?,
         searchType: String,
         status: String?,
