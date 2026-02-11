@@ -12,9 +12,15 @@ interface AdminPushRepository : CoroutineCrudRepository<PushEntity, Long> {
         """
         SELECT COUNT(*)
         FROM push p
-        WHERE (
+        WHERE
+            (
                 :type IS NULL OR :type = 'ALL'
                 OR p.code ILIKE ('%' || :type || '%')
+            )
+            AND (
+                :status IS NULL OR :status = 'ALL'
+                OR (:status = 'ACTIVE' AND p.deleted_at IS NULL)
+                OR (:status = 'DELETED' AND p.deleted_at IS NOT NULL)
             )
             AND (
                 :startDate IS NULL
@@ -69,6 +75,7 @@ interface AdminPushRepository : CoroutineCrudRepository<PushEntity, Long> {
     )
     suspend fun countList(
         type: String?,
+        status: String?,
         startDate: LocalDateTime?,
         endDate: LocalDateTime?,
         searchType: String?,
@@ -79,9 +86,15 @@ interface AdminPushRepository : CoroutineCrudRepository<PushEntity, Long> {
         """
         SELECT p.*
         FROM push p
-        WHERE (
+        WHERE
+            (
                 :type IS NULL OR :type = 'ALL'
                 OR p.code ILIKE ('%' || :type || '%')
+            )
+            AND (
+                :status IS NULL OR :status = 'ALL'
+                OR (:status = 'ACTIVE' AND p.deleted_at IS NULL)
+                OR (:status = 'DELETED' AND p.deleted_at IS NOT NULL)
             )
             AND (
                 :startDate IS NULL
@@ -140,6 +153,7 @@ interface AdminPushRepository : CoroutineCrudRepository<PushEntity, Long> {
     )
     suspend fun list(
         type: String?,
+        status: String?,
         startDate: LocalDateTime?,
         endDate: LocalDateTime?,
         searchType: String?,

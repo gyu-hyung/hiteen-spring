@@ -19,30 +19,24 @@ class AdminCashService(
 ) {
     suspend fun listCash(
         type: String?,
+        status: String?,
         startDate: LocalDateTime?,
         endDate: LocalDateTime?,
         searchType: String?,
         search: String?,
-        currentPage: Int,
-        perPage: Int,
+        page: Int,
+        size: Int,
         uid: UUID?,
     ): ApiPage<AdminCashResponse> {
-        val page = currentPage.coerceAtLeast(1)
-        val perPage = perPage.coerceIn(1, 100)
-        val offset = (page - 1) * perPage
+        val page = page.coerceAtLeast(1)
+        val size = size.coerceIn(1, 100)
+        val offset = (page - 1) * size
 
         // 총 레코드수
-        val total = adminCashRepository.countSearchResults(type, startDate, endDate, searchType, search, uid)
-        val rows = adminCashRepository.listSearchResults(type, startDate, endDate, searchType, search, uid, perPage, offset).toList()
+        val total = adminCashRepository.countSearchResults(type, status, startDate, endDate, searchType, search, uid)
+        val rows = adminCashRepository.listSearchResults(type, status, startDate, endDate, searchType, search, uid, size, offset).toList()
 
-        val data = PageUtil.of(
-            items = rows,
-            total = total,
-            page = currentPage,
-            size = perPage
-        )
-
-        return data
+        return PageUtil.of(items = rows, total, page, size)
     }
 
     @Transactional

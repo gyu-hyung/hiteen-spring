@@ -34,6 +34,7 @@ class AdminPointController(
     @GetMapping("/points")
     suspend fun getPoints(
         @RequestParam type: String? = null,
+        @RequestParam status: String? = null,
         @RequestParam startDate: LocalDate? = null,
         @RequestParam endDate: LocalDate? = null,
         @RequestParam searchType: String? = null,
@@ -44,10 +45,9 @@ class AdminPointController(
     ): ResponseEntity<ApiResult<ApiPage<AdminPointResponse>>> {
         val startDate = startDate?.atStartOfDay() // 2025-12-01 00:00:00
         val endDate = endDate?.plusDays(1)?.atStartOfDay() // 2025-12-30 00:00:00 (exclusive)
+        val search = search?.trim()?.takeIf { it.isNotBlank() }
 
-        val data = pointService.listPoints(
-            type, startDate, endDate, searchType, search, page, size, uid
-        )
+        val data = pointService.listPoints(type, status, startDate, endDate, searchType, search, page, size, uid)
 
         return success(data)
     }

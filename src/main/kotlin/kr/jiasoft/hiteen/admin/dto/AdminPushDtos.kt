@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.constraints.Size
 import java.time.OffsetDateTime
+import java.time.format.DateTimeFormatter
 
 @Schema(description = "관리자 푸시 목록 응답")
 data class AdminPushListResponse(
@@ -20,6 +21,8 @@ data class AdminPushListResponse(
     val createdAt: OffsetDateTime?,
     @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm:ss")
     val deletedAt: OffsetDateTime?,
+    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yy.MM.dd HH:mm:ss")
+    val createdDate: String? = createdAt?.format(DateTimeFormatter.ofPattern("yy.MM.dd HH:mm:ss")),
 )
 
 @Schema(description = "관리자 푸시 상세(요약)")

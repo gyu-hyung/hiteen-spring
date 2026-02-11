@@ -26,6 +26,7 @@ class AdminPushController(
     @GetMapping
     suspend fun list(
         @RequestParam type: String? = null,
+        @RequestParam status: String? = null,
         @RequestParam startDate: LocalDate? = null,
         @RequestParam endDate: LocalDate? = null,
         @RequestParam searchType: String? = null,
@@ -38,7 +39,7 @@ class AdminPushController(
         val endDate = endDate?.plusDays(1)?.atStartOfDay()
 
         val data = adminPushService.list(
-            type, startDate, endDate, searchType, search, page, size, order
+            type, status, startDate, endDate, searchType, search, page, size, order
         )
         return success(data)
     }

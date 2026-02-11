@@ -21,6 +21,11 @@ interface AdminPointRepository : CoroutineCrudRepository<PointEntity, Long> {
                 OR p.pointable_type LIKE CONCAT(:type, '%')
             )
             AND (
+                :status IS NULL OR :status = 'ALL'
+                OR (:status = 'CREDIT' AND p.point > 0)
+                OR (:status = 'DEBIT' AND p.point < 0)
+            )
+            AND (
                 :startDate IS NULL
                 OR p.created_at >= :startDate
             )
@@ -35,11 +40,11 @@ interface AdminPointRepository : CoroutineCrudRepository<PointEntity, Long> {
                         u.nickname ILIKE '%' || :search || '%'
                         OR u.phone ILIKE '%' || regexp_replace(:search, '[^0-9]', '', 'g') || '%'
                         OR p.memo ILIKE '%' || :search || '%'
-                    WHEN :searchType = 'nickname' THEN
+                    WHEN :searchType = 'NAME' THEN
                         u.nickname ILIKE '%' || :search || '%'
-                    WHEN :searchType = 'phone' THEN
+                    WHEN :searchType = 'PHONE' THEN
                         u.phone ILIKE '%' || regexp_replace(:search, '[^0-9]', '', 'g') || '%'
-                    WHEN :searchType = 'memo' THEN
+                    WHEN :searchType = 'MEMO' THEN
                         p.memo ILIKE '%' || :search || '%'
                     ELSE TRUE
                 END
@@ -51,6 +56,7 @@ interface AdminPointRepository : CoroutineCrudRepository<PointEntity, Long> {
     """)
     suspend fun countSearchResults(
         type: String?,
+        status: String?,
         startDate: LocalDateTime?,
         endDate: LocalDateTime?,
         searchType: String?,
@@ -72,6 +78,11 @@ interface AdminPointRepository : CoroutineCrudRepository<PointEntity, Long> {
                 OR p.pointable_type LIKE CONCAT(:type, '%')
             )
             AND (
+                :status IS NULL OR :status = 'ALL'
+                OR (:status = 'CREDIT' AND p.point > 0)
+                OR (:status = 'DEBIT' AND p.point < 0)
+            )
+            AND (
                 :startDate IS NULL
                 OR p.created_at >= :startDate
             )
@@ -86,11 +97,11 @@ interface AdminPointRepository : CoroutineCrudRepository<PointEntity, Long> {
                         u.nickname ILIKE '%' || :search || '%'
                         OR u.phone ILIKE '%' || regexp_replace(:search, '[^0-9]', '', 'g') || '%'
                         OR p.memo ILIKE '%' || :search || '%'
-                    WHEN :searchType = 'nickname' THEN
+                    WHEN :searchType = 'NAME' THEN
                         u.nickname ILIKE '%' || :search || '%'
-                    WHEN :searchType = 'phone' THEN
+                    WHEN :searchType = 'PHONE' THEN
                         u.phone ILIKE '%' || regexp_replace(:search, '[^0-9]', '', 'g') || '%'
-                    WHEN :searchType = 'memo' THEN
+                    WHEN :searchType = 'MEMO' THEN
                         p.memo ILIKE '%' || :search || '%'
                     ELSE TRUE
                 END
@@ -100,16 +111,17 @@ interface AdminPointRepository : CoroutineCrudRepository<PointEntity, Long> {
                 OR u.uid = :uid
             )
         ORDER BY id DESC
-        LIMIT :limit OFFSET :offset
+        LIMIT :size OFFSET :offset
     """)
     suspend fun listSearchResults(
         type: String?,
+        status: String?,
         startDate: LocalDateTime?,
         endDate: LocalDateTime?,
         searchType: String?,
         search: String?,
         uid: UUID?,
-        limit: Int,
+        size: Int,
         offset: Int,
     ): Flow<AdminPointResponse>
 }

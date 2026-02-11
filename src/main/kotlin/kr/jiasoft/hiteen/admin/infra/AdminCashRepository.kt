@@ -21,6 +21,11 @@ interface AdminCashRepository : CoroutineCrudRepository<CashEntity, Long> {
                 OR c.cashable_type LIKE CONCAT(:type, '%')
             )
             AND (
+                :status IS NULL OR :status = 'ALL'
+                OR (:status = 'CREDIT' AND c.amount > 0)
+                OR (:status = 'DEBIT' AND c.amount < 0)
+            )
+            AND (
                 :startDate IS NULL
                 OR c.created_at >= :startDate
             )
@@ -35,11 +40,11 @@ interface AdminCashRepository : CoroutineCrudRepository<CashEntity, Long> {
                         u.nickname ILIKE '%' || :search || '%'
                         OR u.phone ILIKE '%' || regexp_replace(:search, '[^0-9]', '', 'g') || '%'
                         OR c.memo ILIKE '%' || :search || '%'
-                    WHEN :searchType = 'nickname' THEN
+                    WHEN :searchType = 'NAME' THEN
                         u.nickname ILIKE '%' || :search || '%'
-                    WHEN :searchType = 'phone' THEN
+                    WHEN :searchType = 'PHONE' THEN
                         u.phone ILIKE '%' || regexp_replace(:search, '[^0-9]', '', 'g') || '%'
-                    WHEN :searchType = 'memo' THEN
+                    WHEN :searchType = 'MEMO' THEN
                         c.memo ILIKE '%' || :search || '%'
                     ELSE TRUE
                 END
@@ -51,6 +56,7 @@ interface AdminCashRepository : CoroutineCrudRepository<CashEntity, Long> {
     """)
     suspend fun countSearchResults(
         type: String?,
+        status: String?,
         startDate: LocalDateTime?,
         endDate: LocalDateTime?,
         searchType: String?,
@@ -72,6 +78,11 @@ interface AdminCashRepository : CoroutineCrudRepository<CashEntity, Long> {
                 OR c.cashable_type LIKE CONCAT(:type, '%')
             )
             AND (
+                :status IS NULL OR :status = 'ALL'
+                OR (:status = 'CREDIT' AND c.amount > 0)
+                OR (:status = 'DEBIT' AND c.amount < 0)
+            )
+            AND (
                 :startDate IS NULL
                 OR c.created_at >= :startDate
             )
@@ -86,11 +97,11 @@ interface AdminCashRepository : CoroutineCrudRepository<CashEntity, Long> {
                         u.nickname ILIKE '%' || :search || '%'
                         OR u.phone ILIKE '%' || regexp_replace(:search, '[^0-9]', '', 'g') || '%'
                         OR c.memo ILIKE '%' || :search || '%'
-                    WHEN :searchType = 'nickname' THEN
+                    WHEN :searchType = 'NAME' THEN
                         u.nickname ILIKE '%' || :search || '%'
-                    WHEN :searchType = 'phone' THEN
+                    WHEN :searchType = 'PHONE' THEN
                         u.phone ILIKE '%' || regexp_replace(:search, '[^0-9]', '', 'g') || '%'
-                    WHEN :searchType = 'memo' THEN
+                    WHEN :searchType = 'MEMO' THEN
                         c.memo ILIKE '%' || :search || '%'
                     ELSE TRUE
                 END
@@ -100,16 +111,17 @@ interface AdminCashRepository : CoroutineCrudRepository<CashEntity, Long> {
                 OR u.uid = :uid
             )
         ORDER BY id DESC
-        LIMIT :limit OFFSET :offset
+        LIMIT :size OFFSET :offset
     """)
     fun listSearchResults(
         type: String?,
+        status: String?,
         startDate: LocalDateTime?,
         endDate: LocalDateTime?,
         searchType: String?,
         search: String?,
         uid: UUID?,
-        limit: Int,
+        size: Int,
         offset: Int,
     ): Flow<AdminCashResponse>
 }

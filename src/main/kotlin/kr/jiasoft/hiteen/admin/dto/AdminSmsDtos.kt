@@ -3,6 +3,7 @@ package kr.jiasoft.hiteen.admin.dto
 import com.fasterxml.jackson.annotation.JsonFormat
 import io.swagger.v3.oas.annotations.media.Schema
 import java.time.OffsetDateTime
+import java.time.format.DateTimeFormatter
 
 @Schema(description = "관리자 SMS 목록 아이템")
 data class AdminSmsListResponse(
@@ -18,6 +19,8 @@ data class AdminSmsListResponse(
     val createdAt: OffsetDateTime,
     @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm:ss")
     val updatedAt: OffsetDateTime?,
+    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yy.MM.dd HH:mm:ss")
+    val createdDate: String? = createdAt.format(DateTimeFormatter.ofPattern("yy.MM.dd HH:mm:ss")),
 )
 
 @Schema(description = "관리자 SMS 상세")

@@ -35,6 +35,7 @@ class AdminCashController(
     @GetMapping("/cash")
     suspend fun getCash(
         @RequestParam type: String? = null,
+        @RequestParam status: String? = null,
         @RequestParam startDate: LocalDate? = null,
         @RequestParam endDate: LocalDate? = null,
         @RequestParam searchType: String? = null,
@@ -43,12 +44,11 @@ class AdminCashController(
         @RequestParam size: Int = 10,
         @RequestParam uid: UUID? = null,
     ): ResponseEntity<ApiResult<ApiPage<AdminCashResponse>>> {
-        val startDateTime = startDate?.atStartOfDay()
-        val endDateTime = endDate?.plusDays(1)?.atStartOfDay()
+        val startDate = startDate?.atStartOfDay()
+        val endDate = endDate?.plusDays(1)?.atStartOfDay()
+        val search = search?.trim()?.takeIf { it.isNotBlank() }
 
-        val data = cashService.listCash(
-            type, startDateTime, endDateTime, searchType, search, page, size, uid
-        )
+        val data = cashService.listCash(type, status, startDate, endDate, searchType, search, page, size, uid)
 
         return success(data)
     }

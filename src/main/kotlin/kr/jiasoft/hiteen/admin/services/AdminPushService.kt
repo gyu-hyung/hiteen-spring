@@ -28,6 +28,7 @@ class AdminPushService(
 
     suspend fun list(
         type: String?,
+        status: String?,
         startDate: LocalDateTime?,
         endDate: LocalDateTime?,
         searchType: String?,
@@ -46,8 +47,8 @@ class AdminPushService(
             else -> "DESC"
         }
 
-        val total = adminPushRepository.countList(type, startDate, endDate, searchType, search)
-        val rows = adminPushRepository.list(type, startDate, endDate, searchType, search, order, perPage, offset)
+        val total = adminPushRepository.countList(type, status, startDate, endDate, searchType, search)
+        val rows = adminPushRepository.list(type, status, startDate, endDate, searchType, search, order, perPage, offset)
 
         return PageUtil.of(
             items = rows.map { it.toListResponse() },
@@ -129,6 +130,7 @@ class AdminPushService(
         // 관리용 API에서는 최신 1건을 다시 조회(동시성 고려 필요). 여기서는 createdId 기준으로 가장 최근 push 1건을 가져옴.
         val latest = adminPushRepository.list(
             type = null,
+            status = null,
             startDate = null,
             endDate = null,
             searchType = "ALL",
