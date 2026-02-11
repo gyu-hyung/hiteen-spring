@@ -38,12 +38,12 @@ interface AdminExpRepository : CoroutineCrudRepository<UserExpHistoryEntity, Lon
                 OR CASE
                     WHEN :searchType = 'ALL' THEN
                         u.nickname ILIKE '%' || :search || '%'
-                        OR u.phone ILIKE '%' || :search || '%'
+                        OR u.phone ILIKE '%' || regexp_replace(:search, '[^0-9]', '', 'g') || '%'
                         OR e.reason ILIKE '%' || :search || '%'
                     WHEN :searchType = 'NAME' THEN
                         u.nickname ILIKE '%' || :search || '%'
                     WHEN :searchType = 'PHONE' THEN
-                        u.phone ILIKE '%' || :search || '%'
+                        u.phone ILIKE '%' || regexp_replace(:search, '[^0-9]', '', 'g') || '%'
                     WHEN :searchType = 'MEMO' THEN
                         e.reason ILIKE '%' || :search || '%'
                     ELSE TRUE
@@ -94,12 +94,12 @@ interface AdminExpRepository : CoroutineCrudRepository<UserExpHistoryEntity, Lon
                 OR CASE
                     WHEN :searchType = 'ALL' THEN
                         u.nickname ILIKE '%' || :search || '%'
-                        OR u.phone ILIKE '%' || :search || '%'
+                        OR u.phone ILIKE '%' || regexp_replace(:search, '[^0-9]', '', 'g') || '%'
                         OR e.reason ILIKE '%' || :search || '%'
                     WHEN :searchType = 'NAME' THEN
                         u.nickname ILIKE '%' || :search || '%'
                     WHEN :searchType = 'PHONE' THEN
-                        u.phone ILIKE '%' || :search || '%'
+                        u.phone ILIKE '%' || regexp_replace(:search, '[^0-9]', '', 'g') || '%'
                     WHEN :searchType = 'MEMO' THEN
                         e.reason ILIKE '%' || :search || '%'
                     ELSE TRUE

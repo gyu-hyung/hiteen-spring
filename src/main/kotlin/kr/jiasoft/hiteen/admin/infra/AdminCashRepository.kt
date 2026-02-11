@@ -33,18 +33,14 @@ interface AdminCashRepository : CoroutineCrudRepository<CashEntity, Long> {
                 OR CASE
                     WHEN :searchType = 'ALL' THEN
                         u.nickname ILIKE '%' || :search || '%'
-                        OR u.phone ILIKE '%' || :search || '%'
+                        OR u.phone ILIKE '%' || regexp_replace(:search, '[^0-9]', '', 'g') || '%'
                         OR c.memo ILIKE '%' || :search || '%'
-            
                     WHEN :searchType = 'nickname' THEN
                         u.nickname ILIKE '%' || :search || '%'
-            
                     WHEN :searchType = 'phone' THEN
-                        u.phone ILIKE '%' || :search || '%'
-            
+                        u.phone ILIKE '%' || regexp_replace(:search, '[^0-9]', '', 'g') || '%'
                     WHEN :searchType = 'memo' THEN
                         c.memo ILIKE '%' || :search || '%'
-            
                     ELSE TRUE
                 END
             )
@@ -88,18 +84,14 @@ interface AdminCashRepository : CoroutineCrudRepository<CashEntity, Long> {
                 OR CASE
                     WHEN :searchType = 'ALL' THEN
                         u.nickname ILIKE '%' || :search || '%'
-                        OR u.phone ILIKE '%' || :search || '%'
+                        OR u.phone ILIKE '%' || regexp_replace(:search, '[^0-9]', '', 'g') || '%'
                         OR c.memo ILIKE '%' || :search || '%'
-            
                     WHEN :searchType = 'nickname' THEN
                         u.nickname ILIKE '%' || :search || '%'
-            
                     WHEN :searchType = 'phone' THEN
-                        u.phone ILIKE '%' || :search || '%'
-            
+                        u.phone ILIKE '%' || regexp_replace(:search, '[^0-9]', '', 'g') || '%'
                     WHEN :searchType = 'memo' THEN
                         c.memo ILIKE '%' || :search || '%'
-            
                     ELSE TRUE
                 END
             )

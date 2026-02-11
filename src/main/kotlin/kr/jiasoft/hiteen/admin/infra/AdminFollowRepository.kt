@@ -23,18 +23,15 @@ interface AdminFollowRepository : CoroutineCrudRepository<FollowEntity, Long> {
                 OR CASE
                     WHEN :searchType = 'ALL' THEN
                         u_from.nickname ILIKE '%' || :search || '%'
-                        OR u_from.phone ILIKE '%' || :search || '%'
+                        OR u_from.phone ILIKE '%' || regexp_replace(:search, '[^0-9]', '', 'g') || '%'
                         OR u_to.nickname ILIKE '%' || :search || '%'
-                        OR u_to.phone ILIKE '%' || :search || '%'
-                    
+                        OR u_to.phone ILIKE '%' || regexp_replace(:search, '[^0-9]', '', 'g') || '%'
                     WHEN :searchType = 'nickname' THEN
                         u_from.nickname ILIKE '%' || :search || '%'
                         OR u_to.nickname ILIKE '%' || :search || '%'
-                    
                     WHEN :searchType = 'phone' THEN
-                        u_from.phone ILIKE '%' || :search || '%'
-                        OR u_to.phone ILIKE '%' || :search || '%'
-                    
+                        u_from.phone ILIKE '%' || regexp_replace(:search, '[^0-9]', '', 'g') || '%'
+                        OR u_to.phone ILIKE '%' || regexp_replace(:search, '[^0-9]', '', 'g') || '%'
                     ELSE TRUE
                 END
             )
@@ -87,18 +84,15 @@ interface AdminFollowRepository : CoroutineCrudRepository<FollowEntity, Long> {
                 OR CASE
                     WHEN :searchType = 'ALL' THEN
                         u_from.nickname ILIKE '%' || :search || '%'
-                        OR u_from.phone ILIKE '%' || :search || '%'
+                        OR u_from.phone ILIKE '%' || regexp_replace(:search, '[^0-9]', '', 'g') || '%'
                         OR u_to.nickname ILIKE '%' || :search || '%'
-                        OR u_to.phone ILIKE '%' || :search || '%'
-                    
+                        OR u_to.phone ILIKE '%' || regexp_replace(:search, '[^0-9]', '', 'g') || '%'
                     WHEN :searchType = 'nickname' THEN
                         u_from.nickname ILIKE '%' || :search || '%'
                         OR u_to.nickname ILIKE '%' || :search || '%'
-                    
                     WHEN :searchType = 'phone' THEN
-                        u_from.phone ILIKE '%' || :search || '%'
-                        OR u_to.phone ILIKE '%' || :search || '%'
-                    
+                        u_from.phone ILIKE '%' || regexp_replace(:search, '[^0-9]', '', 'g') || '%'
+                        OR u_to.phone ILIKE '%' || regexp_replace(:search, '[^0-9]', '', 'g') || '%'
                     ELSE TRUE
                 END
             )

@@ -26,14 +26,11 @@ interface AdminFriendRepository : CoroutineCrudRepository<FriendEntity, Long> {
                 OR CASE
                     WHEN :searchType = 'ALL' THEN
                         u.nickname ILIKE '%' || :search || '%'
-                        OR u.phone ILIKE '%' || :search || '%'
-                    
+                        OR u.phone ILIKE '%' || regexp_replace(:search, '[^0-9]', '', 'g') || '%'
                     WHEN :searchType = 'nickname' THEN
                         u.nickname ILIKE '%' || :search || '%'
-                    
                     WHEN :searchType = 'phone' THEN
-                        u.phone ILIKE '%' || :search || '%'
-                    
+                        u.phone ILIKE '%' || regexp_replace(:search, '[^0-9]', '', 'g') || '%'
                     ELSE TRUE
                 END
             )
@@ -86,14 +83,11 @@ interface AdminFriendRepository : CoroutineCrudRepository<FriendEntity, Long> {
                 OR CASE
                     WHEN :searchType = 'ALL' THEN
                         u.nickname ILIKE '%' || :search || '%'
-                        OR u.phone ILIKE '%' || :search || '%'
-                    
+                        OR u.phone ILIKE '%' || regexp_replace(:search, '[^0-9]', '', 'g') || '%'
                     WHEN :searchType = 'nickname' THEN
                         u.nickname ILIKE '%' || :search || '%'
-                    
                     WHEN :searchType = 'phone' THEN
-                        u.phone ILIKE '%' || :search || '%'
-                    
+                        u.phone ILIKE '%' || regexp_replace(:search, '[^0-9]', '', 'g') || '%'
                     ELSE TRUE
                 END
             )

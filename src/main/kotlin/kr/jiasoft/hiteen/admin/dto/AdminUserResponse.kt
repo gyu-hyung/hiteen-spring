@@ -20,7 +20,10 @@ data class AdminUserResponse(
     val username: String,
     val phone: String,
     val gender: String? = null,
+
+    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yy.MM.dd")
     val birthday: LocalDate? = null,
+
     val schoolName: String? = null,
     val tierNameKr: String? = null,
     val tierAssetUid: String? = null,

@@ -40,15 +40,12 @@ interface AdminAcceptFriendRepository : CoroutineCrudRepository<FriendEntity, Lo
                         OR COALESCE(req.phone, '') ILIKE '%' || :search || '%'
                         OR COALESCE(res.nickname, '') ILIKE '%' || :search || '%'
                         OR COALESCE(res.phone, '') ILIKE '%' || :search || '%'
-            
                     WHEN :searchType = 'SENDER' THEN
                         COALESCE(req.nickname, '') ILIKE '%' || :search || '%'
                         OR COALESCE(req.phone, '') ILIKE '%' || :search || '%'
-            
                     WHEN :searchType = 'RECEIVER' THEN
                         COALESCE(res.nickname, '') ILIKE '%' || :search || '%'
                         OR COALESCE(res.phone, '') ILIKE '%' || :search || '%'
-            
                     ELSE TRUE
                 END
             )
@@ -113,15 +110,12 @@ interface AdminAcceptFriendRepository : CoroutineCrudRepository<FriendEntity, Lo
                         OR COALESCE(req.phone, '') ILIKE '%' || :search || '%'
                         OR COALESCE(res.nickname, '') ILIKE '%' || :search || '%'
                         OR COALESCE(res.phone, '') ILIKE '%' || :search || '%'
-            
                     WHEN :searchType = 'SENDER' THEN
                         COALESCE(req.nickname, '') ILIKE '%' || :search || '%'
                         OR COALESCE(req.phone, '') ILIKE '%' || :search || '%'
-            
                     WHEN :searchType = 'RECEIVER' THEN
                         COALESCE(res.nickname, '') ILIKE '%' || :search || '%'
                         OR COALESCE(res.phone, '') ILIKE '%' || :search || '%'
-            
                     ELSE TRUE
                 END
             )

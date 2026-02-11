@@ -19,7 +19,6 @@ import kr.jiasoft.hiteen.common.dto.ApiPage
 import kr.jiasoft.hiteen.common.dto.ApiResult
 import kr.jiasoft.hiteen.common.dto.ApiPageCursor
 import kr.jiasoft.hiteen.common.dto.PageUtil
-import kr.jiasoft.hiteen.common.extensions.failure
 import kr.jiasoft.hiteen.common.extensions.success
 import kr.jiasoft.hiteen.feature.cash.app.CashService
 import kr.jiasoft.hiteen.feature.point.app.PointService
@@ -36,6 +35,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.util.UUID
 import kotlin.IllegalArgumentException
@@ -60,41 +60,39 @@ class AdminUserController (
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ): ResponseEntity<ApiResult<List<AdminUserSearchResponse>>> {
         val data = adminUserRepository.listSearchUsersAllRoles(keyword).toList()
-        return ResponseEntity.ok(ApiResult.success(data))
+
+        return success(data)
     }
 
     @GetMapping("/users")
     suspend fun getUsers(
-        @RequestParam page: Int = 1,
-        @RequestParam size: Int = 10,
-        @RequestParam order: String = "DESC",
-        @RequestParam search: String? = null,
-        @RequestParam searchType: String = "ALL",
         @RequestParam status: String? = null,
-        @RequestParam id: Long? = null,
-        @RequestParam uid: String? = null,
-        @RequestParam role: String? = null,
+        @RequestParam type: String? = null,
+        @RequestParam startDate: LocalDate? = null,
+        @RequestParam endDate: LocalDate? = null,
+        @RequestParam searchType: String? = null,
+        @RequestParam search: String? = null,
+        @RequestParam order: String = "DESC",
+        @RequestParam size: Int = 10,
+        @RequestParam page: Int = 1,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ): ResponseEntity<ApiResult<ApiPage<AdminUserResponse>>> {
+        val startDate = startDate?.atStartOfDay()
+        val endDate = endDate?.plusDays(1)?.atStartOfDay()
 
-        val res = adminUserRepository.listByPage(
-            page = page,
-            size = size,
-            order = order,
-            search = search,
-            searchType = searchType,
-            status = status,
-            role = role
-        ).toList()
+        val search = search?.trim()?.takeIf { it.isNotBlank() }
 
-        val totalCount = adminUserRepository.totalCount(
-            search = search,
-            searchType = searchType,
-            status = status,
-            role = role
-        )
+        val page = page.coerceAtLeast(1)
+        val size = size.coerceIn(1, 100)
+        val offset = (page - 1) * size
 
-        return ResponseEntity.ok(ApiResult.success(PageUtil.of(res, totalCount, page, size)))
+        val totalCount = adminUserRepository.totalCount(status, type, startDate, endDate, searchType, search)
+
+        val res = adminUserRepository.listByPage(status, type, startDate, endDate, searchType, search, order, size, offset).toList()
+
+        val data = PageUtil.of(res, totalCount, page, size)
+
+        return success(data)
     }
 
     /**
@@ -122,15 +120,13 @@ class AdminUserController (
 
         val nextCursor = list.lastOrNull()?.id?.toString()
 
-        return ResponseEntity.ok(
-            ApiResult.success(
-                ApiPageCursor(
-                    items = list,
-                    nextCursor = nextCursor,
-                    perPage = size,
-                )
-            )
+        val data = ApiPageCursor(
+            items = list,
+            nextCursor = nextCursor,
+            perPage = size,
         )
+
+        return success(data)
     }
 
 

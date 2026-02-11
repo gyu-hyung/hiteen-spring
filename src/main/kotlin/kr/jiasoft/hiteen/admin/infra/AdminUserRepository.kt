@@ -7,6 +7,7 @@ import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 import org.springframework.stereotype.Repository
+import java.time.LocalDateTime
 import java.util.UUID
 
 @Repository
@@ -17,89 +18,143 @@ interface AdminUserRepository : CoroutineCrudRepository<UserEntity, Long> {
     @Query("""
         SELECT COUNT(*)
         FROM users u
+        LEFT JOIN schools s ON s.id = u.school_id
+        LEFT JOIN tiers t ON t.id = u.tier_id
         WHERE
             (
+                :status IS NULL OR :status = 'ALL'
+                OR (:status = 'ACTIVE' AND u.deleted_at IS NULL)
+                OR (:status = 'BLOCKED' AND u.deleted_at IS NOT NULL)
+                OR (:status = 'DELETED' AND u.deleted_at IS NOT NULL)
+            )
+            AND (
+                :type IS NULL OR :type = 'ALL'
+                OR u.role = :type
+            )
+            AND (
+                :startDate IS NULL
+                OR u.created_at >= :startDate
+            )
+            AND (
+                :endDate IS NULL
+                OR u.created_at < :endDate
+            )
+            AND (
                 COALESCE(TRIM(:search), '') = ''
                 OR CASE
                     WHEN :searchType = 'ALL' THEN
-                        (u.nickname ILIKE ('%' || :search || '%')
-                         OR u.phone ILIKE ('%' || :search || '%'))
-                    WHEN :searchType = 'nickname' THEN
+                        (
+                            u.nickname ILIKE ('%' || :search || '%')
+                            OR u.phone ILIKE ('%' || regexp_replace(:search, '[^0-9]', '', 'g') || '%')
+                            OR s.name ILIKE ('%' || :search || '%')
+                            OR t.tier_name_kr ILIKE ('%' || :search || '%')
+                        )
+                    WHEN :searchType = 'NICKNAME' THEN
                         u.nickname ILIKE ('%' || :search || '%')
-                    WHEN :searchType = 'phone' THEN
-                        u.phone ILIKE ('%' || :search || '%')
+                    WHEN :searchType = 'PHONE' THEN
+                        u.phone ILIKE ('%' || regexp_replace(:search, '[^0-9]', '', 'g') || '%')
+                    WHEN :searchType = 'SCHOOL' THEN
+                        s.name ILIKE ('%' || :search || '%')
+                    WHEN :searchType = 'TIER' THEN
+                        t.tier_name_kr ILIKE ('%' || :search || '%')
                     ELSE TRUE
                 END
             )
-            AND (
-                :status IS NULL OR :status = 'ALL'
-                OR (:status = 'ACTIVE' AND u.deleted_at IS NULL)
-                OR (:status = 'DELETED' AND u.deleted_at IS NOT NULL)
-            )
-            AND (:role IS NULL OR u.role = :role)
     """)
     suspend fun totalCount(
-        search: String?,
-        searchType: String,
-        role: String?,
         status: String?,
+        type: String?,
+        startDate: LocalDateTime?,
+        endDate: LocalDateTime?,
+        searchType: String?,
+        search: String?,
     ): Int
 
     @Query("""
         SELECT 
             u.*,
-            (SELECT name FROM schools s WHERE s.id = u.school_id) AS school_name,
-            (SELECT tier_name_kr FROM tiers t WHERE t.id = u.tier_id) AS tier_name_kr,
-            (SELECT uid FROM tiers t WHERE t.id = u.tier_id) AS tier_asset_uid,
-            (SELECT level FROM tiers t WHERE t.id = u.tier_id) AS level,
-            (select total_point from user_points_summary ups where ups.user_id = u.id) point,
-            (select total_cash from user_cash_summary ups where ups.user_id = u.id) cash
+            s.name AS school_name,
+            t.tier_name_kr,
+            t.uid AS tier_asset_uid,
+            t.level,
+            ups.total_point AS point,
+            ucs.total_cash AS cash
         FROM users u
+        LEFT JOIN schools s ON s.id = u.school_id
+        LEFT JOIN tiers t ON t.id = u.tier_id
+        LEFT JOIN user_points_summary ups ON ups.user_id = u.id
+        LEFT JOIN user_cash_summary ucs ON ucs.user_id = u.id
         WHERE
             (
+                :status IS NULL OR :status = 'ALL'
+                OR (:status = 'ACTIVE' AND u.deleted_at IS NULL)
+                OR (:status = 'BLOCKED' AND u.deleted_at IS NOT NULL)
+                OR (:status = 'DELETED' AND u.deleted_at IS NOT NULL)
+            )
+            AND (
+                :type IS NULL OR :type = 'ALL'
+                OR u.role = :type
+            )
+            AND (
+                :startDate IS NULL
+                OR u.created_at >= :startDate
+            )
+            AND (
+                :endDate IS NULL
+                OR u.created_at < :endDate
+            )
+            AND (
                 COALESCE(TRIM(:search), '') = ''
                 OR CASE
                     WHEN :searchType = 'ALL' THEN
-                        (u.nickname ILIKE ('%' || :search || '%')
-                         OR u.phone ILIKE ('%' || :search || '%'))
-                    WHEN :searchType = 'nickname' THEN
+                        (
+                            u.nickname ILIKE ('%' || :search || '%')
+                            OR u.phone ILIKE ('%' || regexp_replace(:search, '[^0-9]', '', 'g') || '%')
+                            OR s.name ILIKE ('%' || :search || '%')
+                            OR t.tier_name_kr ILIKE ('%' || :search || '%')
+                        )
+                    WHEN :searchType = 'NICKNAME' THEN
                         u.nickname ILIKE ('%' || :search || '%')
-                    WHEN :searchType = 'phone' THEN
-                        u.phone ILIKE ('%' || :search || '%')
+                    WHEN :searchType = 'PHONE' THEN
+                        u.phone ILIKE ('%' || regexp_replace(:search, '[^0-9]', '', 'g') || '%')
+                    WHEN :searchType = 'SCHOOL' THEN
+                        s.name ILIKE ('%' || :search || '%')
+                    WHEN :searchType = 'TIER' THEN
+                        t.tier_name_kr ILIKE ('%' || :search || '%')
                     ELSE TRUE
                 END
             )
-            AND (
-                :status IS NULL OR :status = 'ALL'
-                OR (:status = 'ACTIVE' AND u.deleted_at IS NULL)
-                OR (:status = 'DELETED' AND u.deleted_at IS NOT NULL)
-            )
-            AND (:role IS NULL OR u.role = :role)
         ORDER BY 
-            CASE WHEN :order = 'DESC' THEN created_at END DESC,
-            CASE WHEN :order = 'ASC' THEN created_at END ASC
-        LIMIT :size OFFSET (:page - 1) * :size
+            CASE WHEN :order = 'DESC' THEN u.created_at END DESC,
+            CASE WHEN :order = 'ASC' THEN u.created_at END ASC
+        LIMIT :size OFFSET :offset
     """)
     fun listByPage(
-        page: Int,
-        size: Int,
-        order: String,
-        search: String?,
-        searchType: String,
-        role: String?,
         status: String?,
+        type: String?,
+        startDate: LocalDateTime?,
+        endDate: LocalDateTime?,
+        searchType: String?,
+        search: String?,
+        order: String?,
+        size: Int,
+        offset: Int,
     ): Flow<AdminUserResponse>
 
     @Query("""
         SELECT 
             u.*,
-            (SELECT name FROM schools s WHERE s.id = u.school_id) AS school_name,
-            (SELECT tier_name_kr FROM tiers t WHERE t.id = u.tier_id) AS tier_name_kr,
-            (SELECT uid FROM tiers t WHERE t.id = u.tier_id) AS tier_asset_uid,
-            (SELECT level FROM tiers t WHERE t.id = u.tier_id) AS level,
-            (select total_point from user_points_summary ups where ups.user_id = u.id) point,
-            (select total_cash from user_cash_summary ups where ups.user_id = u.id) cash
+            s.name AS school_name,
+            t.tier_name_kr,
+            t.uid AS tier_asset_uid,
+            t.level,
+            ups.total_point AS point,
+            ucs.total_cash AS cash
         FROM users u
+        LEFT JOIN schools s ON s.id = u.school_id
+        LEFT JOIN tiers t ON t.id = u.tier_id
+        LEFT JOIN user_points_summary ups ON ups.user_id = u.id
+        LEFT JOIN user_cash_summary ucs ON ucs.user_id = u.id
         WHERE u.uid = :uid
     """)
     suspend fun findResponseByUid(uid: UUID): AdminUserResponse?
@@ -116,10 +171,8 @@ interface AdminUserRepository : CoroutineCrudRepository<UserEntity, Long> {
             AND u.role = 'USER'
             AND (
                 :keyword IS NULL
-                OR (
-                        u.nickname LIKE CONCAT('%', :keyword, '%')
-                        OR u.phone LIKE CONCAT('%', :keyword, '%')
-                )
+                OR u.nickname ILIKE ('%' || :keyword || '%')
+                OR u.phone ILIKE ('%' || regexp_replace(:keyword, '[^0-9]', '', 'g') || '%')
             )
     """)
     suspend fun listSearchUsers(
@@ -136,10 +189,8 @@ interface AdminUserRepository : CoroutineCrudRepository<UserEntity, Long> {
         WHERE u.deleted_at IS NULL
             AND (
                 :keyword IS NULL
-                OR (
-                        u.nickname LIKE CONCAT('%', :keyword, '%')
-                        OR u.phone LIKE CONCAT('%', :keyword, '%')
-                )
+                OR u.nickname ILIKE ('%' || :keyword || '%')
+                OR u.phone ILIKE ('%' || regexp_replace(:keyword, '[^0-9]', '', 'g') || '%')
             )
     """)
     suspend fun listSearchUsersAllRoles(
@@ -165,33 +216,38 @@ interface AdminUserRepository : CoroutineCrudRepository<UserEntity, Long> {
     @Query("""
         SELECT 
             u.*,
-            (SELECT name FROM schools s WHERE s.id = u.school_id) AS school_name,
-            (SELECT tier_name_kr FROM tiers t WHERE t.id = u.tier_id) AS tier_name_kr,
-            (SELECT uid FROM tiers t WHERE t.id = u.tier_id) AS tier_asset_uid,
-            (SELECT level FROM tiers t WHERE t.id = u.tier_id) AS level,
-            (select total_point from user_points_summary ups where ups.user_id = u.id) point,
-            (select total_cash from user_cash_summary ups where ups.user_id = u.id) cash
+            s.name AS school_name,
+            t.tier_name_kr,
+            t.uid AS tier_asset_uid,
+            t.level,
+            ups.total_point AS point,
+            ucs.total_cash AS cash
         FROM users u
+        LEFT JOIN schools s ON s.id = u.school_id
+        LEFT JOIN tiers t ON t.id = u.tier_id
+        LEFT JOIN user_points_summary ups ON ups.user_id = u.id
+        LEFT JOIN user_cash_summary ucs ON ucs.user_id = u.id
         WHERE
             (
+                :status IS NULL OR :status = 'ALL'
+                OR (:status = 'ACTIVE' AND u.deleted_at IS NULL)
+                OR (:status = 'BLOCKED' AND u.deleted_at IS NOT NULL)
+                OR (:status = 'DELETED' AND u.deleted_at IS NOT NULL)
+            )
+            AND (:role IS NULL OR u.role = :role)
+            AND (
                 COALESCE(TRIM(:search), '') = ''
                 OR CASE
                     WHEN :searchType = 'ALL' THEN
                         (u.nickname ILIKE ('%' || :search || '%')
-                         OR u.phone ILIKE ('%' || :search || '%'))
+                         OR u.phone ILIKE ('%' || regexp_replace(:search, '[^0-9]', '', 'g') || '%'))
                     WHEN :searchType = 'nickname' THEN
                         u.nickname ILIKE ('%' || :search || '%')
                     WHEN :searchType = 'phone' THEN
-                        u.phone ILIKE ('%' || :search || '%')
+                        u.phone ILIKE ('%' || regexp_replace(:search, '[^0-9]', '', 'g') || '%')
                     ELSE TRUE
                 END
             )
-            AND (
-                :status IS NULL OR :status = 'ALL'
-                OR (:status = 'ACTIVE' AND u.deleted_at IS NULL)
-                OR (:status = 'DELETED' AND u.deleted_at IS NOT NULL)
-            )
-            AND (:role IS NULL OR u.role = :role)
             AND (:lastId IS NULL OR u.id < :lastId)
         ORDER BY u.id DESC
         LIMIT :size

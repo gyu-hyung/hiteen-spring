@@ -32,15 +32,15 @@ interface AdminPointRepository : CoroutineCrudRepository<PointEntity, Long> {
                 COALESCE(TRIM(:search), '') = ''
                 OR CASE
                     WHEN :searchType = 'ALL' THEN
-                        (u.nickname ILIKE CONCAT('%', :search, '%')
-                        OR u.phone ILIKE CONCAT('%', :search, '%')
-                        OR p.memo ILIKE CONCAT('%', :search, '%'))
+                        u.nickname ILIKE '%' || :search || '%'
+                        OR u.phone ILIKE '%' || regexp_replace(:search, '[^0-9]', '', 'g') || '%'
+                        OR p.memo ILIKE '%' || :search || '%'
                     WHEN :searchType = 'nickname' THEN
-                        u.nickname ILIKE CONCAT('%', :search, '%')
+                        u.nickname ILIKE '%' || :search || '%'
                     WHEN :searchType = 'phone' THEN
-                        u.phone ILIKE CONCAT('%', :search, '%')
+                        u.phone ILIKE '%' || regexp_replace(:search, '[^0-9]', '', 'g') || '%'
                     WHEN :searchType = 'memo' THEN
-                        p.memo ILIKE CONCAT('%', :search, '%')
+                        p.memo ILIKE '%' || :search || '%'
                     ELSE TRUE
                 END
             )
@@ -83,15 +83,15 @@ interface AdminPointRepository : CoroutineCrudRepository<PointEntity, Long> {
                 COALESCE(TRIM(:search), '') = ''
                 OR CASE
                     WHEN :searchType = 'ALL' THEN
-                        (u.nickname ILIKE CONCAT('%', :search, '%')
-                        OR u.phone ILIKE CONCAT('%', :search, '%')
-                        OR p.memo ILIKE CONCAT('%', :search, '%'))
+                        u.nickname ILIKE '%' || :search || '%'
+                        OR u.phone ILIKE '%' || regexp_replace(:search, '[^0-9]', '', 'g') || '%'
+                        OR p.memo ILIKE '%' || :search || '%'
                     WHEN :searchType = 'nickname' THEN
-                        u.nickname ILIKE CONCAT('%', :search, '%')
+                        u.nickname ILIKE '%' || :search || '%'
                     WHEN :searchType = 'phone' THEN
-                        u.phone ILIKE CONCAT('%', :search, '%')
+                        u.phone ILIKE '%' || regexp_replace(:search, '[^0-9]', '', 'g') || '%'
                     WHEN :searchType = 'memo' THEN
-                        p.memo ILIKE CONCAT('%', :search, '%')
+                        p.memo ILIKE '%' || :search || '%'
                     ELSE TRUE
                 END
             )
