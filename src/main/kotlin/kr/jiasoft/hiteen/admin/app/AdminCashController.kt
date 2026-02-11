@@ -114,7 +114,7 @@ class AdminCashController(
 
         val users: List<UserEntity> = when (targetType) {
             "all" -> userRepository.findByRole("USER")
-            else -> userRepository.findUsersByPhones(role = "USER", phones = receivers)
+            else -> userRepository.findUsersByPhonesAndRole(role = "USER", phones = receivers)
         }
 
         val total = users.size
