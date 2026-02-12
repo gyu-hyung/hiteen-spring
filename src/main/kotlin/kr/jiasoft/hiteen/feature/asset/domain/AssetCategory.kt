@@ -24,6 +24,7 @@ enum class AssetCategory(
     SOUND("sound"),
     BARCODE("barcode"),
     ARTICLE("article"),
+    GAME_RESULT("game", "result"),
     ;
 
     fun fullPath(): String =

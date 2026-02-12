@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactor.awaitSingle
 import kr.jiasoft.hiteen.common.dto.ApiResult
+import kr.jiasoft.hiteen.feature.asset.domain.AssetCategory
 import kr.jiasoft.hiteen.feature.asset.domain.ThumbnailMode
 import kr.jiasoft.hiteen.feature.asset.dto.AssetResponse
 import kr.jiasoft.hiteen.feature.asset.dto.toResponse
@@ -47,9 +48,10 @@ class AssetController(
     suspend fun upload(
         @Parameter(description = "업로드할 파일") @RequestPart("file") file: FilePart,
         @Parameter(description = "원본 파일명 (선택)") @RequestPart(name = "originFileName", required = false) originFileName: String?,
+        @Parameter(description = "파일 카테고리 (선택, 기본: COMMON)") @RequestParam(name = "category", required = false) category: AssetCategory?,
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ): ResponseEntity<ApiResult<AssetResponse>>
-    = ResponseEntity.ok(ApiResult.success(assetService.upload(file, originFileName, currentUserId = user.id)))
+    = ResponseEntity.ok(ApiResult.success(assetService.upload(file, originFileName, currentUserId = user.id, category = category ?: AssetCategory.COMMON)))
 
     @Operation(
         summary = "여러 파일 업로드",
