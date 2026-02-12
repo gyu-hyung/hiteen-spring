@@ -218,4 +218,4 @@ metrics:
 #   - gitlab-registry: GitLab Container Registry 인증
 #
 # Secret 수정 방법:
-#   kubectl edit secret hiteen-app-secret -n hiteen-prod
+#   kubectl edit secret hiteen-app-secret -n hiteen

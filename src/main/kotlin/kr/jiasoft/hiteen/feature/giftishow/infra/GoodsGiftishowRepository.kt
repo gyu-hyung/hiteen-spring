@@ -73,7 +73,8 @@ interface GiftishowGoodsRepository : CoroutineCrudRepository<GoodsGiftishowEntit
 
 
     /**
-     * 사용자 상품 목록 조회
+     * 사용자 상품 목록 조회 (브랜드명, 판매가격 순 정렬)
+     * 커서 페이징: (lastBrandName, lastSalePrice, lastId) 복합 커서 사용
      * */
     @Query("""
         SELECT g.*
@@ -107,13 +108,20 @@ interface GiftishowGoodsRepository : CoroutineCrudRepository<GoodsGiftishowEntit
                 :goodsCodeType IS NULL OR :goodsCodeType = 'ALL'
                 OR g.goods_code LIKE CONCAT(:goodsCodeType, '%')
             )
-            AND (:lastId IS NULL OR g.id < :lastId)
-        ORDER BY g.id DESC
+            AND (
+                :lastBrandName IS NULL 
+                OR g.brand_name > :lastBrandName
+                OR (g.brand_name = :lastBrandName AND g.sale_price > :lastSalePrice)
+                OR (g.brand_name = :lastBrandName AND g.sale_price = :lastSalePrice AND g.id > :lastId)
+            )
+        ORDER BY g.brand_name ASC, g.sale_price ASC, g.id ASC
         LIMIT :size
     """)
     fun listByCursorId(
         size: Int,
         lastId: Long?,
+        lastBrandName: String?,
+        lastSalePrice: Int?,
         search: String?,
         searchType: String,
         categorySeq: Int?,

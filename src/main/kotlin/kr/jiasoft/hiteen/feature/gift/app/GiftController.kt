@@ -150,21 +150,26 @@ class GiftController (
      * 기프트쇼 상품 목록조회
      * */
     @GetMapping("/goods")
+    @Operation(description = "ex) /api/gift/goods?lastId=1852&lastBrandName=다이소&lastSalePrice=10000 ")
     suspend fun getGoods(
         @RequestParam size: Int = 10,
-        @RequestParam(required = false) lastId: Long?,   // ⭐ id 커서
+        @RequestParam(required = false) lastId: Long?,   // 커서
         @RequestParam search: String? = null,
         @RequestParam searchType: String = "ALL",
         @RequestParam categorySeq: Int? = null,
         @RequestParam goodsTypeCd: String? = null,
         @RequestParam(required = false) brandCode: String? = null,
         @RequestParam(required = false) goodsCodeType: String? = null,
+        @RequestParam(required = false) lastBrandName: String? = null,// 커서
+        @RequestParam(required = false) lastSalePrice: Int? = null,// 커서
         @AuthenticationPrincipal(expression = "user") user: UserEntity,
     ): ResponseEntity<ApiResult<ApiPageCursor<GoodsGiftishowEntity>>> {
 
         val list = giftishowGoodsRepository.listByCursorId(
             size = size,
             lastId = lastId,
+            lastBrandName = lastBrandName,
+            lastSalePrice = lastSalePrice,
             search = search,
             searchType = searchType,
             categorySeq = categorySeq,
@@ -173,8 +178,9 @@ class GiftController (
             goodsCodeType = goodsCodeType,
         ).toList()
 
-        // 다음 커서 (마지막 id)
-        val nextCursor = list.lastOrNull()?.id?.toString()
+        // 다음 커서 (brandName:salePrice:id 형태)
+        val lastItem = list.lastOrNull()
+        val nextCursor = lastItem?.let { "${it.brandName}:${it.salePrice}:${it.id}" }
 
         return ResponseEntity.ok(
             ApiResult.success(

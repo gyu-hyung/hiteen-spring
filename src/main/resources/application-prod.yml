@@ -7,7 +7,7 @@ spring:
     name: hiteen
 
   r2dbc:
-    url: r2dbc:postgresql://${DB_HOST:10.8.0.200}:5432/${DB_NAME:hiteen-prod}
+    url: r2dbc:postgresql://${DB_HOST:10.8.0.200}:5432/${DB_NAME:hiteen}
     username: ${DB_USER:hiteen}
     password: ${DB_PASSWORD:}
     pool:
@@ -22,7 +22,7 @@ spring:
 
   liquibase:
     enabled: false  # 운영에서는 수동 마이그레이션
-    url: jdbc:postgresql://${DB_HOST:10.8.0.200}:5432/${DB_NAME:hiteen-prod}
+    url: jdbc:postgresql://${DB_HOST:10.8.0.200}:5432/${DB_NAME:hiteen}
     user: ${DB_USER:hiteen}
     password: ${DB_PASSWORD:}
     change-log: classpath:db/changelog/db.changelog-master.yaml
@@ -146,21 +146,21 @@ batch:
 
 giftishow:
   url: "https://bizapi.giftishow.com/bizApi"
-  auth-key: ${GIFTISHOW_AUTH_KEY:}
-  token-key: ${GIFTISHOW_TOKEN_KEY:}
-  template-id: ${GIFTISHOW_TEMPLATE_ID:}
-  banner-id: ${GIFTISHOW_BANNER_ID:}
+  auth-key: "REAL626e92ac568f4330947dd8793622e9ac"
+  token-key: "0F3WhVAAAx6iuIFzIcF7Gg=="
+  template-id: "202404120253800"
+  banner-id: "202404120290767"
   callback: "15775993"
-  user-id: ${GIFTISHOW_USER_ID:}
-  admin-phone: ${GIFTISHOW_ADMIN_PHONE:}
+  user-id: "ceo@jiasoft.kr"
+  admin-phone: "01026490217|01066227103|01099136543"
 
 neis:
   base-url: "https://open.neis.go.kr/hub"
-  api-key: ${NEIS_API_KEY:}
+  api-key: "458d6485b25c46009758a4ab53413497"
 
 kakao:
   base-url: "https://dapi.kakao.com/v2/local"
-  api-key: ${KAKAO_API_KEY:}
+  api-key: "6ba92dcdddc5dccc78dbbaa50eb95825"
 
 logging:
   level:

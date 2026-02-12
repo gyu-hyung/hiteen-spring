@@ -61,22 +61,22 @@
 
 ```bash
 # 1. 네임스페이스 생성
-kubectl create ns hiteen-prod
+kubectl create ns hiteen
 
 # 2. Secret 생성
 kubectl create secret docker-registry gitlab-registry-secret \
   --docker-server=registry.gitlab.com \
   --docker-username=<USER> \
   --docker-password=<TOKEN> \
-  -n hiteen-prod
+  -n hiteen
 
 kubectl create secret generic firebase-secret \
   --from-file=firebase-key.json=/path/to/key.json \
-  -n hiteen-prod
+  -n hiteen
 
 # 3. 인프라 배포
 helm upgrade --install hiteen-infra ./hiteen-infra-chart \
-  -n hiteen-prod \
+  -n hiteen \
   --set redis.password=<REDIS_PW> \
   --set dbBackup.postgres.password=<DB_PW> \
   --set nfs.server=<NFS_IP> \
@@ -84,7 +84,7 @@ helm upgrade --install hiteen-infra ./hiteen-infra-chart \
 
 # 4. 앱 배포 (시크릿 파일 사용)
 helm upgrade --install hiteen-app ./hiteen-app-chart \
-  -n hiteen-prod \
+  -n hiteen \
   -f ./hiteen-app-chart/values.yaml \
   -f ./secrets-prod.yaml \
   --set app.image.tag=<TAG>

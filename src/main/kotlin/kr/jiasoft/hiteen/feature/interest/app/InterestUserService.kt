@@ -247,10 +247,12 @@ class InterestUserService(
                         var ok = false
 
                         // 같은 학교급 여부 (특수학교(9)는 학교급 제한 없음)
-                        val isSameSchoolLevel = mySchoolType == null ||
-                                                mySchoolType == 9 ||
-                                                targetSchoolType == 9 ||
-                                                mySchoolType == targetSchoolType
+                        // targetSchoolType이 null이면 학교급 비교 불가 → 같은 학교급이 아닌 것으로 처리
+                        val isSameSchoolLevel = when {
+                            mySchoolType == null || targetSchoolType == null -> false // 학교급 정보 없으면 같은 학교급 아님
+                            mySchoolType == 9 || targetSchoolType == 9 -> true // 특수학교는 모든 학교급과 매칭 가능
+                            else -> mySchoolType == targetSchoolType // 같은 학교급인지 비교
+                        }
 
                         // 동급생: 같은 학교급 내에서 같은 학년
                         if (recommendOptions.contains("동급생") && targetGrade == userGrade && isSameSchoolLevel) ok = true

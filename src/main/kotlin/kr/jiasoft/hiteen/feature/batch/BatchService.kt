@@ -8,6 +8,7 @@ import kr.jiasoft.hiteen.feature.play.app.GameManageService
 import kr.jiasoft.hiteen.feature.school.app.SchoolFoodImportService
 import kr.jiasoft.hiteen.feature.school.app.SchoolImportService
 import kr.jiasoft.hiteen.feature.timetable.app.TimeTableImportService
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Profile
@@ -104,6 +105,7 @@ class BatchService(
      * 매일 0시 3초에 게임 시즌 종료 처리
      */
     @Scheduled(cron = "3 0 0 * * *", zone = "Asia/Seoul")
+    @SchedulerLock(name = "autoManageSeasons", lockAtMostFor = "PT30M", lockAtLeastFor = "PT1M")
     fun autoManageSeasons() = runBlocking {
         val today = LocalDate.now()
         val yesterday = today.minusDays(1)
@@ -131,6 +133,7 @@ class BatchService(
      * 매일 새벽 2시에 급식 정보를 가져와 갱신한다.
      */
     @Scheduled(cron = "0 0 2 * * *", zone = "Asia/Seoul")
+    @SchedulerLock(name = "schoolFoodImport", lockAtMostFor = "PT1H", lockAtLeastFor = "PT1M")
     fun schoolFoodImport() = runBlocking {
         runBatch("SchoolFoodImport") {
             schoolFoodImportService.import()
@@ -142,6 +145,7 @@ class BatchService(
      * 매일 3시에 기프트쇼 정보 싱크
      */
     @Scheduled(cron = "0 0 3 * * *", zone = "Asia/Seoul")
+    @SchedulerLock(name = "syncGiftishowData", lockAtMostFor = "PT1H", lockAtLeastFor = "PT1M")
     fun syncGiftishowData() = runBlocking {
         runBatch("GiftishowSync") {
             giftishowSyncService.syncGoods()
@@ -153,6 +157,7 @@ class BatchService(
      * 매일 새벽 4시에 시간표 정보를 가져옵니다.
      */
     @Scheduled(cron = "0 0 4 * * *", zone = "Asia/Seoul")
+    @SchedulerLock(name = "timeTableImport", lockAtMostFor = "PT1H", lockAtLeastFor = "PT1M")
     fun timeTableImport() = runBlocking {
         runBatch("timeTableImport") {
             timeTableImportService.import()

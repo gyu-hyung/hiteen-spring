@@ -142,6 +142,10 @@ dependencies {
 
     // WebP ImageIO writer(썸네일 webp 출력용)
     implementation("org.sejda.imageio:webp-imageio:0.1.6")
+
+    // ShedLock (분산 환경 배치 중복 실행 방지)
+    implementation("net.javacrumbs.shedlock:shedlock-spring:5.10.0")
+    implementation("net.javacrumbs.shedlock:shedlock-provider-redis-spring:5.10.0")
 }
 
 

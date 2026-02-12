@@ -208,8 +208,20 @@ interface AdminUserRepository : CoroutineCrudRepository<UserEntity, Long> {
           AND u.phone IS NOT NULL
           AND u.phone IN (:phones)
     """)
-    suspend fun findUsersByPhones(
+    suspend fun findUsersByPhonesAndRole(
         role: String? = "USER",
+        phones: List<String>
+    ): List<UserEntity>
+
+
+    // 휴대폰번호 기준 회원 목록
+    @Query("""
+        SELECT *
+        FROM users u
+        WHERE u.phone IS NOT NULL
+          AND u.phone IN (:phones)
+    """)
+    suspend fun findUsersByPhones(
         phones: List<String>
     ): List<UserEntity>
 

@@ -111,7 +111,7 @@ class AdminPointController(
         val users: List<UserEntity> = when (targetType) {
             "all" -> userRepository.findByRole("USER")
             else -> {
-                userRepository.findUsersByPhones(
+                userRepository.findUsersByPhonesAndRole(
                     role = "USER",
                     phones = receivers
                 )

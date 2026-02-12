@@ -115,7 +115,7 @@ class AdminExpController(
 
         val users: List<UserEntity> = when (targetType) {
             "all" -> adminUserRepository.findByRole("USER")
-            else -> adminUserRepository.findUsersByPhones(role = "USER", phones = receivers)
+            else -> adminUserRepository.findUsersByPhones(receivers)
         }
 
         val total = users.size
