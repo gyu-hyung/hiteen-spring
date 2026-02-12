@@ -99,16 +99,20 @@ interface ChatRoomRepository : CoroutineCrudRepository<ChatRoomEntity, Long> {
             r.id,
             r.uid as room_uid,
             r.room_name as room_title,
-            COALESCE(r.asset_uid::text, (
-                SELECT u_other.asset_uid::text 
-                FROM chat_users cu_other 
-                JOIN users u_other ON u_other.id = cu_other.user_id 
-                WHERE cu_other.chat_room_id = r.id 
-                  AND cu_other.user_id != :userId 
-                  AND cu_other.deleted_at IS NULL
-                ORDER BY cu_other.id ASC
-                LIMIT 1
-            )) as asset_uid,
+            CASE 
+                WHEN (SELECT COUNT(*) FROM chat_users cu_cnt WHERE cu_cnt.chat_room_id = r.id AND cu_cnt.deleted_at IS NULL) = 2 
+                THEN (
+                    SELECT u_other.asset_uid::text 
+                    FROM chat_users cu_other 
+                    JOIN users u_other ON u_other.id = cu_other.user_id 
+                    WHERE cu_other.chat_room_id = r.id 
+                      AND cu_other.user_id != :userId 
+                      AND cu_other.deleted_at IS NULL
+                    ORDER BY cu_other.id ASC
+                    LIMIT 1
+                )
+                ELSE r.asset_uid::text
+            END as asset_uid,
             COALESCE(r.updated_at, r.created_at) as updated_at,
             m.id as last_message_id,
             m.uid as last_message_uid,
