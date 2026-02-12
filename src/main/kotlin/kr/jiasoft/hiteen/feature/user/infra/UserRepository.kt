@@ -261,6 +261,7 @@ interface UserRepository : CoroutineCrudRepository<UserEntity, Long> {
         LEFT JOIN schools s ON u.school_id = s.id
         WHERE u.deleted_at IS NULL
           AND u.invite_joins > 0
+          AND U.role <> 'ADMIN'
         ORDER BY u.invite_joins DESC
         LIMIT :limit
     """)
@@ -273,6 +274,7 @@ interface UserRepository : CoroutineCrudRepository<UserEntity, Long> {
         SELECT COUNT(*)
         FROM users
         WHERE deleted_at IS NULL
+          AND role <> 'ADMIN'
           AND created_at >= :startDate
           AND created_at <= :endDate
     """)

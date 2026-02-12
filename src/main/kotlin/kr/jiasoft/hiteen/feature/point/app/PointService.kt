@@ -103,7 +103,8 @@ class PointService(
 
         // 1. 정책 조회
         val rule = pointRuleRepository.findActiveByActionCode(pointPolicy.code)
-            ?: throw IllegalStateException("포인트 정책이 존재하지 않습니다. ($pointPolicy)")
+//            ?: throw IllegalStateException("포인트 정책이 존재하지 않습니다. ($pointPolicy)")
+            ?: return null
 
 
         val pointAmount = dynamicPoint ?: rule.point

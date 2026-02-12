@@ -57,8 +57,9 @@ interface BoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
           AND (
               :friendOnly = false OR EXISTS (
                   SELECT 1 FROM friends f 
-                  WHERE (f.user_id = :userId AND f.friend_id = b.created_id)
-                     OR (f.friend_id = :userId AND f.user_id = b.created_id)
+                  WHERE f.status = 'ACCEPTED'
+                    AND ((f.user_id = :userId AND f.friend_id = b.created_id)
+                     OR (f.friend_id = :userId AND f.user_id = b.created_id))
               )
           )
           AND (
@@ -299,7 +300,8 @@ interface BoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
                          ELSE f.user_id 
                        END
                 FROM friends f
-                WHERE f.user_id = :userId OR f.friend_id = :userId
+                WHERE f.status = 'ACCEPTED'
+                  AND (f.user_id = :userId OR f.friend_id = :userId)
           ) OR b.created_id = :userId)
           AND (:sameSchoolOnly = false OR b.created_id IN (
                 SELECT u.id FROM users u 

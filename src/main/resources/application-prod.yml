@@ -132,11 +132,11 @@ soketi:
 
 sms:
   callback: "1551-4993"
-  api-key: ${SMS_API_KEY:}
+  api-key: 0rsw46blu616mp6geidaldsy9z6o0pgi
   api-url: https://apis.aligo.in/send/
-  user-id: ${SMS_USER_ID:jiasoft}
+  user-id: jiasoft
   kakao:
-    sender-key: ${KAKAO_SENDER_KEY:}
+    sender-key: KAKAO_SENDER_KEY
     token-url: https://kakaoapi.aligo.in/akv10/token/create/30/s/
     alimtalk-url: https://kakaoapi.aligo.in/akv10/alimtalk/send/
     detail-url: https://kakaoapi.aligo.in/akv10/history/detail/

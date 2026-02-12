@@ -54,7 +54,8 @@ import java.util.UUID
 import org.slf4j.LoggerFactory
 import kr.jiasoft.hiteen.feature.asset.domain.ThumbnailMode
 import kr.jiasoft.hiteen.feature.asset.dto.AssetResponse
-import java.time.LocalDateTime
+import kr.jiasoft.hiteen.feature.cash.app.CashService
+import kr.jiasoft.hiteen.feature.cash.domain.CashPolicy
 
 @Service
 class UserService (
@@ -79,6 +80,8 @@ class UserService (
     private val interestRepository: InterestRepository,
 //    private val interestUserService: InterestUserService,
     private val eventPublisher: ApplicationEventPublisher,
+
+    private val cashService: CashService,
 ) {
 
     private val log = LoggerFactory.getLogger(javaClass)
@@ -470,14 +473,17 @@ class UserService (
                     )
                 )
             }
+
+            val responseUser = userRepository.findById(updated.id)!!.let {
+                UserResponse.from(it, school, null, tier)
+            }
+
             // JWT
             val (access, refresh) = jwtProvider.generateTokens(updated.username)
             // 포인트 지급
             pointService.applyPolicy(updated.id, PointPolicy.SIGNUP)
 
-            val responseUser = userRepository.findById(updated.id)!!.let {
-                UserResponse.from(it, school, null, tier)
-            }
+            cashService.applyPolicy(updated.id, CashPolicy.SIGNUP)
 
             UserResponseWithTokens(
                 tokens = JwtResponse(access.value, refresh.value),
