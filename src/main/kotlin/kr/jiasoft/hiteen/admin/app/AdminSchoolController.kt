@@ -20,7 +20,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
@@ -39,12 +38,10 @@ class AdminSchoolController(
         @RequestParam type: Int? = null,
         @RequestParam searchType: String? = null,
         @RequestParam search: String? = null,
+        @RequestParam size: Int = 10,
         @RequestParam page: Int = 1,
-        @RequestParam size: Int = 10
     ): ResponseEntity<ApiResult<ApiPage<AdminSchoolResponse>>> {
-        val data = schoolService.listSchools(
-            sido, type, searchType, search, page, size
-        )
+        val data = schoolService.listSchools(sido, type, searchType, search, size, page)
 
         return success(data)
     }

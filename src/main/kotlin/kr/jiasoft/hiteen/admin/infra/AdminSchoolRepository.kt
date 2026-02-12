@@ -21,9 +21,9 @@ interface AdminSchoolRepository : CoroutineCrudRepository<SchoolEntity, Long> {
                     WHEN :searchType = 'ALL' THEN
                         (s.name ILIKE ('%' || :search || '%')
                          OR s.address ILIKE ('%' || :search || '%'))
-                    WHEN :searchType = 'name' THEN
+                    WHEN :searchType = 'NAME' THEN
                         s.name ILIKE ('%' || :search || '%')
-                    WHEN :searchType = 'address' THEN
+                    WHEN :searchType = 'ADDRESS' THEN
                         s.address ILIKE ('%' || :search || '%')
                     ELSE TRUE
                 END
@@ -49,24 +49,24 @@ interface AdminSchoolRepository : CoroutineCrudRepository<SchoolEntity, Long> {
                 COALESCE(TRIM(:search), '') = ''
                 OR CASE
                     WHEN :searchType = 'ALL' THEN
-                        (s.name ILIKE ('%' || :search || '%')
-                         OR s.address ILIKE ('%' || :search || '%'))
-                    WHEN :searchType = 'name' THEN
                         s.name ILIKE ('%' || :search || '%')
-                    WHEN :searchType = 'address' THEN
+                        OR s.address ILIKE ('%' || :search || '%')
+                    WHEN :searchType = 'NAME' THEN
+                        s.name ILIKE ('%' || :search || '%')
+                    WHEN :searchType = 'ADDRESS' THEN
                         s.address ILIKE ('%' || :search || '%')
                     ELSE TRUE
                 END
             )
         ORDER BY sido ASC, type ASC, name ASC
-        LIMIT :limit OFFSET :offset
+        LIMIT :size OFFSET :offset
     """)
     suspend fun listSearchResults(
         sido: String?,
         type: Int?,
         searchType: String?,
         search: String?,
-        limit: Int,
+        size: Int,
         offset: Int,
     ): Flow<AdminSchoolResponse>
 

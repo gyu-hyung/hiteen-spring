@@ -15,25 +15,22 @@ class AdminSchoolService(
     private val classes: AdminSchoolClassRepository,
 ) {
     suspend fun listSchools(
-        sido: String?, type: Int?, searchType: String?, search: String?,
-        currentPage: Int, perPage: Int
+        sido: String?,
+        type: Int?,
+        searchType: String?,
+        search: String?,
+        size: Int,
+        page: Int,
     ): ApiPage<AdminSchoolResponse> {
-        val page = currentPage.coerceAtLeast(1)
-        val perPage = perPage.coerceIn(1, 100)
-        val offset = (page - 1) * perPage
+        val page = page.coerceAtLeast(1)
+        val size = size.coerceIn(1, 100)
+        val offset = (page - 1) * size
 
         // 총 레코드수
         val total = schools.countSearchResults(sido, type, searchType, search)
-        val rows = schools.listSearchResults(sido, type, searchType, search, perPage, offset).toList()
+        val rows = schools.listSearchResults(sido, type, searchType, search, size, offset).toList()
 
-        val data = PageUtil.of(
-            items = rows,
-            total = total,
-            page = currentPage,
-            size = perPage
-        )
-
-        return data
+        return PageUtil.of(items = rows, total, page, size)
     }
 
     suspend fun listClasses(
