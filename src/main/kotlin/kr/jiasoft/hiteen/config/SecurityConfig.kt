@@ -76,6 +76,8 @@ class SecurityConfig(
                     "/api/terms/**",
                     "/api/user/profile/ss/{id}",
                     "/api/articles/**",
+                    "/api/invite/ranking",
+                    "/api/invite/stats/join",
 
                     // Android deferred token resolve (auth optional)
                     "/api/invite/deferred/resolve",

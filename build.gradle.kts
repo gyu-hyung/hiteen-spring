@@ -124,7 +124,7 @@ dependencies {
     implementation("io.micrometer:micrometer-registry-prometheus")
 
     //poi
-    implementation("org.apache.poi:poi-ooxml:5.2.5")
+    implementation("org.apache.poi:poi-ooxml:5.4.0")
 
     //asset
     implementation("net.coobird:thumbnailator:0.4.20")

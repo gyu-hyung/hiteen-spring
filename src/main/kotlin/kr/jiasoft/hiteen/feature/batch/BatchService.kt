@@ -115,6 +115,9 @@ class BatchService(
         runBatch("GameSeasonCreate") {
             gameManageService.createNewSeasons(today)   // 2. 새로운 시즌 생성
         }
+//        runBatch("LeagueOpenPush") {
+//            gameManageService.sendLeagueOpenPush(today) // 3. 오픈된 리그 푸시 발송
+//        }
     }
 
 

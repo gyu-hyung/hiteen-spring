@@ -57,7 +57,6 @@ class GameService(
 
     private val adService: AdService,
     private val txOperator: TransactionalOperator,
-    private val rewardLeagueStartNotifier: RewardLeagueStartNotifier,
     private val eventPublisher: ApplicationEventPublisher,
 ) {
 
@@ -265,13 +264,13 @@ class GameService(
             createScore(participant.seasonId, participant.id, gameId, finalScore)
         }
 
-        // ✅ 점수 등록자 수(=game_scores) 기준으로 10명 달성 시 '보상 리그 시작' 알림 트리거
-        // - recordScore(=게임 종료/점수 등록) 지점이 기준과 가장 일치해서 가장 합리적
-        rewardLeagueStartNotifier.notifyIfReached(
-            seasonId = participant.seasonId,
-            league = participant.league,
-            gameId = gameId,
-        )
+//        // ✅ 점수 등록자 수(=game_scores) 기준으로 10명 달성 시 '보상 리그 시작' 알림 트리거
+//        // - recordScore(=게임 종료/점수 등록) 지점이 기준과 가장 일치해서 가장 합리적
+//        rewardLeagueStartNotifier.notifyIfReached(
+//            seasonId = participant.seasonId,
+//            league = participant.league,
+//            gameId = gameId,
+//        )
 
         // ✅ 신기록 달성 여부(개인 베스트 개선/최초 기록)
         // - 점수는 낮을수록 좋음
