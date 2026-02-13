@@ -2,9 +2,13 @@ package kr.jiasoft.hiteen.admin.services
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.toList
 import kr.jiasoft.hiteen.admin.dto.AdminExpActionCreateRequest
 import kr.jiasoft.hiteen.admin.dto.AdminExpActionResponse
 import kr.jiasoft.hiteen.admin.dto.AdminExpActionUpdateRequest
+import kr.jiasoft.hiteen.admin.infra.AdminExpActionRepository
+import kr.jiasoft.hiteen.common.dto.ApiPage
+import kr.jiasoft.hiteen.common.dto.PageUtil
 import kr.jiasoft.hiteen.feature.level.domain.ExpActionEntity
 import kr.jiasoft.hiteen.feature.level.infra.ExpActionRepository
 import org.springframework.stereotype.Service
@@ -13,9 +17,30 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class AdminExpActionService(
     private val expActionRepository: ExpActionRepository,
+    private val adminExpActionRepository: AdminExpActionRepository,
 ) {
 
-    fun list(enabled: Boolean? = null): Flow<AdminExpActionResponse> =
+    suspend fun listExpActions(
+        status: Boolean?,
+        searchType: String?,
+        search: String?,
+        order: String,
+        size: Int,
+        page: Int,
+    ): ApiPage<AdminExpActionResponse> {
+        val page = page.coerceAtLeast(1)
+        val size = size.coerceIn(1, 100)
+        val offset = (page - 1) * size
+
+        // 총 레코드수
+        val total = adminExpActionRepository.totalCount(status, searchType, search)
+        val items = adminExpActionRepository.listByPage(status, searchType, search, order, size, offset).toList()
+
+        return PageUtil.of(items, total, page, size)
+    }
+
+    // 목록
+    suspend fun list(enabled: Boolean? = null): Flow<AdminExpActionResponse> =
         expActionRepository.findAllByEnabled(enabled)
             .map { it.toResponse() }
 
@@ -38,6 +63,7 @@ class AdminExpActionService(
         ).map { it.toResponse() }
     }
 
+    // 전체 갯수
     suspend fun totalCount(enabled: Boolean? = null): Int =
         expActionRepository.totalCount(enabled)
 

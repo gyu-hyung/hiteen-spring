@@ -30,26 +30,15 @@ class AdminPointRulesController(
 
     @GetMapping
     suspend fun list(
-        @RequestParam page: Int = 1,
-        @RequestParam size: Int = 10,
-        @RequestParam order: String = "DESC",
-        @RequestParam(required = false) search: String? = null,
-        @RequestParam searchType: String = "ALL",
-        /**
-         * ACTIVE(기본): deleted_at IS NULL
-         * DELETED: deleted_at IS NOT NULL
-         * ALL: 전체
-         */
         @RequestParam status: String? = null,
+        @RequestParam searchType: String? = null,
+        @RequestParam search: String? = null,
+        @RequestParam order: String = "ASC",
+        @RequestParam size: Int = 10,
+        @RequestParam page: Int = 1,
     ): ResponseEntity<ApiResult<ApiPage<AdminPointRuleResponse>>> {
-        val data = adminPointRulesService.list(
-            search = search,
-            searchType = searchType,
-            status = status,
-            order = order,
-            currentPage = page,
-            perPage = size,
-        )
+        val data = adminPointRulesService.list(status, searchType, search, order, size, page)
+
         return success(data)
     }
 

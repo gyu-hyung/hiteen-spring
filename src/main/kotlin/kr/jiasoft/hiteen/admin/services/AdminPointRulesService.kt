@@ -16,61 +16,21 @@ class AdminPointRulesService(
 ) {
 
     suspend fun list(
-        search: String?,
-        searchType: String?,
         status: String?,
-        order: String?,
-        currentPage: Int,
-        perPage: Int,
+        searchType: String?,
+        search: String?,
+        order: String,
+        size: Int,
+        page: Int,
     ): ApiPage<AdminPointRuleResponse> {
-        val page = currentPage.coerceAtLeast(1)
-        val size = perPage.coerceIn(1, 100)
+        val page = page.coerceAtLeast(1)
+        val size = size.coerceIn(1, 100)
         val offset = (page - 1) * size
 
-        val normalizedSearch = search?.trim()?.takeIf { it.isNotBlank() }
+        val total = adminPointRuleRepository.countList(status, searchType, search)
+        val items = adminPointRuleRepository.list(status, searchType, search, order, size, offset)
 
-        val normalizedSearchType = when (searchType?.trim()?.uppercase()) {
-            null, "" -> "ALL"
-            "ALL" -> "ALL"
-            "ACTION_CODE" -> "ACTION_CODE"
-            "DESCRIPTION" -> "DESCRIPTION"
-            else -> "ALL"
-        }
-
-        // status: ACTIVE(기본)/DELETED/ALL
-        val normalizedStatus = when (status?.trim()?.uppercase()) {
-            null, "" -> "ACTIVE"
-            "ACTIVE" -> "ACTIVE"
-            "DELETED" -> "DELETED"
-            "ALL" -> "ALL"
-            else -> "ACTIVE"
-        }
-
-        val normalizedOrder = when (order?.trim()?.uppercase()) {
-            "ASC" -> "ASC"
-            else -> "DESC"
-        }
-
-        val total = adminPointRuleRepository.countList(
-            search = normalizedSearch,
-            searchType = normalizedSearchType,
-            status = normalizedStatus,
-        )
-        val rows = adminPointRuleRepository.list(
-            search = normalizedSearch,
-            searchType = normalizedSearchType,
-            status = normalizedStatus,
-            order = normalizedOrder,
-            limit = size,
-            offset = offset,
-        )
-
-        return PageUtil.of(
-            items = rows.map { it.toResponse() },
-            total = total,
-            page = page,
-            size = size,
-        )
+        return PageUtil.of(items, total, page, size)
     }
 
     suspend fun get(id: Long, includeDeleted: Boolean): AdminPointRuleResponse {
@@ -139,6 +99,11 @@ class AdminPointRulesService(
         dailyCap = dailyCap,
         cooldownSec = cooldownSec,
         description = description,
+        createdAt = null,
+        updatedAt = null,
         deletedAt = deletedAt,
+        createdDate = null,
+        updatedDate = null,
+        deletedDate = null,
     )
 }

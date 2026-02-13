@@ -1,11 +1,13 @@
 package kr.jiasoft.hiteen.admin.dto
 
+import com.fasterxml.jackson.annotation.JsonFormat
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.constraints.Max
 import jakarta.validation.constraints.Min
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size
 import java.time.OffsetDateTime
+import java.time.format.DateTimeFormatter
 
 @Schema(name = "AdminPointRuleCreateRequest")
 data class AdminPointRuleCreateRequest(
@@ -56,5 +58,18 @@ data class AdminPointRuleResponse(
     val dailyCap: Int?,
     val cooldownSec: Int?,
     val description: String?,
+
+    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm:ss")
+    val createdAt: OffsetDateTime?,
+    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm:ss")
+    val updatedAt: OffsetDateTime?,
+    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm:ss")
     val deletedAt: OffsetDateTime?,
+
+    @get:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yy.MM.dd HH:mm")
+    val createdDate: String? = createdAt?.format(DateTimeFormatter.ofPattern("yy.MM.dd HH:mm")),
+    @get:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yy.MM.dd HH:mm")
+    val updatedDate: String? = updatedAt?.format(DateTimeFormatter.ofPattern("yy.MM.dd HH:mm")),
+    @get:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yy.MM.dd HH:mm")
+    val deletedDate: String? = deletedAt?.format(DateTimeFormatter.ofPattern("yy.MM.dd HH:mm")),
 )

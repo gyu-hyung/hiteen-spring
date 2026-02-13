@@ -1,74 +1,80 @@
 package kr.jiasoft.hiteen.admin.infra
 
+import kr.jiasoft.hiteen.admin.dto.AdminPointRuleResponse
 import kr.jiasoft.hiteen.feature.point.domain.PointRuleEntity
 import org.springframework.data.r2dbc.repository.Modifying
 import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 
 interface AdminPointRuleRepository : CoroutineCrudRepository<PointRuleEntity, Long> {
-
     @Query(
         """
         SELECT COUNT(*)
-        FROM point_rules
+        FROM point_rules AS p
         WHERE
             (
                 :status IS NULL OR :status = 'ALL'
-                OR (:status = 'ACTIVE' AND deleted_at IS NULL)
-                OR (:status = 'DELETED' AND deleted_at IS NOT NULL)
+                OR (:status = 'ACTIVE' AND p.deleted_at IS NULL)
+                OR (:status = 'DELETED' AND p.deleted_at IS NOT NULL)
             )
             AND (
                 COALESCE(TRIM(:search), '') = ''
                 OR CASE
-                    WHEN :searchType = 'ACTION_CODE' THEN
-                        action_code ILIKE ('%' || :search || '%')
+                    WHEN :searchType = 'ALL' THEN
+                        p.action_code ILIKE '%' || :search || '%'
+                        OR p.description ILIKE '%' || :search || '%'
+                    WHEN :searchType = 'CODE' THEN
+                        p.action_code ILIKE ('%' || :search || '%')
                     WHEN :searchType = 'DESCRIPTION' THEN
-                        COALESCE(description, '') ILIKE ('%' || :search || '%')
+                        COALESCE(p.description, '') ILIKE ('%' || :search || '%')
                     ELSE TRUE
                 END
             )
         """
     )
     suspend fun countList(
+        status: String?,
+        searchType: String?,
         search: String?,
-        searchType: String,
-        status: String,
     ): Int
 
     @Query(
         """
         SELECT *
-        FROM point_rules
+        FROM point_rules AS p
         WHERE
             (
                 :status IS NULL OR :status = 'ALL'
-                OR (:status = 'ACTIVE' AND deleted_at IS NULL)
-                OR (:status = 'DELETED' AND deleted_at IS NOT NULL)
+                OR (:status = 'ACTIVE' AND p.deleted_at IS NULL)
+                OR (:status = 'DELETED' AND p.deleted_at IS NOT NULL)
             )
             AND (
                 COALESCE(TRIM(:search), '') = ''
                 OR CASE
-                    WHEN :searchType = 'ACTION_CODE' THEN
-                        action_code ILIKE ('%' || :search || '%')
+                    WHEN :searchType = 'ALL' THEN
+                        p.action_code ILIKE '%' || :search || '%'
+                        OR p.description ILIKE '%' || :search || '%'
+                    WHEN :searchType = 'CODE' THEN
+                        p.action_code ILIKE ('%' || :search || '%')
                     WHEN :searchType = 'DESCRIPTION' THEN
-                        COALESCE(description, '') ILIKE ('%' || :search || '%')
+                        COALESCE(p.description, '') ILIKE ('%' || :search || '%')
                     ELSE TRUE
                 END
             )
         ORDER BY
-            CASE WHEN :order = 'ASC' THEN id END ASC,
-            CASE WHEN :order = 'DESC' THEN id END DESC
-        LIMIT :limit OFFSET :offset
+            CASE WHEN :order = 'ASC' THEN p.action_code END ASC,
+            CASE WHEN :order = 'DESC' THEN p.action_code END DESC
+        LIMIT :size OFFSET :offset
         """
     )
     suspend fun list(
+        status: String?,
+        searchType: String?,
         search: String?,
-        searchType: String,
-        status: String,
         order: String,
-        limit: Int,
+        size: Int,
         offset: Int,
-    ): List<PointRuleEntity>
+    ): List<AdminPointRuleResponse>
 
     @Query(
         """
