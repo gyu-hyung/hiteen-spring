@@ -1,5 +1,6 @@
 package kr.jiasoft.hiteen.admin.dto
 
+import com.fasterxml.jackson.annotation.JsonFormat
 import io.swagger.v3.oas.annotations.media.Schema
 import java.time.OffsetDateTime
 import java.util.UUID
@@ -43,18 +44,22 @@ data class AdminReportResponse(
     val answer: String?,
 
     @field:Schema(description = "답변 일시")
+    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm")
     val answerAt: OffsetDateTime?,
 
     @field:Schema(description = "조치 메모")
     val memo: String?,
 
     @field:Schema(description = "생성 일시")
+    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm")
     val createdAt: OffsetDateTime,
 
     @field:Schema(description = "수정 일시")
+    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm")
     val updatedAt: OffsetDateTime?,
 
     @field:Schema(description = "삭제 일시")
+    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm")
     val deletedAt: OffsetDateTime?,
 )
 

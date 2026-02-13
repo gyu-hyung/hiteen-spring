@@ -156,17 +156,29 @@ class AdminQuestionController (
             val items = questionItemsRepository.findAllByQuestionId(saved.id).toList()
             for (item in items) {
                 try {
-                    val answers: MutableList<String> = objectMapper.readValue(item.answers)
+                    // answers 문자열 파싱 (줄바꿈 등 특수문자를 이스케이프 처리)
+                    val answersJson = item.answers
+                        .replace("\r\n", "\\n")
+                        .replace("\n", "\\n")
+                        .replace("\r", "\\n")
+                        .replace("\t", "\\t")
+
+                    val answers: MutableList<String> = objectMapper.readValue(
+                        answersJson,
+                        object : com.fasterxml.jackson.core.type.TypeReference<MutableList<String>>() {}
+                    )
                     // 기존 정답을 새 정답으로 교체
                     val oldAnswer = origin.answer
-                    if (oldAnswer != null && answers.contains(oldAnswer)) {
-                        val index = answers.indexOf(oldAnswer)
-                        answers[index] = req.answer
-                        val updatedItem = item.copy(answers = objectMapper.writeValueAsString(answers))
-                        questionItemsRepository.save(updatedItem)
+                    if (oldAnswer != null) {
+                        val index = answers.indexOfFirst { it.trim() == oldAnswer.trim() }
+                        if (index >= 0) {
+                            answers[index] = req.answer
+                            val updatedItem = item.copy(answers = objectMapper.writeValueAsString(answers))
+                            questionItemsRepository.save(updatedItem)
+                        }
                     }
                 } catch (e: Exception) {
-                    println("⚠️ question_items 업데이트 실패: itemId=${item.id}, error=${e.message}")
+                    println("⚠️ question_items 업데이트 실패: itemId=${item.id}, answers=${item.answers}, error=${e.message}")
                 }
             }
         }

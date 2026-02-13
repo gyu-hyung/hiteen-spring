@@ -21,6 +21,7 @@ import kr.jiasoft.hiteen.feature.level.infra.TierRepository
 import kr.jiasoft.hiteen.feature.point.app.PointService
 import kr.jiasoft.hiteen.feature.point.domain.PointPolicy
 import kr.jiasoft.hiteen.feature.poll.infra.PollCommentRepository
+import kr.jiasoft.hiteen.feature.poll.infra.PollRepository
 import kr.jiasoft.hiteen.feature.poll.infra.PollUserRepository
 import kr.jiasoft.hiteen.feature.push.app.event.PushSendRequestedEvent
 import kr.jiasoft.hiteen.feature.push.domain.PushTemplate
@@ -72,6 +73,7 @@ class UserService (
     private val interestUserRepository: InterestUserRepository,
     private val boardRepository: BoardRepository,
     private val pollUserRepository: PollUserRepository,
+    private val pollRepository: PollRepository,
     private val boardCommentRepository: BoardCommentRepository,
     private val pollCommentRepository: PollCommentRepository,
     private val inviteService: InviteService,
@@ -254,7 +256,7 @@ class UserService (
 
         // 3) 관계 카운트 정보 일괄 조회
         val postCounts = if (includes.relationshipCounts) boardRepository.countBulkByCreatedIdIn(targetIds).toList().associate { it.id to it.count } else emptyMap()
-        val voteCounts = if (includes.relationshipCounts) pollUserRepository.countBulkByUserIdIn(targetIds).toList().associate { it.id to it.count } else emptyMap()
+        val voteCounts = if (includes.relationshipCounts) pollRepository.countBulkByCreatedIdIn(targetIds).toList().associate { it.id to it.count } else emptyMap()
         val bCommentCounts = if (includes.relationshipCounts) boardCommentRepository.countBulkByCreatedIdIn(targetIds).toList().associate { it.id to it.count } else emptyMap()
         val pCommentCounts = if (includes.relationshipCounts) pollCommentRepository.countBulkByCreatedIdIn(targetIds).toList().associate { it.id to it.count } else emptyMap()
         val friendCounts = if (includes.relationshipCounts) friendRepository.countBulkFriendshipIn(targetIds).toList().associate { it.id to it.count } else emptyMap()

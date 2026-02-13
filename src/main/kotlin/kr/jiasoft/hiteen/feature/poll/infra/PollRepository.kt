@@ -1,6 +1,7 @@
 package kr.jiasoft.hiteen.feature.poll.infra
 
 import kotlinx.coroutines.flow.Flow
+import kr.jiasoft.hiteen.feature.board.infra.CountProjection
 import kr.jiasoft.hiteen.feature.poll.domain.PollEntity
 import kr.jiasoft.hiteen.feature.poll.dto.PollSummaryRow
 import org.springframework.data.r2dbc.repository.Query
@@ -10,6 +11,14 @@ import java.util.UUID
 
 @Repository
 interface PollRepository : CoroutineCrudRepository<PollEntity, Long> {
+
+    @Query("""
+        SELECT created_id as id, COUNT(*)::int as count
+        FROM polls
+        WHERE created_id IN (:userIds) AND deleted_at IS NULL
+        GROUP BY created_id
+    """)
+    fun countBulkByCreatedIdIn(userIds: List<Long>): Flow<CountProjection>
 
     @Query("UPDATE polls SET vote_count = vote_count + 1 WHERE id = :id")
     suspend fun increaseVoteCount(id: Long): Int
@@ -77,6 +86,7 @@ interface PollRepository : CoroutineCrudRepository<PollEntity, Long> {
                    OR (earth_distance(ll_to_earth(:userLat, :userLng), ll_to_earth(p.lat, p.lng)) = :lastDistance AND p.id < :lastId))
           )
           AND (:authorUid IS NULL OR p.created_id = (SELECT id FROM users WHERE uid = :authorUid))
+          AND p.created_id NOT IN (SELECT blocked_user_id FROM user_blocks WHERE user_id = :currentUserId)
         ORDER BY
           /* 1달 이내 데이터 우선 */
           CASE WHEN p.created_at >= NOW() - INTERVAL '1 month' THEN 0 ELSE 1 END ASC,

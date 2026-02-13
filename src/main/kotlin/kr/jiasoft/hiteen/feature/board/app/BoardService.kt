@@ -99,7 +99,7 @@ class BoardService(
 
         val hasMore = commentList.size > perPage
         val items = if (hasMore) commentList.dropLast(1) else commentList
-        val nextCursor = if (hasMore) commentList.lastOrNull()?.uid?.toString() else null
+        val nextCursor = if (hasMore) items.lastOrNull()?.uid?.toString() else null
 
         // 조회수 증가
         b.id.let { boards.increaseHits(it) }

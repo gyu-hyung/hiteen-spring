@@ -154,7 +154,7 @@ class BoardController(
 
         val hasMore = list.size > perPage
         val items = if (hasMore) list.dropLast(1) else list
-        val nextCursor = if (hasMore) list.lastOrNull()?.uid?.toString() else null
+        val nextCursor = if (hasMore) items.lastOrNull()?.uid?.toString() else null
 
         val result = ApiPageCursor(
             nextCursor = nextCursor,
@@ -178,7 +178,7 @@ class BoardController(
 
         val hasMore = list.size > perPage
         val items = if (hasMore) list.dropLast(1) else list
-        val nextCursor = if (hasMore) list.lastOrNull()?.uid?.toString() else null
+        val nextCursor = if (hasMore) items.lastOrNull()?.uid?.toString() else null
 
         val result = ApiPageCursor(
             nextCursor = nextCursor,

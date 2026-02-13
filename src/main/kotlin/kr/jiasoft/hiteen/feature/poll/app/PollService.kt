@@ -640,7 +640,7 @@ class PollService(
         cursor: UUID?,
         perPage: Int
     ): List<PollCommentResponse> {
-        val rawComments = comments.findMyComments(userId, cursor, perPage).toList()
+        val rawComments = comments.findMyComments(userId, cursor, perPage + 1).toList()
         if (rawComments.isEmpty()) return emptyList()
 
         val authorIds = rawComments.map { it.createdId }.distinct()

@@ -88,6 +88,7 @@ interface BoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
                   )
               )
           )
+          AND b.created_id NOT IN (SELECT blocked_user_id FROM user_blocks WHERE user_id = :userId)
     """)
     suspend fun countSearchResults(
         category: String?,
@@ -202,6 +203,7 @@ interface BoardRepository : CoroutineCrudRepository<BoardEntity, Long> {
           AND (:maxDistance IS NULL OR :userLat IS NULL OR :userLng IS NULL 
                OR b.lat IS NULL OR b.lng IS NULL
                OR earth_distance(ll_to_earth(:userLat, :userLng), ll_to_earth(b.lat, b.lng)) <= :maxDistance)
+          AND b.created_id NOT IN (SELECT blocked_user_id FROM user_blocks WHERE user_id = :userId)
         ORDER BY 
             /* 1달 이내 데이터 우선 */
             CASE WHEN b.created_at >= NOW() - INTERVAL '1 month' THEN 0 ELSE 1 END ASC,
