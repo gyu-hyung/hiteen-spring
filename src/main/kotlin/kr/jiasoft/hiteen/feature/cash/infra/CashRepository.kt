@@ -38,4 +38,10 @@ interface CashRepository : CoroutineCrudRepository<CashEntity, Long> {
         policyCode: String,
         today: LocalDate
     ): Int
+
+    /**
+     * 특정 정책으로 지급된 캐시 건수 조회 (이벤트 제한용)
+     */
+    @Query("""SELECT COUNT(*) FROM cash WHERE cashable_type = :policyCode""")
+    suspend fun countByPolicy(policyCode: String): Long
 }

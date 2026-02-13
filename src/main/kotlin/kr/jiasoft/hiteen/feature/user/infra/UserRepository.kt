@@ -41,6 +41,10 @@ interface UserRepository : CoroutineCrudRepository<UserEntity, Long> {
     """)
     suspend fun countActiveChallengerUsers(): Long
 
+    // ✅ 전체 활성(미삭제) 사용자 수 조회 (어드민 제외)
+    @Query("""SELECT COUNT(*) FROM users WHERE deleted_at IS NULL AND role <> 'ADMIN'""")
+    suspend fun countActiveUsers(): Long
+
     // ✅ 활성(미삭제) 사용자 - username(=phone)로 조회
     @Query("""SELECT * FROM users WHERE username = :username AND deleted_at IS NULL ORDER BY id DESC LIMIT 1""")
     suspend fun findActiveByUsername(username: String): UserEntity?

@@ -485,7 +485,8 @@ class UserService (
             // 포인트 지급
             pointService.applyPolicy(updated.id, PointPolicy.SIGNUP)
 
-            cashService.applyPolicy(updated.id, CashPolicy.SIGNUP)
+            // 캐시 지급 (10,000명까지만 이벤트 적용)
+            cashService.applySignupCashIfEligible(updated.id)
 
             UserResponseWithTokens(
                 tokens = JwtResponse(access.value, refresh.value),

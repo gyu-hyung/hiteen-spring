@@ -144,8 +144,22 @@ class CashService(
         return cashRepository.save(entity)
     }
 
+    /**
+     * 회원가입 캐시 지급 (2026.03.01 ~ 10,000명까지 이벤트 적용)
+     */
+    suspend fun applySignupCashIfEligible(userId: Long): CashEntity? {
+        // 이벤트 시작일: 2026년 3월 1일
+        val eventStartDate = LocalDate.of(2026, 3, 1)
+        if (LocalDate.now().isBefore(eventStartDate)) {
+            return null
+        }
 
-
+        val signupCashCount = cashRepository.countByPolicy(CashPolicy.SIGNUP.code)
+        if (signupCashCount >= 10_000) {
+            return null
+        }
+        return applyPolicy(userId, CashPolicy.SIGNUP)
+    }
 
 
 //    suspend fun verifyPayment(paymentKey: String, orderId: String, amount: Int): Boolean {
