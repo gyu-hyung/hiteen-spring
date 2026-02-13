@@ -214,7 +214,7 @@ TAG=0.0.1
 # 플랫폼 지정 및 푸시까지 한번에 수행
 ./gradlew clean bootJar && docker build \
   --platform linux/amd64 \
-  -t gitlab.barunsoft.net:5005/jiasoft/hiteen2-server:prod-$TAG \
+  -t gitlab.barunsoft.net:5005/jiasoft/hiteen2-server:prod-0.0.1 \
   . --push
 
 # 2. Helm으로 업데이트

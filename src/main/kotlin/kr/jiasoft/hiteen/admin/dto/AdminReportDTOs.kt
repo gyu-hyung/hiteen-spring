@@ -66,3 +66,13 @@ data class AdminReportProcessRequest(
     @field:Schema(description = "조치 메모")
     val memo: String? = null,
 )
+
+
+@Schema(description = "관리자 신고 반려 요청")
+data class AdminReportRejectRequest(
+    @field:Schema(description = "반려 답변")
+    val answer: String? = null,
+
+    @field:Schema(description = "반려 사유/메모")
+    val memo: String? = null,
+)

@@ -61,3 +61,11 @@ helm upgrade --install hiteen-app ./hiteen-app-chart -n hiteen ...
 
 자세한 내용은 각 문서를 참조하세요.
 
+### 3. DB 백업 및 복원
+
+```bash
+# 백업
+PGPASSWORD='hiteen@2025' pg_dump -h 49.247.175.76 -p 5432 -U hiteen -d hiteen -F p -f /Users/jogyuhyeong/Documents/dev/hiteen2-server/hiteen_20260213.dump
+
+
+PGPASSWORD='hiteen@2025' psql -h 49.247.175.76 -p 5432 -U hiteen -d hiteen -f hiteen_20260213.dump

@@ -1,5 +1,7 @@
 package kr.jiasoft.hiteen.admin.app
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.flow.toList
 import kr.jiasoft.hiteen.admin.dto.SeasonFilterDto
 import kr.jiasoft.hiteen.admin.infra.AdminQuestionRepository
@@ -9,6 +11,7 @@ import kr.jiasoft.hiteen.common.dto.PageUtil
 import kr.jiasoft.hiteen.feature.asset.app.AssetService
 import kr.jiasoft.hiteen.feature.asset.domain.AssetCategory
 import kr.jiasoft.hiteen.feature.study.domain.QuestionEntity
+import kr.jiasoft.hiteen.feature.study.infra.QuestionItemsRepository
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -30,6 +33,8 @@ import java.util.UUID
 class AdminQuestionController (
     private val adminQuestionRepository: AdminQuestionRepository,
     private val assetService: AssetService,
+    private val questionItemsRepository: QuestionItemsRepository,
+    private val objectMapper: ObjectMapper,
 ){
 
     private suspend fun softDeleteAssetIfNeeded(path: String, userId: Long) {
@@ -141,6 +146,29 @@ class AdminQuestionController (
                     updatedAt = now,
                 )
             )
+        }
+
+        /* =====================
+         * 4️⃣ question_items answers 업데이트
+         * 정답(answer)이 변경된 경우, 해당 문제가 포함된 question_items의 answers도 업데이트
+         * ===================== */
+        if (origin != null && origin.answer != req.answer && req.answer != null) {
+            val items = questionItemsRepository.findAllByQuestionId(saved.id).toList()
+            for (item in items) {
+                try {
+                    val answers: MutableList<String> = objectMapper.readValue(item.answers)
+                    // 기존 정답을 새 정답으로 교체
+                    val oldAnswer = origin.answer
+                    if (oldAnswer != null && answers.contains(oldAnswer)) {
+                        val index = answers.indexOf(oldAnswer)
+                        answers[index] = req.answer
+                        val updatedItem = item.copy(answers = objectMapper.writeValueAsString(answers))
+                        questionItemsRepository.save(updatedItem)
+                    }
+                } catch (e: Exception) {
+                    println("⚠️ question_items 업데이트 실패: itemId=${item.id}, error=${e.message}")
+                }
+            }
         }
 
         return ResponseEntity.ok(ApiResult.success(saved))

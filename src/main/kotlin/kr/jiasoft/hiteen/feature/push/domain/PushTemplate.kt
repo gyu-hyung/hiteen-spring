@@ -287,6 +287,28 @@ enum class PushTemplate(
         group = PushTemplateGroup.GAME,
     ),
 
+    /**
+     * 신고 처리 완료 알림 (신고자에게)
+     */
+    REPORT_PROCESSED(
+        code = "REPORT_PROCESSED",
+        title = "신고 처리 완료 📋",
+        message = "{answer}",
+        itemType = PushItemType.ALL,
+        group = PushTemplateGroup.ETC,
+    ),
+
+    /**
+     * 신고 반려 알림 (신고자에게)
+     */
+    REPORT_REJECTED(
+        code = "REPORT_REJECTED",
+        title = "신고 처리 결과 📋",
+        message = "{answer}",
+        itemType = PushItemType.ALL,
+        group = PushTemplateGroup.ETC,
+    ),
+
     ;
 
     /**
