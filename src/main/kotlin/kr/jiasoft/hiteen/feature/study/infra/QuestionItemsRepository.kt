@@ -22,4 +22,10 @@ interface QuestionItemsRepository : CoroutineCrudRepository<QuestionItemsEntity,
     """)
     fun findAllBySeasonId(seasonId: Long): Flow<QuestionItemsEntity>
 
+    @Query("""
+        SELECT * FROM question_items 
+        WHERE question_id = :questionId
+    """)
+    fun findAllByQuestionId(questionId: Long): Flow<QuestionItemsEntity>
+
 }

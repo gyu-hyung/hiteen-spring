@@ -2,11 +2,13 @@ package kr.jiasoft.hiteen.feature.user.infra
 
 import kotlinx.coroutines.flow.Flow
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
+import kr.jiasoft.hiteen.feature.user.dto.InviteRankingRow
 import kr.jiasoft.hiteen.feature.user.dto.UserSummary
 import org.springframework.data.r2dbc.repository.Modifying
 import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 import org.springframework.stereotype.Repository
+import java.time.OffsetDateTime
 import java.util.UUID
 
 @Repository
@@ -243,5 +245,39 @@ interface UserRepository : CoroutineCrudRepository<UserEntity, Long> {
 
     suspend fun findIdByUidIn(uids: List<UUID>): List<Long>
 
+    /**
+     * 초대 랭킹 조회 (inviteJoins 기준 내림차순)
+     */
+    @Query("""
+        SELECT 
+            u.id, 
+            u.nickname, 
+            u.invite_joins AS invite_joins, 
+            u.asset_uid AS asset_uid, 
+            u.grade, 
+            s.type_name AS type, 
+            s.name AS school_name
+        FROM users u
+        LEFT JOIN schools s ON u.school_id = s.id
+        WHERE u.deleted_at IS NULL
+          AND u.invite_joins > 0
+          AND U.role <> 'ADMIN'
+        ORDER BY u.invite_joins DESC
+        LIMIT :limit
+    """)
+    fun findTopInviters(limit: Int): Flow<InviteRankingRow>
+
+    /**
+     * 특정 기간 동안 가입한 유저 수 조회
+     */
+    @Query("""
+        SELECT COUNT(*)
+        FROM users
+        WHERE deleted_at IS NULL
+          AND role <> 'ADMIN'
+          AND created_at >= :startDate
+          AND created_at <= :endDate
+    """)
+    suspend fun countUsersByCreatedAtBetween(startDate: OffsetDateTime, endDate: OffsetDateTime): Long
 
 }

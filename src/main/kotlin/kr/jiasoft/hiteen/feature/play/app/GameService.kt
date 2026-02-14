@@ -192,7 +192,14 @@ class GameService(
             DeltaContextHelper.skipMeta().awaitSingleOrNull()
             if( todayTryCount >=3 ) handleRetry(gameId, userId, retryType, transactionId)
 
-
+            // ✅ 게임 시작 시 tryCount 증가
+            val existing = gameScoreRepository.findBySeasonIdAndParticipantIdAndGameId(participant.seasonId, participant.id, gameId)
+            if (existing != null) {
+                val isToday = existing.updatedAt?.toLocalDate()?.isEqual(LocalDate.now())
+                    ?: existing.createdAt.toLocalDate().isEqual(LocalDate.now())
+                val newTryCount = if (isToday) existing.tryCount + 1 else 1
+                gameScoreRepository.save(existing.copy(tryCount = newTryCount, updatedAt = OffsetDateTime.now()))
+            }
 
             val history = gameHistoryRepository.save(
                 GameHistoryEntity(
@@ -252,8 +259,8 @@ class GameService(
         )
 
         val scoreEntity =  if (existing != null) {
-            val isToday = existing.updatedAt?.toLocalDate()?.isEqual(LocalDate.now()) ?: existing.createdAt.toLocalDate().isEqual(LocalDate.now())
-            updateScore(existing, finalScore, if (isToday) existing.tryCount + 1 else 1)
+            // tryCount는 gameStart에서 이미 증가됨, 여기서는 점수만 업데이트
+            updateScore(existing, finalScore)
         } else {
             createScore(participant.seasonId, participant.id, gameId, finalScore)
         }
@@ -269,7 +276,6 @@ class GameService(
         // ✅ 신기록 달성 여부(개인 베스트 개선/최초 기록)
         // - 점수는 낮을수록 좋음
         val isNewRecord = (existing == null) || (scoreEntity.score < existing.score)
-
         // ✅ 점수 반영 후 친구 랭킹(친구+나) 목록 재조회
         // - 신기록일 때만 추월 알림을 보내기 위해, 신기록이 아니면 여기서 종료
         if (!isNewRecord) {
@@ -572,14 +578,14 @@ class GameService(
         }
     }
 
-    private suspend fun updateScore(existing: GameScoreEntity, score: BigDecimal, tryCount: Int? = null): GameScoreEntity {
+    private suspend fun updateScore(existing: GameScoreEntity, score: BigDecimal): GameScoreEntity {
         val finalScore = minOf(existing.score, score)
         // 기존 점수가 더 좋을 경우 updatedAt 유지
         val finalUpdatedAt = if(existing.score > score) OffsetDateTime.now() else existing.updatedAt
 
         val updated = existing.copy(
             score = finalScore,
-            tryCount = tryCount ?: (existing.tryCount + 1),
+            // tryCount는 gameStart에서 이미 증가됨
             totalTryCount = existing.totalTryCount + 1,
             updatedAt = finalUpdatedAt
         )

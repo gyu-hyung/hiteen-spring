@@ -1578,3 +1578,35 @@ CREATE TABLE public.inquiries (
 );
 CREATE INDEX ix_inquiries_status ON public.inquiries USING btree (status);
 CREATE INDEX ix_inquiries_created_at ON public.inquiries USING btree (created_at);
+
+
+
+
+
+-- 사용자 차단 테이블 생성
+CREATE TABLE IF NOT EXISTS user_blocks (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL,           -- 차단한 사용자
+    blocked_user_id BIGINT NOT NULL,   -- 차단당한 사용자
+    reason VARCHAR(500),               -- 차단 사유 (선택)
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    -- 외래키 제약조건
+    CONSTRAINT fk_user_blocks_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT fk_user_blocks_blocked_user FOREIGN KEY (blocked_user_id) REFERENCES users(id) ON DELETE CASCADE,
+
+    -- 중복 차단 방지
+    CONSTRAINT uk_user_blocks_user_blocked UNIQUE (user_id, blocked_user_id)
+);
+
+-- 인덱스 생성
+CREATE INDEX IF NOT EXISTS idx_user_blocks_user_id ON user_blocks(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_blocks_blocked_user_id ON user_blocks(blocked_user_id);
+
+-- 코멘트
+COMMENT ON TABLE user_blocks IS '사용자 차단 테이블';
+COMMENT ON COLUMN user_blocks.user_id IS '차단한 사용자 ID';
+COMMENT ON COLUMN user_blocks.blocked_user_id IS '차단당한 사용자 ID';
+COMMENT ON COLUMN user_blocks.reason IS '차단 사유';
+COMMENT ON COLUMN user_blocks.created_at IS '차단 일시';
+

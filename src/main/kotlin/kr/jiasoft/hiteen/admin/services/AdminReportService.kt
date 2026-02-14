@@ -5,7 +5,10 @@ import kr.jiasoft.hiteen.admin.dto.AdminReportRejectRequest
 import kr.jiasoft.hiteen.admin.dto.AdminReportResponse
 import kr.jiasoft.hiteen.admin.infra.AdminReportRepository
 import kr.jiasoft.hiteen.feature.level.app.ExpService
+import kr.jiasoft.hiteen.feature.push.app.event.PushSendRequestedEvent
+import kr.jiasoft.hiteen.feature.push.domain.PushTemplate
 import kr.jiasoft.hiteen.feature.report.infra.ReportRepository
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import org.springframework.transaction.reactive.TransactionalOperator
 import org.springframework.transaction.reactive.executeAndAwait
@@ -18,6 +21,7 @@ class AdminReportService(
     private val reportRepository: ReportRepository,
     private val expService: ExpService,
     private val txOperator: TransactionalOperator,
+    private val eventPublisher: ApplicationEventPublisher,
 ) {
 
     fun listByPage(
@@ -99,8 +103,20 @@ class AdminReportService(
                 dynamicMemo = dynamicMemo,
             )
 
+            // 🔔 신고자에게 처리 완료 푸시 발송
+            if (!request.answer.isNullOrBlank()) {
+                eventPublisher.publishEvent(
+                    PushSendRequestedEvent(
+                        userIds = listOf(report.userId),
+                        templateData = PushTemplate.REPORT_PROCESSED.buildPushData(
+                            "answer" to request.answer,
+                        ),
+                    )
+                )
+            }
+
             adminReportRepository.findDetailById(id)
-                ?: throw IllegalStateException("처리 후 데이터를 다시 조회할 수 없습니다. id=$id")
+                ?: throw IllegalStateException("반려 후 데이터를 다시 조회할 수 없습니다. id=$id")
         }
 
     /**
@@ -119,11 +135,25 @@ class AdminReportService(
 
             val updated = report.copy(
                 status = 2,
+                answer = request.answer,
                 memo = request.memo,
+                answerAt = OffsetDateTime.now(),
                 updatedAt = OffsetDateTime.now(),
             )
 
             reportRepository.save(updated)
+
+            // 🔔 신고자에게 반려 푸시 발송
+            if (!request.answer.isNullOrBlank()) {
+                eventPublisher.publishEvent(
+                    PushSendRequestedEvent(
+                        userIds = listOf(report.userId),
+                        templateData = PushTemplate.REPORT_REJECTED.buildPushData(
+                            "answer" to request.answer,
+                        ),
+                    )
+                )
+            }
 
             adminReportRepository.findDetailById(id)
                 ?: throw IllegalStateException("반려 후 데이터를 다시 조회할 수 없습니다. id=$id")

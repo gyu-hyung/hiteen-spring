@@ -103,6 +103,7 @@ interface BoardCommentRepository : CoroutineCrudRepository<BoardCommentEntity, L
              OR (:parentUid IS NOT NULL AND p.uid = :parentUid)
           )
           AND (:cursor IS NULL OR c.id > (SELECT id FROM board_comments WHERE uid = :cursor))
+          AND c.created_id NOT IN (SELECT blocked_user_id FROM user_blocks WHERE user_id = :userId)
         ORDER BY c.id ASC
         LIMIT :perPage
     """)

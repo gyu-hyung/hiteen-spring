@@ -101,11 +101,12 @@ class CashService(
         refId: Long? = null,
         dynamicCash: Int? = null,
         description: String? = null,
-    ): CashEntity {
+    ): CashEntity? {
 
         // 1. 정책 조회
         val rule = cashRuleRepository.findActiveByActionCode(cashPolicy.code)
-            ?: throw IllegalStateException("포인트 정책이 존재하지 않습니다. ($cashPolicy)")
+//            ?: throw IllegalStateException("포인트 정책이 존재하지 않습니다. ($cashPolicy)")
+            ?: return null
 
 
         val cashAmount = dynamicCash ?: rule.amount

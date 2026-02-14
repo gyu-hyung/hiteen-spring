@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonIgnore
 import io.swagger.v3.oas.annotations.media.Schema
 import kr.jiasoft.hiteen.common.dto.ApiPageCursor
+import kr.jiasoft.hiteen.common.helpers.SchoolNameHelper.normalizeSchoolName
 import kr.jiasoft.hiteen.feature.user.dto.UserSummary
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Table
@@ -115,53 +116,5 @@ data class BoardResponse(
 
     @param:Schema(description = "댓글 목록 (커서 기반 페이지네이션)")
     val comments: ApiPageCursor<BoardCommentResponse>? = null,
-) {
-    companion object {
-        private fun normalizeSchoolName(raw: String?): String? {
-            if (raw.isNullOrBlank()) return ""
+)
 
-            var name = raw
-
-            // 1️⃣ 특수 케이스: 검정고시
-            if (name.contains("검정고시")) {
-                return "검정고시"
-            }
-
-            // 2️⃣ 행정용 불필요 키워드 제거
-            val removeKeywords = listOf(
-                "학력인정",
-                "병설",
-                "분교장",
-                "부설",
-                "캠퍼스",
-                "교육센터",
-                "공동실습소",
-                "(2년제)",
-                "테크노폴리스"
-            )
-
-            removeKeywords.forEach {
-                name = name?.replace(it, "")
-            }
-
-            // 3️⃣ 공백 정리
-            name = name?.replace("\\s+".toRegex(), "")
-
-            // 4️⃣ 학교급 치환 (긴 것부터!)
-            val replaceMap = listOf(
-                "기계공업고등학교" to "기계공고",
-                "공업고등학교" to "공고",
-                "고등학교" to "고",
-                "중학교" to "중",
-                "초등학교" to "초"
-            )
-
-            replaceMap.forEach { (from, to) ->
-                name = name?.replace(from, to)
-            }
-
-            return name?.trim()
-        }
-
-    }
-}

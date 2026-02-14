@@ -2,7 +2,10 @@ package kr.jiasoft.hiteen.feature.invite.app
 
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
+import kr.jiasoft.hiteen.common.helpers.SchoolNameHelper.normalizeSchoolName
 import kr.jiasoft.hiteen.feature.invite.domain.InviteEntity
+import kr.jiasoft.hiteen.feature.invite.dto.InviteRankingResponse
+import kr.jiasoft.hiteen.feature.invite.dto.InviteStatsResponse
 import kr.jiasoft.hiteen.feature.invite.infra.InviteRepository
 import kr.jiasoft.hiteen.feature.level.app.ExpService
 import kr.jiasoft.hiteen.feature.point.app.PointService
@@ -157,5 +160,42 @@ class InviteService(
         return (1..length)
             .map { chars.random(Random) }
             .joinToString("")
+    }
+
+    /**
+     * 추천 많이 한 회원 순 랭킹 조회
+     * @param limit 조회할 랭킹 수 (기본 10)
+     */
+    suspend fun getInviteRanking(limit: Int = 10): List<InviteRankingResponse> {
+        return userRepository.findTopInviters(limit)
+            .toList()
+            .mapIndexed { index, row ->
+                InviteRankingResponse(
+                    rank = index + 1,
+                    userId = row.id,
+                    nickname = row.nickname ?: "",
+                    inviteCount = row.inviteJoins,
+                    assetUid = row.assetUid,
+                    grade = row.grade,
+                    type = row.type,
+                    schoolName = row.schoolName,
+                    modifiedSchoolName = normalizeSchoolName(row.schoolName)
+                )
+            }
+    }
+
+
+    /**
+     * 특정 기간 동안 회원가입한 유저 수 조회
+     * @param startDate 시작일시
+     * @param endDate 종료일시
+     */
+    suspend fun getJoinStats(startDate: OffsetDateTime, endDate: OffsetDateTime): InviteStatsResponse {
+        val count = userRepository.countUsersByCreatedAtBetween(startDate, endDate)
+        return InviteStatsResponse(
+            startDate = startDate,
+            endDate = endDate,
+            count = count
+        )
     }
 }

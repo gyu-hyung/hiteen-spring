@@ -270,7 +270,7 @@ class InviteDeferredDeepLinkController(
                         초대코드 복사
                       </button>
                       <button id="openStoreBtn" class="secondary" type="button">
-                        스토어 열기
+                        가입하러 가기
                       </button>
                     </div>
 

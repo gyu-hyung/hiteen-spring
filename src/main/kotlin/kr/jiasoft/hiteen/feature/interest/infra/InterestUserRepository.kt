@@ -111,6 +111,7 @@ interface InterestUserRepository : CoroutineCrudRepository<InterestUserEntity, L
         LEFT JOIN schools s ON s.id = u.school_id
         WHERE iu.interest_id IN (:interestIds)
           AND iu.user_id <> :currentUserId
+          AND u.deleted_at IS NULL
           AND iu.user_id IN (
               SELECT user_id FROM user_photos GROUP BY user_id HAVING COUNT(*) >= 3
           )
@@ -131,6 +132,11 @@ interface InterestUserRepository : CoroutineCrudRepository<InterestUserEntity, L
           AND iu.user_id NOT IN (
               SELECT target_id 
               FROM interest_match_history 
+              WHERE user_id = :currentUserId
+          )
+          AND iu.user_id NOT IN (
+              SELECT blocked_user_id 
+              FROM user_blocks 
               WHERE user_id = :currentUserId
           )
     """)

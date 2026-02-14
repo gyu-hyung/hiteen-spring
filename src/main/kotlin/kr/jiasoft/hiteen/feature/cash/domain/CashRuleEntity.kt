@@ -2,7 +2,7 @@ package kr.jiasoft.hiteen.feature.cash.domain
 
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Table
-import org.threeten.bp.OffsetDateTime
+import java.time.OffsetDateTime
 
 @Table("cash_rules")
 data class CashRuleEntity(

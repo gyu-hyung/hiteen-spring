@@ -170,13 +170,20 @@ class StudyService(
     }
 
     // 🔹 webp 파일 경로 확인 (NFS: /app/assets/word_img)
+    // 지원 확장자: webp, jpg, jpeg, png, gif
     private fun resolveImageAsset(word: String?): String? {
         if (word.isNullOrBlank()) return null
 
         val safeName = word.trim().lowercase()
-        val filePath = Paths.get(assetStorageRoot, "word_img", "$safeName.webp").toFile()
+        val supportedExtensions = listOf("webp", "jpg", "jpeg", "png", "gif")
 
-        // 예: /assets/word_img/blossom.webp
-        return if (filePath.exists()) "/assets/word_img/$safeName.webp" else null
+        for (ext in supportedExtensions) {
+            val filePath = Paths.get(assetStorageRoot, "word_img", "$safeName.$ext").toFile()
+            if (filePath.exists()) {
+                return "/assets/word_img/$safeName.$ext"
+            }
+        }
+
+        return null
     }
 }

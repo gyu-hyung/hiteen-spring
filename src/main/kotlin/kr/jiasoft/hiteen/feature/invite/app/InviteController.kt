@@ -1,9 +1,12 @@
 package kr.jiasoft.hiteen.feature.invite.app
 
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.Parameter
 import kr.jiasoft.hiteen.common.dto.ApiResult
 import kr.jiasoft.hiteen.feature.invite.dto.InviteDeferredIssueResponse
 import kr.jiasoft.hiteen.feature.invite.dto.InviteDeferredResolveResponse
+import kr.jiasoft.hiteen.feature.invite.dto.InviteRankingResponse
+import kr.jiasoft.hiteen.feature.invite.dto.InviteStatsResponse
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
@@ -39,6 +42,33 @@ class InviteController (
         val code = inviteDeferredService.resolveToken(token, user?.id)
             ?: return ResponseEntity.badRequest().body(ApiResult.failure("invalid token"))
         return ResponseEntity.ok(ApiResult.success(InviteDeferredResolveResponse(code)))
+    }
+
+    @Operation(summary = "초대 랭킹 조회", description = "추천을 많이 한 회원 순으로 랭킹을 조회합니다.")
+    @GetMapping("/ranking")
+    suspend fun getInviteRanking(
+        @Parameter(description = "조회할 랭킹 수 (기본 10, 최대 100)")
+        @RequestParam(defaultValue = "10") limit: Int,
+    ): ResponseEntity<ApiResult<List<InviteRankingResponse>>> {
+        val effectiveLimit = limit.coerceIn(1, 100)
+        val ranking = inviteService.getInviteRanking(effectiveLimit)
+        return ResponseEntity.ok(ApiResult.success(ranking))
+    }
+
+    @Operation(summary = "기간별 회원가입 통계 조회", description = "특정 기간 동안 회원가입한 유저 수를 조회합니다.")
+    @GetMapping("/stats/join")
+    suspend fun getJoinStats(
+        @Parameter(description = "시작일시 (형식: yyyy-MM-dd HH:mm:ss, 예: 2025-01-01 00:00:00)")
+        @RequestParam startDate: String,
+        @Parameter(description = "종료일시 (형식: yyyy-MM-dd HH:mm:ss, 예: 2025-12-31 23:59:59)")
+        @RequestParam endDate: String,
+    ): ResponseEntity<ApiResult<InviteStatsResponse>> {
+        val formatter = java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+        val zoneId = java.time.ZoneId.of("Asia/Seoul")
+        val parsedStartDate = java.time.LocalDateTime.parse(startDate, formatter).atZone(zoneId).toOffsetDateTime()
+        val parsedEndDate = java.time.LocalDateTime.parse(endDate, formatter).atZone(zoneId).toOffsetDateTime()
+        val stats = inviteService.getJoinStats(parsedStartDate, parsedEndDate)
+        return ResponseEntity.ok(ApiResult.success(stats))
     }
 
 

@@ -183,11 +183,11 @@ class PollController(
         @Parameter(description = "페이지 당 댓글 수 (기본값 20)") @RequestParam(defaultValue = "20") perPage: Int,
         @AuthenticationPrincipal(expression = "user") user: UserEntity?
     ): ResponseEntity<ApiResult<ApiPageCursor<PollCommentResponse>>> {
-        val list = service.listComments(pollId, parentUid, user?.id, cursor, perPage + 1)
+        val list = service.listComments(pollId, parentUid, user?.id, cursor, perPage)
 
         val hasMore = list.size > perPage
         val items = if (hasMore) list.dropLast(1) else list
-        val nextCursor = if (hasMore) list.lastOrNull()?.uid?.toString() else null
+        val nextCursor = if (hasMore) items.lastOrNull()?.uid?.toString() else null
 
         val result = ApiPageCursor(
             nextCursor = nextCursor,
@@ -260,11 +260,11 @@ class PollController(
         @Parameter(description = "커서 UUID") @RequestParam(required = false) cursor: UUID?,
         @Parameter(description = "페이지당 댓글 개수 (기본 20)") @RequestParam(defaultValue = "20") perPage: Int,
     ): ResponseEntity<ApiResult<ApiPageCursor<PollCommentResponse>>> {
-        val list = service.listMyComments(user.id, cursor, perPage + 1)
+        val list = service.listMyComments(user.id, cursor, perPage)
 
         val hasMore = list.size > perPage
         val items = if (hasMore) list.dropLast(1) else list
-        val nextCursor = if (hasMore) list.lastOrNull()?.uid?.toString() else null
+        val nextCursor = if (hasMore) items.lastOrNull()?.uid?.toString() else null
 
         val result = ApiPageCursor(
             nextCursor = nextCursor,
