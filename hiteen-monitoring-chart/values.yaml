@@ -6,7 +6,7 @@ fullnameOverride: "monitoring"
 
 ingress:
   className: nginx
-  grafanaHost: monitor.dev.hiteen.co.kr
+  grafanaHost: monitor.hiteen.kr
 
 kube-prometheus-stack:
   fullnameOverride: monitoring
@@ -45,10 +45,15 @@ kube-prometheus-stack:
       ingressClassName: nginx
       annotations:
         nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+        cert-manager.io/cluster-issuer: "letsencrypt-prod"
       hosts:
-        - monitor.dev.hiteen.co.kr
+        - monitor.dev.hiteen.kr
       path: /
       pathType: Prefix
+      tls:
+        - hosts:
+            - monitor.hiteen.kr
+          secretName: monitor-tls
 
   prometheus:
     prometheusSpec:
