@@ -312,13 +312,10 @@ class GameManageService(
             .filter { it.status.toInt() == 1 && it.deletedAt == null }
             .toList()
 
-        // 3️⃣ (리그 + 게임) 기준으로 그룹화
-        val groupedByLeagueGame = rankings.groupBy {
+        // 3️⃣ (리그 + 게임) 기준 그룹 단위로 처리
+        rankings.groupBy {
             it.league to it.gameId
-        }
-
-        // 4️⃣ 그룹 단위로 처리
-        groupedByLeagueGame.forEach { (key, groupRankings) ->
+        }.forEach { (key, groupRankings) ->
             val (league, gameId) = key
 
             val participantCount = groupRankings.size
@@ -374,7 +371,7 @@ class GameManageService(
                 )
             }
 
-            "GIFTISHOW", "GIFT_CARD" -> {
+            "GIFTISHOW", "GIFT_CARD", "DELIVERY" -> {
                 val goodsCodes = policy.goodsCodes
                     ?.split(",")
                     ?.map { it.trim() }
@@ -386,11 +383,12 @@ class GameManageService(
                         ranking.userId,
                         GiftProvideRequest(
                             giftType =
-                                if (goodsCode.startsWith("G"))
+                                if (goodsCode.startsWith("G")) {
                                     GiftType.Voucher
-                                else
-                                    GiftType.GiftCard,
-
+                                } else if (goodsCode.startsWith("H")) {
+                                    GiftType.GiftCard
+                                } else
+                                    GiftType.Delivery,
                             giftCategory = GiftCategory.Challenge,
                             receiveUserUids = listOf(ranking.userUid!!),
                             memo = policy.message,
