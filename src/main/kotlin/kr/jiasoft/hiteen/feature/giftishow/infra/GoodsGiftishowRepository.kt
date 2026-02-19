@@ -131,6 +131,61 @@ interface GiftishowGoodsRepository : CoroutineCrudRepository<GoodsGiftishowEntit
     ): Flow<GoodsGiftishowEntity>
 
 
+    /**
+     * 사용자 상품 목록 조회 (가격 낮은순 정렬)
+     * 커서 페이징: (lastSalePrice, lastId) 복합 커서 사용
+     * */
+    @Query("""
+        SELECT g.*
+        FROM goods_giftishow g
+        WHERE g.del_yn = 0
+          AND g.status = 1
+            AND (
+                :search IS NULL
+                OR (
+                    :searchType = 'ALL' AND (
+                        g.goods_name ILIKE CONCAT('%', :search, '%')
+                        OR g.brand_name ILIKE CONCAT('%', :search, '%')
+                        OR g.category1_name ILIKE CONCAT('%', :search, '%')
+                        OR g.goods_type_nm ILIKE CONCAT('%', :search, '%')
+                        OR g.goods_type_dtl_nm ILIKE CONCAT('%', :search, '%')
+                        OR g.srch_keyword ILIKE CONCAT('%', :search, '%')
+                    )
+                )
+                OR (:searchType = 'goodsName' AND g.goods_name ILIKE CONCAT('%', :search, '%'))
+                OR (:searchType = 'brandName' AND g.brand_name ILIKE CONCAT('%', :search, '%'))
+                OR (:searchType = 'category1Name' AND g.category1_name ILIKE CONCAT('%', :search, '%'))
+                OR (:searchType = 'goodsTypeName' AND (
+                      g.goods_type_nm ILIKE CONCAT('%', :search, '%')
+                      OR g.goods_type_dtl_nm ILIKE CONCAT('%', :search, '%')
+                ))
+            )
+            AND (:categorySeq IS NULL OR g.category1_seq = :categorySeq)
+            AND (:goodsTypeCd IS NULL OR g.goods_type_cd = :goodsTypeCd)
+            AND (:brandCode IS NULL OR g.brand_code = :brandCode)
+            AND (
+                :goodsCodeType IS NULL OR :goodsCodeType = 'ALL'
+                OR g.goods_code LIKE CONCAT(:goodsCodeType, '%')
+            )
+            AND (
+                :lastSalePrice IS NULL 
+                OR g.sale_price > :lastSalePrice
+                OR (g.sale_price = :lastSalePrice AND g.id > :lastId)
+            )
+        ORDER BY g.sale_price ASC, g.id ASC
+        LIMIT :size
+    """)
+    fun listByCursorPriceAsc(
+        size: Int,
+        lastId: Long?,
+        lastSalePrice: Int?,
+        search: String?,
+        searchType: String,
+        categorySeq: Int?,
+        goodsTypeCd: String?,
+        brandCode: String?,
+        goodsCodeType: String?,
+    ): Flow<GoodsGiftishowEntity>
 
 
 }
