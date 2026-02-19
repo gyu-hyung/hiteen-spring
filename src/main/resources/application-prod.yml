@@ -20,15 +20,6 @@ spring:
       acquire-timeout: 10s
       max-create-connection-time: 10s
 
-  # JDBC DataSource (ShedLock 분산 락 전용)
-  datasource:
-    url: jdbc:postgresql://${DB_HOST:10.8.0.200}:5432/${DB_NAME:hiteen}
-    username: ${DB_USER:hiteen}
-    password: ${DB_PASSWORD:}
-    hikari:
-      maximum-pool-size: 5
-      minimum-idle: 1
-      connection-timeout: 10000
 
   liquibase:
     enabled: false  # 운영에서는 수동 마이그레이션

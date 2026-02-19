@@ -143,10 +143,9 @@ dependencies {
     // WebP ImageIO writer(썸네일 webp 출력용)
     implementation("org.sejda.imageio:webp-imageio:0.1.6")
 
-    // ShedLock (분산 환경 배치 중복 실행 방지) - JDBC 기반이 Redis Cluster보다 안정적
+    // ShedLock (분산 환경 배치 중복 실행 방지)
     implementation("net.javacrumbs.shedlock:shedlock-spring:5.10.0")
-    implementation("net.javacrumbs.shedlock:shedlock-provider-jdbc-template:5.10.0")
-    implementation("com.zaxxer:HikariCP:5.1.0")  // ShedLock DataSource용
+    implementation("net.javacrumbs.shedlock:shedlock-provider-redis-spring:5.10.0")
 }
 
 
