@@ -189,7 +189,7 @@ spec:
       {{- end }}
       containers:
         - name: redis-cluster-create
-          image: redis:7.2
+          image: {{ .Values.redis.image.repository }}:{{ .Values.redis.image.tag }}
           command:
             - bash
             - -c
