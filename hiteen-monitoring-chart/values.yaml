@@ -13,6 +13,8 @@ kube-prometheus-stack:
 
   grafana:
     enabled: true
+    adminUser: admin
+    adminPassword: hiteen1234
 
     # ConfigMap 기반 dashboard provisioning
     dashboardProviders:
@@ -30,13 +32,39 @@ kube-prometheus-stack:
 
     dashboards:
       hiteen:
+        # Spring Boot JVM 모니터링
         hiteen-spring:
           gnetId: 4701
           revision: 1
           datasource: Prometheus
 
+        # Spring Boot 요청 통계
+        spring-boot-stats:
+          gnetId: 6756
+          revision: 1
+          datasource: Prometheus
+
+        # Redis 클러스터 모니터링
         redis:
           gnetId: 11835
+          revision: 1
+          datasource: Prometheus
+
+        # Nginx Ingress Controller
+        nginx-ingress:
+          gnetId: 9614
+          revision: 1
+          datasource: Prometheus
+
+        # Node Exporter (서버 리소스)
+        node-exporter:
+          gnetId: 1860
+          revision: 37
+          datasource: Prometheus
+
+        # K8s Cluster Overview
+        k8s-cluster:
+          gnetId: 7249
           revision: 1
           datasource: Prometheus
 
@@ -45,9 +73,10 @@ kube-prometheus-stack:
       ingressClassName: nginx
       annotations:
         nginx.ingress.kubernetes.io/proxy-body-size: "50m"
-        cert-manager.io/cluster-issuer: "letsencrypt-prod"
+        nginx.ingress.kubernetes.io/ssl-redirect: "true"
+        # cert-manager.io/cluster-issuer: "letsencrypt-prod"  # 수동 TLS 사용
       hosts:
-        - monitor.dev.hiteen.kr
+        - monitor.hiteen.kr
       path: /
       pathType: Prefix
       tls:

@@ -97,6 +97,27 @@ class LocationCacheRedisService(
         return result ?: "NO RESPONSE"
     }
 
+    /**
+     * 여러 사용자의 최신 위치를 한 번에 조회 (Redis MGET)
+     * @param userIds 조회할 사용자 ID 목록
+     * @return userId -> LocationHistory 맵
+     */
+    suspend fun getLatestBulk(userIds: List<String>): Map<String, LocationHistory> {
+        if (userIds.isEmpty()) return emptyMap()
 
+        val keys = userIds.map { SoketiChannelPattern.PRIVATE_USER_LOCATION.format(it) }
+        val values = redisTemplate.opsForValue().multiGet(keys).awaitFirstOrNull() ?: return emptyMap()
+
+        val result = mutableMapOf<String, LocationHistory>()
+        userIds.forEachIndexed { index, userId ->
+            val json = values.getOrNull(index)
+            if (!json.isNullOrBlank()) {
+                try {
+                    result[userId] = objectMapper.readValue(json, LocationHistory::class.java)
+                } catch (_: Exception) {}
+            }
+        }
+        return result
+    }
 
 }

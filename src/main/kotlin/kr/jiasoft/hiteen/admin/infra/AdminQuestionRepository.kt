@@ -61,8 +61,8 @@ interface AdminQuestionRepository : CoroutineCrudRepository<QuestionEntity, Long
     @Query("""
         SELECT COUNT(*)
         FROM question_2 q
-        WHERE
-            (
+        WHERE (sound IS NOT NULL AND sound <> '') AND (image IS NOT NULL AND image <> '')
+            AND (
                 COALESCE(TRIM(:search), '') = ''
                 OR CASE
                     WHEN :searchType = 'ALL' THEN
@@ -110,8 +110,8 @@ interface AdminQuestionRepository : CoroutineCrudRepository<QuestionEntity, Long
     @Query("""
         SELECT q.*
         FROM question_2 q
-        WHERE
-            (
+        WHERE (sound IS NOT NULL AND sound <> '') AND (image IS NOT NULL AND image <> '')
+            AND (
                 COALESCE(TRIM(:search), '') = ''
                 OR CASE
                     WHEN :searchType = 'ALL' THEN

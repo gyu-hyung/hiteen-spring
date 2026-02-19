@@ -139,10 +139,14 @@ class FriendService(
         val otherIds = friends.map { if (it.userId == me.id) it.friendId else it.userId }
         val userMap = userService.findUserResponseByIds(otherIds, me.id).associateBy { it.id }
 
+        // 위치 정보 bulk 조회 (N+1 최적화)
+        val userUids = userMap.values.map { it.uid }
+        val locationMap = locationCacheRedisService.getLatestBulk(userUids)
+
         return friends.mapNotNull { e ->
             val otherId = if (e.userId == me.id) e.friendId else e.userId
             userMap[otherId]?.let { other ->
-                val latestLocation = locationCacheRedisService.getLatest(other.uid)
+                val latestLocation = locationMap[other.uid]
                 toRelationshipSummary(e, me.id, other, latestLocation)
             }
         }

@@ -85,7 +85,7 @@ class PinService(
         // 친구 ID 목록 조회
         val friendIds = friendRepository.findAllFriendship(userId).toList()
 
-        // 1. 내 주변 친구들의 전체공개 핀 (반경 radius m)
+        // 1. 내 친구들의 주변 전체공개 핀 (반경 radius m)
         val publicPins = if (friendIds.isNotEmpty()) {
             pinRepository.findNearbyFriendsPublicPins(
                 VISIBILITY.PUBLIC.name,

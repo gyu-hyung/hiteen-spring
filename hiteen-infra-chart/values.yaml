@@ -18,10 +18,10 @@ nfs:
   pvcName: nfs-pvc-images
 
 # ============================================
-# NFS (Backup Storage) - 나중에 구성
+# NFS (Backup Storage)
 # ============================================
 backupNfs:
-  enabled: false
+  enabled: true
   server: "10.8.0.159"
   path: "/srv/nfs/backup"
   storage: "100Gi"
@@ -64,16 +64,26 @@ redis:
     pingInterval: 3
 
 # ============================================
-# Database Backup CronJob - 나중에 구성
+# Database Backup CronJob
 # ============================================
 dbBackup:
-  enabled: false
-  schedule: "0 3 * * *"  # 매일 새벽 3시
+  enabled: true
+  schedule: "0 6 * * *"  # 매일 새벽 3시
   postgres:
     host: "10.8.0.200"  # 운영 DB 서버 IP
     database: "hiteen"
     user: "hiteen"
-    password: ""  # Secret으로 관리
+    password: ""  # helm install 시 --set dbBackup.postgres.password=xxx
   retention:
     days: 30  # 백업 보관 일수
 
+# ============================================
+# Asset Backup CronJob
+# ============================================
+# tar -czf ${BACKUP_FILE} -C /assets .
+# tar -xzf assets-20260219-060000.tar.gz -C /복원경로
+assetBackup:
+  enabled: true
+  schedule: "0 6 * * *"  # 매일 새벽 6시 (DB 백업 후)
+  retention:
+    days: 30  # Asset 백업은 용량이 크므로 14일만 보관

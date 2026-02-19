@@ -35,7 +35,7 @@ class StudyService(
     suspend fun startStudy(user: UserEntity, request: StudyStartRequest): StudyStartResponse {
         val type = if (request.type == 9) 1 else request.type
 
-                // 🔹 이미 진행 중인 학습이 있는지 검사
+        // 🔹 이미 진행 중인 학습이 있는지 검사
         val ongoing = studyRepository.findOngoingStudy(user.id, request.seasonId)
 
         if (ongoing != null) {

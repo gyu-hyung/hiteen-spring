@@ -1,0 +1,23 @@
+# Nginx Ingress Controller ServiceMonitor
+# Ingress Controller의 메트릭 활성화 필요:
+# helm upgrade ingress-nginx ingress-nginx/ingress-nginx -n ingress-nginx --set controller.metrics.enabled=true --set controller.metrics.serviceMonitor.enabled=true
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: ingress-nginx
+  namespace: monitoring
+  labels:
+    release: monitoring
+spec:
+  namespaceSelector:
+    matchNames:
+      - ingress-nginx
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ingress-nginx
+      app.kubernetes.io/component: controller
+  endpoints:
+    - port: metrics
+      interval: 30s
+

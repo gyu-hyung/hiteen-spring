@@ -192,12 +192,12 @@ ingress:
         - "*.hiteen.kr"
 
 # ============================================
-# Metrics (Prometheus) - 나중에 활성화
+# Metrics (Prometheus)
 # ============================================
 metrics:
-  enabled: false
+  enabled: true
   serviceMonitor:
-    enabled: false
+    enabled: true
     namespace: monitoring
     releaseLabel: monitoring
     interval: 15s

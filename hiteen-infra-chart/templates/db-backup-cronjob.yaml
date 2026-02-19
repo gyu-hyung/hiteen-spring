@@ -24,8 +24,10 @@ spec:
       template:
         spec:
           restartPolicy: OnFailure
+          {{- with .Values.nodeSelector }}
           nodeSelector:
-            {{- toYaml .Values.nodeSelector | nindent 12 }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           containers:
             - name: db-backup
               image: postgres:16
