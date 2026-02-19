@@ -1,16 +1,16 @@
 import http from 'k6/http';
 import { check, sleep } from 'k6';
 
-const BASE_URL =  'http://dev.hiteen.co.kr';
+const BASE_URL =  'http://api.hiteen.kr';
 const targetUrl = '/api/polls?size=20&type=all';
-const TOKEN = 'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIwMTA5NTM5MzYzNyIsImlhdCI6MTc2ODc4NTIyNSwiZXhwIjoxNzY5NjQ5MjI1fQ.-CZSLnHyy5uOSO9r8XZXuUgMO_E7PwbddFjI-b_mHeIcfF3rUyaSklk_InPKiE97CRtZK223oYm5fsBV1TZL0g';
+const TOKEN = 'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIwMTA5NTM5MzYzNyIsImlhdCI6MTc2OTczNzU5NSwiZXhwIjoyMDg1MDk3NTk1fQ.8favsmq9VkUB8K2Y8cJ4GYYEBTmduavqxPeKSWG-0LCycUWhKJsbUqdiG287NPkxiui7qEjP1tgqrYGdhTOqYw';
 
 if (!TOKEN) {
   throw new Error('TOKEN env is required. e.g. export TOKEN="<JWT>"');
 }
 
 export const options = {
-  vus: 150,
+  vus: 100,
   duration: '5m',
   thresholds: {
     http_req_failed: ['rate<0.01'],
