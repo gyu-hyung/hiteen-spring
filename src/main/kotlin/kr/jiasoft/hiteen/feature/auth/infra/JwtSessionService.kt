@@ -17,6 +17,7 @@ class JwtSessionService(
     companion object {
         private const val SESSION_KEY_PREFIX = "jwt:session:"
         private val SESSION_TTL = Duration.ofDays(7) // refresh token TTL과 동일하게
+        private const val REVOKED_MARKER = "REVOKED"
     }
 
     /**
@@ -42,7 +43,7 @@ class JwtSessionService(
         val storedTokenId = redisTemplate.opsForValue()
             .get(key)
             .awaitFirstOrNull()
-        return storedTokenId == tokenId
+        return storedTokenId != null && storedTokenId != REVOKED_MARKER && storedTokenId == tokenId
     }
 
     /**
@@ -62,7 +63,11 @@ class JwtSessionService(
      */
     suspend fun invalidateSession(username: String) {
         val key = SESSION_KEY_PREFIX + username
-        redisTemplate.delete(key).awaitFirstOrNull()
+        // 🔒 로그아웃 시 키를 삭제하는 대신 REVOKED 마커를 설정하여 
+        // Redis 데이터가 유실된 경우(fail-open)와 명시적으로 로그아웃한 경우를 구분함
+        redisTemplate.opsForValue()
+            .set(key, REVOKED_MARKER, SESSION_TTL)
+            .awaitFirstOrNull()
     }
 }
 

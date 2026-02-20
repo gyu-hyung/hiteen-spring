@@ -17,7 +17,11 @@ import java.util.UUID
 import javax.crypto.SecretKey
 
 
-class BearerToken(val value: String) : AbstractAuthenticationToken(AuthorityUtils.NO_AUTHORITIES) {
+class BearerToken(
+    val value: String,
+    val clientIp: String? = null,
+    val userAgent: String? = null
+) : AbstractAuthenticationToken(AuthorityUtils.NO_AUTHORITIES) {
     override fun getCredentials(): Any = value
     override fun getPrincipal(): Any = value
 }

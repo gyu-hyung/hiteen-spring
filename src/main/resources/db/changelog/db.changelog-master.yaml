@@ -33,3 +33,5 @@ databaseChangeLog:
       file: db/changelog/16-alter-game-history-score-to-numeric-9-5.yaml
   - include:
       file: db/changelog/17-add-chat-rooms-columns.yaml
+  - include:
+      file: db/changelog/18-create-auth-logs.yaml

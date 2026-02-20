@@ -259,12 +259,17 @@ interface UserRepository : CoroutineCrudRepository<UserEntity, Long> {
             u.invite_joins AS invite_joins, 
             u.asset_uid AS asset_uid, 
             u.grade, 
-            s.type_name AS type, 
+            CASE
+              WHEN s.type = 1 THEN '초'
+              WHEN s.type = 2 THEN '중'
+              WHEN s.type = 3 THEN '고'
+              WHEN s.type = 9 THEN '특수'
+              ELSE s.type_name
+            END AS type,
             s.name AS school_name
         FROM users u
         LEFT JOIN schools s ON u.school_id = s.id
-        WHERE u.deleted_at IS NULL
-          AND u.invite_joins > 0
+        WHERE u.invite_joins > 0
           AND U.role <> 'ADMIN'
         ORDER BY u.invite_joins DESC
         LIMIT :limit
@@ -277,8 +282,7 @@ interface UserRepository : CoroutineCrudRepository<UserEntity, Long> {
     @Query("""
         SELECT COUNT(*)
         FROM users
-        WHERE deleted_at IS NULL
-          AND role <> 'ADMIN'
+        WHERE role <> 'ADMIN'
           AND created_at >= :startDate
           AND created_at <= :endDate
     """)

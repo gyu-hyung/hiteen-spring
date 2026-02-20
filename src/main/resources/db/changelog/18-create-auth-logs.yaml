@@ -1,0 +1,57 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-auth-logs
+      author: system
+      changes:
+        - createTable:
+            tableName: auth_logs
+            remarks: "인증 관련 로그"
+            columns:
+              - column:
+                  name: id
+                  type: bigserial
+                  remarks: "고유번호"
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: username
+                  type: varchar(100)
+                  remarks: "사용자 아이디"
+              - column:
+                  name: event_type
+                  type: varchar(50)
+                  remarks: "이벤트 타입 (LOGIN, AUTH_FAIL, SESSION_INVALID 등)"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: token_id
+                  type: varchar(500)
+                  remarks: "토큰 식별자 (jti)"
+              - column:
+                  name: client_ip
+                  type: varchar(50)
+                  remarks: "클라이언트 IP"
+              - column:
+                  name: user_agent
+                  type: text
+                  remarks: "User-Agent"
+              - column:
+                  name: details
+                  type: text
+                  remarks: "상세 내용 (에러 메시지 등)"
+              - column:
+                  name: created_at
+                  type: timestamptz
+                  remarks: "생성 일시"
+                  defaultValueComputed: now()
+                  constraints:
+                    nullable: false
+        - createIndex:
+            tableName: auth_logs
+            indexName: idx_auth_logs_username_created
+            columns:
+              - column:
+                  name: username
+              - column:
+                  name: created_at

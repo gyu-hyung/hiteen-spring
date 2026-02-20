@@ -35,6 +35,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.server.ServerWebExchange
 
 @Tag(name = "Auth", description = "인증 관련 API")
 @RestController
@@ -50,6 +51,7 @@ class AuthController(
     private val smsService: SmsService,
     private val authService: AuthService,
     private val userDetailService: UserDetailService,
+    private val authLogService: AuthLogService,
 ) {
 
 
@@ -67,9 +69,13 @@ class AuthController(
     @PostMapping("/login")
     suspend fun login(
         @Parameter(description = "로그인 요청 DTO") form: LoginForm,
-        response: ServerHttpResponse
+        response: ServerHttpResponse,
+        exchange: ServerWebExchange
     ): ResponseEntity<ApiResult<UserResponseWithTokens>> {
         val userResponseWithTokens = authService.login(form.phone, form.password)
+        
+        // 🔒 로그인 로그 기록
+        authLogService.saveLog(form.phone, "LOGIN", exchange)
 
 //            val cookie = ResponseCookie.from("refreshToken", userResponseWithTokens.tokens.refreshToken.toString())
 //                .httpOnly(true)
@@ -183,11 +189,16 @@ class AuthController(
     )
     @PostMapping("/logout")
     suspend fun logout(
-        @AuthenticationPrincipal(expression = "user") user: UserEntity
+        @AuthenticationPrincipal(expression = "user") user: UserEntity,
+        exchange: ServerWebExchange
     ): ResponseEntity<ApiResult<Boolean>> {
         userDetailService.clearDeviceToken(user.uid)
         // 🔒 세션 무효화
         jwtSessionService.invalidateSession(user.username)
+        
+        // 🔒 로그아웃 로그 기록
+        authLogService.saveLog(user.username, "LOGOUT", exchange)
+        
         return ResponseEntity.ok(ApiResult.success(true, "로그아웃 완료"))
     }
 

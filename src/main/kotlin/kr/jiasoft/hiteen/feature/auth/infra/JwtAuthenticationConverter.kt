@@ -9,9 +9,13 @@ import reactor.core.publisher.Mono
 
 @Component
 class JwtAuthenticationConverter : ServerAuthenticationConverter {
-    override fun convert(exchange: ServerWebExchange): Mono<Authentication> =
-        Mono.justOrEmpty(exchange.request.headers.getFirst(HttpHeaders.AUTHORIZATION))
+    override fun convert(exchange: ServerWebExchange): Mono<Authentication> {
+        val clientIp = exchange.request.remoteAddress?.address?.hostAddress
+        val userAgent = exchange.request.headers.getFirst("User-Agent")
+
+        return Mono.justOrEmpty(exchange.request.headers.getFirst(HttpHeaders.AUTHORIZATION))
             .filter { it.startsWith("Bearer ") }
             .map { it.substring(7) }
-            .map { token -> BearerToken(token) }
+            .map { token -> BearerToken(token, clientIp, userAgent) }
+    }
 }
