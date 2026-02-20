@@ -39,7 +39,7 @@ class SecurityConfig(
         // /api/auth/** 경로는 JWT 필터를 타지 않도록 설정 (로그인, 리프레시 등)
         filter.setRequiresAuthenticationMatcher { exchange ->
             val path = exchange.request.uri.path
-            if (path.startsWith("/api/auth/")) {
+            if (path.startsWith("/api/auth/refresh")) {
                 ServerWebExchangeMatcher.MatchResult.notMatch()
             } else {
                 ServerWebExchangeMatcher.MatchResult.match()
