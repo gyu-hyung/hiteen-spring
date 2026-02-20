@@ -15,6 +15,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.server.SecurityWebFilterChain
 import org.springframework.security.web.server.authentication.AuthenticationWebFilter
+import org.springframework.security.web.server.util.matcher.ServerWebExchangeMatcher
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.reactive.CorsConfigurationSource
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource
@@ -35,6 +36,16 @@ class SecurityConfig(
         val filter = AuthenticationWebFilter(authManager)
         filter.setServerAuthenticationConverter(converter)
 
+        // /api/auth/** 경로는 JWT 필터를 타지 않도록 설정 (로그인, 리프레시 등)
+        filter.setRequiresAuthenticationMatcher { exchange ->
+            val path = exchange.request.uri.path
+            if (path.startsWith("/api/auth/")) {
+                ServerWebExchangeMatcher.MatchResult.notMatch()
+            } else {
+                ServerWebExchangeMatcher.MatchResult.match()
+            }
+        }
+
         return http
             .csrf { it.disable() }
             .cors {  }
@@ -49,6 +60,7 @@ class SecurityConfig(
                 it.pathMatchers(
                     HttpMethod.POST,
                     "/api/auth/**",
+                    "/api/auth/refresh",
                     "/broadcasting/auth",
                     "/api/user",
                     "/api/inquiry",
