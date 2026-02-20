@@ -23,6 +23,7 @@ class GameManageServiceTest  {
             // 2026-02-11 일 시즌 종료
 //            val endDate = LocalDateTime.of(2026, 2, 10, 0, 0)
 //            gameManageService.closeSeasons(endDate.toLocalDate())
+//            gameManageService.generateQuestionItems(11)
         }
     }
 

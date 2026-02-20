@@ -21,6 +21,7 @@ import kr.jiasoft.hiteen.feature.play.dto.RankingRow
 import kr.jiasoft.hiteen.feature.play.infra.*
 import kr.jiasoft.hiteen.feature.push.app.event.PushSendRequestedEvent
 import kr.jiasoft.hiteen.feature.push.domain.PushTemplate
+import kr.jiasoft.hiteen.feature.study.domain.QuestionEntity
 import kr.jiasoft.hiteen.feature.study.infra.QuestionItemsRepository
 import kr.jiasoft.hiteen.feature.study.infra.QuestionRepository
 import kr.jiasoft.hiteen.feature.user.domain.PushItemType
@@ -187,6 +188,13 @@ class GameManageService(
      * 시즌 생성 시 문제 아이템 20개 랜덤 배정 (type별, 중복 방지)
      */
     suspend fun generateQuestionItems(seasonId: Long) {
+        //해당 시즌에 이미 문제 아이템이 존재하는지 체크 (중복 방지)
+        val existingCount = questionItemsRepository.findAllBySeasonId(seasonId)
+        if (existingCount.toList().isNotEmpty()) {
+            println("⚠️ 시즌 ID $seasonId 에 이미 $existingCount 개의 문제 아이템이 존재합니다. 중복 생성을 방지하기 위해 기존 문제 아이템을 유지합니다.")
+            return
+        }
+
         val types = listOf(1, 2, 3) // 초·중·고 타입
 
         for (type in types) {
@@ -205,14 +213,26 @@ class GameManageService(
 
             // 3️⃣ 사용되지 않은 문제만 남기기
             val availableQuestions = allQuestions.filter { it.id !in usedQuestionIds }
-            if (availableQuestions.size < 20) {
-                println("⚠️ type=$type 에 사용 가능한 문제가 ${availableQuestions.size}개 뿐입니다.")
+            if (availableQuestions.size < 30) {
+                println("⚠️ type=$type 에 사용 가능한 문제가 ${availableQuestions.size}개 뿐입니다. 부족분은 이미 사용된 문제에서 재사용합니다.")
             }
 
-            // 4️⃣ 무작위 20개 선택
-            val selectedQuestions = availableQuestions.shuffled().take(20)
+            // 4️⃣ 무작위 30개 선택 (가능하면 사용되지 않은 문제 우선, 부족하면 기존 문제 재사용하되 동일 시즌 내 중복은 피함)
+            val need = 30
+            val selected = mutableListOf<QuestionEntity>()
 
-            selectedQuestions.forEach { q ->
+            // 먼저 사용되지 않은 문제에서 채운다
+            val unusedShuffled = availableQuestions.shuffled()
+            selected.addAll(unusedShuffled.take(minOf(unusedShuffled.size, need)))
+
+            // 부족하면 전체(allQuestions)에서 아직 selected되지 않은 문제를 채움 (이때 이미 시즌에 사용된 문제도 포함됨 — 재사용)
+            if (selected.size < need) {
+                val remainingNeeded = need - selected.size
+                val fillCandidates = allQuestions.shuffled().filter { candidate -> selected.none { it.id == candidate.id } }
+                selected.addAll(fillCandidates.take(remainingNeeded))
+            }
+
+            selected.forEach { q ->
                 val correctAnswer = q.answer ?: return@forEach
 
                 // 5️⃣ 같은 type 안에서 오답 3개 추출

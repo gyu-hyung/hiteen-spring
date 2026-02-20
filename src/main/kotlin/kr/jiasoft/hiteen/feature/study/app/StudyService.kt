@@ -11,6 +11,7 @@ import kr.jiasoft.hiteen.feature.study.infra.QuestionItemsRepository
 import kr.jiasoft.hiteen.feature.study.infra.QuestionRepository
 import kr.jiasoft.hiteen.feature.study.infra.StudyRepository
 import kr.jiasoft.hiteen.feature.user.domain.UserEntity
+import kr.jiasoft.hiteen.feature.play.app.GameService
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import java.nio.file.Paths
@@ -23,6 +24,7 @@ class StudyService(
     private val questionRepository: QuestionRepository,
     private val expService: ExpService,
     private val mapper: ObjectMapper,
+    private val gameService: GameService,
 
     // ✅ NFS 루트 경로 주입 (/app/assets)
     @Value("\${app.asset.storage-root}")
@@ -35,6 +37,16 @@ class StudyService(
     suspend fun startStudy(user: UserEntity, request: StudyStartRequest): StudyStartResponse {
         val type = if (request.type == 9) 1 else request.type
 
+        // 리그별 학습 개수 설정 (기본 BRONZE)
+        // 사용자의 tierId 기반으로 GameService에서 리그 결정
+        val league = gameService.getLeague(user)
+        val perLeagueCount = when (league) {
+            "BRONZE" -> 20
+            "PLATINUM" -> 25
+            "CHALLENGER" -> 30
+            else -> 20
+        }
+
         // 🔹 이미 진행 중인 학습이 있는지 검사
         val ongoing = studyRepository.findOngoingStudy(user.id, request.seasonId)
 
@@ -45,15 +57,15 @@ class StudyService(
             val stored = mapper.readTree(ongoing.studyItems)
             val questionIds = stored["question"].map { it.asLong() }
 
+            // 리그별 개수로 자름 (복원 시에도 적용)
+            val restoredQuestionIds = questionIds.take(perLeagueCount)
+
             // 2️⃣ 문제 아이템 및 본문 로드
-
-            // type이 9인 경우 초등 문제로 대체
-
             val items = questionItemsRepository.findAllBySeasonId(request.seasonId).toList()
-            val questionMap = questionRepository.findAllById(questionIds).toList().associateBy { it.id }
+            val questionMap = questionRepository.findAllById(restoredQuestionIds).toList().associateBy { it.id }
 
             // 3️⃣ 기존 학습 문제 응답 DTO 구성
-            val questions = items.filter { it.questionId in questionIds }.mapNotNull { item ->
+            val questions = items.filter { it.questionId in restoredQuestionIds }.mapNotNull { item ->
                 val q = questionMap[item.questionId] ?: return@mapNotNull null
                 val cleanedJson = item.answers.replace("\n", "\\n").replace("\r", "").trim()
                 val options: List<String> = mapper.readValue(cleanedJson)
@@ -80,10 +92,13 @@ class StudyService(
         val items = questionItemsRepository.findAllBySeasonIdAndType(request.seasonId, type).toList()
         if (items.isEmpty()) throw IllegalStateException("해당 시즌(${request.seasonId})에 학습 가능한 문제가 없습니다.")
 
-        val questionIds = items.map { it.questionId }
+        // 리그별 개수로 제한
+        val limitedItems = if (items.size <= perLeagueCount) items else items.take(perLeagueCount)
+
+        val questionIds = limitedItems.map { it.questionId }
         val questionMap = questionRepository.findAllById(questionIds).toList().associateBy { it.id }
 
-        val questions = items.mapNotNull { item ->
+        val questions = limitedItems.mapNotNull { item ->
             val q = questionMap[item.questionId] ?: return@mapNotNull null
             val cleanedJson = item.answers
                 .replace("\n", "\\n")
@@ -103,7 +118,7 @@ class StudyService(
             )
         }
 
-        // 🔹 새 StudyEntity 생성 및 저장
+        // 🔹 새 StudyEntity 생성 및 저장 (저장되는 questionIds도 리그별 개수로 제한)
         val jsonItems = mapper.writeValueAsString(mapOf("question" to questionIds))
         val study = StudyEntity(
             userId = user.id,

@@ -63,17 +63,17 @@ class JwtAuthenticationManager(
         val jti = jws.payload.id
 
         // Special rule: if username == 01095393637, treat access tokens older than 1 minute as expired
-        if (username == "01095393637") {
-            val issuedAt: Date? = jws.payload.issuedAt
-            if (issuedAt != null) {
-                val ageMs = Date().time - issuedAt.time
-                if (ageMs > 60_000L) {
-                    log.info("Token too old for special user={}, ageMs={}", username, ageMs)
-                    authLogService.saveLog(username, "EXPIRED_POLICY", token, "Token older than 1 minute")
-                    throw InvalidBearerToken("expired")
-                }
-            }
-        }
+//        if (username == "01095393637") {
+//            val issuedAt: Date? = jws.payload.issuedAt
+//            if (issuedAt != null) {
+//                val ageMs = Date().time - issuedAt.time
+//                if (ageMs > 60_000L) {
+//                    log.info("Token too old for special user={}, ageMs={}", username, ageMs)
+//                    authLogService.saveLog(username, "EXPIRED_POLICY", token, "Token older than 1 minute")
+//                    throw InvalidBearerToken("expired")
+//                }
+//            }
+//        }
 
         // 🔒 Redis 세션 검증 (중복 로그인 방지)
         // - jti가 있는 토큰만 검증
